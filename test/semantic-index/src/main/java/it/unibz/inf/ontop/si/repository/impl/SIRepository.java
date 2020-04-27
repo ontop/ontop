@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -45,7 +44,7 @@ public class SIRepository {
         this.typeFactory = loadingConfiguration.getTypeFactory();
         this.loadingConfiguration = loadingConfiguration;
         this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory,
-            loadingConfiguration.getTargetAtomFactory());
+            loadingConfiguration.getTargetAtomFactory(), loadingConfiguration.getSourceQueryFactory());
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
     }
@@ -63,8 +62,6 @@ public class SIRepository {
     public int insertData(Connection connection, Iterator<Assertion> iterator) throws SQLException {
         return dataRepository.insertData(connection, iterator, 5000, 500);
     }
-
-    public SemanticIndexURIMap getUriMap() { return dataRepository.getUriMap(); }
 
     public Connection createConnection() throws SemanticIndexException {
 
@@ -88,12 +85,6 @@ public class SIRepository {
 
         ImmutableList<SQLPPTriplesMap> mappingAxioms = dataRepository.getMappings();
 
-        try {
-            return new SQLPPMappingImpl(mappingAxioms,
-                    specificationFactory.createMetadata(prefixManager));
-        }
-        catch (DuplicateMappingException e) {
-            throw new IllegalStateException(e.getMessage());
-        }
+        return new SQLPPMappingImpl(mappingAxioms, prefixManager);
     }
 }

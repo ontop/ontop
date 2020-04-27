@@ -77,10 +77,16 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 	private static final String solutionSeqManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/solution-seq/manifest#";
 	private static final String sortManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/sort/manifest#";
 	private static final String typePromotionManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/type-promotion/manifest#";
+	private static final String optionalManifest = "http://www.w3.org/2001/sw/DataAccess/tests/data-r2/optional/manifest#";
 
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
-			//TODO: fix (quads are translated as triples)
+			// Quads are not yet supported by the SI
+			optionalManifest + "dawg-optional-complex-2",
+			// Quads are not yet supported by the SI
+			optionalManifest + "dawg-optional-complex-3",
+
+			// Quads are not yet supported by the SI
 			algebraManifest + "join-combo-2",
 			//error, missing a result, null equalities. TODO: fix
 			algebraManifest + "join-combo-1",

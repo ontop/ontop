@@ -35,15 +35,12 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /***
  * Test same as using h2 simple database on wellbores
@@ -51,42 +48,27 @@ import static org.junit.Assert.assertTrue;
 @Ignore
 public class H2ComplexSameAsTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	final String owlfile = "src/test/resources/sameAs/wellbores-complex.owl";
-	final String obdafile = "src/test/resources/sameAs/wellbores-complex.obda";
-	final String propertyfile = "src/test/resources/sameAs/wellbores-complex.properties";
+	private static final String owlfile = "src/test/resources/sameAs/wellbores-complex.owl";
+	private static final String obdafile = "src/test/resources/sameAs/wellbores-complex.obda";
+	private static final String propertyfile = "src/test/resources/sameAs/wellbores-complex.properties";
+
 	private Connection sqlConnection;
 
 	@Before
 	public void setUp() throws Exception {
-
-			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellboresComplex","sa", "");
-			    java.sql.Statement s = sqlConnection.createStatement();
-			  
-//			    try {
-			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-complex-h2.sql") ).useDelimiter("\\A").next();
-			    	s.execute(text);
-//			    	Server.startWebServer(sqlConnection);
-			    	 
-//			    } catch(SQLException sqle) {
-//			        System.out.println("Exception in creating db from script");
-//			    }
-			   
-			    s.close();
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:wellboresComplex", "sa", "");
+		executeFromFile(sqlConnection, "src/test/resources/sameAs/wellbore-complex-h2.sql");
 	}
-
 
 	@After
 	public void tearDown() throws Exception{
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -94,7 +76,7 @@ public class H2ComplexSameAsTest {
 
 
 
-	private ArrayList runTests(String query, boolean sameAs) throws Exception {
+	private ArrayList<String> runTests(String query, boolean sameAs) throws Exception {
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -103,7 +85,6 @@ public class H2ComplexSameAsTest {
 				.ontologyFile(owlfile)
 				.propertyFile(propertyfile)
 				.sameAsMappings(sameAs)
-				.enableFullMetadataExtraction(false)
 				.enableTestMode()
 				.build();
 
@@ -112,9 +93,8 @@ public class H2ComplexSameAsTest {
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
 
-		OWLStatement st = conn.createStatement();
-		ArrayList<String> retVal = new ArrayList<>();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
+			ArrayList<String> retVal = new ArrayList<>();
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
 				final OWLBindingSet bindingSet = rs.next();
@@ -123,26 +103,15 @@ public class H2ComplexSameAsTest {
 					String rendering = ToStringRenderer.getInstance().getRendering(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));
-
 				}
 			}
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
+			return retVal;
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}
-		return retVal;
-
 	}
-
 
 
 	@Test
@@ -153,7 +122,7 @@ public class H2ComplexSameAsTest {
 				"   ?x  a :Wellbore . \n" +
 				"}";
 
-		final ImmutableSet<String> results = ImmutableSet.<String>copyOf(runTests(query, true));
+		final ImmutableSet<String> results = ImmutableSet.copyOf(runTests(query, true));
 
 		ImmutableSet<String> expectedResults =
 				ImmutableSet.<String>builder()
@@ -171,7 +140,6 @@ public class H2ComplexSameAsTest {
 						.build();
 		assertEquals(expectedResults.size(), results.size() );
 		assertEquals(expectedResults, results);
-
     }
 
 	@Test
@@ -183,8 +151,6 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, false);
 		assertEquals(11, results.size() );
-
-
 	}
 
 	@Test
@@ -197,7 +163,6 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, true);
 		assertEquals(9, results.size() );
-
 	}
 
     @Test
@@ -209,8 +174,6 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, true);
 		assertEquals(33, results.size() );
-
-
 	}
 
 	@Test
@@ -221,7 +184,6 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, true);
 		assertEquals(16, results.size() );
-
 	}
 
     @Test
@@ -232,7 +194,6 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, true);
 		assertEquals(18, results.size() );
-
     }
 
     @Test
@@ -254,16 +215,6 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, true);
 		assertEquals(24, results.size() );
-
 	}
-
-
-
-
-
-
-
-
-
-    }
+}
 

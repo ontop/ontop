@@ -49,10 +49,7 @@ public class BootstrapAction extends ProtegeAction {
 	private OBDAModelManager modelManager;
 	private String baseUri = "";
 
-	private OBDAModel currentModel;
-	private OBDADataSource currentSource;
-
-	private Logger log = LoggerFactory.getLogger(BootstrapAction.class);
+	private final Logger log = LoggerFactory.getLogger(BootstrapAction.class);
 
 	@Override
 	public void initialise() {
@@ -70,7 +67,7 @@ public class BootstrapAction extends ProtegeAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		currentModel = modelManager.getActiveOBDAModel();
+		OBDAModel currentModel = modelManager.getActiveOBDAModel();
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -93,7 +90,7 @@ public class BootstrapAction extends ProtegeAction {
 
 		if (res == JOptionPane.OK_OPTION) {
 
-			currentSource = currentModel.getDatasource();
+			OBDADataSource currentSource = currentModel.getDatasource();
 			if (currentSource != null) {
 				this.baseUri = base_uri.getText().trim();
 				if (baseUri.contains("#")) {

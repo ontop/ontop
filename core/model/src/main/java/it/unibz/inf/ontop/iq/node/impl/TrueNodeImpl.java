@@ -143,4 +143,9 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         return ImmutableSet.of();
     }
+
+    @Override
+    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
 }

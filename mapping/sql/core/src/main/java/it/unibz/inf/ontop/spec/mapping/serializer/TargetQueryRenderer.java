@@ -22,12 +22,11 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.impl.BlankNodeTermType;
@@ -110,11 +109,9 @@ public class TargetQueryRenderer {
         throw new UnexpectedTermException(term);
     }
 
-    private static String displayConstantBnode(Term term) {
-        return ((BNode) term).getName();
-    }
+    private static String displayConstantBnode(BNode term) { return term.getName(); }
 
-    private static String displayLiteralConstant(Term term) {
+    private static String displayLiteralConstant(RDFLiteralConstant term) {
         return term.toString();
     }
 
@@ -315,9 +312,6 @@ public class TargetQueryRenderer {
     }
 
     private static class UnexpectedTermException extends OntopInternalBugException {
-        private UnexpectedTermException(Term term) {
-            super("Unexpected type " + term.getClass() + " for term: " + term);
-        }
 
         private UnexpectedTermException(ImmutableTerm term) {
             super("Unexpected type " + term.getClass() + " for term: " + term);

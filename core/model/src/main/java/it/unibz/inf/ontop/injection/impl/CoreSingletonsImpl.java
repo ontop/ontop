@@ -6,14 +6,15 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 @Singleton
@@ -26,18 +27,20 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final TargetAtomFactory targetAtomFactory;
     private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
     private final IntermediateQueryFactory iqFactory;
+    private final ImmutableUnificationTools unificationTools;
     private final OntopModelSettings settings;
+    private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
 
     @Inject
     private CoreSingletonsImpl(TermFactory termFactory, TypeFactory typeFactory,
                                FunctionSymbolFactory functionSymbolFactory,
                                DBFunctionSymbolFactory dbFunctionsymbolFactory, AtomFactory atomFactory,
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
-                               TargetAtomFactory targetAtomFactory, UniqueTermTypeExtractor uniqueTermTypeExtractor,
-                               IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+                               UniqueTermTypeExtractor uniqueTermTypeExtractor,
+                               IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
+                               OntopModelSettings settings, ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
@@ -45,10 +48,11 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.targetAtomFactory = targetAtomFactory;
         this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
         this.iqFactory = iqFactory;
+        this.unificationTools = unificationTools;
         this.settings = settings;
+        this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
     }
 
     @Override
@@ -92,11 +96,6 @@ public class CoreSingletonsImpl implements CoreSingletons {
     }
 
     @Override
-    public TargetAtomFactory getTargetAtomFactory() {
-        return targetAtomFactory;
-    }
-
-    @Override
     public QueryTransformerFactory getQueryTransformerFactory() {
         throw new RuntimeException("TODO: remove it");
     }
@@ -109,5 +108,15 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public OntopModelSettings getSettings() {
         return settings;
+    }
+
+    @Override
+    public ImmutableUnificationTools getUnificationTools() {
+        return unificationTools;
+    }
+
+    @Override
+    public ConstructionSubstitutionNormalizer getConstructionSubstitutionNormalizer() {
+        return constructionSubstitutionNormalizer;
     }
 }

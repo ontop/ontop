@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.substitution;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.Function;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 import java.io.BufferedReader;
@@ -30,12 +30,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.OntopModelTestingTools.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
 
 /**
@@ -44,23 +47,18 @@ import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
  */
 public class AutomaticMGUGenerationTests extends TestCase {
 
-	private UnifierUtilities					unifier		= null;
-	private AutomaticMGUTestDataGenerator	generator	= null;
+	private UnifierUtilities					unifier;
+	private AutomaticMGUTestDataGenerator	generator;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	
 	public void setUp() throws Exception {
 		/*
 		 * TODO modify the API so that function symbols for object terms use the
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new UnifierUtilities(TERM_FACTORY);
+		unifier = new UnifierUtilities(TERM_FACTORY, SUBSTITUTION_FACTORY);
 		generator = new AutomaticMGUTestDataGenerator();
-
 	}
 
 	public void testGetMGUAtomAtomBoolean() throws Exception {
@@ -80,28 +78,24 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String input = testcase;
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
-			List<Function> atoms = generator.getAtoms(atomsstr);
-			List<SingletonSubstitution> expectedmgu = generator.getMGU(mgustr);
+			List<ImmutableTerm> atoms = generator.getAtoms(atomsstr);
+			List<Map.Entry<Variable, ImmutableTerm>> expectedmgu = generator.getMGU(mgustr);
+			List<Map.Entry<Variable, ImmutableTerm>> computedmgu = new ArrayList<>();
 
-			List<SingletonSubstitution> computedmgu = new ArrayList<>();
-			Exception expectedException = null;
-
-			Substitution mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
-			if (mgu == null) {
+			Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
+			if (!mgu.isPresent()) {
 				computedmgu = null;
 			} else {
-				for (Variable var : mgu.getMap().keySet()) {
-					computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
-				}
+				computedmgu.addAll(mgu.get().getImmutableMap().entrySet());
 			}
 
 			log.debug("Expected MGU: {}", expectedmgu);
 
 			if (expectedmgu == null) {
-				assertTrue(computedmgu == null);
+				assertNull(computedmgu);
 			} else {
-				assertTrue(computedmgu != null);
-				assertTrue(computedmgu.size() == expectedmgu.size());
+				assertNotNull(computedmgu);
+				assertEquals(computedmgu.size(), expectedmgu.size());
 				assertTrue(generator.compareUnifiers(expectedmgu, computedmgu));
 
 			}
@@ -109,7 +103,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			testcase = in.readLine();
 		}
 		in.close();
-		log.info("Suceffully executed {} test cases for MGU computation");
+		log.info("Successfully executed {} test cases for MGU computation", casecounter);
 	}
 
 //	/**
@@ -124,8 +118,6 @@ public class AutomaticMGUGenerationTests extends TestCase {
 //
 //	/**
 //	 * Test method for
-//	 * {@link org.obda.reformulation.dllite.AtomUnifier#applySubstitution(org.obda.query.domain.CQIE, org.obda.reformulation.dllite.Substitution)}
-//	 * .
 //	 */
 //	
 //	public void testApplySubstitution() {

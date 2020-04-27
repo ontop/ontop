@@ -28,7 +28,7 @@ import org.apache.commons.rdf.rdf4j.RDF4J;
 
 public class R2RMLVocabulary {
 
-	/**
+    /**
 	 * Returns true if the passed string is a resource.
 	 *
 	 * @param resource
@@ -74,6 +74,7 @@ public class R2RMLVocabulary {
 	public static final IRI refObjectMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#refObjectMap");
 	public static final IRI graphMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#graphMap");
 	public static final IRI graph = rdf4j.createIRI("http://www.w3.org/ns/r2rml#graph");
+	public static final IRI defaultGraph = rdf4j.createIRI("http://www.w3.org/ns/r2rml#defaultGraph");
 
 	public static final IRI predicate = rdf4j.createIRI("http://www.w3.org/ns/r2rml#predicate");
 	public static final IRI template = rdf4j.createIRI("http://www.w3.org/ns/r2rml#template");

@@ -265,6 +265,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMin(DBTermType dbType);
     DBFunctionSymbol getDBMax(DBTermType dbType);
 
+    DBFunctionSymbol getNullIgnoringDBGroupConcat(boolean isDistinct);
+
     /**
      * The first sub-term encodes the index of the term to return.
      * Such values correspond to the following sub-terms

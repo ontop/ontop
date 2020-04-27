@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 
 /**
  * A utility class to render a Source Query object into its representational
@@ -31,7 +31,7 @@ public class SourceQueryRenderer {
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string.
 	 */
-	public static String encode(OBDASQLQuery input) {
+	public static String encode(SQLPPSourceQuery input) {
 		if (input == null) {
 			return "";
 		}

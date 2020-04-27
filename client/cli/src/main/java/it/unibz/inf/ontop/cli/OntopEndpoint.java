@@ -1,18 +1,18 @@
 package it.unibz.inf.ontop.cli;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
+import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.endpoint.OntopEndpointApplication;
 
 import java.util.ArrayList;
 
 
 @Command(name = "endpoint",
-        description = "starts a SPARQL endpoint powered by Ontop")
+        description = "Start a SPARQL endpoint powered by Ontop")
 public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"--portal"}, title = "endpoint portal file",

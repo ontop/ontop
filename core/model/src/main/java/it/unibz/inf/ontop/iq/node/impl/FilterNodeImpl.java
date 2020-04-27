@@ -199,6 +199,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return computeNotInternallyRequiredVariables(ImmutableList.of(child));
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree child) {
         return child.isConstructed(variable);
     }
@@ -207,8 +212,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
      * TODO: detect minus encodings
      */
     @Override
-    public boolean isDistinct(IQTree child) {
-        return child.isDistinct();
+    public boolean isDistinct(IQTree tree, IQTree child) {
+        return isDistinct(tree, ImmutableList.of(child));
     }
 
     @Override

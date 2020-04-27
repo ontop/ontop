@@ -5,13 +5,6 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
 
     boolean isOntologyAnnotationQueryingEnabled();
 
-    boolean isFullMetadataExtractionEnabled();
-
-    /**
-     * Completes user-provided DBMetadata
-     */
-    boolean isProvidedDBMetadataCompletionEnabled();
-
     /**
      * If false, throws an exception if the system is not able to infer the datatype from the database
      * If true use default datatype (xsd:string)
@@ -46,9 +39,7 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     // Keys
     //--------------------------
 
-    String OBTAIN_FULL_METADATA = "ontop.fullMetadataExtraction";
     String QUERY_ONTOLOGY_ANNOTATIONS = "ontop.queryOntologyAnnotation";
-    String COMPLETE_PROVIDED_METADATA = "ontop.completeProvidedMetadata";
     String INFER_DEFAULT_DATATYPE = "ontop.inferDefaultDatatype";
     String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";

@@ -63,22 +63,22 @@ public class SQLMappingParserUsingOwlTest {
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankMappingId()
-            throws DuplicateMappingException, InvalidMappingException, MappingIOException {
+            throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile5.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, MappingIOException {
+    public void testLoadWithBlankTargetQuery() throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile6.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, MappingIOException {
+    public void testLoadWithBlankSourceQuery() throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBadTargetQuery() throws DuplicateMappingException, InvalidMappingException,
+    public void testLoadWithBadTargetQuery() throws InvalidMappingException,
             MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");
     }
@@ -89,7 +89,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithAllMistakes() throws DuplicateMappingException, InvalidMappingException,
+    public void testLoadWithAllMistakes() throws InvalidMappingException,
             MappingIOException {
             loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile10.obda");
     }
@@ -100,7 +100,7 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
-                specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of())));
+                specificationFactory.createPrefixManager(ImmutableMap.of()));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
@@ -113,7 +113,7 @@ public class SQLMappingParserUsingOwlTest {
         SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
 
         // Check the content
-        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 5);
+        assertEquals(ppMapping.getPrefixManager().getPrefixMap().size(), 5);
         assertEquals(ppMapping.getTripleMaps().size(), 0);
     }
 
@@ -121,12 +121,12 @@ public class SQLMappingParserUsingOwlTest {
         SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
 
         // Check the content
-        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 6);
+        assertEquals(ppMapping.getPrefixManager().getPrefixMap().size(), 6);
         assertEquals(ppMapping.getTripleMaps().size(), 2);
     }
 
     private SQLPPMapping loadObdaFile(String fileLocation) throws MappingIOException,
-            InvalidMappingException, DuplicateMappingException {
+            InvalidMappingException {
         // Load the OBDA model
         return mappingParser.parse(new File(fileLocation));
     }

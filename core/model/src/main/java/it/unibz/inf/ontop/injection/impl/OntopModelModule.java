@@ -16,14 +16,12 @@ import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -48,11 +46,9 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(TermFactory.class);
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
-        bindFromSettings(TargetAtomFactory.class);
 
         bindFromSettings(IntermediateQueryValidator.class);
         bindFromSettings(TermNullabilityEvaluator.class);
-        bindFromSettings(FilterNullableVariableQueryTransformer.class);
         bindFromSettings(NoNullValueEnforcer.class);
         bindFromSettings(ExpressionNormalizer.class);
         bindFromSettings(IQConverter.class);
@@ -64,6 +60,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(OrderByNormalizer.class);
         bindFromSettings(DistinctNormalizer.class);
         bindFromSettings(AggregationNormalizer.class);
+        bindFromSettings(NotRequiredVariableRemover.class);
         bindFromSettings(RDF.class);
         bindFromSettings(UniqueTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);

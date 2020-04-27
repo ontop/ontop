@@ -11,21 +11,16 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -44,52 +39,18 @@ public class LeftJoinProfTest {
 
     @Before
     public void setUp() throws Exception {
-
         String url = "jdbc:h2:mem:professor";
         String username = "sa";
         String password = "sa";
 
         conn = DriverManager.getConnection(url, username, password);
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(CREATE_SCRIPT);
-
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, CREATE_SCRIPT);
     }
 
     @After
     public void tearDown() throws Exception {
-        dropTables();
+        executeFromFile(conn, DROP_SCRIPT);
         conn.close();
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(DROP_SCRIPT);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
-        conn.commit();
     }
 
     @Test
@@ -1131,6 +1092,130 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    @Test
+    public void testGroupConcat1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     ?p :nickname ?n .\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog Rog", "Frankie Frankie", "Johnny Johnny", "King of Pop King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat3() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(DISTINCT ?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat4() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(?n ; separator='|') AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog|Rog", "Frankie|Frankie", "Johnny|Johnny", "King of Pop|King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat5() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(DISTINCT ?n ; separator='|') AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+    
+    @Test
+    public void testGroupConcat6() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (COALESCE(GROUP_CONCAT(?n),'nothing') AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :teaches ?c .\n" +
+                "       ?c :nbStudents ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("nothing", "Frankie", "nothing", "King of Pop", "", "", "", "nothing");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
@@ -1153,12 +1238,11 @@ public class LeftJoinProfTest {
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
         Optional<String> sql;
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
-        try {
+        try (OntopOWLStatement st = conn.createStatement()) {
             IQ executableQuery = st.getExecutableQuery(query);
             sql = Optional.of(executableQuery.getTree())
                     .filter(t -> t instanceof UnaryIQTree)
@@ -1177,9 +1261,8 @@ public class LeftJoinProfTest {
                     i++;
                 }
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }

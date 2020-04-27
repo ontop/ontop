@@ -26,7 +26,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import junit.framework.TestCase;
 import org.junit.Ignore;
@@ -56,7 +56,6 @@ public class TurtleSyntaxParserTest {
 		Injector injector = configuration.getInjector();
         specificationFactory = injector.getInstance(SpecificationFactory.class);
 		parser = TARGET_QUERY_PARSER_FACTORY.createParser(getPrefixManager().getPrefixMap());
-
 	}
 
     @Test

@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -32,19 +33,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -65,62 +60,25 @@ public class BindTest {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-
     private static final String OWL_FILE = "src/test/resources/test/bind/sparqlBind.owl";
     private static final String OBDA_FILE = "src/test/resources/test/bind/sparqlBind.obda";
     private static final String PROPERTY_FILE = "src/test/resources/test/bind/sparqlBind.properties";
 
     @Before
     public void setUp() throws Exception {
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
         // String driver = "org.h2.Driver";
         String url = "jdbc:h2:mem:questjunitdb";
         String username = "sa";
         String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-create-h2.sql");
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, "src/test/resources/test/bind/sparqlBind-create-h2.sql");
 	}
 
     @After
     public void tearDown() throws Exception {
-        dropTables();
+        executeFromFile(conn, "src/test/resources/test/bind/sparqlBind-drop-h2.sql");
         conn.close();
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-drop-h2.sql");
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
-        conn.commit();
     }
 
     private OWLObject runTests(String query) throws Exception {
@@ -140,7 +98,6 @@ public class BindTest {
         OWLConnection conn = reasoner.getConnection();
         OWLStatement st = conn.createStatement();
 
-
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
 //            rs.hasNext();
@@ -149,7 +106,6 @@ public class BindTest {
             OWLObject ind2 = bindingSet.getOWLObject("price");
 
             return ind2;
-
         }
         finally {
             st.close();
@@ -187,11 +143,6 @@ public class BindTest {
         OWLObject price1 = runTests(querySelect1);
 
         assertEquals("\"33.6\"^^xsd:decimal", price1.toString());
-
-
-
-
-
     }
 
     @Test
@@ -207,17 +158,7 @@ public class BindTest {
                 + "   ?x dc:title ?title .\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"17.25\"^^xsd:decimal");
-
-
-        checkReturnedValues(queryBind, expectedValues);
-//        OWLObject price = runTests(p, queryBind);
-//
-//        assertEquals("\"17.25\"", price.toString());
-
-
+        checkReturnedValues(queryBind, ImmutableList.of("\"17.25\"^^xsd:decimal"));
     }
 
     @Test
@@ -233,18 +174,9 @@ public class BindTest {
                 + "   ?x dc:title ?title .\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"17.25\"^^xsd:decimal");
-
-
-        checkReturnedValues(queryBind, expectedValues);
-//        OWLObject price = runTests(p, queryBind);
-//
-//        assertEquals("\"17.25\"", price.toString());
-
-
+        checkReturnedValues(queryBind, ImmutableList.of("\"17.25\"^^xsd:decimal"));
     }
+
     @Test
     public void testDoubleBind() throws Exception{
         
@@ -261,12 +193,7 @@ public class BindTest {
                 "   BIND (?fullPrice  - ?discount AS ?w) \n" +
                 "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"41.8\"^^xsd:decimal");
-        expectedValues.add("\"22.75\"^^xsd:decimal");
-
-
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValues(queryBind, ImmutableList.of("\"41.8\"^^xsd:decimal", "\"22.75\"^^xsd:decimal"));
     }
 
 
@@ -285,12 +212,7 @@ public class BindTest {
                 "   BIND (?p AS ?fullPrice) \n" +
                 "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.4\"^^xsd:decimal");
-        expectedValues.add("\"5.75\"^^xsd:decimal");
-
-
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValues(queryBind, ImmutableList.of("\"8.4\"^^xsd:decimal", "\"5.75\"^^xsd:decimal"));
     }
 
     @Test
@@ -368,15 +290,10 @@ public class BindTest {
         try {
             OWLObject price = runTests(queryBind1);
 
-        } catch (OntopOWLException e) {
-
-            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
-
         }
-
-
-
-
+        catch (OntopOWLException e) {
+            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
+        }
     }
 
     @Test
@@ -391,11 +308,8 @@ public class BindTest {
                 + "   BIND (CONCAT(?title, \" title\") AS ?w)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial title\"^^xsd:string");
-        expectedValues.add("\"The Semantic Web title\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValues(queryBind, ImmutableList.of(
+                "\"SPARQL Tutorial title\"^^xsd:string", "\"The Semantic Web title\"^^xsd:string"));
     }
 
     @Test
@@ -410,11 +324,8 @@ public class BindTest {
                 + "   BIND (UCASE(?title) AS ?w)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL TUTORIAL\"@en");
-        expectedValues.add("\"THE SEMANTIC WEB\"@en");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValues(queryBind, ImmutableList.of(
+                "\"SPARQL TUTORIAL\"@en", "\"THE SEMANTIC WEB\"@en"));
     }
 
     @Test
@@ -430,13 +341,8 @@ public class BindTest {
                 + "   BIND (CONCAT(?title, \" \", str(?v)) AS ?w)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial 16\"^^xsd:string");
-        expectedValues.add("\"The Semantic Web 17\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
-
-
+        checkReturnedValues(queryBind, ImmutableList.of(
+                "\"SPARQL Tutorial 16\"^^xsd:string", "\"The Semantic Web 17\"^^xsd:string"));
     }
 
     @Test
@@ -451,14 +357,8 @@ public class BindTest {
                 + "   BIND (CONCAT(?title, ?title) AS ?w)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL TutorialSPARQL Tutorial\"@en");
-        expectedValues.add("\"The Semantic WebThe Semantic Web\"@en");
-        checkReturnedValues(queryBind, expectedValues);
-
-
-
+        checkReturnedValues(queryBind, ImmutableList.of(
+                "\"SPARQL TutorialSPARQL Tutorial\"@en", "\"The Semantic WebThe Semantic Web\"@en"));
     }
 
     @Test
@@ -517,14 +417,8 @@ public class BindTest {
                 + "   BIND (CONCAT(?desc, ?title) AS ?w)\n"
                 + "}";
 
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"goodSPARQL Tutorial\"@en");
-        expectedValues.add("\"badThe Semantic Web\"@en");
-        checkReturnedValues(queryBind, expectedValues);
-
-
-
+        checkReturnedValues(queryBind, ImmutableList.of(
+                "\"goodSPARQL Tutorial\"@en", "\"badThe Semantic Web\"@en"));
     }
 
 
@@ -545,10 +439,10 @@ public class BindTest {
 
         try {
             runTests(queryBind);
-        } catch (OntopOWLException e) {
+        }
+        catch (OntopOWLException e) {
             throw e.getCause();
         }
-
     }
 
     @Test
@@ -558,12 +452,9 @@ public class BindTest {
                 "WHERE {\n" +
                 "  ?y dc:title ?title .\n" +
                 "  BIND( lang(?title) AS ?w ) .\n" +
-                "}\n";
+                "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"en\"^^xsd:string");
-        expectedValues.add("\"en\"^^xsd:string");
-        checkReturnedValues(query, expectedValues);
+        checkReturnedValues(query, ImmutableList.of("\"en\"^^xsd:string", "\"en\"^^xsd:string"));
     }
 
     @Test
@@ -574,12 +465,9 @@ public class BindTest {
                 "  ?y dc:title ?title .\n" +
                 "  BIND (str(?title) AS ?s)\n" +
                 "  BIND( lang(?s) AS ?w ) .\n" +
-                "}\n";
+                "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"^^xsd:string");
-        expectedValues.add("\"\"^^xsd:string");
-        checkReturnedValues(query, expectedValues);
+        checkReturnedValues(query, ImmutableList.of("\"\"^^xsd:string", "\"\"^^xsd:string"));
     }
 
 
@@ -626,6 +514,5 @@ public class BindTest {
         assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
 
     }
-
 
 }

@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer.RightProvenance;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -35,19 +36,21 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     private final ConditionSimplifier conditionSimplifier;
     private final JoinLikeChildBindingLifter bindingLifter;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
+    private final RightProvenanceNormalizer rightProvenanceNormalizer;
 
 
     @Inject
     private LeftJoinNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, ConditionSimplifier conditionSimplifier,
                                    JoinLikeChildBindingLifter bindingLifter,
-                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
+                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools, RightProvenanceNormalizer rightProvenanceNormalizer) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
         this.conditionSimplifier = conditionSimplifier;
         this.bindingLifter = bindingLifter;
         this.variableNullabilityTools = variableNullabilityTools;
+        this.rightProvenanceNormalizer = rightProvenanceNormalizer;
     }
 
 
@@ -186,11 +189,13 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             try {
                 ImmutableList<IQTree> children = ImmutableList.of(liftedLeftChild, rightChild);
+                VariableNullability childVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
+                        ImmutableList.of(leftGrandChild, rightChild));
 
                 return bindingLifter.liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
                         children,
                         leftGrandChild.getVariables(), ljCondition, variableGenerator,
-                        variableNullabilityTools.getChildrenVariableNullability(children), this::applyLeftChildBindingLift)
+                        childVariableNullability, this::applyLeftChildBindingLift)
                         // Recursive (for optimization purposes)
                         .liftLeftChild();
             }
@@ -308,14 +313,12 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             Optional<RightProvenance> rightProvenance = createProvenanceElements(rightSubTree,
                     naiveAscendingSubstitution, leftVariables, rightSubTree.getVariables(), variableGenerator);
 
+            IQTree newRightChild = rightProvenance.map(RightProvenance::getRightTree)
+                    .orElse(rightSubTree);
+
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution =
                     makeRightSpecificDefsProvenanceDependent(naiveAscendingSubstitution,
-                            rightProvenance.map(p -> p.variable), leftVariables);
-
-            IQTree newRightChild = rightProvenance
-                    .flatMap(p -> p.constructionNode)
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, rightSubTree))
-                    .orElse(rightSubTree);
+                            rightProvenance.map(RightProvenance::getProvenanceVariable), leftVariables);
 
             ImmutableSet<Variable> parentVariables = children.stream()
                     .flatMap(c -> c.getVariables().stream())
@@ -364,7 +367,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         ljCondition, leftVariables,
                         variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
 
-                ImmutableSubstitution<NonFunctionalTerm> downSubstitution = selectDownSubstitution(
+                ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution = selectDownSubstitution(
                         simplificationResults.getSubstitution(), rightChild.getVariables());
 
                 if (downSubstitution.isEmpty())
@@ -376,13 +379,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 Optional<RightProvenance> rightProvenance = createProvenanceElements(updatedRightChild, downSubstitution,
                         leftVariables, updatedRightChild.getVariables(), variableGenerator);
 
-                IQTree newRightChild = rightProvenance
-                        .flatMap(p -> p.constructionNode)
-                        .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, updatedRightChild))
+                IQTree newRightChild = rightProvenance.map(RightProvenance::getRightTree)
                         .orElse(updatedRightChild);
 
                 ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = computeLiftableSubstitution(
-                        downSubstitution, rightProvenance.map(p -> p.variable), leftVariables);
+                        downSubstitution, rightProvenance.map(RightProvenance::getProvenanceVariable), leftVariables);
 
                 ConstructionNode newParentConstructionNode = iqFactory.createConstructionNode(
                         Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy(),
@@ -453,7 +454,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .orElse(rightSubstitution);
 
             /*
-             * Substitution with only a provenance entry -> see if something can be lifted from the grand child
+             * substitution with only a provenance entry -> see if something can be lifted from the grand child
              */
             if (selectedSubstitution.isEmpty())
                 return liftRightGrandChildWithProvenance(
@@ -467,16 +468,16 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             // TODO: only create a right provenance when really needed
             Optional<RightProvenance> rightProvenance = excludedEntry
                     .map(e -> createProvenanceElements(e, rightGrandChild, rightChildRequiredVariables))
+                    .map(Optional::of)
                     .orElseGet(() -> createProvenanceElements(rightGrandChild, selectedSubstitution,
                             leftVariables, rightChildRequiredVariables, variableGenerator));
 
-            IQTree newRightChild = rightProvenance
-                    .flatMap(p -> p.constructionNode)
-                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, rightGrandChild))
+            // Tree where a fresh non-nullable variable may have been introduced for the provenance
+            IQTree newRightChild = rightProvenance.map(RightProvenance::getRightTree)
                     .orElse(rightGrandChild);
 
             ImmutableSubstitution<ImmutableTerm> liftableSubstitution = computeLiftableSubstitution(
-                    selectedSubstitution, rightProvenance.map(e -> e.variable), leftVariables);
+                    selectedSubstitution, rightProvenance.map(RightProvenance::getProvenanceVariable), leftVariables);
 
             ConstructionNode newParentNode = iqFactory.createConstructionNode(
                     Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy(),
@@ -667,16 +668,16 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
          *
          * Useful when there is an equality between two variables defined on the right (otherwise would not converge)
          */
-        private ImmutableSubstitution<NonFunctionalTerm> selectDownSubstitution(
-                ImmutableSubstitution<NonFunctionalTerm> simplificationSubstitution, ImmutableSet<Variable> rightVariables) {
-            ImmutableMap<Variable, NonFunctionalTerm> newMap = simplificationSubstitution.getImmutableMap().entrySet().stream()
+        private ImmutableSubstitution<? extends VariableOrGroundTerm> selectDownSubstitution(
+                ImmutableSubstitution<? extends VariableOrGroundTerm> simplificationSubstitution, ImmutableSet<Variable> rightVariables) {
+            ImmutableMap<Variable, ? extends VariableOrGroundTerm> newMap = simplificationSubstitution.getImmutableMap().entrySet().stream()
                     .filter(e -> rightVariables.contains(e.getKey()))
                     .collect(ImmutableCollectors.toMap());
             return substitutionFactory.getSubstitution(newMap);
         }
 
-        private Optional<RightProvenance> createProvenanceElements(Map.Entry<Variable, Constant> provenanceVariableDefinition,
-                                                                   IQTree rightTree, ImmutableSet<Variable> rightRequiredVariables) {
+        private RightProvenance createProvenanceElements(Map.Entry<Variable, Constant> provenanceVariableDefinition,
+                                                                               IQTree rightTree, ImmutableSet<Variable> rightRequiredVariables) {
             Variable rightProvenanceVariable = provenanceVariableDefinition.getKey();
 
             ImmutableSet<Variable> newRightProjectedVariables =
@@ -688,12 +689,16 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     newRightProjectedVariables,
                     substitutionFactory.getSubstitution(rightProvenanceVariable, provenanceVariableDefinition.getValue()));
 
-            return Optional.of(new RightProvenance(rightProvenanceVariable, newRightConstructionNode));
+            UnaryIQTree newRightTree = iqFactory.createUnaryIQTree(newRightConstructionNode, rightTree);
+            return new RightProvenance(rightProvenanceVariable, newRightTree);
         }
 
         /**
          * When at least one value does not depend on a right-specific variable
          *   (i.e. is a ground term or only depends on left variables)
+         *
+         *  A fresh non-nullable variable may have been introduced for the provenance inside a sparse data node
+         *  of the returned right tree
          */
         private Optional<RightProvenance> createProvenanceElements(IQTree rightTree,
                                                                    ImmutableSubstitution<? extends ImmutableTerm> selectedSubstitution,
@@ -705,36 +710,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .filter(e -> !leftVariables.contains(e.getKey()))
                     .map(Map.Entry::getValue)
                     .anyMatch(value -> needsAnExternalProvenanceVariable(value, leftVariables))) {
-
-                VariableNullability rightNullability = rightTree.getVariableNullability();
-
-                Optional<Variable> nonNullableRightVariable = rightTree.getVariables().stream()
-                        .filter(v -> !leftVariables.contains(v))
-                        .filter(v -> !rightNullability.isPossiblyNullable(v))
-                        .findFirst();
-
-                if (nonNullableRightVariable.isPresent()) {
-                    return Optional.of(new RightProvenance(nonNullableRightVariable.get()));
-                }
-                /*
-                 * Otherwise, creates a fresh variable and its construction node
-                 */
-                else {
-                    Variable provenanceVariable = variableGenerator.generateNewVariable();
-
-                    ImmutableSet<Variable> newRightProjectedVariables =
-                            Stream.concat(
-                                    Stream.of(provenanceVariable),
-                                    rightRequiredVariables.stream())
-                                    .collect(ImmutableCollectors.toSet());
-
-                    ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(
-                            newRightProjectedVariables,
-                            substitutionFactory.getSubstitution(provenanceVariable,
-                                    termFactory.getProvenanceSpecialConstant()));
-
-                    return Optional.of(new RightProvenance(provenanceVariable, newRightConstructionNode));
-                }
+                return Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
+                        rightTree, leftVariables, rightRequiredVariables, variableGenerator));
             }
             else {
                 return Optional.empty();
@@ -801,28 +778,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .filter(e -> (e.getValue().equals(specialProvenanceConstant)))
                     .map(e -> Maps.immutableEntry(e.getKey(), specialProvenanceConstant))
                     .findFirst();
-        }
-    }
-
-    /**
-     * Elements that keep track that the right part contributed to the intermediate results:
-     *
-     * - Variable: right-specific, not nullable on the right
-     * - Construction node (optional): defines the provenance variable (when the latter is not defined by an atom)
-     */
-    private static class RightProvenance {
-
-        public final Variable variable;
-        public final Optional<ConstructionNode> constructionNode;
-
-        private RightProvenance(Variable provenanceVariable, ConstructionNode constructionNode) {
-            this.variable = provenanceVariable;
-            this.constructionNode = Optional.of(constructionNode);
-        }
-
-        private RightProvenance(Variable rightProvenanceVariable) {
-            this.variable = rightProvenanceVariable;
-            this.constructionNode = Optional.empty();
         }
     }
 }

@@ -33,11 +33,6 @@ public interface DBTypeFactory {
     DBTermType getDBTermType(String typeName);
     DBTermType getDBTermType(String typeName, int columnSize);
 
-    @Deprecated
-    default DBTermType getDBTermType(int typeCode, String typeName) {
-        return getDBTermType(typeName);
-    }
-
     String getDBTrueLexicalValue();
     String getDBFalseLexicalValue();
     String getNullLexicalValue();

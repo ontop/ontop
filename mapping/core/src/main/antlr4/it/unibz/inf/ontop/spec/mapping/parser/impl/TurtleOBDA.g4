@@ -68,6 +68,7 @@ directiveStatement
 
 triplesStatement
   : triples '.'
+  | quads '.'
   ;
 
 directive
@@ -81,6 +82,10 @@ prefixID
 
 base
   : ('@base' | '@BASE') IRIREF
+  ;
+
+quads
+  : 'GRAPH' graph '{' triples+ '}'
   ;
 
 triples
@@ -102,6 +107,12 @@ objectList
 verb
   : resource
   | 'a'
+  ;
+
+graph
+  : resource
+  | variable
+  | blank
   ;
 
 subject

@@ -25,10 +25,10 @@ import it.unibz.inf.ontop.model.type.TermType;
 import java.util.Optional;
 
 /**
- * This class defines a type of {@link Term} in which it has a constant
+ * This class defines a type of {@link ImmutableTerm} in which it has a constant
  * value.
  */
-public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
+public interface Constant extends NonFunctionalTerm, GroundTerm {
 
 	// TODO: eliminate getValue from this interface
 	String getValue();

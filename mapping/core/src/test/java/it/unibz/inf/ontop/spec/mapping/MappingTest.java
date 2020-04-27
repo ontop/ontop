@@ -2,18 +2,14 @@ package it.unibz.inf.ontop.spec.mapping;
 
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -35,15 +31,13 @@ import static junit.framework.TestCase.fail;
 
 public class MappingTest {
 
-    private static final RelationPredicate P1_PREDICATE;
-    private static final RelationPredicate P3_PREDICATE;
-    private static final RelationPredicate P4_PREDICATE;
-    private static final RelationPredicate P5_PREDICATE;
-    private static final RelationPredicate BROKER_PREDICATE;
+    private static final RelationDefinition P1;
+    private static final RelationDefinition P3;
+    private static final RelationDefinition P4;
+    private static final RelationDefinition P5;
+    private static final RelationDefinition BROKER;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
-
-    private static final DBMetadata DB_METADATA;
 
     private static Variable A = TERM_FACTORY.getVariable("a");
     private static Variable B = TERM_FACTORY.getVariable("b");
@@ -59,38 +53,28 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        P1 = builder.createDatabaseRelation("p1",
+            "col1", integerDBType, false,
+            "col12", integerDBType, false);
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col12"), integerDBType.getName(), integerDBType, false);
-        P1_PREDICATE = table1Def.getAtomPredicate();
+        P3 = builder.createDatabaseRelation("p3",
+            "col31", integerDBType, false);
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col31"), integerDBType.getName(), integerDBType, false);
-        P3_PREDICATE = table3Def.getAtomPredicate();
+        P4 = builder.createDatabaseRelation("p4",
+            "col41", integerDBType, false);
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
-        table4Def.addAttribute(idFactory.createAttributeID("col41"), integerDBType.getName(), integerDBType, false);
-        P4_PREDICATE = table4Def.getAtomPredicate();
+        P5 = builder.createDatabaseRelation("p5",
+            "col51", integerDBType, false);
 
-        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
-        table5Def.addAttribute(idFactory.createAttributeID("col51"), integerDBType.getName(), integerDBType, false);
-        P5_PREDICATE = table5Def.getAtomPredicate();
-
-
-        DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID("DB2INST1", "brokerworksfor"));
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), integerDBType.getName(), integerDBType, false);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), integerDBType.getName(), integerDBType, true);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), integerDBType.getName(), integerDBType, true);
-        BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
+        BROKER = builder.createDatabaseRelation("brokerworksfor",
+            "broker", integerDBType, false,
+            "company", integerDBType, true,
+            "client", integerDBType, true);
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";
-
-        DB_METADATA = dbMetadata;
 
         PROP_1 = RDF_FACTORY.createIRI("http://example.org/voc#Prop1");
         PROP_2 = RDF_FACTORY.createIRI("http://example.org/voc#Prop2");
@@ -102,15 +86,12 @@ public class MappingTest {
 
         ImmutableList<IRI> propertyIris = ImmutableList.of(PROP_1, PROP_2);
 
-        DataAtom<RelationPredicate> binaryExtensionalAtom = ATOM_FACTORY.getDataAtom(P1_PREDICATE, ImmutableList.of(A, B));
-        DataAtom<RelationPredicate> unaryExtensionalAtom = ATOM_FACTORY.getDataAtom(P3_PREDICATE, ImmutableList.of(A));
-
         ImmutableMap.Builder<IRI, IQ> propertyMapBuilder = ImmutableMap.builder();
         RDFAtomPredicate rdfAtomPredicate = null;
 
         // Properties
         for (IRI propertyIri : propertyIris){
-            IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
+            IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
             ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                     SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                             P, getConstantIRI(propertyIri),
@@ -120,7 +101,7 @@ public class MappingTest {
             rdfAtomPredicate = (RDFAtomPredicate) mappingProjectionAtom.getPredicate();
 
             mappingBuilder.init(mappingProjectionAtom, mappingRootNode);
-            ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(binaryExtensionalAtom);
+            ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P1, ImmutableMap.of(0, A, 1, B));
             mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
             IQ mappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
             propertyMapBuilder.put(propertyIri, mappingAssertion);
@@ -128,14 +109,14 @@ public class MappingTest {
         }
 
         // Class
-        IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                 SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                         P, getConstantIRI(RDF.TYPE),
                         O, getConstantIRI(CLASS_1)));
 
         mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
-        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(unaryExtensionalAtom);
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P3, ImmutableMap.of(0, A));
         mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
         IQ classMappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
         ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
@@ -145,12 +126,19 @@ public class MappingTest {
         /*
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
-                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
-
-        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  transformIntoTable(
-                propertyMapBuilder.build()), transformIntoTable(classMap));
-        Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
+        final RDFAtomPredicate tp = rdfAtomPredicate;
+        ImmutableList<MappingAssertion> nonNormalizedMapping = Stream.concat(
+                propertyMapBuilder.build().entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                MappingAssertionIndex.ofProperty(tp, e.getKey()), e.getValue())),
+                classMap.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                MappingAssertionIndex.ofClass(tp, e.getKey()), e.getValue())))
+                .collect(ImmutableCollectors.toMap()).entrySet().stream()
+                .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
+                .collect(ImmutableCollectors.toList());
+        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping).stream()
+                .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
 
         /*
          * Test whether two mapping assertions share a variable
@@ -161,12 +149,11 @@ public class MappingTest {
         // Properties
         for (IRI propertyIri : propertyIris){
 
-            IQ mappingAssertion = normalizedMapping.getRDFPropertyDefinition(rdfAtomPredicate, propertyIri)
-                    .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
+            IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri));
 
             LOGGER.info(mappingAssertion.toString());
             ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
-            if(Stream.of(mappingAssertionVariables)
+            if (Stream.of(mappingAssertionVariables)
                     .anyMatch(variableUnion::contains)){
                 fail();
                 break;
@@ -176,8 +163,7 @@ public class MappingTest {
         }
 
         // Class
-        IQ mappingAssertion = normalizedMapping.getRDFClassDefinition(rdfAtomPredicate, CLASS_1)
-                .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
+        IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofClass(rdfAtomPredicate, CLASS_1));
 
         System.out.println(mappingAssertion);
         ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
@@ -197,23 +183,20 @@ public class MappingTest {
                         P, getConstantIRI(RDF.TYPE),
                         O, getConstantIRI(CLASS_1)));
 
-        DataAtom<RelationPredicate> dataAtom = ATOM_FACTORY.getDataAtom(BROKER_PREDICATE, ImmutableList.of(C,Y,C));
-        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(dataAtom);
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(
+                BROKER, ImmutableMap.of(0, C,1, Y,2, C));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, table1DataNode);
 
         IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info(mappingAssertion.toString());
 
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
-                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
-        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableTable.of(),
-                transformIntoTable(ImmutableMap.of(CLASS_1, mappingAssertion))
-        );
+//        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
+//        ImmutableMap.of(MappingAssertionIndex.ofClass(tp, CLASS_1), mappingAssertion);
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
@@ -222,13 +205,5 @@ public class MappingTest {
 
     private IRIConstant getConstantIRI(IRI iri) {
         return TERM_FACTORY.getConstantIRI(iri);
-    }
-
-    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
-        return map.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toTable());
     }
 }

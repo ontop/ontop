@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
@@ -132,8 +133,13 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private TranslationResult translate(TupleExpr node) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
-        if (node instanceof StatementPattern)
-            return translateTriplePattern((StatementPattern) node);
+        if (node instanceof StatementPattern){
+            StatementPattern stmt = (StatementPattern)node;
+            if( stmt.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS) ){
+                return translateQuadPattern(stmt); // Davide> Quad
+            }
+            else return translateTriplePattern((StatementPattern) node);
+        }
 
         if (node instanceof Join)
             return translateJoinLikeNode((Join) node);
@@ -226,9 +232,16 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub,
                                                             ImmutableSet<Variable> leftNullableVars, ImmutableSet<Variable> rightNullableVars) {
-        return getConjunction(sharedVars.stream()
-                .map(v -> getEqOrNullable(v, sub.get(v), leftNullableVars, rightNullableVars))
-                .collect(ImmutableCollectors.toList())
+        return getConjunction(
+                Stream.concat(
+                        sharedVars.stream()
+                                .map(v -> getEqOrNullable(v, sub.get(v), leftNullableVars, rightNullableVars)),
+                        Stream.of(
+                                getDisjunction(
+                                        sharedVars.stream()
+                                                .map(v -> termFactory.getStrictEquality(v, sub.get(v)))
+                                                .collect(ImmutableCollectors.toList())
+                        ))).collect(ImmutableCollectors.toList())
         );
     }
 
@@ -839,6 +852,21 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
+    // Davide> Quads support
+    private TranslationResult translateQuadPattern(StatementPattern quad) {
+
+        return new TranslationResult(
+                iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalQuadAtom(
+                                translateRDF4JVar(quad.getSubjectVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(quad.getPredicateVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(quad.getObjectVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(quad.getContextVar(), ImmutableSet.of(), true)
+                        )),
+                ImmutableSet.of()
+        );
+    }
+
     private TranslationResult translateExtension(Extension node) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult childTranslation = translate(node.getArg());
         IQTree childQuery = childTranslation.iqTree;
@@ -1078,18 +1106,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             //Unary count
             if (expr instanceof Count) {
                 Count count = (Count) expr;
-                if (count.isDistinct())
-                    return termFactory.getImmutableFunctionalTerm(
-                            functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(SPARQL.COUNT,1),
-                            term
-                    );
                 return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                SPARQL.COUNT,
-                                1
-                        ),
-                        term
-                );
+                        getSPARQLAggregateFunctionSymbol(SPARQL.COUNT, 1, count.isDistinct()),
+                        term);
             }
             if (expr instanceof Avg) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -1137,25 +1156,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 );
             }
             if (expr instanceof GroupConcat) {
-                ValueExpr sep = ((GroupConcat) expr).getSeparator();
-                return sep == null ?
-                        termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                        SPARQL.GROUP_CONCAT,
-                                        1
-                                ),
-                                term
-                        ) :
-                        termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                        SPARQL.GROUP_CONCAT,
-                                        2
-                                ),
-                                term,
-                                getTerm(
-                                        sep,
-                                        ImmutableSet.of()
-                                ));
+                String separator = Optional.ofNullable(((GroupConcat) expr).getSeparator())
+                        .map(e -> ((ValueConstant) e).getValue().stringValue())
+                        // Default separator
+                        .orElse(" ");
+
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, ((GroupConcat) expr).isDistinct()),
+                        term);
             }
             if (expr instanceof Not) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -1340,6 +1348,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // If
         // BNodeGenerator
         throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
+    }
+
+    private FunctionSymbol getSPARQLAggregateFunctionSymbol(String officialName, int arity, boolean isDistinct) {
+        return isDistinct
+                ? functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(officialName, arity)
+                : functionSymbolFactory.getRequiredSPARQLFunctionSymbol(officialName, arity);
     }
 
     /**

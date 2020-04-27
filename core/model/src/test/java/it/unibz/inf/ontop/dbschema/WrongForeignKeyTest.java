@@ -1,127 +1,70 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
-import static it.unibz.inf.ontop.OntopModelTestingTools.createDummyMetadata;
+import static it.unibz.inf.ontop.OntopModelTestingTools.createMetadataProviderBuilder;
+
 
 /**
  * Test that we correctly output exceptions in case we try to insert an incorrect foreign key (missing values)
  */
+
 public class WrongForeignKeyTest {
-    private static final DBMetadata METADATA;
+    private static final QuotedIDFactory ID_FACTORY;
+    private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
 
-    static{
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+    static {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        ID_FACTORY = builder.getQuotedIDFactory();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        table1Def = builder.createDatabaseRelation("table1",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false,
+            "col4", integerDBType, false,
+            "col5", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table1Def)
+                .addDeterminant(2)
+                .addDependent(3)
+                .addDependent(4)
+                .build();
 
-        /*
-         * Table 1:
-         */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID("schema1","table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T1 = table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T1 = table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        Attribute col4T1 = table1Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
-        // Independent
-        table1Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col2T1)
-                .addDependent(col3T1)
-                .addDependent(col4T1)
-                .build());
+        table2Def = builder.createDatabaseRelation("table2",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
 
-
-        /*
-         * Table 2:
-         */
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID("schema1","table2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
-
-
-        /*
-         * Table 3:
-         */
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T3 = table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        Attribute col4T3 = table3Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
-        Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col6"), integerDBType.getName(), integerDBType, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col2T3)
-                .addDependent(col3T3)
-                .build());
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col4T3)
-                .addDependent(col5T3)
-                .build());
-
-
-        dbMetadata.freeze();
-        METADATA = dbMetadata;
+        table3Def = builder.createDatabaseRelation("table3",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false,
+            "col4", integerDBType, false,
+            "col5", integerDBType, false,
+            "col6", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table3Def)
+                .addDeterminant(2)
+                .addDependent(3)
+                .build();
+        FunctionalDependency.defaultBuilder(table3Def)
+                .addDeterminant(4)
+                .addDependent(5)
+                .build();
     }
-
 
     //Add a foreign key constraint where a column is missing in the referring table
-    @Test(expected = IllegalArgumentException.class)
-    public void testMissingColumnPK(){
+    @Test(expected = AttributeNotFoundException.class)
+    public void testMissingColumnPK() throws AttributeNotFoundException {
+        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder("", table1Def, table2Def);
 
-        RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(METADATA.getQuotedIDFactory(),
-                "SCHEMA1", "TABLE1");
-        RelationID refId = RelationID.createRelationIdFromDatabaseRecord(METADATA.getQuotedIDFactory(),
-                "SCHEMA1", "TABLE2");
-        DatabaseRelationDefinition relation = METADATA.getDatabaseRelation(relationId);
-        DatabaseRelationDefinition ref = METADATA.getDatabaseRelation(refId);
-
-        ForeignKeyConstraint.Builder builder;
-
-        builder = new ForeignKeyConstraint.Builder(relation, ref);
-
-        QuotedID attrId = QuotedID.createIdFromDatabaseRecord(METADATA.getQuotedIDFactory(), "COL4");
-        QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(METADATA.getQuotedIDFactory(), "COL4");
-        builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
-
+        QuotedID attrId = ID_FACTORY.createAttributeID("COL4");
+        QuotedID refAttrId = ID_FACTORY.createAttributeID( "COL4");
+        builder.add(attrId, refAttrId);
     }
 
-    //Add two foreign key constraints referring to two different tables
-    @Test(expected = IllegalArgumentException.class)
-    public void testFKonDifferentTables(){
-
-        RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(METADATA.getQuotedIDFactory(),
-                "SCHEMA1", "TABLE1");
-        RelationID refId = RelationID.createRelationIdFromDatabaseRecord(METADATA.getQuotedIDFactory(),
-                "SCHEMA1", "TABLE2");
-        DatabaseRelationDefinition relation = METADATA.getDatabaseRelation(relationId);
-        DatabaseRelationDefinition ref = METADATA.getDatabaseRelation(refId);
-
-        ForeignKeyConstraint.Builder builder;
-
-        builder = new ForeignKeyConstraint.Builder(relation, ref);
-
-        QuotedID attrId = QuotedID.createIdFromDatabaseRecord(METADATA.getQuotedIDFactory(), "COL2");
-        QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(METADATA.getQuotedIDFactory(), "COL1");
-        builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
-
-        RelationID relationId2 = RelationID.createRelationIdFromDatabaseRecord(METADATA.getQuotedIDFactory(),
-                "SCHEMA1", "TABLE3");
-
-        DatabaseRelationDefinition relation2 = METADATA.getDatabaseRelation(relationId2);
-
-        QuotedID attrId2 = QuotedID.createIdFromDatabaseRecord(METADATA.getQuotedIDFactory(), "COL2");
-        QuotedID refAttrId2 = QuotedID.createIdFromDatabaseRecord(METADATA.getQuotedIDFactory(), "COL1");
-        builder.add(relation2.getAttribute(attrId2), ref.getAttribute(refAttrId2));
-
-    }
 }

@@ -3,13 +3,12 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
+import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
-import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -31,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGeneratorImpl.class);
-    private final RDBMetadata metadata;
+    private final DBParameters dbParameters;
     private final IntermediateQueryFactory iqFactory;
     private final UnionFlattener unionFlattener;
     private final OptimizerFactory optimizerFactory;
@@ -43,7 +42,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final BooleanExpressionPushDownTransformer pushDownTransformer;
 
     @AssistedInject
-    private SQLGeneratorImpl(@Assisted DBMetadata metadata,
+    private SQLGeneratorImpl(@Assisted DBParameters dbParameters,
                              IntermediateQueryFactory iqFactory,
                              UnionFlattener unionFlattener,
                              OptimizerFactory optimizerFactory,
@@ -55,10 +54,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
         this.pushDownTransformer = pushDownTransformer;
-        if (!(metadata instanceof RDBMetadata)) {
-            throw new IllegalArgumentException("Not a DBMetadata!");
-        }
-        this.metadata = (RDBMetadata) metadata;
+        this.dbParameters = dbParameters;
         this.iqFactory = iqFactory;
         this.unionFlattener = unionFlattener;
         this.optimizerFactory = optimizerFactory;
@@ -133,6 +129,6 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     }
 
     private NativeNode generateNativeNode(IQTree normalizedSubTree) {
-        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, metadata.getDBParameters());
+        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters);
     }
 }

@@ -19,9 +19,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class OracleIdentifierTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/oracle/identifiers/identifiers.owl";
-	static final String obdafile = "/oracle/identifiers/identifiers-oracle.obda";
-	static final String propertiesfile = "/oracle/oracle.properties";
+	private static final String owlfile = "/oracle/identifiers/identifiers.owl";
+	private static final String obdafile = "/oracle/identifiers/identifiers-oracle.obda";
+	private static final String propertiesfile = "/oracle/oracle.properties";
 
 	private static OntopOWLReasoner REASONER;
 	private static OntopOWLConnection CONNECTION;

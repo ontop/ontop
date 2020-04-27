@@ -10,4 +10,6 @@ public class MappingException extends OBDASpecificationException {
     protected MappingException(Exception e) {
         super(e);
     }
+
+    protected MappingException(String message, Exception e) { super(message, e); }
 }

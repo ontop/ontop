@@ -26,6 +26,7 @@ public class OracleConstraintTest extends AbstractConstraintTest {
 
 	private static final String propertyFile = "/oracle/oracle.properties";
 
+	// TODO: CHECK THAT THE DATABASE CONTAINS THE TABLES
 	public OracleConstraintTest(String method) {
 		super(method, propertyFile);
 	}

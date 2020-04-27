@@ -186,7 +186,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         LeftJoinNode normalizedLeftJoin = updateRightNodesAndLJ(leftJoinNode, rightComponent, newLJCondition,
                 analysis.getProposedRightDataNode(), treeComponent);
 
-        DataNode newRightChild = analysis.getProposedRightDataNode()
+        ExtensionalDataNode newRightChild = analysis.getProposedRightDataNode()
                 .orElse(rightComponent.dataNode);
 
         LeftJoinNode leftJoinNodeToUpgrade = newLJCondition
@@ -249,8 +249,9 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private LeftJoinNode updateRightNodesAndLJ(LeftJoinNode leftJoinNode,
                                                DataNodeAndSubstitution rightComponent,
                                                Optional<ImmutableExpression> newLJCondition,
-                                               Optional<DataNode> proposedRightDataNode,
+                                               Optional<ExtensionalDataNode> proposedRightDataNode,
                                                QueryTreeComponent treeComponent) {
+        ImmutableSet<Variable> projectedVariables = treeComponent.getVariables(leftJoinNode);
         rightComponent.constructionNode
                 .ifPresent(n -> treeComponent.replaceNodeByChild(n, Optional.empty()));
         rightComponent.filterNode
@@ -260,10 +261,15 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         LeftJoinNode newLeftJoinNode = leftJoinNode.changeOptionalFilterCondition(newLJCondition);
         treeComponent.replaceNode(leftJoinNode, newLeftJoinNode);
 
+        // Maintains the same projected variables
+        ImmutableSet<Variable> tmpProjectedVariables = treeComponent.getVariables(newLeftJoinNode);
+        if (!projectedVariables.equals(tmpProjectedVariables))
+            treeComponent.insertParent(newLeftJoinNode, iqFactory.createConstructionNode(projectedVariables));
+
         return newLeftJoinNode;
     }
 
-    private LeftJoinNode liftCondition(LeftJoinNode leftJoinNode, QueryNode leftChild, DataNode rightChild,
+    private LeftJoinNode liftCondition(LeftJoinNode leftJoinNode, QueryNode leftChild, ExtensionalDataNode rightChild,
                                        ImmutableSet<Variable> requiredVariablesAboveLJ, QueryTreeComponent treeComponent,
                                        Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution,
                                        VariableGenerator variableGenerator, IntermediateQuery query) {
@@ -296,7 +302,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                              query, treeComponent, remainingRightSubstitution, variableGenerator);
     }
 
-    private LeftJoinNode updateConditionalVariables(ImmutableSet<Variable> rightVariablesToUpdate, DataNode rightChild,
+    private LeftJoinNode updateConditionalVariables(ImmutableSet<Variable> rightVariablesToUpdate, ExtensionalDataNode rightChild,
                                                     LeftJoinNode newLeftJoinNode, ImmutableExpression ljCondition,
                                                     IntermediateQuery query, QueryTreeComponent treeComponent,
                                                     Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution,
@@ -309,7 +315,8 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
          * Update the right child
          */
         InjectiveVar2VarSubstitution localSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(newVariableMap);
-        DataNode newRightChild = rightChild.newAtom(localSubstitution.applyToDataAtom(rightChild.getProjectionAtom()));
+        ExtensionalDataNode newRightChild = iqFactory.createExtensionalDataNode(rightChild.getRelationDefinition(),
+                localSubstitution.applyToArgumentMap(rightChild.getArgumentMap()));
         treeComponent.replaceNode(rightChild, newRightChild);
 
         ImmutableExpression newCondition = localSubstitution.applyToBooleanExpression(ljCondition);

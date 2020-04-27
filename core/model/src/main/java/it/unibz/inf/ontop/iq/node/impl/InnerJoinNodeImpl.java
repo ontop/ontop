@@ -287,8 +287,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public boolean isDistinct(ImmutableList<IQTree> children) {
-        return children.stream().allMatch(IQTree::isDistinct);
+    public boolean isDistinct(IQTree tree, ImmutableList<IQTree> children) {
+        return super.isDistinct(tree, children);
     }
 
     @Override
@@ -385,6 +385,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(Map.Entry::getKey)
                 .flatMap(child -> constraintMap.get(child).stream())
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
+        return super.computeNotInternallyRequiredVariables(children);
     }
 
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(

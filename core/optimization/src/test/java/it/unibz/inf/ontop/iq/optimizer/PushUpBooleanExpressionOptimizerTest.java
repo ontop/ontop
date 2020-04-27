@@ -45,22 +45,16 @@ public class PushUpBooleanExpressionOptimizerTest {
     @Test
     public void testPropagationFomInnerJoinProvider() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getConjunction (EXPRESSION1, EXPRESSION2)
         );
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom (TABLE4_AR3, X, Y, Z)
-        );
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y)
-        );
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_AR2, Z, W)
-        );
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode1);
@@ -76,10 +70,9 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
-        queryBuilder2.init(projectionAtom, constructionNode);
-        queryBuilder2.addChild(constructionNode, joinNode2);
+        queryBuilder2.init(projectionAtom, joinNode2);
         queryBuilder2.addChild(joinNode2, dataNode1);
         queryBuilder2.addChild(joinNode2, dataNode2);
         queryBuilder2.addChild(joinNode2, dataNode3);
@@ -92,15 +85,15 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testNoPropagationFomInnerJoinProvider() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getConjunction (EXPRESSION1, EXPRESSION2)
         );
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE2_AR2, Z, W));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(Z));
 
         queryBuilder1.init(projectionAtom, unionNode);
         queryBuilder1.addChild(unionNode, dataNode1);
@@ -124,12 +117,12 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testPropagationFomFilterNodeProvider() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION1);
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE1_AR2, X, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
 
         queryBuilder1.init(projectionAtom, joinNode1);
         queryBuilder1.addChild(joinNode1, dataNode2);
@@ -143,7 +136,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.of(EXPRESSION1));
 
         queryBuilder2.init(projectionAtom, joinNode2);
@@ -158,12 +151,12 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testNoPropagationFomFilterNodeProvider() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION1);
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE3_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE4_AR3, X, Y, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
 
         queryBuilder1.init(projectionAtom, unionNode);
         queryBuilder1.addChild(unionNode, dataNode1);
@@ -186,17 +179,15 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testNoPropagationFomLeftJoinProvider() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getConjunction (EXPRESSION1, EXPRESSION2));
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode (ATOM_FACTORY.getDataAtom (TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom (TABLE2_AR2, Z, W));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode (TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(Z));
 
-        queryBuilder1.init(projectionAtom, constructionNode);
-        queryBuilder1.addChild(constructionNode, joinNode1);
+        queryBuilder1.init(projectionAtom, joinNode1);
         queryBuilder1.addChild(joinNode1, dataNode1);
         queryBuilder1.addChild(joinNode1, leftJoinNode);
         queryBuilder1.addChild(leftJoinNode, dataNode2, LEFT);
@@ -218,14 +209,14 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testPropagationToExistingFilterRecipient() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION3);
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction
                 (EXPRESSION2));
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, W, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(W, X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, filterNode1);
@@ -240,7 +231,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(EXPRESSION3, EXPRESSION2));
 
 
@@ -257,15 +248,15 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testRecursivePropagation() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.of(EXPRESSION1));
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION3);
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, W, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(W, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode1);
@@ -282,7 +273,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION3));
 
         queryBuilder2.init(projectionAtom, constructionNode);
@@ -300,14 +291,14 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testPropagationToLeftJoinRecipient() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode(Optional.empty());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION2));
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, Z, W));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, leftJoinNode1);
@@ -323,12 +314,11 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION2));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
 
-        queryBuilder2.init(projectionAtom, constructionNode);
-        queryBuilder2.addChild(constructionNode, leftJoinNode2);
+        queryBuilder2.init(projectionAtom, leftJoinNode2);
         queryBuilder2.addChild(leftJoinNode2, dataNode1, LEFT);
         queryBuilder2.addChild(leftJoinNode2, joinNode2, RIGHT);
         queryBuilder2.addChild(joinNode2, dataNode2);
@@ -342,14 +332,14 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testPropagationThroughLeftJoin() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(Optional.empty());
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION2));
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, Z, W));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, leftJoinNode);
@@ -365,12 +355,11 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION2));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(Optional.empty());
 
-        queryBuilder2.init(projectionAtom, constructionNode);
-        queryBuilder2.addChild(constructionNode, filterNode);
+        queryBuilder2.init(projectionAtom, filterNode);
         queryBuilder2.addChild(filterNode, leftJoinNode);
         queryBuilder2.addChild(leftJoinNode, joinNode2, LEFT);
         queryBuilder2.addChild(leftJoinNode, dataNode1, RIGHT);
@@ -386,14 +375,14 @@ public class PushUpBooleanExpressionOptimizerTest {
     @Ignore("TODO: support it")
     @Test
     public void testCompletePropagationThroughUnion() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION1);
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(EXPRESSION1);
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, W, X, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(W, X, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, unionNode1);
@@ -409,7 +398,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         FilterNode filterNode3 = IQ_FACTORY.createFilterNode(EXPRESSION1);
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Z));
 
@@ -427,13 +416,13 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     @Test
     public void testNoPropagationThroughUnion() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION1);
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(EXPRESSION3);
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, W, X, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(W, X, Z));
 
         queryBuilder1.init(projectionAtom, unionNode1);
         queryBuilder1.addChild(unionNode1, filterNode1);
@@ -458,16 +447,16 @@ public class PushUpBooleanExpressionOptimizerTest {
     @Ignore("Shall we support it?")
     @Test
     public void testPartialPropagationThroughUnion() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION2));
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION3));
         FilterNode filterNode3 = IQ_FACTORY.createFilterNode(EXPRESSION1);
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, W, X, Z));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE6_AR3, X, V, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(W, X, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE6_AR3, ImmutableList.of(X, V, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, unionNode1);
@@ -485,7 +474,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         FilterNode filterNode4 = IQ_FACTORY.createFilterNode(EXPRESSION1);
         FilterNode filterNode5 = IQ_FACTORY.createFilterNode(EXPRESSION2);
         FilterNode filterNode6 = IQ_FACTORY.createFilterNode(EXPRESSION3);
@@ -509,7 +498,7 @@ public class PushUpBooleanExpressionOptimizerTest {
     @Ignore("TODO: support it")
     @Test
     public void testMultiplePropagationsThroughUnion() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
@@ -519,9 +508,9 @@ public class PushUpBooleanExpressionOptimizerTest {
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(EXPRESSION3, EXPRESSION5));
         FilterNode filterNode2 = IQ_FACTORY.createFilterNode(EXPRESSION3);
         FilterNode filterNode3 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(EXPRESSION3, EXPRESSION2));
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, W, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, W, Y, Z));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Y, W, U, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3_AR3, ImmutableList.of(X, W, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(W, Y, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE7_AR4, ImmutableList.of(Y, W, U, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode1);
         queryBuilder1.addChild(constructionNode1, unionNode1);
@@ -541,7 +530,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         FilterNode filterNode4 = IQ_FACTORY.createFilterNode(EXPRESSION3);
         FilterNode filterNode5 = IQ_FACTORY.createFilterNode(EXPRESSION5);
         FilterNode filterNode6 = IQ_FACTORY.createFilterNode(EXPRESSION2);

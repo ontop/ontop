@@ -28,14 +28,11 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 /***
@@ -49,132 +46,61 @@ import java.sql.Statement;
 public class ReverseURIH2Test {
 
 	private static OWLConnection conn;
-
-	static Logger log = LoggerFactory.getLogger(ReverseURIH2Test.class);
-
-	final static String owlfile = "src/test/resources/reverseuri/reverse-uri-test.owl";
-	final static String obdafile = "src/test/resources/reverseuri/reverse-uri-test.obda";
 	private static OntopOWLReasoner reasoner;
-
 	private static Connection sqlConnection;
 
-	private static void runUpdateOnSQLDB(String sqlscript, Connection sqlConnection)
-			throws Exception {
+	private static final String owlfile = "src/test/resources/reverseuri/reverse-uri-test.owl";
+	private static final String obdafile = "src/test/resources/reverseuri/reverse-uri-test.obda";
 
-		Statement st = sqlConnection.createStatement();
-
-		FileReader reader = new FileReader(sqlscript);
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			bf.append("\n");
-			line = in.readLine();
-		}
-		in.close();
-
-		System.out.println(bf.toString());
-		st.executeUpdate(bf.toString());
-		if (!sqlConnection.getAutoCommit())
-			sqlConnection.commit();
-	}
-	
-	@Before
-	public void init() {
-		
-	}
-	
-	@After
-	public void after() {
-		
-	}
-	
-	
+	private static final String url = "jdbc:h2:mem:questrepository;";
+	private static final String username = "fish";
+	private static final String password = "fish";
 
 	@BeforeClass
 	public static void setUp() throws Exception {
+		sqlConnection = DriverManager
+				.getConnection(url, username, password);
 
-		 String url = "jdbc:h2:mem:questrepository;";
-		 String username = "fish";
-		 String password = "fish";
+		FileReader reader = new FileReader("src/test/resources/reverseuri/reverse-uri-test.sql");
+		BufferedReader in = new BufferedReader(reader);
+		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
+		runner.runScript(in);
 
-
-//		String url = "jdbc:mysql://33.33.33.1:3306/ontop?sessionVariables=sql_mode='ANSI'&allowMultiQueries=true";
-		//String url = "jdbc:postgresql://localhost/ontop";
-//		String url = "jdbc:db2://192.168.99.100:50000/ontop";
-//		String url = "jdbc:oracle:thin:@192.168.99.100:49161:xe";
-		
-//		String username = "db2inst1";
-//		String password = "ontop";
-
-		// system/oracle
-		
-		System.out.println("Test");
-
-		try {
-
-			sqlConnection = DriverManager
-					.getConnection(url, username, password);
-
-//			runUpdateOnSQLDB("src/test/resources/reverse-uri-test.sql",
-//					sqlConnection);
-			
-			FileReader reader = new FileReader("src/test/resources/reverseuri/reverse-uri-test.sql");
-			BufferedReader in = new BufferedReader(reader);
-			SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
-			runner.runScript(in);
-
-		    // Creating a new instance of the reasoner
-	        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.nativeOntopMappingFile(obdafile)
-					.ontologyFile(owlfile)
-					.jdbcUrl(url)
-					.jdbcUser(username)
-					.jdbcPassword(password)
-					.enableFullMetadataExtraction(false)
-					.build();
-	        reasoner = factory.createReasoner(config);
-	        
-			// Now we are ready for querying
-			conn = reasoner.getConnection();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			log.error(e.getMessage(), e);
-			throw e;
-		}
-
+		// Creating a new instance of the reasoner
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.build();
+		reasoner = factory.createReasoner(config);
+		conn = reasoner.getConnection();
 	}
 
 	@AfterClass
 	public static void tearDown() throws Exception {
-		
+
 		FileReader reader = new FileReader("src/test/resources/reverseuri/reverse-uri-test.sql.drop");
 		BufferedReader in = new BufferedReader(reader);
 		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
 		runner.runScript(in);
-		
 
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			Statement s = sqlConnection.createStatement();
-			try {
+			try (Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
-
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			/*
@@ -195,15 +121,6 @@ public class ReverseURIH2Test {
 			 * ind2.toString()); assertEquals("\"value1\"", val.toString());
 			 */
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				Assert.assertTrue(false);
-			}
 		}
 	}
 

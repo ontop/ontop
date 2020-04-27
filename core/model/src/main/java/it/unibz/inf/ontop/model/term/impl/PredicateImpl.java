@@ -29,11 +29,9 @@ public class PredicateImpl implements Predicate {
 
 	private final int arity;
 	private final String name;
-	private final int identifier;
 
 	protected PredicateImpl(@Nonnull String name, int arity) {
 		this.name = name;
-		this.identifier = name.hashCode();
 		this.arity = arity;
 	}
 
@@ -51,27 +49,18 @@ public class PredicateImpl implements Predicate {
 	 * TODO: also check arity?
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof PredicateImpl)) {
-			return false;
-		}
-		PredicateImpl pred2 = (PredicateImpl) obj;
-		return this.identifier == pred2.identifier;
+	public boolean equals(Object other) {
+		return (other instanceof PredicateImpl &&
+					this.name.equals(((PredicateImpl) other).name));
 	}
 
 	@Override
 	public int hashCode() {
-		return identifier;
-	}
-
-	@Override
-	public Predicate clone() {
-		return this;
+		return name.hashCode();
 	}
 
 	@Override
 	public String toString() {
 		return name;
 	}
-
 }

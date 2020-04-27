@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
-import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -26,37 +29,30 @@ public class MappingCQCOptimizerTest {
 
     @Test
     public void test() {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DatabaseRelationDefinition company = builder.createDatabaseRelation("company",
+            "cmpNpdidCompany", integerType, false,
+            "cmpShortName", integerType, false);
 
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "company"));
-        table24Def.addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType.getName(), integerType, false);
-        table24Def.addAttribute(idFactory.createAttributeID("cmpShortName"), integerType.getName(), integerType, false);
-        RelationPredicate company = table24Def.getAtomPredicate();
-
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "company_reserves"));
-        table3Def.addAttribute(idFactory.createAttributeID("cmpShare"), integerType.getName(), integerType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("fldNpdidField"), integerType.getName(), integerType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType.getName(), integerType, false);
-        RelationPredicate companyReserves = table3Def.getAtomPredicate();
-
-        table3Def.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(table3Def, table24Def)
-                        .add(table3Def.getAttribute(3), table24Def.getAttribute(1))
-                        .build("FK"));
-
-        dbMetadata.freeze();
+        DatabaseRelationDefinition companyReserves = builder.createDatabaseRelation("company_reserves",
+            "cmpShare", integerType, false,
+            "fldNpdidField", integerType, false,
+            "cmpNpdidCompany", integerType, false);
+        ForeignKeyConstraint.builder("FK", companyReserves, company)
+                .add(2, 1)
+                .build();
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
         final Variable fldNpdidField1 = TERM_FACTORY.getVariable("fldNpdidField1");
         final Variable cmpNpdidCompany2 = TERM_FACTORY.getVariable("cmpNpdidCompany2");
         final Variable cmpShortName2 = TERM_FACTORY.getVariable("cmpShortName2");
 
-        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1, fldNpdidField1, cmpNpdidCompany2));
-        ExtensionalDataNode companyNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(company, cmpShortName2, cmpNpdidCompany2));
+        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(
+                companyReserves, ImmutableMap.of(1, fldNpdidField1, 2, cmpNpdidCompany2));//cmpShare1,
+        ExtensionalDataNode companyNode = IQ_FACTORY.createExtensionalDataNode(
+                company, ImmutableMap.of(0, cmpShortName2, 1, cmpNpdidCompany2));
 
         IQTree joinTree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                 ImmutableList.of(companyReservesNode, companyNode));
@@ -68,15 +64,15 @@ public class MappingCQCOptimizerTest {
 
         IQ q = IQ_FACTORY.createIQ(root, rootTree);
 
-        LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
+        LinearInclusionDependenciesImpl.Builder<RelationPredicate> b = LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
 
         final Variable cmpShare1M = TERM_FACTORY.getVariable("cmpShare1M");
         final Variable fldNpdidField1M = TERM_FACTORY.getVariable("fldNpdidField1M");
         final Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
         final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
 
-        b.add(ATOM_FACTORY.getDataAtom(company, cmpShortName2M, cmpNpdidCompany2M),
-                ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
+        b.add(ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), cmpShortName2M, cmpNpdidCompany2M),
+                ATOM_FACTORY.getDataAtom(companyReserves.getAtomPredicate(), cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(b.build());
 
@@ -97,47 +93,30 @@ public class MappingCQCOptimizerTest {
     public void test_foreign_keys() {
         // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition addressTable = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "address"));
-        addressTable.addAttribute(idFactory.createAttributeID("address_id"), integerType.getName(), integerType, false);
-        addressTable.addAttribute(idFactory.createAttributeID("address"), integerType.getName(), integerType, false);
+        DatabaseRelationDefinition addressTable = builder.createDatabaseRelation("address",
+            "address_id", integerType, false,
+            "address", integerType, false);
         RelationPredicate address = addressTable.getAtomPredicate();
 
-        DatabaseRelationDefinition storeTable = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "store"));
-        storeTable.addAttribute(idFactory.createAttributeID("store_id"), integerType.getName(), integerType, false);
-        storeTable.addAttribute(idFactory.createAttributeID("address_id"), integerType.getName(), integerType, false);
-        storeTable.addAttribute(idFactory.createAttributeID("manager_staff_id"), integerType.getName(), integerType, false);
+        DatabaseRelationDefinition storeTable = builder.createDatabaseRelation("store",
+            "store_id", integerType, false,
+            "address_id", integerType, false,
+            "manager_staff_id", integerType, false);
         RelationPredicate store = storeTable.getAtomPredicate();
 
-        DatabaseRelationDefinition staffTable = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "staff"));
-        staffTable.addAttribute(idFactory.createAttributeID("staff_id"), integerType.getName(), integerType, false);
-        staffTable.addAttribute(idFactory.createAttributeID("address_id"), integerType.getName(), integerType, false);
-        staffTable.addAttribute(idFactory.createAttributeID("store_id"), integerType.getName(), integerType, false);
+        DatabaseRelationDefinition staffTable = builder.createDatabaseRelation("staff",
+            "staff_id", integerType, false,
+            "address_id", integerType, false,
+            "store_id", integerType, false);
         RelationPredicate staff = staffTable.getAtomPredicate();
 
-        storeTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(storeTable, addressTable)
-                        .add(storeTable.getAttribute(2), addressTable.getAttribute(1))
-                        .build("FK"));
-        storeTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(storeTable, staffTable)
-                        .add(storeTable.getAttribute(3), staffTable.getAttribute(1))
-                        .build("FK"));
-
-        staffTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(staffTable, addressTable)
-                        .add(staffTable.getAttribute(2), addressTable.getAttribute(1))
-                        .build("FK"));
-        staffTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(staffTable, storeTable)
-                        .add(staffTable.getAttribute(3), storeTable.getAttribute(1))
-                        .build("FK"));
-        dbMetadata.freeze();
+        ForeignKeyConstraint.of("FK", storeTable.getAttribute(2), addressTable.getAttribute(1));
+        ForeignKeyConstraint.of("FK", storeTable.getAttribute(3), staffTable.getAttribute(1));
+        ForeignKeyConstraint.of("FK", staffTable.getAttribute(2), addressTable.getAttribute(1));
+        ForeignKeyConstraint.of("FK", staffTable.getAttribute(3), storeTable.getAttribute(1));
 
         final Variable staffId1 = TERM_FACTORY.getVariable("staff_id2");
         final Variable addressId1 = TERM_FACTORY.getVariable("address_id2");
@@ -158,7 +137,7 @@ public class MappingCQCOptimizerTest {
 
         System.out.println("ONE " + one + "\n" + "TWO " + two);
 
-        LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
+        LinearInclusionDependenciesImpl.Builder<RelationPredicate> b = LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
 
         final Variable addressIdM = TERM_FACTORY.getVariable("address_id_m");
         final Variable addressIdM2 = TERM_FACTORY.getVariable("address_id_m2");
@@ -179,7 +158,7 @@ public class MappingCQCOptimizerTest {
         b.add(ATOM_FACTORY.getDataAtom(store, storeIdM, addressIdM2, staffIdM2),
                 ATOM_FACTORY.getDataAtom(staff, staffIdM, addressIdM, storeIdM));
 
-        LinearInclusionDependencies<RelationPredicate> lids = b.build();
+        BasicLinearInclusionDependenciesImpl<RelationPredicate> lids = b.build();
         System.out.println("LIDS: " + lids);
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(lids);
@@ -197,6 +176,5 @@ public class MappingCQCOptimizerTest {
                         .filter(ImmutableHomomorphismIterator::hasNext)
                         .map(ImmutableHomomorphismIterator::next);
         System.out.println(from.get());
-
     }
 }

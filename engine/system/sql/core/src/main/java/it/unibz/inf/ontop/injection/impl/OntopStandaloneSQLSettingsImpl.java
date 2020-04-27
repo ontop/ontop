@@ -63,6 +63,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public int getFetchSize() {
+        return systemSettings.getFetchSize();
+    }
+
+    @Override
     public Optional<Integer> getDefaultQueryTimeout() {
         return getInteger(DEFAULT_QUERY_TIMEOUT);
     }
@@ -70,5 +75,20 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     @Override
     public boolean isPermanentDBConnectionEnabled() {
         return systemSettings.isPermanentDBConnectionEnabled();
+    }
+
+    @Override
+    public Optional<Integer> getHttpMaxAge() {
+        return systemSettings.getHttpMaxAge();
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleWhileRevalidate() {
+        return systemSettings.getHttpStaleWhileRevalidate();
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleIfError() {
+        return systemSettings.getHttpStaleIfError();
     }
 }

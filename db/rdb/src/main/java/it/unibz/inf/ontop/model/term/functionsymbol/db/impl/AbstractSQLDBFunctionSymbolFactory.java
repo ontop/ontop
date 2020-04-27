@@ -68,6 +68,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private DBIsNullOrNotFunctionSymbol isNotNull;
     // Created in init()
     private DBIsTrueFunctionSymbol isTrue;
+
+
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
         super(regularFunctionTable, typeFactory);

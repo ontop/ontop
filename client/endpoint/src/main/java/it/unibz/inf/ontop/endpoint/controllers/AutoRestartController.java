@@ -47,7 +47,7 @@ public class AutoRestartController {
 
         // this code assumes that the input files are under the same directory
         final Path parentDirectoryPath = filesToWatch.get(0).getParent();
-        System.out.println(parentDirectoryPath);
+        //System.out.println(parentDirectoryPath);
 
         new Thread(() -> {
             try {

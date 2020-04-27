@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.iq.transform;
 
-import it.unibz.inf.ontop.exception.QueryTransformationException;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 
-public interface NoNullValueEnforcer {
+public interface NoNullValueEnforcer extends IQTreeTransformer {
 
-    IQ transform(IQ originalQuery) throws QueryTransformationException;
+    IQTree transform(IQTree tree);
 }

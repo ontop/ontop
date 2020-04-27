@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.spec.mapping.pp;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 
 import java.util.Optional;
 
@@ -31,17 +31,12 @@ public interface SQLPPTriplesMap extends PreProcessedTriplesMap {
 
 	ImmutableList<TargetAtom> getTargetAtoms();
 
-	OBDASQLQuery getSourceQuery();
+	SQLPPSourceQuery getSourceQuery();
 
 	String getId();
 
 	// when created from OBDA files, or parsed from String, targetString is presented. If generated, e.g. from R2RML, targetString might be null
 	Optional<String> getOptionalTargetString();
-
-	/**
-	 * PPMappingAssertion: a SQLPPTriplesMap with a single target atom.
-	 */
-	SQLPPTriplesMap extractPPMappingAssertion(TargetAtom atom);
 
 	SQLPPTriplesMap extractPPMappingAssertions(String newId, ImmutableList<TargetAtom> atoms);
 

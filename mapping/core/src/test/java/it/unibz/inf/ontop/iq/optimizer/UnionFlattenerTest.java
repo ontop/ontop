@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -32,23 +33,18 @@ public class UnionFlattenerTest {
             (ANS2_PREDICATE, W, Z);
 
     private final static ExtensionalDataNode DATA_NODE1 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE1_AR3, X, Y, Z)
-    );
+            TABLE1_AR3, ImmutableMap.of(0, X, 1, Y, 2, Z));
     private final static ExtensionalDataNode DATA_NODE2 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE2_AR3, X, Y, Z)
-    );
+            TABLE2_AR3, ImmutableMap.of(0, X, 1, Y, 2, Z));
     private final static ExtensionalDataNode DATA_NODE3 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, Y, Z)
-    );
+            TABLE3_AR3, ImmutableMap.of(0, X, 1, Y, 2, Z));
     private final static ExtensionalDataNode DATA_NODE4 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE1_AR2, Y, Z)
-    );
+            TABLE1_AR2, ImmutableMap.of(0, Y, 1, Z));
     private final static ExtensionalDataNode DATA_NODE5 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE2_AR2, Y, Z)
-    );
+            TABLE2_AR2, ImmutableMap.of(0, Y, 1, Z));
 
-    private static String uriTemplate1 = "http://example.org/ds1/{}";
-    private static String uriTemplate2 = "http://example.org/ds1/{}{}";
+    private final static String uriTemplate1 = "http://example.org/ds1/{}";
+    private final static String uriTemplate2 = "http://example.org/ds1/{}{}";
 
     private final static DBConstant CONSTANT_STRING = TERM_FACTORY.getDBConstant("john",
             TYPE_FACTORY.getDBTypeFactory().getDBStringType());
@@ -200,7 +196,7 @@ public class UnionFlattenerTest {
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
         ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_AR3, A, Y, Z));
+                TABLE4_AR3, ImmutableMap.of(1, Y, 2, Z));
 
         IQTree union1 = IQ_FACTORY.createNaryIQTree(
                 unionNode1,

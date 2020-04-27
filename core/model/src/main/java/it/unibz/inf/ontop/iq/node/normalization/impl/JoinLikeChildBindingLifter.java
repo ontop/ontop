@@ -51,8 +51,8 @@ public class JoinLikeChildBindingLifter {
 
         ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
-        ImmutableSubstitution<NonFunctionalTerm> downPropagableFragment = selectedChildSubstitution
-                .getNonFunctionalTermFragment();
+        ImmutableSubstitution<VariableOrGroundTerm> downPropagableFragment = selectedChildSubstitution
+                .getVariableOrGroundTermFragment();
 
         ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.getFunctionalTermFragment();
 
@@ -76,7 +76,7 @@ public class JoinLikeChildBindingLifter {
         // to the effective ascending substitution (e.g., for the LJ, in the case of the renaming of right-specific vars)
         ImmutableSubstitution<ImmutableTerm> naiveAscendingSubstitution = expressionResults.getSubstitution().composeWith(
                 selectedChildSubstitution);
-        ImmutableSubstitution<NonFunctionalTerm> descendingSubstitution =
+        ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution =
                 expressionResults.getSubstitution().composeWith2(freshRenaming)
                         .composeWith2(downPropagableFragment);
 

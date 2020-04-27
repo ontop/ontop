@@ -11,18 +11,14 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 @Singleton
 public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
@@ -69,18 +65,13 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
 
         @Override
         public Optional<TermType> visitExtensionalData(ExtensionalDataNode dataNode) {
-            DataAtom<RelationPredicate> projectionAtom = dataNode.getProjectionAtom();
-            RelationDefinition relationDefinition = projectionAtom.getPredicate().getRelationDefinition();
+            RelationDefinition relationDefinition = dataNode.getRelationDefinition();
 
-            ImmutableList<? extends VariableOrGroundTerm> arguments = projectionAtom.getArguments();
-
-            return IntStream.range(0, arguments.size())
-                    .filter(i -> arguments.get(i).equals(variable))
-                    .boxed()
-                    .map(i -> relationDefinition.getAttribute(i + 1))
+            return dataNode.getArgumentMap().entrySet().stream()
+                    .filter(e -> e.getValue().equals(variable))
+                    .map(e -> relationDefinition.getAttribute(e.getKey() + 1))
                     .map(Attribute::getTermType)
-                    .filter(Optional::isPresent)
-                    .map(o -> (TermType) o.get())
+                    .map(o -> (TermType) o)
                     .findAny();
         }
 

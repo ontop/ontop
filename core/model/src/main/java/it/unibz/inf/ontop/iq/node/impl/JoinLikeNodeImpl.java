@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
@@ -45,6 +46,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         return Stream.concat(cooccuringVariableStream, getLocallyRequiredVariables().stream())
                 .collect(ImmutableCollectors.toSet());
     }
+
 
     /**
      * Checks that non-projected variables are not shared among children

@@ -36,20 +36,8 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			/* AGGREGATES */
-
-			// TODO: support GROUP_CONCAT
-			aggregatesManifest + "agg-groupconcat-01",
-			aggregatesManifest + "agg-groupconcat-02",
-			aggregatesManifest + "agg-groupconcat-03",
 			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
-
-			/* BINDINGS
-			 */
-			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
-			bindingsManifest + "values8",
-			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
-			bindingsManifest + "values5",
 
 			/* FUNCTIONS*/
 
@@ -135,10 +123,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			negationManifest + "full-minuend",
 			// DISABLED DUE TO ORDER OVER IRI
 			negationManifest + "partial-minuend",
-			// TODO: enable it
-    		negationManifest + "full-minuend-modified",
-			// TODO: enable it
-    		negationManifest + "partial-minuend-modified",
 
 			/* EXISTS
 			not supported yet */
@@ -154,6 +138,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			//wrong result, unexpected binding
 			propertyPathManifest + "pp06",
+
+			// Quads are not yet supported by the SI
+			propertyPathManifest + "pp07",
 
 			// Not supported: ArbitraryLengthPath
 			propertyPathManifest + "pp12",
@@ -189,24 +176,26 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* SUBQUERY
 			*/
-			//Quad translated as a triple. TODO: fix it
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery01",
+			// Quads are not yet supported by the SI
 			subqueryManifest + "subquery02",
-			//Quad translated as a triple. TODO: fix it
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery03",
+			// Quads are not yet supported by the SI
 			subqueryManifest + "subquery04",
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery05",
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery07",
 			// EXISTS is not supported yet
 			subqueryManifest + "subquery10",
 
-			//ORDER BY IRI (for supported by the SI)
+			//ORDER BY IRI (not supported by the SI)
 			subqueryManifest + "subquery11",
 
-			//unbound variable: Var TODO: fix it
-			subqueryManifest + "subquery12",
-
-			//ORDER BY IRI (for supported by the SI)
-			subqueryManifest + "subquery13",
-
-			//missing results (TODO: fix)
-			subqueryManifest + "subquery14"
+			//ORDER BY IRI (not supported by the SI)
+			subqueryManifest + "subquery13"
 	);
 
 	public MemorySPARQL11QueryTest(String testIRI, String name, String queryFileURL, String resultFileURL, Dataset dataSet,

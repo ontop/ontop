@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -66,7 +66,7 @@ public class OBDAMappingTransformer {
 	 */
 	public Stream<TriplesMap> getTriplesMaps(SQLPPTriplesMap triplesMap, PrefixManager prefixManager) {
 
-		SQLQueryImpl squery = (SQLQueryImpl) triplesMap.getSourceQuery();
+		SQLPPSourceQueryImpl squery = (SQLPPSourceQueryImpl) triplesMap.getSourceQuery();
 		ImmutableList<TargetAtom> targetAtoms = triplesMap.getTargetAtoms();
 
 		//triplesMap node
@@ -79,7 +79,7 @@ public class OBDAMappingTransformer {
 		BlankNodeOrIRI mainNode = rdfFactory.createIRI(mapping_id);
 
 		//Table
-		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQLQuery());
+		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQL());
 
 		ImmutableMultimap<ImmutableTerm, TargetAtom> targetAtomMultimap = targetAtoms.stream()
 				.collect(ImmutableCollectors.toMultimap(

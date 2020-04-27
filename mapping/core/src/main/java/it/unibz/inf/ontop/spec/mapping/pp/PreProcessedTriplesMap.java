@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.pp;
 
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 
 /**
  * TODO: describe

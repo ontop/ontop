@@ -20,9 +20,7 @@ public class BasicR2RMLMappingMistakeTest extends AbstractBasicMappingMistakeTes
         execute("/mistake/invalid-sql1-r2rml.ttl");
     }
 
-    @Ignore("TODO: create an option for disabling black-box view creation "
-            + "and create a specific exception for it")
-    @Test
+    @Test(expected = InvalidMappingSourceQueriesException.class)
     public void testInvalidSQLQuery2() throws OBDASpecificationException {
         execute("/mistake/invalid-sql2-r2rml.ttl");
     }
@@ -35,12 +33,10 @@ public class BasicR2RMLMappingMistakeTest extends AbstractBasicMappingMistakeTes
     @Override
     protected OntopMappingSQLAllConfiguration createConfiguration(String mappingFile) {
         return OntopMappingSQLAllConfiguration.defaultBuilder()
-                .dbMetadata(getDBMetadata())
                 .r2rmlMappingFile(getClass().getResource(mappingFile).getPath())
-                .jdbcUrl("jdbc:h2://localhost/fake")
+                .jdbcUrl("jdbc:h2:mem:questrepository")
                 .jdbcUser("fake_user")
                 .jdbcPassword("fake_password")
-                .enableProvidedDBMetadataCompletion(false)
                 .build();
     }
 

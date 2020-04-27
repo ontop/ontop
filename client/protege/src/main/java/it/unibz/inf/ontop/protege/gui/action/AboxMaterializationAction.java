@@ -1,24 +1,5 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
-/*
- * #%L
- * ontop-protege
- * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -74,8 +55,6 @@ public class AboxMaterializationAction extends ProtegeAction {
     private static final String OWL_XML = "OWL/XML";
     private static final String TURTLE = "Turtle";
     private static final String NTRIPLES = "N-Triples";
-
-    private static final boolean DO_STREAM_RESULTS = true;
 
     private OWLWorkspace workspace;
     private OWLModelManager modelManager;
@@ -190,7 +169,6 @@ public class AboxMaterializationAction extends ProtegeAction {
                 OWLOntology ontology = modelManager.getActiveOntology();
                 OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
                 MaterializationParams params = MaterializationParams.defaultBuilder()
-                        .enableDBResultsStreaming(DO_STREAM_RESULTS)
                         .build();
                 final long startTime = System.currentTimeMillis();
                 switch (format) {
@@ -302,7 +280,6 @@ public class AboxMaterializationAction extends ProtegeAction {
                 OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
 
                 MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-                        .enableDBResultsStreaming(DO_STREAM_RESULTS)
                         .build();
                 OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(configuration, materializationParams);
                 MaterializedGraphOWLResultSet graphResultSet = materializer.materialize();

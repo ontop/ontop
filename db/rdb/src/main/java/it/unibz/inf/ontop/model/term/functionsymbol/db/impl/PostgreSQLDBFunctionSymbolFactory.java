@@ -78,6 +78,17 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return builder.build();
     }
 
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (terms, termConverter, termFactory) -> String.format(
+                        "array_to_string(array_agg(%s%s),%s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1))
+                ));
+    }
+
     /**
      * Requires sometimes to type NULLs
      */

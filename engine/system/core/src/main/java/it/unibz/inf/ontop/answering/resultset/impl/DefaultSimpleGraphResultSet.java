@@ -187,8 +187,6 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
         if (extMap != null) {
             ve = extMap.get(node_name);
-            if (ve != null && ve instanceof Var)
-                throw new OntopResultConversionException("Invalid query. Found unbound variable: " + ve);
         }
 
 //		if (node_name.charAt(0) == '-') {

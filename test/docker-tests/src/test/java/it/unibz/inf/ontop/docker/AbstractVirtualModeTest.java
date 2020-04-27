@@ -42,7 +42,6 @@ public abstract class AbstractVirtualModeTest {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .enableFullMetadataExtraction(false)
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)
@@ -51,46 +50,25 @@ public abstract class AbstractVirtualModeTest {
         return factory.createReasoner(config);
     }
 
-    protected String runQueryAndReturnStringOfIndividualX(String query) throws Exception {
-        OWLStatement st = createStatement();
-        String retval;
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-
+    protected String runQueryAndReturnStringOfIndividualX(String query) throws OWLException {
+        try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
             assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-            retval = ind1.toString();
-
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            st.close();
+            return ind1.toString();
         }
-        return retval;
     }
 
-    protected String runQueryAndReturnStringOfLiteralX(String query) throws Exception {
-        OWLStatement st = createStatement();
-        String retval;
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-
+    protected String runQueryAndReturnStringOfLiteralX(String query) throws OWLException {
+        try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
             assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-//            retval = ind1.getLiteral();
-            retval = ToStringRenderer.getInstance().getRendering(ind1);
-
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            st.close();
+            return ToStringRenderer.getInstance().getRendering(ind1);
         }
-        return retval;
     }
 
-    protected boolean runQueryAndReturnBooleanX(String query) throws Exception {
+    protected boolean runQueryAndReturnBooleanX(String query) throws OWLException {
         try (OWLStatement st = createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
             return rs.getValue();
@@ -99,33 +77,28 @@ public abstract class AbstractVirtualModeTest {
 
     protected void countResults(int expectedCount, String query) throws OWLException {
 
-        OWLStatement st = createStatement();
-        TupleOWLResultSet results = st.executeSelectQuery(query);
-        int count = 0;
-        while (results.hasNext()) {
-            results.next();
-            count++;
+        try (OWLStatement st = createStatement(); TupleOWLResultSet results = st.executeSelectQuery(query)) {
+            int count = 0;
+            while (results.hasNext()) {
+                results.next();
+                count++;
+            }
+            assertEquals(expectedCount, count);
         }
-        assertEquals(expectedCount, count);
     }
 
     protected boolean checkContainsTuplesSetSemantics(String query,
                                                       ImmutableSet<ImmutableMap<String, String>> expectedTuples)
-            throws Exception {
-        HashSet<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedTuples);
-        try (OWLStatement st = createStatement()) {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
+            throws OWLException {
+        try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+            Set<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedTuples);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
                 ImmutableMap<String, String> tuple = getTuple(rs, bindingSet);
-                if (mutableCopy.contains(tuple)) {
-                    mutableCopy.remove(tuple);
-                }
+                mutableCopy.remove(tuple);
             }
-        } catch (Exception e) {
-            throw e;
+            return mutableCopy.isEmpty();
         }
-        return mutableCopy.isEmpty();
     }
 
     protected ImmutableMap<String, String> getTuple(TupleOWLResultSet rs, OWLBindingSet bindingSet) throws OWLException {
@@ -137,11 +110,9 @@ public abstract class AbstractVirtualModeTest {
     }
 
     protected void checkReturnedUris(List<String> expectedUris, String query) throws Exception {
-        OWLStatement st = createStatement();
-        int i = 0;
-        List<String> returnedUris = new ArrayList<>();
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
+        try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+            int i = 0;
+            List<String> returnedUris = new ArrayList<>();
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
                 OWLNamedIndividual ind1 = (OWLNamedIndividual) bindingSet.getOWLIndividual("x");
@@ -150,32 +121,14 @@ public abstract class AbstractVirtualModeTest {
                 log.debug(ind1.getIRI().toString());
                 i++;
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            st.close();
+            assertEquals(String.format("%s instead of \n %s", returnedUris.toString(), expectedUris.toString()), returnedUris, expectedUris);
+            assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedUris.size()), expectedUris.size(), i);
         }
-        assertTrue(String.format("%s instead of \n %s", returnedUris.toString(), expectedUris.toString()),
-                returnedUris.equals(expectedUris));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedUris.size()), expectedUris.size() == i);
     }
 
     protected void checkThereIsAtLeastOneResult(String query) throws Exception {
-        OWLStatement st = createStatement();
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
+        try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
             assertTrue(rs.hasNext());
-
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
-
-            } catch (Exception e) {
-                st.close();
-                assertTrue(false);
-            }
-            st.close();
         }
     }
 
@@ -186,17 +139,12 @@ public abstract class AbstractVirtualModeTest {
         checkReturnedValuesAndMayReturnSql(query, false, expectedValues);
     }
 
-
     private String checkReturnedValuesAndMayReturnSql(String query, boolean returnSQL, List<String> expectedValues)
             throws Exception {
 
-        OntopOWLStatement st = createStatement();
-        // Non-final
-        String sql = null;
-
-        int i = 0;
-        List<String> returnedValues = new ArrayList<>();
-        try {
+        try (OntopOWLStatement st = createStatement()) {
+            // Non-final
+            String sql = null;
             if (returnSQL) {
                 IQ executableQuery = st.getExecutableQuery(query);
                 sql = Optional.of(executableQuery.getTree())
@@ -206,96 +154,93 @@ public abstract class AbstractVirtualModeTest {
                         .map(n -> ((NativeNode) n).getNativeQueryString())
                         .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
             }
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                OWLLiteral ind1 = bindingSet.getOWLLiteral("v");
-                // log.debug(ind1.toString());
-                if (ind1 != null) {
-                    returnedValues.add(ind1.getLiteral());
-                    System.out.println(ind1.getLiteral());
-                    i++;
+            int i = 0;
+            List<String> returnedValues = new ArrayList<>();
+            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                while (rs.hasNext()) {
+                    final OWLBindingSet bindingSet = rs.next();
+                    OWLLiteral ind1 = bindingSet.getOWLLiteral("v");
+                    // log.debug(ind1.toString());
+                    if (ind1 != null) {
+                        returnedValues.add(ind1.getLiteral());
+                        log.debug(ind1.getLiteral());
+                        i++;
+                    }
                 }
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            st.close();
-        }
-
-        assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),expectedValues, returnedValues);
+            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),expectedValues, returnedValues);
 //        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
 //                returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
+            assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);
 
-        // May be null
-        return sql;
+            // May be null
+            return sql;
+        }
     }
-
 
     protected void runQueries(String queryFileName) throws Exception {
 
-        OWLStatement st = createStatement();
+        try (OWLStatement st = createStatement()) {
+            QueryController qc = new QueryController();
+            QueryIOManager qman = new QueryIOManager(qc);
+            qman.load(queryFileName);
 
-        QueryController qc = new QueryController();
-        QueryIOManager qman = new QueryIOManager(qc);
-        qman.load(queryFileName);
+            for (QueryControllerGroup group : qc.getGroups()) {
+                for (QueryControllerQuery query : group.getQueries()) {
 
-        for (QueryControllerGroup group : qc.getGroups()) {
-            for (QueryControllerQuery query : group.getQueries()) {
+                    log.debug("Executing query: {}", query.getID());
+                    log.debug("Query: \n{}", query.getQuery());
 
-                log.debug("Executing query: {}", query.getID());
-                log.debug("Query: \n{}", query.getQuery());
+                    long start = System.nanoTime();
+                    try (TupleOWLResultSet res = st.executeSelectQuery(query.getQuery())) {
+                        long end = System.nanoTime();
+                        long time = (end - start) / 1000;
 
-                long start = System.nanoTime();
-                TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
-                long end = System.nanoTime();
-
-                double time = (end - start) / 1000;
-
-                int count = 0;
-                while (res.hasNext()) {
-                    count += 1;
+                        int count = 0;
+                        while (res.hasNext()) {
+                            count += 1;
+                        }
+                        log.debug("Total result: {}", count);
+                        assertNotEquals(0, count);
+                        log.debug("Elapsed time: {} ms", time);
+                    }
                 }
-                log.debug("Total result: {}", count);
-                assertFalse(count == 0);
-                log.debug("Elapsed time: {} ms", time);
             }
         }
     }
 
     protected void runQuery(String query) throws Exception {
-        long t1 = System.currentTimeMillis();
+        try (OntopOWLStatement st = createStatement()) {
+            long t1 = System.nanoTime();
+            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                while (rs.hasNext()) {
+                    final OWLBindingSet bindingSet = rs.next();
+                    log.debug(bindingSet.toString());
+                }
+            }
+            long t2 = System.nanoTime();
 
-        OntopOWLStatement st = createStatement();
-        TupleOWLResultSet rs = st.executeSelectQuery(query);
-
-        while (rs.hasNext()) {
-            final OWLBindingSet bindingSet = rs.next();
-            log.debug(bindingSet.toString());
+            /*
+             * Print the query summary
+             */
+            IQ iq = st.getExecutableQuery(query);
+            String sqlQuery = Optional.of(iq.getTree())
+                    .filter(t -> t instanceof UnaryIQTree)
+                    .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                    .filter(n -> n instanceof NativeNode)
+                    .map(n -> ((NativeNode) n).getNativeQueryString())
+                    .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query: " + iq));
+            log.info("");
+            log.info("The input SPARQL query:");
+            log.info("=======================");
+            log.info(query);
+            log.info("");
+            log.info("The output SQL query:");
+            log.info("=====================");
+            log.info(sqlQuery);
+            log.info("Query Execution Time:");
+            log.info("=====================");
+            log.info((t2 - t1)/1000 + "ms");
         }
-        rs.close();
-        long t2 = System.currentTimeMillis();
-
-        /*
-         * Print the query summary
-         */
-        String sqlQuery = Optional.of(st.getExecutableQuery(query).getTree())
-                .filter(t -> t instanceof UnaryIQTree)
-                .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
-                .filter(n -> n instanceof NativeNode)
-                .map(n -> ((NativeNode) n).getNativeQueryString())
-                .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query"));
-        log.info("");
-        log.info("The input SPARQL query:");
-        log.info("=======================");
-        log.info(query);
-        log.info("");
-        log.info("The output SQL query:");
-        log.info("=====================");
-        log.info(sqlQuery);
-        log.info("Query Execution Time:");
-        log.info("=====================");
-        log.info((t2 - t1) + "ms");
     }
 }

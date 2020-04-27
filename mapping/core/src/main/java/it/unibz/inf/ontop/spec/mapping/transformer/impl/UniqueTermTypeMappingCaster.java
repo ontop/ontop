@@ -2,15 +2,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
@@ -19,8 +16,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -37,7 +33,6 @@ import java.util.Optional;
 public class UniqueTermTypeMappingCaster implements MappingCaster {
 
     private final FunctionSymbolFactory functionSymbolFactory;
-    private final ProvenanceMappingFactory mappingFactory;
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final UniqueTermTypeExtractor typeExtractor;
@@ -46,59 +41,36 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
 
     @Inject
     private UniqueTermTypeMappingCaster(FunctionSymbolFactory functionSymbolFactory,
-                                        ProvenanceMappingFactory mappingFactory,
-                                        TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
-                                        SubstitutionFactory substitutionFactory, UniqueTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory) {
+                                        CoreSingletons coreSingletons,
+                                        UniqueTermTypeExtractor typeExtractor) {
         this.functionSymbolFactory = functionSymbolFactory;
-        this.mappingFactory = mappingFactory;
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.typeExtractor = typeExtractor;
-        this.termFactory = termFactory;
-        this.dBStringType = typeFactory.getDBTypeFactory().getDBStringType();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.dBStringType = coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType();
     }
 
     @Override
-    public MappingWithProvenance transform(MappingWithProvenance mapping) {
-        ImmutableMap<IQ, PPMappingAssertionProvenance> newProvenanceMap = mapping.getProvenanceMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> transformMappingAssertion(e.getKey()),
-                        Map.Entry::getValue));
-        return mappingFactory.create(newProvenanceMap, mapping.getMetadata());
-    }
-
-    private IQ transformMappingAssertion(IQ mappingAssertion) {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(mappingAssertion.getTree())
-                .filter(t -> t.getRootNode() instanceof ConstructionNode)
-                .map(IQTree::getRootNode)
-                .map(n -> (ConstructionNode) n)
-                .map(ConstructionNode::getSubstitution)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "The mapping assertion was expecting to start with a construction node\n" + mappingAssertion));
-
-        ImmutableSet<Variable> projectedVariables = mappingAssertion.getTree().getVariables();
-
+    public MappingAssertion transform(MappingAssertion assertion) {
         RDFTermFunctionSymbol rdfTermFunctionSymbol = functionSymbolFactory.getRDFTermFunctionSymbol();
 
-        if (!projectedVariables.stream()
-                .map(topSubstitution::apply)
+        if (!assertion.getTerms().stream()
                 .allMatch(t -> ((t instanceof ImmutableFunctionalTerm) &&
                         ((ImmutableFunctionalTerm) t).getFunctionSymbol().equals(rdfTermFunctionSymbol))
                         || (t instanceof RDFConstant))) {
             throw new MinorOntopInternalBugException(
                     "The root construction node is not defining all the variables with a RDF functional or constant term\n"
-                            + mappingAssertion);
+                            + assertion);
         }
-        IQTree childTree = ((UnaryIQTree)mappingAssertion.getTree()).getChild();
+        IQTree childTree = assertion.getTopChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = transformTopSubstitution(
-                topSubstitution.getImmutableMap(), childTree);
+                assertion.getTopSubstitution().getImmutableMap(), childTree);
 
-        ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
+        ConstructionNode newRootNode = iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution);
 
-        return iqFactory.createIQ(mappingAssertion.getProjectionAtom(),
-                iqFactory.createUnaryIQTree(newRootNode, childTree));
+        return assertion.copyOf(iqFactory.createUnaryIQTree(newRootNode, childTree), iqFactory);
     }
 
     /**
@@ -222,6 +194,4 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         else
             return term;
     }
-
-
 }

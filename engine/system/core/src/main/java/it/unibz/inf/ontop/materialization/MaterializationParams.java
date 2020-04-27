@@ -8,13 +8,6 @@ import it.unibz.inf.ontop.materialization.impl.MaterializationParamsImpl;
 public interface MaterializationParams {
 
     /**
-     * If true, configures the DB connection so as to enable streaming.
-     *
-     * False by default.
-     */
-    boolean isDBResultStreamingEnabled();
-
-    /**
      * If true, stops exceptions due to materialization issues
      * for some RDF properties/classes.
      *
@@ -30,8 +23,6 @@ public interface MaterializationParams {
 
 
     interface Builder<B extends Builder<B>> {
-
-        B enableDBResultsStreaming(boolean enable);
 
         B enableIncompleteMaterialization(boolean enable);
 

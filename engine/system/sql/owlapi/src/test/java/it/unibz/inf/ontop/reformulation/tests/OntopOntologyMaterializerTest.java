@@ -34,7 +34,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -42,21 +41,37 @@ import java.sql.Statement;
 
 public class OntopOntologyMaterializerTest extends TestCase {
 
-	private Connection jdbcconn = null;
+	private Connection jdbcconn;
 
 	private static final Logger LOGGER =  LoggerFactory.getLogger(OntopOntologyMaterializerTest.class);
 
-	String url = "jdbc:h2:mem:questjunitdb";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
-	public OntopOntologyMaterializerTest() {
-    }
 
 	@Override
 	public void setUp() throws Exception {
-		createTables();
+		String createDDL = readSQLFile("src/test/resources/materializer/createMaterializeTest.sql");
+
+		jdbcconn = DriverManager.getConnection(url, username, password);
+		try (Statement st = jdbcconn.createStatement()) {
+			st.executeUpdate(createDDL);
+			jdbcconn.commit();
+		}
 	}
+
+	@Override
+	public void tearDown() throws Exception {
+		String dropDDL = readSQLFile("src/test/resources/materializer/dropMaterializeTest.sql");
+
+		try (Statement st = jdbcconn.createStatement()) {
+			st.executeUpdate(dropDDL);
+			jdbcconn.commit();
+		}
+		jdbcconn.close();
+	}
+
 
 	private String readSQLFile(String file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
@@ -69,34 +84,6 @@ public class OntopOntologyMaterializerTest extends TestCase {
 		return bf.toString();
 	}
 
-	private void createTables() throws IOException, SQLException, URISyntaxException {
-		String createDDL = readSQLFile("src/test/resources/materializer/createMaterializeTest.sql");
-
-		// Initializing and H2 database with the data		
-		// String driver = "org.h2.Driver";
-		
-		jdbcconn = DriverManager.getConnection(url, username, password);
-		Statement st = jdbcconn.createStatement();
-
-		st.executeUpdate(createDDL);
-		jdbcconn.commit();
-	}
-
-	@Override
-	public void tearDown() throws Exception {
-
-		dropTables();
-//		conn.close();
-		jdbcconn.close();
-	}
-
-	private void dropTables() throws SQLException, IOException {
-		String dropDDL = readSQLFile("src/test/resources/materializer/dropMaterializeTest.sql");
-		Statement st = jdbcconn.createStatement();
-		st.executeUpdate(dropDDL);
-		st.close();
-		jdbcconn.commit();
-	}
 
 	public void testDataWithModel() throws Exception {
 	

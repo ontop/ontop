@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
@@ -7,10 +8,13 @@ import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import java.util.Optional;
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.impl.OntopSQLCoreSettingsImpl.extractJdbcDriver;
+
 
 public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImpl implements OntopSystemSQLSettings {
 
     private static final String DEFAULT_FILE = "system-sql-default.properties";
+    private static final String STATEMENT_INITIALIZER_SUFFIX = "-statementInitializer";
     private final OntopSystemSettings systemSettings;
     private final OntopSQLCredentialSettings sqlCredentialSettings;
 
@@ -23,6 +27,19 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     private static Properties loadProperties(Properties userProperties) {
         Properties properties = loadDefaultSystemSQLProperties();
         properties.putAll(userProperties);
+
+        String jdbcDriver = extractJdbcDriver(userProperties);
+
+        /*
+         * Statement initializer
+         */
+        String initializerKey = jdbcDriver + STATEMENT_INITIALIZER_SUFFIX;
+        String initializerName = JDBCStatementInitializer.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(initializerKey))
+                // Must NOT override user properties
+                .filter(v -> !userProperties.containsKey(initializerName))
+                .ifPresent(v -> properties.setProperty(initializerName, v));
+
         return properties;
     }
 
@@ -63,6 +80,11 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     }
 
     @Override
+    public int getFetchSize() {
+        return getRequiredInteger(FETCH_SIZE);
+    }
+
+    @Override
     public Optional<Integer> getDefaultQueryTimeout() {
         return getInteger(DEFAULT_QUERY_TIMEOUT);
     }
@@ -70,6 +92,21 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     @Override
     public boolean isPermanentDBConnectionEnabled() {
         return systemSettings.isPermanentDBConnectionEnabled();
+    }
+
+    @Override
+    public Optional<Integer> getHttpMaxAge() {
+        return systemSettings.getHttpMaxAge();
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleWhileRevalidate() {
+        return systemSettings.getHttpStaleWhileRevalidate();
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleIfError() {
+        return systemSettings.getHttpStaleIfError();
     }
 
     @Override

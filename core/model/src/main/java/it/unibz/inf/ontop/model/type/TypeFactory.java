@@ -3,8 +3,6 @@ package it.unibz.inf.ontop.model.type;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.Optional;
-
 /**
  * Accessible through Guice (recommended) or through CoreSingletons.
  */

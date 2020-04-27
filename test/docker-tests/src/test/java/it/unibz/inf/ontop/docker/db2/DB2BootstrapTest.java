@@ -41,7 +41,6 @@ public class DB2BootstrapTest {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .enableFullMetadataExtraction(false)
                 .ontologyFile(owlOutputFile)
                 .nativeOntopMappingFile(obdaOutputFile)
                 .propertyFile(propertyFile)

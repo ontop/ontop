@@ -19,6 +19,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /***
@@ -61,29 +62,18 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
     private void runTests(String query) throws Exception {
+        try (OWLStatement st = conn.createStatement()) {
+            int i = 0;
+            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                while (rs.hasNext()) {
+                    final OWLBindingSet bindingSet = rs.next();
+                    OWLObject ind1 = bindingSet.getOWLObject("w");
 
-        // Creating a new instance of the reasoner
-
-        // Now we are ready for querying
-        OWLStatement st = conn.createStatement();
-
-
-        int i = 0;
-
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                OWLObject ind1 = bindingSet.getOWLObject("w");
-
-
-                System.out.println(ind1);
-                i++;
+                    log.debug(ind1.toString());
+                    i++;
+                }
+                assertTrue(i > 0);
             }
-            assertTrue(i > 0);
-
-        } catch (Exception e) {
-            throw e;
         }
     }
 
@@ -277,11 +267,11 @@ public abstract class AbstractBindTestWithFunctions {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
-            StringBuffer hexString = new StringBuffer();
+            StringBuilder hexString = new StringBuilder();
 
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
-                if(hex.length() == 1) hexString.append('0');
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
 
@@ -1253,38 +1243,30 @@ public abstract class AbstractBindTestWithFunctions {
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
-        // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
-        OWLStatement st = conn.createStatement();
+        try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
+            int i = 0;
+            List<String> returnedValues = new ArrayList<>();
+            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                while (rs.hasNext()) {
+                    final OWLBindingSet bindingSet = rs.next();
+                    OWLObject ind1 = bindingSet.getOWLObject("w");
 
+                    // log.debug(ind1.toString());
 
-
-        int i = 0;
-        List<String> returnedValues = new ArrayList<>();
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                OWLObject ind1 = bindingSet.getOWLObject("w");
-
-                // log.debug(ind1.toString());
-
-                if (ind1 != null) {
-                    String value = ToStringRenderer.getInstance().getRendering(ind1);
-                    returnedValues.add(value);
-                    System.out.println(value);
-                } else {
-                    returnedValues.add(null);
+                    if (ind1 != null) {
+                        String value = ToStringRenderer.getInstance().getRendering(ind1);
+                        returnedValues.add(value);
+                        log.debug(value);
+                    }
+                    else {
+                        returnedValues.add(null);
+                    }
+                    i++;
                 }
-                i++;
             }
-        } catch (Exception e) {
-            throw e;
+            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), returnedValues, expectedValues);
+            assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);
         }
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
-
     }
 
 

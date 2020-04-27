@@ -21,10 +21,11 @@ import static org.junit.Assert.*;
 
 public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/oracle/datetime/dateTimeExampleBooks.owl";
-	static final String obdafile = "/oracle/datetime/dateTimeExampleBooks.obda";
-	static final String propertyfile = "/oracle/datetime/dateTimeExampleBooks.properties";
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlfile = "/oracle/datetime/dateTimeExampleBooks.owl";
+	private static final String obdafile = "/oracle/datetime/dateTimeExampleBooks.obda";
+	private static final String propertyfile = "/oracle/datetime/dateTimeExampleBooks.properties";
+
+	private static final Logger log = LoggerFactory.getLogger(OracleDateTimeTest.class);
 
 	private static OntopOWLReasoner REASONER;
 	private static OntopOWLConnection CONNECTION;
@@ -69,24 +70,17 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testDateTime() throws Exception {
-		OWLStatement st = null;
-		try {
-			st = createStatement();
+		try (OWLStatement st = createStatement()) {
 
-				String query = "PREFIX :	<http://meraka/moss/exampleBooks.owl#> \n " +
-						" SELECT ?x ?y WHERE " +
-						"{?x :dateOfPublication ?y .}\n" +
-						"ORDER BY DESC(?y)";
-				String date = runTest(st, query, true);
-				log.debug(date);
-				
-				assertEquals("\"2010-05-01T10:02:30\"^^xsd:dateTime", date);
-			
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (st != null)
-				st.close();
+			String query = "PREFIX :	<http://meraka/moss/exampleBooks.owl#> \n " +
+					" SELECT ?x ?y WHERE " +
+					"{?x :dateOfPublication ?y .}\n" +
+					"ORDER BY DESC(?y)";
+			String date = runTest(st, query, true);
+			log.debug(date);
+
+			assertEquals("\"2010-05-01T10:02:30\"^^xsd:dateTime", date);
+
 		}
 	}
 

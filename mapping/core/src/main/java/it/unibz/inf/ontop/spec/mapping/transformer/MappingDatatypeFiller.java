@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 
-public interface MappingDatatypeFiller extends MappingWithProvenanceTransformer {
+public interface MappingDatatypeFiller  {
 
-    @Override
-    MappingWithProvenance transform(MappingWithProvenance mapping)
+    MappingAssertion transform(MappingAssertion assertion)
             throws UnknownDatatypeException;
 }

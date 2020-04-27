@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -35,12 +36,12 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
     private final ImmutableSortedSet<Variable> variables;
-    private final ImmutableMap<Variable, String> columnNames;
+    private final ImmutableMap<Variable, QuotedID> columnNames;
 
     @AssistedInject
     private NativeNodeImpl(@Assisted ImmutableSortedSet<Variable> variables,
                            @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
-                           @Assisted("columnNames") ImmutableMap<Variable, String> columnNames,
+                           @Assisted("columnNames") ImmutableMap<Variable, QuotedID> columnNames,
                            @Assisted String nativeQueryString,
                            @Assisted VariableNullability variableNullability,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
@@ -122,7 +123,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public ImmutableMap<Variable, String> getColumnNames() {
+    public ImmutableMap<Variable, QuotedID> getColumnNames() {
         return columnNames;
     }
 
@@ -179,6 +180,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        return getVariables();
     }
 
     @Override

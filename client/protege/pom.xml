@@ -375,10 +375,6 @@
             <artifactId>libthrift</artifactId>
             <version>[0.12.0,)</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.jsonld-java</groupId>
-            <artifactId>jsonld-java</artifactId>
-        </dependency>
         <!-- transtiive closure of commons-rdf-jena ends -->
 
         <!-- Protege and OWLAPI bundle dependencies -->

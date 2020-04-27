@@ -24,16 +24,6 @@
 		<navigates value="@org.protege.classcategory"/>
 	</extension>
 
-	<extension id="MappingAssistantViewComponent"
-		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Mapping assistant"/>
-		<class
-			value="it.unibz.inf.ontop.protege.views.MappingAssistantView">
-		</class>
-		<headerColor value="8C1717"/>
-		<category value="ontop"/>
-	</extension>
-
 	<!-- Individuals queries views -->
 
 	<extension id="QueryManagerViewComponent"

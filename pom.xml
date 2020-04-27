@@ -137,7 +137,7 @@
         <hikari-cp.version>2.6.3</hikari-cp.version>
         <commons-rdf.version>0.5.0</commons-rdf.version>
         <guava.version>18.0</guava.version>
-        <jsqlparser.version>1.0</jsqlparser.version>
+        <jsqlparser.version>3.1</jsqlparser.version>
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <jackson.version>2.9.7</jackson.version>
         <jena.version>3.9.0</jena.version>
@@ -150,6 +150,7 @@
         <docker.mysql.password>mysql</docker.mysql.password>
         <docker.oracle.password>oracle</docker.oracle.password>
         <docker.pgsql.password>postgres2</docker.pgsql.password>
+        <docker.denodo.password>admin</docker.denodo.password>
     </properties>
 
     <build>
@@ -612,13 +613,6 @@
                 <version>${rdf4j.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.github.jsonld-java</groupId>
-                <artifactId>jsonld-java</artifactId>
-                <version>0.12.1</version>
-            </dependency>
-
-
             <!-- JDBC Drivers -->
 
             <dependency>
@@ -634,7 +628,7 @@
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
-                <version>1.4.196</version>
+                <version>1.4.199</version>
             </dependency>
             <dependency>
                 <groupId>com.microsoft.sqlserver</groupId>

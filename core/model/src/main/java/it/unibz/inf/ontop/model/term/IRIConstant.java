@@ -33,5 +33,5 @@ public interface IRIConstant extends ObjectConstant {
 	 *
 	 * @return the IRI object.
 	 */
-	public IRI getIRI();
+	IRI getIRI();
 }

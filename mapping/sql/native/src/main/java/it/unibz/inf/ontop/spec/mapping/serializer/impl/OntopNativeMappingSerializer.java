@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.OntopNativeMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -61,7 +61,7 @@ public class OntopNativeMappingSerializer {
      */
 
     private void writePrefixDeclaration(BufferedWriter writer) throws IOException {
-        final ImmutableMap<String, String> prefixMap = ppMapping.getMetadata().getPrefixManager().getPrefixMap();
+        final ImmutableMap<String, String> prefixMap = ppMapping.getPrefixManager().getPrefixMap();
 
         if (prefixMap.size() == 0) {
             return; // do nothing if there is no prefixes to write
@@ -92,7 +92,7 @@ public class OntopNativeMappingSerializer {
             ImmutableList<TargetAtom> targetQuery = axiom.getTargetAtoms();
             writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
 
-            OBDASQLQuery sourceQuery = axiom.getSourceQuery();
+            SQLPPSourceQuery sourceQuery = axiom.getSourceQuery();
             writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }
@@ -101,10 +101,10 @@ public class OntopNativeMappingSerializer {
     }
 
     private String printTargetQuery(ImmutableList<TargetAtom> query) {
-        return TargetQueryRenderer.encode(query, ppMapping.getMetadata().getPrefixManager());
+        return TargetQueryRenderer.encode(query, ppMapping.getPrefixManager());
     }
 
-    private String printSourceQuery(OBDASQLQuery query) {
+    private String printSourceQuery(SQLPPSourceQuery query) {
         String sourceString = SourceQueryRenderer.encode(query);
         String toReturn = convertTabToSpaces(sourceString);
         return toReturn.replaceAll("\n", "\n\t\t\t");

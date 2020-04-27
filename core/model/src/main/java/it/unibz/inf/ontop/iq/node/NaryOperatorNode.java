@@ -39,7 +39,7 @@ public interface NaryOperatorNode extends QueryNode {
 
     boolean isConstructed(Variable variable, ImmutableList<IQTree> children);
 
-    boolean isDistinct(ImmutableList<IQTree> children);
+    boolean isDistinct(IQTree tree, ImmutableList<IQTree> children);
 
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
@@ -63,4 +63,6 @@ public interface NaryOperatorNode extends QueryNode {
     IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties);
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children);
+
+    ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children);
 }

@@ -241,12 +241,18 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             iqFactory.createConstructionNode(requiredGrandChildVariables),
                             selectedGrandChild);
 
+            VariableNullability newChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
+                    IntStream.range(0, liftedChildren.size())
+                            .boxed()
+                            .map(i -> i == selectedChildPosition ? selectedGrandChildWithLimitedProjection : liftedChildren.get(i))
+                            .collect(ImmutableCollectors.toList()));
+
             try {
                 return bindingLift.liftRegularChildBinding(selectedChildConstructionNode,
                         selectedChildPosition,
                         selectedGrandChildWithLimitedProjection,
                         liftedChildren, ImmutableSet.of(), joiningCondition, variableGenerator,
-                        childrenVariableNullability, this::convertIntoState);
+                        newChildrenVariableNullability, this::convertIntoState);
             } catch (UnsatisfiableConditionException e) {
                 return declareAsEmpty();
             }

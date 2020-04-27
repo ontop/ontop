@@ -1,38 +1,31 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
-    private final ProvenanceMappingFactory mappingFactory;
     private final OntopMappingSettings settings;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -41,37 +34,30 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private final UniqueTermTypeExtractor typeExtractor;
 
     @Inject
-    private MappingDatatypeFillerImpl(ProvenanceMappingFactory mappingFactory, OntopMappingSettings settings,
-                                      TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                      TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
+    private MappingDatatypeFillerImpl(OntopMappingSettings settings,
+                                      CoreSingletons coreSingletons,
                                       UniqueTermTypeExtractor typeExtractor) {
-        this.mappingFactory = mappingFactory;
         this.settings = settings;
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.typeFactory = typeFactory;
-        this.iqFactory = iqFactory;
+        this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.typeFactory = coreSingletons.getTypeFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
         this.typeExtractor = typeExtractor;
     }
 
     @Override
-    public MappingWithProvenance transform(MappingWithProvenance mapping)
-            throws UnknownDatatypeException {
-
-        ImmutableMap.Builder<IQ, PPMappingAssertionProvenance> newProvenanceMapBuilder = ImmutableMap.builder();
-
-        for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            IQ newIQ = transformMappingAssertion(entry.getKey(), entry.getValue());
-            newProvenanceMapBuilder.put(newIQ, entry.getValue());
+    public MappingAssertion transform(MappingAssertion assertion) throws UnknownDatatypeException {
+        try {
+            return transformMappingAssertion(assertion);
         }
-
-        return mappingFactory.create(newProvenanceMapBuilder.build(), mapping.getMetadata());
+        catch (UnknownDatatypeException e) {
+            throw new UnknownDatatypeException(e, "\nMapping assertion:\n" + assertion.getProvenance());
+        }
     }
 
-    private IQ transformMappingAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance)
-            throws UnknownDatatypeException {
-        Variable objectVariable = extractObjectVariable(mappingAssertion);
-        ImmutableSet<ImmutableTerm> objectDefinitions = extractDefinitions(objectVariable, mappingAssertion);
+    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) throws UnknownDatatypeException {
+        Variable objectVariable = assertion.getRDFAtomPredicate().getObject(assertion.getProjectionAtom().getArguments());
+        ImmutableSet<ImmutableTerm> objectDefinitions = extractDefinitions(objectVariable, assertion.getQuery());
 
         ImmutableSet<Optional<TermTypeInference>> typeInferences = objectDefinitions.stream()
                 .map(ImmutableTerm::inferType)
@@ -79,7 +65,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         if (typeInferences.size() > 1) {
             throw new MinorOntopInternalBugException("Multiple types found for the object in a mapping assertion\n"
-                    + mappingAssertion);
+                    + assertion);
         }
 
         Optional<TermTypeInference> optionalTypeInference = typeInferences.stream()
@@ -93,14 +79,14 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                 .flatMap(TermTypeInference::getTermType)
                 .filter(t -> !t.isAbstract())
                 .isPresent())
-            return mappingAssertion;
+            return assertion;
         else
-            return fillMissingDatatype(objectVariable, mappingAssertion, provenance);
+            return assertion.copyOf(fillMissingDatatype(objectVariable, assertion), iqFactory);
     }
 
-    private ImmutableSet<ImmutableTerm> extractDefinitions(Variable objectVariable, IQ mappingAssertion) {
+    private ImmutableSet<ImmutableTerm> extractDefinitions(Variable objectVariable, IQ iq) {
 
-        ImmutableSet<ImmutableTerm> objectDefinitions = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
+        ImmutableSet<ImmutableTerm> objectDefinitions = iq.getTree().getPossibleVariableDefinitions().stream()
                 .map(s -> s.get(objectVariable))
                 .collect(ImmutableCollectors.toSet());
 
@@ -108,32 +94,13 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                 .allMatch(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant)))
             throw new MinorOntopInternalBugException("The object was expected to be defined by functional terms " +
                     "or RDF constant only\n"
-                    + mappingAssertion);
+                    + iq);
 
         return objectDefinitions;
     }
 
-    Variable extractObjectVariable(IQ mappingAssertion) {
-        DistinctVariableOnlyDataAtom projectionAtom = mappingAssertion.getProjectionAtom();
-
-        RDFAtomPredicate rdfAtomPredicate = Optional.of(projectionAtom.getPredicate())
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "An RDFAtomPredicate was expected for the mapping assertion"));
-
-        return rdfAtomPredicate.getObject(projectionAtom.getArguments());
-    }
-
-    private IQ fillMissingDatatype(Variable objectVariable, IQ mappingAssertion,
-                                   PPMappingAssertionProvenance provenance) throws UnknownDatatypeException {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(mappingAssertion.getTree())
-                .filter(t -> t.getRootNode() instanceof ConstructionNode)
-                .map(IQTree::getRootNode)
-                .map(n -> (ConstructionNode) n)
-                .map(ConstructionNode::getSubstitution)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "The mapping assertion was expecting to start with a construction node\n" + mappingAssertion));
+    private IQTree fillMissingDatatype(Variable objectVariable, MappingAssertion assertion) throws UnknownDatatypeException {
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopSubstitution();
 
         ImmutableTerm objectLexicalTerm = Optional.ofNullable(topSubstitution.get(objectVariable))
                 .filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
@@ -142,12 +109,12 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                         : termFactory.getRDFTermTypeConstant(((RDFConstant) t).getType()))
                 .orElseThrow(() -> new MinorOntopInternalBugException(
                         "The root construction node is not defining the object variable with a functional term " +
-                                "or a RDF constant\n" + mappingAssertion));
+                                "or a RDF constant\n" + assertion));
 
-        IQTree childTree = ((UnaryIQTree)mappingAssertion.getTree()).getChild();
+        IQTree childTree = assertion.getTopChild();
 
         // May throw an UnknownDatatypeException
-        RDFDatatype datatype = extractObjectType(objectLexicalTerm, childTree, provenance);
+        RDFDatatype datatype = extractObjectType(objectLexicalTerm, childTree);
 
         ImmutableTerm objectDefinition = termFactory.getRDFLiteralFunctionalTerm(objectLexicalTerm, datatype);
 
@@ -158,17 +125,14 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                         Stream.of(Maps.immutableEntry(objectVariable, objectDefinition)))
                         .collect(ImmutableCollectors.toMap()));
 
-        IQTree newTree = iqFactory.createUnaryIQTree(
+        return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(
-                        mappingAssertion.getProjectionAtom().getVariables(),
+                        assertion.getProjectedVariables(),
                         newSubstitution),
                 childTree);
-
-        return iqFactory.createIQ(mappingAssertion.getProjectionAtom(), newTree);
     }
 
-    private RDFDatatype extractObjectType(ImmutableTerm objectLexicalTerm, IQTree subTree,
-                                          PPMappingAssertionProvenance provenance) throws UnknownDatatypeException {
+    private RDFDatatype extractObjectType(ImmutableTerm objectLexicalTerm, IQTree subTree) throws UnknownDatatypeException {
 
         // Only if partially cast
         ImmutableTerm uncastObjectLexicalTerm = uncast(objectLexicalTerm);
@@ -184,9 +148,8 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         if ((!settings.isDefaultDatatypeInferred())
                 && (!optionalType.isPresent())) {
             throw new UnknownDatatypeException(
-                    String.format("Could not infer the type of %s and the option \"%s\" is disabled.\n" +
-                                    "Mapping assertion:\n%s",
-                            uncastObjectLexicalTerm, OntopMappingSettings.INFER_DEFAULT_DATATYPE, provenance));
+                    String.format("Could not infer the type of %s and the option \"%s\" is disabled.\n",
+                            uncastObjectLexicalTerm, OntopMappingSettings.INFER_DEFAULT_DATATYPE));
         }
 
         Optional<RDFDatatype> optionalRDFDatatype = optionalType
@@ -198,8 +161,8 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
             throw new UnknownDatatypeException(
                     String.format("Could infer the type %s for %s, " +
                                     "but this type is not mapped to an RDF datatype " +
-                                    "and the option \"%s\" is disabled.\nMapping assertion:\n%s",
-                            optionalType.get(), uncastObjectLexicalTerm, OntopMappingSettings.INFER_DEFAULT_DATATYPE, provenance));
+                                    "and the option \"%s\" is disabled.",
+                            optionalType.get(), uncastObjectLexicalTerm, OntopMappingSettings.INFER_DEFAULT_DATATYPE));
         }
 
         return optionalRDFDatatype

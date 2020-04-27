@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -60,6 +62,26 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
         return ImmutableList.of("15.500000", "16.000000", "18.875000");
+    }
+
+    /**
+     * DISTINCT is not (yet ?) supported in STRING_AGG
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat3() throws Exception {
+        super.testGroupConcat3();
+    }
+
+    /**
+     * DISTINCT is not (yet ?) supported in STRING_AGG
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat5() throws Exception {
+        super.testGroupConcat5();
     }
 
     @Override

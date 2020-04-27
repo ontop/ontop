@@ -68,7 +68,7 @@ public class ImmutableHomomorphism {
 
     @Override
     public boolean equals(Object other) {
-        if (other != null && other instanceof ImmutableHomomorphism) {
+        if (other instanceof ImmutableHomomorphism) {
             ImmutableHomomorphism o = (ImmutableHomomorphism)other;
             return this.map.equals(o.map);
         }
