@@ -13,6 +13,8 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -59,19 +61,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     private Boolean isDistinct;
 
     private final CoreUtilsFactory coreUtilsFactory;
-
-    /**
-     * See {@link IntermediateQueryFactory#createExtensionalDataNode(DataAtom)}
-     */
-    @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
-                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory) {
-        super(iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.relationDefinition = atom.getPredicate().getRelationDefinition();
-        this.argumentMap = extractArgumentMap(atom);
-    }
 
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
