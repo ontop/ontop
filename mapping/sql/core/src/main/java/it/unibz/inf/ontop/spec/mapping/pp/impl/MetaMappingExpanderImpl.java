@@ -41,6 +41,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final org.apache.commons.rdf.api.RDF rdfFactory;
     private final MappingEqualityTransformer mappingEqualityTransformer;
     private final IQTree2NativeNodeGenerator nativeNodeGenerator;
+    private final OntopSQLCredentialSettings settings;
 
     @Inject
     private MetaMappingExpanderImpl(SubstitutionFactory substitutionFactory,
@@ -48,17 +49,20 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                                     TermFactory termFactory,
                                     org.apache.commons.rdf.api.RDF rdfFactory,
                                     MappingEqualityTransformer mappingEqualityTransformer,
-                                    IQTree2NativeNodeGenerator nativeNodeGenerator) {
+                                    IQTree2NativeNodeGenerator nativeNodeGenerator,
+                                    OntopSQLCredentialSettings settings) {
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.nativeNodeGenerator = nativeNodeGenerator;
+        this.settings = settings;
     }
 
     @Override
-    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping, OntopSQLCredentialSettings settings, DBParameters dbParameters) throws MetaMappingExpansionException {
+    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters)
+            throws MetaMappingExpansionException {
         ImmutableList.Builder<MappingAssertion> resultBuilder = ImmutableList.builder();
         ImmutableList.Builder<ExpansionPosition> positionsBuilder = ImmutableList.builder();
 

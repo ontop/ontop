@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 
 public interface MetaMappingExpander {
 
-    ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mappings, OntopSQLCredentialSettings settings, DBParameters dbParameters)
+    ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mappings, DBParameters dbParameters)
             throws MetaMappingExpansionException;
 
 }
