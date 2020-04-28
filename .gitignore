@@ -43,3 +43,4 @@ ontop-optique-test
 tmp
 *.log
 
+.run
