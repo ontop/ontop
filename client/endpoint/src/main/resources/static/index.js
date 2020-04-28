@@ -1,19 +1,27 @@
-// Functions for the buffer/loading spinner that's displayed while the fetch call loads the data
-function showSpinner(spinner) {
-    $(spinner).css("visibility", "visible");
-    // setTimeout(() => {
-    //     $(spinner).css("visibility", "hidden");
-    // }, 5000);
-}
+function delayedLoop(collection, delay, callback, context) {
+    context = context || null;
 
-function hideSpinner(spinner) {
-    $(spinner).css("visibility", "hidden");
+    var i = 0,
+        nextInteration = function() {
+            if (i === collection.length) {
+                return;
+            }
+            callback.call(context, collection[i], i);
+            i++;
+            setTimeout(nextInteration, delay);
+        };
+
+    nextInteration();
 }
 
 
 async function selectGroup(index, numGroups, elem) {
-    $("div").removeClass("chosen");
-    $(elem).addClass("chosen");
+
+    //delayedLoop(["dummy","dummy"], 1, function(t, idx) {
+        $("div").removeClass("chosen");
+        $(elem).addClass("chosen");
+    //});
+
 
     const yId = 'yasgui' + index;
     x = document.getElementById(yId);
@@ -21,12 +29,12 @@ async function selectGroup(index, numGroups, elem) {
         x.style.display = "block";
     } else {
         const $main = $("#main");
-        $main.css("visibility","hidden");
-        showSpinner("#spinner");
-        await createYasgui(index);
+        //$main.css("visibility","hidden");
+        //showSpinner("#spinner");
         $(yId).addClass("chosen");
-        hideSpinner("#spinner");
-        $main.css("visibility","visible")
+        await createYasgui(index);
+        //hideSpinner("#spinner");
+     //   $main.css("visibility","visible")
     }
 
     for (i = 0; i <= numGroups; i++) {
@@ -45,6 +53,7 @@ async function createYasgui(i) {
     let group = window.portalConfig.tabGroups[i - 1];
     const yId = `yasgui${i}`;
     $('#yasguis').append(`<div id='${yId}' class="predefined"></div>`);
+
     const y = YASGUI(document.getElementById(yId), {
         yasqe: {
             sparql: {endpoint: window.endpointUrl},
@@ -55,26 +64,25 @@ async function createYasgui(i) {
     for (let tabId in y.tabs) {
         y.closeTab(tabId);
     }
-    for (let t of group.tabs) {
+    //const nTabs = group.tabs.length;
+    //const p = document.getElementsByTagName("progress")[0];
+
+    delayedLoop(group.tabs, 1, function(t, idx) {
+        //p.max = nTabs;
+        //console.log(idx)
+        //p.value = idx+1;
+        //$(yId).addClass("chosen");
         let tab = y.addTab();
         tab.rename(t.name);
         tab.setQuery(t.query);
-        // console.log(t.name, new Date().toLocaleTimeString());
-    }
+        //console.log(t.name, new Date().toLocaleTimeString());
+    });
+
     y.selectTab(Object.keys(y.tabs)[0]);
     return yId;
 }
 
 $(document).ready(function () {
-    // console.log("enter $(document).ready()", new Date().toLocaleTimeString());
-
-    // hide main content until data is loaded
-    $("#main").css("visibility", "hidden");
-
-    // show buffering spinner
-    spinner = $("#spinner");
-    showSpinner(spinner);
-
     // fetch data form the toml file
     fetch('ontop/portalConfig')
         .then(response => response.json())
@@ -84,37 +92,23 @@ $(document).ready(function () {
                 // console.log("ontop/portalConfig fetched", new Date().toLocaleTimeString());
                 const $switcher = $("#switcher");
                 if ($.isEmptyObject(config)) {
-                    // show main content and then hide+remove the spinner after data has been loaded.
                     // Also we hide the switcher since in this case the endpoint was not initialized with a .toml file
                     $switcher.hide();
-                    hideSpinner(spinner);
-                    $("header").css("visibility", "visible");
-                    $("#main").css("visibility", "visible");
-                    //$(spinner).remove();
                 } else {
                     if (config.title) $("#title").text(config.title);
 
                     if (config.tabGroups) {
                         let numGroups = config.tabGroups.length;
                         $switcher.append(`<div class="choice-option" id="select0" onclick='selectGroup(0, ${numGroups}, this)'>Playground</div>`);
-                        //numGroups=0;
                         for (let i = 0; i < numGroups; i++) {
                             let group = config.tabGroups[i];
                             $switcher.append(`<div class="choice-option" id='select${i + 1}' onclick='selectGroup(${i + 1}, ${numGroups}, this)'> ${group.name} </div>`)
                         }
-                        // for (let i = 0; i < numGroups; i++) {
-                        //     let group = config.tabGroups[i];
-                        //     let {tabId, t} = createYasgui(i, endpointUrl, group);
-                        // }
+
                         selectGroup(0, numGroups, "#select0");
                     }
                 }
 
-                // show main content and then hide+remove the spinner after data has been loaded.
-                //hideSpinner(spinner);
-                $("header").css("visibility", "visible");
-                $("#main").css("visibility", "visible");
-                //$(spinner).remove();
             }
         );
 
@@ -126,3 +120,5 @@ $(document).ready(function () {
     });
 
 });
+
+// https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
