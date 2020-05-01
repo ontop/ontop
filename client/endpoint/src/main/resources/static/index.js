@@ -1,3 +1,4 @@
+// https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
 function delayedLoop(collection, delay, callback, context) {
     context = context || null;
 
@@ -109,16 +110,17 @@ $(document).ready(function () {
                     }
                 }
 
+                const endpointUrl = new Request('sparql').url;
+                window.endpointUrl = endpointUrl;
+                $('#endpoint').text(endpointUrl);
+                var yasgui = YASGUI(document.getElementById("yasgui0"), {
+                    yasqe: {sparql: {endpoint: endpointUrl}}
+                });
             }
         );
 
-    const endpointUrl = new Request('sparql').url;
-    window.endpiontUrl = endpointUrl;
-    $('#endpoint').text(endpointUrl);
-    var yasgui = YASGUI(document.getElementById("yasgui0"), {
-        yasqe: {sparql: {endpoint: endpointUrl}}
-    });
+
 
 });
 
-// https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
+
