@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.OntopModelTestingTools.DEFAULT_DUMMY_DB_METADATA;
+import static it.unibz.inf.ontop.OntopModelTestingTools.createMetadataProviderBuilder;
+
 
 /**
  * Test that we correctly output exceptions in case we try to insert an incorrect foreign key (missing values)
@@ -14,10 +16,11 @@ public class WrongForeignKeyTest {
     private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
 
     static {
-        ID_FACTORY = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        ID_FACTORY = builder.getQuotedIDFactory();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table1",
+        table1Def = builder.createDatabaseRelation("table1",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
@@ -30,13 +33,13 @@ public class WrongForeignKeyTest {
                 .addDependent(4)
                 .build();
 
-        table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
+        table2Def = builder.createDatabaseRelation("table2",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
         UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
 
-        table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table3",
+        table3Def = builder.createDatabaseRelation("table3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,

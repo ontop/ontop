@@ -46,28 +46,17 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping)
-            throws UnknownDatatypeException {
-
-        ImmutableList.Builder<MappingAssertion> newProvenanceMapBuilder = ImmutableList.builder();
-
-        // no streams because of exception handling
-        for (MappingAssertion a : mapping) {
-            try {
-                MappingAssertion newMappingAssertion = transformMappingAssertion(a);
-                newProvenanceMapBuilder.add(newMappingAssertion);
-            }
-            catch (UnknownDatatypeException e) {
-                throw new UnknownDatatypeException(e, "\nMapping assertion:\n" + a.getProvenance());
-            }
+    public MappingAssertion transform(MappingAssertion assertion) throws UnknownDatatypeException {
+        try {
+            return transformMappingAssertion(assertion);
         }
-
-        return newProvenanceMapBuilder.build();
+        catch (UnknownDatatypeException e) {
+            throw new UnknownDatatypeException(e, "\nMapping assertion:\n" + assertion.getProvenance());
+        }
     }
 
-    private MappingAssertion transformMappingAssertion(MappingAssertion assertion)
-            throws UnknownDatatypeException {
-        Variable objectVariable = assertion.getObject();
+    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) throws UnknownDatatypeException {
+        Variable objectVariable = assertion.getRDFAtomPredicate().getObject(assertion.getProjectionAtom().getArguments());
         ImmutableSet<ImmutableTerm> objectDefinitions = extractDefinitions(objectVariable, assertion.getQuery());
 
         ImmutableSet<Optional<TermTypeInference>> typeInferences = objectDefinitions.stream()
@@ -92,7 +81,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                 .isPresent())
             return assertion;
         else
-            return assertion.copyOf(fillMissingDatatype(objectVariable, assertion));
+            return assertion.copyOf(fillMissingDatatype(objectVariable, assertion), iqFactory);
     }
 
     private ImmutableSet<ImmutableTerm> extractDefinitions(Variable objectVariable, IQ iq) {
@@ -110,8 +99,8 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         return objectDefinitions;
     }
 
-    private IQ fillMissingDatatype(Variable objectVariable, MappingAssertion assertion) throws UnknownDatatypeException {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopNode().getSubstitution();
+    private IQTree fillMissingDatatype(Variable objectVariable, MappingAssertion assertion) throws UnknownDatatypeException {
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopSubstitution();
 
         ImmutableTerm objectLexicalTerm = Optional.ofNullable(topSubstitution.get(objectVariable))
                 .filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
@@ -136,13 +125,11 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                         Stream.of(Maps.immutableEntry(objectVariable, objectDefinition)))
                         .collect(ImmutableCollectors.toMap()));
 
-        IQTree newTree = iqFactory.createUnaryIQTree(
+        return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(
-                        assertion.getProjectionAtom().getVariables(),
+                        assertion.getProjectedVariables(),
                         newSubstitution),
                 childTree);
-
-        return iqFactory.createIQ(assertion.getProjectionAtom(), newTree);
     }
 
     private RDFDatatype extractObjectType(ImmutableTerm objectLexicalTerm, IQTree subTree) throws UnknownDatatypeException {

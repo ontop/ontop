@@ -27,7 +27,7 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
 
     public ImmutableList<MappingAssertion> addDistinct(ImmutableList<MappingAssertion> mapping){
         return mapping.stream()
-                .map(a -> a.copyOf(updateQuery(a.getQuery())))
+                .map(this::updateQuery)
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -37,12 +37,12 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
      * In the special case of CONSTRUCTION -> DISTINCT -> UNION, we try to push
      * the DISTINCT under the union.
      */
-    private IQ updateQuery(IQ query) {
-        VariableGenerator variableGenerator = query.getVariableGenerator();
+    private MappingAssertion updateQuery(MappingAssertion assertion) {
+        VariableGenerator variableGenerator = assertion.getQuery().getVariableGenerator();
 
         IQTree distinctTree = iqFactory.createUnaryIQTree(
                 iqFactory.createDistinctNode(),
-                query.getTree())
+                assertion.getQuery().getTree())
                 .normalizeForOptimization(variableGenerator);
 
         Optional<ConstructionNode> topConstructionNode = Optional.of(distinctTree.getRootNode())
@@ -61,6 +61,6 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
                 .map(t -> t.normalizeForOptimization(variableGenerator))
                 .orElse(distinctTree);
 
-        return iqFactory.createIQ(query.getProjectionAtom(), newTree);
+        return assertion.copyOf(newTree, iqFactory);
     }
 }

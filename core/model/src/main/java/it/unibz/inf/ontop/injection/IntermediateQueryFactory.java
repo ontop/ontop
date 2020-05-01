@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.inject.Guice;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
@@ -13,7 +14,6 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -25,7 +25,7 @@ import java.util.Optional;
  *
  * See https://github.com/google/guice/wiki/AssistedInject.
  *
- * Accessible through Guice (recommended) or through CoreSingletons.
+ * Accessible through {@link Guice} (recommended) or through {@link CoreSingletons#getIQFactory()}.
  *
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -51,8 +51,6 @@ public interface IntermediateQueryFactory {
     FilterNode createFilterNode(ImmutableExpression filterCondition);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
-    @Deprecated
-    ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);
 
     /**
      * NB: keys of the argumentMap are indices. They start at 0.

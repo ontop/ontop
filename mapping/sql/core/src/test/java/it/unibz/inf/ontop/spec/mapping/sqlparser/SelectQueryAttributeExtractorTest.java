@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import org.junit.Test;
 
@@ -10,35 +13,30 @@ import static org.junit.Assert.assertEquals;
 
 public class SelectQueryAttributeExtractorTest {
 
+    @Test
+    public void test_no_from() throws Exception {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        MetadataLookup metadataLookup = builder.build();
+        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
+        DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);
+        RAExpressionAttributes r = ae.getRAExpressionAttributes("SELECT 1 AS A");
+        assertEquals(ImmutableSet.of(new QualifiedAttributeID(null, idfac.createAttributeID("A"))), r.getAttributes().keySet());
+    }
 
     @Test
-    public void test_1() throws InvalidSelectQueryException {
-        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(ImmutableList.of());
-        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
+    public void test_approximation() throws InvalidSelectQueryException {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        QuotedIDFactory idfac = builder.getQuotedIDFactory();
 
-        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);
+        ApproximateSelectQueryAttributeExtractor aex = new ApproximateSelectQueryAttributeExtractor(idfac);
 
-        ImmutableList<QuotedID> res = aex.extract("SELECT ALMAES001.IDART,\n"+
-//                "     ALMAES001.CODART,\n"+
-//                "     ALMAES001.IDFAMI,\n"+
-//                "     ALMAES001.DESCRIP,\n"+
-//                "     ALMAES001.DESCRII,\n"+
-//                "     ALMAES001.MEDIDA,\n"+
-//                "     ALMAES001.DESCUENTO,\n"+
-//                "     ALMAES001.UNIDADES,\n"+
-//                "     ALMAES001.UDSENV,\n"+
-//                "     ALMAES001.IDTIPIVA,\n"+
+        ImmutableList<QuotedID> res = aex.getAttributes("SELECT ALMAES001.IDART,\n"+
                 "     ALMAES001.UPC,\n"+
-                "     ALMAES001.PVP1, ALMAES001.PVP2, ALMAES001.PVP3, ALMAES001.PVP4, ALMAES001.PVP5,\n"+
+                "     ALMAES001.PVP1, ALMAES001.PVP2, ALMAES001.PVP3, \n"+
                 "     to_char(ALMAES001.FECALTA,'YYYY-MM-DD') AS FECALTA,\n"+
                 "     to_char(ALMAES001.FECBLO,'YYYY-MM-DD') AS FECBLO,\n"+
                 "     to_char((ALMAES001.FECBLO),('YYYY-MM-DD')) AS FECBLO1,\n"+
                 "     ALMAES001.STCMIN,\n"+
-//                "     ALMAES001.STCMAX,\n"+
-//                "     ALMAES001.PUNRUP,\n"+
-//                "     ALMAES001.UBICACION,\n"+
-//                "     ALMAES001.IDCTACOMPRA,\n"+
-//                "     ALMAES001.IDCTAVENTA,\n"+
                 "     ALESFO001.PRECIOFINAL\n"+
                 "\t             \n"+
                 "FROM ALMAES001 "+
@@ -47,30 +45,14 @@ public class SelectQueryAttributeExtractorTest {
         );
         assertEquals(ImmutableList.of(
                 idfac.createAttributeID("IDART"),
-//                idfac.createAttributeID("CODART"),
-//                idfac.createAttributeID("IDFAMI"),
-//                idfac.createAttributeID("DESCRIP"),
-//                idfac.createAttributeID("DESCRII"),
-//                idfac.createAttributeID("MEDIDA"),
-//                idfac.createAttributeID("DESCUENTO"),
-//                idfac.createAttributeID("UNIDADES"),
-//                idfac.createAttributeID("UDSENV"),
-//                idfac.createAttributeID("IDTIPIVA"),
                 idfac.createAttributeID("UPC"),
                 idfac.createAttributeID("PVP1"),
                 idfac.createAttributeID("PVP2"),
                 idfac.createAttributeID("PVP3"),
-                idfac.createAttributeID("PVP4"),
-                idfac.createAttributeID("PVP5"),
                 idfac.createAttributeID("FECALTA"),
                 idfac.createAttributeID("FECBLO"),
                 idfac.createAttributeID("FECBLO1"),
                 idfac.createAttributeID("STCMIN"),
-//                idfac.createAttributeID("STCMAX"),
-//                idfac.createAttributeID("PUNRUP"),
-//                idfac.createAttributeID("UBICACION"),
-//                idfac.createAttributeID("IDCTACOMPRA"),
-//                idfac.createAttributeID("IDCTAVENTA"),
                 idfac.createAttributeID("PRECIOFINAL")), res);
     }
 }

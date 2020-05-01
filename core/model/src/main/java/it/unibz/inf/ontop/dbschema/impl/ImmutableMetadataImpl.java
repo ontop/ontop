@@ -6,6 +6,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Map;
 
 public class ImmutableMetadataImpl implements ImmutableMetadata {
@@ -30,14 +33,18 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     }
 
     @JsonProperty("metadata")
-    Map<String, String> getMedadataForJsonExport() {
-        return ImmutableMap.of(
-                "dbmsProductName", getDBParameters().getDbmsProductName(),
-                "dbmsVersion", getDBParameters().getDbmsVersion(),
-                "driverName", getDBParameters().getDriverName(),
-                "driverVersion", getDBParameters().getDriverVersion(),
-                "quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString()
-        );
+    Map<String, String> getMetadataForJsonExport() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        String extractionTime = dateFormat.format(Calendar.getInstance().getTime());
+
+        return ImmutableMap.<String, String>builder()
+                .put("dbmsProductName", getDBParameters().getDbmsProductName())
+                .put("dbmsVersion", getDBParameters().getDbmsVersion())
+                .put("driverName", getDBParameters().getDriverName())
+                .put("driverVersion", getDBParameters().getDriverVersion())
+                .put("quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString())
+                .put("extractionTime", extractionTime)
+                .build();
     }
 
     @Override

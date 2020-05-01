@@ -563,6 +563,12 @@
             <artifactId>commons-rdf-simple</artifactId>
             <version>${commons-rdf.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.jsonld-java</groupId>
+            <artifactId>jsonld-java</artifactId>
+            <version>0.12.3</version>
+        </dependency>
     </dependencies>
 
     <build>

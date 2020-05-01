@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.iq.visitor;
 
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 import java.util.stream.Stream;
 
