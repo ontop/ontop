@@ -1,63 +1,39 @@
-// Functions for the buffer/loading spinner that's displayed while the fetch call loads the data
-function showSpinner(spinner) {
-    $(spinner).css("visibility", "visible");
-    // setTimeout(() => {
-    //     $(spinner).css("visibility", "hidden");
-    // }, 5000);
-}
-
-function hideSpinner(spinner) {
-    $(spinner).css("visibility", "hidden");
-}
-
-
 // https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
 function delayedLoop(collection, delay, callback, context) {
     context = context || null;
 
-    var i = 0,
-        nextInteration = function () {
-            if (i === collection.length) {
-                return;
-            }
-            callback.call(context, collection[i], i);
-            i++;
-            setTimeout(nextInteration, delay);
-        };
+    let i = 0;
+    const nextIteration = function () {
+        if (i === collection.length) {
+            return;
+        }
+        callback.call(context, collection[i], i);
+        i++;
+        setTimeout(nextIteration, delay);
+    };
 
-    nextInteration();
+    nextIteration();
 }
 
 
-async function selectGroup(index, numGroups, elem) {
-
-    //delayedLoop(["dummy","dummy"], 1, function(t, idx) {
+function selectGroup(index, numGroups, elem) {
     $("div").removeClass("chosen");
     $(elem).addClass("chosen");
-    //});
-
 
     const yId = 'yasgui' + index;
-    x = document.getElementById(yId);
+    let x = document.getElementById(yId);
     if (x) {
         x.style.display = "block";
     } else {
-        const $main = $("#main");
-        //$main.css("visibility","hidden");
-
-        delayedLoop([0, 1, 2], 10, function (t, idx) {
+        delayedLoop([0, 1, 2], 10, (_, idx) => {
             if (idx === 0) {
-                $(yId).addClass("chosen");
-                showSpinner("#spinner");
+                $("#spinner").css("visibility", "visible");
             } else if (idx === 1) {
                 createYasgui(index);
             } else /* idx === 2*/ {
-                hideSpinner("#spinner");
+                $("#spinner").css("visibility", "hidden");
             }
-
         })
-        //hideSpinner("#spinner");
-        // $main.css("visibility","visible")
     }
 
     for (i = 0; i <= numGroups; i++) {
@@ -72,7 +48,7 @@ async function selectGroup(index, numGroups, elem) {
     }
 }
 
-async function createYasgui(i) {
+function createYasgui(i) {
     let group = window.portalConfig.tabGroups[i - 1];
     const yId = `yasgui${i}`;
     $('#yasguis').append(`<div id='${yId}' class="predefined"></div>`);
@@ -87,14 +63,8 @@ async function createYasgui(i) {
     for (let tabId in y.tabs) {
         y.closeTab(tabId);
     }
-    //const nTabs = group.tabs.length;
-    //const p = document.getElementsByTagName("progress")[0];
 
-    delayedLoop(group.tabs, 1, function (t, idx) {
-        //p.max = nTabs;
-        //console.log(idx)
-        //p.value = idx+1;
-        //$(yId).addClass("chosen");
+    delayedLoop(group.tabs, 1, (t, _) => {
         let tab = y.addTab();
         tab.rename(t.name);
         tab.setQuery(t.query);
@@ -105,7 +75,7 @@ async function createYasgui(i) {
     return yId;
 }
 
-$(document).ready(function () {
+$(() => {
     // fetch data form the toml file
     fetch('ontop/portalConfig')
         .then(response => response.json())
@@ -115,7 +85,7 @@ $(document).ready(function () {
                 // console.log("ontop/portalConfig fetched", new Date().toLocaleTimeString());
                 const $switcher = $("#switcher");
                 if ($.isEmptyObject(config)) {
-                    // Also we hide the switcher since in this case the endpoint was not initialized with a .toml file
+                    // we hide the switcher since in this case the endpoint was not initialized with a .toml file
                     $switcher.hide();
                 } else {
                     if (config.title) $("#title").text(config.title);
@@ -140,8 +110,6 @@ $(document).ready(function () {
                 });
             }
         );
-
-
 });
 
 

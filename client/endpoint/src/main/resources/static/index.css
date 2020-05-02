@@ -1,4 +1,4 @@
-#spinner{
+#spinner {
     visibility: hidden;
     width: 100px;
     height: 100px;
@@ -8,9 +8,9 @@
     border-radius: 100%;
 
     position: absolute;
-    top:0;
-    bottom:0;
-    left:0;
+    top: 0;
+    bottom: 0;
+    left: 0;
     right: 0;
     margin: auto;
 
@@ -20,7 +20,8 @@
 @keyframes spin {
     from {
         transform: rotate(0deg);
-    } to {
+    }
+    to {
         transform: rotate(360deg);
     }
 }
@@ -91,11 +92,3 @@ header {
     background-color: #337ab7;
     color: #fff;
 }
-
-/*#yasgui2 .close {*/
-/*    display: none !important;*/
-/*}*/
-
-/*#yasgui2 a[role="addTab"] {*/
-/*    display: none !important;*/
-/*}*/
