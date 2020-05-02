@@ -1,9 +1,22 @@
+// Functions for the buffer/loading spinner that's displayed while the fetch call loads the data
+function showSpinner(spinner) {
+    $(spinner).css("visibility", "visible");
+    // setTimeout(() => {
+    //     $(spinner).css("visibility", "hidden");
+    // }, 5000);
+}
+
+function hideSpinner(spinner) {
+    $(spinner).css("visibility", "hidden");
+}
+
+
 // https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
 function delayedLoop(collection, delay, callback, context) {
     context = context || null;
 
     var i = 0,
-        nextInteration = function() {
+        nextInteration = function () {
             if (i === collection.length) {
                 return;
             }
@@ -19,8 +32,8 @@ function delayedLoop(collection, delay, callback, context) {
 async function selectGroup(index, numGroups, elem) {
 
     //delayedLoop(["dummy","dummy"], 1, function(t, idx) {
-        $("div").removeClass("chosen");
-        $(elem).addClass("chosen");
+    $("div").removeClass("chosen");
+    $(elem).addClass("chosen");
     //});
 
 
@@ -31,11 +44,20 @@ async function selectGroup(index, numGroups, elem) {
     } else {
         const $main = $("#main");
         //$main.css("visibility","hidden");
-        //showSpinner("#spinner");
-        $(yId).addClass("chosen");
-        await createYasgui(index);
+
+        delayedLoop([0, 1, 2], 10, function (t, idx) {
+            if (idx === 0) {
+                $(yId).addClass("chosen");
+                showSpinner("#spinner");
+            } else if (idx === 1) {
+                createYasgui(index);
+            } else /* idx === 2*/ {
+                hideSpinner("#spinner");
+            }
+
+        })
         //hideSpinner("#spinner");
-     //   $main.css("visibility","visible")
+        // $main.css("visibility","visible")
     }
 
     for (i = 0; i <= numGroups; i++) {
@@ -68,7 +90,7 @@ async function createYasgui(i) {
     //const nTabs = group.tabs.length;
     //const p = document.getElementsByTagName("progress")[0];
 
-    delayedLoop(group.tabs, 1, function(t, idx) {
+    delayedLoop(group.tabs, 1, function (t, idx) {
         //p.max = nTabs;
         //console.log(idx)
         //p.value = idx+1;
@@ -118,7 +140,6 @@ $(document).ready(function () {
                 });
             }
         );
-
 
 
 });
