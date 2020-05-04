@@ -95,10 +95,10 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getStrExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1967-11-05 07:50:00.0\"^^xsd:string");
-        expectedValues.add("\"2011-12-08 12:30:00.0\"^^xsd:string");
-        expectedValues.add("\"2014-07-14 12:47:52.0\"^^xsd:string");
-        expectedValues.add("\"2015-09-21 11:23:06.0\"^^xsd:string");
+        expectedValues.add("\"1967-11-04T22:50:00.000000-08:00\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T03:30:00.000000-08:00\"^^xsd:string");
+        expectedValues.add("\"2014-07-14T03:47:52.000000-07:00\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T02:23:06.000000-07:00\"^^xsd:string");
 
         return expectedValues;
     }
