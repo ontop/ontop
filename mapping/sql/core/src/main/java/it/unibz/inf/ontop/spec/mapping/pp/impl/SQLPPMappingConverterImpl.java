@@ -166,7 +166,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 }
             }
             catch (JSQLParserException e) {
-                System.out.println("FAILED TO PARSE: " + sourceQuery);
+                System.out.println("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
                 ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
                 attributes = sqae.getAttributes(sourceQuery);
             }
