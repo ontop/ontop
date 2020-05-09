@@ -43,21 +43,6 @@ public class SelectQueryParser {
         this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
 
-    public RAExpression parseForTest(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
-        try {
-            return select(JSqlParserTools.parse(sql));
-        }
-        catch (JSQLParserException e) {
-            throw new InvalidSelectQueryException(e.getMessage(), sql);
-        }
-        catch (InvalidSelectQueryRuntimeException e) {
-            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
-        }
-        catch (UnsupportedSelectQueryRuntimeException e) {
-            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
-        }
-    }
-
     public RAExpression parse(SelectBody selectBody) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
             return select(selectBody);
