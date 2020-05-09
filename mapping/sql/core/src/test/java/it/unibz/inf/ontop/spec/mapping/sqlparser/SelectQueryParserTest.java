@@ -107,7 +107,6 @@ public class SelectQueryParserTest {
     @Test
     public void cross_join_test() throws Exception {
         RAExpression re = parse("SELECT * FROM P CROSS JOIN  Q;");
-
         assertEquals(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }

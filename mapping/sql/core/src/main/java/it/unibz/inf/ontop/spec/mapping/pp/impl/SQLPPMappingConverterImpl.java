@@ -176,7 +176,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
             }
             System.out.println("PARSER VIEW FOR " + sourceQuery);
             ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
-            return sqp.createAtom(view, ImmutableSet.of());
+            return sqp.create(view, ImmutableSet.of());
         }
         catch (InvalidSelectQueryException e) {
             throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()

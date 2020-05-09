@@ -4,30 +4,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
  *
  */
-public class SelectQueryParser {
-    private final MetadataLookup metadata;
+public class SelectQueryParser extends FromItemParser<RAExpression> {
     private final QuotedIDFactory idfac;
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
@@ -36,7 +27,7 @@ public class SelectQueryParser {
     private int relationIndex = 0;
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        this.metadata = metadata;
+        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata);
         this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
@@ -45,7 +36,7 @@ public class SelectQueryParser {
 
     public RAExpression parse(SelectBody selectBody) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
-            return select(selectBody);
+            return translateSelectBody(selectBody);
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
@@ -56,11 +47,9 @@ public class SelectQueryParser {
     }
 
 
-    private RAExpression select(SelectBody selectBody) {
-        return plainSelect(JSqlParserTools.getPlainSelect(selectBody));
-    }
-
-    private RAExpression plainSelect(PlainSelect plainSelect) {
+    @Override
+    protected RAExpression translateSelectBody(SelectBody selectBody) {
+        PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
 
         if (plainSelect.getDistinct() != null)
             throw new UnsupportedSelectQueryRuntimeException("DISTINCT is not supported", plainSelect);
@@ -68,7 +57,7 @@ public class SelectQueryParser {
         if (plainSelect.getGroupBy() != null || plainSelect.getHaving() != null)
             throw new UnsupportedSelectQueryRuntimeException("GROUP BY / HAVING are not supported", plainSelect);
 
-        if (plainSelect.getLimit() != null || plainSelect.getTop() != null || plainSelect.getOffset()!= null)
+        if (plainSelect.getLimit() != null || plainSelect.getTop() != null || plainSelect.getOffset() != null)
             throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / TOP are not supported", plainSelect);
 
         if (plainSelect.getOrderByElements() != null)
@@ -80,15 +69,12 @@ public class SelectQueryParser {
         if (plainSelect.getFromItem() == null)
             throw new UnsupportedSelectQueryRuntimeException("SELECT without FROM is not supported", plainSelect);
 
-        RAExpression current = getRelationalExpression(plainSelect.getFromItem());
-        if (plainSelect.getJoins() != null) {
-            for (Join join : plainSelect.getJoins())
-                try {
-                    current = join(current, join);
-                }
-                catch (IllegalJoinException e) {
-                    throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
-                }
+        RAExpression current;
+        try {
+            current = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
+        }
+        catch (IllegalJoinException e) {
+            throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
         }
 
         ImmutableList<ImmutableExpression> filterAtoms = (plainSelect.getWhere() == null)
@@ -96,96 +82,61 @@ public class SelectQueryParser {
                 : ImmutableList.<ImmutableExpression>builder()
                 .addAll(current.getFilterAtoms())
                 .addAll(expressionParser.parseBooleanExpression(
-                            plainSelect.getWhere(), current.getAttributes()))
+                        plainSelect.getWhere(), current.getAttributes()))
                 .build();
 
-        ImmutableMap.Builder<QualifiedAttributeID, ImmutableTerm> attributesBuilder = ImmutableMap.builder();
         SelectItemParser sip = new SelectItemParser(current.getAttributes(), expressionParser::parseTerm, idfac);
 
-        plainSelect.getSelectItems().forEach(si -> {
-            ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sip.getAttributes(si);
-
-            // attributesBuilder.build() below checks that the keys in attrs do not intersect
-            attributesBuilder.putAll(attrs);
-        });
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
-        try {
-            attributes = attributesBuilder.build();
-        }
-        catch (IllegalArgumentException e) {
-            SelectItemParser sip2 = new SelectItemParser(current.getAttributes(), expressionParser::parseTerm, idfac);
-            Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
-            plainSelect.getSelectItems().forEach(si -> {
-                ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sip2.getAttributes(si);
-                for (Map.Entry<QualifiedAttributeID, ImmutableTerm> a : attrs.entrySet())
-                    duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
-            });
-            throw new InvalidSelectQueryRuntimeException(duplicates.entrySet().stream()
-                    .filter(d -> d.getValue() > 1)
-                    .map(Map.Entry::getKey)
-                    .map(QualifiedAttributeID::getSQLRendering)
-                    .collect(Collectors.joining(", ", "Duplicate column names ", " in the SELECT clause: ")), plainSelect);
-        }
+        RAExpressionAttributes attributes =
+                JSqlParserTools.parseSelectItems(sip, plainSelect.getSelectItems());
 
         return new RAExpression(current.getDataAtoms(),
                 ImmutableList.<ImmutableExpression>builder().addAll(filterAtoms).build(),
-                new RAExpressionAttributes(attributes));
+                attributes);
     }
 
-    private RAExpression join(RAExpression left, Join join) throws IllegalJoinException {
+    @Override
+    protected RAExpression crossJoin(RAExpression left, RAExpression right) throws IllegalJoinException {
+        return RAExpression.crossJoin(left, right);
+    }
+
+    @Override
+    protected RAExpression naturalJoin(RAExpression left, RAExpression right) throws IllegalJoinException {
+        return RAExpression.naturalJoin(left, right, termFactory);
+    }
+
+    @Override
+    protected RAExpression joinOn(RAExpression left, RAExpression right, Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+        return RAExpression.joinOn(left, right, getAtomOnExpression);
+    }
+
+    @Override
+    protected RAExpression joinUsing(RAExpression left, RAExpression right, ImmutableSet<QuotedID> using) throws IllegalJoinException {
+        return RAExpression.joinUsing(left, right, using, termFactory);
+    }
+
+    @Override
+    protected RAExpression alias(RAExpression rae, RelationID relationId) {
+        return RAExpression.alias(rae, relationId);
+    }
+
+
+    @Override
+    protected RAExpression join(RAExpression left, Join join) throws IllegalJoinException {
 
         if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
             throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
-        RAExpression right = getRelationalExpression(join.getRightItem());
-        if (join.isSimple()) {
-            return RAExpression.crossJoin(left, right);
-        }
-        else if (join.isCross()) {
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
-                throw new InvalidSelectQueryRuntimeException("CROSS JOIN cannot have USING/ON conditions", join);
-
-            if (join.isInner())
-                throw new InvalidSelectQueryRuntimeException("CROSS INNER JOIN is not allowed", join);
-
-            return RAExpression.crossJoin(left, right);
-        }
-        else if (join.isNatural()) {
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
-                throw new InvalidSelectQueryRuntimeException("NATURAL JOIN cannot have USING/ON conditions", join);
-
-            if (join.isInner())
-                throw new InvalidSelectQueryRuntimeException("NATURAL INNER JOIN is not allowed", join);
-
-            return RAExpression.naturalJoin(left, right, termFactory);
-        }
-        else {
-            if (join.getOnExpression() != null) {
-                if (join.getUsingColumns() !=null)
-                    throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
-
-                return RAExpression.joinOn(left, right,
-                        (attributes -> expressionParser.parseBooleanExpression(
-                                join.getOnExpression(), attributes)));
-            }
-            else if (join.getUsingColumns() != null) {
-                return RAExpression.joinUsing(left, right,
-                        join.getUsingColumns().stream()
-                                .map(p -> idfac.createAttributeID(p.getColumnName()))
-                                .collect(ImmutableCollectors.toSet()), termFactory);
-            }
-            else
-                throw new InvalidSelectQueryRuntimeException("[INNER] JOIN requires either ON or USING", join);
-        }
+        return super.join(left, join);
     }
 
 
-    private RAExpression getRelationalExpression(FromItem fromItem) {
-        return new FromItemProcessor(fromItem).result;
-    }
 
-    public RAExpression createAtom(RelationDefinition relation, ImmutableSet<RelationID> relationIDs) {
+
+
+    @Override
+    public RAExpression create(RelationDefinition relation, ImmutableSet<RelationID> relationIDs) {
+        relationIndex++;
         ImmutableMap<Integer, Variable> terms = relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(a -> a.getIndex() - 1,
                         a -> termFactory.getVariable(a.getID().getName() + relationIndex)));
@@ -201,85 +152,4 @@ public class SelectQueryParser {
 
         return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
     }
-
-
-    private class FromItemProcessor implements FromItemVisitor {
-
-        private RAExpression result = null;
-
-        FromItemProcessor(FromItem fromItem) {
-            fromItem.accept(this);
-        }
-
-        @Override
-        public void visit(Table tableName) {
-
-            RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
-            // construct the predicate using the table name
-            try {
-                DatabaseRelationDefinition relation = metadata.getRelation(id);
-                relationIndex++;
-
-                ImmutableSet<RelationID> relationIDs = (tableName.getAlias() == null)
-                        ? relation.getAllIDs()
-                        : ImmutableSet.of(idfac.createRelationID(null, tableName.getAlias().getName()));
-
-                result = createAtom(relation, relationIDs);
-            }
-            catch (MetadataExtractionException e) {
-                throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
-            }
-        }
-
-
-        @Override
-        public void visit(SubSelect subSelect) {
-            if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
-                throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
-
-            RAExpression current = select(subSelect.getSelectBody());
-
-            RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
-            result = RAExpression.alias(current, aliasId);
-        }
-
-        @Override
-        public void visit(SubJoin subjoin) {
-            if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
-                throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
-
-            RAExpression join = getRelationalExpression(subjoin.getLeft());
-            try {
-                for (Join j : subjoin.getJoinList())
-                    join = join(join, j);
-            }
-            catch (IllegalJoinException e) {
-                throw new InvalidSelectQueryRuntimeException(e.toString(), subjoin);
-            }
-
-            RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
-            result = RAExpression.alias(join, aliasId);
-        }
-
-        @Override
-        public void visit(LateralSubSelect lateralSubSelect) {
-            throw new UnsupportedSelectQueryRuntimeException("LateralSubSelects are not supported", lateralSubSelect);
-        }
-
-        @Override
-        public void visit(ValuesList valuesList) {
-            throw new UnsupportedSelectQueryRuntimeException("ValuesLists are not supported", valuesList);
-        }
-
-        @Override
-        public void visit(TableFunction tableFunction) {
-            throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
-        }
-
-        @Override
-        public void visit(ParenthesisFromItem parenthesisFromItem) {
-            throw new UnsupportedSelectQueryRuntimeException("ParenthesisFromItem are not supported", parenthesisFromItem);
-        }
-    }
-
 }
