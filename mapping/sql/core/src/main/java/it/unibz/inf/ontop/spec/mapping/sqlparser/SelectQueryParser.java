@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -77,22 +78,19 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
         }
 
-        ImmutableList<ImmutableExpression> filterAtoms = (plainSelect.getWhere() == null)
-                ? current.getFilterAtoms()
-                : ImmutableList.<ImmutableExpression>builder()
-                .addAll(current.getFilterAtoms())
-                .addAll(expressionParser.parseBooleanExpression(
-                        plainSelect.getWhere(), current.getAttributes()))
-                .build();
+        ImmutableList<ImmutableExpression> filterAtoms = Stream.concat(
+                current.getFilterAtoms().stream(),
+                plainSelect.getWhere() == null
+                    ? Stream.of()
+                    : expressionParser.parseBooleanExpression(
+                        plainSelect.getWhere(), current.getAttributes()).stream())
+                .collect(ImmutableCollectors.toList());
 
         SelectItemParser sip = new SelectItemParser(current.getAttributes(), expressionParser::parseTerm, idfac);
-
         RAExpressionAttributes attributes =
                 JSqlParserTools.parseSelectItems(sip, plainSelect.getSelectItems());
 
-        return new RAExpression(current.getDataAtoms(),
-                ImmutableList.<ImmutableExpression>builder().addAll(filterAtoms).build(),
-                attributes);
+        return new RAExpression(current.getDataAtoms(), filterAtoms, attributes);
     }
 
     @Override
@@ -101,8 +99,8 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
     }
 
     @Override
-    protected RAExpression naturalJoin(RAExpression left, RAExpression right) throws IllegalJoinException {
-        return RAExpression.naturalJoin(left, right, termFactory);
+    protected ImmutableSet<QuotedID> getShared(RAExpression left, RAExpression right)  {
+        return RAExpression.getShared(left, right);
     }
 
     @Override
@@ -124,7 +122,11 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
     @Override
     protected RAExpression join(RAExpression left, Join join) throws IllegalJoinException {
 
-        if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
+        if (join.isSimple() && join.isOuter())
+            throw new UnsupportedSelectQueryRuntimeException("Simple OUTER JOINs are not supported", join);
+
+        if ((join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
+            && (join.getUsingColumns() != null || join.getOnExpression() != null))
             throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
         return super.join(left, join);

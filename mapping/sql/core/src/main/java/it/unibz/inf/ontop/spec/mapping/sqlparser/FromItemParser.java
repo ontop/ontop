@@ -25,9 +25,10 @@ public abstract class FromItemParser<T> {
     private final MetadataLookup metadata;
 
     protected abstract T crossJoin(T left, T right) throws IllegalJoinException;
-    protected abstract T naturalJoin(T left, T right) throws IllegalJoinException;
     protected abstract T joinOn(T left, T right, Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException;
     protected abstract T joinUsing(T left, T right, ImmutableSet<QuotedID> using) throws IllegalJoinException;
+
+    protected abstract ImmutableSet<QuotedID> getShared(T left, T right); // for natural
 
     protected abstract T create(RelationDefinition relation, ImmutableSet<RelationID> relationIds);
     protected abstract T alias(T t, RelationID relationId);
@@ -40,10 +41,35 @@ public abstract class FromItemParser<T> {
         this.metadata = metadata;
     }
 
+    /**
+     * main method for analysing FROM clauses
+     *
+     * @param left
+     * @param joins
+     * @return
+     * @throws IllegalJoinException
+     */
+    protected T translateJoins(FromItem left, List<Join> joins) throws IllegalJoinException {
+        T current = translateFromItem(left);
+        if (joins != null)
+            for (Join join : joins) // no reduce - exception handling
+                current = join(current, join);
+
+        return current;
+    }
+
     private T translateFromItem(FromItem fromItem) {
         return new FromItemProcessor().translate(fromItem);
     }
 
+    /**
+     * can be overridden to add additional checks
+     *
+     * @param left
+     * @param join
+     * @return
+     * @throws IllegalJoinException
+     */
     protected T join(T left, Join join) throws IllegalJoinException {
 
         T right = translateFromItem(join.getRightItem());
@@ -66,7 +92,7 @@ public abstract class FromItemParser<T> {
             if (join.isInner())
                 throw new InvalidSelectQueryRuntimeException("NATURAL INNER JOIN is not allowed", join);
 
-            return naturalJoin(left, right);
+            return joinUsing(left, right, getShared(left, right));
         }
         else {
             if (join.getOnExpression() != null) {
@@ -87,20 +113,11 @@ public abstract class FromItemParser<T> {
                                 .collect(ImmutableCollectors.toSet()));
             }
             else
-                throw new InvalidSelectQueryRuntimeException("[INNER] JOIN requires either ON or USING", join);
+                throw new InvalidSelectQueryRuntimeException("[INNER|OUTER] JOIN requires either ON or USING", join);
         }
     }
 
-    protected T translateJoins(FromItem left, List<Join> joins) throws IllegalJoinException {
-        T current = translateFromItem(left);
-        if (joins != null)
-            for (Join join : joins)
-                    current = join(current, join);
-
-        return current;
-    }
-
-    protected class FromItemProcessor implements FromItemVisitor {
+    private class FromItemProcessor implements FromItemVisitor {
 
         private T result = null;
 
@@ -113,7 +130,6 @@ public abstract class FromItemParser<T> {
         public void visit(Table tableName) {
 
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
-            // construct the predicate using the table name
             try {
                 DatabaseRelationDefinition relation = metadata.getRelation(id);
 
@@ -175,5 +191,4 @@ public abstract class FromItemParser<T> {
             throw new UnsupportedSelectQueryRuntimeException("ParenthesisFromItem are not supported", parenthesisFromItem);
         }
     }
-
 }

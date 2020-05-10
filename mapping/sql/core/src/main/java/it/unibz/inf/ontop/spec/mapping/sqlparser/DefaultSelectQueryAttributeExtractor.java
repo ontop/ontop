@@ -78,8 +78,8 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
     }
 
     @Override
-    protected RAExpressionAttributes naturalJoin(RAExpressionAttributes left, RAExpressionAttributes right) throws IllegalJoinException {
-        return RAExpressionAttributes.joinUsing(left, right, RAExpressionAttributes.getShared(left, right));
+    protected ImmutableSet<QuotedID> getShared(RAExpressionAttributes left, RAExpressionAttributes right)  {
+        return RAExpressionAttributes.getShared(left, right);
     }
 
     @Override

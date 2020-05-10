@@ -89,28 +89,9 @@ public class RAExpression {
                         getAtomOnExpression.apply(attributes.getAttributes())), attributes);
     }
 
-    /**
-     * NATURAL JOIN
-     *
-     * @param re1 a {@link RAExpression}
-     * @param re2 a {@link RAExpression}
-     * @return a {@link RAExpression}
-     * @throws IllegalJoinException if the same alias occurs in both arguments
-     *          or one of the shared attributes is ambiguous
-     */
 
-    public static RAExpression naturalJoin(RAExpression re1, RAExpression re2, TermFactory termFactory) throws IllegalJoinException {
-
-        ImmutableSet<QuotedID> shared =
-                RAExpressionAttributes.getShared(re1.attributes, re2.attributes);
-
-        RAExpressionAttributes attributes =
-                RAExpressionAttributes.joinUsing(re1.attributes, re2.attributes, shared);
-
-        return new RAExpression(union(re1.atoms, re2.atoms),
-                union(re1.filters, re2.filters,
-                        getJoinOnFilter(re1.attributes, re2.attributes, shared, termFactory)),
-                attributes);
+    public static ImmutableSet<QuotedID> getShared(RAExpression re1, RAExpression re2)  {
+        return RAExpressionAttributes.getShared(re1.attributes, re2.attributes);
     }
 
     /**

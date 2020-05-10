@@ -177,7 +177,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
         System.out.println(eq);
 
-        RAExpression relationalExpression = RAExpression.naturalJoin(re1, re2, TERM_FACTORY);
+        RAExpression relationalExpression = RAExpression.joinUsing(re1, re2, RAExpression.getShared(re1, re2), TERM_FACTORY);
         System.out.println(relationalExpression);
 
         naturalUsingCommonAsserts(relationalExpression);
@@ -188,7 +188,7 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re1_1);
 
-        RAExpression relationalExpression = RAExpression.naturalJoin(re1, re1_1, TERM_FACTORY);
+        RAExpression relationalExpression = RAExpression.joinUsing(re1, re1_1, RAExpression.getShared(re1, re1_1), TERM_FACTORY);
         System.out.println(relationalExpression);
     }
 
@@ -197,14 +197,14 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re2);
 
-        RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
+        RAExpression re = RAExpression.joinOn(re1, re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes));
 
-        System.out.println(relationalExpression);
+        System.out.println(re);
         System.out.println(re3);
 
-        RAExpression.naturalJoin(relationalExpression, re3, TERM_FACTORY);
+        RAExpression.joinUsing(re, re3, RAExpression.getShared(re, re3), TERM_FACTORY);
     }
 
     @Test()
@@ -295,7 +295,6 @@ public class RelationalExpressionTest {
         assertEquals(y, attrs.get(qaNy));
         assertEquals(x, attrs.get(qaTx));
         assertEquals(y, attrs.get(qaTy));
-
     }
 
 
@@ -312,7 +311,6 @@ public class RelationalExpressionTest {
         assertNull(attrs.get(qaTu));
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
-
     }
 
     private void crossJoinAndJoinOnCommonAsserts(RAExpression relationalExpression ){
