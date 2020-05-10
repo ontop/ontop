@@ -207,7 +207,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(9, re.getAttributes().size());
+		assertEquals(9, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -215,7 +215,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT student.* FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(9, re.getAttributes().size());
+		assertEquals(9, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -223,7 +223,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -231,7 +231,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
@@ -257,7 +257,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT student.id FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -265,7 +265,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT student.id, student.name FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -275,7 +275,7 @@ public class SQLParserTest {
 				"WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -283,7 +283,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name as alias1, value as alias2 FROM table1");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -292,7 +292,7 @@ public class SQLParserTest {
 		RAExpression re = parse("select to_char(REGION_ID) as RID FROM HR.REGIONS");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -302,7 +302,7 @@ public class SQLParserTest {
 				"WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -315,7 +315,7 @@ public class SQLParserTest {
 				"FROM tableName");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(15, re.getAttributes().size());
+		assertEquals(15, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -323,7 +323,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT undergraduate.* FROM student as undergraduate");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(9, re.getAttributes().size());
+		assertEquals(9, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -331,7 +331,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT undergraduate.id FROM student as undergraduate");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -339,7 +339,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT alias.id, alias.name FROM student as alias");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = InvalidSelectQueryException.class) // alias does not exist
@@ -347,7 +347,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT alias.id, alias.name FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -355,7 +355,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id FROM \"STUDENT\"");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -364,7 +364,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id FROM \"public\".\"STUDENT\"");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -373,7 +373,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, t1.name FROM \"public\".\"STUDENT\" as t1");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -381,7 +381,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id FROM student WHERE id=1");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -389,7 +389,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name FROM student WHERE id=1 AND name='John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -401,7 +401,7 @@ public class SQLParserTest {
 				+ "(nationality='IT' OR nationality='DE')");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(6, re.getFilterAtoms().size()); // OR has precedence over AND
-		assertEquals(5, re.getAttributes().size());
+		assertEquals(5, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -409,7 +409,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT graduate.id, graduate.name FROM student as graduate WHERE graduate.name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -417,7 +417,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE grade is null");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -425,7 +425,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE grade is not null");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -433,7 +433,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE grade is null AND name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -442,7 +442,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name FROM \"public\".\"STUDENT\" WHERE name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -452,7 +452,7 @@ public class SQLParserTest {
 				+ "WHERE t1.name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -462,7 +462,7 @@ public class SQLParserTest {
 				+ "WHERE t1.grade is not null AND t1.name<>'John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -470,7 +470,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name FROM student WHERE class IN (7, 8, 9)");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -478,7 +478,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE name IN ('John', 'Jack', 'Clara')");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -486,7 +486,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT MAX(score) as max_score FROM grade");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -494,7 +494,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT MIN(score) as min_score FROM grade");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -502,7 +502,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT AVG(score) as avg_score FROM grade");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -510,7 +510,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT SUM(amount) as total_amount FROM tax");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to COUNT(*)
@@ -528,7 +528,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT EVERY(id) as student_count FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	// @Test(expected = UnsupportedSelectQueryException.class)
@@ -570,7 +570,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT name as student_name, address as student_address FROM student WHERE id >= 66 AND id <= 69");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to ALL
@@ -584,7 +584,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 JOIN grade t2 ON t1.id=t2.st_id");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(4, re.getAttributes().size());
+		assertEquals(4, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -592,7 +592,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id as sid, t1.name as fullname FROM student t1 JOIN grade t2 ON t1.id=t2.st_id AND t2.mark='A'");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -600,7 +600,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.st_id AND t2.\"SCORE\">=25");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -608,7 +608,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.st_id AND t2.pass=true");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -616,7 +616,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 INNER JOIN grade t2 ON t1.id=t2.st_id");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(4, re.getAttributes().size());
+		assertEquals(4, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to LEFT JOIN
@@ -654,7 +654,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, name, score FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
 		assertEquals(3, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -662,7 +662,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.score FROM (SELECT id, name FROM student WHERE student.name='John') AS t1 JOIN grade as t2 ON t1.id=t2.st_id");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	// TODO: check the intention
@@ -670,7 +670,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, score FROM student JOIN grade USING (id)");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -678,7 +678,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.grade FROM (SELECT id, name FROM student) t1, (SELECT st_id as sid, grade FROM grade) t2 WHERE t1.id=t2.sid");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -686,7 +686,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -694,7 +694,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1 WHERE t1.score>=25");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -702,8 +702,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT ('ID-' || student.id) as sid FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
-		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
+		assertEquals(1, re.getAttributes().asMap().size());
+		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test
@@ -711,8 +711,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
-		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
+		assertEquals(1, re.getAttributes().asMap().size());
+		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
 
@@ -721,8 +721,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT (grade.score * 30 / 100) as percentage from grade");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
-		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
+		assertEquals(1, re.getAttributes().asMap().size());
+		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to UNION ALL
@@ -756,7 +756,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, address from student where name = 'John'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -764,7 +764,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, address from student where id = 20");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -772,7 +772,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT payee, amount from tax where amount = 12.345");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -780,7 +780,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, address from student where birth_date = '1984-01-22 00:02:01.234'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -788,7 +788,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, address from student where birth_date = '1984-01-22 00:02:01'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -796,7 +796,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT id, name, address from student where birth_date = '1984-01-22'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -805,7 +805,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT st_id, course, score from grade where pass = TRUE");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().size());
+		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -814,7 +814,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT name from grade, student where pass = TRUE AND course = 'CS001' AND ( (score = 8 AND mark = 'B') OR (score = 7 AND mark = 'C') OR (score >= 9 AND mark = 'A') )");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -823,7 +823,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT name from grade, student where pass = FALSE AND ( course = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -832,7 +832,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT \"NAME\" from grade, student where pass = FALSE AND ( \"COURSE\" = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -840,7 +840,7 @@ public class SQLParserTest {
 		RAExpression re = parse("select t1.owner NAME from all_tables t1, all_tables t2, ALL_VIEWS where t1.table_name = t2.table_name and t1.owner = t2.owner and t1.owner = ALL_VIEWS.OWNER");
 		assertEquals(3, re.getDataAtoms().size());
 		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -848,7 +848,7 @@ public class SQLParserTest {
 		RAExpression re = parse("select name from grade, student where score BETWEEN 6 AND 8");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -856,8 +856,8 @@ public class SQLParserTest {
 		RAExpression re = parse("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
-		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
+		assertEquals(1, re.getAttributes().asMap().size());
+		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
 
@@ -901,7 +901,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM pet WHERE name REGEXP '^b'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -909,7 +909,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -917,7 +917,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM pet WHERE name ~ 'foo'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to SIMILAR (PostgreSQL)
@@ -930,7 +930,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM pet WHERE REGEXP_LIKE(testcol, '[[:alpha:]]')");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -938,7 +938,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -946,7 +946,7 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM pet WHERE NOT (REGEXP_LIKE(testcol, '[[:alpha:]]'))");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	// TODO: expand
@@ -962,8 +962,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
-		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
+		assertEquals(1, re.getAttributes().asMap().size());
+		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test
@@ -971,8 +971,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
-		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
+		assertEquals(1, re.getAttributes().asMap().size());
+		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class)
@@ -994,7 +994,7 @@ public class SQLParserTest {
 				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(4, re.getAttributes().size());
+		assertEquals(4, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -1002,14 +1002,14 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM (SELECT * FROM oreda.pm_maint_items) AS child, (SELECT * FROM oreda.pm_program) AS parent  WHERE child.i_id=parent.i_id AND child.inst_id=parent.inst_id AND child.su_code=parent.su_code AND child.pm_interval=parent.pm_interval AND child.mc_code=parent.mc_code AND child.mac_code=parent.mac_code AND child.owner_id=parent.owner_id");
 		assertEquals(2, re.getDataAtoms().size());
 		assertEquals(7, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) //due to IN with subselect
 	public void test_IN() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = parse("SELECT * FROM oreda.pm_maint_items  WHERE (i_id,  pm_interval) IN (SELECT i_id, MAX(pm_interval) FROM oreda.pm_program GROUP BY i_id)");
 		assertEquals(7, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
     @Test
@@ -1017,7 +1017,7 @@ public class SQLParserTest {
         RAExpression re = parse("select id, name from student where lower(name)=lower('ColleeN')");
         assertEquals(1, re.getDataAtoms().size());
         assertEquals(1, re.getFilterAtoms().size());
-        assertEquals(2, re.getAttributes().size());
+        assertEquals(2, re.getAttributes().asMap().size());
     }
 
     @Test
@@ -1025,7 +1025,7 @@ public class SQLParserTest {
         RAExpression re = parse("select id, lower(name) as lower_name from student");
         assertEquals(1, re.getDataAtoms().size());
         assertEquals(0, re.getFilterAtoms().size());
-        assertEquals(2, re.getAttributes().size());
+        assertEquals(2, re.getAttributes().asMap().size());
     }
 
 }

@@ -125,7 +125,7 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
 
     private class FromItemProcessor implements FromItemVisitor {
 
-        private T result = null;
+        private T result;
 
         T translate(FromItem fromItem) {
             fromItem.accept(this);

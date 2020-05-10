@@ -61,13 +61,23 @@ public class ExpressionParser {
         this.dbFunctionSymbolFactory = coreSingletons.getDBFunctionsymbolFactory();
     }
 
-    public ImmutableTerm parseTerm(Expression expression, ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
-        TermVisitor visitor = new TermVisitor(attributes);
+    public ImmutableTerm parseTerm(Expression expression, RAExpressionAttributes attributes) {
+        TermVisitor visitor = new TermVisitor(attributes.asMap());
         return visitor.getTerm(expression);
     }
 
-    public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
-        BooleanExpressionVisitor parser = new BooleanExpressionVisitor(attributes);
+    public ImmutableTerm parseTerm(Expression expression, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) {
+        TermVisitor visitor = new TermVisitor(map);
+        return visitor.getTerm(expression);
+    }
+
+    public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
+        BooleanExpressionVisitor parser = new BooleanExpressionVisitor(attributes.asMap());
+        return parser.translate(expression);
+    }
+
+    public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) {
+        BooleanExpressionVisitor parser = new BooleanExpressionVisitor(map);
         return parser.translate(expression);
     }
 

@@ -50,9 +50,7 @@ public class RAExpression implements RAEntity<RAExpression> {
         return filters;
     }
 
-    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes() {
-        return attributes.asMap();
-    }
+    public RAExpressionAttributes getAttributes() { return attributes; }
 
     public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributes() {
         return attributes.getUnqualifiedAttributes();
@@ -83,14 +81,14 @@ public class RAExpression implements RAEntity<RAExpression> {
      */
     @Override
     public RAExpression joinOn(RAExpression re2,
-                                      Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+                                      Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
 
         RAExpressionAttributes attributes =
                 this.attributes.crossJoin(re2.attributes);
 
         return new RAExpression(union(this.atoms, re2.atoms),
                 union(this.filters, re2.filters,
-                        getAtomOnExpression.apply(attributes.asMap())), attributes, termFactory);
+                        getAtomOnExpression.apply(attributes)), attributes, termFactory);
     }
 
     @Override

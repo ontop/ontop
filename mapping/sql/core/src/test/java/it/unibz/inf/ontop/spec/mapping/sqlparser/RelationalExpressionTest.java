@@ -34,7 +34,13 @@ public class RelationalExpressionTest {
     private ExtensionalDataNode f1, f2;
     private ImmutableFunctionalTerm eq;
     private Variable x, y, u, v;
-    private QualifiedAttributeID qaTx, qaTy, qaNx, qaNy, qaTu, qaTv, qaNu, qaNv;
+    private QualifiedAttributeID qaTx;
+    private QualifiedAttributeID qaTy;
+    private QualifiedAttributeID qaNx;
+    private QualifiedAttributeID qaNy;
+    private QualifiedAttributeID qaTu;
+    private QualifiedAttributeID qaTv;
+    private QualifiedAttributeID qaNv;
     private QuotedID attX, attY;
     private RAExpression re1, re2, re1_1, re3;
     private EqualsTo onExpression;
@@ -65,9 +71,9 @@ public class RelationalExpressionTest {
 
         re1 = new RAExpression(ImmutableList.of(f1),
                 ImmutableList.of(),
-                new RAExpressionAttributes(
-                        ImmutableMap.of(qaTx, x, qaTy, y, qaNx, x, qaNy, y),
-                        ImmutableMap.of(attX, ImmutableSet.of(P.getID()), attY, P.getAllIDs())), TERM_FACTORY);
+                RAExpressionAttributes.create(
+                        ImmutableMap.of(attX, x, attY, y),
+                        P.getAllIDs()), TERM_FACTORY);
 
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
@@ -83,15 +89,14 @@ public class RelationalExpressionTest {
 
         qaTu = new QualifiedAttributeID(Q.getID(), attu);
         qaTv = new QualifiedAttributeID(Q.getID(), attv);
-        qaNu = new QualifiedAttributeID(null, attu);
         qaNv = new QualifiedAttributeID(null, attv);
 
         re2 = new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
-                new RAExpressionAttributes(
-                        ImmutableMap.of(qaTu, u,qaTv, v, qaNu, u, qaNv, v),
-                        ImmutableMap.of(attu, ImmutableSet.of(Q.getID()), attv, ImmutableSet.of(Q.getID()))), TERM_FACTORY);
-        
+                RAExpressionAttributes.create(
+                        ImmutableMap.of(attu, u, attv, v),
+                        Q.getAllIDs()), TERM_FACTORY);
+
         Variable w = TERM_FACTORY.getVariable("u");
         Variable z = TERM_FACTORY.getVariable("v");
 
@@ -152,12 +157,12 @@ public class RelationalExpressionTest {
 
         RAExpression relationalExpression = re1.joinOn(re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression,  attributes));
+                        .parseBooleanExpression(onExpression,  attributes.asMap()));
 
         System.out.println(relationalExpression);
 
         crossJoinAndJoinOnCommonAsserts(relationalExpression);
-        assertTrue(relationalExpression.getFilterAtoms().contains(eq));
+        assertEquals(ImmutableList.of(eq), relationalExpression.getFilterAtoms());
     }
 
     @Test(expected = IllegalJoinException.class)
@@ -167,7 +172,7 @@ public class RelationalExpressionTest {
 
         re1.joinOn(re1_1,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes));
+                        .parseBooleanExpression(onExpression, attributes.asMap()));
     }
 
     @Test
@@ -198,7 +203,7 @@ public class RelationalExpressionTest {
 
         RAExpression re = re1.joinOn(re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes));
+                        .parseBooleanExpression(onExpression, attributes.asMap()));
 
         System.out.println(re);
         System.out.println(re3);
@@ -254,7 +259,7 @@ public class RelationalExpressionTest {
 
         RAExpression relationalExpression = re1.joinOn(re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes));
+                        .parseBooleanExpression(onExpression, attributes.asMap()));
 
         System.out.println(relationalExpression);
         System.out.println(re3);
@@ -275,7 +280,7 @@ public class RelationalExpressionTest {
 
         assertTrue(actual.getDataAtoms().contains(f1));
 
-        assertEquals(ImmutableMap.of(qaNx, x, qaNy, y, qaAx, x, qaAy, y), actual.getAttributes());
+        assertEquals(ImmutableMap.of(qaNx, x, qaNy, y, qaAx, x, qaAy, y), actual.getAttributes().asMap());
     }
 
     @Test
@@ -285,7 +290,7 @@ public class RelationalExpressionTest {
                 RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), P.getAllIDs()), TERM_FACTORY);
         System.out.println(actual);
 
-        assertEquals(ImmutableMap.of(qaNx, x, qaNy, y, qaTx, x, qaTy, y), actual.getAttributes());
+        assertEquals(ImmutableMap.of(qaNx, x, qaNy, y, qaTx, x, qaTy, y), actual.getAttributes().asMap());
     }
 
 
@@ -294,7 +299,7 @@ public class RelationalExpressionTest {
         assertTrue(relationalExpression.getDataAtoms().contains(f2));
         assertEquals(ImmutableList.of(eq), relationalExpression.getFilterAtoms());
 
-        assertEquals(ImmutableMap.of(qaNx, x, qaTy, y, qaNy, y, qaTv, v, qaNv, v), relationalExpression.getAttributes());
+        assertEquals(ImmutableMap.of(qaNx, x, qaTy, y, qaNy, y, qaTv, v, qaNv, v), relationalExpression.getAttributes().asMap());
     }
 
     private void crossJoinAndJoinOnCommonAsserts(RAExpression relationalExpression ){
@@ -307,6 +312,6 @@ public class RelationalExpressionTest {
                 .put(qaNy, y)
                 .put(qaTu, u)
                 .put(qaTv, v)
-                .put(qaNv, v).build(), relationalExpression.getAttributes());
+                .put(qaNv, v).build(), relationalExpression.getAttributes().asMap());
     }
 }

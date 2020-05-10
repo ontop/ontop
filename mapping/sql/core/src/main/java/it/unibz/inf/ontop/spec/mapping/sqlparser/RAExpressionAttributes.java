@@ -31,31 +31,10 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
      * @param attributes  an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
      * @param occurrences an {@link RAExpressionAttributeOccurrences}>>
      */
-    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
+    private RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
                                   RAExpressionAttributeOccurrences occurrences) {
         this.attributes = attributes;
         this.occurrences = occurrences;
-    }
-
-    /**
-     * constructs a relation expression
-     *
-     * @param attributes     an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
-     * @param occurrencesMap an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link Variable}>>
-     */
-    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                                  ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrencesMap) {
-        this(attributes, new RAExpressionAttributeOccurrences(occurrencesMap));
-    }
-
-    /**
-     * constructs a relation expression
-     *
-     * @param attributes  an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
-     */
-    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
-        this.attributes = attributes;
-        this.occurrences = null;
     }
 
     public ImmutableMap<QualifiedAttributeID, ImmutableTerm> asMap() {
@@ -142,7 +121,7 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
     }
 
     @Override
-    public RAExpressionAttributes joinOn(RAExpressionAttributes right, Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+    public RAExpressionAttributes joinOn(RAExpressionAttributes right, Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
         return crossJoin(right);
     }
 
@@ -171,11 +150,10 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
                                         .map(i -> Maps.immutableEntry(i, e.getValue())))
                         .collect(ImmutableCollectors.toMap());
 
-        ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrencesMap =
-                unqualifiedAttributes.keySet().stream()
-                        .collect(ImmutableCollectors.toMap(Function.identity(), id -> aliases));
-
-        return new RAExpressionAttributes(attributes, occurrencesMap);
+        return new RAExpressionAttributes(attributes,
+                RAExpressionAttributeOccurrences.create(
+                        unqualifiedAttributes.keySet().stream(),
+                        id -> aliases));
     }
 
     private static Stream<QualifiedAttributeID> createQualifiedID(ImmutableSet<RelationID> aliases, QuotedID attributeId) {

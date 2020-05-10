@@ -85,7 +85,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
         SelectItemParser sip = new SelectItemParser(current.getAttributes(), expressionParser::parseTerm, idfac);
         RAExpressionAttributes attributes =
-                JSqlParserTools.parseSelectItems(sip, plainSelect.getSelectItems());
+                sip.parseSelectItems(plainSelect.getSelectItems());
 
         return new RAExpression(current.getDataAtoms(), filterAtoms, attributes, termFactory);
     }
