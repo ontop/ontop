@@ -67,7 +67,7 @@ public class RelationalExpressionTest {
                 ImmutableList.of(),
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTx, x, qaTy, y, qaNx, x, qaNy, y),
-                        ImmutableMap.of(attX, ImmutableSet.of(P.getID()), attY, P.getAllIDs())));
+                        ImmutableMap.of(attX, ImmutableSet.of(P.getID()), attY, P.getAllIDs())), TERM_FACTORY);
 
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
@@ -90,7 +90,7 @@ public class RelationalExpressionTest {
                 ImmutableList.of(),
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTu, u,qaTv, v, qaNu, u, qaNv, v),
-                        ImmutableMap.of(attu, ImmutableSet.of(Q.getID()), attv, ImmutableSet.of(Q.getID()))));
+                        ImmutableMap.of(attu, ImmutableSet.of(Q.getID()), attv, ImmutableSet.of(Q.getID()))), TERM_FACTORY);
 
 
         Variable w = TERM_FACTORY.getVariable("u");
@@ -107,7 +107,7 @@ public class RelationalExpressionTest {
         re3 = new RAExpression(
                 ImmutableList.of(f3),
                 ImmutableList.of(),
-                RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), ImmutableSet.of(table3)));
+                RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), ImmutableSet.of(table3)), TERM_FACTORY);
 
         eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
 
@@ -120,7 +120,7 @@ public class RelationalExpressionTest {
         // "cross join" and "join on" and "natural join"
         re1_1 = new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
-                RAExpressionAttributes.create(ImmutableMap.of(attX, x), P.getAllIDs()));
+                RAExpressionAttributes.create(ImmutableMap.of(attX, x), P.getAllIDs()), TERM_FACTORY);
 
         System.out.println("****************************************************");
     }
@@ -130,7 +130,7 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re2);
 
-        RAExpression relationalExpression = RAExpression.crossJoin(re1, re2);
+        RAExpression relationalExpression = re1.crossJoin(re2);
         System.out.println(relationalExpression);
 
         crossJoinAndJoinOnCommonAsserts(relationalExpression);
@@ -142,7 +142,7 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re1_1);
 
-        RAExpression.crossJoin(re1, re1_1);
+        re1.crossJoin(re1_1);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
         System.out.println(eq);
 
-        RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
+        RAExpression relationalExpression = re1.joinOn(re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression,  attributes));
 
@@ -166,7 +166,7 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re1_1);
 
-        RAExpression.joinOn(re1, re1_1,
+        re1.joinOn(re1_1,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes));
     }
@@ -177,7 +177,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
         System.out.println(eq);
 
-        RAExpression relationalExpression = RAExpression.joinUsing(re1, re2, RAExpression.getShared(re1, re2), TERM_FACTORY);
+        RAExpression relationalExpression = re1.joinUsing(re2, re1.getSharedAttributeNames(re2));
         System.out.println(relationalExpression);
 
         naturalUsingCommonAsserts(relationalExpression);
@@ -188,7 +188,7 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re1_1);
 
-        RAExpression relationalExpression = RAExpression.joinUsing(re1, re1_1, RAExpression.getShared(re1, re1_1), TERM_FACTORY);
+        RAExpression relationalExpression = re1.joinUsing(re1_1, re1.getSharedAttributeNames(re1_1));
         System.out.println(relationalExpression);
     }
 
@@ -197,14 +197,14 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re2);
 
-        RAExpression re = RAExpression.joinOn(re1, re2,
+        RAExpression re = re1.joinOn(re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes));
 
         System.out.println(re);
         System.out.println(re3);
 
-        RAExpression.joinUsing(re, re3, RAExpression.getShared(re, re3), TERM_FACTORY);
+        re.joinUsing(re3, re.getSharedAttributeNames(re3));
     }
 
     @Test()
@@ -214,7 +214,7 @@ public class RelationalExpressionTest {
         System.out.println(eq);
 
         RAExpression relationalExpression =
-                RAExpression.joinUsing(re1, re2, ImmutableSet.of(MDFAC.createAttributeID("A")), TERM_FACTORY);
+                re1.joinUsing(re2, ImmutableSet.of(MDFAC.createAttributeID("A")));
 
         System.out.println(relationalExpression);
 
@@ -227,8 +227,8 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re1_1);
 
-        RAExpression relationalExpression = RAExpression.joinUsing(re1, re1_1,
-                ImmutableSet.of(MDFAC.createAttributeID("A")), TERM_FACTORY);
+        RAExpression relationalExpression = re1.joinUsing(re1_1,
+                ImmutableSet.of(MDFAC.createAttributeID("A")));
         System.out.println(relationalExpression);
     }
 
@@ -240,12 +240,12 @@ public class RelationalExpressionTest {
                 ImmutableList.of(),
                 RAExpressionAttributes.create(
                         ImmutableMap.of(MDFAC.createAttributeID("C"), u,  MDFAC.createAttributeID("D"), v),
-                        ImmutableSet.of(MDFAC.createRelationID(null, "Q"))));
+                        ImmutableSet.of(MDFAC.createRelationID(null, "Q"))), TERM_FACTORY);
 
         System.out.println(re1);
         System.out.println(re2);
 
-        RAExpression.joinUsing(re1, re2, ImmutableSet.of(MDFAC.createAttributeID("A")), TERM_FACTORY);
+        re1.joinUsing(re2, ImmutableSet.of(MDFAC.createAttributeID("A")));
     }
 
     @Test(expected = IllegalJoinException.class)
@@ -253,14 +253,14 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re2);
 
-        RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
+        RAExpression relationalExpression = re1.joinOn(re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes));
 
         System.out.println(relationalExpression);
         System.out.println(re3);
 
-        RAExpression.joinUsing(relationalExpression, re3, ImmutableSet.of(MDFAC.createAttributeID("A")), TERM_FACTORY);
+        relationalExpression.joinUsing(re3, ImmutableSet.of(MDFAC.createAttributeID("A")));
     }
 
 
@@ -271,7 +271,7 @@ public class RelationalExpressionTest {
         QualifiedAttributeID qaAy = new QualifiedAttributeID(tableAlias, attY);
 
         System.out.println(re1);
-        RAExpression actual =  RAExpression.alias(re1, tableAlias);
+        RAExpression actual =  re1.withAlias(tableAlias);
         System.out.println(actual);
 
         assertTrue(actual.getDataAtoms().contains(f1));
@@ -287,7 +287,7 @@ public class RelationalExpressionTest {
     public void  create_test(){
         RAExpression actual = new RAExpression(re1.getDataAtoms(),
                 re1.getFilterAtoms(),
-                RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), P.getAllIDs()));
+                RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), P.getAllIDs()), TERM_FACTORY);
         System.out.println(actual);
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = actual.getAttributes();

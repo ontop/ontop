@@ -1,12 +1,11 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
@@ -15,30 +14,26 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
-import java.util.function.Function;
 
-public abstract class FromItemParser<T> {
+public abstract class FromItemParser<T extends RAEntity<T>> {
 
     protected final ExpressionParser expressionParser;
     protected final QuotedIDFactory idfac;
+    protected final TermFactory termFactory;
 
     private final MetadataLookup metadata;
 
-    protected abstract T crossJoin(T left, T right) throws IllegalJoinException;
-    protected abstract T joinOn(T left, T right, Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException;
-    protected abstract T joinUsing(T left, T right, ImmutableSet<QuotedID> using) throws IllegalJoinException;
-
-    protected abstract ImmutableSet<QuotedID> getShared(T left, T right); // for natural
+    private int relationIndex = 0;
 
     protected abstract T create(RelationDefinition relation, ImmutableSet<RelationID> relationIds);
-    protected abstract T alias(T t, RelationID relationId);
 
     protected abstract T translateSelectBody(SelectBody selectBody);
 
-    protected FromItemParser(ExpressionParser expressionParser, QuotedIDFactory idfac, MetadataLookup metadata) {
+    protected FromItemParser(ExpressionParser expressionParser, QuotedIDFactory idfac, MetadataLookup metadata, TermFactory termFactory) {
         this.expressionParser = expressionParser;
         this.idfac = idfac;
         this.metadata = metadata;
+        this.termFactory = termFactory;
     }
 
     /**
@@ -74,7 +69,7 @@ public abstract class FromItemParser<T> {
 
         T right = translateFromItem(join.getRightItem());
         if (join.isSimple()) {
-            return crossJoin(left, right);
+            return left.crossJoin(right);
         }
         else if (join.isCross()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
@@ -83,7 +78,7 @@ public abstract class FromItemParser<T> {
             if (join.isInner())
                 throw new InvalidSelectQueryRuntimeException("CROSS INNER JOIN is not allowed", join);
 
-            return crossJoin(left, right);
+            return left.crossJoin(right);
         }
         else if (join.isNatural()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
@@ -92,14 +87,14 @@ public abstract class FromItemParser<T> {
             if (join.isInner())
                 throw new InvalidSelectQueryRuntimeException("NATURAL INNER JOIN is not allowed", join);
 
-            return joinUsing(left, right, getShared(left, right));
+            return left.joinUsing(right, left.getSharedAttributeNames(right));
         }
         else {
             if (join.getOnExpression() != null) {
                 if (join.getUsingColumns() !=null)
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
-                return joinOn(left, right,
+                return left.joinOn(right,
                         (attributes -> expressionParser.parseBooleanExpression(
                                 join.getOnExpression(), attributes)));
             }
@@ -107,7 +102,7 @@ public abstract class FromItemParser<T> {
                 if (join.getUsingColumns().stream().anyMatch(p -> p.getTable() != null))
                     throw new InvalidSelectQueryRuntimeException("JOIN USING columns cannot be qualified", join);
 
-                return joinUsing(left, right,
+                return left.joinUsing(right,
                         join.getUsingColumns().stream()
                                 .map(p -> idfac.createAttributeID(p.getColumnName()))
                                 .collect(ImmutableCollectors.toSet()));
@@ -116,6 +111,17 @@ public abstract class FromItemParser<T> {
                 throw new InvalidSelectQueryRuntimeException("[INNER|OUTER] JOIN requires either ON or USING", join);
         }
     }
+
+    protected RAExpressionAttributes createRAExpressionAttributes(RelationDefinition relation, ImmutableSet<RelationID> relationIds) {
+
+        relationIndex++;
+        ImmutableMap<QuotedID, ImmutableTerm> attributes = relation.getAttributes().stream()
+                .collect(ImmutableCollectors.toMap(Attribute::getID,
+                        attribute -> termFactory.getVariable(attribute.getID().getName() + relationIndex)));
+
+        return RAExpressionAttributes.create(attributes, relationIds);
+    }
+
 
     private class FromItemProcessor implements FromItemVisitor {
 
@@ -153,7 +159,7 @@ public abstract class FromItemParser<T> {
             T current = translateSelectBody(subSelect.getSelectBody());
 
             RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
-            result = alias(current, aliasId);
+            result = current.withAlias(aliasId);
         }
 
         @Override
@@ -164,7 +170,7 @@ public abstract class FromItemParser<T> {
             try {
                 T join = translateJoins(subjoin.getLeft(), subjoin.getJoinList());
                 RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
-                result = alias(join, aliasId);
+                result = join.withAlias(aliasId);
             }
             catch (IllegalJoinException e) {
                 throw new InvalidSelectQueryRuntimeException(e.toString(), subjoin);

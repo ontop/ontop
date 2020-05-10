@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 /**
  * Created by roman on 24/01/2017.
  */
-public class RAExpressionAttributes {
+public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> {
 
     private final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
     private final RAExpressionAttributeOccurrences occurrences;
@@ -65,33 +66,32 @@ public class RAExpressionAttributes {
     /**
      * CROSS JOIN (also denoted by , in SQL)
      *
-     * @param re1 an {@link RAExpressionAttributes}
      * @param re2 an {@link RAExpressionAttributes}
      * @return an {@link RAExpressionAttributes}
      * @throws IllegalJoinException if the same relation alias occurs in both arguments
      */
-    public static RAExpressionAttributes crossJoin(RAExpressionAttributes re1, RAExpressionAttributes re2) throws IllegalJoinException {
+    @Override
+    public RAExpressionAttributes crossJoin(RAExpressionAttributes re2) throws IllegalJoinException {
 
-        checkRelationAliasesConsistency(re1, re2);
+        checkRelationAliasesConsistency(re2);
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
-                re1.selectAttributes(id ->
+                this.selectAttributes(id ->
                         (id.getRelation() != null) || re2.occurrences.isAbsent(id.getAttribute())),
 
                 re2.selectAttributes(id ->
-                        (id.getRelation() != null) || re1.occurrences.isAbsent(id.getAttribute())))
+                        (id.getRelation() != null) || this.occurrences.isAbsent(id.getAttribute())))
 
                 .collect(ImmutableCollectors.toMap());
 
         return new RAExpressionAttributes(attributes,
-                RAExpressionAttributeOccurrences.crossJoin(re1.occurrences, re2.occurrences));
+                RAExpressionAttributeOccurrences.crossJoin(this.occurrences, re2.occurrences));
     }
 
 
     /**
      * JOIN USING
      *
-     * @param re1 an {@link RAExpressionAttributes}
      * @param re2 an {@link RAExpressionAttributes}
      * @param using an {@link ImmutableSet}<{@link QuotedID}>
      * @return an {@link RAExpressionAttributes}
@@ -99,49 +99,53 @@ public class RAExpressionAttributes {
      *          or one of the `using' attributes is ambiguous or absent
      */
 
-    public static RAExpressionAttributes joinUsing(RAExpressionAttributes re1,
-                                                   RAExpressionAttributes re2,
+    @Override
+    public RAExpressionAttributes joinUsing(RAExpressionAttributes re2,
                                                    ImmutableSet<QuotedID> using) throws IllegalJoinException {
 
-        checkRelationAliasesConsistency(re1, re2);
+        checkRelationAliasesConsistency(re2);
 
         Optional<RAExpressionAttributeOccurrences> occurrences = RAExpressionAttributeOccurrences.joinUsing(
-                re1.occurrences, re2.occurrences, using);
+                this.occurrences, re2.occurrences, using);
         if (!occurrences.isPresent()) {
 
             ImmutableList<QuotedID> notFound = using.stream()
-                    .filter(id -> re1.occurrences.isAbsent(id) || re2.occurrences.isAbsent(id))
+                    .filter(id -> this.occurrences.isAbsent(id) || re2.occurrences.isAbsent(id))
                     .collect(ImmutableCollectors.toList());
 
             ImmutableList<QuotedID> ambiguous = using.stream()
-                    .filter(id -> re1.occurrences.isAmbiguous(id) || re2.occurrences.isAmbiguous(id))
+                    .filter(id -> this.occurrences.isAmbiguous(id) || re2.occurrences.isAmbiguous(id))
                     .collect(ImmutableCollectors.toList());
 
-            throw new IllegalJoinException(re1, re2,
+            throw new IllegalJoinException(this, re2,
                     (!notFound.isEmpty() ? "Attribute(s) " + notFound + " cannot be found" : "") +
                             (!notFound.isEmpty() && !ambiguous.isEmpty() ? ", " : "") +
                             (!ambiguous.isEmpty() ? "Attribute(s) " + ambiguous + " are ambiguous" : ""));
         }
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
-                re1.selectAttributes(id ->
+                this.selectAttributes(id ->
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
                                 || (id.getRelation() == null && re2.occurrences.isAbsent(id.getAttribute()))
                                 || (id.getRelation() == null && using.contains(id.getAttribute()))),
 
                 re2.selectAttributes(id ->
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
-                                || (id.getRelation() == null && re1.occurrences.isAbsent(id.getAttribute()))))
+                                || (id.getRelation() == null && this.occurrences.isAbsent(id.getAttribute()))))
 
                 .collect(ImmutableCollectors.toMap());
 
         return new RAExpressionAttributes(attributes, occurrences.get());
     }
 
-    public static ImmutableSet<QuotedID> getShared(RAExpressionAttributes re1,
-                                                   RAExpressionAttributes re2) {
+    @Override
+    public RAExpressionAttributes joinOn(RAExpressionAttributes right, Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+        return crossJoin(right);
+    }
 
-        return RAExpressionAttributeOccurrences.getShared(re1.occurrences, re2.occurrences);
+    @Override
+    public ImmutableSet<QuotedID> getSharedAttributeNames(RAExpressionAttributes re2) {
+        return RAExpressionAttributeOccurrences.getShared(this.occurrences, re2.occurrences);
     }
 
     /**
@@ -182,36 +186,38 @@ public class RAExpressionAttributes {
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
     }
 
+    @Override
+    public RAExpressionAttributes withAlias(RelationID aliasId) {
+        return create(getUnqualifiedAttributes(), ImmutableSet.of(aliasId));
+    }
+
+
 
     private Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(Predicate<QualifiedAttributeID> condition) {
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()));
     }
 
+    private ImmutableSet<RelationID> getRelationAliases() {
+        return attributes.keySet().stream()
+                .filter(id -> id.getRelation() != null)
+                .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
+    }
 
 
     /**
      * throw IllegalJoinException if a relation alias occurs in both arguments of the join
      *
-     * @param re1 a {@link RAExpressionAttributes}
      * @param re2 a {@link RAExpressionAttributes}
      * @throws IllegalJoinException if the same alias occurs in both arguments
      */
 
-    private static void checkRelationAliasesConsistency(RAExpressionAttributes re1,
-                                                        RAExpressionAttributes re2) throws IllegalJoinException {
+    private void checkRelationAliasesConsistency(RAExpressionAttributes re2) throws IllegalJoinException {
 
-        ImmutableSet<RelationID> alias1 = re1.attributes.keySet().stream()
-                .filter(id -> id.getRelation() != null)
-                .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<RelationID> alias2 = re2.attributes.keySet().stream()
-                .filter(id -> id.getRelation() != null)
-                .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
-
-        Sets.SetView<RelationID> intersection = Sets.intersection(alias1, alias2);
+        Sets.SetView<RelationID> intersection = Sets.intersection(
+                this.getRelationAliases(), re2.getRelationAliases());
         if (!intersection.isEmpty())
-            throw new IllegalJoinException(re1, re2, intersection.stream()
+            throw new IllegalJoinException(this, re2, intersection.stream()
                     .map(RelationID::getSQLRendering)
                     .collect(Collectors.joining(", ", "Relation alias ", " occurs in both arguments of the JOIN")));
     }

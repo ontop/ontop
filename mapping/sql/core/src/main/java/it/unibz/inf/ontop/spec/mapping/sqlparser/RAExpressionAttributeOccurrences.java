@@ -136,7 +136,6 @@ public class RAExpressionAttributeOccurrences {
         return Sets.union(s1, s2).immutableCopy();
     }
 
-
     @Override
     public String toString() {
         return map.toString();

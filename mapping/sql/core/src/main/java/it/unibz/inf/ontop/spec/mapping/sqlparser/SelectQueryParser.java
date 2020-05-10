@@ -25,10 +25,8 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
     private final IntermediateQueryFactory iqFactory;
     private final ExpressionParser expressionParser;
 
-    private int relationIndex = 0;
-
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata);
+        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory());
         this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
@@ -90,32 +88,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
         RAExpressionAttributes attributes =
                 JSqlParserTools.parseSelectItems(sip, plainSelect.getSelectItems());
 
-        return new RAExpression(current.getDataAtoms(), filterAtoms, attributes);
-    }
-
-    @Override
-    protected RAExpression crossJoin(RAExpression left, RAExpression right) throws IllegalJoinException {
-        return RAExpression.crossJoin(left, right);
-    }
-
-    @Override
-    protected ImmutableSet<QuotedID> getShared(RAExpression left, RAExpression right)  {
-        return RAExpression.getShared(left, right);
-    }
-
-    @Override
-    protected RAExpression joinOn(RAExpression left, RAExpression right, Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
-        return RAExpression.joinOn(left, right, getAtomOnExpression);
-    }
-
-    @Override
-    protected RAExpression joinUsing(RAExpression left, RAExpression right, ImmutableSet<QuotedID> using) throws IllegalJoinException {
-        return RAExpression.joinUsing(left, right, using, termFactory);
-    }
-
-    @Override
-    protected RAExpression alias(RAExpression rae, RelationID relationId) {
-        return RAExpression.alias(rae, relationId);
+        return new RAExpression(current.getDataAtoms(), filterAtoms, attributes, termFactory);
     }
 
 
@@ -138,20 +111,14 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
     @Override
     public RAExpression create(RelationDefinition relation, ImmutableSet<RelationID> relationIDs) {
-        relationIndex++;
+        RAExpressionAttributes attributes = createRAExpressionAttributes(relation, relationIDs);
+
         ImmutableMap<Integer, Variable> terms = relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(a -> a.getIndex() - 1,
-                        a -> termFactory.getVariable(a.getID().getName() + relationIndex)));
+                        a -> (Variable) attributes.getAttributes().get(new QualifiedAttributeID(null, a.getID()))));
 
         ExtensionalDataNode atom = iqFactory.createExtensionalDataNode(relation, terms);
 
-        ImmutableMap<QuotedID, ImmutableTerm> attributes = relation.getAttributes().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Attribute::getID,
-                        a -> terms.get(a.getIndex() - 1)));
-
-        RAExpressionAttributes attrs = RAExpressionAttributes.create(attributes, relationIDs);
-
-        return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
+        return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attributes, termFactory);
     }
 }
