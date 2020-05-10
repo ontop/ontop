@@ -87,7 +87,7 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
             if (join.isInner())
                 throw new InvalidSelectQueryRuntimeException("NATURAL INNER JOIN is not allowed", join);
 
-            return left.joinUsing(right, left.getSharedAttributeNames(right));
+            return left.naturalJoin(right);
         }
         else {
             if (join.getOnExpression() != null) {

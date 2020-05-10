@@ -90,8 +90,8 @@ public class RAExpression implements RAEntity<RAExpression> {
     }
 
     @Override
-    public ImmutableSet<QuotedID> getSharedAttributeNames(RAExpression re2)  {
-        return attributes.getSharedAttributeNames(re2.attributes);
+    public RAExpression naturalJoin(RAExpression re2) throws IllegalJoinException {
+        return joinUsing(re2, attributes.getSharedAttributeNames(re2.attributes));
     }
 
     /**

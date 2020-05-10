@@ -16,8 +16,7 @@ public interface RAEntity<T> {
     T withAlias(RelationID aliasId);
 
     T crossJoin(T right) throws IllegalJoinException;
+    T naturalJoin(T right) throws IllegalJoinException;
     T joinUsing(T right, ImmutableSet<QuotedID> using) throws IllegalJoinException;
     T joinOn(T right, Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException;
-
-    ImmutableSet<QuotedID> getSharedAttributeNames(T right); // for natural join
 }

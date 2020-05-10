@@ -144,8 +144,12 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
     }
 
     @Override
-    public ImmutableSet<QuotedID> getSharedAttributeNames(RAExpressionAttributes re2) {
-        return RAExpressionAttributeOccurrences.getShared(this.occurrences, re2.occurrences);
+    public RAExpressionAttributes naturalJoin(RAExpressionAttributes right) throws IllegalJoinException {
+        return joinUsing(right, getSharedAttributeNames(right));
+    }
+
+    public ImmutableSet<QuotedID> getSharedAttributeNames(RAExpressionAttributes right) {
+        return RAExpressionAttributeOccurrences.getShared(this.occurrences, right.occurrences);
     }
 
     /**
