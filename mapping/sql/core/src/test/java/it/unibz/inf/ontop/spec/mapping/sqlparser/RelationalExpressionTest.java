@@ -177,7 +177,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
         System.out.println(eq);
 
-        RAExpression relationalExpression = re1.joinUsing(re2, re1.getSharedAttributeNames(re2));
+        RAExpression relationalExpression = re1.naturalJoin(re2);
         System.out.println(relationalExpression);
 
         naturalUsingCommonAsserts(relationalExpression);
@@ -188,7 +188,7 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re1_1);
 
-        RAExpression relationalExpression = re1.joinUsing(re1_1, re1.getSharedAttributeNames(re1_1));
+        RAExpression relationalExpression = re1.naturalJoin(re1_1);
         System.out.println(relationalExpression);
     }
 
@@ -204,7 +204,7 @@ public class RelationalExpressionTest {
         System.out.println(re);
         System.out.println(re3);
 
-        re.joinUsing(re3, re.getSharedAttributeNames(re3));
+        re.naturalJoin(re3);
     }
 
     @Test()
