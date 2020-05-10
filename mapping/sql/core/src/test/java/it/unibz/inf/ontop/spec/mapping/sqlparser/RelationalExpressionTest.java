@@ -91,8 +91,7 @@ public class RelationalExpressionTest {
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTu, u,qaTv, v, qaNu, u, qaNv, v),
                         ImmutableMap.of(attu, ImmutableSet.of(Q.getID()), attv, ImmutableSet.of(Q.getID()))), TERM_FACTORY);
-
-
+        
         Variable w = TERM_FACTORY.getVariable("u");
         Variable z = TERM_FACTORY.getVariable("v");
 
@@ -207,7 +206,7 @@ public class RelationalExpressionTest {
         re.naturalJoin(re3);
     }
 
-    @Test()
+    @Test
     public void join_using_test() throws IllegalJoinException {
         System.out.println(re1);
         System.out.println(re2);
@@ -276,56 +275,38 @@ public class RelationalExpressionTest {
 
         assertTrue(actual.getDataAtoms().contains(f1));
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = actual.getAttributes();
-        assertEquals(x, attrs.get(qaNx));
-        assertEquals(y, attrs.get(qaNy));
-        assertEquals(x, attrs.get(qaAx));
-        assertEquals(y, attrs.get(qaAy));
+        assertEquals(ImmutableMap.of(qaNx, x, qaNy, y, qaAx, x, qaAy, y), actual.getAttributes());
     }
 
     @Test
-    public void  create_test(){
+    public void create_test() {
         RAExpression actual = new RAExpression(re1.getDataAtoms(),
                 re1.getFilterAtoms(),
                 RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), P.getAllIDs()), TERM_FACTORY);
         System.out.println(actual);
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = actual.getAttributes();
-        assertEquals(x, attrs.get(qaNx));
-        assertEquals(y, attrs.get(qaNy));
-        assertEquals(x, attrs.get(qaTx));
-        assertEquals(y, attrs.get(qaTy));
+        assertEquals(ImmutableMap.of(qaNx, x, qaNy, y, qaTx, x, qaTy, y), actual.getAttributes());
     }
 
 
-    private void naturalUsingCommonAsserts(RAExpression relationalExpression){
+    private void naturalUsingCommonAsserts(RAExpression relationalExpression) {
         assertTrue(relationalExpression.getDataAtoms().contains(f1));
         assertTrue(relationalExpression.getDataAtoms().contains(f2));
-        assertTrue(relationalExpression.getFilterAtoms().contains(eq));
+        assertEquals(ImmutableList.of(eq), relationalExpression.getFilterAtoms());
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = relationalExpression.getAttributes();
-        assertEquals(x, attrs.get(qaNx));
-        assertNull(attrs.get(qaTx));
-        assertEquals(y, attrs.get(qaTy));
-        assertEquals(y, attrs.get(qaNy));
-        assertNull(attrs.get(qaTu));
-        assertEquals(v, attrs.get(qaTv));
-        assertEquals(v, attrs.get(qaNv));
+        assertEquals(ImmutableMap.of(qaNx, x, qaTy, y, qaNy, y, qaTv, v, qaNv, v), relationalExpression.getAttributes());
     }
 
     private void crossJoinAndJoinOnCommonAsserts(RAExpression relationalExpression ){
         assertTrue(relationalExpression.getDataAtoms().contains(f1));
         assertTrue(relationalExpression.getDataAtoms().contains(f2));
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = relationalExpression.getAttributes();
-        assertEquals(x, attrs.get(qaTx));
-        assertNull(attrs.get(qaNx));
-        assertEquals(y, attrs.get(qaTy));
-        assertEquals(y, attrs.get(qaNy));
-        assertEquals(u, attrs.get(qaTu));
-        assertNull(attrs.get(qaNu));
-        assertEquals(v, attrs.get(qaTv));
-        assertEquals(v, attrs.get(qaNv));
-
+        assertEquals(ImmutableMap.builder()
+                .put(qaTx, x)
+                .put(qaTy, y)
+                .put(qaNy, y)
+                .put(qaTu, u)
+                .put(qaTv, v)
+                .put(qaNv, v).build(), relationalExpression.getAttributes());
     }
 }

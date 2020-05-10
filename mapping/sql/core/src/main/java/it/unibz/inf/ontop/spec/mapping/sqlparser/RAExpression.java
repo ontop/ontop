@@ -51,16 +51,20 @@ public class RAExpression implements RAEntity<RAExpression> {
     }
 
     public ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes() {
-        return attributes.getAttributes();
+        return attributes.asMap();
     }
 
-    /**
-     * CROSS JOIN (also denoted by , in SQL)
-     *
-     * @param re2 a {@link RAExpression}
-     * @return a {@link RAExpression}
-     * @throws IllegalJoinException if the same alias occurs in both arguments
-     */
+    public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributes() {
+        return attributes.getUnqualifiedAttributes();
+    }
+
+        /**
+         * CROSS JOIN (also denoted by , in SQL)
+         *
+         * @param re2 a {@link RAExpression}
+         * @return a {@link RAExpression}
+         * @throws IllegalJoinException if the same alias occurs in both arguments
+         */
     @Override
     public RAExpression crossJoin(RAExpression re2) throws IllegalJoinException {
         return new RAExpression(union(this.atoms, re2.atoms),
@@ -86,7 +90,7 @@ public class RAExpression implements RAEntity<RAExpression> {
 
         return new RAExpression(union(this.atoms, re2.atoms),
                 union(this.filters, re2.filters,
-                        getAtomOnExpression.apply(attributes.getAttributes())), attributes, termFactory);
+                        getAtomOnExpression.apply(attributes.asMap())), attributes, termFactory);
     }
 
     @Override
@@ -130,17 +134,9 @@ public class RAExpression implements RAEntity<RAExpression> {
                                                                       TermFactory termFactory) {
 
         return using.stream()
-                .map(id -> new QualifiedAttributeID(null, id))
-                .map(id -> {
-                    // TODO: this will be removed later, when OBDA factory will start checking non-nulls
-                    ImmutableTerm v1 = re1.getAttributes().get(id);
-                    if (v1 == null)
-                        throw new IllegalArgumentException("Term " + id + " not found in " + re1);
-                    ImmutableTerm v2 = re2.getAttributes().get(id);
-                    if (v2 == null)
-                        throw new IllegalArgumentException("Term " + id + " not found in " + re2);
-                    return termFactory.getNotYetTypedEquality(v1, v2);
-                })
+                .map(id -> termFactory.getNotYetTypedEquality(
+                        re1.get(id),
+                        re2.get(id)))
                 .collect(ImmutableCollectors.toList());
     }
 

@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -115,7 +114,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
         ImmutableMap<Integer, Variable> terms = relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(a -> a.getIndex() - 1,
-                        a -> (Variable) attributes.getAttributes().get(new QualifiedAttributeID(null, a.getID()))));
+                        a -> (Variable) attributes.get(a.getID())));
 
         ExtensionalDataNode atom = iqFactory.createExtensionalDataNode(relation, terms);
 

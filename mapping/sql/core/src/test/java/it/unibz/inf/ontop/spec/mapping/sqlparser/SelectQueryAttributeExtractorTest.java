@@ -20,7 +20,7 @@ public class SelectQueryAttributeExtractorTest {
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
         DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
         RAExpressionAttributes r = ae.getRAExpressionAttributes(JSqlParserTools.parse("SELECT 1 AS A"));
-        assertEquals(ImmutableSet.of(new QualifiedAttributeID(null, idfac.createAttributeID("A"))), r.getAttributes().keySet());
+        assertEquals(ImmutableSet.of(idfac.createAttributeID("A")), r.getUnqualifiedAttributes().keySet());
     }
 
     @Test

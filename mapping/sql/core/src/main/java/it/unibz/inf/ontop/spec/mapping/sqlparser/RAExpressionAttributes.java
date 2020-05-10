@@ -58,10 +58,13 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
         this.occurrences = null;
     }
 
-    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes() {
+    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> asMap() {
         return attributes;
     }
 
+    public ImmutableTerm get(QuotedID attributeId) {
+        return attributes.get(new QualifiedAttributeID(null, attributeId));
+    }
 
     /**
      * CROSS JOIN (also denoted by , in SQL)

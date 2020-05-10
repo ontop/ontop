@@ -72,10 +72,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     termFactory.getConjunction(re.getFilterAtoms().stream()),
                     iqFactory);
 
-            ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() == null)
-                    .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
-            Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), lookupTable);
+            Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
 
             for (TargetAtom target : assertion.getTargetAtoms()) {
                 PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);

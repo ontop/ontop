@@ -49,7 +49,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
         try {
             if (plainSelect.getFromItem() != null) {
                 RAExpressionAttributes current = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
-                attributeMap = current.getAttributes();
+                attributeMap = current.asMap();
             }
             else
                 attributeMap = ImmutableMap.of();
