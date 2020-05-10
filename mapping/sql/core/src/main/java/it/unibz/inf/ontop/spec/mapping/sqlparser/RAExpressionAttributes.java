@@ -150,6 +150,9 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
                                         .map(i -> Maps.immutableEntry(i, e.getValue())))
                         .collect(ImmutableCollectors.toMap());
 
+        if (aliases.size() > 1)
+            System.out.println("ALIASES: " + aliases);
+
         return new RAExpressionAttributes(attributes,
                 RAExpressionAttributeOccurrences.create(
                         unqualifiedAttributes.keySet().stream(),

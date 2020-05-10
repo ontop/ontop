@@ -81,7 +81,7 @@ public class RAExpression implements RAEntity<RAExpression> {
      */
     @Override
     public RAExpression joinOn(RAExpression re2,
-                                      Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+                               Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
 
         RAExpressionAttributes attributes =
                 this.attributes.crossJoin(re2.attributes);
@@ -132,9 +132,7 @@ public class RAExpression implements RAEntity<RAExpression> {
                                                                       TermFactory termFactory) {
 
         return using.stream()
-                .map(id -> termFactory.getNotYetTypedEquality(
-                        re1.get(id),
-                        re2.get(id)))
+                .map(id -> termFactory.getNotYetTypedEquality(re1.get(id), re2.get(id)))
                 .collect(ImmutableCollectors.toList());
     }
 

@@ -132,14 +132,8 @@ public class RAExpressionAttributeOccurrences {
 
     private static Function<QuotedID, ImmutableSet<RelationID>> unionOf(RAExpressionAttributeOccurrences o1, RAExpressionAttributeOccurrences o2) {
         return id -> {
-            ImmutableSet<RelationID> s1 = o1.map.get(id);
-            ImmutableSet<RelationID> s2 = o2.map.get(id);
-            if (s1 == null)
-                return s2;
-
-            if (s2 == null)
-                return s1;
-
+            ImmutableSet<RelationID> s1 = o1.map.getOrDefault(id, ImmutableSet.of());
+            ImmutableSet<RelationID> s2 = o2.map.getOrDefault(id, ImmutableSet.of());
             return Sets.union(s1, s2).immutableCopy();
         };
     }
