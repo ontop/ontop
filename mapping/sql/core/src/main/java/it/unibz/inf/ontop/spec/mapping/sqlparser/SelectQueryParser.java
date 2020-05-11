@@ -65,30 +65,30 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
         if (plainSelect.getOracleHierarchical() != null || plainSelect.isOracleSiblings())
             throw new UnsupportedSelectQueryRuntimeException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", plainSelect);
 
-        if (plainSelect.getFromItem() == null)
-            throw new UnsupportedSelectQueryRuntimeException("SELECT without FROM is not supported", plainSelect);
-
-        RAExpression current;
+        RAExpression rae;
         try {
-            current = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
+            rae = (plainSelect.getFromItem() != null)
+                ? translateJoins(plainSelect.getFromItem(), plainSelect.getJoins())
+                : new RAExpression(ImmutableList.of(), ImmutableList.of(),
+                    RAExpressionAttributes.create(ImmutableMap.of()), termFactory);
         }
         catch (IllegalJoinException e) {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
         }
 
         ImmutableList<ImmutableExpression> filterAtoms = Stream.concat(
-                current.getFilterAtoms().stream(),
+                rae.getFilterAtoms().stream(),
                 plainSelect.getWhere() == null
                     ? Stream.of()
                     : expressionParser.parseBooleanExpression(
-                        plainSelect.getWhere(), current.getAttributes()).stream())
+                        plainSelect.getWhere(), rae.getAttributes()).stream())
                 .collect(ImmutableCollectors.toList());
 
-        SelectItemParser sip = new SelectItemParser(current.getAttributes(), expressionParser::parseTerm, idfac);
+        SelectItemParser sip = new SelectItemParser(rae.getAttributes(), expressionParser::parseTerm, idfac);
         RAExpressionAttributes attributes =
                 sip.parseSelectItems(plainSelect.getSelectItems());
 
-        return new RAExpression(current.getDataAtoms(), filterAtoms, attributes, termFactory);
+        return new RAExpression(rae.getDataAtoms(), filterAtoms, attributes, termFactory);
     }
 
 

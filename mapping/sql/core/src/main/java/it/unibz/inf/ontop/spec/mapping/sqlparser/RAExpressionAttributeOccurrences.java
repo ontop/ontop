@@ -125,6 +125,10 @@ public class RAExpressionAttributeOccurrences {
                ids.collect(ImmutableCollectors.toMap(Function.identity(), valueSupplier)));
     }
 
+    public static RAExpressionAttributeOccurrences create(ImmutableSet<QuotedID> ids, ImmutableSet<RelationID> relationIds) {
+        return create(ids.stream(), id -> relationIds);
+    }
+
     /**
      * union of two sets
      * treats null set references as empty sets

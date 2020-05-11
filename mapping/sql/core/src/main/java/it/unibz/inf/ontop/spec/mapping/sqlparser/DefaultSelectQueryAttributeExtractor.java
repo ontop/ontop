@@ -48,11 +48,9 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
 
         RAExpressionAttributes attributes;
         try {
-            if (plainSelect.getFromItem() != null) {
-                attributes = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
-            }
-            else
-                attributes = RAExpressionAttributes.create(ImmutableMap.of());
+            attributes = (plainSelect.getFromItem() != null)
+                ? translateJoins(plainSelect.getFromItem(), plainSelect.getJoins())
+                : RAExpressionAttributes.create(ImmutableMap.of());
         }
         catch (IllegalJoinException e) {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);

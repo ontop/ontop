@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 public class SelectQueryParserTest {
 
     private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_SP, TABLE_SQ;
+    private DBTermType integerDBType;
 
     private static final String A1 = "A1";
     private static final String A2 = "A2";
@@ -40,7 +41,7 @@ public class SelectQueryParserTest {
     private RAExpression parse(String sql) throws JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
 
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
-        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
+        integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         TABLE_P = builder.createDatabaseRelation("P",
                 "A", integerDBType, false,
@@ -117,15 +118,39 @@ public class SelectQueryParserTest {
                 dataAtomOf(TABLE_P, A2, B2), dataAtomOf(TABLE_Q, A3, C3)), re.getDataAtoms());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
-    public void select_no_from_test() throws Exception {
-        parse("SELECT 1");
+    @Test
+    public void select_one_no_from() throws Exception {
+        RAExpression re = parse("SELECT 1");
+
+        assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getDataAtoms());
     }
 
-    // TODO: extend
-    @Test//(expected = InvalidSelectQueryException.class)
-    public void select_one_complex_expression_test() throws Exception {
-        parse("SELECT 1 FROM Q");
+    @Test
+    public void select_one_no_from_alias() throws Exception {
+        RAExpression re = parse("SELECT 1 AS A");
+
+        assertEquals(ImmutableMap.of(TERM_FACTORY.getVariable("A"), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getDataAtoms());
+    }
+
+    @Test
+    public void select_one_from() throws Exception {
+        RAExpression re = parse("SELECT 1 FROM Q");
+        assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getDataAtoms());
+    }
+
+    @Test
+    public void select_one_from_alias() throws Exception {
+        RAExpression re = parse("SELECT 1 AS A FROM Q");
+
+        assertEquals(ImmutableMap.of(TERM_FACTORY.getVariable("A"), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getDataAtoms());
     }
 
     @Test(expected = InvalidSelectQueryException.class)

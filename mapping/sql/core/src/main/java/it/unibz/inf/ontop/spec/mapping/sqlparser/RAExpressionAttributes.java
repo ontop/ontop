@@ -137,7 +137,6 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
     /**
      *
      * @param unqualifiedAttributes a {@link ImmutableMap}<{@link QuotedID}, {@link Variable}>
-     * @param aliases a {@link RelationID}
      * @return a {@link RAExpressionAttributes}
      */
 
@@ -152,8 +151,7 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
 
         return new RAExpressionAttributes(attributes,
                 RAExpressionAttributeOccurrences.create(
-                        unqualifiedAttributes.keySet().stream(),
-                        id -> ImmutableSet.of(relationId)));
+                        unqualifiedAttributes.keySet(), ImmutableSet.of(relationId)));
     }
 
     public static RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes) {
@@ -162,8 +160,7 @@ public class RAExpressionAttributes implements RAEntity<RAExpressionAttributes> 
                         .collect(ImmutableCollectors.toMap(e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue));
 
         return new RAExpressionAttributes(attributes,
-                RAExpressionAttributeOccurrences.create(Stream.of(),
-                        id -> ImmutableSet.of()));
+                RAExpressionAttributeOccurrences.create(ImmutableSet.of(), ImmutableSet.of()));
     }
 
     private static Stream<QualifiedAttributeID> createQualifiedID(ImmutableSet<RelationID> aliases, QuotedID attributeId) {
