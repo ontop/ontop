@@ -168,6 +168,42 @@ public class SelectQueryParserTest {
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_SP, A1, B1), dataAtomOf(TABLE_SQ, A2, C2)), re.getDataAtoms());
     }
 
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_apply() throws Exception {
+        RAExpression re = parse("SELECT A FROM P APPLY Q");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_cross_apply() throws Exception {
+        RAExpression re = parse("SELECT A FROM P CROSS APPLY Q");
+    }
+
+    @Test(expected = JSQLParserException.class) // is valid in MS SQL Server
+    public void select_outer_apply() throws Exception {
+        RAExpression re = parse("SELECT A FROM P OUTER APPLY Q");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_straight() throws Exception {
+        RAExpression re = parse("SELECT A FROM P STRAIGHT_JOIN Q");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_straight_on() throws Exception {
+        RAExpression re = parse("SELECT A FROM P STRAIGHT_JOIN Q ON (P.A = Q.A)");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_straight_using() throws Exception {
+        RAExpression re = parse("SELECT A FROM P STRAIGHT_JOIN Q USING (A)");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_within() throws Exception {
+        RAExpression re = parse("SELECT A FROM P INNER JOIN Q WITHIN (1 HOURS) ON P.A = Q.A");
+    }
+
+
     // -----------------------------------------------------
     // NEW TESTS
 

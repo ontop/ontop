@@ -69,7 +69,19 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
     protected T join(T left, Join join) throws IllegalJoinException {
 
         T right = translateFromItem(join.getRightItem());
+        if (join.isApply()) {
+            if (!join.isCross() && !join.isOuter())
+                throw new InvalidSelectQueryRuntimeException("APPLY must be either CROSS or OUTER", join);
+        }
+        if (join.isStraight()) {
+            if (join.isInner() || join.isOuter() || join.isLeft() || join.isRight() || join.isFull() || join.isNatural())
+                throw new InvalidSelectQueryRuntimeException("Invalid STRAIGHT_JOIN", join);
+        }
+
         if (join.isSimple()) {
+            return left.crossJoin(right);
+        }
+        else if (join.isApply()) {
             return left.crossJoin(right);
         }
         else if (join.isCross()) {
