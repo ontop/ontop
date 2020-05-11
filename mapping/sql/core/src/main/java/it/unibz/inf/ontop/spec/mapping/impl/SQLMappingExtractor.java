@@ -145,7 +145,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile());
 
-        ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(mm.getMapping(), settings, mm.getDBParameters());
+        ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(mm.getMapping(), mm.getDBParameters());
 
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         // no streams because of exception handling
