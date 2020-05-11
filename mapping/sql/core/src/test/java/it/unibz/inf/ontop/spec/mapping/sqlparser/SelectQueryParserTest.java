@@ -203,6 +203,37 @@ public class SelectQueryParserTest {
         RAExpression re = parse("SELECT A FROM P INNER JOIN Q WITHIN (1 HOURS) ON P.A = Q.A");
     }
 
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_oracle_hint() throws Exception {
+        RAExpression re = parse("SELECT /*+ value  */ A FROM P");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_skip() throws Exception {
+        RAExpression re = parse("SELECT SKIP 1 A FROM P");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_first() throws Exception {
+        RAExpression re = parse("SELECT FIRST 10 A FROM P");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_top() throws Exception {
+        RAExpression re = parse("SELECT TOP 10 A FROM P");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_sql_no_cache() throws Exception {
+        RAExpression re = parse("SELECT SQL_NO_CACHE A FROM P");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_sql_cal_found_rows() throws Exception {
+        RAExpression re = parse("SELECT SQL_CALC_FOUND_ROWS A FROM P");
+    }
+
+
 
     // -----------------------------------------------------
     // NEW TESTS

@@ -50,20 +50,47 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
     protected RAExpression translateSelectBody(SelectBody selectBody) {
         PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
 
+        if (plainSelect.getOracleHint() != null)
+            throw new UnsupportedSelectQueryRuntimeException("Oracle hints are not supported", plainSelect);
+
+        if (plainSelect.getSkip() != null || plainSelect.getFirst() != null)
+            throw new UnsupportedSelectQueryRuntimeException("SKIP / FIRST are not supported", plainSelect);
+
         if (plainSelect.getDistinct() != null)
             throw new UnsupportedSelectQueryRuntimeException("DISTINCT is not supported", plainSelect);
+
+        if (plainSelect.getTop() != null)
+            throw new UnsupportedSelectQueryRuntimeException("TOP is not supported", plainSelect);
+
+        if (plainSelect.getMySqlSqlNoCache())
+            throw new UnsupportedSelectQueryRuntimeException("MySQL SQL_NO_CACHE is not supported", plainSelect);
+
+        if (plainSelect.getMySqlSqlCalcFoundRows())
+            throw new UnsupportedSelectQueryRuntimeException("MySQL SQL_CALC_FOUND_ROWS is not supported", plainSelect);
+
+        if (plainSelect.getKsqlWindow() != null)
+            throw new UnsupportedSelectQueryRuntimeException("WINDOW is not supported", plainSelect);
+
+        if (plainSelect.getOracleHierarchical() != null || plainSelect.isOracleSiblings())
+            throw new UnsupportedSelectQueryRuntimeException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", plainSelect);
 
         if (plainSelect.getGroupBy() != null || plainSelect.getHaving() != null)
             throw new UnsupportedSelectQueryRuntimeException("GROUP BY / HAVING are not supported", plainSelect);
 
-        if (plainSelect.getLimit() != null || plainSelect.getTop() != null || plainSelect.getOffset() != null)
-            throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / TOP are not supported", plainSelect);
-
         if (plainSelect.getOrderByElements() != null)
             throw new UnsupportedSelectQueryRuntimeException("ORDER BY is not supported", plainSelect);
 
-        if (plainSelect.getOracleHierarchical() != null || plainSelect.isOracleSiblings())
-            throw new UnsupportedSelectQueryRuntimeException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", plainSelect);
+        if (plainSelect.getLimit() != null || plainSelect.getOffset() != null || plainSelect.getFetch() != null)
+            throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / FETCH are not supported", plainSelect);
+
+        if (plainSelect.isForUpdate())
+            throw new UnsupportedSelectQueryRuntimeException("FOR UPDATE is not supported", plainSelect);
+
+        if (plainSelect.getOptimizeFor() != null)
+            throw new UnsupportedSelectQueryRuntimeException("OPTIMIZE FOR is not supported", plainSelect);
+
+        if (plainSelect.getForXmlPath() != null)
+            throw new UnsupportedSelectQueryRuntimeException("FOR XML PATH is not supported", plainSelect);
 
         RAExpression rae;
         try {
