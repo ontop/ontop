@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -25,7 +26,7 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
 
     private int relationIndex = 0;
 
-    protected abstract T create(RelationDefinition relation, ImmutableSet<RelationID> relationIds);
+    protected abstract T create(DatabaseRelationDefinition relation);
 
     protected abstract T translateSelectBody(SelectBody selectBody);
 
@@ -112,16 +113,16 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
         }
     }
 
-    protected RAExpressionAttributes createRAExpressionAttributes(RelationDefinition relation, ImmutableSet<RelationID> relationIds) {
-
+    public ImmutableMap<QuotedID, ImmutableTerm> createAttributesMap(RelationDefinition relation) {
         relationIndex++;
-        ImmutableMap<QuotedID, ImmutableTerm> attributes = relation.getAttributes().stream()
+        return relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(Attribute::getID,
                         attribute -> termFactory.getVariable(attribute.getID().getName() + relationIndex)));
-
-        return RAExpressionAttributes.create(attributes, relationIds);
     }
 
+    public RAExpressionAttributes createRAExpressionAttributes(DatabaseRelationDefinition relation) {
+         return RAExpressionAttributes.create(createAttributesMap(relation), relation.getID(), relation.getAllIDs());
+    }
 
     private class FromItemProcessor implements FromItemVisitor {
 
@@ -138,12 +139,10 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
             try {
                 DatabaseRelationDefinition relation = metadata.getRelation(id);
-
-                ImmutableSet<RelationID> relationIDs = (tableName.getAlias() == null)
-                        ? relation.getAllIDs()
-                        : ImmutableSet.of(idfac.createRelationID(null, tableName.getAlias().getName()));
-
-                result = create(relation, relationIDs);
+                T rae = create(relation);
+                result = (tableName.getAlias() == null)
+                        ? rae
+                        : alias(rae, tableName.getAlias());
             }
             catch (MetadataExtractionException e) {
                 throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
@@ -156,10 +155,8 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
 
-            T current = translateSelectBody(subSelect.getSelectBody());
-
-            RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
-            result = current.withAlias(aliasId);
+            T rae = translateSelectBody(subSelect.getSelectBody());
+            result = alias(rae, subSelect.getAlias());
         }
 
         @Override
@@ -168,9 +165,8 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
                 throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
 
             try {
-                T join = translateJoins(subjoin.getLeft(), subjoin.getJoinList());
-                RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
-                result = join.withAlias(aliasId);
+                T rae = translateJoins(subjoin.getLeft(), subjoin.getJoinList());
+                result = alias(rae, subjoin.getAlias());
             }
             catch (IllegalJoinException e) {
                 throw new InvalidSelectQueryRuntimeException(e.toString(), subjoin);
@@ -195,6 +191,11 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
         @Override
         public void visit(ParenthesisFromItem parenthesisFromItem) {
             throw new UnsupportedSelectQueryRuntimeException("ParenthesisFromItem are not supported", parenthesisFromItem);
+        }
+
+        private T alias(T rae, Alias alias) {
+            RelationID aliasId = idfac.createRelationID(null, alias.getName());
+            return rae.withAlias(aliasId);
         }
     }
 }

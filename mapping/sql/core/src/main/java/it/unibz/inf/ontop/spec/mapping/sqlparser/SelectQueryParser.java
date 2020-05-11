@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.statement.select.*;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -109,15 +110,16 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
 
     @Override
-    public RAExpression create(RelationDefinition relation, ImmutableSet<RelationID> relationIDs) {
-        RAExpressionAttributes attributes = createRAExpressionAttributes(relation, relationIDs);
+    public RAExpression create(DatabaseRelationDefinition relation) {
+        return create(relation, createRAExpressionAttributes(relation));
+    }
 
+    public RAExpression create(RelationDefinition relation, RAExpressionAttributes attributes) {
         ImmutableMap<Integer, Variable> terms = relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(a -> a.getIndex() - 1,
                         a -> (Variable) attributes.get(a.getID())));
 
-        ExtensionalDataNode atom = iqFactory.createExtensionalDataNode(relation, terms);
-
+        ExtensionalDataNode atom =  iqFactory.createExtensionalDataNode(relation, terms);
         return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attributes, termFactory);
     }
 }

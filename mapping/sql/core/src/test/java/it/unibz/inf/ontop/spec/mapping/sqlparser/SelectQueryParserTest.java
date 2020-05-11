@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -23,7 +24,7 @@ import static org.junit.Assert.*;
  */
 public class SelectQueryParserTest {
 
-    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R;
+    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_SP, TABLE_SQ;
 
     private static final String A1 = "A1";
     private static final String A2 = "A2";
@@ -55,6 +56,21 @@ public class SelectQueryParserTest {
                 "C", integerDBType, false,
                 "D", integerDBType, false);
 
+        QuotedIDFactory idfac = builder.getQuotedIDFactory();
+        TABLE_SP = builder.createDatabaseRelation(
+                ImmutableList.of(idfac.createRelationID(null, "PP"),
+                        idfac.createRelationID("S", "PP")),
+                DatabaseTableDefinition.attributeListBuilder()
+        .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
+        .addAttribute(idfac.createAttributeID("B"), integerDBType, false));
+
+        TABLE_SQ = builder.createDatabaseRelation(
+                ImmutableList.of(idfac.createRelationID(null, "QQ"),
+                        idfac.createRelationID("S", "QQ")),
+                DatabaseTableDefinition.attributeListBuilder()
+                        .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
+                        .addAttribute(idfac.createAttributeID("C"), integerDBType, false));
+
         MetadataLookup metadataLookup = builder.build();
         SelectQueryParser parser = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
 
@@ -64,7 +80,7 @@ public class SelectQueryParserTest {
 
     @Test
     public void inner_join_on_same_table_test() throws Exception {
-        RAExpression re = parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN  P p2 on p1.A = p2.A ");
+        RAExpression re = parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN P p2 on p1.A = p2.A ");
         System.out.println(re);
 
         assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
@@ -115,6 +131,15 @@ public class SelectQueryParserTest {
     @Test(expected = InvalidSelectQueryException.class)
     public void select_missing_column_test2() throws Exception {
         parse("SELECT R FROM Q");
+    }
+
+    @Test
+    public void select_natural_join_schema() throws Exception {
+        RAExpression re = parse("SELECT A FROM S.PP NATURAL JOIN S.QQ");
+        System.out.println(re);
+
+        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_SP, A1, B1), dataAtomOf(TABLE_SQ, A2, C2)), re.getDataAtoms());
     }
 
     // -----------------------------------------------------

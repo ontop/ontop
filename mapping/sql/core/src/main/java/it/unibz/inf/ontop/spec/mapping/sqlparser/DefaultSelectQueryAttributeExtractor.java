@@ -4,10 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
+
+import java.util.Optional;
 
 
 /**
@@ -49,7 +52,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
                 attributes = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
             }
             else
-                attributes = RAExpressionAttributes.create(ImmutableMap.of(), ImmutableSet.of());
+                attributes = RAExpressionAttributes.create(ImmutableMap.of());
         }
         catch (IllegalJoinException e) {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
@@ -64,9 +67,10 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
         return sip.parseSelectItems(plainSelect.getSelectItems());
     }
 
+
     @Override
-    protected RAExpressionAttributes create(RelationDefinition relation, ImmutableSet<RelationID> relationIds) {
-        return createRAExpressionAttributes(relation, relationIds);
+    protected RAExpressionAttributes create(DatabaseRelationDefinition relation) {
+        return createRAExpressionAttributes(relation);
     }
 
 }

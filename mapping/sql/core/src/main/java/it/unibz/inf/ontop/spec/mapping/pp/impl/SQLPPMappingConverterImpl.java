@@ -173,7 +173,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
             }
             System.out.println("PARSER VIEW FOR " + sourceQuery);
             ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
-            return sqp.create(view, ImmutableSet.of());
+            RAExpressionAttributes rae = RAExpressionAttributes.create(sqp.createAttributesMap(view));
+            return sqp.create(view, rae);
         }
         catch (InvalidSelectQueryException e) {
             throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()
