@@ -134,8 +134,11 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
         if (join.isWindowJoin())
             throw new UnsupportedSelectQueryRuntimeException("WITHIN WINDOW is not supported", join);
 
-        if ((join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
+        if ((join.isFull() || join.isRight() || (join.isLeft() && !join.isSemi()) || join.isOuter())
             && (join.getUsingColumns() != null || join.getOnExpression() != null))
+            throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
+
+        if (join.isLeft() && join.isSemi() && join.getOnExpression() != null)
             throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
         return super.join(left, join);

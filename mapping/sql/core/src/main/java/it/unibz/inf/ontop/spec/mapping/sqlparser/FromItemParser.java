@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -68,28 +67,62 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
      */
     protected T join(T left, Join join) throws IllegalJoinException {
 
+        /*  JSQLParser modifiers grammar
+          [   LEFT SEMI
+            | LEFT [ OUTER ]
+            | RIGHT [ OUTER ]
+            | FULL [ OUTER ]
+            | INNER
+            | NATURAL
+            | CROSS
+            | OUTER ]
+          (   JOIN
+            | "," (OUTER)?
+            | STRAIGHT_JOIN
+            | APPLY )
+         */
+
         T right = translateFromItem(join.getRightItem());
         if (join.isApply()) {
+            // https://docs.microsoft.com/en-us/sql/t-sql/queries/from-transact-sql?view=sql-server-ver15
+            // left_table_source { CROSS | OUTER } APPLY right_table_source
+            // Specifies that the right_table_source of the APPLY operator is evaluated against every row of
+            // the left_table_source. This functionality is useful when the right_table_source contains
+            // a table-valued function that takes column values from the left_table_source as one of its arguments.
+            if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi()
+                    || join.isInner() || join.isNatural()
+                    || join.getOnExpression() != null || join.getUsingColumns() != null)
+                throw new InvalidSelectQueryRuntimeException("Invalid APPLY join", join);
+
             if (!join.isCross() && !join.isOuter())
                 throw new InvalidSelectQueryRuntimeException("APPLY must be either CROSS or OUTER", join);
+
+            return left.crossJoin(right);
         }
         if (join.isStraight()) {
-            if (join.isInner() || join.isOuter() || join.isLeft() || join.isRight() || join.isFull() || join.isNatural())
+            // https://dev.mysql.com/doc/refman/8.0/en/join.html
+            // STRAIGHT_JOIN is similar to JOIN, except that the left table is always read before the right table.
+            // This can be used for those (few) cases for which the join optimizer processes the tables in a
+            // suboptimal order.
+            if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi() || join.isOuter()
+                    || join.isInner() || join.isNatural() || join.isCross())
                 throw new InvalidSelectQueryRuntimeException("Invalid STRAIGHT_JOIN", join);
         }
 
         if (join.isSimple()) {
-            return left.crossJoin(right);
-        }
-        else if (join.isApply()) {
+            // JSQLParser apparently allows weird combinations like SELECT * FROM P LEFT, Q
+            if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi() || join.isOuter()
+                    || join.isInner() || join.isNatural() || join.isCross())
+                throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
+
+            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+                throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
+
             return left.crossJoin(right);
         }
         else if (join.isCross()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
                 throw new InvalidSelectQueryRuntimeException("CROSS JOIN cannot have USING/ON conditions", join);
-
-            if (join.isInner())
-                throw new InvalidSelectQueryRuntimeException("CROSS INNER JOIN is not allowed", join);
 
             return left.crossJoin(right);
         }
@@ -97,21 +130,29 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
                 throw new InvalidSelectQueryRuntimeException("NATURAL JOIN cannot have USING/ON conditions", join);
 
-            if (join.isInner())
-                throw new InvalidSelectQueryRuntimeException("NATURAL INNER JOIN is not allowed", join);
-
             return left.naturalJoin(right);
         }
         else {
+            // also covers STRAIGHT_JOIN
             if (join.getOnExpression() != null) {
                 if (join.getUsingColumns() !=null)
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
+
+                if (join.isSemi()) {
+                    // https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Joins
+                    // table_reference LEFT SEMI JOIN table_reference ON expression
+                    // TODO: write a proper operation if supported
+                    return left;
+                }
 
                 return left.joinOn(right,
                         (attributes -> expressionParser.parseBooleanExpression(
                                 join.getOnExpression(), attributes)));
             }
             else if (join.getUsingColumns() != null) {
+                if (join.isSemi())
+                    throw new InvalidSelectQueryRuntimeException("Invalid SEMI JOIN", join);
+
                 if (join.getUsingColumns().stream().anyMatch(p -> p.getTable() != null))
                     throw new InvalidSelectQueryRuntimeException("JOIN USING columns cannot be qualified", join);
 

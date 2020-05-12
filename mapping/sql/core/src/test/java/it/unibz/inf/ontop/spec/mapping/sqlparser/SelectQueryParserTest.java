@@ -233,6 +233,37 @@ public class SelectQueryParserTest {
         RAExpression re = parse("SELECT SQL_CALC_FOUND_ROWS A FROM P");
     }
 
+    // JSQLParser apparently allows more weird combinations like this
+    @Test(expected = InvalidSelectQueryException.class)
+    public void select_left_simple() throws Exception {
+        RAExpression re = parse("SELECT * FROM P LEFT, Q");
+        System.out.println(re);
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void select_simple_on() throws Exception {
+        RAExpression re = parse("SELECT * FROM P, Q ON P.A = Q.A");
+        System.out.println(re);
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void select_simple_using() throws Exception {
+        RAExpression re = parse("SELECT * FROM P, Q USING (A)");
+        System.out.println(re);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_left_semi_join_on() throws Exception {
+        RAExpression re = parse("SELECT * FROM P LEFT SEMI JOIN Q ON P.A = Q.A");
+        System.out.println(re);
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void select_left_semi_join_using() throws Exception {
+        RAExpression re = parse("SELECT * FROM P LEFT SEMI JOIN Q USING (A)");
+        System.out.println(re);
+    }
+
 
 
     // -----------------------------------------------------
