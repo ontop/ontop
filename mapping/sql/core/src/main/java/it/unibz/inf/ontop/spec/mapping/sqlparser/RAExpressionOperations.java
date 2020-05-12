@@ -3,23 +3,31 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class RAExpressionOperations implements RAOperations<RAExpression> {
 
     private final RAExpressionAttributesOperations aops = new RAExpressionAttributesOperations();
     private final TermFactory termFactory;
+    private final IntermediateQueryFactory iqFactory;
 
-    public RAExpressionOperations(TermFactory termFactory) {
+    public RAExpressionOperations(TermFactory termFactory, IntermediateQueryFactory iqFactory) {
         this.termFactory = termFactory;
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -134,5 +142,26 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
                 Stream.concat(Stream.concat(left.getFilterAtoms().stream(), right.getFilterAtoms().stream()), filter.stream())
                         .collect(ImmutableCollectors.toList()),
                 attributes);
+    }
+
+    public RAExpression create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
+        return new RAExpression(
+                createExtensionalDataNodes(relation, variables),
+                ImmutableList.of(),
+                aops.create(relation, variables));
+    }
+
+    public RAExpression createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {
+        return new RAExpression(
+                createExtensionalDataNodes(relation, variables),
+                ImmutableList.of(),
+                aops.create(aops.getAttributesMap(relation, variables)));
+    }
+
+    private ImmutableList<ExtensionalDataNode> createExtensionalDataNodes(RelationDefinition relation, ImmutableList<Variable> variables) {
+        ImmutableMap<Integer, Variable> terms = IntStream.range(0, variables.size()).boxed()
+                .collect(ImmutableCollectors.toMap(Function.identity(), variables::get));
+
+        return ImmutableList.of(iqFactory.createExtensionalDataNode(relation, terms));
     }
 }

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -59,10 +58,8 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
         return sip.parseSelectItems(plainSelect.getSelectItems());
     }
 
-
     @Override
     protected RAExpressionAttributes create(DatabaseRelationDefinition relation) {
-        return createRAExpressionAttributes(relation);
+        return ((RAExpressionAttributesOperations)operations).create(relation, createAttributeVariables(relation));
     }
-
 }

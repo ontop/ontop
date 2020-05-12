@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -17,16 +16,16 @@ import java.util.stream.Stream;
 public class RAExpressionAttributeOccurrencesOperations implements RAOperations<RAExpressionAttributeOccurrences> {
 
 
+    @Override
+    public RAExpressionAttributeOccurrences create() {
+        return create(ImmutableSet.of(), ImmutableSet.of());
+    }
+
     public RAExpressionAttributeOccurrences create(ImmutableSet<QuotedID> attributeIds, ImmutableSet<RelationID> relationIds) {
         return new RAExpressionAttributeOccurrences(attributeIds.stream()
                 .collect(ImmutableCollectors.toMap(
                         Function.identity(),
                         id -> relationIds)));
-    }
-
-    @Override
-    public RAExpressionAttributeOccurrences create() {
-        return create(ImmutableSet.of(), ImmutableSet.of());
     }
 
     @Override
@@ -96,7 +95,4 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
     private static Function<QuotedID, ImmutableSet<RelationID>> unionOf(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right) {
         return id -> Sets.union(left.get(id), right.get(id)).immutableCopy();
     }
-
-
-
 }

@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
@@ -172,16 +174,13 @@ public abstract class FromItemParser<T> {
         }
     }
 
-    public ImmutableMap<QuotedID, ImmutableTerm> createAttributesMap(RelationDefinition relation) {
+    public ImmutableList<Variable> createAttributeVariables(RelationDefinition relation) {
         relationIndex++;
         return relation.getAttributes().stream()
-                .collect(ImmutableCollectors.toMap(Attribute::getID,
-                        attribute -> termFactory.getVariable(attribute.getID().getName() + relationIndex)));
+                .map(attribute -> termFactory.getVariable(attribute.getID().getName() + relationIndex))
+                .collect(ImmutableCollectors.toList());
     }
 
-    public RAExpressionAttributes createRAExpressionAttributes(DatabaseRelationDefinition relation) {
-         return RAExpressionAttributesOperations.create(createAttributesMap(relation), relation.getID(), relation.getAllIDs());
-    }
 
     private class FromItemProcessor implements FromItemVisitor {
 

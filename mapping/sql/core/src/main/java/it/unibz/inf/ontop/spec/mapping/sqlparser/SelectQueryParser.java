@@ -1,18 +1,13 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -21,13 +16,11 @@ import java.util.stream.Stream;
  */
 public class SelectQueryParser extends FromItemParser<RAExpression> {
     private final QuotedIDFactory idfac;
-    private final IntermediateQueryFactory iqFactory;
     private final ExpressionParser expressionParser;
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExpressionOperations(coreSingletons.getTermFactory()));
+        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
         this.idfac = metadata.getQuotedIDFactory();
-        this.iqFactory = coreSingletons.getIQFactory();
         this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
 
@@ -140,20 +133,12 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
     }
 
 
-
-
-
     @Override
     public RAExpression create(DatabaseRelationDefinition relation) {
-        return create(relation, createRAExpressionAttributes(relation));
+        return ((RAExpressionOperations)operations).create(relation, createAttributeVariables(relation));
     }
 
-    public RAExpression create(RelationDefinition relation, RAExpressionAttributes attributes) {
-        ImmutableMap<Integer, Variable> terms = relation.getAttributes().stream()
-                .collect(ImmutableCollectors.toMap(a -> a.getIndex() - 1,
-                        a -> (Variable) attributes.get(a.getID())));
-
-        ExtensionalDataNode atom =  iqFactory.createExtensionalDataNode(relation, terms);
-        return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attributes);
+    public RAExpression translateParserView(RelationDefinition view) {
+        return ((RAExpressionOperations)operations).createWithoutName(view, createAttributeVariables(view));
     }
 }

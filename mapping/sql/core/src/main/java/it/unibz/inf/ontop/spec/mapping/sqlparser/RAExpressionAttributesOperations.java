@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -21,7 +19,12 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
 
     @Override
     public RAExpressionAttributes create() {
-        return new RAExpressionAttributes(ImmutableMap.of(), aoops.create());
+        return create(ImmutableMap.of());
+    }
+
+    public RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes) {
+        return new RAExpressionAttributes(attachAliases(unqualifiedAttributes, ImmutableSet.of()),
+                aoops.create(unqualifiedAttributes.keySet(), ImmutableSet.of()));
     }
 
     @Override
@@ -142,44 +145,32 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
 
 
 
-
-    /**
-     *
-     * @param unqualifiedAttributes a {@link ImmutableMap}<{@link QuotedID}, {@link Variable}>
-     * @return a {@link RAExpressionAttributes}
-     */
-
-    public static RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes, RelationID relationId,
-                                                ImmutableSet<RelationID> allRelationIds) {
-
-        return new RAExpressionAttributesOperations().create0(unqualifiedAttributes, ImmutableSet.of(relationId), allRelationIds);
+    public RAExpressionAttributes create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
+        ImmutableMap<QuotedID, ImmutableTerm> map = getAttributesMap(relation, variables);
+        return new RAExpressionAttributes(attachAliases(map, relation.getAllIDs()),
+                aoops.create(map.keySet(), ImmutableSet.of(relation.getID())));
     }
 
-    public static RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes) {
-        return new RAExpressionAttributesOperations().create0(unqualifiedAttributes, ImmutableSet.of(), ImmutableSet.of());
+
+    public ImmutableMap<QuotedID, ImmutableTerm> getAttributesMap(RelationDefinition relation, ImmutableList<Variable> variables) {
+        return relation.getAttributes().stream()
+                .collect(ImmutableCollectors.toMap(Attribute::getID,
+                        attribute -> variables.get(attribute.getIndex() - 1)));
     }
 
-    public static ImmutableMap<QualifiedAttributeID, ImmutableTerm> attachAliases(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes, ImmutableSet<RelationID> allRelationIds) {
+    private ImmutableMap<QualifiedAttributeID, ImmutableTerm> attachAliases(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes, ImmutableSet<RelationID> allRelationIds) {
         return unqualifiedAttributes.entrySet().stream()
                         .flatMap(e -> createQualifiedID(allRelationIds, e.getKey())
                                 .map(i -> Maps.immutableEntry(i, e.getValue())))
                         .collect(ImmutableCollectors.toMap());
     }
 
-    private RAExpressionAttributes create0(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes, ImmutableSet<RelationID> occurrences,
-                                                ImmutableSet<RelationID> allRelationIds) {
-
-        return new RAExpressionAttributes(attachAliases(unqualifiedAttributes, allRelationIds),
-                aoops.create(unqualifiedAttributes.keySet(), occurrences));
-    }
-
-    private static Stream<QualifiedAttributeID> createQualifiedID(ImmutableSet<RelationID> aliases, QuotedID attributeId) {
+    private Stream<QualifiedAttributeID> createQualifiedID(ImmutableSet<RelationID> aliases, QuotedID attributeId) {
         return Stream.concat(Stream.of(new QualifiedAttributeID(null, attributeId)),
                 aliases.stream()
                         .flatMap(l -> l.getWithSchemalessID().stream())
                         .distinct()
                         .map(a -> new QualifiedAttributeID(a, attributeId)));
     }
-
 
 }
