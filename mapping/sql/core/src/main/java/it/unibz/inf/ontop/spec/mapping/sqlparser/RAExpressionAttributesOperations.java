@@ -26,10 +26,8 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     public RAExpressionAttributes create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<QuotedID, ImmutableTerm> map = getAttributesMap(relation, variables);
         return new RAExpressionAttributes(attachAliases(map, relation.getAllIDs()),
-                aoops.create(map.keySet(), ImmutableSet.of(relation.getID())));
+                aoops.create(relation, variables));
     }
-
-
 
     public RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes) {
         return new RAExpressionAttributes(attachAliases(unqualifiedAttributes, ImmutableSet.of()),
@@ -40,7 +38,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     public RAExpressionAttributes withAlias(RAExpressionAttributes rae, RelationID aliasId) {
         ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes = rae.getUnqualifiedAttributes();
         return new RAExpressionAttributes(attachAliases(unqualifiedAttributes, ImmutableSet.of(aliasId)),
-                aoops.create(unqualifiedAttributes.keySet(), ImmutableSet.of(aliasId)));
+                aoops.withAlias(rae.getOccurrences(), aliasId));
     }
 
     /**

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
@@ -26,7 +27,11 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
 
     @Override
     public RAExpressionAttributeOccurrences create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
-        throw new IllegalArgumentException("operation not implemented");
+        ImmutableSet<RelationID> relationIds = ImmutableSet.of(relation.getID());
+        return new RAExpressionAttributeOccurrences(relation.getAttributes().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Attribute::getID,
+                        id -> relationIds)));
     }
 
     public RAExpressionAttributeOccurrences create(ImmutableSet<QuotedID> attributeIds, ImmutableSet<RelationID> relationIds) {
@@ -38,7 +43,11 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
 
     @Override
     public RAExpressionAttributeOccurrences withAlias(RAExpressionAttributeOccurrences rae, RelationID aliasId) {
-        throw new IllegalArgumentException("operation not implemented");
+        ImmutableSet<RelationID> relationIds = ImmutableSet.of(aliasId);
+        return new RAExpressionAttributeOccurrences(rae.getAttributes().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Function.identity(),
+                        id -> relationIds)));
     }
 
 
