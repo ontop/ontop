@@ -21,14 +21,12 @@ import java.util.stream.Stream;
  */
 public class SelectQueryParser extends FromItemParser<RAExpression> {
     private final QuotedIDFactory idfac;
-    private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
     private final ExpressionParser expressionParser;
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory());
+        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExpressionOperations(coreSingletons.getTermFactory()));
         this.idfac = metadata.getQuotedIDFactory();
-        this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
         this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
@@ -97,7 +95,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
             rae = (plainSelect.getFromItem() != null)
                 ? translateJoins(plainSelect.getFromItem(), plainSelect.getJoins())
                 : new RAExpression(ImmutableList.of(), ImmutableList.of(),
-                    RAExpressionAttributes.create(ImmutableMap.of()), termFactory);
+                    RAExpressionAttributes.create(ImmutableMap.of()));
         }
         catch (IllegalJoinException e) {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
@@ -115,7 +113,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
         RAExpressionAttributes attributes =
                 sip.parseSelectItems(plainSelect.getSelectItems());
 
-        return new RAExpression(rae.getDataAtoms(), filterAtoms, attributes, termFactory);
+        return new RAExpression(rae.getDataAtoms(), filterAtoms, attributes);
     }
 
 
@@ -159,6 +157,6 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
                         a -> (Variable) attributes.get(a.getID())));
 
         ExtensionalDataNode atom =  iqFactory.createExtensionalDataNode(relation, terms);
-        return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attributes, termFactory);
+        return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attributes);
     }
 }

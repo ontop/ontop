@@ -15,7 +15,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
 
-public abstract class FromItemParser<T extends RAEntity<T>> {
+public abstract class FromItemParser<T> {
 
     protected final ExpressionParser expressionParser;
     protected final QuotedIDFactory idfac;
@@ -23,17 +23,20 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
 
     private final MetadataLookup metadata;
 
+    private final RAOperations<T> operations;
+
     private int relationIndex = 0;
 
     protected abstract T create(DatabaseRelationDefinition relation);
 
     protected abstract T translateSelectBody(SelectBody selectBody);
 
-    protected FromItemParser(ExpressionParser expressionParser, QuotedIDFactory idfac, MetadataLookup metadata, TermFactory termFactory) {
+    protected FromItemParser(ExpressionParser expressionParser, QuotedIDFactory idfac, MetadataLookup metadata, TermFactory termFactory, RAOperations<T> operations) {
         this.expressionParser = expressionParser;
         this.idfac = idfac;
         this.metadata = metadata;
         this.termFactory = termFactory;
+        this.operations = operations;
     }
 
     /**
@@ -97,7 +100,7 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
             if (!join.isCross() && !join.isOuter())
                 throw new InvalidSelectQueryRuntimeException("APPLY must be either CROSS or OUTER", join);
 
-            return left.crossJoin(right);
+            return operations.crossJoin(left, right);
         }
         if (join.isStraight()) {
             // https://dev.mysql.com/doc/refman/8.0/en/join.html
@@ -118,19 +121,19 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
                 throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
 
-            return left.crossJoin(right);
+            return operations.crossJoin(left, right);
         }
         else if (join.isCross()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
                 throw new InvalidSelectQueryRuntimeException("CROSS JOIN cannot have USING/ON conditions", join);
 
-            return left.crossJoin(right);
+            return operations.crossJoin(left, right);
         }
         else if (join.isNatural()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
                 throw new InvalidSelectQueryRuntimeException("NATURAL JOIN cannot have USING/ON conditions", join);
 
-            return left.naturalJoin(right);
+            return operations.naturalJoin(left, right);
         }
         else {
             // also covers STRAIGHT_JOIN
@@ -145,7 +148,7 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
                     return left;
                 }
 
-                return left.joinOn(right,
+                return operations.joinOn(left, right,
                         (attributes -> expressionParser.parseBooleanExpression(
                                 join.getOnExpression(), attributes)));
             }
@@ -156,7 +159,7 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
                 if (join.getUsingColumns().stream().anyMatch(p -> p.getTable() != null))
                     throw new InvalidSelectQueryRuntimeException("JOIN USING columns cannot be qualified", join);
 
-                return left.joinUsing(right,
+                return operations.joinUsing(left, right,
                         join.getUsingColumns().stream()
                                 .map(p -> idfac.createAttributeID(p.getColumnName()))
                                 .collect(ImmutableCollectors.toSet()));
@@ -248,7 +251,7 @@ public abstract class FromItemParser<T extends RAEntity<T>> {
 
         private T alias(T rae, Alias alias) {
             RelationID aliasId = idfac.createRelationID(null, alias.getName());
-            return rae.withAlias(aliasId);
+            return operations.withAlias(rae, aliasId);
         }
     }
 }

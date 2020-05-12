@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import net.sf.jsqlparser.schema.Column;
@@ -23,7 +21,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
     private final CoreSingletons coreSingletons;
 
     public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory());
+        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExprressionAttributesOperations());
         this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.coreSingletons = coreSingletons;
