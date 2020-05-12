@@ -35,6 +35,14 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
         return new RAExpression(ImmutableList.of(), ImmutableList.of(), aops.create());
     }
 
+    @Override
+    public RAExpression create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
+        return new RAExpression(
+                createExtensionalDataNodes(relation, variables),
+                ImmutableList.of(),
+                aops.create(relation, variables));
+    }
+
 
     /**
      * (relational expression) AS A
@@ -142,13 +150,6 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
                 Stream.concat(Stream.concat(left.getFilterAtoms().stream(), right.getFilterAtoms().stream()), filter.stream())
                         .collect(ImmutableCollectors.toList()),
                 attributes);
-    }
-
-    public RAExpression create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
-        return new RAExpression(
-                createExtensionalDataNodes(relation, variables),
-                ImmutableList.of(),
-                aops.create(relation, variables));
     }
 
     public RAExpression createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {

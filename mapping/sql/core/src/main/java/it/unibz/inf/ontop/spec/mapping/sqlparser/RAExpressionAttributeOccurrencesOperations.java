@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -18,7 +21,12 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
 
     @Override
     public RAExpressionAttributeOccurrences create() {
-        return create(ImmutableSet.of(), ImmutableSet.of());
+        return new RAExpressionAttributeOccurrences(ImmutableMap.of());
+    }
+
+    @Override
+    public RAExpressionAttributeOccurrences create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
+        throw new IllegalArgumentException("operation not implemented");
     }
 
     public RAExpressionAttributeOccurrences create(ImmutableSet<QuotedID> attributeIds, ImmutableSet<RelationID> relationIds) {

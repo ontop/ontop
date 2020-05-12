@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 
 import java.util.function.Function;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 public interface RAOperations<T> {
 
     T create();
+    T create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables);
 
     T withAlias(T rae, RelationID aliasId);
 
