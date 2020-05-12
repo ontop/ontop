@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
@@ -14,12 +15,18 @@ import java.util.stream.Stream;
 
 public class RAExpressionOperations implements RAOperations<RAExpression> {
 
-    private final RAExprressionAttributesOperations aops = new RAExprressionAttributesOperations();
+    private final RAExpressionAttributesOperations aops = new RAExpressionAttributesOperations();
     private final TermFactory termFactory;
 
     public RAExpressionOperations(TermFactory termFactory) {
         this.termFactory = termFactory;
     }
+
+    @Override
+    public RAExpression create() {
+        return new RAExpression(ImmutableList.of(), ImmutableList.of(), aops.create());
+    }
+
 
     /**
      * (relational expression) AS A

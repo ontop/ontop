@@ -12,6 +12,8 @@ import java.util.function.Function;
 
 public interface RAOperations<T> {
 
+    T create();
+
     T withAlias(T rae, RelationID aliasId);
 
     T crossJoin(T left, T right) throws IllegalJoinException;

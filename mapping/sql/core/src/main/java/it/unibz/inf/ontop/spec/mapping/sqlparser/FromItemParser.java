@@ -23,7 +23,7 @@ public abstract class FromItemParser<T> {
 
     private final MetadataLookup metadata;
 
-    private final RAOperations<T> operations;
+    protected final RAOperations<T> operations;
 
     private int relationIndex = 0;
 
@@ -48,6 +48,9 @@ public abstract class FromItemParser<T> {
      * @throws IllegalJoinException
      */
     protected T translateJoins(FromItem left, List<Join> joins) throws IllegalJoinException {
+        if (left == null)
+            return operations.create();
+
         T current = translateFromItem(left);
         if (joins != null)
             for (Join join : joins) // no reduce - exception handling
@@ -177,7 +180,7 @@ public abstract class FromItemParser<T> {
     }
 
     public RAExpressionAttributes createRAExpressionAttributes(DatabaseRelationDefinition relation) {
-         return RAExpressionAttributes.create(createAttributesMap(relation), relation.getID(), relation.getAllIDs());
+         return RAExpressionAttributesOperations.create(createAttributesMap(relation), relation.getID(), relation.getAllIDs());
     }
 
     private class FromItemProcessor implements FromItemVisitor {

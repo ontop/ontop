@@ -92,10 +92,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
         RAExpression rae;
         try {
-            rae = (plainSelect.getFromItem() != null)
-                ? translateJoins(plainSelect.getFromItem(), plainSelect.getJoins())
-                : new RAExpression(ImmutableList.of(), ImmutableList.of(),
-                    RAExpressionAttributes.create(ImmutableMap.of()));
+            rae = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
         }
         catch (IllegalJoinException e) {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);

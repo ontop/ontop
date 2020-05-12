@@ -40,7 +40,7 @@ public class SelectItemParser {
                     .flatMap(si -> new SelectItemProcessor().getAttributes(si))
                     .collect(ImmutableCollectors.toMap());
 
-            return RAExpressionAttributes.create(map);
+            return RAExpressionAttributesOperations.create(map);
         }
         catch (IllegalArgumentException e) {
             Map<QuotedID, Integer> duplicates = new HashMap<>();

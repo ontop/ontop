@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.Optional;
-
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.
@@ -21,7 +19,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
     private final CoreSingletons coreSingletons;
 
     public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
-        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExprressionAttributesOperations());
+        super(new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons), metadata.getQuotedIDFactory(), metadata, coreSingletons.getTermFactory(), new RAExpressionAttributesOperations());
         this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.coreSingletons = coreSingletons;
@@ -46,9 +44,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
 
         RAExpressionAttributes attributes;
         try {
-            attributes = (plainSelect.getFromItem() != null)
-                ? translateJoins(plainSelect.getFromItem(), plainSelect.getJoins())
-                : RAExpressionAttributes.create(ImmutableMap.of());
+            attributes = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
         }
         catch (IllegalJoinException e) {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
