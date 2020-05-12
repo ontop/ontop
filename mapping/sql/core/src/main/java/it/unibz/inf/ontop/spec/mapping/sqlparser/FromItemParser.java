@@ -181,6 +181,7 @@ public abstract class FromItemParser<T> {
                 .collect(ImmutableCollectors.toList());
     }
 
+    protected void validateFromItem(Table table) {  }
 
     private class FromItemProcessor implements FromItemVisitor {
 
@@ -192,15 +193,19 @@ public abstract class FromItemParser<T> {
         }
 
         @Override
-        public void visit(Table tableName) {
+        public void visit(Table table) {
+            if (table.getPivot() != null || table.getUnPivot() != null)
+                throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", table);
 
-            RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
+            validateFromItem(table);
+
+            RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
             try {
                 DatabaseRelationDefinition relation = metadata.getRelation(id);
                 T rae = create(relation);
-                result = (tableName.getAlias() == null)
+                result = (table.getAlias() == null)
                         ? rae
-                        : alias(rae, tableName.getAlias());
+                        : alias(rae, table.getAlias());
             }
             catch (MetadataExtractionException e) {
                 throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
@@ -213,6 +218,12 @@ public abstract class FromItemParser<T> {
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
 
+            if (subSelect.getWithItemsList() != null)
+                throw new UnsupportedSelectQueryRuntimeException("WITH is not supported", subSelect);
+
+            if (subSelect.getPivot() != null || subSelect.getUnPivot() != null)
+                throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", subSelect);
+
             T rae = translateSelectBody(subSelect.getSelectBody());
             result = alias(rae, subSelect.getAlias());
         }
@@ -221,6 +232,9 @@ public abstract class FromItemParser<T> {
         public void visit(SubJoin subjoin) {
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
+
+            if (subjoin.getPivot() != null || subjoin.getUnPivot() != null)
+                throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", subjoin);
 
             try {
                 T rae = translateJoins(subjoin.getLeft(), subjoin.getJoinList());
@@ -252,6 +266,9 @@ public abstract class FromItemParser<T> {
         }
 
         private T alias(T rae, Alias alias) {
+            if (alias.getAliasColumns() != null)
+                throw new UnsupportedSelectQueryRuntimeException("Alias columns are not supported", alias);
+
             RelationID aliasId = idfac.createRelationID(null, alias.getName());
             return operations.withAlias(rae, aliasId);
         }

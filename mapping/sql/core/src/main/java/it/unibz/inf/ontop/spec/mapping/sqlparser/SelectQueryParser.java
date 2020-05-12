@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.stream.Stream;
@@ -132,10 +133,15 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
         return super.join(left, join);
     }
 
+    @Override
+    protected void validateFromItem(Table table) {
+        if (table.getIndexHint() != null)
+            throw new UnsupportedSelectQueryRuntimeException("MySQL index hints are not supported", table);
+    }
 
     @Override
     public RAExpression create(DatabaseRelationDefinition relation) {
-        return ((RAExpressionOperations)operations).create(relation, createAttributeVariables(relation));
+        return operations.create(relation, createAttributeVariables(relation));
     }
 
     public RAExpression translateParserView(RelationDefinition view) {

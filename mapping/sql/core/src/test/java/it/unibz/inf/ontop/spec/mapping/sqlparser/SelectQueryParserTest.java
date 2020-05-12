@@ -264,6 +264,17 @@ public class SelectQueryParserTest {
         System.out.println(re);
     }
 
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_column_alias() throws Exception {
+        RAExpression re = parse("SELECT * FROM P AS PP(AA, BB)");
+        System.out.println(re);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_from_values() throws Exception {
+        RAExpression re = parse("SELECT * FROM (VALUES(1,2,3)) QQ(A,B,C)");
+        System.out.println(re);
+    }
 
 
     // -----------------------------------------------------
