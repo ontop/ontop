@@ -125,6 +125,11 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
         return aoops.getSharedAttributeNames(left.getOccurrences(), right.getOccurrences());
     }
 
+    @Override
+    public RAExpressionAttributes filter(RAExpressionAttributes rae, ImmutableList<ImmutableExpression> filter) {
+        return rae;
+    }
+
     /**
      * throw IllegalJoinException if a relation alias occurs in both arguments of the join
      *

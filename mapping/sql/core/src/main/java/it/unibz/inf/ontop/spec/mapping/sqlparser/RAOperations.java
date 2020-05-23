@@ -28,4 +28,5 @@ public interface RAOperations<T> {
 
     ImmutableSet<QuotedID> getSharedAttributeNames(T left, T right);
 
+    T filter(T rae, ImmutableList<ImmutableExpression> filter);
 }

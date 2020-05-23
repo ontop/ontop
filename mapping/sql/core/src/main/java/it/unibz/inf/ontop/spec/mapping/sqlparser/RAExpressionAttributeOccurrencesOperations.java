@@ -102,6 +102,12 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
         return Sets.intersection(left.getAttributes(), right.getAttributes()).immutableCopy();
     }
 
+    @Override
+    public RAExpressionAttributeOccurrences filter(RAExpressionAttributeOccurrences rae, ImmutableList<ImmutableExpression> filter) {
+        return rae;
+    }
+
+
     private static Stream<QuotedID> idUnionStream(RAExpressionAttributeOccurrences o1, RAExpressionAttributeOccurrences o2) {
         return Stream.of(o1, o2)
                 .map(RAExpressionAttributeOccurrences::getAttributes)

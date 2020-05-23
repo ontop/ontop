@@ -86,25 +86,23 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
 
         RAExpression rae;
         try {
-            rae = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
+            RAExpression base = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
+
+            ImmutableList<ImmutableExpression> filter = plainSelect.getWhere() == null
+                    ? ImmutableList.of()
+                    : expressionParser.parseBooleanExpression(plainSelect.getWhere(), base.getAttributes());
+
+            rae = operations.filter(base, filter);
         }
         catch (IllegalJoinException e) {
             throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
         }
 
-        ImmutableList<ImmutableExpression> filterAtoms = Stream.concat(
-                rae.getFilterAtoms().stream(),
-                plainSelect.getWhere() == null
-                    ? Stream.of()
-                    : expressionParser.parseBooleanExpression(
-                        plainSelect.getWhere(), rae.getAttributes()).stream())
-                .collect(ImmutableCollectors.toList());
-
         SelectItemParser sip = new SelectItemParser(rae.getAttributes(), expressionParser::parseTerm, idfac);
         RAExpressionAttributes attributes =
                 sip.parseSelectItems(plainSelect.getSelectItems());
 
-        return new RAExpression(rae.getDataAtoms(), filterAtoms, attributes);
+        return new RAExpression(rae.getDataAtoms(), rae.getFilterAtoms(), attributes);
     }
 
 

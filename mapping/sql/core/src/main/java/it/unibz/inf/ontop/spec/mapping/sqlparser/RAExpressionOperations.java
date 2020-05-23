@@ -53,8 +53,7 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
 
     @Override
     public RAExpression withAlias(RAExpression rae, RelationID aliasId) {
-        return new RAExpression(rae.getDataAtoms(),
-                rae.getFilterAtoms(),
+        return new RAExpression(rae.getDataAtoms(), rae.getFilterAtoms(),
                 aops.withAlias(rae.getAttributes(), aliasId));
     }
 
@@ -68,10 +67,7 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
      */
     @Override
     public RAExpression crossJoin(RAExpression left, RAExpression right) throws IllegalJoinException {
-        return filterProduct(
-                left,
-                right,
-                ImmutableList.of(),
+        return product(left, right,
                 aops.crossJoin(left.getAttributes(), right.getAttributes()));
     }
 
@@ -88,14 +84,10 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
 
     @Override
     public RAExpression joinUsing(RAExpression left, RAExpression right, ImmutableSet<QuotedID> using) throws IllegalJoinException {
-        RAExpressionAttributes attributes =
-                aops.joinUsing(left.getAttributes(), right.getAttributes(), using);
-
-        return filterProduct(
-                left,
-                right,
-                getJoinOnFilter(left.getAttributes(), right.getAttributes(), using),
-                attributes);
+        return filter(
+                product(left, right,
+                        aops.joinUsing(left.getAttributes(), right.getAttributes(), using)),
+                getJoinOnFilter(left.getAttributes(), right.getAttributes(), using));
     }
 
     /**
@@ -128,14 +120,8 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
 
     @Override
     public RAExpression joinOn(RAExpression left, RAExpression right, Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
-        RAExpressionAttributes attributes =
-                aops.crossJoin(left.getAttributes(), right.getAttributes());
-
-        return filterProduct(
-                left,
-                right,
-                getAtomOnExpression.apply(attributes),
-                attributes);
+        RAExpression rae = crossJoin(left, right);
+        return filter(rae, getAtomOnExpression.apply(rae.getAttributes()));
     }
 
     @Override
@@ -143,11 +129,19 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
         return aops.getSharedAttributeNames(left.getAttributes(), right.getAttributes());
     }
 
-    private RAExpression filterProduct(RAExpression left, RAExpression right, ImmutableList<ImmutableExpression> filter, RAExpressionAttributes attributes) {
+    @Override
+    public RAExpression filter(RAExpression rae, ImmutableList<ImmutableExpression> filter) {
+        return new RAExpression(rae.getDataAtoms(),
+                Stream.concat(rae.getFilterAtoms().stream(), filter.stream())
+                        .collect(ImmutableCollectors.toList()),
+                rae.getAttributes());
+    }
+
+    private RAExpression product(RAExpression left, RAExpression right, RAExpressionAttributes attributes) {
         return new RAExpression(
                 Stream.concat(left.getDataAtoms().stream(), right.getDataAtoms().stream())
                         .collect(ImmutableCollectors.toList()),
-                Stream.concat(Stream.concat(left.getFilterAtoms().stream(), right.getFilterAtoms().stream()), filter.stream())
+                Stream.concat(left.getFilterAtoms().stream(), right.getFilterAtoms().stream())
                         .collect(ImmutableCollectors.toList()),
                 attributes);
     }
