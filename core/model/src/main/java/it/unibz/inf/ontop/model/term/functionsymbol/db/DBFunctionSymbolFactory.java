@@ -277,4 +277,6 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);
+
+    DBBooleanFunctionSymbol getDBSTWithin();
 }

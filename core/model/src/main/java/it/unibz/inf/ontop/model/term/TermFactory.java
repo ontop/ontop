@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.model.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -198,13 +198,13 @@ public interface TermFactory {
 	 * </code>
 	 * <p>
 	 * are all well-formed URI strings.
-	 * 
+	 *
 	 * @param iri
 	 *            the URI.
 	 * @return a URI constant.
 	 */
 	public IRIConstant getConstantIRI(IRI iri);
-	
+
 	public BNode getConstantBNode(String name);
 
 	/**
@@ -248,7 +248,7 @@ public interface TermFactory {
 	 * "Person"^^xsd:String <br />
 	 * 22^^xsd:Integer
 	 * </code>
-	 * 
+	 *
 	 * @param value
 	 *            the value of the constant.
 	 * @param type
@@ -268,7 +268,7 @@ public interface TermFactory {
 	 * <code>
 	 * "This is American English"@en-US <br />
 	 * </code>
-	 * 
+	 *
 	 * @param value
 	 *            the value of the constant.
 	 * @param language
@@ -294,7 +294,7 @@ public interface TermFactory {
 	 * pred($x) <br />
 	 * func(?x, ?y)
 	 * </code>
-	 * 
+	 *
 	 * @param name
 	 *            the name of the variable.
 	 * @return the variable object.
@@ -571,4 +571,6 @@ public interface TermFactory {
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
 
 	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
+
+	ImmutableTerm getDBSTWithin(ImmutableList<? extends ImmutableTerm> terms);
 }

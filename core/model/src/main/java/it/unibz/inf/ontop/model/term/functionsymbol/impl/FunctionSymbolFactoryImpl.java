@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.GeoSPARQL;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -109,6 +110,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         RDFDatatype xsdDecimal = typeFactory.getXsdDecimalDatatype();
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
+        RDFDatatype wktLiteral = typeFactory.getWktLiteralDatatype();
         RDFDatatype rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
         RDFTermType abstractRDFType = typeFactory.getAbstractRDFTermType();
         ObjectRDFType bnodeType = typeFactory.getBlankNodeType();
@@ -218,7 +220,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
-                new MinBasedSampleSPARQLFunctionSymbol(typeFactory));
+                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
+                new GeofSfWIthinFUnctionSymbolImpl(GeoSPARQL.GEOF_SFWITHIN, wktLiteral, xsdBoolean)
+        );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
 
@@ -336,6 +340,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         }
     }
 
+
     @Override
     public Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName, int arity) {
         return Optional.ofNullable(distinctSparqlAggregateFunctionTable.get(officialName, arity));
@@ -438,4 +443,5 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
     }
+
 }

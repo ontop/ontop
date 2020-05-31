@@ -45,6 +45,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CONCAT_OP_STR = "||";
     protected static final String NULLIF_STR = "NULLIF";
 
+    protected static final String ST_WITHIN = "ST_WITHIN";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -53,6 +54,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected final DBTermType dbDoubleType;
     protected final DBTermType dbIntegerType;
     protected final DBTermType dbDecimalType;
+
     protected final DBTermType abstractRootDBType;
     protected final TermType abstractRootType;
     private final Map<Integer, DBConcatFunctionSymbol> nullRejectingConcatMap;
@@ -201,6 +203,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol nullIfFunctionSymbol = new NullIfDBFunctionSymbolImpl(abstractRootDBType);
         builder.put(NULLIF_STR, 2, nullIfFunctionSymbol);
+
+        // GEO Functions
+        DBFunctionSymbol withinFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_WITHIN, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_WITHIN, 2, withinFunctionSymbol);
 
         return builder.build();
     }
@@ -773,6 +780,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTWithin() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_WITHIN, 2);    }
 
     /**
      * Can be overridden.
