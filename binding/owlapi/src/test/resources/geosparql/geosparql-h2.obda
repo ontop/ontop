@@ -1,0 +1,13 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+xsd:    http://www.w3.org/2001/XMLSchema#
+geo:    http://www.opengis.net/ont/geosparql#
+geof:   http://www.opengis.net/def/function/geosparql/
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	geoms
+target		:{ID} a :Geom ; geo:asWKT {THE_GEOM}^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM GEOMS;
+]]
+
