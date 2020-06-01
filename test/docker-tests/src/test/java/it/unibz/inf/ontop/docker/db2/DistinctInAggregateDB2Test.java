@@ -30,7 +30,7 @@ public class DistinctInAggregateDB2Test extends AbstractDistinctInAggregateTest 
         testAvg(
                 ImmutableMap.of(
                         "p",buildAnswerIRI("1"),
-                        "ad", "\"10.5000\"^^xsd:decimal"
+                        "ad", "\"10.5000000000000000000\"^^xsd:decimal"
                 ));
     }
 
