@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.docker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
@@ -104,7 +105,7 @@ public abstract class AbstractVirtualModeTest {
     protected ImmutableMap<String, String> getTuple(TupleOWLResultSet rs, OWLBindingSet bindingSet) throws OWLException {
         ImmutableMap.Builder<String, String> tuple = ImmutableMap.builder();
         for (String variable : rs.getSignature()) {
-            tuple.put(variable, bindingSet.getOWLIndividual(variable).toString());
+            tuple.put(variable, bindingSet.getOWLObject(variable).toString());
         }
         return tuple.build();
     }
