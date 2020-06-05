@@ -1115,7 +1115,10 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "WHERE {\n" +
                 "   { [] ?p1 \"Frankie\"  }\n" +
                 "    UNION \n" +
-                "   { [] ?p2 10 }\n" +
+                "   { \n" +
+                "     [] ?p2 ?n \n" +
+                "     FILTER (?n = 10)" +
+                " }\n" +
                 "   BIND(str(coalesce(?p1, ?p2)) AS ?v)" +
                 "}\n" +
                 "ORDER BY ?v\n";
