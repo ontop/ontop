@@ -56,6 +56,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                            VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQProperties normalizedProperties = currentIQProperties.declareNormalizedForOptimization();
 
+        if (aggregationNode.getGroupingVariables().isEmpty() && aggregationNode.getSubstitution().isEmpty())
+            return iqFactory.createTrueNode();
+
         IQTree shrunkChild = child.normalizeForOptimization(variableGenerator);
 
         if (shrunkChild.isDeclaredAsEmpty()) {
