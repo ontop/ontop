@@ -215,4 +215,13 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
     public Constant evaluateEmptyBag(TermFactory termFactory) {
         return termFactory.getRDFLiteralConstant("", xsdStringType);
     }
+
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        ImmutableTerm newTerm = newTerms.get(0);
+        return newTerm.isNull()
+                ? evaluateEmptyBag(termFactory)
+                : super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+    }
 }
