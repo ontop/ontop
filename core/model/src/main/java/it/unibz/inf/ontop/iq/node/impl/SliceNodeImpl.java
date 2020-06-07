@@ -72,18 +72,21 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             return mergeWithSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
-        else if (newChildRoot instanceof TrueNode)
+        else if ((newChildRoot instanceof TrueNode)
+                || ((newChildRoot instanceof AggregationNode)
+                    && ((AggregationNode) newChildRoot).getGroupingVariables().isEmpty()))
             return offset > 0
                     ? iqFactory.createEmptyNode(child.getVariables())
                     : newChild;
         else if ((newChildRoot instanceof DistinctNode)
+                && (offset == 0)
                 && getLimit()
                     .filter(l -> l <= 1)
                     .isPresent())
             // Distinct can be eliminated
             return normalizeForOptimization(((UnaryIQTree) child).getChild(), variableGenerator, currentIQProperties);
-
-        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
+        else
+            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
