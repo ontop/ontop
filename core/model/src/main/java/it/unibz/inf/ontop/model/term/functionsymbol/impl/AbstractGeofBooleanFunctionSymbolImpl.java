@@ -12,10 +12,10 @@ import org.apache.commons.rdf.api.IRI;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class GeofFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public abstract class AbstractGeofBooleanFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
     private final RDFDatatype xsdBooleanType;
 
-    protected GeofFunctionSymbolImpl(
+    protected AbstractGeofBooleanFunctionSymbolImpl(
             @Nonnull String functionSymbolName,
             @Nonnull IRI functionIRI,
             RDFDatatype wktLiteralType,

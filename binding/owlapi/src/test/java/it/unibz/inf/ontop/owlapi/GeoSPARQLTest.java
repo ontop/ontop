@@ -1,10 +1,5 @@
 package it.unibz.inf.ontop.owlapi;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
@@ -17,12 +12,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
-
-import org.h2.tools.Server;
 
 public class GeoSPARQLTest {
 
@@ -71,7 +68,7 @@ public class GeoSPARQLTest {
 
     @Test
     public void testSelectWithin() throws Exception {
-        String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> \n" +
+        String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "SELECT ?x ?y WHERE {\n" +
@@ -80,12 +77,12 @@ public class GeoSPARQLTest {
                 "FILTER (geof:sfWithin(?xWkt, ?yWkt) && ?x != ?y)\n" +
                 "}\n";
         String val = runQueryReturnIndividual(query);
-        assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#1>", val);
+        assertEquals("<http://ex.org/1>", val);
     }
 
     @Test
     public void testAskWithin() throws Exception {
-        String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> \n" +
+        String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "ASK WHERE {\n" +
@@ -95,6 +92,25 @@ public class GeoSPARQLTest {
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
+    }
+
+    @Test
+    public void testSelectDistance() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":4 a :Geom; geo:asWKT ?yWkt.\n" +
+//                "BIND((geof:distance(?xWkt, ?yWkt, uom:metre)/1000) as ?x) .\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+        //        "BIND(geof:distance(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(530571, val, 1.0);
     }
 
     private String runQueryReturnIndividual(String query) throws OWLException {
@@ -116,4 +132,13 @@ public class GeoSPARQLTest {
         }
     }
 
+    private double runQueryAndReturnDoubleX(String query) throws Exception {
+        try (OWLStatement st = conn.createStatement()) {
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
+            assertTrue(rs.hasNext());
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
+            return ind1.parseDouble();
+        }
+    }
 }

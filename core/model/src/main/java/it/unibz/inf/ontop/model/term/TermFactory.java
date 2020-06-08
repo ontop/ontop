@@ -573,4 +573,12 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
 
 	ImmutableTerm getDBSTWithin(ImmutableList<? extends ImmutableTerm> terms);
+
+	ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2);
+
+    ImmutableTerm getDBSTDistance(ImmutableList<? extends ImmutableTerm> terms);
+
+	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
 }

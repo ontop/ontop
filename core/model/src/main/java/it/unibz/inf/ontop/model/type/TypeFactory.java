@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
-import it.unibz.inf.ontop.model.vocabulary.GeoSPARQL;
+import it.unibz.inf.ontop.model.vocabulary.GEO;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
@@ -70,6 +70,6 @@ public interface TypeFactory {
 	DBTypeFactory getDBTypeFactory();
 
     default RDFDatatype getWktLiteralDatatype() {
-        return getDatatype(GeoSPARQL.GEO_WKT_LITERAL);
+        return getDatatype(GEO.GEO_WKT_LITERAL);
     }
 }

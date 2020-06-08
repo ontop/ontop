@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
@@ -46,6 +47,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String NULLIF_STR = "NULLIF";
 
     protected static final String ST_WITHIN = "ST_WITHIN";
+
+    protected static final String ST_DISTANCE = "ST_DISTANCE";
+
+    protected static final String ST_TRANSFORM = "ST_TRANSFORM";
+
+    protected static final String ST_SETSRID = "ST_SETSRID";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -135,6 +142,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType dbDateTimestamp = dbTypeFactory.getDBDateTimestampType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+        DBTermType dbDoubleType = dbTypeFactory.getDBDoubleType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
@@ -209,6 +217,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_WITHIN, 2, withinFunctionSymbol);
 
+        DBFunctionSymbol distanceFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE, 2, dbDoubleType, false,
+                abstractRootDBType);
+        builder.put(ST_DISTANCE, 2, distanceFunctionSymbol);
+
         return builder.build();
     }
 
@@ -229,6 +241,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     protected abstract DBConcatFunctionSymbol createNullRejectingDBConcat(int arity);
+
     protected abstract DBConcatFunctionSymbol createDBConcatOperator(int arity);
 
     @Override
@@ -386,7 +399,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
      * By default explicit
      */
     protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
-                                                                                    DBTermType targetType) {
+                                                                                        DBTermType targetType) {
         return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType, Serializers.getCastSerializer(targetType));
     }
 
@@ -470,13 +483,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeYearFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
-                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeYear(terms, termConverter, termFactory);
     }
 
     @Override
     protected String serializeYearFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeYear(terms, termConverter, termFactory);
     }
 
@@ -490,13 +503,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeMonthFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
-                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeMonth(terms, termConverter, termFactory);
     }
 
     @Override
     protected String serializeMonthFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeMonth(terms, termConverter, termFactory);
     }
 
@@ -510,13 +523,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeDayFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
-                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeDay(terms, termConverter, termFactory);
     }
 
     @Override
     protected String serializeDayFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeDay(terms, termConverter, termFactory);
     }
 
@@ -783,11 +796,27 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     public DBBooleanFunctionSymbol getDBSTWithin() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_WITHIN, 2);    }
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_WITHIN, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTDistance() {
+        return getRegularDBFunctionSymbol(ST_DISTANCE, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTTransform() {
+        return getRegularDBFunctionSymbol(ST_TRANSFORM, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBST_SETSRID() {
+        return getRegularDBFunctionSymbol(ST_SETSRID, 2);
+    }
 
     /**
      * Can be overridden.
-     *
+     * <p>
      * Not an official SQL function
      */
     protected String getRandNameInDialect() {

@@ -279,4 +279,10 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBIntIndex(int nbValues);
 
     DBBooleanFunctionSymbol getDBSTWithin();
+
+    DBFunctionSymbol getDBSTDistance();
+
+    DBFunctionSymbol getDBSTTransform();
+
+    DBFunctionSymbol getDBST_SETSRID();
 }
