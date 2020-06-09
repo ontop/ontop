@@ -21,18 +21,21 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
 
     /**
      * @param subLexicalTerms (lat, lon, unit)
-     *                        <p>
      *                        Assume the args are WGS 84, EPSG:4326 (lat lon)
-     *                        <p>
-     * @return if unit=meter, returns ST_DISTANCE(ST_Transform ( ST_SETSRID ( lat, 4326), 3857) ,
-     * ST_Transform(ST_SETSRID(lon,4326), 3857) )
+     *
+     * @return if unit=meter, returns
+     * <pre>
+ *      ST_DISTANCE(
+     *      ST_Transform(ST_SETSRID(arg1, 4326), 3857) ,
+     *      ST_Transform(ST_SETSRID(arg2, 4326), 3857) )
+     * </pre>
      */
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
         if (UOM.METRE.getIRIString().equals(unit)) {
-            DBConstant SRID_4326 = termFactory.getDBIntegerConstant(4326);
-            DBConstant SRID_3857 = termFactory.getDBIntegerConstant(3857);
+            DBConstant SRID_4326 = termFactory.getDBIntegerConstant(4326); // WGS 84, (lat, lon)
+            DBConstant SRID_3857 = termFactory.getDBIntegerConstant(3857); // Pseudo-Mercator
             return termFactory.getDBSTDistance(
                     termFactory.getDBSTSTransform(
                             termFactory.getDBSTSetSRID(subLexicalTerms.get(0),
