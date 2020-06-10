@@ -21,6 +21,8 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 /**
  * TODO: rename it QueryTranslatorImpl ?
  *
@@ -69,7 +71,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(InputQuery inputQuery)
+	public IQ reformulateIntoNativeQuery(InputQuery inputQuery, UUID queryId)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();

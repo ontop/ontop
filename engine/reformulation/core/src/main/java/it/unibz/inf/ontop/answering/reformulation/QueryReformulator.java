@@ -6,12 +6,14 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.iq.IQ;
 
+import java.util.UUID;
+
 /**
  * See ReformulationFactory for creating a new instance.
  */
 public interface QueryReformulator {
 
-    IQ reformulateIntoNativeQuery(InputQuery inputQuery) throws OntopReformulationException;
+    IQ reformulateIntoNativeQuery(InputQuery inputQuery, UUID queryId) throws OntopReformulationException;
 
     /**
      * For analysis purposes

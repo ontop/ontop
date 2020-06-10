@@ -13,6 +13,7 @@ import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -61,7 +62,7 @@ public abstract class QuestStatement implements OntopStatement {
 		private Exception exception;
 		private boolean executingTargetQuery;
 
-		QueryExecutionThread(Q inputQuery, IQ executableQuery, Evaluator<R,Q> evaluator,
+		QueryExecutionThread(Q inputQuery, IQ executableQuery, UUID queryId, Evaluator<R,Q> evaluator,
 							 CountDownLatch monitor) {
 			this.executableQuery = executableQuery;
 			this.inputQuery = inputQuery;
@@ -289,10 +290,11 @@ public abstract class QuestStatement implements OntopStatement {
 
 		log.debug("Executing SPARQL query: \n{}", inputQuery.getInputString());
 
+		UUID queryId = UUID.randomUUID();
 		CountDownLatch monitor = new CountDownLatch(1);
-		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery);
+		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryId);
 
-		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, executableQuery, evaluator,
+		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, executableQuery, queryId, evaluator,
 				monitor);
 
 		this.executionThread = executionthread;
@@ -348,7 +350,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
-			return engine.reformulateIntoNativeQuery(inputQuery);
+			return engine.reformulateIntoNativeQuery(inputQuery, UUID.randomUUID());
 	}
 
 }

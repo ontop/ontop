@@ -22,14 +22,13 @@ import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.joining;
 import static junit.framework.TestCase.assertEquals;
@@ -84,7 +83,7 @@ public class OfflineOnlineMarriageTest {
 
         SelectQuery query = inputQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
 
-        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query);
+        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query, UUID.randomUUID());
         String sqlQuery = Optional.of(executableQuery.getTree())
                 .filter(t -> t instanceof UnaryIQTree)
                 .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
