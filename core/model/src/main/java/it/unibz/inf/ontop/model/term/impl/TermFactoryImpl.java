@@ -563,29 +563,30 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
-    public ImmutableTerm getDBSTWithin(ImmutableList<? extends ImmutableTerm> terms) {
-        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTWithin(), terms);
+    public ImmutableTerm getDBSTWithin(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTWithin(), arg1, arg2);
     }
 
     @Override
-    public ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTTransform(), arg1, arg2);
+    public ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTTransform(), arg1, srid);
     }
 
     @Override
     public ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBST_SETSRID(), arg1, arg2);
-    }
-
-    @Override
-    public ImmutableTerm getDBSTDistance(ImmutableList<? extends ImmutableTerm> terms) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistance(), terms);
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTSetSRID(), arg1, arg2);
     }
 
     @Override
     public ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistance(), ImmutableList.of(arg1, arg2));
     }
+
+    @Override
+    public ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistanceSphere(), ImmutableList.of(arg1, arg2));
+    }
+
 
     @Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {

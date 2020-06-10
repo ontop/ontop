@@ -21,38 +21,23 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
 
     /**
      * @param subLexicalTerms (lat, lon, unit)
-     *                        Assume the args are WGS 84, EPSG:4326 (lat lon)
-     *
-     * @return if unit=meter, returns
+     *                        Assume the args are WGS 84 (lat lon)
+     * @return if unit=uom:metre, returns
      * <pre>
- *      ST_DISTANCE(
-     *      ST_Transform(ST_SETSRID(arg1, 4326), 3857) ,
-     *      ST_Transform(ST_SETSRID(arg2, 4326), 3857) )
+     *      ST_DISTANCE_SPHERE(arg1, arg2)
      * </pre>
+     * <p> if unit=uom:radian, returns
+     * <pre>
+     *         ST_DISTANCE(arg1, arg2)
+     *       </pre>
      */
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
         if (UOM.METRE.getIRIString().equals(unit)) {
-            DBConstant SRID_4326 = termFactory.getDBIntegerConstant(4326); // WGS 84, (lat, lon)
-            DBConstant SRID_3857 = termFactory.getDBIntegerConstant(3857); // Pseudo-Mercator
-            return termFactory.getDBSTDistance(
-                    termFactory.getDBSTSTransform(
-                            termFactory.getDBSTSetSRID(subLexicalTerms.get(0),
-                                    SRID_4326
-                            ),
-                            SRID_3857
-                    )
-                    ,
-                    termFactory.getDBSTSTransform(
-                            termFactory.getDBSTSetSRID(subLexicalTerms.get(1),
-                                    SRID_4326
-                            ),
-                            SRID_3857
-                    )
-            );
+            return termFactory.getDBSTDistanceSphere(subLexicalTerms.get(0), subLexicalTerms.get(1));
         } else if (UOM.RADIAN.getIRIString().equals(unit)) {
-            return termFactory.getDBSTDistance(subLexicalTerms.subList(0, 2));
+            return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
         }
         throw new IllegalStateException("Unexpected unit: " + unit);
 

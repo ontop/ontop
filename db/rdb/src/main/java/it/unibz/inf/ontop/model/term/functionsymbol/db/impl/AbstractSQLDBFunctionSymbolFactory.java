@@ -50,6 +50,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected static final String ST_DISTANCE = "ST_DISTANCE";
 
+    protected static final String ST_DISTANCE_SPHERE = "ST_DISTANCESPHERE";
+
     protected static final String ST_TRANSFORM = "ST_TRANSFORM";
 
     protected static final String ST_SETSRID = "ST_SETSRID";
@@ -220,6 +222,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol distanceFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE, 2, dbDoubleType, false,
                 abstractRootDBType);
         builder.put(ST_DISTANCE, 2, distanceFunctionSymbol);
+
+        DBFunctionSymbol distanceSphereFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE_SPHERE, 2, dbDoubleType, false,
+                abstractRootDBType);
+        builder.put(ST_DISTANCE_SPHERE, 2, distanceSphereFunctionSymbol);
 
         return builder.build();
     }
@@ -805,12 +811,17 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    public DBFunctionSymbol getDBSTDistanceSphere() {
+        return getRegularDBFunctionSymbol(ST_DISTANCE_SPHERE, 2);
+    }
+
+    @Override
     public DBFunctionSymbol getDBSTTransform() {
         return getRegularDBFunctionSymbol(ST_TRANSFORM, 2);
     }
 
     @Override
-    public DBFunctionSymbol getDBST_SETSRID() {
+    public DBFunctionSymbol getDBSTSetSRID() {
         return getRegularDBFunctionSymbol(ST_SETSRID, 2);
     }
 
