@@ -15,13 +15,9 @@ public class QueryLoggerImpl implements QueryLogger {
     public QueryLoggerImpl(PrintStream outputStream) {
         this.outputStream = outputStream;
         this.queryId = UUID.randomUUID();
-        // TODO: get timestamp
         creationTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public UUID getQueryId() {
-        return queryId;
+        reformulationTime = -1;
+        unblockedResulSetTime = -1;
     }
 
     /**
@@ -32,10 +28,10 @@ public class QueryLoggerImpl implements QueryLogger {
         reformulationTime = System.currentTimeMillis();
         // TODO: use a proper framework
         String json = String.format(
-                "{\"queryId\": %s, \"reformulationDuration\": %d, \"reformulationCache\": %s}",
+                "{\"queryId\": %s, \"reformulationDuration\": %d, \"reformulationCacheHit\": %b}",
                 queryId,
                 reformulationTime - creationTime,
-                wasCached ? "HIT" : "MISS");
+                wasCached);
         outputStream.println(json);
     }
 
@@ -45,11 +41,34 @@ public class QueryLoggerImpl implements QueryLogger {
     @Override
     public void declareResultSetUnblockedAndSerialize() {
         unblockedResulSetTime = System.currentTimeMillis();
+        if (reformulationTime == -1)
+            throw new IllegalStateException("Reformulation should have been declared as finished");
+
         // TODO: use a proper framework
         String json = String.format(
                 "{\"queryId\": %s, \"executionBeforeUnblockingDuration\": %d}",
                 queryId,
                 unblockedResulSetTime - reformulationTime);
+        outputStream.println(json);
+    }
+
+    /**
+     * TODO: implement it seriously!
+     * @param resultCount
+     */
+    @Override
+    public void declareLastResultRetrievedAndSerialize(long resultCount) {
+        long lastResultFetchedTime = System.currentTimeMillis();
+        if (unblockedResulSetTime == -1)
+            throw new IllegalStateException("Result set should have been declared as unblocked");
+
+        // TODO: use a proper framework
+        String json = String.format(
+                "{\"queryId\": %s, \"executionAndFetchingDuration\": %d, \"totalDuration\": %d, \"resultCount\": %d}",
+                queryId,
+                lastResultFetchedTime - reformulationTime,
+                lastResultFetchedTime - creationTime,
+                resultCount);
         outputStream.println(json);
     }
 }

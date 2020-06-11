@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 
@@ -168,7 +167,7 @@ public class SQLQuestStatement extends QuestStatement {
             String sqlQuery = extractSQLQuery(executableQuery);
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                return new SQLBooleanResultSet(set);
+                return new SQLBooleanResultSet(set, queryLogger);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
@@ -189,8 +188,8 @@ public class SQLQuestStatement extends QuestStatement {
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 return settings.isDistinctPostProcessingEnabled()
-                        ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), termFactory, substitutionFactory)
-                        : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), termFactory, substitutionFactory);
+                        ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory)
+                        : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e);
             }
@@ -213,7 +212,7 @@ public class SQLQuestStatement extends QuestStatement {
             try {
                 ResultSet rs = sqlStatement.executeQuery(sqlQuery);
                 tuples = new JDBCTupleResultSet(rs, SQLSignature, SQLTypeMap, constructionNode,
-                        executableQuery.getProjectionAtom(), termFactory, substitutionFactory);
+                        executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
