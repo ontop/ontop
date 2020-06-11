@@ -194,7 +194,7 @@ public class SQLQuestStatement extends QuestStatement {
                 throw new OntopQueryEvaluationException(e);
             }
         } catch (EmptyQueryException e) {
-            return new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments());
+            return new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
     }
 
@@ -217,7 +217,7 @@ public class SQLQuestStatement extends QuestStatement {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         } catch (EmptyQueryException e) {
-            tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments());
+            tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
         return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory, rdfFactory);
     }

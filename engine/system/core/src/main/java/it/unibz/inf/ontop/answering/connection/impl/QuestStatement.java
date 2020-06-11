@@ -105,7 +105,7 @@ public abstract class QuestStatement implements OntopStatement {
 //				e.printStackTrace();
 //			}
 			try {
-				/**
+				/*
 				 * Executes the target query.
 				 */
 				log.debug("Executing the query and get the result...");
