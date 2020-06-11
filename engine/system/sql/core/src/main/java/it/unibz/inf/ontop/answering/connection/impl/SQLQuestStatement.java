@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.impl.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
@@ -161,7 +162,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected BooleanResultSet executeBooleanQuery(IQ executableQuery)
+    protected BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
@@ -177,7 +178,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(IQ executableQuery)
+    protected TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
@@ -199,7 +200,8 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected SimpleGraphResultSet executeGraphQuery(ConstructQuery inputQuery, IQ executableQuery, boolean collectResults)
+    protected SimpleGraphResultSet executeGraphQuery(ConstructQuery inputQuery, IQ executableQuery, boolean collectResults,
+                                                     QueryLogger queryLogger)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         TupleResultSet tuples;
         try {

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
@@ -71,14 +72,16 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(InputQuery inputQuery, UUID queryId)
+	public IQ reformulateIntoNativeQuery(InputQuery inputQuery, QueryLogger queryLogger)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();
 
 		IQ cachedQuery = queryCache.get(inputQuery);
-		if (cachedQuery != null)
+		if (cachedQuery != null) {
+			queryLogger.declareReformulationFinishedAndSerialize(true);
 			return cachedQuery;
+		}
 
 		try {
 			log.debug("SPARQL query:\n{}", inputQuery.getInputString());
@@ -107,6 +110,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				log.info(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
+				queryLogger.declareReformulationFinishedAndSerialize(false);
 				return executableQuery;
 
 			}
@@ -120,6 +124,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		 */
 		catch (Exception e) {
 			log.warn("Unexpected exception: " + e.getMessage(), e);
+			// TODO: involve the query logger
 			throw new OntopReformulationException(e);
 			//throw new OntopReformulationException("Error rewriting and unfolding into SQL\n" + e.getMessage());
 		}

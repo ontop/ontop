@@ -9,5 +9,7 @@ public interface QueryLogger {
 
     UUID getQueryId();
 
-    void serialize();
+    void declareReformulationFinishedAndSerialize(boolean wasCached);
+
+    void declareResultSetUnblockedAndSerialize();
 }
