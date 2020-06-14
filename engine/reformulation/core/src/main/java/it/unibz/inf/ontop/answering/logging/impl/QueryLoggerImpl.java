@@ -12,6 +12,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private final long creationTime;
     private final PrintStream outputStream;
     private final OntopReformulationSettings settings;
+    private final boolean disabled;
     private long reformulationTime;
     private long unblockedResulSetTime;
 
@@ -21,6 +22,7 @@ public class QueryLoggerImpl implements QueryLogger {
     }
 
     protected QueryLoggerImpl(PrintStream outputStream, OntopReformulationSettings settings) {
+        this.disabled = !settings.isQueryLoggingEnabled();
         this.outputStream = outputStream;
         this.settings = settings;
         this.queryId = UUID.randomUUID();
@@ -29,11 +31,11 @@ public class QueryLoggerImpl implements QueryLogger {
         unblockedResulSetTime = -1;
     }
 
-    /**
-     * TODO: implement it seriously!
-     */
     @Override
     public void declareReformulationFinishedAndSerialize(boolean wasCached) {
+        if (disabled)
+            return;
+
         reformulationTime = System.currentTimeMillis();
         // TODO: use a proper framework
         String json = String.format(
@@ -44,11 +46,10 @@ public class QueryLoggerImpl implements QueryLogger {
         outputStream.println(json);
     }
 
-    /**
-     * TODO: implement it seriously!
-     */
     @Override
     public void declareResultSetUnblockedAndSerialize() {
+        if (disabled)
+            return;
         unblockedResulSetTime = System.currentTimeMillis();
         if (reformulationTime == -1)
             throw new IllegalStateException("Reformulation should have been declared as finished");
@@ -61,12 +62,11 @@ public class QueryLoggerImpl implements QueryLogger {
         outputStream.println(json);
     }
 
-    /**
-     * TODO: implement it seriously!
-     * @param resultCount
-     */
     @Override
     public void declareLastResultRetrievedAndSerialize(long resultCount) {
+        if (disabled)
+            return;
+
         long lastResultFetchedTime = System.currentTimeMillis();
         if (unblockedResulSetTime == -1)
             throw new IllegalStateException("Result set should have been declared as unblocked");
