@@ -7,6 +7,8 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
 
     boolean isDistinctPostProcessingEnabled();
 
+    boolean isQueryLoggingEnabled();
+
     long getQueryCacheMaxSize();
 
 
@@ -17,4 +19,5 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     String EXISTENTIAL_REASONING = "ontop.existentialReasoning";
     String DISTINCT_RESULTSET = "ontop.distinctResultSet";
     String QUERY_CACHE_MAX_SIZE = "ontop.cache.query.size";
+    String QUERY_LOGGING = "ontop.queryLogging";
 }

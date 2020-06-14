@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -46,10 +47,10 @@ public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements Tu
 
     public DistinctJDBCTupleResultSet(ResultSet rs, ImmutableSortedSet<Variable> sqlSignature, ImmutableMap<Variable, DBTermType> sqlTypes,
                                       ConstructionNode constructionNode,
-                                      DistinctVariableOnlyDataAtom answerAtom, TermFactory termFactory,
+                                      DistinctVariableOnlyDataAtom answerAtom, QueryLogger queryLogger, TermFactory termFactory,
                                       SubstitutionFactory substitutionFactory) {
 
-        super(rs, sqlSignature, sqlTypes, constructionNode, answerAtom, termFactory, substitutionFactory);
+        super(rs, sqlSignature, sqlTypes, constructionNode, answerAtom, queryLogger, termFactory, substitutionFactory);
         rowKeys = new HashSet<>();
     }
 
