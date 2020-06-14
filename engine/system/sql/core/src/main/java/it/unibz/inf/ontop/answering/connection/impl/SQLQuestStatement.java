@@ -167,11 +167,13 @@ public class SQLQuestStatement extends QuestStatement {
             String sqlQuery = extractSQLQuery(executableQuery);
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
+                queryLogger.declareResultSetUnblockedAndSerialize();
                 return new SQLBooleanResultSet(set, queryLogger);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         } catch (EmptyQueryException e) {
+            queryLogger.declareResultSetUnblockedAndSerialize();
             return new PredefinedBooleanResultSet(false);
         }
     }
@@ -187,6 +189,7 @@ public class SQLQuestStatement extends QuestStatement {
             ImmutableMap<Variable, DBTermType> typeMap = nativeNode.getTypeMap();
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
+                queryLogger.declareResultSetUnblockedAndSerialize();
                 return settings.isDistinctPostProcessingEnabled()
                         ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory)
                         : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory);
@@ -194,6 +197,7 @@ public class SQLQuestStatement extends QuestStatement {
                 throw new OntopQueryEvaluationException(e);
             }
         } catch (EmptyQueryException e) {
+            queryLogger.declareResultSetUnblockedAndSerialize();
             return new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
     }
@@ -211,12 +215,14 @@ public class SQLQuestStatement extends QuestStatement {
             ImmutableMap<Variable, DBTermType> SQLTypeMap = nativeNode.getTypeMap();
             try {
                 ResultSet rs = sqlStatement.executeQuery(sqlQuery);
+                queryLogger.declareResultSetUnblockedAndSerialize();
                 tuples = new JDBCTupleResultSet(rs, SQLSignature, SQLTypeMap, constructionNode,
                         executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         } catch (EmptyQueryException e) {
+            queryLogger.declareResultSetUnblockedAndSerialize();
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
         return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory, rdfFactory);

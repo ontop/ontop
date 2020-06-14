@@ -326,7 +326,6 @@ public abstract class QuestStatement implements OntopStatement {
 			throw new OntopQueryEvaluationException("Query execution was cancelled");
 		}
 		R resultSet = executionthread.getResultSet();
-		queryLogger.declareResultSetUnblockedAndSerialize();
 		return resultSet;
 	}
 
