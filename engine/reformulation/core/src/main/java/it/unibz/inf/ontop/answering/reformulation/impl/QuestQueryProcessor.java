@@ -101,7 +101,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
-                	log.info(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
+                	log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
 					queryLogger.declareReformulationFinishedAndSerialize(false);
 					return unfoldedIQ;
 				}
@@ -113,7 +113,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
-				log.info(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
+				log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
 				queryLogger.declareReformulationFinishedAndSerialize(false);
 				return executableQuery;
 
