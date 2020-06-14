@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.answering.logging.impl;
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 
 import java.io.PrintStream;
 import java.util.UUID;
@@ -9,11 +11,18 @@ public class QueryLoggerImpl implements QueryLogger {
     private final UUID queryId;
     private final long creationTime;
     private final PrintStream outputStream;
+    private final OntopReformulationSettings settings;
     private long reformulationTime;
     private long unblockedResulSetTime;
 
-    public QueryLoggerImpl(PrintStream outputStream) {
+    @Inject
+    protected QueryLoggerImpl(OntopReformulationSettings settings) {
+        this(System.out, settings);
+    }
+
+    protected QueryLoggerImpl(PrintStream outputStream, OntopReformulationSettings settings) {
         this.outputStream = outputStream;
+        this.settings = settings;
         this.queryId = UUID.randomUUID();
         creationTime = System.currentTimeMillis();
         reformulationTime = -1;

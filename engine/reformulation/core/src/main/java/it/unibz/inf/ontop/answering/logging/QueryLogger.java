@@ -10,4 +10,8 @@ public interface QueryLogger {
     void declareResultSetUnblockedAndSerialize();
 
     void declareLastResultRetrievedAndSerialize(long rowCount);
+
+    interface Factory {
+        QueryLogger create();
+    }
 }

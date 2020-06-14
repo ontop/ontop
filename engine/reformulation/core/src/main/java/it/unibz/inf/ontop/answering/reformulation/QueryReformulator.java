@@ -20,4 +20,6 @@ public interface QueryReformulator {
     String getRewritingRendering(InputQuery query) throws OntopReformulationException;
 
     InputQueryFactory getInputQueryFactory();
+
+    QueryLogger.Factory getQueryLoggerFactory();
 }

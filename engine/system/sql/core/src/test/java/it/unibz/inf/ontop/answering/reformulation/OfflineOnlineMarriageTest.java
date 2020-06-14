@@ -83,7 +83,9 @@ public class OfflineOnlineMarriageTest {
 
         SelectQuery query = inputQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
 
-        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query, new QueryLoggerImpl(System.out));
+
+        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query,
+                queryReformulator.getQueryLoggerFactory().create());
         String sqlQuery = Optional.of(executableQuery.getTree())
                 .filter(t -> t instanceof UnaryIQTree)
                 .map(t -> ((UnaryIQTree) t).getChild().getRootNode())

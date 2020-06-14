@@ -26,6 +26,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private final QueryReformulator engine;
 	private final InputQueryFactory inputQueryFactory;
+	private final QueryLogger.Factory queryLoggerFactory;
 
 	private QueryExecutionThread executionThread;
 	private boolean canceled = false;
@@ -37,6 +38,7 @@ public abstract class QuestStatement implements OntopStatement {
 	public QuestStatement(QueryReformulator queryProcessor, InputQueryFactory inputQueryFactory) {
 		this.engine = queryProcessor;
 		this.inputQueryFactory = inputQueryFactory;
+		this.queryLoggerFactory = queryProcessor.getQueryLoggerFactory();
 	}
 
 	/**
@@ -291,7 +293,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
-		QueryLogger queryLogger = createQueryLogger();
+		QueryLogger queryLogger = queryLoggerFactory.create();
 
 		log.debug("Executing SPARQL query: \n{}", inputQuery.getInputString());
 
@@ -355,12 +357,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
-			return engine.reformulateIntoNativeQuery(inputQuery, createQueryLogger());
-	}
-
-	private QueryLogger createQueryLogger() {
-		// TODO: use a factory instead
-		return new QueryLoggerImpl(System.out);
+			return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create());
 	}
 
 }
