@@ -11,6 +11,8 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
 
     long getQueryCacheMaxSize();
 
+    String getApplicationName();
+
 
     //--------------------------
     // Keys
@@ -20,4 +22,6 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     String DISTINCT_RESULTSET = "ontop.distinctResultSet";
     String QUERY_CACHE_MAX_SIZE = "ontop.cache.query.size";
     String QUERY_LOGGING = "ontop.queryLogging";
+    // Needed for logging
+    String APPLICATION_NAME = "ontop.applicationName";
 }

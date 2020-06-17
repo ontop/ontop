@@ -43,6 +43,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public String getApplicationName() {
+        return getRequiredProperty(APPLICATION_NAME);
+    }
+
+    @Override
     public boolean isKeepAliveEnabled() {
         return systemSettings.isKeepAliveEnabled();
     }
