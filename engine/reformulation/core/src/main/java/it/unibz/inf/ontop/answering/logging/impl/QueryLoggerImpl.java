@@ -5,6 +5,9 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 
 import java.io.PrintStream;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 public class QueryLoggerImpl implements QueryLogger {
@@ -13,8 +16,10 @@ public class QueryLoggerImpl implements QueryLogger {
     private final PrintStream outputStream;
     private final OntopReformulationSettings settings;
     private final boolean disabled;
+    private final String applicationName;
     private long reformulationTime;
     private long unblockedResulSetTime;
+    private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     @Inject
     protected QueryLoggerImpl(OntopReformulationSettings settings) {
@@ -27,6 +32,7 @@ public class QueryLoggerImpl implements QueryLogger {
         this.settings = settings;
         this.queryId = UUID.randomUUID();
         creationTime = System.currentTimeMillis();
+        applicationName = settings.getApplicationName();
         reformulationTime = -1;
         unblockedResulSetTime = -1;
     }
@@ -39,8 +45,10 @@ public class QueryLoggerImpl implements QueryLogger {
         reformulationTime = System.currentTimeMillis();
         // TODO: use a proper framework
         String json = String.format(
-                "{\"queryId\": %s, \"reformulationDuration\": %d, \"reformulationCacheHit\": %b}",
+                "{\"@timestamp\": \"%s\", \"queryId\": \"%s\", \"message\": \"Query reformulated\", \"application\": \"%s\", \"reformulationDuration\": %d, \"reformulationCacheHit\": %b}",
+                serializeTimestamp(reformulationTime),
                 queryId,
+                applicationName,
                 reformulationTime - creationTime,
                 wasCached);
         outputStream.println(json);
@@ -56,8 +64,10 @@ public class QueryLoggerImpl implements QueryLogger {
 
         // TODO: use a proper framework
         String json = String.format(
-                "{\"queryId\": %s, \"executionBeforeUnblockingDuration\": %d}",
+                "{\"@timestamp\": \"%s\", \"queryId\": \"%s\", \"message\": \"Result set unblocked\", \"application\": \"%s\", \"executionBeforeUnblockingDuration\": %d}",
+                serializeTimestamp(unblockedResulSetTime),
                 queryId,
+                applicationName,
                 unblockedResulSetTime - reformulationTime);
         outputStream.println(json);
     }
@@ -73,11 +83,17 @@ public class QueryLoggerImpl implements QueryLogger {
 
         // TODO: use a proper framework
         String json = String.format(
-                "{\"queryId\": %s, \"executionAndFetchingDuration\": %d, \"totalDuration\": %d, \"resultCount\": %d}",
+                "{\"@timestamp\": \"%s\", \"queryId\": \"%s\", \"message\": \"Last result fetched\", \"application\": \"%s\", \"executionAndFetchingDuration\": %d, \"totalDuration\": %d, \"resultCount\": %d}",
+                serializeTimestamp(lastResultFetchedTime),
                 queryId,
+                applicationName,
                 lastResultFetchedTime - reformulationTime,
                 lastResultFetchedTime - creationTime,
                 resultCount);
         outputStream.println(json);
+    }
+
+    protected String serializeTimestamp(long time) {
+        return DATE_FORMAT.format(new Timestamp(time));
     }
 }

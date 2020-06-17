@@ -46,4 +46,9 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     public long getQueryCacheMaxSize() {
         return getRequiredLong(QUERY_CACHE_MAX_SIZE);
     }
+
+    @Override
+    public String getApplicationName() {
+        return getRequiredProperty(APPLICATION_NAME);
+    }
 }
