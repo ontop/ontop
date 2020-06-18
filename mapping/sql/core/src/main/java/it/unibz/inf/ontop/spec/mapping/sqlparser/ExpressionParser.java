@@ -1111,9 +1111,7 @@ public class ExpressionParser {
             ImmutableTerm term = getTerm(expression.getLeftExpression());
             ColDataType type = expression.getType();
             String datatype = type.getDataType();
-            // TODO: proper datatype conversion is required at this stage
-            // result = FACTORY.getFunctionCast(term, datatype);
-            throw new UnsupportedSelectQueryRuntimeException("CAST is not supported yet", expression);
+            result = termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBTermType(datatype), term);
         }
 
 
