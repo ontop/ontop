@@ -129,6 +129,6 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     }
 
     private NativeNode generateNativeNode(IQTree normalizedSubTree) {
-        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters);
+        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters, false);
     }
 }

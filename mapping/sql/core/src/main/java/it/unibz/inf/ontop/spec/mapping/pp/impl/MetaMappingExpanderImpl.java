@@ -121,7 +121,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), constructionTree);
 
             IQTree transformedTree = mappingEqualityTransformer.transform(tree);
-            return nativeNodeGenerator.generate(transformedTree, dbParameters);
+            return nativeNodeGenerator.generate(transformedTree, dbParameters, true);
         }
 
         MappingAssertion createExpansion(ImmutableMap<Variable, ImmutableTerm> values) {

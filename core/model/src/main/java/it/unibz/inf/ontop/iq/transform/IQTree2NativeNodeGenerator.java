@@ -9,6 +9,10 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
  */
 public interface IQTree2NativeNodeGenerator {
 
-    NativeNode generate(IQTree iqTree, DBParameters dbParameters);
+    /**
+     * NB: the tolerateUnknownTypes option has been added for the MetaMappingExpander, because
+     * at this stage we may not be able to infer the types.
+     */
+    NativeNode generate(IQTree iqTree, DBParameters dbParameters, boolean tolerateUnknownTypes);
 
 }
