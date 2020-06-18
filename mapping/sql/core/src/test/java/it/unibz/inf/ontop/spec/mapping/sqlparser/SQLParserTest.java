@@ -857,10 +857,9 @@ public class SQLParserTest {
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to NULL
-	//add support for CAST also in unquoted visited query
+	@Test
 	public void testUnquoted1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = sqp.parse("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+		RAExpression re = sqp.parse("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", \"QpeopleVIEW0\".\"id\" AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
 	}
