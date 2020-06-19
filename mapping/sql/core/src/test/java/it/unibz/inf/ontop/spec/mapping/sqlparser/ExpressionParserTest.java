@@ -61,6 +61,24 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void hex_test() throws JSQLParserException {
+        ImmutableTerm translation = parseTerm("SELECT 0xFF AS A FROM DUMMY", ImmutableMap.of());
+        assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
+    }
+
+    @Test
+    public void hex_quote_test() throws JSQLParserException {
+        ImmutableTerm translation = parseTerm("SELECT x'FF' AS A FROM DUMMY", ImmutableMap.of());
+        assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
+    }
+
+    @Test
+    public void hex_quote2_test() throws JSQLParserException {
+        ImmutableTerm translation = parseTerm("SELECT X'FF' AS A FROM DUMMY", ImmutableMap.of());
+        assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
+    }
+
+    @Test
     public void long_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT 1 AS A FROM DUMMY", ImmutableMap.of());
         assertEquals(TERM_FACTORY.getDBConstant("1", dbLongType), translation);
@@ -1126,13 +1144,25 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
 
-    // TODO
-    @Test // (expected = JSQLParserException.class)
-    public void function_SQL_SUBSTRING_test() throws JSQLParserException {
-        // SQL:99 SUBSTRING cannot be supported because of JSQLParser
+    @Test
+    public void function_SQL_SUBSTRING2_test() throws JSQLParserException {
+        // SQL:99: SUBSTRING <left paren> <character value expression> FROM <start position> [ FOR <string length> ] <right paren>
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT SUBSTRING(X FROM 1) AS A FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString2(), v,
+                TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
+    }
+
+    @Test
+    public void function_SQL_SUBSTRING3_test() throws JSQLParserException {
+        // SQL:99: SUBSTRING <left paren> <character value expression> FROM <start position> [ FOR <string length> ] <right paren>
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT SUBSTRING(X FROM 1 FOR 2) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString3(), v,
+                TERM_FACTORY.getDBConstant("1", dbLongType),
+                TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
 
     @Test

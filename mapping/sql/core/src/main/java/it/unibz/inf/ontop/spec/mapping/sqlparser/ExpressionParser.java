@@ -725,9 +725,6 @@ public class ExpressionParser {
         if (expression.isDistinct() || expression.isAllColumns())
             throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
-        if (expression.getNamedParameters() != null)
-            throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-
         if (expression.isEscaped())
             throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
@@ -737,16 +734,25 @@ public class ExpressionParser {
         if (expression.getKeep() != null)
             throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
-        ImmutableList<ImmutableTerm> terms = (expression.getParameters() == null)
-                ? ImmutableList.of()
-                : expression.getParameters().getExpressions().stream()
-                .map(termVisitor::getTerm).collect(ImmutableCollectors.toList());
+        ImmutableList<ImmutableTerm> terms;
+        if (expression.getParameters() != null) {
+            terms = expression.getParameters().getExpressions().stream()
+                    .map(termVisitor::getTerm).collect(ImmutableCollectors.toList());
+        }
+        else if (expression.getNamedParameters() != null) {
+            // TODO: handle parameter names as in SUBSTRING(X FROM 1 FOR 2):
+            //           "" for X, "FROM" for 1 and "FOR" for 2
+            terms = expression.getNamedParameters().getExpressions().stream()
+                    .map(termVisitor::getTerm).collect(ImmutableCollectors.toList());
+        }
+        else
+            terms = ImmutableList.of();
 
         DBFunctionSymbol functionSymbol = dbFunctionSymbolFactory.getRegularDBFunctionSymbol(expression.getName(),
                 terms.size());
         return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
     }
-
+    
     private ImmutableFunctionalTerm getRAND(net.sf.jsqlparser.expression.Function expression, TermVisitor termVisitor) {
         if (expression.getParameters() == null)
             return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
@@ -824,7 +830,13 @@ public class ExpressionParser {
 
         @Override
         public void visit(HexValue expression) {
-            throw new UnsupportedSelectQueryRuntimeException("HEX is not supported", expression);
+            String value = expression.getValue();
+            if (value.startsWith("0x"))
+                process(Long.parseLong(value.substring(2), 16) + "", dbTypeFactory.getDBLargeIntegerType());
+            else if (value.toUpperCase().startsWith("X'"))
+                process(Long.parseLong(value.substring(2, value.length() - 1), 16) + "", dbTypeFactory.getDBLargeIntegerType());
+            else
+                throw new UnsupportedOperationException("Invalid HEX" + value);
         }
 
         @Override
