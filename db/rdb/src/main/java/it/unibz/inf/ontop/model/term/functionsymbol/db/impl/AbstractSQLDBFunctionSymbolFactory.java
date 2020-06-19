@@ -585,7 +585,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType) {
+    protected DBMathBinaryOperator createSubtractOperator(DBTermType dbNumericType) {
         return new DefaultTypedDBMathBinaryOperator(SUBTRACT_STR, dbNumericType);
     }
 
