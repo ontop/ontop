@@ -35,7 +35,11 @@ public class RAExpressionAttributes  {
     }
 
     public ImmutableTerm get(QuotedID attributeId) {
-        return attributes.get(new QualifiedAttributeID(null, attributeId));
+        return get(new QualifiedAttributeID(null, attributeId));
+    }
+
+    public ImmutableTerm get(QualifiedAttributeID id) {
+        return attributes.get(id);
     }
 
     RAExpressionAttributeOccurrences getOccurrences() { return occurrences; }

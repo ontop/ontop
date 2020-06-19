@@ -62,12 +62,12 @@ public class ExpressionParser {
     }
 
     public ImmutableTerm parseTerm(Expression expression, RAExpressionAttributes attributes) {
-        TermVisitor visitor = new TermVisitor(attributes.asMap());
+        TermVisitor visitor = new TermVisitor(attributes);
         return visitor.getTerm(expression);
     }
 
     public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
-        BooleanExpressionVisitor parser = new BooleanExpressionVisitor(attributes.asMap());
+        BooleanExpressionVisitor parser = new BooleanExpressionVisitor(attributes);
         return parser.translate(expression);
     }
 
@@ -95,7 +95,7 @@ public class ExpressionParser {
         // concurrent evaluation is not possible
         private ImmutableList<ImmutableExpression> result;
 
-        BooleanExpressionVisitor(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
+        BooleanExpressionVisitor(RAExpressionAttributes attributes) {
             termVisitor = new TermVisitor(attributes);
         }
 
@@ -699,12 +699,73 @@ public class ExpressionParser {
     }
 
 
+    // ---------------------------------------------------------------
+    // supported and officially unsupported SQL functions
+    // (WARNING: not all combinations of the parameters are supported)
+    // ---------------------------------------------------------------
+
+    private final ImmutableMap<String, BiFunction< net.sf.jsqlparser.expression.Function, TermVisitor, ImmutableFunctionalTerm>>
+            FUNCTIONS = ImmutableMap.<String, BiFunction<net.sf.jsqlparser.expression.Function, TermVisitor, ImmutableFunctionalTerm>>builder()
+            .put("RAND", this::getRAND)
+            // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
+            .put("CONVERT", this::reject)
+            // due to COUNT(*) TODO: support it
+            .put("COUNT", this::reject)
+            // Array functions changing the cardinality: not yet supported
+            //    - From PostgreSQL
+            .put("UNNEST", this::reject)
+            .put("JSON_EACH", this::reject)
+            .put("JSON_EACH_TEXT", this::reject)
+            .put("JSON_OBJECT_KEYS", this::reject)
+            .put("JSON_POPULATE_RECORDSET", this::reject)
+            .put("JSON_ARRAY_ELEMENTS", this::reject)
+            .build();
+
+    private ImmutableFunctionalTerm getGenericDBFunction(net.sf.jsqlparser.expression.Function expression, TermVisitor termVisitor) {
+        if (expression.isDistinct() || expression.isAllColumns())
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+
+        if (expression.getNamedParameters() != null)
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+
+        if (expression.isEscaped())
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+
+        if (expression.getAttribute() != null || expression.getAttributeName() != null)
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+
+        if (expression.getKeep() != null)
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+
+        ImmutableList<ImmutableTerm> terms = (expression.getParameters() == null)
+                ? ImmutableList.of()
+                : expression.getParameters().getExpressions().stream()
+                .map(termVisitor::getTerm).collect(ImmutableCollectors.toList());
+
+        DBFunctionSymbol functionSymbol = dbFunctionSymbolFactory.getRegularDBFunctionSymbol(expression.getName(),
+                terms.size());
+        return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
+    }
+
+    private ImmutableFunctionalTerm getRAND(net.sf.jsqlparser.expression.Function expression, TermVisitor termVisitor) {
+        if (expression.getParameters() == null)
+            return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
+
+        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+    }
+
+    private ImmutableFunctionalTerm reject(net.sf.jsqlparser.expression.Function expression, TermVisitor termVisitor) {
+        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+    }
+
+
+
     /**
      * This visitor class converts the SQL Expression to a Term
      *
      * Exceptions
      *      - UnsupportedOperationException:
-     *                  an internal error (due to the unexpected bahaviour of JSQLparser)
+     *                  an internal error (due to the unexpected bahaviour of JSQLParser)
      *      - InvalidSelectQueryRuntimeException:
      *                  the input is not a valid mapping query
      *      - UnsupportedSelectQueryRuntimeException:
@@ -713,13 +774,13 @@ public class ExpressionParser {
      */
     private class TermVisitor implements ExpressionVisitor {
 
-        private final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
+        private final RAExpressionAttributes attributes;
 
         // CAREFUL: this variable gets reset in each visit method implementation
         // concurrent evaluation is not possible
         private ImmutableTerm result;
 
-        TermVisitor(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
+        TermVisitor(RAExpressionAttributes attributes) {
             this.attributes = attributes;
         }
 
@@ -732,26 +793,14 @@ public class ExpressionParser {
 
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
-            ImmutableList<ImmutableTerm> terms = (expression.getParameters() != null)
-                    ? expression.getParameters().getExpressions().stream()
-                            .map(this::getTerm).collect(ImmutableCollectors.toList())
-                    : ImmutableList.of();
+            BiFunction<net.sf.jsqlparser.expression.Function, TermVisitor, ImmutableFunctionalTerm> function
+                    = FUNCTIONS.getOrDefault(expression.getName().toUpperCase(),
+                                    ExpressionParser.this::getGenericDBFunction);
 
-            // Old approach
-            BiFunction<ImmutableList<ImmutableTerm>, net.sf.jsqlparser.expression.Function, ImmutableFunctionalTerm> function
-                    = FUNCTIONS.get(expression.getName().toUpperCase());
-
-            result = (function == null)
-                    // New approach
-                    ? convertFunction(expression, terms)
-                    : function.apply(terms, expression);
+            result = function.apply(expression, this);
         }
 
-        private ImmutableTerm convertFunction(net.sf.jsqlparser.expression.Function expression, ImmutableList<ImmutableTerm> terms) {
-            DBFunctionSymbol functionSymbol = dbFunctionSymbolFactory.getRegularDBFunctionSymbol(expression.getName(),
-                    terms.size());
-            return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
-        }
+
 
 
         // ------------------------------------------------------------
@@ -1231,37 +1280,5 @@ public class ExpressionParser {
 
 
 
-    // ---------------------------------------------------------------
-    // supported and officially unsupported SQL functions
-    // (WARNING: not all combinations of the parameters are supported)
-    // ---------------------------------------------------------------
-
-    private final ImmutableMap<String, BiFunction<ImmutableList<ImmutableTerm>, net.sf.jsqlparser.expression.Function, ImmutableFunctionalTerm>>
-            FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<ImmutableTerm>, net.sf.jsqlparser.expression.Function, ImmutableFunctionalTerm>>builder()
-            .put("RAND", this::get_RAND)
-            // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
-            .put("CONVERT", this::reject)
-            // due to COUNT(*) TODO: support it
-            .put("COUNT", this::reject)
-            // Array functions changing the cardinality: not yet supported
-            //    - From PostgreSQL
-            .put("UNNEST", this::reject)
-            .put("JSON_EACH", this::reject)
-            .put("JSON_EACH_TEXT", this::reject)
-            .put("JSON_OBJECT_KEYS", this::reject)
-            .put("JSON_POPULATE_RECORDSET", this::reject)
-            .put("JSON_ARRAY_ELEMENTS", this::reject)
-            .build();
-
-    private ImmutableFunctionalTerm get_RAND(ImmutableList<ImmutableTerm> terms, net.sf.jsqlparser.expression.Function expression) {
-        if (terms.size() == 0)
-            return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
-
-        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-    }
-
-    private ImmutableFunctionalTerm reject(ImmutableList<ImmutableTerm> terms, net.sf.jsqlparser.expression.Function expression) {
-        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-    }
 
 }
