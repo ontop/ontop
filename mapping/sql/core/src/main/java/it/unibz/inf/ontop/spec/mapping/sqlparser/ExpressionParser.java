@@ -71,11 +71,6 @@ public class ExpressionParser {
         return parser.translate(expression);
     }
 
-    public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) {
-        BooleanExpressionVisitor parser = new BooleanExpressionVisitor(map);
-        return parser.translate(expression);
-    }
-
 
 
 

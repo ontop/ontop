@@ -202,15 +202,9 @@ public class ExpressionParserTest {
 
     @Test
     public void equalsTo_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X = 'B'";
-
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -218,16 +212,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void notEqualsTo_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X <> 'B'";
-
+    public void not_equalsTo_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X <> 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -235,16 +223,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void notEqualsTo_Bang_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X != 'B'";
-
+    public void not_equalsTo_bang_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X != 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -252,16 +234,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void greaterThan_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X > 3";
-
+    public void greater_than_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X > 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GT),
@@ -270,16 +246,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void greaterThanEquals_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X >= 3";
-
+    public void greater_than_or_equals_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X >= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
@@ -288,16 +258,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void minorThan_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X < 3";
-
+    public void minor_than_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X < 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LT),
@@ -306,16 +270,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void minorThanEquals_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X <= 3";
-
+    public void minor_than_equals_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X <= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LTE),
@@ -324,16 +282,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_EqualsTo_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X = 'B'";
-
+    public void not_equals_to_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X = 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -341,16 +293,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_NotEqualsTo_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X <> 'B'";
-
+    public void not_not_equals_to_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X <> 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -358,16 +304,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_NotEqualsTo_Bang_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X != 'B'";
-
+    public void not_not_equals_to_bang_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X != 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -375,16 +315,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_GreaterThan_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X > 3";
-
+    public void not_greater_than_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X > 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GT),
@@ -393,16 +327,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_GreaterThanEquals_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X >= 3";
-
+    public void not_greater_than_equals_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X >= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
@@ -411,16 +339,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_MinorThan_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X < 3";
-
+    public void not_minor_than_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X < 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LT),
@@ -429,16 +351,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_MinorThanEquals_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X <= 3";
-
+    public void not_minor_than_equals_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X <= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LTE),
@@ -447,16 +363,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void in_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X IN (1, 3)";
-
+    public void in_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IN (1, 3)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getNotYetTypedEquality(
@@ -468,16 +378,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_In_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X NOT IN (1, 3)";
-
+    public void not_in_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X NOT IN (1, 3)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
@@ -490,18 +394,13 @@ public class ExpressionParserTest {
     }
 
     @Test(expected = JSQLParserException.class)
-    public void in_Multi_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE (X, Y) IN ((1, 3), (2,4))";
-
+    public void in_multi_test() throws JSQLParserException {
         Variable v1 = TERM_FACTORY.getVariable("x0");
         Variable v2 = TERM_FACTORY.getVariable("y0");
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE (X, Y) IN ((1, 3), (2,4))", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v1,
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getConjunction(
@@ -521,49 +420,31 @@ public class ExpressionParserTest {
 
 
     @Test
-    public void isNull_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X IS NULL";
-
+    public void is_null_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IS NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBIsNull(), v), translation.get(0));
     }
 
     @Test
-    public void isNotNull_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X IS NOT NULL";
-
+    public void is_not_null_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IS NOT NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBIsNull(), v)), translation.get(0));
     }
 
     @Test
-    public void between_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X BETWEEN 1 AND 3";
-
+    public void between_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X BETWEEN 1 AND 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        System.out.println(translation);
-
-        assertEquals(ImmutableList.of(// FACTORY.getImmutableExpression(AND,
+        assertEquals(ImmutableList.of(
                 TERM_FACTORY.getImmutableExpression(
                         DB_FS_FACTORY.getDBDefaultInequality(GTE),
                         v,
@@ -575,19 +456,12 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Between_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X NOT BETWEEN 1 AND 3";
-
+    public void not_between_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X NOT BETWEEN 1 AND 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        System.out.println(translation);
-
-        assertEquals(//FACTORY.getImmutableExpression(NOT,
-                TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                         TERM_FACTORY.getImmutableExpression(
                                 DB_FS_FACTORY.getDBDefaultInequality(LT),
                                 v,
@@ -599,16 +473,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void like_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X LIKE '_A%'";
-
+    public void like_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X LIKE '_A%'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBLike(),
                 v,
@@ -616,16 +484,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Like_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X NOT LIKE '_A%'";
-
+    public void not_like_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X NOT LIKE '_A%'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBLike(),
@@ -634,16 +496,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void regexp_Match_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X ~ 'A.*B'";
-
+    public void regexp_match_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X ~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
@@ -651,16 +507,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void regexp_NotMatch_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X !~ 'A.*B'";
-
+    public void regexp_not_match_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X !~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
@@ -669,16 +519,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void regexp_MatchIgnoreCase_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X ~* 'A.*B'";
-
+    public void regexp_match_ignore_case_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X ~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
@@ -687,16 +531,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void regexp_NotMatchIgnoreCase_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X !~* 'A.*B'";
-
+    public void regexp_not_match_ignore_case_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X !~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
@@ -706,16 +544,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Regexp_Match_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X ~ 'A.*B'";
-
+    public void not_regexp_match_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X ~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
@@ -724,16 +556,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Regexp_NotMatch_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X !~ 'A.*B'";
-
+    public void not_regexp_not_match_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X !~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
@@ -741,16 +567,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Regexp_MatchIgnoreCase_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X ~* 'A.*B'";
-
+    public void not_regexp_match_ignore_case_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X ~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
@@ -760,16 +580,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Regexp_NotMatchIgnoreCase_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X !~* 'A.*B'";
-
+    public void not_regexp_not_match_ignore_case_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X !~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
@@ -779,16 +593,10 @@ public class ExpressionParserTest {
 
 
     @Test
-    public void regexp_MySQL_Match_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X REGEXP BINARY 'A.*B'";
-
+    public void regexp_MySQL_match_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X REGEXP BINARY 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
@@ -796,16 +604,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void regexp_MySQL_MatchIgnoreCase_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X REGEXP 'A.*B'";
-
+    public void regexp_MySQL_match_ignore_case_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X REGEXP 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
@@ -814,16 +616,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Regexp_MySQL_Match_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X REGEXP BINARY 'A.*B'";
-
+    public void not_regexp_MySQL_match_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X REGEXP BINARY 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
@@ -832,16 +628,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Regexp_MySQL_MatchIgnoreCase_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X REGEXP 'A.*B'";
-
+    public void not_regexp_MySQL_match_ignore_case_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X REGEXP 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
@@ -851,16 +641,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void and_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X >= 1 AND X <= 3";
-
+    public void and_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X >= 1 AND X <= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(ImmutableList.of( //FACTORY.getImmutableExpression(AND,
                 TERM_FACTORY.getImmutableExpression(
@@ -874,16 +658,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_and_Test_brackets() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT (X >= 1 AND X <= 3)";
-
+    public void not_and_test_brackets() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT (X >= 1 AND X <= 3)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(ImmutableList.of(TERM_FACTORY.getDBNot(TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(
@@ -897,16 +675,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_not_and_Test_brackets() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT (NOT (X >= 1 AND X <= 3))";
-
+    public void not_not_and_test_brackets() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT (NOT (X >= 1 AND X <= 3))", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(ImmutableList.of(TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(
@@ -921,16 +693,10 @@ public class ExpressionParserTest {
 
 
     @Test
-    public void or_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE X < 1 OR X > 3";
-
+    public void or_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X < 1 OR X > 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getImmutableExpression(
@@ -944,16 +710,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void parenthesis_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE (X >= 1)";
-
+    public void parenthesis_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE (X >= 1)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
@@ -962,16 +722,10 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void not_Parenthesis_Test() throws JSQLParserException {
-        String sql = "SELECT X AS A FROM DUMMY WHERE NOT (X >= 1)";
-
+    public void not_parenthesis_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT (X >= 1)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(
@@ -1115,46 +869,30 @@ public class ExpressionParserTest {
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
-    public void exists_Test() throws JSQLParserException {
-        String sql = "SELECT * FROM P WHERE EXISTS (SELECT * FROM Q WHERE A = P.B);";
-
+    public void exists_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE EXISTS (SELECT * FROM Q WHERE A = P.B);", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
-    public void not_Exists_Test() throws JSQLParserException {
-        String sql = "SELECT * FROM P WHERE NOT EXISTS (SELECT * FROM Q WHERE A = P.B);";
-
+    public void not_exists_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE NOT EXISTS (SELECT * FROM Q WHERE A = P.B);", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
-    public void allComparison_Test() throws JSQLParserException {
-        String sql = "SELECT * FROM P WHERE A > ALL (SELECT C FROM Q WHERE A = P.B);";
-
+    public void all_comparison_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A > ALL (SELECT C FROM Q WHERE A = P.B);", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
-    public void anyComparison_Test() throws JSQLParserException {
-        String sql = "SELECT * FROM P WHERE A > ANY (SELECT C FROM Q WHERE A = P.B);";
-
+    public void any_comparison_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A > ANY (SELECT C FROM Q WHERE A = P.B);", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
     }
 
@@ -1209,50 +947,32 @@ public class ExpressionParserTest {
 
     @Test(expected = InvalidSelectQueryRuntimeException.class)
     public void jdbc_parameter_test() throws JSQLParserException {
-        String sql = "SELECT A FROM P WHERE B = ?;";
-
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT A FROM P WHERE B = ?;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v));
     }
 
     @Test(expected = InvalidSelectQueryRuntimeException.class)
     public void jdbcNamedParameter_Test() throws JSQLParserException {
-        String sql = "SELECT A FROM P WHERE B = :name;";
-
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT A FROM P WHERE B = :name;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v));
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
-    public void oracle_OuterJoin_Test() throws JSQLParserException {
-        String sql = "SELECT * FROM P, Q WHERE P.A = Q.A(+)";
-
+    public void oracle_outer_join_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         Variable u = TERM_FACTORY.getVariable("y0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P, Q WHERE P.A = Q.A(+)", ImmutableMap.of(
                 new QualifiedAttributeID(IDFAC.createRelationID(null,"P"), IDFAC.createAttributeID("A")), v,
                 new QualifiedAttributeID(IDFAC.createRelationID(null, "Q"), IDFAC.createAttributeID("A")), u));
     }
 
     @Test
     public void true_column_Test() throws JSQLParserException {
-        String sql = "SELECT * FROM P WHERE A = true";
-
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A = true", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -1261,15 +981,9 @@ public class ExpressionParserTest {
 
     @Test
     public void false_column_Test() throws JSQLParserException {
-        String sql = "SELECT * FROM P WHERE A = false";
-
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A = false", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -1277,32 +991,20 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void function_REGEXP_LIKE_Test() throws JSQLParserException {
-        String sql = "SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$')";
-
+    public void function_REGEXP_LIKE_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$")), translation.get(0));
     }
 
     @Test
-    public void function_REGEXP_LIKE_3_Test() throws JSQLParserException {
-        String sql = "SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i')";
-
+    public void function_REGEXP_LIKE_3_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1310,19 +1012,13 @@ public class ExpressionParserTest {
     }
 
     /**
-     * Not recognized
+     * Not recognized ???
      */
     @Test
-    public void function_REGEXP_LIKE_4_Test() throws JSQLParserException {
-        String sql = "SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i', '')";
-
+    public void function_REGEXP_LIKE_4_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i', '')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
     }
 
     @Test
@@ -1575,11 +1271,12 @@ public class ExpressionParserTest {
         return translation;
     }
 
-
-
-
-    private net.sf.jsqlparser.expression.Expression getWhereExpression(String sql) throws JSQLParserException {
+    private ImmutableList<ImmutableExpression> parseBooleanExpression(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws JSQLParserException {
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
         Statement statement = CCJSqlParserUtil.parse(sql);
-        return ((PlainSelect) ((Select) statement).getSelectBody()).getWhere();
+        net.sf.jsqlparser.expression.Expression exp = ((PlainSelect) ((Select) statement).getSelectBody()).getWhere();
+        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(exp, new RAExpressionAttributes(map, null));
+        System.out.println(translation);
+        return translation;
     }
 }

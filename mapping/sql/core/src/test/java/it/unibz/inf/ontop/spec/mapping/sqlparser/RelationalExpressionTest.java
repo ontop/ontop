@@ -147,7 +147,7 @@ public class RelationalExpressionTest {
         RAExpressionOperations ops = new RAExpressionOperations(TERM_FACTORY, IQ_FACTORY);
         RAExpression relationalExpression = ops.joinOn(re1, re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression,  attributes.asMap()));
+                        .parseBooleanExpression(onExpression,  attributes));
 
         System.out.println(relationalExpression);
 
@@ -163,7 +163,7 @@ public class RelationalExpressionTest {
         RAExpressionOperations ops = new RAExpressionOperations(TERM_FACTORY, IQ_FACTORY);
         ops.joinOn(re1, re1_1,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes.asMap()));
+                        .parseBooleanExpression(onExpression, attributes));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class RelationalExpressionTest {
         RAExpressionOperations ops = new RAExpressionOperations(TERM_FACTORY, IQ_FACTORY);
         RAExpression re = ops.joinOn(re1, re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes.asMap()));
+                        .parseBooleanExpression(onExpression, attributes));
 
         System.out.println(re);
         System.out.println(re3);
@@ -252,7 +252,7 @@ public class RelationalExpressionTest {
         RAExpressionOperations ops = new RAExpressionOperations(TERM_FACTORY, IQ_FACTORY);
         RAExpression relationalExpression = ops.joinOn(re1, re2,
                 attributes -> new ExpressionParser(MDFAC, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes.asMap()));
+                        .parseBooleanExpression(onExpression, attributes));
 
         System.out.println(relationalExpression);
         System.out.println(re3);
