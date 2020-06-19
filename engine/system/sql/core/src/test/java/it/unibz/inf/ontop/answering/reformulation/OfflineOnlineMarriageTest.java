@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.answering.logging.impl.QueryLoggerImpl;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
@@ -22,8 +23,6 @@ import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -84,7 +83,9 @@ public class OfflineOnlineMarriageTest {
 
         SelectQuery query = inputQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
 
-        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query);
+
+        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query,
+                queryReformulator.getQueryLoggerFactory().create());
         String sqlQuery = Optional.of(executableQuery.getTree())
                 .filter(t -> t instanceof UnaryIQTree)
                 .map(t -> ((UnaryIQTree) t).getChild().getRootNode())

@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -32,11 +33,16 @@ import java.util.NoSuchElementException;
 public class EmptyTupleResultSet implements TupleResultSet {
 
 	private final ImmutableList<String> signature;
+	private final QueryLogger queryLogger;
+	private boolean hasNextCalled = false;
 
-	public EmptyTupleResultSet(ImmutableList<Variable> answerVariables) {
+	public EmptyTupleResultSet(ImmutableList<Variable> answerVariables,
+							   QueryLogger queryLogger) {
 		this.signature = answerVariables.stream()
 				.map(Variable::getName)
 				.collect(ImmutableCollectors.toList());
+
+		this.queryLogger = queryLogger;
 	}
 
 	@Override
@@ -65,6 +71,9 @@ public class EmptyTupleResultSet implements TupleResultSet {
 
 	@Override
 	public boolean hasNext()  {
+		if (!hasNextCalled)
+			queryLogger.declareLastResultRetrievedAndSerialize(0);
+		hasNextCalled = true;
 		return false;
 	}
 

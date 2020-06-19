@@ -868,10 +868,9 @@ public class SQLParserTest {
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to NULL
-	//add support for CAST also in unquoted visited query
+	@Test
 	public void testUnquoted1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+		RAExpression re = parse("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", \"QpeopleVIEW0\".\"id\" AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
 	}
@@ -884,9 +883,12 @@ public class SQLParserTest {
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to CAST
+	@Test
 	public void testCast1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = parse("SELECT CAST(\"view0\".\"nick2\" AS CHAR (8000) CHARACTER SET utf8) AS \"v0\" FROM people \"view0\" WHERE \"view0\".\"nick2\" IS NOT NULL");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT

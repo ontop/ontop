@@ -35,12 +35,18 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
 
     @Override
     public boolean blocksNegation() {
-        return true;
+        return false;
     }
 
     @Override
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
-        throw new UnsupportedOperationException();
+        ImmutableList<ImmutableExpression> negatedSubTerms = subTerms.stream()
+                .map(t -> (ImmutableExpression) t)
+                .map(e -> e.negate(termFactory))
+                .collect(ImmutableCollectors.toList());
+        return possibleBoolean
+                ? termFactory.getFalseOrNullFunctionalTerm(negatedSubTerms)
+                : termFactory.getTrueOrNullFunctionalTerm(negatedSubTerms);
     }
 
     @Override

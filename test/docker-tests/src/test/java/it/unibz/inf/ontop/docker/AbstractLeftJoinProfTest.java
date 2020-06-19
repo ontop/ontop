@@ -1106,6 +1106,27 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
         checkReturnedValuesAndReturnSql(query, expectedValues);
     }
 
+    @Test
+    public void testProperties() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   { [] ?p1 \"Frankie\"  }\n" +
+                "    UNION \n" +
+                "   { \n" +
+                "     [] ?p2 ?n \n" +
+                "     FILTER (?n = 10)" +
+                " }\n" +
+                "   BIND(str(coalesce(?p1, ?p2)) AS ?v)" +
+                "}\n" +
+                "ORDER BY ?v\n";
+
+        List<String> expectedValues = ImmutableList.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents", "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {

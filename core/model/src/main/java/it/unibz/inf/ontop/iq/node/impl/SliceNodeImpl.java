@@ -72,6 +72,19 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             return mergeWithSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
+        else if ((newChildRoot instanceof TrueNode)
+                || ((newChildRoot instanceof AggregationNode)
+                    && ((AggregationNode) newChildRoot).getGroupingVariables().isEmpty()))
+            return offset > 0
+                    ? iqFactory.createEmptyNode(child.getVariables())
+                    : newChild;
+        else if ((newChildRoot instanceof DistinctNode)
+                && (offset == 0)
+                && getLimit()
+                    .filter(l -> l <= 1)
+                    .isPresent())
+            // Distinct can be eliminated
+            return normalizeForOptimization(((UnaryIQTree) child).getChild(), variableGenerator, currentIQProperties);
         else
             return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
@@ -84,11 +97,22 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 iqFactory.createIQProperties().declareNormalizedForOptimization());
     }
 
-    /**
-     * TODO: implement it seriously
-     */
     private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
-        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
+        long newOffset = offset + newChildRoot.getOffset();
+        Optional<Long> newLimit = newChildRoot.getLimit()
+                .map(cl -> Math.max(cl - offset, 0L))
+                .map(cl -> getLimit()
+                        .map(l -> Math.min(cl, l))
+                        .orElse(cl))
+                .map(Optional::of)
+                // No limit in the child
+                .orElseGet(this::getLimit);
+
+        SliceNode newSliceNode = newLimit
+                .map(l -> iqFactory.createSliceNode(newOffset, l))
+                .orElseGet(() -> iqFactory.createSliceNode(newOffset));
+
+        return iqFactory.createUnaryIQTree(newSliceNode, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     @Override
@@ -114,6 +138,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
+        if (limit != null && limit <= 1)
+            return true;
         return child.isDistinct();
     }
 
