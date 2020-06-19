@@ -30,10 +30,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
@@ -707,8 +704,7 @@ public class ExpressionParser {
     private final ImmutableMap<String, BiFunction< net.sf.jsqlparser.expression.Function, TermVisitor, ImmutableFunctionalTerm>>
             FUNCTIONS = ImmutableMap.<String, BiFunction<net.sf.jsqlparser.expression.Function, TermVisitor, ImmutableFunctionalTerm>>builder()
             .put("RAND", this::getRAND)
-            // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
-            .put("CONVERT", this::reject)
+            .put("CONVERT", this::getCONVERT)
             // due to COUNT(*) TODO: support it
             .put("COUNT", this::reject)
             // Array functions changing the cardinality: not yet supported
@@ -752,7 +748,19 @@ public class ExpressionParser {
                 terms.size());
         return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
     }
-    
+
+    private ImmutableFunctionalTerm getCONVERT(net.sf.jsqlparser.expression.Function expression, TermVisitor termVisitor) {
+        if (expression.getParameters() == null)
+            throw new InvalidSelectQueryRuntimeException("Invalid CONVERT", expression);
+        List<Expression> parameters = expression.getParameters().getExpressions();
+        if (parameters.size() != 2)
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+
+        ImmutableTerm term = termVisitor.getTerm(parameters.get(1));
+        String datatype = parameters.get(0).toString();
+        return termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBTermType(datatype), term);
+    }
+
     private ImmutableFunctionalTerm getRAND(net.sf.jsqlparser.expression.Function expression, TermVisitor termVisitor) {
         if (expression.getParameters() == null)
             return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
@@ -877,37 +885,32 @@ public class ExpressionParser {
 
         @Override
         public void visit(Addition expression) {
-            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
-                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_ADD), t1, t2));
+            process(expression, getArithmeticOperation(expression));
         }
 
         @Override
         public void visit(Subtraction expression) {
-            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
-                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_SUBSTRACT), t1, t2));
+            process(expression, getArithmeticOperation(expression));
         }
 
         @Override
         public void visit(Multiplication expression) {
-            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
-                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY), t1, t2));
+            process(expression, getArithmeticOperation(expression));
         }
 
         @Override
         public void visit(Division expression) {
-            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
-                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_DIVIDE), t1, t2));
+            process(expression, getArithmeticOperation(expression));
         }
 
         @Override
         public void visit(IntegerDivision expression) {
-            throw new UnsupportedSelectQueryRuntimeException("INTEGER DIVISION is not supported yet", expression);
+            process(expression, getArithmeticOperation(expression));
         }
 
         @Override
         public void visit(Modulo expression) {
-            // TODO: introduce operation and implement
-            throw new UnsupportedSelectQueryRuntimeException("MODULO is not supported yet", expression);
+            process(expression, getArithmeticOperation(expression));
         }
 
         @Override
@@ -922,7 +925,10 @@ public class ExpressionParser {
             result = op.apply(leftTerm, rightTerm);
         }
 
-
+        private BinaryOperator<ImmutableTerm> getArithmeticOperation(BinaryExpression expression) {
+            return (t1, t2) -> termFactory.getImmutableFunctionalTerm(
+                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(expression.getStringExpression()), t1, t2);
+        }
 
         /*
                 UNARY OPERATIONS

@@ -936,7 +936,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 return createDivideOperator(dbNumericType);
             case SPARQL.NUMERIC_ADD:
                 return createAddOperator(dbNumericType);
-            case SPARQL.NUMERIC_SUBSTRACT:
+            case SPARQL.NUMERIC_SUBTRACT:
                 return createSubstractOperator(dbNumericType);
             default:
                 throw new UnsupportedOperationException("The math operator " + dbMathOperatorName + " is not supported");
@@ -951,8 +951,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 return createUntypedDivideOperator();
             case SPARQL.NUMERIC_ADD:
                 return createUntypedAddOperator();
-            case SPARQL.NUMERIC_SUBSTRACT:
-                return createUntypedSubstractOperator();
+            case SPARQL.NUMERIC_SUBTRACT:
+                return createUntypedSubtractOperator();
             default:
                 throw new UnsupportedOperationException("The untyped math operator " + dbMathOperatorName + " is not supported");
         }
@@ -1052,7 +1052,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBMathBinaryOperator createUntypedMultiplyOperator();
     protected abstract DBMathBinaryOperator createUntypedDivideOperator();
     protected abstract DBMathBinaryOperator createUntypedAddOperator();
-    protected abstract DBMathBinaryOperator createUntypedSubstractOperator();
+    protected abstract DBMathBinaryOperator createUntypedSubtractOperator();
 
     protected abstract DBBooleanFunctionSymbol createNonStrictNumericEquality();
     protected abstract DBBooleanFunctionSymbol createNonStrictStringEquality();

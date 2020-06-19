@@ -21,7 +21,6 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.stream.Stream;
@@ -119,7 +118,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
-                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_ADD),
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator("+"),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
@@ -131,7 +130,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
-                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_SUBSTRACT),
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator("-"),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
@@ -143,7 +142,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
-                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator("*"),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
@@ -155,21 +154,33 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
-                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_DIVIDE),
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator("/"),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test(expected = UnsupportedOperationException.class)
     public void modulo_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT X % 2 AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-//        assertEquals(FACTORY.getImmutableFunctionalTerm(
-//                DIVIDE,
-//                v,
-//                FACTORY.getConstantLiteral("2", dbLongType)), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator("%"),
+                v,
+                TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void integer_div_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT X DIV 2 AS A FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator("DIV"),
+                v,
+                TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
 
     @Test
@@ -767,8 +778,6 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT -X  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        System.out.println(translation);
-
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
                 TERM_FACTORY.getDBConstant("-1", DB_TYPE_FACTORY.getDBLargeIntegerType()),
@@ -1045,7 +1054,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 3), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace3(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant("")), translation);
     }
@@ -1092,16 +1101,14 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
     }
 
-    /**
-     * Not recognized ????
-     *
-     * Does it makes sense in the first place? Which DB supports it?
-     */
     @Test
     public void function_REPLACE_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT REPLACE(X,'J') AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 2), v,
+                TERM_FACTORY.getDBStringConstant("J")), translation);
     }
 
     @Test
@@ -1115,12 +1122,16 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getDBStringConstant("BL")), translation);
     }
 
-    // TODO
     @Test
     public void function_REPLACE_4_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT REPLACE(X, 'J', 'BL', 'i')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 4), v,
+                TERM_FACTORY.getDBStringConstant("J"),
+                TERM_FACTORY.getDBStringConstant("BL"),
+                TERM_FACTORY.getDBStringConstant("i")), translation);
     }
 
     @Test
@@ -1268,26 +1279,38 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT LENGTH(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 1), v), translation);
+        DBFunctionSymbol lengthFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 1);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lengthFunctionSymbol, v), translation);
     }
 
-    // TODO  ?
-    @Ignore("LENGTH2")
     @Test
-    public void function_LENGTH_2_Test() throws JSQLParserException {
+    public void function_LENGTH_2_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT LENGTH(X, 'A') AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        DBFunctionSymbol lengthFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 2);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lengthFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test
-    public void function_LEN_Test() throws JSQLParserException {
+    public void function_LEN_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT LEN(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        DBFunctionSymbol upperFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LEN", 1);
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(upperFunctionSymbol, v), translation);
+        DBFunctionSymbol lenFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LEN", 1);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lenFunctionSymbol, v), translation);
+    }
+
+    @Test
+    public void function_CONVERT_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT CONVERT(VARCHAR(50), X) AS A FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        DBFunctionSymbol castFunctionSymbol = DB_FS_FACTORY.getDBCastFunctionSymbol(DB_TYPE_FACTORY.getDBTermType("VARCHAR(50)"));
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(castFunctionSymbol, v), translation);
     }
 
 
