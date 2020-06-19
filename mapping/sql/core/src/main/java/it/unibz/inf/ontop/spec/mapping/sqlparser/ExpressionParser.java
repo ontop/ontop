@@ -66,11 +66,6 @@ public class ExpressionParser {
         return visitor.getTerm(expression);
     }
 
-    public ImmutableTerm parseTerm(Expression expression, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) {
-        TermVisitor visitor = new TermVisitor(map);
-        return visitor.getTerm(expression);
-    }
-
     public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
         BooleanExpressionVisitor parser = new BooleanExpressionVisitor(attributes.asMap());
         return parser.translate(expression);
