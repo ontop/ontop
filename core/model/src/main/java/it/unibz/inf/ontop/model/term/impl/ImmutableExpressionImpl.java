@@ -40,6 +40,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         if (getFunctionSymbol() instanceof DBAndFunctionSymbol) {
             return getTerms().stream()
                     .map(t -> (ImmutableExpression) t)
+                    .flatMap(ImmutableExpression::flattenAND)
                     .distinct();
         }
         return Stream.of(this);
@@ -50,6 +51,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         if (getFunctionSymbol() instanceof DBOrFunctionSymbol) {
             return getTerms().stream()
                     .map(t -> (ImmutableExpression) t)
+                    .flatMap(ImmutableExpression::flattenOR)
                     .distinct();
         }
         return Stream.of(this);

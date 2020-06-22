@@ -195,7 +195,9 @@ public class SQLParserTest {
 
 	private RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 		try {
-			return sqp.parse(JSqlParserTools.parse(sql));
+			RAExpression rae = sqp.parse(JSqlParserTools.parse(sql));
+			System.out.println(rae);
+			return rae;
 		}
 		catch (JSQLParserException e) {
 			throw new InvalidSelectQueryException(e.getCause().getMessage(), sql);
