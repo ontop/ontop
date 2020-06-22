@@ -112,6 +112,25 @@ public class ExpressionParserTest {
                 DB_TYPE_FACTORY.getDBDateTimestampType()), translation);
     }
 
+
+    @Test
+    public void date_literal_test() throws JSQLParserException {
+        ImmutableTerm translation = parseTerm("SELECT DATE '1998-03-07' FROM DUMMY", ImmutableMap.of());
+        assertEquals(TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType()), translation);
+    }
+
+    @Test
+    public void time_literal_test() throws JSQLParserException {
+        ImmutableTerm translation = parseTerm("SELECT TIME '15:57:02' FROM DUMMY", ImmutableMap.of());
+        assertEquals(TERM_FACTORY.getDBConstant("15:57:02", DB_TYPE_FACTORY.getDBTimeType()), translation);
+    }
+
+    @Test
+    public void timestamp_literal_test() throws JSQLParserException {
+        ImmutableTerm translation = parseTerm("SELECT TIMESTAMP '2016-12-02 15:57:02.03' FROM DUMMY", ImmutableMap.of());
+        assertEquals(TERM_FACTORY.getDBConstant("2016-12-02 15:57:02.03", DB_TYPE_FACTORY.getDBDateTimestampType()), translation);
+    }
+
     @Test
     public void addition_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
@@ -876,7 +895,7 @@ public class ExpressionParserTest {
     @Test
     public void case_when_test_4b_null() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE NULL END FROM DUMMY;", ImmutableMap.of(
+        ImmutableTerm translation = parseTerm("SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE NULL END FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
         assertEquals(TERM_FACTORY.getDBCase(
@@ -892,7 +911,7 @@ public class ExpressionParserTest {
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void subSelect_Test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT (SELECT A FROM Q WHERE A = P.B) AS C FROM P;", ImmutableMap.of(
+        ImmutableTerm translation = parseTerm("SELECT (SELECT A FROM Q WHERE A = P.B) AS C FROM P", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
     }
 
@@ -951,39 +970,69 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u));
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
+    public void extract_variable_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM X) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getDBMonthFromDatetime(v), translation);
+    }
+
+    @Test
     public void extract_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM CURRENT_DATE) AS C FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getDBMonthFromDatetime(TERM_FACTORY.getDBNow()), translation);
+    }
+
+    @Test
+    public void extract_current_date_brackets_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM CURRENT_DATE()) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getDBMonthFromDatetime(TERM_FACTORY.getDBNow()), translation);
+    }
+
+    @Test
+    public void extract_from_literal_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT EXTRACT(YEAR FROM DATE '1998-03-07') FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getDBYearFromDatetime(TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType())),
+                translation);
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void interval_test() throws JSQLParserException {
-        ImmutableTerm translation = parseTerm("SELECT INTERVAL '31' DAY FROM DUMMY;", ImmutableMap.of());
+        ImmutableTerm translation = parseTerm("SELECT INTERVAL '31' DAY FROM DUMMY", ImmutableMap.of());
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void analytic_expression_test() throws JSQLParserException {
-        ImmutableTerm translation = parseTerm("SELECT LAG(A) OVER () FROM P;", ImmutableMap.of());
+        ImmutableTerm translation = parseTerm("SELECT LAG(A) OVER () FROM P", ImmutableMap.of());
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void json_expression_test() throws JSQLParserException {
-        ImmutableTerm translation = parseTerm("SELECT A->'B' FROM DUMMY;", ImmutableMap.of());
+        ImmutableTerm translation = parseTerm("SELECT A->'B' FROM DUMMY", ImmutableMap.of());
     }
 
     @Test(expected = InvalidSelectQueryRuntimeException.class)
     public void jdbc_parameter_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT A FROM P WHERE B = ?;", ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT A FROM P WHERE B = ?", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v));
     }
 
     @Test(expected = InvalidSelectQueryRuntimeException.class)
-    public void jdbcNamedParameter_Test() throws JSQLParserException {
+    public void jdbc_named_parameter_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT A FROM P WHERE B = :name;", ImmutableMap.of(
+        ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT A FROM P WHERE B = :name", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v));
     }
 

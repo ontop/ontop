@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
@@ -59,8 +61,8 @@ public class ExpressionParser {
     }
 
     public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
-        TermVisitor parser = new TermVisitor(attributes);
-        return parser.getExpression(expression).flattenAND().collect(ImmutableCollectors.toList());
+        TermVisitor visitor = new TermVisitor(attributes);
+        return visitor.getExpression(expression).flattenAND().collect(ImmutableCollectors.toList());
     }
 
 
@@ -75,10 +77,11 @@ public class ExpressionParser {
 
     private final ImmutableMap<String, BiFunction<Function, TermVisitor, ImmutableFunctionalTerm>>
             FUNCTIONS = ImmutableMap.<String, BiFunction<Function, TermVisitor, ImmutableFunctionalTerm>>builder()
-            .put("RAND", this::getRAND)
+            .put("RAND", this::getRAND) // make it deterministic
             .put("CONVERT", this::getCONVERT)
             // due to COUNT(*) TODO: support it
             .put("COUNT", this::reject)
+            // TODO: include MAX, MIN, etc.
             // Array functions changing the cardinality: not yet supported
             //    - From PostgreSQL
             .put("UNNEST", this::reject)
@@ -245,9 +248,27 @@ public class ExpressionParser {
         @Override
         public void visit(IntervalExpression expression) {
             // example: INTERVAL '4 5:12' DAY TO MINUTE
-            throw new UnsupportedSelectQueryRuntimeException("Temporal INTERVALs are not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Temporal INTERVALs are not supported", expression);
         }
 
+        @Override
+        public void visit(DateTimeLiteralExpression expression) {
+            String val = expression.getValue();
+            switch (expression.getType()) {
+                case DATE:
+                    // strip off ''
+                    result = termFactory.getDBConstant(val.substring(1, val.length() - 1), dbTypeFactory.getDBDateType());
+                    break;
+                case TIME:
+                    result = termFactory.getDBConstant(val.substring(1, val.length() - 1), dbTypeFactory.getDBTimeType());
+                    break;
+                case TIMESTAMP:
+                    result = termFactory.getDBConstant(val.substring(1, val.length() - 1), dbTypeFactory.getDBDateTimestampType());
+                    break;
+                default:
+                    throw new UnsupportedOperationException(expression + " is not valid");
+            }
+        }
 
 
 
@@ -321,12 +342,12 @@ public class ExpressionParser {
 
         @Override
         public void visit(BitwiseRightShift expression) { // expression1 >> expression2
-            throw new UnsupportedSelectQueryRuntimeException("BITWISE RIGHT SHIFT is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("BITWISE RIGHT SHIFT is not supported", expression);
         }
 
         @Override
         public void visit(BitwiseLeftShift expression) { // expression1 << expression2
-            throw new UnsupportedSelectQueryRuntimeException("BITWISE LEFT SHIFT is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("BITWISE LEFT SHIFT is not supported", expression);
         }
 
 
@@ -340,10 +361,6 @@ public class ExpressionParser {
         }
 
 
-        // ------------------------------------------------------------
-        //        RELATIONAL OPERATIONS
-        // ------------------------------------------------------------
-
         @Override
         public void visit(SignedExpression expression) {
 
@@ -351,7 +368,7 @@ public class ExpressionParser {
             switch (expression.getSign()) {
                 case '-' :
                     result = termFactory.getImmutableFunctionalTerm(
-                            dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
+                            dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator("*"),
                             termFactory.getDBConstant("-1", dbTypeFactory.getDBLargeIntegerType()),
                             arg);
                     break;
@@ -364,10 +381,53 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(ExtractExpression expression) {
-            // Example: EXTRACT(month FROM order_date)
-            throw new UnsupportedSelectQueryRuntimeException("EXTRACT is not supported yet", expression);
+        public void visit(ExtractExpression expression) { // EXTRACT(month FROM order_date)
+            String component = expression.getName().toUpperCase();
+            ImmutableTerm dateTime = getTerm(expression.getExpression());
+            switch (component) {
+                case "YEAR":
+                    result = termFactory.getDBYearFromDatetime(dateTime);
+                    break;
+                case "MONTH":
+                    result = termFactory.getDBMonthFromDatetime(dateTime);
+                    break;
+                case "DAY":
+                    result = termFactory.getDBDayFromDatetime(dateTime);
+                    break;
+                case "HOUR":
+                    result = termFactory.getDBHours(dateTime);
+                    break;
+                case "MINUTE":
+                    result = termFactory.getDBMinutes(dateTime);
+                    break;
+                case "SECOND":
+                    result = termFactory.getDBSeconds(dateTime);
+                    break;
+                case "TIMEZONE_ABBR":
+                    result = termFactory.getDBTz(dateTime);
+                    break;
+                default:
+                    throw new UnsupportedSelectQueryRuntimeException("EXTRACT is not supported", expression);
+            }
         }
+
+        @Override
+        public void visit(TimeKeyExpression expression) {
+            String str = expression.getStringValue().toUpperCase();
+            switch (str) {
+                case "CURRENT_TIMESTAMP":
+                case "CURRENT_TIMESTAMP()":
+                case "CURRENT_TIME":
+                case "CURRENT_TIME()":
+                case "CURRENT_DATE":
+                case "CURRENT_DATE()":
+                    result = termFactory.getDBNow();
+                    break;
+                default:
+                    throw new UnsupportedSelectQueryRuntimeException("TimeKeyExpression is not supported", expression);
+            }
+        }
+
 
 
 
@@ -386,7 +446,7 @@ public class ExpressionParser {
                 // can be
                 //    - a CONSTANT or
                 //    - a PSEUDO-COLUMN like ROWID, ROWNUM or
-                //    - a FUNCTION without arguments like USER, CURRENT_DATE
+                //    - a FUNCTION without arguments like USER
 
                 if (column.equals(idfac.createAttributeID("true")))
                     result = termFactory.getDBBooleanConstant(true);
@@ -527,7 +587,7 @@ public class ExpressionParser {
         @Override
         // expression1 [NOT] SIMILAR TO expression2 [ESCAPE escape]
         public void visit(SimilarToExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("SIMILAR TO it not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("SIMILAR TO is not supported", expression);
         }
 
         @Override
@@ -543,39 +603,30 @@ public class ExpressionParser {
 
         @Override //KEEP (DENSE_RANK FIRST ORDER BY col1)
         public void visit(KeepExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("KeepExpression is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("KeepExpression is not supported", expression);
 
         }
 
         @Override
         public void visit(MySQLGroupConcat expression) {
-            throw new UnsupportedSelectQueryRuntimeException("MySQLGroupConcat is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("MySQLGroupConcat is not supported", expression);
         }
 
         @Override
         public void visit(ValueListExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("ValueList is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("ValueList is not supported", expression);
         }
 
         @Override
         public void visit(RowConstructor expression) {
-            throw new UnsupportedSelectQueryRuntimeException("RowConstructor is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("RowConstructor is not supported", expression);
         }
 
         @Override
         public void visit(OracleHint expression) {
-            throw new UnsupportedSelectQueryRuntimeException("OracleHint is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("OracleHint is not supported", expression);
         }
 
-        @Override
-        public void visit(TimeKeyExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("TimeKeyExpression is not supported yet", expression);
-        }
-
-        @Override
-        public void visit(DateTimeLiteralExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("DateTimeLiteralExpression is not supported yet", expression);
-        }
 
 
         // -----------------------------------
