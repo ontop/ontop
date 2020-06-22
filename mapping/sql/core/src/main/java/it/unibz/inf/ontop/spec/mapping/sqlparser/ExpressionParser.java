@@ -381,51 +381,33 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(ExtractExpression expression) { // EXTRACT(month FROM order_date)
-            String component = expression.getName().toUpperCase();
-            ImmutableTerm dateTime = getTerm(expression.getExpression());
-            switch (component) {
-                case "YEAR":
-                    result = termFactory.getDBYearFromDatetime(dateTime);
-                    break;
-                case "MONTH":
-                    result = termFactory.getDBMonthFromDatetime(dateTime);
-                    break;
-                case "DAY":
-                    result = termFactory.getDBDayFromDatetime(dateTime);
-                    break;
-                case "HOUR":
-                    result = termFactory.getDBHours(dateTime);
-                    break;
-                case "MINUTE":
-                    result = termFactory.getDBMinutes(dateTime);
-                    break;
-                case "SECOND":
-                    result = termFactory.getDBSeconds(dateTime);
-                    break;
-                case "TIMEZONE_ABBR":
-                    result = termFactory.getDBTz(dateTime);
-                    break;
-                default:
-                    throw new UnsupportedSelectQueryRuntimeException("EXTRACT is not supported", expression);
-            }
+        public void visit(ExtractExpression expression) { // EXTRACT(MONTH/YEAR/etc. FROM order_date)
+            DBFunctionSymbol extractFunctionSymbol = dbFunctionSymbolFactory.getExtractFunctionSymbol(expression.getName());
+            ImmutableTerm arg = getTerm(expression.getExpression());
+            result = termFactory.getImmutableFunctionalTerm(extractFunctionSymbol, arg);
         }
 
         @Override
         public void visit(TimeKeyExpression expression) {
             String str = expression.getStringValue().toUpperCase();
+            DBFunctionSymbol functionSymbol;
             switch (str) {
                 case "CURRENT_TIMESTAMP":
                 case "CURRENT_TIMESTAMP()":
+                    functionSymbol = dbFunctionSymbolFactory.getCurrentDateTimeSymbol("TIMESTAMP");
+                    break;
                 case "CURRENT_TIME":
                 case "CURRENT_TIME()":
+                    functionSymbol = dbFunctionSymbolFactory.getCurrentDateTimeSymbol("TIME");
+                    break;
                 case "CURRENT_DATE":
                 case "CURRENT_DATE()":
-                    result = termFactory.getDBNow();
+                    functionSymbol = dbFunctionSymbolFactory.getCurrentDateTimeSymbol("DATE");
                     break;
                 default:
                     throw new UnsupportedSelectQueryRuntimeException("TimeKeyExpression is not supported", expression);
             }
+            result = termFactory.getImmutableFunctionalTerm(functionSymbol);
         }
 
 

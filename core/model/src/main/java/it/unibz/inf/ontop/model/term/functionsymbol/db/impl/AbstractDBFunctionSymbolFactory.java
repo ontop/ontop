@@ -80,6 +80,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
 
+    private final Map<String, DBFunctionSymbol> extractFunctionSymbolsMap;
+    private final Map<String, DBFunctionSymbol> currentDateTimeFunctionSymbolsMap;
+
     // Created in init()
     private DBBooleanFunctionSymbol nonStrictNumericEqOperator;
     // Created in init()
@@ -286,6 +289,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.maxMap = new ConcurrentHashMap<>();
 
         this.typeNullMap = new ConcurrentHashMap<>();
+
+        this.extractFunctionSymbolsMap = new ConcurrentHashMap<>();
+        this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -823,6 +829,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getExtractFunctionSymbol(String component) {
+        return extractFunctionSymbolsMap.computeIfAbsent(component, c -> createExtractFunctionSymbol(c));
+    }
+
+    @Override
+    public DBFunctionSymbol getCurrentDateTimeSymbol(String type) {
+        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, c -> createCurrentDateTimeFunctionSymbol(c));
+    }
+
+    @Override
     public DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType) {
         return typeNullMap
                 .computeIfAbsent(termType, this::createTypeNullFunctionSymbol);
@@ -1044,6 +1060,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeTz);
     }
 
+    protected DBFunctionSymbol createExtractFunctionSymbol(String component) {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("EXTRACT_" + component, rootDBType, rootDBType, false,
+                (t, c, f) -> serializeExtract(component, t, c, f));
+    }
+
+    protected DBFunctionSymbol createCurrentDateTimeFunctionSymbol(String type) {
+        return new DBFunctionSymbolWithSerializerImpl("CURRENT_" + type, ImmutableList.of(), rootDBType, false,
+                (t, c, f) -> serializeCurrentDateTime(type, t, c, f));
+    }
+
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) ;
@@ -1177,6 +1203,20 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
                                                Function<ImmutableTerm, String> termConverter,
                                                TermFactory termFactory);
+
+    protected String serializeExtract(String component,
+                                               ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory) {
+        return "EXTRACT(" + component + " FROM " + termConverter.apply(terms.get(0)) + ")";
+    }
+
+    protected String serializeCurrentDateTime(String type,
+                                      ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter,
+                                      TermFactory termFactory) {
+        return "CURRENT_" + type;
+    }
 
 
     @Override

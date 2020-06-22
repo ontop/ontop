@@ -976,7 +976,8 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM X) AS C FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        assertEquals(TERM_FACTORY.getDBMonthFromDatetime(v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
+                v), translation);
     }
 
     @Test
@@ -985,7 +986,8 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM CURRENT_DATE) AS C FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        assertEquals(TERM_FACTORY.getDBMonthFromDatetime(TERM_FACTORY.getDBNow()), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
+                TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getCurrentDateTimeSymbol("DATE"))), translation);
     }
 
     @Test
@@ -994,7 +996,8 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM CURRENT_DATE()) AS C FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        assertEquals(TERM_FACTORY.getDBMonthFromDatetime(TERM_FACTORY.getDBNow()), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
+                TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getCurrentDateTimeSymbol("DATE"))), translation);
     }
 
     @Test
@@ -1003,7 +1006,8 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(YEAR FROM DATE '1998-03-07') FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        assertEquals(TERM_FACTORY.getDBYearFromDatetime(TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType())),
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("YEAR"),
+                TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType())),
                 translation);
     }
 
