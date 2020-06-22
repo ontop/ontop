@@ -22,7 +22,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
 
     private final FunctionSymbol functionSymbol;
     private final ImmutableList<? extends ImmutableTerm> terms;
-    private final TermFactory termFactory;
+    protected final TermFactory termFactory;
 
     // LAZY
     @Nullable

@@ -14,17 +14,13 @@ import java.util.stream.Stream;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
 
-    private final TermFactory termFactory;
-
     protected ImmutableExpressionImpl(TermFactory termFactory, BooleanFunctionSymbol functor, ImmutableTerm... terms) {
         super(functor, termFactory, terms);
-        this.termFactory = termFactory;
     }
 
     protected ImmutableExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms,
                                       TermFactory termFactory) {
         super(functor, terms, termFactory);
-        this.termFactory = termFactory;
     }
 
     @Override
@@ -37,7 +33,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
      */
     @Override
     public Stream<ImmutableExpression> flattenAND() {
-        if (getFunctionSymbol() instanceof DBAndFunctionSymbol) {
+        if (super.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
             return getTerms().stream()
                     .map(t -> (ImmutableExpression) t)
                     .flatMap(ImmutableExpression::flattenAND)
@@ -48,7 +44,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
 
     @Override
     public Stream<ImmutableExpression> flattenOR() {
-        if (getFunctionSymbol() instanceof DBOrFunctionSymbol) {
+        if (super.getFunctionSymbol() instanceof DBOrFunctionSymbol) {
             return getTerms().stream()
                     .map(t -> (ImmutableExpression) t)
                     .flatMap(ImmutableExpression::flattenOR)
