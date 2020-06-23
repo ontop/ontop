@@ -1016,6 +1016,51 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT INTERVAL '31' DAY FROM DUMMY", ImmutableMap.of());
     }
 
+
+    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    public void sum_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT SUM(X) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    public void avg_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT AVG(X) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    public void min_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT MIN(X) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    public void max_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT MAX(X) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    public void count_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT COUNT(X) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    public void count_star_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT COUNT(*) AS C FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+
+
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void analytic_expression_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT LAG(A) OVER () FROM P", ImmutableMap.of());
@@ -1050,7 +1095,7 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void true_column_Test() throws JSQLParserException {
+    public void true_column_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A = true", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
@@ -1061,7 +1106,7 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void false_column_Test() throws JSQLParserException {
+    public void false_column_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A = false", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
@@ -1169,7 +1214,7 @@ public class ExpressionParserTest {
     @Test
     public void function_REPLACE_3_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT REPLACE(X, 'J', 'BL')  AS A FROM DUMMY", ImmutableMap.of(
+        ImmutableTerm translation = parseTerm("SELECT REPLACE(X, 'J', 'BL') AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 3), v,
@@ -1180,7 +1225,7 @@ public class ExpressionParserTest {
     @Test
     public void function_REPLACE_4_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT REPLACE(X, 'J', 'BL', 'i')  AS A FROM DUMMY", ImmutableMap.of(
+        ImmutableTerm translation = parseTerm("SELECT REPLACE(X, 'J', 'BL', 'i') AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 4), v,
@@ -1262,32 +1307,12 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void function_LCASE_2_Test() throws JSQLParserException {
-        Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT LCASE(X, 'A') AS A FROM DUMMY", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        DBFunctionSymbol lowerFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LCASE", 2);
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lowerFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
-    }
-
-    @Test
     public void function_LOWER_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT LOWER(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBLower(), v), translation);
-    }
-
-    @Test
-    public void function_LOWER_2_test() throws JSQLParserException {
-        Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT LOWER(X, 'A') AS A FROM DUMMY", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        DBFunctionSymbol lowerFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LOWER", 2);
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lowerFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test
@@ -1300,32 +1325,12 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void function_UCASE_2_test() throws JSQLParserException {
-        Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT UCASE(X, 'A') AS A FROM DUMMY", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        DBFunctionSymbol upperFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("UCASE", 2);
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(upperFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
-    }
-
-    @Test
     public void function_UPPER_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT UPPER(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBUpper(), v), translation);
-    }
-
-    @Test
-    public void function_UPPER_2_test() throws JSQLParserException {
-        Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT UPPER(X, 'A') AS A FROM DUMMY", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        DBFunctionSymbol upperFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("UPPER", 2);
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(upperFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test
@@ -1336,16 +1341,6 @@ public class ExpressionParserTest {
 
         DBFunctionSymbol lengthFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 1);
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lengthFunctionSymbol, v), translation);
-    }
-
-    @Test
-    public void function_LENGTH_2_test() throws JSQLParserException {
-        Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("SELECT LENGTH(X, 'A') AS A FROM DUMMY", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        DBFunctionSymbol lengthFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 2);
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lengthFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test

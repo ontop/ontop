@@ -483,61 +483,53 @@ public class SQLParserTest {
 		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
-	@Test
-	public void test_3_1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT MAX(score) as max_score FROM grade");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	public void max_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT MAX(score) AS max_score FROM grade");
 	}
 
-	@Test
-	public void test_3_2() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT MIN(score) as min_score FROM grade");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	public void min_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT MIN(score) AS min_score FROM grade");
 	}
 
-	@Test
-	public void test_3_3() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT AVG(score) as avg_score FROM grade");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	public void avg_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT AVG(score) AS avg_score FROM grade");
 	}
 
-	@Test
-	public void test_3_4() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT SUM(amount) as total_amount FROM tax");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	public void sum_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT SUM(amount) AS total_amount FROM tax");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to COUNT(*)
-	public void test_3_5() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT COUNT(*) as student_count FROM student");
+	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	public void count_star_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT COUNT(*) AS student_count FROM student");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to COUNT(id)
-	public void test_3_6() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT COUNT(id) as student_count FROM student");
+	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	public void count_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT COUNT(id) AS student_count FROM student");
 	}
 
-	@Test
-	public void test_3_7() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT EVERY(id) as student_count FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+	//@Test(expected = UnsupportedSelectQueryException.class)
+	// SQL:1999 aggregation not supported by JSQLParser
+	// see https://blog.jooq.org/2014/12/18/a-true-sql-gem-you-didnt-know-yet-the-every-aggregate-function/
+	public void every_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT EVERY(id < 10) AS student_id FROM student");
 	}
 
 	// @Test(expected = UnsupportedSelectQueryException.class)
-	// not a valid SQL query - ANY is a keyword and used here in a position of the function
-	public void test_3_8() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT ANY(id) FROM student");
+	public void any_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT ANY(id < 10) AS student_id FROM student");
 	}
+
+	// @Test(expected = UnsupportedSelectQueryException.class)
+	public void some_test() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("SELECT SOME(id < 10) AS student_id FROM student");
+	}
+
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
 	public void test_3_8_1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
@@ -545,11 +537,6 @@ public class SQLParserTest {
 				+ "WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)");
 	}
 
-	// @Test(expected = UnsupportedSelectQueryException.class)
-	// not a valid SQL query - SOME is a keyword and used here in a position of the function
-	public void test_3_9() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = parse("SELECT SOME(id) FROM student");
-	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
 	public void test_3_9_1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {

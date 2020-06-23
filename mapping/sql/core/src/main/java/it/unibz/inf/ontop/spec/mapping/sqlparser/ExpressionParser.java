@@ -77,13 +77,15 @@ public class ExpressionParser {
 
     private final ImmutableMap<String, BiFunction<Function, TermVisitor, ImmutableFunctionalTerm>>
             FUNCTIONS = ImmutableMap.<String, BiFunction<Function, TermVisitor, ImmutableFunctionalTerm>>builder()
-            .put("RAND", this::getRAND) // make it deterministic
+            .put("RAND", this::getRAND) // to make it deterministic
             .put("CONVERT", this::getCONVERT)
-            // due to COUNT(*) TODO: support it
+            // Aggregate functions
             .put("COUNT", this::reject)
-            // TODO: include MAX, MIN, etc.
-            // Array functions changing the cardinality: not yet supported
-            //    - From PostgreSQL
+            .put("MIN", this::reject)
+            .put("MAX", this::reject)
+            .put("SUM", this::reject)
+            .put("AVG", this::reject)
+            // Array functions (PostgreSQL) change cardinality
             .put("UNNEST", this::reject)
             .put("JSON_EACH", this::reject)
             .put("JSON_EACH_TEXT", this::reject)
@@ -179,7 +181,6 @@ public class ExpressionParser {
         }
 
 
-
         @Override
         public void visit(Function expression) {
             BiFunction<Function, TermVisitor, ImmutableFunctionalTerm> function
@@ -188,8 +189,6 @@ public class ExpressionParser {
 
             result = function.apply(expression, this);
         }
-
-
 
 
         // ------------------------------------------------------------
@@ -897,8 +896,4 @@ public class ExpressionParser {
             throw new InvalidSelectQueryRuntimeException("JDBC named parameters are not allowed", expression);
         }
     }
-
-
-
-
 }
