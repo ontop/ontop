@@ -38,7 +38,17 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
+    public boolean isQueryLoggingEnabled() {
+        return getRequiredBoolean(QUERY_LOGGING);
+    }
+
+    @Override
     public long getQueryCacheMaxSize() {
         return getRequiredLong(QUERY_CACHE_MAX_SIZE);
+    }
+
+    @Override
+    public String getApplicationName() {
+        return getRequiredProperty(APPLICATION_NAME);
     }
 }

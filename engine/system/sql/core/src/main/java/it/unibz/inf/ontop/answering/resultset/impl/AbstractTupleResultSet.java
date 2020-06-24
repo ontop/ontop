@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
@@ -16,6 +17,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     protected final ResultSet rs;
     protected final ImmutableList<Variable> signature;
+    private final QueryLogger queryLogger;
 
     /**
      * Flag used to emulate the expected behavior of next() and hasNext()
@@ -27,9 +29,12 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
     /* Set to false iff the moveCursor() method returned false (at least once) */
     private boolean foundNextElement = true;
 
-    AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature){
+    private long rowCount = 0;
+
+    AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature, QueryLogger queryLogger){
         this.rs = rs;
         this.signature = signature;
+        this.queryLogger = queryLogger;
     }
 
     @Override
@@ -79,10 +84,14 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
             try {
                 // Moves cursor one result ahead
                 foundNextElement = moveCursor();
+                if (foundNextElement)
+                    rowCount++;
             } catch (Exception e) {
                 throw new OntopConnectionException(e);
             }
         }
+        if (!foundNextElement)
+            queryLogger.declareLastResultRetrievedAndSerialize(rowCount);
         return foundNextElement;
     }
 

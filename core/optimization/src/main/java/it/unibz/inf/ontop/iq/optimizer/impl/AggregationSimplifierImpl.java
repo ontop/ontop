@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.AggregationNode;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSimplifier;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -78,6 +80,13 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             // In case of aggregation nodes in the sub-tree
             IQTree normalizedChild = child.acceptTransformer(this)
                     .normalizeForOptimization(variableGenerator);
+
+            QueryNode newChildRoot = normalizedChild.getRootNode();
+
+            // May need to renormalize the tree (RECURSIVE)
+            if ((newChildRoot instanceof ConstructionNode) && (!child.getRootNode().equals(newChildRoot)))
+                return transform(
+                        iqFactory.createUnaryIQTree(rootNode, normalizedChild).normalizeForOptimization(variableGenerator));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
 
