@@ -963,22 +963,24 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private InjectiveVar2VarSubstitution getNonProjVarsRenaming(IQTree leftQuery, IQTree rightQuery) {
+        VariableGenerator vGen = coreUtilsFactory.createVariableGenerator(
+                Sets.union(
+                        leftQuery.getKnownVariables(),
+                        rightQuery.getKnownVariables()
+                ));
         ImmutableSet<Variable> leftNonProjVars = ImmutableSet.copyOf(
                 Sets.difference(
                         leftQuery.getKnownVariables(),
                         leftQuery.getVariables()
                 ));
-                VariableGenerator vGen = coreUtilsFactory.createVariableGenerator(
-                Sets.union(
-                        leftQuery.getKnownVariables(),
-                        rightQuery.getKnownVariables()
-                ));
+        ImmutableSet<Variable> righProjVars = rightQuery.getVariables();
 
         // Return a substitution that renames non-projected variables from the right operand that are also present in the left operand
         return generateVariableSubstitution(
                 rightQuery.getKnownVariables().stream()
-                .filter(v -> leftNonProjVars.contains(v))
-                .collect(ImmutableCollectors.toSet()),
+                        .filter(v -> !righProjVars.contains(v))
+                        .filter(v -> leftNonProjVars.contains(v))
+                        .collect(ImmutableCollectors.toSet()),
                 vGen
         );
     }
