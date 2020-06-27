@@ -1,5 +1,5 @@
 PREFIX : <http://www.example.org/test#>
-SELECT ?p (GROUP_CONCAT(DISTINCT ?s) as ?sd)
+SELECT ?p (GROUP_CONCAT(DISTINCT ?s; SEPARATOR="|") as ?sd)
 WHERE {
 ?p :teaches ?c .
 ?c :numberOfStudents ?s .
