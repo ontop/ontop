@@ -581,4 +581,8 @@ public interface TermFactory {
 	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableTerm getDBAsText(ImmutableTerm arg1);
+
+	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
 }

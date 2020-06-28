@@ -287,4 +287,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSTTransform();
 
     DBFunctionSymbol getDBSTSetSRID();
+
+    FunctionSymbol getDBAsText();
+
+    FunctionSymbol getDBBuffer();
 }

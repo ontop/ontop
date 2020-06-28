@@ -583,6 +583,16 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableTerm getDBAsText(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBAsText(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBuffer(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
     public ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistanceSphere(), ImmutableList.of(arg1, arg2));
     }

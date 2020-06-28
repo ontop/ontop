@@ -161,8 +161,8 @@ public class GeoSPARQLTest {
                 ":2 a :Geom; geo:asWKT ?xWkt.\n" +
                 "BIND(geof:buffer(?xWkt, 1) as ?x) .\n" +
                 "}\n";
-        double val = runQueryAndReturnDoubleX(query);
-        assertEquals(3.55, val, 0.01);
+        String val = runQueryAndReturnString(query);
+        assertTrue(val.startsWith("POLYGON ((0 1, 0 7,"));
     }
 
     private String runQueryReturnIndividual(String query) throws OWLException {
@@ -191,6 +191,16 @@ public class GeoSPARQLTest {
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
             return ind1.parseDouble();
+        }
+    }
+
+    private String runQueryAndReturnString(String query) throws Exception {
+        try (OWLStatement st = conn.createStatement()) {
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
+            assertTrue(rs.hasNext());
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
+            return ind1.getLiteral();
         }
     }
 }

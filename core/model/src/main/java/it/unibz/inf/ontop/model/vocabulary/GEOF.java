@@ -11,12 +11,16 @@ public class GEOF {
 
     public static final IRI DISTANCE;
 
+    public static final IRI BUFFER;
+
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
 
         SF_WITHIN = factory.createIRI(PREFIX + "sfWithin");
 
         DISTANCE = factory.createIRI(PREFIX + "distance");
+
+        BUFFER = factory.createIRI(PREFIX + "buffer");
 
     }
 }

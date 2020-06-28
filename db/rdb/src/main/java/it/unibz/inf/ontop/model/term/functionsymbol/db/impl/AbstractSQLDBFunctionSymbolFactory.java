@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
@@ -55,6 +56,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ST_TRANSFORM = "ST_TRANSFORM";
 
     protected static final String ST_SETSRID = "ST_SETSRID";
+
+    protected static final String ST_ASTEXT = "ST_ASTEXT";
+    private static final String ST_BUFFER = "ST_BUFFER";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -226,6 +230,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol distanceSphereFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE_SPHERE, 2, dbDoubleType, false,
                 abstractRootDBType);
         builder.put(ST_DISTANCE_SPHERE, 2, distanceSphereFunctionSymbol);
+
+        DBFunctionSymbol asTextSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ASTEXT, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_ASTEXT, 1, asTextSymbol);
+
+        DBFunctionSymbol bufferSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_BUFFER, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_BUFFER, 2, bufferSymbol);
 
         return builder.build();
     }
@@ -813,6 +825,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBSTDistanceSphere() {
         return getRegularDBFunctionSymbol(ST_DISTANCE_SPHERE, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBAsText() {
+        return getRegularDBFunctionSymbol(ST_ASTEXT, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBBuffer() {
+        return getRegularDBFunctionSymbol(ST_BUFFER, 2);
     }
 
     @Override

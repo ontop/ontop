@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.term.functionsymbol.impl;
+package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 
 public class GeofSfWIthinFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
 
-    protected GeofSfWIthinFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
+    public GeofSfWIthinFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_SF_WITHIN", functionIRI, wktLiteralType, xsdBooleanType);
     }
 

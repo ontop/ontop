@@ -10,6 +10,9 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBufferFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDistanceFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWIthinFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.GEOF;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
@@ -226,9 +229,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                  */
                 new GeofSfWIthinFunctionSymbolImpl(GEOF.SF_WITHIN, wktLiteral, xsdBoolean),
                 /*
-                 * Geo SF Functions
+                 * Geo Functions
                  */
-                new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble)
+                new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble),
+                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

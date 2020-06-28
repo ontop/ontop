@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.term.functionsymbol.impl;
+package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.DBConstant;
@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
-    protected GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType) {
+    public GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType) {
         super("GEOF_DISTANCE", functionIRI,
                 ImmutableList.of(wktLiteralType, wktLiteralType, iriType),
                 xsdDoubleType);
