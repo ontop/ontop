@@ -159,7 +159,7 @@ public class GeoSPARQLTest {
                 "\n" +
                 "SELECT ?x WHERE {\n" +
                 ":2 a :Geom; geo:asWKT ?xWkt.\n" +
-                "BIND(geof:buffer(?xWkt, 1) as ?x) .\n" +
+                "BIND(geof:buffer(?xWkt, 1, uom:degree) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
         assertTrue(val.startsWith("POLYGON ((0 1, 0 7,"));

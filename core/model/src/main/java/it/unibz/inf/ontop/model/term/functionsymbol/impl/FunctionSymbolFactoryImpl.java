@@ -232,7 +232,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                  * Geo Functions
                  */
                 new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
-                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal)
+                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
