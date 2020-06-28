@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolFactoryImpl;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.UOM;
@@ -13,10 +16,13 @@ import javax.annotation.Nonnull;
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
-    public GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType) {
+    FunctionSymbolFactory functionSymbolFactory;
+
+    public GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType, FunctionSymbolFactoryImpl functionSymbolFactory) {
         super("GEOF_DISTANCE", functionIRI,
                 ImmutableList.of(wktLiteralType, wktLiteralType, iriType),
                 xsdDoubleType);
+        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     /**
@@ -39,22 +45,6 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         } else if (UOM.RADIAN.getIRIString().equals(unit)) {
             // TODO: distance(p1, p2) / 180 * PI
             return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
-//            return termFactory
-//                    .getDBSTDistance(
-//                    termFactory.getDBSTSTransform(
-//                            termFactory.getDBSTSetSRID(subLexicalTerms.get(0),
-//                                    SRID_4326
-//                            ),
-//                            SRID_3857
-//                    )
-//                    ,
-//                    termFactory.getDBSTSTransform(
-//                            termFactory.getDBSTSetSRID(subLexicalTerms.get(1),
-//                                    SRID_4326
-//                            ),
-//                            SRID_3857
-//                    )
-//            );
         } else if (UOM.DEGREE.getIRIString().equals(unit)) {
             return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
         } else {
