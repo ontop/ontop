@@ -37,9 +37,30 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         if (UOM.METRE.getIRIString().equals(unit)) {
             return termFactory.getDBSTDistanceSphere(subLexicalTerms.get(0), subLexicalTerms.get(1));
         } else if (UOM.RADIAN.getIRIString().equals(unit)) {
+            // TODO: distance(p1, p2) / 180 * PI
             return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
+//            return termFactory
+//                    .getDBSTDistance(
+//                    termFactory.getDBSTSTransform(
+//                            termFactory.getDBSTSetSRID(subLexicalTerms.get(0),
+//                                    SRID_4326
+//                            ),
+//                            SRID_3857
+//                    )
+//                    ,
+//                    termFactory.getDBSTSTransform(
+//                            termFactory.getDBSTSetSRID(subLexicalTerms.get(1),
+//                                    SRID_4326
+//                            ),
+//                            SRID_3857
+//                    )
+//            );
+        } else if (UOM.DEGREE.getIRIString().equals(unit)) {
+            return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        } else {
+            throw new IllegalArgumentException("Unexpected unit: " + unit);
         }
-        throw new IllegalStateException("Unexpected unit: " + unit);
+
 
     }
 }

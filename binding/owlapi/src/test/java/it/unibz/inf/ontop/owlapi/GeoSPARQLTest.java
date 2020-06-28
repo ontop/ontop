@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.h2gis.ext.H2GISExtension;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -95,7 +96,7 @@ public class GeoSPARQLTest {
     }
 
     @Test
-    public void testSelectDistance() throws Exception {
+    public void testSelectDistance_Metre() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -110,7 +111,58 @@ public class GeoSPARQLTest {
         //        "BIND(geof:distance(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
-        assertEquals(530571, val, 1.0);
+        assertEquals(339241, val, 1.0);
+    }
+
+    @Ignore("Triggers an Ontop Bug")
+    @Test
+    public void testSelectDistance_KiloMetre() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":4 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND((geof:distance(?xWkt, ?yWkt, uom:metre)/1000) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(339.241, val, 1.0);
+    }
+
+    @Test
+    public void testSelectDistance_Degree() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":4 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:degree) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(3.55, val, 0.01);
+    }
+
+    @Test
+    public void testSelectBuffer() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:buffer(?xWkt, 1) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(3.55, val, 0.01);
     }
 
     private String runQueryReturnIndividual(String query) throws OWLException {
