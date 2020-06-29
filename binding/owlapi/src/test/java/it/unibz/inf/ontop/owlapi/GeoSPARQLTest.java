@@ -195,7 +195,7 @@ public class GeoSPARQLTest {
                 "BIND(geof:buffer(?xWkt, 10000, uom:metre) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertTrue(val.startsWith("POLYGON ((0.9950"));
+        assertTrue(val.startsWith("POLYGON ((0.9100"));
     }
 
     private String runQueryReturnIndividual(String query) throws OWLException {
