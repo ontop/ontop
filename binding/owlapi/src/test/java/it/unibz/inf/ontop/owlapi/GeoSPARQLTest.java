@@ -150,6 +150,23 @@ public class GeoSPARQLTest {
     }
 
     @Test
+    public void testSelectDistance_Radian() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":4 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:radian) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(0.062, val, 0.001);
+    }
+
+    @Test
     public void testSelectBuffer() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
@@ -163,6 +180,22 @@ public class GeoSPARQLTest {
                 "}\n";
         String val = runQueryAndReturnString(query);
         assertTrue(val.startsWith("POLYGON ((0 1, 0 7,"));
+    }
+
+    @Test
+    public void testSelectBuffer_Metre() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:buffer(?xWkt, 10000, uom:metre) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertTrue(val.startsWith("POLYGON ((0.9950"));
     }
 
     private String runQueryReturnIndividual(String query) throws OWLException {

@@ -1,18 +1,22 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolFactoryImpl;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+
+import static java.lang.Math.PI;
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
@@ -26,31 +30,30 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
     }
 
     /**
-     * @param subLexicalTerms (lat, lon, unit)
-     *                        Assume the args are WGS 84 (lat lon)
-     * @return if unit=uom:metre, returns
-     * <pre>
-     *      ST_DISTANCE_SPHERE(arg1, arg2)
-     * </pre>
-     * <p> if unit=uom:radian, returns
-     * <pre>
-     *         ST_DISTANCE(arg1, arg2)
-     *       </pre>
+     * @param subLexicalTerms (geom1, geom2, unit)
+     * NB: we assume that the geoms are WGS 84 (lat lon). Other SRIDs need to be implemented.
      */
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+
         String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
-        if (UOM.METRE.getIRIString().equals(unit)) {
+        if (unit.equals(UOM.METRE.getIRIString())) {
+            // ST_DISTANCESPHERE
             return termFactory.getDBSTDistanceSphere(subLexicalTerms.get(0), subLexicalTerms.get(1));
-        } else if (UOM.RADIAN.getIRIString().equals(unit)) {
-            // TODO: distance(p1, p2) / 180 * PI
+        } else if (unit.equals(UOM.DEGREE.getIRIString())) {
+            // ST_DISTANCE
             return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
-        } else if (UOM.DEGREE.getIRIString().equals(unit)) {
-            return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        } else if (unit.equals(UOM.RADIAN.getIRIString())) {
+            // ST_DISTANCE / 180 * PI
+            double ratio = PI / 180;
+            DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
+            DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+            DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
+            ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
+            return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType()));
         } else {
             throw new IllegalArgumentException("Unexpected unit: " + unit);
         }
-
 
     }
 }
