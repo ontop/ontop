@@ -106,17 +106,4 @@ public class IQ2CQ {
         }
         throw new IllegalStateException("Use getExtensionalDataNodes first to check whether it's a CQ");
     }
-
-    public static Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optExpression, List<ImmutableExpression> expressions, TermFactory termFactory) {
-        if (expressions.isEmpty())
-            throw new IllegalArgumentException("Nonempty list of filters expected");
-
-        ImmutableExpression result = (optExpression.isPresent()
-                ? Stream.concat(Stream.of(optExpression.get()), expressions.stream())
-                : expressions.stream())
-                .reduce(null,
-                        (a, b) -> (a == null) ? b : termFactory.getConjunction(a, b));
-        return Optional.of(result);
-    }
-
 }

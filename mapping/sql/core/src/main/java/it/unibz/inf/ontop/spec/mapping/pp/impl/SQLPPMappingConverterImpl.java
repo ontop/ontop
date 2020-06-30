@@ -27,6 +27,8 @@ import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,6 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreSingletons coreSingletons;
     private final DBTypeFactory dbTypeFactory;
@@ -54,7 +55,6 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private SQLPPMappingConverterImpl(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
-        this.atomFactory = coreSingletons.getAtomFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.coreSingletons = coreSingletons;
         this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
@@ -72,10 +72,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     termFactory.getConjunction(re.getFilterAtoms().stream()),
                     iqFactory);
 
-            ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() == null)
-                    .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
-            Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), lookupTable);
+            Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
 
             for (TargetAtom target : assertion.getTargetAtoms()) {
                 PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
@@ -153,23 +150,30 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
         SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
         try {
+            ImmutableList<QuotedID> attributes;
             try {
-                return sqp.parse(sourceQuery);
-            }
-            catch (UnsupportedSelectQueryException e) {
-                ImmutableList<QuotedID> attributes;
+                SelectBody selectBody = JSqlParserTools.parse(sourceQuery);
                 try {
-                    DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(metadataLookup, termFactory);
-                    ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(sourceQuery).getUnqualifiedAttributes();
+                    return sqp.parse(selectBody);
+                }
+                catch (UnsupportedSelectQueryException e) {
+                    DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(metadataLookup, coreSingletons);
+                    ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(selectBody).getUnqualifiedAttributes();
                     attributes = ImmutableList.copyOf(attrs.keySet());
                 }
-                catch (InvalidSelectQueryException | UnsupportedSelectQueryException e2) {
-                    ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
-                    attributes = sqae.getAttributes(sourceQuery);
-                }
-                ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
-                return sqp.createAtom(view, ImmutableSet.of());
             }
+            catch (JSQLParserException e) {
+                System.out.println("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
+                ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
+                attributes = sqae.getAttributes(sourceQuery);
+            }
+            catch (UnsupportedSelectQueryException e) {
+                ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
+                attributes = sqae.getAttributes(sourceQuery);
+            }
+            System.out.println("PARSER VIEW FOR " + sourceQuery);
+            ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
+            return sqp.translateParserView(view);
         }
         catch (InvalidSelectQueryException e) {
             throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()

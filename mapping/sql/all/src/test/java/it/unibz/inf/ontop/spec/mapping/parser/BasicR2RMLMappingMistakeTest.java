@@ -15,6 +15,7 @@ public class BasicR2RMLMappingMistakeTest extends AbstractBasicMappingMistakeTes
         execute("/mistake/unbound-r2rml.ttl");
     }
 
+    @Ignore
     @Test(expected = InvalidMappingSourceQueriesException.class)
     public void testInvalidSQLQuery1() throws OBDASpecificationException {
         execute("/mistake/invalid-sql1-r2rml.ttl");

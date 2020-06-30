@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
@@ -1456,7 +1455,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
             new ImmutableMap.Builder<MathExpr.MathOp, String>()
                     .put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
-                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBSTRACT)
+                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBTRACT)
                     .put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
                     .put(MathExpr.MathOp.DIVIDE, SPARQL.NUMERIC_DIVIDE)
                     .build();

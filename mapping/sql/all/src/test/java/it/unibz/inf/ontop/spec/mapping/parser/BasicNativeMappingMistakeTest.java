@@ -15,6 +15,7 @@ public class BasicNativeMappingMistakeTest extends AbstractBasicMappingMistakeTe
         execute("/mistake/unbound.obda");
     }
 
+    @Ignore
     @Test(expected = InvalidMappingSourceQueriesException.class)
     public void testInvalidSQLQuery1() throws OBDASpecificationException {
         execute("/mistake/invalid-sql1.obda");
