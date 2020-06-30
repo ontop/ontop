@@ -573,6 +573,16 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
 
 	ImmutableTerm getDBSTWithin(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTContains(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCrosses(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTDisjoint(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTEquals(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTIntersects(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTOverlaps(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTTouches(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCoveredBy(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCovers(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTContainsProperly(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid);
 
@@ -581,6 +591,17 @@ public interface TermFactory {
 	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	//ImmutableTerm getDBSTBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+	/*ImmutableTerm getDBSTBoundary(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTConvexHull(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTEnvelope(ImmutableTerm arg1, ImmutableTerm arg2);
+	//ImmutableTerm getDBSTIntersection(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1);
+	ImmutableTerm getDBSTSymDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTUnion(ImmutableTerm arg1, ImmutableTerm arg2);
+	//ImmutableTerm getDBSTRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);*/
 
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 

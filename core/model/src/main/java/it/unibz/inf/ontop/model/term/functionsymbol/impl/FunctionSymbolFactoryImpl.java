@@ -12,7 +12,30 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBufferFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDistanceFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWIthinFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWithinFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfContainsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfCrossesFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfDisjointFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfEqualsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfOverlapsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfIntersectsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfTouchesFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhContainsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhCoveredByFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhCoversFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhDisjointFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhEqualsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhInsideFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhMeetFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhOverlapFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8DcFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8EqFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8EcFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppiFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8PoFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppiFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.GEOF;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
@@ -227,12 +250,60 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 /*
                  * Geo SF relation Functions
                  */
-                new GeofSfWIthinFunctionSymbolImpl(GEOF.SF_WITHIN, wktLiteral, xsdBoolean),
+                new GeofSfEqualsFunctionSymbolImpl(GEOF.SF_EQUALS, wktLiteral, xsdBoolean),
+                new GeofSfDisjointFunctionSymbolImpl(GEOF.SF_DISJOINT, wktLiteral, xsdBoolean),
+                new GeofSfIntersectsFunctionSymbolImpl(GEOF.SF_INTERSECTS, wktLiteral, xsdBoolean),
+                new GeofSfTouchesFunctionSymbolImpl(GEOF.SF_TOUCHES, wktLiteral, xsdBoolean),
+                new GeofSfCrossesFunctionSymbolImpl(GEOF.SF_CROSSES, wktLiteral, xsdBoolean),
+                new GeofSfWithinFunctionSymbolImpl(GEOF.SF_WITHIN, wktLiteral, xsdBoolean),
+                new GeofSfContainsFunctionSymbolImpl(GEOF.SF_CONTAINS, wktLiteral, xsdBoolean),
+                new GeofSfOverlapsFunctionSymbolImpl(GEOF.SF_OVERLAPS, wktLiteral, xsdBoolean),
+
+                /*
+                 * Geo Egenhofer relation Functions
+                 */
+                new GeofEhEqualsFunctionSymbolImpl(GEOF.EH_EQUALS, wktLiteral, xsdBoolean),
+                new GeofEhDisjointFunctionSymbolImpl(GEOF.EH_DISJOINT, wktLiteral, xsdBoolean),
+                new GeofEhMeetFunctionSymbolImpl(GEOF.EH_MEET, wktLiteral, xsdBoolean),
+                new GeofEhOverlapFunctionSymbolImpl(GEOF.EH_OVERLAP, wktLiteral, xsdBoolean),
+                new GeofEhCoversFunctionSymbolImpl(GEOF.EH_COVERS, wktLiteral, xsdBoolean),
+                new GeofEhCoveredByFunctionSymbolImpl(GEOF.EH_COVEREDBY, wktLiteral, xsdBoolean),
+                new GeofEhInsideFunctionSymbolImpl(GEOF.EH_INSIDE, wktLiteral, xsdBoolean),
+                new GeofEhContainsFunctionSymbolImpl(GEOF.EH_CONTAINS, wktLiteral, xsdBoolean),
+                /*
+                 * Geo Egenhofer Functions
+                 */
+
+                /*
+                 * Geo RCC8 relation Functions
+                 */
+                new GeofRcc8EqFunctionSymbolImpl(GEOF.RCC8_EQ, wktLiteral, xsdBoolean),
+                new GeofRcc8DcFunctionSymbolImpl(GEOF.RCC8_DC, wktLiteral, xsdBoolean),
+                new GeofRcc8EcFunctionSymbolImpl(GEOF.RCC8_EC, wktLiteral, xsdBoolean),
+                new GeofRcc8PoFunctionSymbolImpl(GEOF.RCC8_PO, wktLiteral, xsdBoolean),
+                new GeofRcc8TppFunctionSymbolImpl(GEOF.RCC8_TPP, wktLiteral, xsdBoolean),
+                new GeofRcc8TppiFunctionSymbolImpl(GEOF.RCC8_TPPI, wktLiteral, xsdBoolean),
+                new GeofRcc8NtppFunctionSymbolImpl(GEOF.RCC8_NTPP, wktLiteral, xsdBoolean),
+                new GeofRcc8NtppiFunctionSymbolImpl(GEOF.RCC8_NTPPI, wktLiteral, xsdBoolean),
+                /*
+                 * Geo RCC8 Functions
+                 */
+
                 /*
                  * Geo Functions
                  */
                 new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
                 new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType)
+                //                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral, iriType, xsdDouble)
+//                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, iriType, xsdDouble)
+//                new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral, iriType, xsdDouble)
+//                new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral, iriType, xsdDouble)
+//                new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral, iriType, xsdDouble)
+                //new GeofIntersectionFunctionSymbolImpl(GEOF.INTERSECTION, wktLiteral, iriType, xsdString),
+                //new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, iriType, xsdInteger),
+//                new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType, xsdDouble)
+//                new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType, xsdDouble)
+                //new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdBoolean)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

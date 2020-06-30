@@ -8,9 +8,9 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class GeofSfWIthinFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofSfWithinFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
 
-    public GeofSfWIthinFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
+    public GeofSfWithinFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_SF_WITHIN", functionIRI, wktLiteralType, xsdBooleanType);
     }
 

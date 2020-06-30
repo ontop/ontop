@@ -568,6 +568,56 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableTerm getDBSTOverlaps(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTOverlaps(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTContains(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTContains(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTCrosses(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTCrosses(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTDisjoint(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTDisjoint(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTEquals(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTEquals(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTIntersects(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTIntersects(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTTouches(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTTouches(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTCoveredBy(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTCoveredBy(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTCovers(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTCovers(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTContainsProperly(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTContainsProperly(), arg1, arg2);
+    }
+
+    @Override
     public ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTTransform(), arg1, srid);
     }
@@ -597,6 +647,50 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistanceSphere(), ImmutableList.of(arg1, arg2));
     }
 
+    /*@Override
+    public ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTGetSRID(), arg1);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTRelate(), arg1, arg2, arg3);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTIntersection(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTIntersection(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTUnion(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTUnion(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTEnvelope(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTEnvelope(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTConvexHull(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTConvexHull(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTBoundary(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTBoundary(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDifference(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTSymDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
+         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTSymDifference(), ImmutableList.of(arg1, arg2));
+    }*/
 
     @Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {

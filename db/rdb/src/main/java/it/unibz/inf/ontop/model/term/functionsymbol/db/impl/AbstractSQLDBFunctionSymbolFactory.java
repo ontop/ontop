@@ -48,6 +48,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String NULLIF_STR = "NULLIF";
 
     protected static final String ST_WITHIN = "ST_WITHIN";
+    protected static final String ST_CONTAINS = "ST_CONTAINS";
+    protected static final String ST_CROSSES = "ST_CROSSES";
+    protected static final String ST_DISJOINT = "ST_DISJOINT";
+    protected static final String ST_EQUALS = "ST_EQUALS";
+    protected static final String ST_OVERLAPS = "ST_OVERLAPS";
+    protected static final String ST_INTERSECTS = "ST_INTERSECTS";
+    protected static final String ST_TOUCHES = "ST_TOUCHES";
+    protected static final String ST_COVERS = "ST_COVERS";
+    protected static final String ST_COVEREDBY = "ST_COVEREDBY";
+    protected static final String ST_CONTAINSPROPERLY = "ST_CONTAINSPROPERLY";
 
     protected static final String ST_DISTANCE = "ST_DISTANCE";
 
@@ -222,6 +232,46 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol withinFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_WITHIN, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_WITHIN, 2, withinFunctionSymbol);
+
+        DBFunctionSymbol containsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_CONTAINS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_CONTAINS, 2, containsFunctionSymbol);
+
+        DBFunctionSymbol crossesFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_CROSSES, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_CROSSES, 2, crossesFunctionSymbol);
+
+        DBFunctionSymbol disjointFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_DISJOINT, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_DISJOINT, 2, disjointFunctionSymbol);
+
+        DBFunctionSymbol equalsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_EQUALS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_EQUALS, 2, equalsFunctionSymbol);
+
+        DBFunctionSymbol intersectsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_INTERSECTS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_INTERSECTS, 2, intersectsFunctionSymbol);
+
+        DBFunctionSymbol overlapsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_OVERLAPS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_OVERLAPS, 2, overlapsFunctionSymbol);
+
+        DBFunctionSymbol touchesFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_TOUCHES, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_TOUCHES, 2, touchesFunctionSymbol);
+
+        DBFunctionSymbol coversFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_COVERS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_COVERS, 2, coversFunctionSymbol);
+
+        DBFunctionSymbol coveredbyFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_COVEREDBY, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_COVEREDBY, 2, coveredbyFunctionSymbol);
+
+        DBFunctionSymbol containsproperlyFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_CONTAINSPROPERLY, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_CONTAINSPROPERLY, 2, containsproperlyFunctionSymbol);
 
         DBFunctionSymbol distanceFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE, 2, dbDoubleType, false,
                 abstractRootDBType);
@@ -815,6 +865,56 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBBooleanFunctionSymbol getDBSTWithin() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_WITHIN, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTContains() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_CONTAINS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTCrosses() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_CROSSES, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTDisjoint() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_DISJOINT, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTEquals() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_EQUALS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTIntersects() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_INTERSECTS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTOverlaps() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_OVERLAPS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTTouches() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_TOUCHES, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTCoveredBy() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_COVEREDBY, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTCovers() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_COVERS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTContainsProperly() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_CONTAINSPROPERLY, 2);
     }
 
     @Override

@@ -279,6 +279,18 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBIntIndex(int nbValues);
 
     DBBooleanFunctionSymbol getDBSTWithin();
+    DBBooleanFunctionSymbol getDBSTEquals();
+    DBBooleanFunctionSymbol getDBSTIntersects();
+    DBBooleanFunctionSymbol getDBSTOverlaps();
+    DBBooleanFunctionSymbol getDBSTContains();
+    DBBooleanFunctionSymbol getDBSTCrosses();
+    DBBooleanFunctionSymbol getDBSTDisjoint();
+    DBBooleanFunctionSymbol getDBSTTouches();
+    DBBooleanFunctionSymbol getDBSTCoveredBy();
+    DBBooleanFunctionSymbol getDBSTCovers();
+    DBBooleanFunctionSymbol getDBSTContainsProperly();
+
+    //DBBooleanFunctionSymbol getDBSTRelate();
 
     DBFunctionSymbol getDBSTDistance();
 
@@ -291,4 +303,14 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBAsText();
 
     FunctionSymbol getDBBuffer();
+
+    /*DBBooleanFunctionSymbol getDBSTRelate();
+    DBBooleanFunctionSymbol getDBSTIntersection();
+    DBBooleanFunctionSymbol getDBSTBoundary();
+    DBBooleanFunctionSymbol getDBSTSymDifference();
+    DBBooleanFunctionSymbol getDBSTGetSRID();
+    DBBooleanFunctionSymbol getDBSTUnion();
+    DBBooleanFunctionSymbol getDBSTEnvelope();
+    DBBooleanFunctionSymbol getDBSTConvexHull();
+    DBBooleanFunctionSymbol getDBSTDifference();*/
 }
