@@ -1,0 +1,21 @@
+[PrefixDeclaration]
+ex: http://example.org/
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+
+[MappingDeclaration] @collection [[
+
+mappingId   xml-fct
+target      ex:Individual{id} ex:xmlProperty {u}^^xsd:string .
+source      SELECT id, XMLNODE('a', XMLATTR('href', 'https://h2database.com')) AS u FROM data
+
+mappingId   label
+target      ex:Individual{id} rdfs:label {label} .
+source      SELECT id, label FROM data
+
+mappingId   unknown-fct
+target      ex:Individual{id} ex:unknownProperty {u}^^xsd:string .
+source      SELECT id, unknownFct(label) AS u FROM data
+
+
+]]

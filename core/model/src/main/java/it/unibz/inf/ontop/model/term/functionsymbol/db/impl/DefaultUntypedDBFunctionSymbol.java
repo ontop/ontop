@@ -21,17 +21,12 @@ import java.util.stream.IntStream;
  * Function symbols of each we don't know the return type.
  *
  * By default, it is treated as non-injective and non-postprocessable.
+ * They also may not reject NULLs and produce NULLs without having NULLs as input.
  *
  * This class is typically used for not recognized DB functions (e.g. when parsing the mapping)
  *
- * IMPORTANT ASSUMPTIONS (could be possibly violated as the function symbol is not recognized):
- *   1. Does not tolerate NULLs -> returns a NULL if it receives a NULL as input
- *   2. Does not return a NULL if its argument are all non-NULL
- *   3. The function symbol is DETERMINISTIC
- *
- * The assumption 1 and 2 are important for FILTERING out NULLs from the mapping assertions.
- * Violations of these assumptions are expected to be rare enough so that such function symbols can be recognized
- * and therefore be modelled properly.
+ * IMPORTANT ASSUMPTION (could be possibly violated as the function symbol is not recognized)
+ *   1. The function symbol is DETERMINISTIC
  *
  */
 public class DefaultUntypedDBFunctionSymbol extends FunctionSymbolImpl implements DBFunctionSymbol {
@@ -56,12 +51,9 @@ public class DefaultUntypedDBFunctionSymbol extends FunctionSymbolImpl implement
         return Optional.empty();
     }
 
-    /**
-     * ASSUMPTION 2
-     */
     @Override
     protected boolean mayReturnNullWithoutNullArguments() {
-        return false;
+        return true;
     }
 
     @Override
@@ -75,17 +67,11 @@ public class DefaultUntypedDBFunctionSymbol extends FunctionSymbolImpl implement
         return serializer.getNativeDBString(terms, termConverter, termFactory);
     }
 
-    /**
-     * ASSUMPTION 1
-     */
     @Override
     protected boolean tolerateNulls() {
-        return false;
+        return true;
     }
 
-    /**
-     * By default, to be overridden when necessary
-     */
     @Override
     public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return false;
