@@ -21,6 +21,7 @@ import java.sql.DriverManager;
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertFalse;
 
 public class GeoSPARQLTest {
 
@@ -207,6 +208,328 @@ public class GeoSPARQLTest {
             String retval = ind1.toString();
             return retval;
         }
+    }
+
+    @Test // line within line
+    public void testAskWithin2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":9 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":10 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfWithin(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // line within polygon
+    public void testAskWithin3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":9 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":6 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfWithin(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // point within polygon
+    public void testAskWithin4() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":11 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfWithin(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // point within linestring
+    public void testAskWithin5() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":11 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":10 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfWithin(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testAskEquals() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":6 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfEquals(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // unequal if identical shape but different coordinates
+    public void testAskEquals2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":5 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfEquals(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
+    @Test
+    public void testAskDisjoint() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":5 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":7 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfDisjoint(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // polygons
+    public void testAskIntersects() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":5 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfIntersects(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // linestrings
+    public void testAskIntersects2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":12 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfIntersects(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testAskTouches() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":7 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":8 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfTouches(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // Test result is false for 2 overlapping polygons
+    public void testAskCrosses() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":5 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfCrosses(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
+    @Test // Test result is false for point in polygon / multipoint needed
+    public void testAskCrosses2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":11 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfCrosses(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
+    @Test // Test result is false for linestring within linestring
+    public void testAskCrosses3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":9 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":10 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfCrosses(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
+    @Test // Test result is true for linestring crossing polygon
+    public void testAskCrosses4() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":12 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfCrosses(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // polygons
+    public void testAskContains() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfContains(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // linestrings
+    public void testAskContains2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":9 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfContains(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // point within polygon
+    public void testAskContains3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":11 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfContains(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // point within linestring
+    public void testAskContains4() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":11 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfContains(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // linestring within polygon
+    public void testAskContains5() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":6 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":9 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfContains(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testAskOverlaps() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":5 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfOverlaps(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test
+    public void testAskOverlaps2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":5 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfOverlaps(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // same as contains for polygons
+    public void testAskCovers() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:ehCovers(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // case when it differs vs. contains
+    public void testAskCovers2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":11 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:ehCovers(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
     }
 
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
