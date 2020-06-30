@@ -187,6 +187,11 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
+    public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        return applyFreshRenaming(freshRenamingSubstitution);
+    }
+
+    @Override
     public synchronized VariableNullability getVariableNullability() {
         if (variableNullability == null) {
 

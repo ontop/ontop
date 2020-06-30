@@ -42,7 +42,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
             throws ConversionException;
 
     /**
-     * Returns "(g o f)" where g is this substitution.
+     * Viewing a substitution as a function (takes a term, returns a term).
+     * This method yield the substitution "(g o f)" where g is this substitution.
      * NB: (g o f)(x) = g(f(x))
      */
     ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f);

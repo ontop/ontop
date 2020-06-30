@@ -91,6 +91,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
+    public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        return applyFreshRenaming(freshRenamingSubstitution);
+    }
+
+    @Override
     public VariableNullability getVariableNullability() {
         return coreUtilsFactory.createEmptyVariableNullability(getVariables());
     }
