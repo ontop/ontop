@@ -50,6 +50,21 @@ public abstract class AbstractVirtualModeTest {
         return factory.createReasoner(config);
     }
 
+    protected static OntopOWLReasoner createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) throws OWLOntologyCreationException {
+        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
+        r2rmlFile =  AbstractBindTestWithFunctions.class.getResource(r2rmlFile).toString();
+        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
+
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .r2rmlMappingFile(r2rmlFile)
+                .ontologyFile(owlFile)
+                .propertyFile(propertiesFile)
+                .enableTestMode()
+                .build();
+        return factory.createReasoner(config);
+    }
+
     protected String runQueryAndReturnStringOfIndividualX(String query) throws OWLException {
         try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
             assertTrue(rs.hasNext());

@@ -1,0 +1,461 @@
+﻿@base <http://example.com/base/> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rev: <http://purl.org/stuff/rev#> .
+@prefix bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> .
+@prefix bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/> .
+
+<#ProductFeature> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "productfeature" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature{nr}";
+  rr:class bsbm:ProductFeature;
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:label;
+  rr:objectMap [ rr:column "label"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:comment;
+  rr:objectMap [ rr:column "comment"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [ rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/StandardizationInstitution{publisher}"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
+
+<#ProductType> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "producttype" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType{nr}";
+  rr:class bsbm:ProductType;
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:label;
+  rr:objectMap [ rr:column "label"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:comment;
+  rr:objectMap [ rr:column "comment"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:subClassOf;
+  rr:objectMap [
+    rr:parentTriplesMap <#ProductType>;
+    rr:joinCondition [
+      rr:child "parent";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [ rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/StandardizationInstitution{publisher}"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
+
+<#Producer> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "producer" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Producer{nr}";
+  rr:class bsbm:Producer;
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:label;
+  rr:objectMap [ rr:column "label"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:comment;
+  rr:objectMap [ rr:column "comment"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate foaf:homepage;
+  rr:objectMap [
+    rr:column "homepage";
+    rr:termType rr:IRI;
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:country;
+  rr:objectMap [
+    rr:template "http://downlode.org/rdf/iso-3166/countries#{country}";
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [
+    rr:parentTriplesMap <#Producer>;
+    rr:joinCondition [
+      rr:child "publisher";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
+
+<#Product> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "product" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Product{nr}";
+  rr:class bsbm:Product;
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:label;
+  rr:objectMap [ rr:column "label"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:comment;
+  rr:objectMap [ rr:column "comment"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:producer;
+  rr:objectMap [
+    rr:parentTriplesMap <#Producer>;
+    rr:joinCondition [
+      rr:child "producer";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [
+    rr:parentTriplesMap <#Producer>;
+    rr:joinCondition [
+      rr:child "publisher";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyNumeric1;
+  rr:objectMap [ rr:column "propertyNum1"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyNumeric2;
+  rr:objectMap [ rr:column "propertyNum2"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyNumeric3;
+  rr:objectMap [ rr:column "propertyNum3"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyNumeric4;
+  rr:objectMap [ rr:column "propertyNum4"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyNumeric5;
+  rr:objectMap [ rr:column "propertyNum5"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyTextual6;
+  rr:objectMap [ rr:column "propertyNum6"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyTextual1;
+  rr:objectMap [ rr:column "propertyTex1"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyTextual2;
+  rr:objectMap [ rr:column "propertyTex2"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyTextual3;
+  rr:objectMap [ rr:column "propertyTex3"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyTextual4;
+  rr:objectMap [ rr:column "propertyTex4"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyTextual5;
+  rr:objectMap [ rr:column "propertyTex5"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productPropertyTextual6;
+  rr:objectMap [ rr:column "propertyTex6"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
+
+<#ProductTypeProduct> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "producttypeproduct" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Product{product}";
+];
+rr:predicateObjectMap [
+  rr:predicate rdf:type;
+  rr:objectMap [
+    rr:parentTriplesMap <#ProductType>;
+    rr:joinCondition [
+      rr:child "productType";
+      rr:parent "nr";
+    ];
+  ];
+];
+.
+
+<#ProductFeatureProduct> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "productfeatureproduct" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Product{product}";
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:productFeature;
+  rr:objectMap [
+    rr:parentTriplesMap <#ProductFeature>;
+    rr:joinCondition [
+      rr:child "productFeature";
+      rr:parent "nr";
+    ];
+  ];
+];
+.
+
+<#Vendor> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "vendor" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Vendor{nr}";
+  rr:class bsbm:Vendor;
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:label;
+  rr:objectMap [ rr:column "label"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate rdfs:comment;
+  rr:objectMap [ rr:column "comment"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate foaf:homepage;
+  rr:objectMap [
+    rr:column "homepage";
+    rr:termType rr:IRI;
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:country;
+  rr:objectMap [
+    rr:template "http://downlode.org/rdf/iso-3166/countries#{country}";
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [
+    rr:parentTriplesMap <#Vendor>;
+    rr:joinCondition [
+      rr:child "publisher";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
+
+<#Offer> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "offer" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Offer{nr}";
+  rr:class bsbm:Offer;
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:product;
+  rr:objectMap [
+    rr:parentTriplesMap <#Product>;
+    rr:joinCondition [
+      rr:child "product";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:producer;
+  rr:objectMap [
+    rr:parentTriplesMap <#Producer>;
+    rr:joinCondition [
+      rr:child "producer";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:vendor;
+  rr:objectMap [
+    rr:parentTriplesMap <#Vendor>;
+    rr:joinCondition [
+      rr:child "vendor";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:price;
+  rr:objectMap [ rr:column "price"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:validFrom;
+  rr:objectMap [ rr:column "validFrom"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:validTo;
+  rr:objectMap [ rr:column "validTo"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:deliveryDays;
+  rr:objectMap [ rr:column "deliveryDays"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:offerWebpage;
+  rr:objectMap [
+    rr:column "offerWebpage";
+    rr:termType rr:IRI;
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [
+    rr:parentTriplesMap <#Vendor>;
+    rr:joinCondition [
+      rr:child "publisher";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
+
+<#Person> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "person" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Reviewer{nr}";
+  rr:class bsbm:Person;
+];
+rr:predicateObjectMap [
+  rr:predicate foaf:name;
+  rr:objectMap [ rr:column "name"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate foaf:mbox_sha1sum;
+  rr:objectMap [ rr:column "mbox_sha1sum"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:country;
+  rr:objectMap [
+    rr:template "http://downlode.org/rdf/iso-3166/countries#{country}";
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [ rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/RatingSite{publisher}"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
+
+<#Review> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "review" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Review{nr}";
+  rr:class bsbm:Review;
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:reviewFor;
+  rr:objectMap [
+    rr:parentTriplesMap <#Product>;
+    rr:joinCondition [
+      rr:child "product";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:producer;
+  rr:objectMap [
+    rr:parentTriplesMap <#Producer>;
+    rr:joinCondition [
+      rr:child "producer";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate rev:reviewer;
+  rr:objectMap [
+    rr:parentTriplesMap <#Person>;
+    rr:joinCondition [
+      rr:child "person";
+      rr:parent "nr";
+    ];
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:reviewDate;
+  rr:objectMap [ rr:column "reviewDate"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:title;
+  rr:objectMap [
+    rr:column "title";
+    rr:language "en";
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate rev:text;
+  rr:objectMap [
+    rr:column "text";
+    rr:language "en";
+  ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:rating1;
+  rr:objectMap [ rr:column "rating1"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:rating2;
+  rr:objectMap [ rr:column "rating2"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:rating3;
+  rr:objectMap [ rr:column "rating3"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate bsbm:rating4;
+  rr:objectMap [ rr:column "rating4"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:publisher;
+  rr:objectMap [ rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/RatingSite{publisher}"; ];
+];
+rr:predicateObjectMap [
+  rr:predicate dc:date;
+  rr:objectMap [ rr:column "publishDate"; ];
+];
+.
