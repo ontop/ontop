@@ -592,12 +592,11 @@ public interface TermFactory {
 
 	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
 
-	//ImmutableTerm getDBSTBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBIntersection(ImmutableTerm arg1, ImmutableTerm arg2);
 	/*ImmutableTerm getDBSTBoundary(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTConvexHull(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTDifference(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTEnvelope(ImmutableTerm arg1, ImmutableTerm arg2);
-	//ImmutableTerm getDBSTIntersection(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1);
 	ImmutableTerm getDBSTSymDifference(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTUnion(ImmutableTerm arg1, ImmutableTerm arg2);

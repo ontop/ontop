@@ -47,6 +47,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CONCAT_OP_STR = "||";
     protected static final String NULLIF_STR = "NULLIF";
 
+    // Geographic Boolean Relation Functions
     protected static final String ST_WITHIN = "ST_WITHIN";
     protected static final String ST_CONTAINS = "ST_CONTAINS";
     protected static final String ST_CROSSES = "ST_CROSSES";
@@ -59,6 +60,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ST_COVEREDBY = "ST_COVEREDBY";
     protected static final String ST_CONTAINSPROPERLY = "ST_CONTAINSPROPERLY";
 
+    // Geographic Boolean Relation Functions
+
     protected static final String ST_DISTANCE = "ST_DISTANCE";
 
     protected static final String ST_DISTANCE_SPHERE = "ST_DISTANCESPHERE";
@@ -69,6 +72,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected static final String ST_ASTEXT = "ST_ASTEXT";
     private static final String ST_BUFFER = "ST_BUFFER";
+    private static final String ST_INTERSECTION = "ST_INTERSECTION";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -288,6 +292,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol bufferSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_BUFFER, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_BUFFER, 2, bufferSymbol);
+
+        DBFunctionSymbol intersectionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_INTERSECTION, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_INTERSECTION, 2, intersectionSymbol);
 
         return builder.build();
     }
@@ -935,6 +943,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public FunctionSymbol getDBBuffer() {
         return getRegularDBFunctionSymbol(ST_BUFFER, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBIntersection() {
+        return getRegularDBFunctionSymbol(ST_INTERSECTION, 2);
     }
 
     @Override

@@ -532,6 +532,22 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
+    @Test
+    public void testSelectIntersection() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertTrue(val.startsWith("POLYGON ((0.9100"));
+    }
+
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);

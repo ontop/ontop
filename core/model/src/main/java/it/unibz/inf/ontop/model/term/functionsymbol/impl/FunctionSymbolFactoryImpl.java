@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBufferFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDistanceFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofIntersectionFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWithinFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfContainsFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfCrossesFunctionSymbolImpl;
@@ -293,17 +294,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                  * Geo Functions
                  */
                 new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
-                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType)
-                //                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral, iriType, xsdDouble)
-//                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, iriType, xsdDouble)
+                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType),
+                new GeofIntersectionFunctionSymbolImpl(GEOF.INTERSECTION, wktLiteral, iriType)
+//                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral, iriType, xsdDouble)
 //                new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral, iriType, xsdDouble)
 //                new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral, iriType, xsdDouble)
 //                new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral, iriType, xsdDouble)
-                //new GeofIntersectionFunctionSymbolImpl(GEOF.INTERSECTION, wktLiteral, iriType, xsdString),
-                //new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, iriType, xsdInteger),
+//                new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, iriType, xsdInteger),
 //                new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType, xsdDouble)
 //                new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType, xsdDouble)
-                //new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdBoolean)
+//                new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdBoolean)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
