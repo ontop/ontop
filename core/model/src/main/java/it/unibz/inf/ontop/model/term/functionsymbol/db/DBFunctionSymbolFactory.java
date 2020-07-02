@@ -228,6 +228,9 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBTz();
     DBFunctionSymbol getDBNow();
 
+    DBFunctionSymbol getExtractFunctionSymbol(String component);
+    DBFunctionSymbol getCurrentDateTimeSymbol(String type);
+
     /**
      * The functional term using it may be simplifiable to a regular NULL or not, depending on the DB system.
      *

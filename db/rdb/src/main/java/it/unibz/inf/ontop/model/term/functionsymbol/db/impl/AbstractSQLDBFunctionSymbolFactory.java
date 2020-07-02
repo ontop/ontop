@@ -36,7 +36,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String MULTIPLY_STR = "*";
     protected static final String DIVIDE_STR = "/";
     protected static final String ADD_STR = "+";
-    protected static final String SUBSTRACT_STR = "-";
+    protected static final String SUBTRACT_STR = "-";
     protected static final String ABS_STR = "ABS";
     protected static final String CEIL_STR = "CEIL";
     protected static final String ROUND_STR = "ROUND";
@@ -681,8 +681,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType) {
-        return new DefaultTypedDBMathBinaryOperator(SUBSTRACT_STR, dbNumericType);
+    protected DBMathBinaryOperator createSubtractOperator(DBTermType dbNumericType) {
+        return new DefaultTypedDBMathBinaryOperator(SUBTRACT_STR, dbNumericType);
     }
 
     @Override
@@ -701,8 +701,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBMathBinaryOperator createUntypedSubstractOperator() {
-        return new DefaultUntypedDBMathBinaryOperator(SUBSTRACT_STR, abstractRootDBType);
+    protected DBMathBinaryOperator createUntypedSubtractOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(SUBTRACT_STR, abstractRootDBType);
     }
 
     @Override

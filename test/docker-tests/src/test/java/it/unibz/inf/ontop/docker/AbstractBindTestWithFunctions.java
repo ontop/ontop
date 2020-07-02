@@ -1241,6 +1241,51 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
+    @Test
+    public void testConstantFloatDivide() throws Exception {
+        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:float AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:float");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantFloatIntegerDivide() throws Exception {
+        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1\"^^xsd:integer AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:float");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantFloatDecimalDivide() throws Exception {
+        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:decimal AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:float");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantFloatDoubleDivide() throws Exception {
+        String queryBind = "SELECT (\"1.0\"^^xsd:float / \"2.0\"^^xsd:double AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:double");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantDoubleDoubleDivide() throws Exception {
+        String queryBind = "SELECT (\"1.0\"^^xsd:double / \"2.0\"^^xsd:double AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:double");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {

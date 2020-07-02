@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
@@ -216,6 +215,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
         ImmutableExpression filter = getFilterConditionForDifference(sub);
 
+        InjectiveVar2VarSubstitution nonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation.iqTree, rightTranslation.iqTree);
+
         return new TranslationResult(
                 iqFactory.createUnaryIQTree(
                         iqFactory.createFilterNode(
@@ -224,7 +225,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         iqFactory.createBinaryNonCommutativeIQTree(
                                 iqFactory.createLeftJoinNode(ljCond),
                                 leftTranslation.iqTree,
-                                rightTranslation.iqTree.applyDescendingSubstitutionWithoutOptimizing(sub)
+                                rightTranslation.iqTree
+                                        .applyDescendingSubstitutionWithoutOptimizing(sub)
+                                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming)
                         )),
                 leftTranslation.nullableVariables
         );
@@ -697,10 +700,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 topSubstitution.getImmutableMap().keySet().stream())
                 .collect(ImmutableCollectors.toSet());
 
+        InjectiveVar2VarSubstitution nonProjVarsRenaming = getNonProjVarsRenaming(leftQuery, rightQuery);
+
         IQTree joinTree = getJoinTree(
                 joinNode,
                 leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution),
-                rightQuery.applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution)
+                rightQuery
+                        .applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution)
+                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming)
         );
 
         return topSubstitution.isEmpty() ?
@@ -821,6 +828,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         ConstructionNode rootNode = iqFactory.createConstructionNode(rootVariables);
 
+        InjectiveVar2VarSubstitution nonProjVarsRenaming = getNonProjVarsRenaming(leftQuery, rightQuery);
+
         return new TranslationResult(
                 iqFactory.createUnaryIQTree(
                         rootNode,
@@ -834,7 +843,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                         iqFactory.createUnaryIQTree(
                                                 rightCn,
                                                 rightQuery
-                                        )))),
+                                        ).applyFreshRenamingToAllVariables(nonProjVarsRenaming)
+                                ))),
                 allNullable
         );
     }
@@ -948,6 +958,29 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         return new TranslationResult(
                 subquery.iqTree,
                 subquery.nullableVariables
+        );
+    }
+
+    private InjectiveVar2VarSubstitution getNonProjVarsRenaming(IQTree leftQuery, IQTree rightQuery) {
+        VariableGenerator vGen = coreUtilsFactory.createVariableGenerator(
+                Sets.union(
+                        leftQuery.getKnownVariables(),
+                        rightQuery.getKnownVariables()
+                ));
+        ImmutableSet<Variable> leftNonProjVars = ImmutableSet.copyOf(
+                Sets.difference(
+                        leftQuery.getKnownVariables(),
+                        leftQuery.getVariables()
+                ));
+        ImmutableSet<Variable> righProjVars = rightQuery.getVariables();
+
+        // Return a substitution that renames non-projected variables from the right operand that are also present in the left operand
+        return generateVariableSubstitution(
+                rightQuery.getKnownVariables().stream()
+                        .filter(v -> !righProjVars.contains(v))
+                        .filter(v -> leftNonProjVars.contains(v))
+                        .collect(ImmutableCollectors.toSet()),
+                vGen
         );
     }
 
@@ -1422,7 +1455,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
             new ImmutableMap.Builder<MathExpr.MathOp, String>()
                     .put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
-                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBSTRACT)
+                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBTRACT)
                     .put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
                     .put(MathExpr.MathOp.DIVIDE, SPARQL.NUMERIC_DIVIDE)
                     .build();

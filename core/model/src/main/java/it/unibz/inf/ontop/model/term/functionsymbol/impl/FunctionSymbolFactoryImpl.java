@@ -188,7 +188,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Sha512SPARQLFunctionSymbolImpl(xsdString),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBSTRACT, abstractNumericType),
+                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBTRACT, abstractNumericType),
                 new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),

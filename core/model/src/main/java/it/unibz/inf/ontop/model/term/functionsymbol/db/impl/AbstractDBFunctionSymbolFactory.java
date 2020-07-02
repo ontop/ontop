@@ -81,6 +81,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
 
+    private final Map<String, DBFunctionSymbol> extractFunctionSymbolsMap;
+    private final Map<String, DBFunctionSymbol> currentDateTimeFunctionSymbolsMap;
+
     // Created in init()
     private DBBooleanFunctionSymbol nonStrictNumericEqOperator;
     // Created in init()
@@ -287,6 +290,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.maxMap = new ConcurrentHashMap<>();
 
         this.typeNullMap = new ConcurrentHashMap<>();
+
+        this.extractFunctionSymbolsMap = new ConcurrentHashMap<>();
+        this.currentDateTimeFunctionSymbolsMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -824,6 +830,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getExtractFunctionSymbol(String component) {
+        return extractFunctionSymbolsMap.computeIfAbsent(component, c -> createExtractFunctionSymbol(c));
+    }
+
+    @Override
+    public DBFunctionSymbol getCurrentDateTimeSymbol(String type) {
+        return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, c -> createCurrentDateTimeFunctionSymbol(c));
+    }
+
+    @Override
     public DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType) {
         return typeNullMap
                 .computeIfAbsent(termType, this::createTypeNullFunctionSymbol);
@@ -938,8 +954,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 return createDivideOperator(dbNumericType);
             case SPARQL.NUMERIC_ADD:
                 return createAddOperator(dbNumericType);
-            case SPARQL.NUMERIC_SUBSTRACT:
-                return createSubstractOperator(dbNumericType);
+            case SPARQL.NUMERIC_SUBTRACT:
+                return createSubtractOperator(dbNumericType);
             default:
                 throw new UnsupportedOperationException("The math operator " + dbMathOperatorName + " is not supported");
         }
@@ -953,8 +969,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 return createUntypedDivideOperator();
             case SPARQL.NUMERIC_ADD:
                 return createUntypedAddOperator();
-            case SPARQL.NUMERIC_SUBSTRACT:
-                return createUntypedSubstractOperator();
+            case SPARQL.NUMERIC_SUBTRACT:
+                return createUntypedSubtractOperator();
             default:
                 throw new UnsupportedOperationException("The untyped math operator " + dbMathOperatorName + " is not supported");
         }
@@ -1046,15 +1062,25 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeTz);
     }
 
+    protected DBFunctionSymbol createExtractFunctionSymbol(String component) {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("EXTRACT_" + component, rootDBType, rootDBType, false,
+                (t, c, f) -> serializeExtract(component, t, c, f));
+    }
+
+    protected DBFunctionSymbol createCurrentDateTimeFunctionSymbol(String type) {
+        return new DBFunctionSymbolWithSerializerImpl("CURRENT_" + type, ImmutableList.of(), rootDBType, false,
+                (t, c, f) -> serializeCurrentDateTime(type, t, c, f));
+    }
+
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) ;
-    protected abstract DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType);
+    protected abstract DBMathBinaryOperator createSubtractOperator(DBTermType dbNumericType);
 
     protected abstract DBMathBinaryOperator createUntypedMultiplyOperator();
     protected abstract DBMathBinaryOperator createUntypedDivideOperator();
     protected abstract DBMathBinaryOperator createUntypedAddOperator();
-    protected abstract DBMathBinaryOperator createUntypedSubstractOperator();
+    protected abstract DBMathBinaryOperator createUntypedSubtractOperator();
 
     protected abstract DBBooleanFunctionSymbol createNonStrictNumericEquality();
     protected abstract DBBooleanFunctionSymbol createNonStrictStringEquality();
@@ -1179,6 +1205,20 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
                                                Function<ImmutableTerm, String> termConverter,
                                                TermFactory termFactory);
+
+    protected String serializeExtract(String component,
+                                               ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory) {
+        return "EXTRACT(" + component + " FROM " + termConverter.apply(terms.get(0)) + ")";
+    }
+
+    protected String serializeCurrentDateTime(String type,
+                                      ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter,
+                                      TermFactory termFactory) {
+        return "CURRENT_" + type;
+    }
 
 
     @Override
