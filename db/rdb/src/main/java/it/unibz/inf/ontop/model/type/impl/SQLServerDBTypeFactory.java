@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
 
 public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
@@ -19,6 +20,7 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String DATETIME2_STR = "DATETIME2";
     public static final String DATETIMEOFFSET_STR = "DATETIMEOFFSET";
     public static final String UNIQUEIDENTIFIER_STR = "UNIQUEIDENTIFIER";
+    private static final String DEFAULT_DECIMAL_STR = "DECIMAL(38, 19)";
 
 
     @AssistedInject
@@ -47,6 +49,11 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType uniqueIdType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UNIQUEIDENTIFIER_STR,
                 rootTermType.getAncestry(), WITH_ALL);
 
+        // Default decimal (otherwise, the default value of DECIMAL would be DECIMAL(19,0)
+        // with 0 digits after the point). Still arbitrary.
+        NumberDBTermType defaultDecimalType = new NumberDBTermType(DEFAULT_DECIMAL_STR, rootAncestry,
+                typeFactory.getXsdDecimalDatatype(), DECIMAL);
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NVARCHAR_STR, nvarcharType);
         map.put(BIT_STR, bitType);
@@ -54,6 +61,7 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DATETIME2_STR, datetime2Type);
         map.put(DATETIMEOFFSET_STR, dateTimeOffset);
         map.put(UNIQUEIDENTIFIER_STR, uniqueIdType);
+        map.put(DEFAULT_DECIMAL_STR, defaultDecimalType);
         return map;
     }
 
@@ -64,6 +72,7 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.DATETIMESTAMP, DATETIME2_STR);
         // By default float is float(53) which is a float with double precision
         map.put(DefaultTypeCode.DOUBLE, FLOAT_STR);
+        map.put(DefaultTypeCode.DECIMAL, DEFAULT_DECIMAL_STR);
         return ImmutableMap.copyOf(map);
     }
 
