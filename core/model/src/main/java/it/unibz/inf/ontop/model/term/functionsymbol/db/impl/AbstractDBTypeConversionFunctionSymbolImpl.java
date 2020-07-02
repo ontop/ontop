@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -27,7 +24,7 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
                 ? convertDBConstant((DBConstant) subTerm, termFactory)
                 : (subTerm instanceof ImmutableFunctionalTerm)
                     ? buildTermFromFunctionalTerm((ImmutableFunctionalTerm) subTerm, termFactory, variableNullability)
-                    : termFactory.getImmutableFunctionalTerm(this, newTerms);
+                    : buildFromVariable(newTerms, termFactory, variableNullability) ;
     }
 
     /**
@@ -36,6 +33,14 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
      */
     protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
+    }
+
+    /**
+     * Default implementation
+     *
+     */
+    protected ImmutableTerm buildFromVariable(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory, VariableNullability variableNullability) {
+        return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
     protected abstract ImmutableTerm convertDBConstant(DBConstant constant, TermFactory termFactory) throws DBTypeConversionException;

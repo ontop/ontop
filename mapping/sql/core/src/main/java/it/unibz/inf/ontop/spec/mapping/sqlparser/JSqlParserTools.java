@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -13,17 +12,12 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 
 public class JSqlParserTools {
 
-    public static SelectBody parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
-        try {
-            Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
-            if (!(statement instanceof Select))
-                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
+    public static SelectBody parse(String sql) throws InvalidSelectQueryException, JSQLParserException {
+        Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
+        if (!(statement instanceof Select))
+            throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
 
-            return ((Select) statement).getSelectBody();
-        }
-        catch (JSQLParserException e) {
-            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
-        }
+        return ((Select) statement).getSelectBody();
     }
 
     /**
@@ -37,7 +31,7 @@ public class JSqlParserTools {
     public static PlainSelect getPlainSelect(SelectBody selectBody) {
         // other subclasses of SelectBody are
         //      SelectOperationList (INTERSECT, EXCEPT, MINUS, UNION),
-        //      ValuesStatement (VALUES) TODO and
+        //      ValuesStatement (VALUES)
         //      WithItem ([RECURSIVE]...)
 
         if (!(selectBody instanceof PlainSelect))

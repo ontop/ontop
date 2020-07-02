@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -31,6 +32,18 @@ public abstract class AbstractDBAggregationFunctionSymbol extends AbstractAggreg
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializer.getNativeDBString(terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        if (getArity() >= 1) {
+            ImmutableTerm newTerm = newTerms.get(0);
+            return newTerm.isNull()
+                    ? evaluateEmptyBag(termFactory)
+                    : super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+        }
+        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -28,9 +29,9 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
                               ImmutableMap<Variable, DBTermType> sqlTypeMap,
                               ConstructionNode constructionNode,
                               DistinctVariableOnlyDataAtom answerAtom,
-                              TermFactory termFactory,
+                              QueryLogger queryLogger, TermFactory termFactory,
                               SubstitutionFactory substitutionFactory) {
-        super(rs, answerAtom.getArguments());
+        super(rs, answerAtom.getArguments(),queryLogger);
         this.sqlSignature = sqlSignature;
         this.sqlTypeMap = sqlTypeMap;
         this.substitutionFactory = substitutionFactory;

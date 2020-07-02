@@ -64,6 +64,14 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
     }
 
     @Override
+    protected ImmutableTerm buildFromVariable(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory, VariableNullability variableNullability) {
+        if ((inputType != null) && inputType.equals(getTargetType()))
+            return newTerms.get(0);
+        else
+            return super.buildFromVariable(newTerms, termFactory, variableNullability);
+    }
+
+    @Override
     public Optional<DBTermType> getInputType() {
         return Optional.ofNullable(inputType);
     }

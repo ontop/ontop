@@ -215,7 +215,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType) {
+    protected DBMathBinaryOperator createSubtractOperator(DBTermType dbNumericType) {
         return new DefaultTypedDBMathBinaryOperator(SUBSTRACT_STR, dbNumericType);
     }
 
@@ -235,7 +235,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBMathBinaryOperator createUntypedSubstractOperator() {
+    protected DBMathBinaryOperator createUntypedSubtractOperator() {
         return new DefaultUntypedDBMathBinaryOperator(SUBSTRACT_STR, abstractRootDBType);
     }
 

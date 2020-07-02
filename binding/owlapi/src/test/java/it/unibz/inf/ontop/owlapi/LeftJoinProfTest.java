@@ -1217,6 +1217,44 @@ public class LeftJoinProfTest {
         checkReturnedValuesAndReturnSql(query, expectedValues);
     }
 
+    @Test
+    public void testProperties() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   { [] ?p1 \"Frankie\"  }\n" +
+                "    UNION \n" +
+                "   { [] ?p2 10 }\n" +
+                "   BIND(str(coalesce(?p1, ?p2)) AS ?v)" +
+                "}\n" +
+                "ORDER BY ?v\n";
+
+        List<String> expectedValues = ImmutableList.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents", "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testCommonNonProjectedVariable() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "   { SELECT ?c { ?c  :duration ?o  } }\n" +
+                "   { SELECT ?c { ?o :teaches ?c } }\n" +
+                "   BIND(str(?c) AS ?v)" +
+                "}\n" +
+                "ORDER BY ?v\n";
+
+        List<String> expectedValues = ImmutableList.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/AdvancedDatabases",
+                "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/DiscreteMathematics",
+                "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/LinearAlgebra",
+                "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/ScientificWriting");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {
