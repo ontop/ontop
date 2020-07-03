@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -1017,6 +1018,88 @@ public class BindWithFunctionsTest {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.5\"^^xsd:double");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantIntegerDivide() throws Exception {
+        String queryBind = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:decimal");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceDivideByZeroInt() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"1\"^^xsd:integer / \"0\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceDivideByZeroDecimal() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"1\"^^xsd:decimal / \"0\"^^xsd:decimal, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidDivide1() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" / \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidDivide2() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"2\"^^xsd:integer / \"rrr\", \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidSum() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" + \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidSub() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" - \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidTimes() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" * \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Ignore("TODO: support it, by using a case")
+    @Test
+    public void testDivideByZeroFloat() throws Exception {
+        String queryBind = "SELECT (\"1\"^^xsd:integer / \"0.0\"^^xsd:float AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"+INF\"^^xsd:float");
         checkReturnedValues(queryBind, expectedValues);
     }
 

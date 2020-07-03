@@ -70,6 +70,13 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
     public void testTZ() {
     }
 
+    @Override
+    protected List<String> getConstantIntegerDivideExpectedResults() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.50000000000000000000000000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
 
     @Override
     protected List<String> getAbsExpectedValues() {
