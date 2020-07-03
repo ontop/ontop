@@ -1319,6 +1319,24 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
     @Test
+    public void testCoalesceInvalidDivide1() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" / \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidDivide2() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"2\"^^xsd:integer / \"rrr\", \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
     public void testCoalesceInvalidSum() throws Exception {
         String queryBind = "SELECT (COALESCE(\"rrr\" + \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
 

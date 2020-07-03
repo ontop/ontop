@@ -61,8 +61,16 @@ public class DivideSPARQLFunctionSymbolImpl extends NumericBinarySPARQLFunctionS
      */
     @Override
     protected ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm, TermFactory termFactory) {
-        return termFactory.getCommonPropagatedOrSubstitutedNumericType(
-                super.extractRDFTermTypeTerm(rdfTerm, termFactory),
-                termFactory.getRDFTermTypeConstant(xsdDecimalType));
+        ImmutableTerm rdfTermType = super.extractRDFTermTypeTerm(rdfTerm, termFactory);
+
+        return termFactory.getIfThenElse(
+                // If numeric
+                termFactory.getIsAExpression(rdfTermType, (RDFTermType) getExpectedBaseType(0)),
+                // Tries to transform integers into xsd:decimal
+                termFactory.getCommonPropagatedOrSubstitutedNumericType(
+                        super.extractRDFTermTypeTerm(rdfTerm, termFactory),
+                        termFactory.getRDFTermTypeConstant(xsdDecimalType)),
+                // Else: keep it
+                rdfTermType);
     }
 }
