@@ -56,21 +56,11 @@ public class DivideSPARQLFunctionSymbolImpl extends NumericBinarySPARQLFunctionS
                 .evaluate(variableNullability);
     }
 
-    /**
-     * Makes sure that it returns a xsd:decimal if both operands are xsd:integer
-     */
     @Override
-    protected ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm, TermFactory termFactory) {
-        ImmutableTerm rdfTermType = super.extractRDFTermTypeTerm(rdfTerm, termFactory);
-
-        return termFactory.getIfThenElse(
-                // If numeric
-                termFactory.getIsAExpression(rdfTermType, (RDFTermType) getExpectedBaseType(0)),
-                // Tries to transform integers into xsd:decimal
-                termFactory.getCommonPropagatedOrSubstitutedNumericType(
-                        super.extractRDFTermTypeTerm(rdfTerm, termFactory),
-                        termFactory.getRDFTermTypeConstant(xsdDecimalType)),
-                // Else: keep it
-                rdfTermType);
+    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
+                                            ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, VariableNullability variableNullability) {
+        return termFactory.getCommonPropagatedOrSubstitutedNumericType(
+                super.computeTypeTerm(subLexicalTerms, typeTerms, termFactory, variableNullability),
+                termFactory.getRDFTermTypeConstant(xsdDecimalType));
     }
 }
