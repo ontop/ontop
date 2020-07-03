@@ -22,8 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class AbstractDistinctInAggregateTest {
@@ -66,17 +68,26 @@ public class AbstractDistinctInAggregateTest {
         REASONER.dispose();
     }
 
-    protected boolean checkContainsTuplesSetSemantics(String query,
-                                                      ImmutableSet<ImmutableMap<String, String>> expectedTuples)
+    protected void checkContainsTuplesSetSemantics(String query,
+                                                      ImmutableSet<ImmutableMap<String, String>> expectedAnswers)
             throws OWLException {
         try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
-            Set<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedTuples);
+            Set<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedAnswers);
+            LinkedList<ImmutableMap<String, String>> returnedAnswers = new LinkedList<>();
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
                 ImmutableMap<String, String> tuple = getTuple(rs, bindingSet);
                 mutableCopy.remove(tuple);
+                returnedAnswers.add(tuple);
             }
-            return mutableCopy.isEmpty();
+            String errorMessageSuffix = returnedAnswers.size() > 10?
+                    "were not returned":
+                    "the query returned " +returnedAnswers;
+
+            assertTrue(
+                    "The mappings "+ expectedAnswers+ " were expected among the answers, but "+ errorMessageSuffix,
+                    mutableCopy.isEmpty()
+            );
         }
     }
 
@@ -89,12 +100,11 @@ public class AbstractDistinctInAggregateTest {
     }
 
     private void runTest(String query, ImmutableMap<String,String> expectedTuple) throws Exception {
-        assertTrue(
                 checkContainsTuplesSetSemantics(
                         query,
                         ImmutableSet.of(
                                 expectedTuple
-                                )));
+                                ));
     }
 
     protected void testCount(ImmutableMap<String, String> tuple) throws Exception {

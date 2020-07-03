@@ -30,13 +30,22 @@ public class DistinctInAggregateMssqlTest extends AbstractDistinctInAggregateTes
         testAvg(
                 ImmutableMap.of(
                         "p",buildAnswerIRI("1"),
-                        "ad", "\"10.5000\"^^xsd:decimal"
+                        "ad", "\"10.500000\"^^xsd:decimal"
                 ));
     }
 
     @Test
     public void testSumDistinct() throws Exception {
         testSum(
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("1"),
+                        "sd", "\"21\"^^xsd:integer"
+                ));
+    }
+
+    @Test
+    public void testGroupConcatDistinct() throws Exception {
+        testGroupConcat(
                 ImmutableMap.of(
                         "p", buildAnswerIRI("1"),
                         "sd", "\"21\"^^xsd:integer"
