@@ -157,7 +157,7 @@ public class SPARQLRegExTest {
 	}
 
 	@Test
-	public void testIssue75() throws Exception {
+	public void testIssue72() throws Exception {
 		String query = "SELECT DISTINCT * WHERE {\n" +
 				"?s a <http://www.opendatasemanticuplift.org/vocab/class/Data_Centre_List_Five> .\n" +
 				"?s ?p ?lit .\n" +
