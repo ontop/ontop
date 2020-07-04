@@ -1,0 +1,26 @@
+<example1>
+	rr:logicalTable [
+		rr:tableName "example1";
+	];
+	rr:subjectMap [
+		rr:template "http://example.org/{primarykey}";
+		rr:class <http://ex.com#class1>;
+	];
+	rr:predicateObjectMap [
+		rr:predicateMap [ rr:constant <http://ex.com#ex2> ];
+		rr:objectMap [
+			rr:parentTriplesMap <example2>; 
+			rr:joinCondition [ rr:child "id"; rr:parent "id"; ];
+		];
+	];
+.
+
+<example2>
+	rr:logicalTable [
+		rr:tableName "example2";
+	];
+	rr:subjectMap [
+		rr:template "http://example.org/{id}";
+		rr:class <http://ex.com#class1>;
+	];
+.
