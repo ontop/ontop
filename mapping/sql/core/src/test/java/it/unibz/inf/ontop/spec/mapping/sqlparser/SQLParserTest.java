@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
+import org.eclipse.rdf4j.query.algebra.In;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -1033,6 +1034,11 @@ public class SQLParserTest {
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(2, re.getAttributes().asMap().size());
+	}
+
+	@Test(expected = UnsupportedSelectQueryException.class) // issue 184
+	public void test_limit() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50");
 	}
 
 }
