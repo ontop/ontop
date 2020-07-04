@@ -23,6 +23,17 @@ public class SelectQueryAttributeExtractorTest {
         assertEquals(ImmutableSet.of(idfac.createAttributeID("A")), r.getUnqualifiedAttributes().keySet());
     }
 
+    @Test // issue 184
+    public void test_order() throws Exception {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        builder.createDatabaseRelation("demographics", "STUDY_ID", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
+        MetadataLookup metadataLookup = builder.build();
+        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
+        DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
+        RAExpressionAttributes r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50"));
+        assertEquals(ImmutableSet.of(idfac.createAttributeID("study_id"), idfac.createAttributeID("label")), r.getUnqualifiedAttributes().keySet());
+    }
+
     @Test
     public void test_approximation() throws InvalidSelectQueryException {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
