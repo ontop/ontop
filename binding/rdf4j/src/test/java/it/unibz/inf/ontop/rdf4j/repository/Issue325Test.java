@@ -7,6 +7,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static org.junit.Assert.assertEquals;
+
 public class Issue325Test extends AbstractRDF4JTest {
 
     private static final String R2RML_FILE = "/issue325/mapping.r2rml.ttl";
@@ -23,8 +25,9 @@ public class Issue325Test extends AbstractRDF4JTest {
     }
     @Test
     public void testQuery() {
-        runQueryAndCount("SELECT * WHERE {\n" +
+        int count = runQueryAndCount("SELECT * WHERE {\n" +
                 "\t?s <http://ex.com#ex2> ?s2\n" +
                 "}");
+        assertEquals(count, 3);
     }
 }
