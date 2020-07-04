@@ -1019,4 +1019,20 @@ public class SQLParserTest {
         assertEquals(2, re.getAttributes().asMap().size());
     }
 
+	@Test // issue 157
+	public void test_locate() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("select id, locate('A', name, 2) as pos from student");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(2, re.getAttributes().asMap().size());
+	}
+
+	@Test // issue 157
+	public void test_position() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = parse("select id, position('A', name) as pos from student");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(2, re.getAttributes().asMap().size());
+	}
+
 }
