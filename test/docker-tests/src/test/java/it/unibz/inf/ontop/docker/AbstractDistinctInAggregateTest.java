@@ -6,13 +6,9 @@ import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -21,14 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-public class AbstractDistinctInAggregateTest {
+public class AbstractDistinctInAggregateTest extends AbstractVirtualModeTest {
 
     protected static OntopOWLReasoner REASONER;
     protected static OntopOWLConnection CONNECTION;
@@ -40,6 +30,7 @@ public class AbstractDistinctInAggregateTest {
     protected static final String avgDistinctQueryFile = "/distinctInAggregates/avgDistinct.rq";
     protected static final String countDistinctQueryFile = "/distinctInAggregates/countDistinct.rq";
     protected static final String groupConcatDistinctQueryFile = "/distinctInAggregates/groupConcatDistinct.rq";
+
 
     protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
         owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
@@ -56,8 +47,7 @@ public class AbstractDistinctInAggregateTest {
         return factory.createReasoner(config);
     }
 
-
-
+    @Override
     protected OntopOWLStatement createStatement() throws OWLException {
         return CONNECTION.createStatement();
     }
@@ -68,79 +58,80 @@ public class AbstractDistinctInAggregateTest {
         REASONER.dispose();
     }
 
-    protected void checkContainsTuplesSetSemantics(String query,
-                                                      ImmutableSet<ImmutableMap<String, String>> expectedAnswers)
-            throws OWLException {
-        try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
-            Set<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedAnswers);
-            LinkedList<ImmutableMap<String, String>> returnedAnswers = new LinkedList<>();
-            while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                ImmutableMap<String, String> tuple = getTuple(rs, bindingSet);
-                mutableCopy.remove(tuple);
-                returnedAnswers.add(tuple);
-            }
-            String errorMessageSuffix = returnedAnswers.size() > 10?
-                    "were not returned":
-                    "the query returned " +returnedAnswers;
-
-            assertTrue(
-                    "The mappings "+ expectedAnswers+ " were expected among the answers, but "+ errorMessageSuffix,
-                    mutableCopy.isEmpty()
-            );
-        }
-    }
-
-    protected ImmutableMap<String, String> getTuple(TupleOWLResultSet rs, OWLBindingSet bindingSet) throws OWLException {
-        ImmutableMap.Builder<String, String> tuple = ImmutableMap.builder();
-        for (String variable : rs.getSignature()) {
-            tuple.put(variable, bindingSet.getOWLObject(variable).toString());
-        }
-        return tuple.build();
-    }
-
-    private void runTest(String query, ImmutableMap<String,String> expectedTuple) throws Exception {
-                checkContainsTuplesSetSemantics(
-                        query,
-                        ImmutableSet.of(
-                                expectedTuple
-                                ));
-    }
-
-    protected void testCount(ImmutableMap<String, String> tuple) throws Exception {
-                runTest(
-                        readQueryFile(countDistinctQueryFile),
-                        tuple
-        );
-    }
-
-    protected void testAvg(ImmutableMap<String, String> tuple) throws Exception {
-        runTest(
-                readQueryFile(avgDistinctQueryFile),
-                tuple
-        );
-    }
-
-    protected void testSum(ImmutableMap<String, String> tuple) throws Exception {
-        runTest(
-                readQueryFile(sumDistinctQueryFile),
-                tuple
-        );
-    }
-
-    protected void testGroupConcat(ImmutableMap<String, String> tuple) throws Exception {
-        runTest(
+    @Test
+    public void testGroupConcatDistinct() throws Exception {
+        checkContainsOneOfSetSemanticsWithErrorMessage(
                 readQueryFile(groupConcatDistinctQueryFile),
-                tuple
+                getTuplesForConcat()
         );
+    }
+
+    @Test
+    public void testSumDistinct() throws Exception {
+        checkContainsAllSetSemanticsWithErrorMessage(
+                readQueryFile(sumDistinctQueryFile),
+                getTuplesForSum()
+        );
+    }
+
+    @Test
+    public void testAvgDistinct() throws Exception {
+        checkContainsAllSetSemanticsWithErrorMessage(
+                readQueryFile(avgDistinctQueryFile),
+                getTuplesForAvg()
+        );
+    }
+
+    @Test
+    public void testCountDistinct() throws Exception {
+        checkContainsAllSetSemanticsWithErrorMessage(
+                readQueryFile(countDistinctQueryFile),
+                getTuplesForCount());
+    }
+
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForCount() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("1"),
+                        "cd", "\"2\"^^xsd:integer"
+                ));
+    }
+
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForSum() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("1"),
+                        "sd", "\"21\"^^xsd:integer"
+                ));
+    }
+
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "ad", "\"10.5000\"^^xsd:decimal"
+                ));
+    }
+
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForConcat() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("1"),
+                        "sd", "10|11"
+                ),
+                ImmutableMap.of(
+                        "p", buildAnswerIRI("1"),
+                        "sd", "11|10"
+                ));
     }
 
     protected String buildAnswerIRI(String s) {
         return "<http://www.example.org/test#"+s+">";
     }
 
-    protected String readQueryFile(String queryFile) throws IOException {
+    private String readQueryFile(String queryFile) throws IOException {
         Path path = Paths.get(QuestSPARQLRewriterTest.class.getResource(queryFile).getPath());
         return new String(Files.readAllBytes(path));
     }
+
 }

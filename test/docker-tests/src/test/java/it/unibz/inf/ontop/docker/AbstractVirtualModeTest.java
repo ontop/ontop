@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.docker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
@@ -117,12 +116,70 @@ public abstract class AbstractVirtualModeTest {
         }
     }
 
+    protected void checkContainsAllSetSemanticsWithErrorMessage(String query,
+                                                                ImmutableSet<ImmutableMap<String, String>> expectedTuples)
+            throws OWLException {
+            try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                Set<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedTuples);
+                LinkedList<ImmutableMap<String, String>> returnedAnswers = new LinkedList<>();
+                while (rs.hasNext()) {
+                    final OWLBindingSet bindingSet = rs.next();
+                    ImmutableMap<String, String> tuple = getTuple(rs, bindingSet);
+                    mutableCopy.remove(tuple);
+                    returnedAnswers.add(tuple);
+                }
+                String errorMessageSuffix = returnedAnswers.size() > 10?
+                        "were not returned":
+                        "the query returned " +returnedAnswers;
+
+                assertTrue(
+                        "The mappings "+ expectedTuples+ " were expected among the answers, but "+ errorMessageSuffix,
+                        mutableCopy.isEmpty()
+                );
+            }
+    }
+
+    protected void checkContainsOneOfSetSemanticsWithErrorMessage(String query,
+                                                                  ImmutableSet<ImmutableMap<String, String>> expectedTuples)
+            throws OWLException {
+
+        try (OWLStatement st = createStatement(); TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+            LinkedList<ImmutableMap<String, String>> returnedAnswers = new LinkedList<>();
+            while (rs.hasNext()) {
+                final OWLBindingSet bindingSet = rs.next();
+                ImmutableMap<String, String> tuple = getTuple(rs, bindingSet);
+                returnedAnswers.add(tuple);
+                if (expectedTuples.contains(tuple))
+                    return;
+                String errorMessageSuffix = returnedAnswers.size() > 10 ?
+                        "none was returned" :
+                        "the query returned " + returnedAnswers;
+                assertTrue(
+                        "One of " + expectedTuples + " was expected among the answers, but " + errorMessageSuffix,
+                        false
+                );
+            }
+        }
+    }
+
     protected ImmutableMap<String, String> getTuple(TupleOWLResultSet rs, OWLBindingSet bindingSet) throws OWLException {
         ImmutableMap.Builder<String, String> tuple = ImmutableMap.builder();
         for (String variable : rs.getSignature()) {
-            tuple.put(variable, bindingSet.getOWLObject(variable).toString());
+            tuple.put(variable, getStringForBindingValue(bindingSet.getOWLObject(variable)));
         }
         return tuple.build();
+    }
+
+    private String getStringForBindingValue(OWLObject owlObject) {
+        if(owlObject instanceof OWLIndividual)
+            return owlObject.toString();
+        if(owlObject instanceof OWLLiteral) {
+            OWLLiteral literal = (OWLLiteral) owlObject;
+            return literal.getDatatype().isString() ?
+                    literal.getLiteral() :
+                    literal.toString();
+        }
+        throw new UnexpectedBindingTypeException("an instance of "+ OWLIndividual.class + " or "+ OWLLiteral.class+ " is expected");
     }
 
     protected void checkReturnedUris(List<String> expectedUris, String query) throws Exception {
@@ -257,6 +314,12 @@ public abstract class AbstractVirtualModeTest {
             log.info("Query Execution Time:");
             log.info("=====================");
             log.info((t2 - t1)/1000 + "ms");
+        }
+    }
+
+    private static class UnexpectedBindingTypeException extends RuntimeException{
+        UnexpectedBindingTypeException(String message) {
+            super(message);
         }
     }
 }

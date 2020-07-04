@@ -243,7 +243,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "ORDER BY DESC(?v)";
 
         String [] expectedValues = {
-                "Rog", "Rog", "Johnny"
+                "Rog", "Rog", "Rog", "Johnny"
         };
         String sql = checkReturnedValuesAndReturnSql(query, Arrays.asList(expectedValues));
 
@@ -461,7 +461,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        List<String> expectedValues = ImmutableList.of("46");
+        List<String> expectedValues = ImmutableList.of("56");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
@@ -480,7 +480,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("12", "13", "21");
+        List<String> expectedValues = ImmutableList.of("12", "13", "31");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
@@ -502,7 +502,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "12", "13", "21");
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "12", "13", "31");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
@@ -521,7 +521,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?s";
 
-        List<String> expectedValues = ImmutableList.of("John: 12", "Mary: 13", "Roger: 21");
+        List<String> expectedValues = ImmutableList.of("John: 12", "Mary: 13", "Roger: 31");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
@@ -540,7 +540,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p ?fName \n" +
                 "ORDER BY ?s";
 
-        List<String> expectedValues = ImmutableList.of("John: 12", "Mary: 13", "Roger: 21");
+        List<String> expectedValues = ImmutableList.of("John: 12", "Mary: 13", "Roger: 31");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
@@ -584,7 +584,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents1() {
-        return  ImmutableList.of("11.5");
+        return  ImmutableList.of("11.2");
     }
 
     @Test
@@ -607,7 +607,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents2() {
-        return   ImmutableList.of("10.5","12", "13");
+        return   ImmutableList.of("10.3","12", "13");
     }
 
 
@@ -634,7 +634,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "10.5", "12", "13");
+        return ImmutableList.of("0", "0", "0", "0", "0", "10.3", "12", "13");
     }
 
     @Test
@@ -732,7 +732,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     protected ImmutableList<String> getExpectedValuesDuration1() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "54.5");
+        return ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "84.5");
     }
 
     @Test
@@ -757,7 +757,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
-        return ImmutableList.of("31", "32", "75.5");
+        return ImmutableList.of("31", "32", "115.5");
     }
 
     @Test
@@ -782,7 +782,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     }
 
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("15.5", "16", "18.875");
+        return ImmutableList.of("15.5", "16", "19.25");
     }
 
 

@@ -16,39 +16,27 @@ public class DistinctInAggregateMssqlTest extends AbstractDistinctInAggregateTes
         CONNECTION = REASONER.getConnection();
     }
 
-    @Test
-    public void testCountDistinct() throws Exception {
-        testCount(
-                ImmutableMap.of(
-                        "p", buildAnswerIRI("1"),
-                        "cd", "\"2\"^^xsd:integer"
-                ));
-    }
+//    @Test
+//    public void testCountDistinct() throws Exception {
+//        super.testCountDistinct();
+//    }
 
-    @Test
-    public void testAvgDistinct() throws Exception {
-        testAvg(
-                ImmutableMap.of(
-                        "p",buildAnswerIRI("1"),
-                        "ad", "\"10.500000\"^^xsd:decimal"
-                ));
-    }
+//    @Test
+//    public void testAvgDistinct() throws Exception {
+//        testAvg(
+//                ImmutableMap.of(
+//                        "p",buildAnswerIRI("1"),
+//                        "ad", "\"10.500000\"^^xsd:decimal"
+//                ));
+//    }
 
-    @Test
-    public void testSumDistinct() throws Exception {
-        testSum(
-                ImmutableMap.of(
-                        "p", buildAnswerIRI("1"),
-                        "sd", "\"21\"^^xsd:integer"
-                ));
-    }
+//    @Test
+//    public void testSumDistinct() throws Exception {
+//        super.testSumDistinct();
+//    }
 
-    @Test
-    public void testGroupConcatDistinct() throws Exception {
-        testGroupConcat(
-                ImmutableMap.of(
-                        "p", buildAnswerIRI("1"),
-                        "sd", "\"21\"^^xsd:integer"
-                ));
-    }
+//    @Test
+//    public void testGroupConcatDistinct() throws Exception {
+//        super.testGroupConcatDistinct();
+//    }
 }
