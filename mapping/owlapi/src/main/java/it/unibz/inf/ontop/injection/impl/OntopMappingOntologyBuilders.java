@@ -15,12 +15,19 @@ public class OntopMappingOntologyBuilders {
     static class OntopMappingOntologyOptions {
 
         final Optional<File> ontologyFile;
+
         final Optional<URL> ontologyURL;
+
+        final Optional<String> xmlCatalogFile;
+
         final OntopMappingOptions mappingOptions;
 
-        private OntopMappingOntologyOptions(Optional<File> ontologyFile, Optional<URL> ontologyURL,
-                                           OntopMappingOptions mappingOptions) {
+        private OntopMappingOntologyOptions(Optional<File> ontologyFile,
+                                            Optional<URL> ontologyURL,
+                                            Optional<String> xmlCatalogFile,
+                                            OntopMappingOptions mappingOptions) {
             this.ontologyFile = ontologyFile;
+            this.xmlCatalogFile = xmlCatalogFile;
             this.ontologyURL = ontologyURL;
             this.mappingOptions = mappingOptions;
         }
@@ -32,7 +39,8 @@ public class OntopMappingOntologyBuilders {
         private final B builder;
         private final Runnable declareOntologyDefinedCB;
         private Optional<File> ontologyFile = Optional.empty();
-        private Optional<URL> ontologyURL = Optional.empty() ;
+        private Optional<URL> ontologyURL = Optional.empty();
+        private Optional<String> xmlCatalogFile = Optional.empty();
 
         StandardMappingOntologyBuilderFragment(B builder,
                                                Runnable declareOntologyDefinedCB) {
@@ -50,16 +58,20 @@ public class OntopMappingOntologyBuilders {
                 String protocol = url.getProtocol();
                 if (protocol == null) {
                     return ontologyFile(new File(urlOrPath));
-                }
-                else if (protocol.equals("file")) {
+                } else if (protocol.equals("file")) {
                     return ontologyFile(new File(url.getPath()));
-                }
-                else {
+                } else {
                     return ontologyFile(url);
                 }
             } catch (MalformedURLException e) {
                 return ontologyFile(new File(urlOrPath));
             }
+        }
+
+        @Override
+        public B xmlCatalogFile(@Nonnull String xmlCatalogFile) {
+            this.xmlCatalogFile = Optional.of(xmlCatalogFile);
+            return builder;
         }
 
         @Override
@@ -78,7 +90,7 @@ public class OntopMappingOntologyBuilders {
         }
 
         OntopMappingOntologyOptions generateMappingOntologyOptions(OntopMappingOptions mappingOptions) {
-            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, mappingOptions);
+            return new OntopMappingOntologyOptions(ontologyFile, ontologyURL, xmlCatalogFile, mappingOptions);
         }
     }
 }

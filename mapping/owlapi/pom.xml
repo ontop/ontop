@@ -73,6 +73,17 @@
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>owlapi-apibinding</artifactId>
         </dependency>
+        <dependency>
+            <groupId>edu.stanford.protege</groupId>
+            <artifactId>org.protege.xmlcatalog</artifactId>
+            <version>1.0.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-osgidistribution</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 

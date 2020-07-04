@@ -13,6 +13,8 @@ public interface OntopMappingOntologyConfiguration extends OntopMappingConfigura
 
         B ontologyFile(@Nonnull String urlOrPath);
 
+        B xmlCatalogFile(@Nonnull String xmlCatalogFile);
+
         B ontologyFile(@Nonnull URL url);
 
         B ontologyFile(@Nonnull File owlFile);
