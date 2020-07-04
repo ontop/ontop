@@ -107,17 +107,14 @@ public class GeoSPARQLTest {
                 "SELECT ?x WHERE {\n" +
                 ":3 a :Geom; geo:asWKT ?xWkt.\n" +
                 ":4 a :Geom; geo:asWKT ?yWkt.\n" +
-//                "BIND((geof:distance(?xWkt, ?yWkt, uom:metre)/1000) as ?x) .\n" +
                 "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
-        //        "BIND(geof:distance(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
         assertEquals(339241, val, 1.0);
     }
 
-    @Ignore("Triggers an Ontop Bug")
     @Test
-    public void testSelectDistance_KiloMetre() throws Exception {
+    public void testSelectDistance_Kilometre() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
