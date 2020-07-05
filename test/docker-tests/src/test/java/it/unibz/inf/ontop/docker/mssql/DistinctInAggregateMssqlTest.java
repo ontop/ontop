@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.docker.mssql;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractDistinctInAggregateTest;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -16,27 +18,18 @@ public class DistinctInAggregateMssqlTest extends AbstractDistinctInAggregateTes
         CONNECTION = REASONER.getConnection();
     }
 
-//    @Test
-//    public void testCountDistinct() throws Exception {
-//        super.testCountDistinct();
-//    }
+    @Test
+    @Ignore("STRING_AGG(DISTINCT) is not supported by MSSQL")
+    @Override
+    public void testGroupConcatDistinct() throws Exception {
+    }
 
-//    @Test
-//    public void testAvgDistinct() throws Exception {
-//        testAvg(
-//                ImmutableMap.of(
-//                        "p",buildAnswerIRI("1"),
-//                        "ad", "\"10.500000\"^^xsd:decimal"
-//                ));
-//    }
-
-//    @Test
-//    public void testSumDistinct() throws Exception {
-//        super.testSumDistinct();
-//    }
-
-//    @Test
-//    public void testGroupConcatDistinct() throws Exception {
-//        super.testGroupConcatDistinct();
-//    }
+    @Override
+    protected ImmutableSet<ImmutableMap<String, String>> getTuplesForAvg() {
+        return ImmutableSet.of(
+                ImmutableMap.of(
+                        "p",buildAnswerIRI("1"),
+                        "ad", "\"10.500000\"^^xsd:decimal"
+                ));
+    }
 }

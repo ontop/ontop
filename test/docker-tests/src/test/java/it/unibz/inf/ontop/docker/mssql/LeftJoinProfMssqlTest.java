@@ -56,7 +56,7 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesDuration1() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "18.000", "20.000", "54.500");
+        return ImmutableList.of("0", "0", "0", "0", "0", "18.000", "20.000", "84.500");
     }
 
     @Override
