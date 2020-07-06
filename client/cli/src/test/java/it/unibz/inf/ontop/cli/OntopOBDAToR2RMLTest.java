@@ -55,6 +55,15 @@ public class OntopOBDAToR2RMLTest {
         runCommand(argv);
     }
 
+    @Test
+    public void testOntopR2RML2OBDA2R2RML (){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/mapping-northwind-named-graph.obda",
+                "-o", "src/test/resources/output/mapping-northwind-named-graph.r2rml"
+        };
+        runCommand(argv);
+    }
+
     private void runCommand(String[] args) {
         Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();
 
