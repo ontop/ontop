@@ -24,7 +24,7 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
             protected String serializeStringConstant(String constant) {
                 // quotes, doubles backslashes and escapes single quotes
                 return "'" + constant.replace("\\", "\\\\")
-                        .replaceAll("(?<!')'(?!')", "\\'") + "'";
+                        .replaceAll("(?<!')'(?!')", "\\\\'") + "'";
             }
         });
     }
