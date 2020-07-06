@@ -31,8 +31,8 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 	private final Extension extension;
 
 	RDF4JConstructTemplate(ParsedQuery pq) {
-		TupleExpr topExpression = getFirstNonSliceExpression(pq.getTupleExpr());
-		projection = getFirstProjection(topExpression);
+		TupleExpr topNonSliceExpression = getFirstNonSliceExpression(pq.getTupleExpr());
+		projection = getFirstProjection(topNonSliceExpression);
 		extension =  getProjectionExtension(projection);
 	}
 
@@ -62,14 +62,14 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 
 	private Extension getExtension(MultiProjection multiProj) {
 		TupleExpr ext = multiProj.getArg();
-		return (ext != null && ext instanceof Extension)?
+		return (ext instanceof Extension)?
 				(Extension)ext:
 				null;
 	}
 
 	private Extension getExtension(Projection proj) {
 		TupleExpr ext = proj.getArg();
-		return (ext != null && ext instanceof Extension)?
+		return (ext instanceof Extension)?
 				(Extension)ext:
 				null;
 	}
@@ -78,7 +78,8 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 		if(expr instanceof Projection || expr instanceof MultiProjection)
 			return expr;
 		if (expr instanceof Reduced)
-			return ((Reduced) expr).getArg();
+			return getFirstProjection(((Reduced) expr).getArg());
+
 		throw new MinorOntopInternalBugException("Unexpected SPARQL query (after parsing): "+
 				"an instance of "+
 				Projection.class+
