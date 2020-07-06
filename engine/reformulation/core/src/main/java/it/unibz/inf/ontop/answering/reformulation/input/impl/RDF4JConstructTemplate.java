@@ -79,7 +79,7 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 	}
 
 	private TupleExpr getFirstProjection(TupleExpr expr) {
-		if(expr instanceof Projection)
+		if(expr instanceof Projection || expr instanceof MultiProjection)
 			return expr;
 		if (expr instanceof Reduced)
 			return ((Reduced) expr).getArg();
