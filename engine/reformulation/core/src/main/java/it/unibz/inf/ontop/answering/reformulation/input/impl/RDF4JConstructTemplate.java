@@ -31,15 +31,17 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 	private final Extension extension;
 
 	RDF4JConstructTemplate(ParsedQuery pq) {
-		TupleExpr topExpression = pq.getTupleExpr();
-
-		// NB: the slice is not relevant for the construct template
-		// (will be taken into account in the SELECT query fragment)
-		Slice slice = (topExpression instanceof Slice) ? (Slice) topExpression : null;
-
-		TupleExpr firstNonSliceExpression = (slice == null) ? topExpression : slice.getArg();
+		TupleExpr topExpression = getFirstNonSliceExpression(pq.getTupleExpr());
 		projection = getFirstProjection(topExpression);
 		extension =  getProjectionExtension(projection);
+	}
+
+	private TupleExpr getFirstNonSliceExpression(TupleExpr expr) {
+		// NB: the slice is not relevant for the construct template
+		// (will be taken into account in the SELECT query fragment)
+		return expr instanceof Slice?
+				getFirstNonSliceExpression(((Slice) expr).getArg()):
+				expr;
 	}
 
 	private Extension getProjectionExtension(TupleExpr proj) {
@@ -53,7 +55,7 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 				Projection.class+
 				" or "+
 				MultiProjection.class+
-				"is expected, instead of\n"+
+				" is expected, instead of\n"+
 				proj
 		);
 	}
@@ -72,12 +74,6 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 				null;
 	}
 
-	private Extension castExtension(TupleExpr expr) {
-		return expr instanceof Extension?
-				(Extension) expr:
-				null;
-	}
-
 	private TupleExpr getFirstProjection(TupleExpr expr) {
 		if(expr instanceof Projection || expr instanceof MultiProjection)
 			return expr;
@@ -88,7 +84,7 @@ class RDF4JConstructTemplate implements ConstructTemplate {
 				Projection.class+
 				" or "+
 				Reduced.class+
-				"is expected, instead of\n"+
+				" is expected, instead of\n"+
 				expr
 		);
 	}
