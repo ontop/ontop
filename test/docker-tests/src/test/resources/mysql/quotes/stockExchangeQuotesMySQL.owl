@@ -59,6 +59,8 @@
 
     <owl:NamedIndividual rdf:about="http://www.semanticweb.org/ontologies/2020/6/untitled-ontology-19#testIndividual">
         <firstName>a &apos;quoted&apos; name</firstName>
+        <firstName>a &apos;&apos;quoted&apos;&apos;&apos; name</firstName>
+        <firstName>a &quot;quoted&apos;&quot; name</firstName>
     </owl:NamedIndividual>
 </rdf:RDF>
 
