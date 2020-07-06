@@ -16,9 +16,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  */
 public class QuotesMySQLTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/mysql/quotes/stockBolzanoAddress.owl";
-	static final String obdafile = "/mysql/quotes/stockexchangeRegexMySQL.obda";
-	static final String propertiesfile = "/mysql/quotes/stockexchangeRegexMySQL.properties";
+	static final String owlfile = "/mysql/quotes/stockExchangeQuotesMySQL.owl";
+	static final String obdafile = "/mysql/quotes/stockExchangeQuotesMySQL.obda";
+	static final String propertiesfile = "/mysql/quotes/stockExchangeQuotesMySQL.properties";
 
 	private static OntopOWLReasoner REASONER;
 	private static OntopOWLConnection CONNECTION;
@@ -40,28 +40,11 @@ public class QuotesMySQLTest extends AbstractVirtualModeTest {
 		REASONER.dispose();
 	}
 
-	/**
-	 * Test use of regex in MySQL
-	 * select id, street, number, city, state, country from address where city regexp 'b.+z'
-	 * @throws Exception
-	 */
 	@Test
-	public void testRegexLike() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :BolzanoAddress}";
+	public void testQuotes() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2020/6/untitled-ontology-19#> SELECT * WHERE {?x :firstName ?y}";
 		countResults(2, query);
 	}
-	
-	/**
-	 * Test use of regex in MySQL
-	 * select "id", "name", "lastname", "dateofbirth", "ssn" from "broker" where "name" regexp binary 'J.+a'
-	 * @throws Exception
-	 */
-	@Test
-	public void testRegexLikeUppercase() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :PhysicalPerson}";
-		countResults(1, query);
-	}
-	
 
 	
 	
