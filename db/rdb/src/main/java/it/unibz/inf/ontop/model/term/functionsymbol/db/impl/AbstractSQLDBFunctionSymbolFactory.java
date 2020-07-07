@@ -79,6 +79,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private static final String ST_DIFFERENCE = "ST_DIFFERENCE";
     private static final String ST_SYMDIFFERENCE = "ST_SYMDIFFERENCE";
     private static final String ST_UNION = "ST_UNION";
+    private static final String ST_RELATE = "ST_RELATE";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -326,6 +327,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol unionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_UNION, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_UNION, 2, unionSymbol);
+
+        DBFunctionSymbol relateSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_RELATE, 3, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_RELATE, 3, relateSymbol);
 
         return builder.build();
     }
@@ -1008,6 +1013,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public FunctionSymbol getDBUnion() {
         return getRegularDBFunctionSymbol(ST_UNION, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRelate() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_RELATE, 3);
     }
 
     @Override

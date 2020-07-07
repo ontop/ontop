@@ -641,6 +641,106 @@ public class GeoSPARQLTest {
         assertFalse(val.startsWith("POLYGON ((0.9100"));
     }
 
+    @Test // To be reviewed whether this is a real use case
+    public void testAskRelate() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:relate(?xWkt, ?yWkt, geof:sfContains))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
+    @Test // Check for equality
+    public void testAskRelate2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":6 a :Geom; geo:asWKT ?yWkt.\n" +
+                //"FILTER (geof:relate(?xWkt, ?yWkt, " + "\"TFFFTFFFT\"" + "))\n" +
+                "FILTER (geof:relate(?xWkt, ?yWkt, 'TFFFTFFFT'))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // Check for within
+    public void testAskRelate3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                //"FILTER (geof:relate(?xWkt, ?yWkt, " + "\"T*F**F***\"" + "))\n" +
+                "FILTER (geof:relate(?xWkt, ?yWkt, 'T*F**F***'))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // Sub-polygon contained properly non-tangential
+    public void testAskRcc8Ntpp() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:rcc8ntpp(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // Sub-polygon contained properly, non-tangential
+    public void testAskRcc8Tpp() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:rcc8tpp(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
+    @Test // Sub-polygon contained properly non-tangential
+    public void testAskRcc8Ntppi() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:rcc8ntppi(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // Sub-polygon contained properly, non-tangential
+    public void testAskRcc8Tppi() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:rcc8tppi(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);

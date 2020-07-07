@@ -11,11 +11,12 @@ import javax.annotation.Nonnull;
 public class GeofRcc8NtppiFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofRcc8NtppiFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_RCC8_NTPPI", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_RCC8_NTPPI", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTContainsProperly(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        final String matrix_pattern = "TTTFFTFFT";
+        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1),termFactory.getDBStringConstant(matrix_pattern));
     }
 }

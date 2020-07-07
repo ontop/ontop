@@ -656,11 +656,7 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTGetSRID(), arg1);
     }
-
-    @Override
-    public ImmutableTerm getDBSTRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTRelate(), arg1, arg2, arg3);
-    }*/
+    */
 
     @Override
     public ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2) {
@@ -690,6 +686,11 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableTerm getDBSymDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
          return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSymDifference(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBRelate(), arg1, arg2, arg3);
     }
 
     @Override

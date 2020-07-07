@@ -290,8 +290,6 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBSTCovers();
     DBBooleanFunctionSymbol getDBSTContainsProperly();
 
-    //DBBooleanFunctionSymbol getDBSTRelate();
-
     DBFunctionSymbol getDBSTDistance();
 
     DBFunctionSymbol getDBSTDistanceSphere();
@@ -314,8 +312,9 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBEnvelope();
     FunctionSymbol getDBConvexHull();
     FunctionSymbol getDBDifference();
+    DBBooleanFunctionSymbol getDBRelate();
 
-    /*FunctionSymbol getDBSTRelate();
+    /*
     FunctionSymbol getDBSTGetSRID();
     */
 }

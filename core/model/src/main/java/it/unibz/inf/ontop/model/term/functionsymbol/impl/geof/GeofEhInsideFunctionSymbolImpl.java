@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public class GeofEhInsideFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofEhInsideFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_EH_INSIDE", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_EH_INSIDE", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override

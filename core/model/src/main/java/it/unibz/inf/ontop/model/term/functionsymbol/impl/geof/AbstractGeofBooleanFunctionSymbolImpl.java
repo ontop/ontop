@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.ReduciblePositiveAritySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import org.apache.commons.rdf.api.IRI;
 
@@ -19,9 +20,11 @@ public abstract class AbstractGeofBooleanFunctionSymbolImpl extends ReduciblePos
     protected AbstractGeofBooleanFunctionSymbolImpl(
             @Nonnull String functionSymbolName,
             @Nonnull IRI functionIRI,
-            RDFDatatype wktLiteralType,
+            //RDFDatatype wktLiteralType,
+            ImmutableList<TermType> inputTypes,
             RDFDatatype xsdBooleanType) {
-        super(functionSymbolName, functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType));
+        //super(functionSymbolName, functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType));
+        super(functionSymbolName, functionIRI, inputTypes);
         this.xsdBooleanType = xsdBooleanType;
     }
 

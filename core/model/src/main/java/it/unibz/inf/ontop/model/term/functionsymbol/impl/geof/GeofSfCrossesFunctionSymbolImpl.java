@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public class GeofSfCrossesFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofSfCrossesFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_SF_CROSSES", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_SF_CROSSES", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override

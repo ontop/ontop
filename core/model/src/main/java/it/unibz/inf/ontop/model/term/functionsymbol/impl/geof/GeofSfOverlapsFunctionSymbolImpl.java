@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public class GeofSfOverlapsFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofSfOverlapsFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_SF_OVERLAPS", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_SF_OVERLAPS", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override

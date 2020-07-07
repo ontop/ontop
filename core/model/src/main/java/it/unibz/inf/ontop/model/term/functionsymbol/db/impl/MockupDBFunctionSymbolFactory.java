@@ -648,6 +648,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBRelate() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }

@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDifferenceFunc
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEnvelopeFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSymDifferenceFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofUnionFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRelateFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWithinFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfContainsFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfCrossesFunctionSymbolImpl;
@@ -297,7 +298,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                  */
 
                 /*
-                 * Geo Functions
+                 * Geo Non-Topological Functions
                  */
                 new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
                 new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType),
@@ -308,8 +309,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral, iriType),
 //                new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, iriType, xsdInteger),
                 new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType),
-                new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType)
-//                new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdBoolean)
+                new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
+                new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

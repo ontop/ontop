@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public class GeofRcc8DcFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofRcc8DcFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_RCC8_DC", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_RCC8_DC", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override

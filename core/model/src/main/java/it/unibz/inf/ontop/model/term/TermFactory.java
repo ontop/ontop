@@ -606,9 +606,10 @@ public interface TermFactory {
 
 	ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2);
 
+	ImmutableTerm getDBRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
 	/*
 	ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1);
-	ImmutableTerm getDBSTRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);*/
+	*/
 
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 
