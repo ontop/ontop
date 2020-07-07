@@ -56,12 +56,12 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesDuration1() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "18.000", "20.000", "84.500");
+        return ImmutableList.of("0", "0", "0", "0", "0", "18.0000000000000000000", "20.0000000000000000000", "84.5000000000000000000");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("15.500000", "16.000000", "19.250000");
+        return ImmutableList.of("15.5000000000000000000", "16.0000000000000000000", "19.2500000000000000000");
     }
 
     /**
@@ -86,7 +86,7 @@ public class LeftJoinProfMssqlTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
-        return ImmutableList.of("31.000", "32.000", "115.500");
+        return ImmutableList.of("31.0000000000000000000", "32.0000000000000000000", "115.5000000000000000000");
     }
 }
 
