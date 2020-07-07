@@ -545,7 +545,100 @@ public class GeoSPARQLTest {
                 "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertTrue(val.startsWith("POLYGON ((0.9100"));
+        assertFalse(val.startsWith("POLYGON ((0.9100"));
+    }
+
+    @Test
+    public void testSelectDifference() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:difference(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertFalse(val.startsWith("POLYGON ((0.9100"));
+    }
+
+    @Test
+    public void testSelectSymDifference() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:symDifference(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertFalse(val.startsWith("POLYGON ((0.9100"));
+    }
+
+    @Test
+    public void testSelectUnion() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:union(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertFalse(val.startsWith("POLYGON ((0.9100"));
+    }
+
+    @Test
+    public void testSelectEnvelope() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:envelope(?xWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertFalse(val.startsWith("POLYGON ((0.9100"));
+    }
+
+    @Test
+    public void testSelectBoundary() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:boundary(?xWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertFalse(val.startsWith("POLYGON ((0.9100"));
+    }
+
+    @Test
+    public void testSelectConvexHull() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:convexHull(?xWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertFalse(val.startsWith("POLYGON ((0.9100"));
     }
 
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {

@@ -593,14 +593,22 @@ public interface TermFactory {
 	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableTerm getDBIntersection(ImmutableTerm arg1, ImmutableTerm arg2);
-	/*ImmutableTerm getDBSTBoundary(ImmutableTerm arg1, ImmutableTerm arg2);
-	ImmutableTerm getDBSTConvexHull(ImmutableTerm arg1, ImmutableTerm arg2);
-	ImmutableTerm getDBSTDifference(ImmutableTerm arg1, ImmutableTerm arg2);
-	ImmutableTerm getDBSTEnvelope(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableTerm getDBBoundary(ImmutableTerm arg1);
+
+	ImmutableTerm getDBConvexHull(ImmutableTerm arg1);
+
+	ImmutableTerm getDBDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableTerm getDBEnvelope(ImmutableTerm arg1);
+
+	ImmutableTerm getDBSymDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	/*
 	ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1);
-	ImmutableTerm getDBSTSymDifference(ImmutableTerm arg1, ImmutableTerm arg2);
-	ImmutableTerm getDBSTUnion(ImmutableTerm arg1, ImmutableTerm arg2);
-	//ImmutableTerm getDBSTRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);*/
+	ImmutableTerm getDBSTRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);*/
 
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 

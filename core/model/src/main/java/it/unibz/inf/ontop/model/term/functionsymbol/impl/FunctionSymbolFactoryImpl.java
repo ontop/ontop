@@ -13,6 +13,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBufferFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDistanceFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofIntersectionFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBoundaryFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofConvexHullFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDifferenceFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEnvelopeFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSymDifferenceFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofUnionFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWithinFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfContainsFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfCrossesFunctionSymbolImpl;
@@ -295,14 +301,14 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                  */
                 new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
                 new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType),
-                new GeofIntersectionFunctionSymbolImpl(GEOF.INTERSECTION, wktLiteral, iriType)
-//                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral, iriType, xsdDouble)
-//                new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral, iriType, xsdDouble)
-//                new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral, iriType, xsdDouble)
-//                new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral, iriType, xsdDouble)
+                new GeofIntersectionFunctionSymbolImpl(GEOF.INTERSECTION, wktLiteral, iriType),
+                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral, iriType),
+                new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral, iriType),
+                new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral, iriType),
+                new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral, iriType),
 //                new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, iriType, xsdInteger),
-//                new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType, xsdDouble)
-//                new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType, xsdDouble)
+                new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType),
+                new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType)
 //                new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdBoolean)
         );
 

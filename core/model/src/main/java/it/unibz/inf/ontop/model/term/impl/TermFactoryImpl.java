@@ -660,39 +660,37 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableTerm getDBSTRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTRelate(), arg1, arg2, arg3);
-    }
-
-
-
-    @Override
-    public ImmutableTerm getDBSTUnion(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTUnion(), ImmutableList.of(arg1, arg2));
-    }
-
-    @Override
-    public ImmutableTerm getDBSTEnvelope(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTEnvelope(), ImmutableList.of(arg1, arg2));
-    }
-
-    @Override
-    public ImmutableTerm getDBSTConvexHull(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTConvexHull(), ImmutableList.of(arg1, arg2));
-    }
-
-    @Override
-    public ImmutableTerm getDBSTBoundary(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTBoundary(), ImmutableList.of(arg1, arg2));
-    }
-
-    @Override
-    public ImmutableTerm getDBSTDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDifference(), ImmutableList.of(arg1, arg2));
-    }
-
-    @Override
-    public ImmutableTerm getDBSTSymDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
-         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTSymDifference(), ImmutableList.of(arg1, arg2));
     }*/
+
+    @Override
+    public ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUnion(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBEnvelope(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBEnvelope(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBConvexHull(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBConvexHull(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBBoundary(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBoundary(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDifference(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSymDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
+         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSymDifference(), ImmutableList.of(arg1, arg2));
+    }
 
     @Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {

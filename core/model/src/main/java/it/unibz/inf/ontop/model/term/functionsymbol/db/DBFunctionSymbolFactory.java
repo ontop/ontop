@@ -305,12 +305,17 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBBuffer();
 
     FunctionSymbol getDBIntersection();
+
+    FunctionSymbol getDBBoundary();
+
+    FunctionSymbol getDBSymDifference();
+
+    FunctionSymbol getDBUnion();
+    FunctionSymbol getDBEnvelope();
+    FunctionSymbol getDBConvexHull();
+    FunctionSymbol getDBDifference();
+
     /*FunctionSymbol getDBSTRelate();
-    FunctionSymbol getDBSTBoundary();
-    FunctionSymbol getDBSTSymDifference();
     FunctionSymbol getDBSTGetSRID();
-    FunctionSymbol getDBSTUnion();
-    FunctionSymbol getDBSTEnvelope();
-    FunctionSymbol getDBSTConvexHull();
-    FunctionSymbol getDBSTDifference();*/
+    */
 }

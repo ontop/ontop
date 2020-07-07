@@ -73,6 +73,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ST_ASTEXT = "ST_ASTEXT";
     private static final String ST_BUFFER = "ST_BUFFER";
     private static final String ST_INTERSECTION = "ST_INTERSECTION";
+    private static final String ST_CONVEXHULL = "ST_CONVEXHULL";
+    private static final String ST_BOUNDARY = "ST_BOUNDARY";
+    private static final String ST_ENVELOPE = "ST_ENVELOPE";
+    private static final String ST_DIFFERENCE = "ST_DIFFERENCE";
+    private static final String ST_SYMDIFFERENCE = "ST_SYMDIFFERENCE";
+    private static final String ST_UNION = "ST_UNION";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -296,6 +302,30 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol intersectionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_INTERSECTION, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_INTERSECTION, 2, intersectionSymbol);
+
+        DBFunctionSymbol boundarySymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_BOUNDARY, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_BOUNDARY, 2, boundarySymbol);
+
+        DBFunctionSymbol convexhullSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_CONVEXHULL, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_CONVEXHULL, 2, convexhullSymbol);
+
+        DBFunctionSymbol differenceSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIFFERENCE, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_DIFFERENCE, 2, differenceSymbol);
+
+        DBFunctionSymbol symdifferenceSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_SYMDIFFERENCE, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_SYMDIFFERENCE, 2, symdifferenceSymbol);
+
+        DBFunctionSymbol envelopeSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ENVELOPE, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_ENVELOPE, 2, envelopeSymbol);
+
+        DBFunctionSymbol unionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_UNION, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_UNION, 2, unionSymbol);
 
         return builder.build();
     }
@@ -948,6 +978,36 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public FunctionSymbol getDBIntersection() {
         return getRegularDBFunctionSymbol(ST_INTERSECTION, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBBoundary() {
+        return getRegularDBFunctionSymbol(ST_BOUNDARY, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBConvexHull() {
+        return getRegularDBFunctionSymbol(ST_CONVEXHULL, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBDifference() {
+        return getRegularDBFunctionSymbol(ST_DIFFERENCE, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBEnvelope() {
+        return getRegularDBFunctionSymbol(ST_ENVELOPE, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBSymDifference() {
+        return getRegularDBFunctionSymbol(ST_SYMDIFFERENCE, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBUnion() {
+        return getRegularDBFunctionSymbol(ST_UNION, 2);
     }
 
     @Override
