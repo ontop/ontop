@@ -1,17 +1,22 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingOntologyBuilders.OntopMappingOntologyOptions;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
+import org.protege.xmlcatalog.owlapi.XMLCatalogIRIMapper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,11 +57,21 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
          */
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
+        if (options.mappingOntologyOptions.xmlCatalogFile.isPresent()) {
+            OWLOntologyIRIMapper iriMapper;
+            try {
+                iriMapper = new XMLCatalogIRIMapper(new File(options.mappingOntologyOptions.xmlCatalogFile.get()));
+            } catch (IOException e) {
+                throw new OWLOntologyCreationException(e.getMessage());
+            }
+            manager.setIRIMappers(ImmutableSet.of(iriMapper));
+        }
+
         if (options.mappingOntologyOptions.ontologyFile.isPresent()) {
             owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(options.mappingOntologyOptions.ontologyFile.get()));
         }
 
-        /**
+        /*
          * URL
          */
         try {

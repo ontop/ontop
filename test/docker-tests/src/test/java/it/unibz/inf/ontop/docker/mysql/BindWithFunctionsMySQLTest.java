@@ -103,4 +103,11 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
         super.testREPLACE();
     }
 
+    @Override
+    protected List<String> getConstantIntegerDivideExpectedResults() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.500000000000000000000000000000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
 }
