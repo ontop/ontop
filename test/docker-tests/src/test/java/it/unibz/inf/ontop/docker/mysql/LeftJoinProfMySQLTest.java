@@ -41,22 +41,22 @@ public class LeftJoinProfMySQLTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents1() {
-        return  ImmutableList.of("11.5000");
+        return  ImmutableList.of("11.2000");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "10.5000", "12.0000", "13.0000");
+        return ImmutableList.of("0", "0", "0", "0", "0", "10.3333", "12.0000", "13.0000");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents2() {
-        return   ImmutableList.of("10.5000","12.0000", "13.0000");
+        return   ImmutableList.of("10.3333","12.0000", "13.0000");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("15.500000000000000000000000000000", "16.000000000000000000000000000000", "18.875000000000000000000000000000");
+        return ImmutableList.of("15.500000000000000000000000000000", "16.000000000000000000000000000000", "19.250000000000000000000000000000");
     }
 
     // TODO: investigate with a more recent version of MySQL
@@ -77,12 +77,12 @@ public class LeftJoinProfMySQLTest extends AbstractLeftJoinProfTest {
 
     @Override
     protected ImmutableList<String> getExpectedValuesDuration1() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "18.000", "20.000", "54.500");
+        return ImmutableList.of("0", "0", "0", "0", "0", "18.000", "20.000", "84.500");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
-        return ImmutableList.of("31.000", "32.000", "75.500");
+        return ImmutableList.of("31.000", "32.000", "115.500");
     }
 
 }

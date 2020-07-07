@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 public class SumSPARQLFunctionSymbolImpl extends SumLikeSPARQLAggregationFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
     protected SumSPARQLFunctionSymbolImpl(boolean isDistinct, RDFTermType rootRdfTermType) {
-        super("SP_SUM", SPARQL.SUM, isDistinct, rootRdfTermType, "sum1");
+        super("SP_SUM"+ (isDistinct ? "_DISTINCT" : ""), SPARQL.SUM, isDistinct, rootRdfTermType, "sum1");
     }
 
     @Override
