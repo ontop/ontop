@@ -43,6 +43,15 @@ public class OntopR2RMLToOBDATest {
         runCommand(argv);
     }
 
+    @Test
+    public void testOntopR2RMLToOBDANamedGraph (){
+        String[] argv = {"mapping", "to-obda",
+                "-i", "src/test/resources/mapping-named-graph.ttl",
+                "-o", "src/test/resources/output/mapping-named-graph.obda"
+        };
+        runCommand(argv);
+    }
+
     private void runCommand(String[] args) {
         Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();
 
