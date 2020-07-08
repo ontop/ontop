@@ -68,7 +68,7 @@ public class QuadsTest {
             "{ GRAPH ?g {?subject  ?predicate ?object } } ";
 
 
-    int expectedCardinality = 15;
+    int expectedCardinality = 30;
     String sql = execute(queryQuad, expectedCardinality);
 
     System.out.println("SQL Query: \n" + sql);
@@ -114,7 +114,7 @@ public class QuadsTest {
         builder.append("\t" + "object" + "\t" + object + "\n");
         i++;
       }
-      assertTrue(i == expectedCardinality);
+      assertEquals(expectedCardinality, i);
       assertEquals(expectedResult + "\n", builder.toString());
     } catch (Exception e) {
       throw e;

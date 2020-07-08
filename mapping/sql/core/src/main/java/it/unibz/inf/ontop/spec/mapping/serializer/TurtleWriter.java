@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -111,7 +112,10 @@ class TurtleWriter {
 		for (Optional<String> graph : graphToSubjects.keySet()) {
 			graph.ifPresent(g -> sb.append(String.format("GRAPH %s { ", g)));
 
-			for (String subject : graphToSubjects.get(graph)) {
+			Collection<String> subjects = graphToSubjects.get(graph);
+			int i = 0;
+
+			for (String subject : subjects) {
 				String subjectKey = graph
 						.map(g -> computeSubjectKey(g, subject))
 						.orElse(subject);
@@ -135,11 +139,15 @@ class TurtleWriter {
 						commaSeparator = true;
 					}
 				}
-				sb.append(" ");
-				sb.append(".");
-				sb.append(" ");
+
+				// For the last subject, postpone the last dot
+				if (++i < subjects.size()) {
+					sb.append(" . ");
+				}
 			}
-			graph.ifPresent(g -> sb.append(" } "));
+			sb.append(
+					graph.map(g -> " } . ")
+							.orElse(" . "));
 		}
 		return sb.toString();
 	}
