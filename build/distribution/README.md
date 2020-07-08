@@ -21,7 +21,7 @@ By downloading these packages you are agreeing with them.
 
 - `ontop-protege-bundle-[version].zip` : Protege bundled with Ontop. This is ready to run package, unzip and use the run.sh or run.bat start scripts.
 
-- `ontop-tomcat-bundle-[version].zip` : (DEPRECATED) omcat + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
+- `ontop-tomcat-bundle-[version].zip` : (DEPRECATED) Tomcat + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
 
 - `ontop-jetty-bundle-[version].zip` : (DEPRECATED) Jetty + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
 
