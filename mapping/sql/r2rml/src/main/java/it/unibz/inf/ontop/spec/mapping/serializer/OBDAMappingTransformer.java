@@ -33,6 +33,7 @@ import org.apache.commons.rdf.api.*;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 
@@ -73,10 +74,9 @@ public class OBDAMappingTransformer {
 		String mapping_id = triplesMap.getId();
 
 		// check if mapping id is an iri
-		if (!mapping_id.contains(":")) {
-            mapping_id = baseIRIString + mapping_id;
-        }
-		BlankNodeOrIRI mainNode = rdfFactory.createIRI(mapping_id);
+		String mainNodeURLPrefix = (!mapping_id.contains(":"))
+				? baseIRIString + mapping_id
+				: mapping_id;
 
 		//Table
 		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQL());
@@ -88,11 +88,11 @@ public class OBDAMappingTransformer {
 
 		// Creates a triples map per subject map
 		return targetAtomMultimap.asMap().entrySet().stream()
-				.flatMap(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNode, prefixManager));
+				.flatMap(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
 	}
 
 	private Stream<TriplesMap> extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
-										 Collection<TargetAtom> targetAtoms, BlankNodeOrIRI mainNode,
+										 Collection<TargetAtom> targetAtoms, String mainNodeURLPrefix,
 										 PrefixManager prefixManager) {
 
 		ImmutableMap<Optional<ImmutableTerm>, Collection<TargetAtom>> graphMap = targetAtoms.stream()
@@ -104,13 +104,19 @@ public class OBDAMappingTransformer {
 				.asMap();
 
 		return graphMap.entrySet().stream()
-				.map(e -> extractTriplesMap(logicalTable, substitutedTerm, e.getKey(), e.getValue(), mainNode, prefixManager));
+				.map(e -> extractTriplesMap(logicalTable, substitutedTerm, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
 	}
 
 	private TriplesMap extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
 										 Optional<ImmutableTerm> graphTerm, Collection<TargetAtom> targetAtoms,
-										 BlankNodeOrIRI mainNode, PrefixManager prefixManager) {
+										 String mainNodeURLPrefix, PrefixManager prefixManager) {
 		SubjectMap sm = extractSubjectMap(substitutedTerm, prefixManager);
+
+		// Make sure we don't create triples map with the same name in case of multiple named graphs
+		BlankNodeOrIRI mainNode = rdfFactory.createIRI(
+				graphTerm
+						.map(t -> mainNodeURLPrefix + "-" + UUID.randomUUID().toString())
+						.orElse(mainNodeURLPrefix));
 
 		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, sm, mainNode);
 
