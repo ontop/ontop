@@ -22,11 +22,6 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
-import org.semanticweb.owlapi.io.WriterDocumentTarget;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -38,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 
 /***
@@ -52,7 +46,7 @@ public class AboxMaterializationAction extends ProtegeAction {
     private static final long serialVersionUID = -1211395039869926309L;
 
     private static final String RDF_XML = "RDF/XML";
-    private static final String OWL_XML = "OWL/XML";
+//    private static final String OWL_XML = "OWL/XML";
     private static final String TURTLE = "Turtle";
     private static final String NTRIPLES = "N-Triples";
 
@@ -99,7 +93,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         //combo box for output format,
         JLabel lFormat = new JLabel("Output format:\t");
-        String[] fileOptions = {RDF_XML, OWL_XML, TURTLE, NTRIPLES};
+        String[] fileOptions = {RDF_XML, TURTLE, NTRIPLES};
         final JComboBox comboFormats = new JComboBox(fileOptions);
         //should be enabled only when radio button export is selected
         comboFormats.setEnabled(false);
@@ -172,9 +166,6 @@ public class AboxMaterializationAction extends ProtegeAction {
                         .build();
                 final long startTime = System.currentTimeMillis();
                 switch (format) {
-                    case OWL_XML:
-                        stats = exportWithOWLAPI(configuration, params, file);
-                        break;
                     case TURTLE:
                     case RDF_XML:
                     case NTRIPLES:
@@ -184,17 +175,11 @@ public class AboxMaterializationAction extends ProtegeAction {
                         throw new Exception("Unknown format: " + format);
                 }
                 final long endTime = System.currentTimeMillis();
-                if (stats == null) {
-                    String msg = "Materialization failed.";
-                    log.error(msg);
-                    JOptionPane.showMessageDialog(workspace, msg);
-                } else {
-                    JOptionPane.showMessageDialog(this.workspace,
-                            "Task is completed" + lineSeparator + "Nr. of triples: " + stats.getCount()
-                                    + lineSeparator + "Vocabulary size: " + stats.getVocabSize()
-                                    + lineSeparator + "Elapsed time: " + (endTime - startTime) + " ms.", "Done",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
+                JOptionPane.showMessageDialog(this.workspace,
+                        "Task is completed" + lineSeparator + "Nr. of triples: " + stats.getCount()
+                                + lineSeparator + "Vocabulary size: " + stats.getVocabSize()
+                                + lineSeparator + "Elapsed time: " + (endTime - startTime) + " ms.", "Done",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -231,38 +216,6 @@ public class AboxMaterializationAction extends ProtegeAction {
                     graphQuery.getSelectedVocabulary().size()
             );
         }
-    }
-
-    private MaterializationStats exportWithOWLAPI(OntopSQLOWLAPIConfiguration configuration, MaterializationParams params,
-                                                  File file) throws OWLException, OBDASpecificationException, IOException {
-
-        MaterializationStats stats;
-        try (MaterializedGraphOWLResultSet graphResultSet = OntopOWLAPIMaterializer.defaultMaterializer(
-                configuration,
-                params
-        ).materialize()) {
-
-            HashSet<OWLAxiom> axiomSet = new HashSet();
-            while (graphResultSet.hasNext()) {
-                axiomSet.add(graphResultSet.next());
-            }
-            OutputStream out = new FileOutputStream(file);
-            BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(
-                    out,
-                    StandardCharsets.UTF_8
-            ));
-            OWLManager.createOWLOntologyManager().createOntology(axiomSet).saveOntology(
-                    new OWLXMLDocumentFormat(),
-                    new WriterDocumentTarget(fileWriter)
-            );
-            fileWriter.close();
-            out.close();
-            stats = new MaterializationStats(
-                    graphResultSet.getTripleCountSoFar(),
-                    graphResultSet.getSelectedVocabulary().size()
-            );
-        }
-        return stats;
     }
 
 
