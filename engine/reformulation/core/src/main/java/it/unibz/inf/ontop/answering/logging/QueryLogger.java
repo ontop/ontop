@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.logging;
 
 import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 
 /**
@@ -8,7 +9,7 @@ import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
  */
 public interface QueryLogger {
 
-    void declareReformulationFinishedAndSerialize(boolean wasCached);
+    void declareReformulationFinishedAndSerialize(IQ reformulatedQuery, boolean wasCached);
 
     void declareResultSetUnblockedAndSerialize();
 
@@ -21,6 +22,8 @@ public interface QueryLogger {
     void declareConnectionException(Exception e);
 
     void declareConversionException(InconsistentOntologyException e);
+
+    void setSparqlQuery(String sparqlQuery);
 
     interface Factory {
         QueryLogger create();

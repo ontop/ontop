@@ -82,7 +82,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		IQ cachedQuery = queryCache.get(inputQuery);
 		if (cachedQuery != null) {
-			queryLogger.declareReformulationFinishedAndSerialize(true);
+			queryLogger.declareReformulationFinishedAndSerialize(cachedQuery,true);
 			return cachedQuery;
 		}
 
@@ -102,7 +102,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
                 	log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
-					queryLogger.declareReformulationFinishedAndSerialize(false);
+					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
 					return unfoldedIQ;
 				}
                 log.debug("Unfolded query: \n" + unfoldedIQ.toString());
@@ -114,7 +114,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
-				queryLogger.declareReformulationFinishedAndSerialize(false);
+				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				return executableQuery;
 
 			}

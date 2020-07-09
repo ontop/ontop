@@ -295,7 +295,9 @@ public abstract class QuestStatement implements OntopStatement {
 			throws OntopReformulationException, OntopQueryEvaluationException {
 		QueryLogger queryLogger = queryLoggerFactory.create();
 
-		log.debug("Executing SPARQL query: \n{}", inputQuery.getInputString());
+		String sparqlQuery = inputQuery.getInputString();
+		log.debug("Executing SPARQL query: \n{}", sparqlQuery);
+		queryLogger.setSparqlQuery(sparqlQuery);
 
 		CountDownLatch monitor = new CountDownLatch(1);
 		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);

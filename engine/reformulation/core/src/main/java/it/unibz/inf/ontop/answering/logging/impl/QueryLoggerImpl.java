@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 
+import javax.annotation.Nullable;
 import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -17,6 +19,8 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String EVALUATION_EXC_MSG = "query:exception-evaluation";
     protected static final String CONNECTION_EXC_MSG = "query:exception-connection";
     protected static final String CONVERSION_EXC_MSG = "query:exception-conversion";
+    protected static final String SPARQL_QUERY_KEY = "sparqlQuery";
+    protected static final String REFORMULATED_QUERY_KEY = "reformulatedQuery";
     private final UUID queryId;
     private final long creationTime;
     private final PrintStream outputStream;
@@ -26,6 +30,8 @@ public class QueryLoggerImpl implements QueryLogger {
     private long reformulationTime;
     private long unblockedResulSetTime;
     private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+    @Nullable
+    private String sparqlQueryString;
 
     @Inject
     protected QueryLoggerImpl(OntopReformulationSettings settings) {
@@ -44,17 +50,30 @@ public class QueryLoggerImpl implements QueryLogger {
     }
 
     @Override
-    public void declareReformulationFinishedAndSerialize(boolean wasCached) {
+    public void declareReformulationFinishedAndSerialize(IQ reformulatedQuery, boolean wasCached) {
         if (disabled)
             return;
+
+        String reformulatedQueryString = settings.isReformulatedQueryIncludedIntoQueryLog()
+                ? serializeEntry(REFORMULATED_QUERY_KEY, reformulatedQuery.toString())
+                : "";
 
         reformulationTime = System.currentTimeMillis();
         // TODO: use a proper framework
         String json = String.format(
-                "{\"@timestamp\": \"%s\", \"application\": \"%s\", \"message\": \"query:reformulated\", \"payload\": { \"queryId\": \"%s\", \"reformulationDuration\": %d, \"reformulationCacheHit\": %b } }",
+                "{\"@timestamp\": \"%s\", " +
+                        "\"application\": \"%s\", " +
+                        "\"message\": \"query:reformulated\", " +
+                        "\"payload\": { " +
+                        "\"queryId\": \"%s\", " +
+                        "%s %s" +
+                        "\"reformulationDuration\": %d, " +
+                        "\"reformulationCacheHit\": %b } }",
                 serializeTimestamp(reformulationTime),
                 applicationName,
                 queryId,
+                serializeEntry(SPARQL_QUERY_KEY, sparqlQueryString),
+                reformulatedQueryString,
                 reformulationTime - creationTime,
                 wasCached);
         outputStream.println(json);
@@ -119,6 +138,16 @@ public class QueryLoggerImpl implements QueryLogger {
         declareException(e, CONVERSION_EXC_MSG);
     }
 
+    @Override
+    public void setSparqlQuery(String sparqlQuery) {
+        if (disabled || (!settings.isSparqlQueryIncludedIntoQueryLog()))
+            return;
+
+        if (sparqlQueryString != null)
+            throw new IllegalStateException("Already specified SPARQL query");
+        sparqlQueryString = sparqlQuery;
+    }
+
     protected void declareException(Exception e, String exceptionType) {
         if (disabled)
             return;
@@ -136,5 +165,15 @@ public class QueryLoggerImpl implements QueryLogger {
 
     protected String serializeTimestamp(long time) {
         return DATE_FORMAT.format(new Timestamp(time));
+    }
+
+    protected String serializeEntry(String key, @Nullable String value) {
+        return (value == null)
+                ? ""
+                : String.format("\"%s\": \"%s\", ", key, escapeDoubleQuotes(value));
+    }
+
+    protected String escapeDoubleQuotes(String value) {
+        return value.replaceAll("\"", "\\\"");
     }
 }

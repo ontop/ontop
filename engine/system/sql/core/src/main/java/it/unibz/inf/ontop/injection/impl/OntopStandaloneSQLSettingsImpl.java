@@ -38,6 +38,31 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isSparqlQueryIncludedIntoQueryLog() {
+        return getRequiredBoolean(SPARQL_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean isReformulatedQueryIncludedIntoQueryLog() {
+        return getRequiredBoolean(REFORMULATED_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean arePropertiesIncludedIntoQueryLog() {
+        return getRequiredBoolean(PROPERTIES_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean areClassesIncludedIntoQueryLog() {
+        return getRequiredBoolean(CLASSES_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean areTablesIncludedIntoQueryLog() {
+        return getRequiredBoolean(TABLES_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
     public long getQueryCacheMaxSize() {
         return getRequiredLong(QUERY_CACHE_MAX_SIZE);
     }
