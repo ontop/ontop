@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.answering.logging.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
+import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 
 import java.io.PrintStream;
 import java.sql.Timestamp;
@@ -11,6 +13,10 @@ import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 public class QueryLoggerImpl implements QueryLogger {
+    protected static final String REFORMATION_EXC_MSG = "query:exception-reformulation";
+    protected static final String EVALUATION_EXC_MSG = "query:exception-evaluation";
+    protected static final String CONNECTION_EXC_MSG = "query:exception-connection";
+    protected static final String CONVERSION_EXC_MSG = "query:exception-conversion";
     private final UUID queryId;
     private final long creationTime;
     private final PrintStream outputStream;
@@ -45,10 +51,10 @@ public class QueryLoggerImpl implements QueryLogger {
         reformulationTime = System.currentTimeMillis();
         // TODO: use a proper framework
         String json = String.format(
-                "{\"@timestamp\": \"%s\", \"queryId\": \"%s\", \"message\": \"Query reformulated\", \"application\": \"%s\", \"reformulationDuration\": %d, \"reformulationCacheHit\": %b}",
+                "{\"@timestamp\": \"%s\", \"application\": \"%s\", \"message\": \"query:reformulated\", \"payload\": { \"queryId\": \"%s\", \"reformulationDuration\": %d, \"reformulationCacheHit\": %b } }",
                 serializeTimestamp(reformulationTime),
-                queryId,
                 applicationName,
+                queryId,
                 reformulationTime - creationTime,
                 wasCached);
         outputStream.println(json);
@@ -64,10 +70,10 @@ public class QueryLoggerImpl implements QueryLogger {
 
         // TODO: use a proper framework
         String json = String.format(
-                "{\"@timestamp\": \"%s\", \"queryId\": \"%s\", \"message\": \"Result set unblocked\", \"application\": \"%s\", \"executionBeforeUnblockingDuration\": %d}",
+                "{\"@timestamp\": \"%s\", \"application\": \"%s\", \"message\": \"query:result-set-unblocked\", \"payload\": { \"queryId\": \"%s\", \"executionBeforeUnblockingDuration\": %d } }",
                 serializeTimestamp(unblockedResulSetTime),
-                queryId,
                 applicationName,
+                queryId,
                 unblockedResulSetTime - reformulationTime);
         outputStream.println(json);
     }
@@ -83,13 +89,48 @@ public class QueryLoggerImpl implements QueryLogger {
 
         // TODO: use a proper framework
         String json = String.format(
-                "{\"@timestamp\": \"%s\", \"queryId\": \"%s\", \"message\": \"Last result fetched\", \"application\": \"%s\", \"executionAndFetchingDuration\": %d, \"totalDuration\": %d, \"resultCount\": %d}",
+                "{\"@timestamp\": \"%s\", \"application\": \"%s\" \"message\": \"query:last-result-fetched\", \"payload\": { \"queryId\": \"%s\", \"executionAndFetchingDuration\": %d, \"totalDuration\": %d, \"resultCount\": %d } }",
                 serializeTimestamp(lastResultFetchedTime),
-                queryId,
                 applicationName,
+                queryId,
                 lastResultFetchedTime - reformulationTime,
                 lastResultFetchedTime - creationTime,
                 resultCount);
+        outputStream.println(json);
+    }
+
+    @Override
+    public void declareReformulationException(OntopReformulationException e) {
+        declareException(e, REFORMATION_EXC_MSG);
+    }
+
+    @Override
+    public void declareEvaluationException(Exception e) {
+        declareException(e, EVALUATION_EXC_MSG);
+    }
+
+    @Override
+    public void declareConnectionException(Exception e) {
+        declareException(e, CONNECTION_EXC_MSG);
+    }
+
+    @Override
+    public void declareConversionException(InconsistentOntologyException e) {
+        declareException(e, CONVERSION_EXC_MSG);
+    }
+
+    protected void declareException(Exception e, String exceptionType) {
+        if (disabled)
+            return;
+
+        // TODO: use a proper framework
+        String json = String.format(
+                "{\"@timestamp\": \"%s\", \"application\": \"%s\" \"message\": \"%s\", \"payload\": { \"queryId\": \"%s\", \"exception\": %s} }",
+                serializeTimestamp(System.currentTimeMillis()),
+                applicationName,
+                exceptionType,
+                queryId,
+                e.getMessage());
         outputStream.println(json);
     }
 

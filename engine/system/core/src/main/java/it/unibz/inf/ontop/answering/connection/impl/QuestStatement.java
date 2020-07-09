@@ -316,9 +316,11 @@ public abstract class QuestStatement implements OntopStatement {
 				throw (OntopReformulationException) ex;
 			}
 			else if (ex instanceof OntopQueryEvaluationException) {
+				queryLogger.declareEvaluationException(ex);
 				throw (OntopQueryEvaluationException) ex;
 			}
 			else {
+				queryLogger.declareEvaluationException(ex);
 				throw new OntopQueryEvaluationException(ex);
 			}
 		}

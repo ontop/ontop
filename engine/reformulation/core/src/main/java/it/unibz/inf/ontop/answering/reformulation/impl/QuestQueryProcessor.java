@@ -119,6 +119,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			}
             catch (OntopReformulationException e) {
+            	queryLogger.declareReformulationException(e);
                 throw e;
             }
         }
@@ -128,9 +129,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		 */
 		catch (Exception e) {
 			log.warn("Unexpected exception: " + e.getMessage(), e);
-			// TODO: involve the query logger
-			throw new OntopReformulationException(e);
-			//throw new OntopReformulationException("Error rewriting and unfolding into SQL\n" + e.getMessage());
+			OntopReformulationException exception = new OntopReformulationException(e);
+			queryLogger.declareReformulationException(exception);
+			throw exception;
 		}
 	}
 
