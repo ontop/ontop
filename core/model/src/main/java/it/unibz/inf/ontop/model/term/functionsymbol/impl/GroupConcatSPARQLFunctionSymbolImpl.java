@@ -24,7 +24,7 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
 
     protected GroupConcatSPARQLFunctionSymbolImpl(RDFDatatype xsdStringType, String separator, boolean isDistinct) {
         super(
-                "SP_GROUP_CONCAT" + (separator.equals(" ") ? "": separator),
+                "SP_GROUP_CONCAT" + (isDistinct ? "_DISTINCT" : "") + (separator.equals(" ") ? "": separator),
                 SPARQL.GROUP_CONCAT,
                 ImmutableList.of(xsdStringType)
         );

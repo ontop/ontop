@@ -35,6 +35,10 @@ else
   echo "ERROR: environment variable ONTOP_PROPERTIES_FILE is not set" && exit 1
 fi
 
+if [ "${ONTOP_XML_CATALOG_FILE+x}" ]; then
+  args_array+=("--xml-catalog=${ONTOP_XML_CATALOG_FILE}")
+fi
+
 if [ "${ONTOP_CONSTRAINT_FILE+x}" ]; then
   args_array+=("--constraint=${ONTOP_CONSTRAINT_FILE}")
 fi

@@ -4,9 +4,9 @@ The [Ontop](http://ontop.inf.ubibz.it) framework is an open source project avail
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 4.0.0-beta-1
-* Release date: 21/12/2019
-* [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
+* Current version: 4.0.0-rc-1
+* Release date: 08/07/2020
+* [Changelog](https://ontop-vkg.org/guide/releases.html)
 
 
 ## Main downloads
@@ -15,22 +15,17 @@ By downloading these packages you are agreeing with them.
 
 - `it.unibz.inf.ontop.protege-[version].jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
 
-- `ontop-webapps-[version].zip`: WAR files required to create an Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server.
+- `ontop-webapps-[version].zip`: (DEPRECATED) WAR files required to create an Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server .
 
 ## Bundles
 
 - `ontop-protege-bundle-[version].zip` : Protege bundled with Ontop. This is ready to run package, unzip and use the run.sh or run.bat start scripts.
 
-- `ontop-tomcat-bundle-[version].zip` : Tomcat + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
+- `ontop-tomcat-bundle-[version].zip` : (DEPRECATED) Tomcat + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
 
-- `ontop-jetty-bundle-[version].zip` : Jetty + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
-
-## Tutorial
-
-- [Ontop-tutorial](https://github.com/ontop/ontop-tutorial)
+- `ontop-jetty-bundle-[version].zip` : (DEPRECATED) Jetty + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
 
 ## Links
-
 
 - Official Website: http://ontop.inf.unibz.it/
 - Download: http://sourceforge.net/projects/ontop4obda/files/

@@ -2,7 +2,7 @@
     <parent>
         <artifactId>ontop-system-sql</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.0.0-beta-2-SNAPSHOT</version>
+        <version>4.0.0-rc-2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

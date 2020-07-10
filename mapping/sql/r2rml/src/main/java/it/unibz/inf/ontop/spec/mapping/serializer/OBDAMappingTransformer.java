@@ -33,6 +33,7 @@ import org.apache.commons.rdf.api.*;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 
@@ -73,10 +74,9 @@ public class OBDAMappingTransformer {
 		String mapping_id = triplesMap.getId();
 
 		// check if mapping id is an iri
-		if (!mapping_id.contains(":")) {
-            mapping_id = baseIRIString + mapping_id;
-        }
-		BlankNodeOrIRI mainNode = rdfFactory.createIRI(mapping_id);
+		String mainNodeURLPrefix = (!mapping_id.contains(":"))
+				? baseIRIString + mapping_id
+				: mapping_id;
 
 		//Table
 		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQL());
@@ -88,14 +88,40 @@ public class OBDAMappingTransformer {
 
 		// Creates a triples map per subject map
 		return targetAtomMultimap.asMap().entrySet().stream()
-				.map(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNode, prefixManager));
+				.flatMap(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
+	}
+
+	private Stream<TriplesMap> extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
+										 Collection<TargetAtom> targetAtoms, String mainNodeURLPrefix,
+										 PrefixManager prefixManager) {
+
+		ImmutableMap<Optional<ImmutableTerm>, Collection<TargetAtom>> graphMap = targetAtoms.stream()
+				.collect(ImmutableCollectors.toMultimap(
+						t -> Optional.of(t.getProjectionAtom())
+								.filter(a -> a.getArity() > 3)
+								.map(a -> t.getSubstitutedTerm(3)),
+						t -> t))
+				.asMap();
+
+		return graphMap.entrySet().stream()
+				.map(e -> extractTriplesMap(logicalTable, substitutedTerm, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
 	}
 
 	private TriplesMap extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
-										 Collection<TargetAtom> targetAtoms, BlankNodeOrIRI mainNode,
-										 PrefixManager prefixManager) {
+										 Optional<ImmutableTerm> graphTerm, Collection<TargetAtom> targetAtoms,
+										 String mainNodeURLPrefix, PrefixManager prefixManager) {
 		SubjectMap sm = extractSubjectMap(substitutedTerm, prefixManager);
+
+		// Make sure we don't create triples map with the same name in case of multiple named graphs
+		BlankNodeOrIRI mainNode = rdfFactory.createIRI(
+				graphTerm
+						.map(t -> mainNodeURLPrefix + "-" + UUID.randomUUID().toString())
+						.orElse(mainNodeURLPrefix));
+
 		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, sm, mainNode);
+
+		graphTerm.map(g -> extractGraphMap(g, prefixManager))
+				.ifPresent(sm::addGraphMap);
 
 		ImmutableMap<Boolean, ImmutableList<TargetAtom>> targetAtomClassification = targetAtoms.stream()
 				.collect(ImmutableCollectors.partitioningBy(OBDAMappingTransformer::isConstantClassTargetAtom));
@@ -116,7 +142,6 @@ public class OBDAMappingTransformer {
 				.forEach(tm::addPredicateObjectMap);
 
 		return tm;
-
 	}
 
 	private static boolean isConstantClassTargetAtom(TargetAtom targetAtom) {
@@ -145,6 +170,20 @@ public class OBDAMappingTransformer {
 				mappingFactory::createSubjectMap,
 				mappingFactory::createSubjectMap,
 				// TODO: allow blank nodes to appear in a subject map
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+				prefixManager);
+	}
+
+	private GraphMap extractGraphMap(ImmutableTerm substitutedTerm, PrefixManager prefixManager) {
+		return extractTermMap(substitutedTerm, true, false,
+				mappingFactory::createGraphMap,
+				mappingFactory::createGraphMap,
+				mappingFactory::createGraphMap,
 				l -> {
 					throw new UnsupportedOperationException();
 				},

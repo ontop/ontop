@@ -90,9 +90,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* CONSTRUCT not supported yet*/
 			//Projection cannot be cast to Reduced in rdf4j
-			constructManifest + "constructwhere01",
-			constructManifest + "constructwhere02",
-			constructManifest + "constructwhere03",
+//			constructManifest + "constructwhere01",
+//			constructManifest + "constructwhere02",
+//			constructManifest + "constructwhere03",
 			//problem importing dataset
 			constructManifest + "constructwhere04",
 

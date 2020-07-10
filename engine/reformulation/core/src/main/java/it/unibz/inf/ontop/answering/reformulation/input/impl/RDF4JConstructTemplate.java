@@ -28,43 +28,81 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 class RDF4JConstructTemplate implements ConstructTemplate {
     private final TupleExpr projection;
-	private final TupleExpr extension;
+	private final Extension extension;
 
 	RDF4JConstructTemplate(ParsedQuery pq) {
-		TupleExpr topExpression = pq.getTupleExpr();
-
-		// NB: the slice is not relevant for the construct template
-		// (will be taken into account in the SELECT query fragment)
-		Slice slice = (topExpression instanceof Slice) ? (Slice) topExpression : null;
-
-		TupleExpr firstNonSliceExpression = (slice == null) ? topExpression : slice.getArg();
-
-		if (!(firstNonSliceExpression instanceof Reduced))
-			// TODO: throw a better exception?
-			throw new MinorOntopInternalBugException("Was expecting a Reduced instead of: " + firstNonSliceExpression);
-
-		projection = ((Reduced) firstNonSliceExpression).getArg();
-		TupleExpr texpr = (projection instanceof MultiProjection)
-				? ((MultiProjection) projection).getArg()
-				: ((Projection) projection).getArg();
-		extension = (texpr!= null && texpr instanceof Extension) ? texpr : null;
+		TupleExpr topNonSliceExpression = getFirstNonSliceExpression(pq.getTupleExpr());
+		projection = getFirstProjection(topNonSliceExpression);
+		extension =  getProjectionExtension(projection);
 	}
 
+	private TupleExpr getFirstNonSliceExpression(TupleExpr expr) {
+		// NB: the slice is not relevant for the construct template
+		// (will be taken into account in the SELECT query fragment)
+		return expr instanceof Slice?
+				getFirstNonSliceExpression(((Slice) expr).getArg()):
+				expr;
+	}
+
+	private Extension getProjectionExtension(TupleExpr proj) {
+		if (proj instanceof Projection)
+			return getExtension((Projection) proj);
+		if(proj instanceof MultiProjection)
+			return getExtension((MultiProjection) proj);
+
+		throw new MinorOntopInternalBugException("Unexpected SPARQL query (after parsing): "+
+				"an instance of "+
+				Projection.class+
+				" or "+
+				MultiProjection.class+
+				" is expected, instead of\n"+
+				proj
+		);
+	}
+
+	private Extension getExtension(MultiProjection multiProj) {
+		TupleExpr ext = multiProj.getArg();
+		return (ext instanceof Extension)?
+				(Extension)ext:
+				null;
+	}
+
+	private Extension getExtension(Projection proj) {
+		TupleExpr ext = proj.getArg();
+		return (ext instanceof Extension)?
+				(Extension)ext:
+				null;
+	}
+
+	private TupleExpr getFirstProjection(TupleExpr expr) {
+		if(expr instanceof Projection || expr instanceof MultiProjection)
+			return expr;
+		if (expr instanceof Reduced)
+			return getFirstProjection(((Reduced) expr).getArg());
+
+		throw new MinorOntopInternalBugException("Unexpected SPARQL query (after parsing): "+
+				"an instance of "+
+				Projection.class+
+				" or "+
+				Reduced.class+
+				" is expected, instead of\n"+
+				expr
+		);
+	}
 
 	@Override
 	public ImmutableList<ProjectionElemList> getProjectionElemList() {
 		if (projection instanceof Projection) {
 			return ImmutableList.of(((Projection) projection).getProjectionElemList());
 		}
-		else if (projection instanceof MultiProjection) {
+		if (projection instanceof MultiProjection) {
 			return ImmutableList.copyOf(((MultiProjection) projection).getProjections());
 		}
-		else
-			return ImmutableList.of();
+		return ImmutableList.of();
 	}
 
 	@Override
 	public Extension getExtension() {
-		return (Extension) extension;
+		return extension;
 	}
 }

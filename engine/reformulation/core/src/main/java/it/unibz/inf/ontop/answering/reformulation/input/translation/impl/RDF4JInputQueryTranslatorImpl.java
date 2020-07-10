@@ -1138,25 +1138,30 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
             //Unary count
             if (expr instanceof Count) {
-                Count count = (Count) expr;
                 return termFactory.getImmutableFunctionalTerm(
-                        getSPARQLAggregateFunctionSymbol(SPARQL.COUNT, 1, count.isDistinct()),
+                        getSPARQLAggregateFunctionSymbol(
+                                SPARQL.COUNT,
+                                1,
+                                ((Count)expr).isDistinct()
+                        ),
                         term);
             }
             if (expr instanceof Avg) {
                 return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                        getSPARQLAggregateFunctionSymbol(
                                 SPARQL.AVG,
-                                1
+                                1,
+                                ((Avg)expr).isDistinct()
                         ),
                         term
                 );
             }
             if (expr instanceof Sum) {
                 return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                        getSPARQLAggregateFunctionSymbol(
                                 SPARQL.SUM,
-                                1
+                                1,
+                                ((Sum) expr).isDistinct()
                         ),
                         term
                 );
@@ -1195,8 +1200,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         .orElse(" ");
 
                 return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, ((GroupConcat) expr).isDistinct()),
-                        term);
+                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(
+                                separator,
+                                ((GroupConcat) expr).isDistinct()
+                        ),
+                        term
+                );
             }
             if (expr instanceof Not) {
                 return termFactory.getImmutableFunctionalTerm(
