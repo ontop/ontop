@@ -91,6 +91,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
 			log.debug("Parsed query converted into IQ (after normalization):\n{}", convertedIQ);
 
+			queryLogger.setSparqlIQ(convertedIQ);
+
             try {
                 log.debug("Start the rewriting process...");
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
@@ -110,6 +112,8 @@ public class QuestQueryProcessor implements QueryReformulator {
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, executorRegistry);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery, executorRegistry);
 				log.debug("Planned query: \n" + plannedQuery);
+
+				queryLogger.setPlannedQuery(plannedQuery);
 
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);

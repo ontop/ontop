@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.answering.logging.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nullable;
 import java.io.PrintStream;
@@ -13,14 +16,23 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class QueryLoggerImpl implements QueryLogger {
+
     protected static final String REFORMATION_EXC_MSG = "query:exception-reformulation";
     protected static final String EVALUATION_EXC_MSG = "query:exception-evaluation";
     protected static final String CONNECTION_EXC_MSG = "query:exception-connection";
     protected static final String CONVERSION_EXC_MSG = "query:exception-conversion";
     protected static final String SPARQL_QUERY_KEY = "sparqlQuery";
     protected static final String REFORMULATED_QUERY_KEY = "reformulatedQuery";
+
+    protected static final String CLASSES_KEY = "classes";
+    protected static final String PROPERTIES_KEY = "properties";
+    protected static final String TABLES_KEY = "tables";
+
+    private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
     private final UUID queryId;
     private final long creationTime;
     private final PrintStream outputStream;
@@ -29,19 +41,32 @@ public class QueryLoggerImpl implements QueryLogger {
     private final String applicationName;
     private long reformulationTime;
     private long unblockedResulSetTime;
-    private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+    private final ClassAndPropertyExtractor classAndPropertyExtractor;
+    private final RelationNameExtractor relationNameExtractor;
+
+    @Nullable
+    private ImmutableSet<IRI> classes, properties;
+    @Nullable
+    private ImmutableSet<String> relationNames;
+
     @Nullable
     private String sparqlQueryString;
 
     @Inject
-    protected QueryLoggerImpl(OntopReformulationSettings settings) {
-        this(System.out, settings);
+    protected QueryLoggerImpl(OntopReformulationSettings settings,
+                              ClassAndPropertyExtractor classAndPropertyExtractor,
+                              RelationNameExtractor relationNameExtractor) {
+        this(System.out, settings, classAndPropertyExtractor, relationNameExtractor);
     }
 
-    protected QueryLoggerImpl(PrintStream outputStream, OntopReformulationSettings settings) {
+    protected QueryLoggerImpl(PrintStream outputStream, OntopReformulationSettings settings,
+                              ClassAndPropertyExtractor classAndPropertyExtractor,
+                              RelationNameExtractor relationNameExtractor) {
         this.disabled = !settings.isQueryLoggingEnabled();
         this.outputStream = outputStream;
         this.settings = settings;
+        this.classAndPropertyExtractor = classAndPropertyExtractor;
+        this.relationNameExtractor = relationNameExtractor;
         this.queryId = UUID.randomUUID();
         creationTime = System.currentTimeMillis();
         applicationName = settings.getApplicationName();
@@ -66,7 +91,7 @@ public class QueryLoggerImpl implements QueryLogger {
                         "\"message\": \"query:reformulated\", " +
                         "\"payload\": { " +
                         "\"queryId\": \"%s\", " +
-                        "%s %s" +
+                        "%s %s %s %s %s" +
                         "\"reformulationDuration\": %d, " +
                         "\"reformulationCacheHit\": %b } }",
                 serializeTimestamp(reformulationTime),
@@ -74,6 +99,9 @@ public class QueryLoggerImpl implements QueryLogger {
                 queryId,
                 serializeEntry(SPARQL_QUERY_KEY, sparqlQueryString),
                 reformulatedQueryString,
+                serializeArrayEntry(CLASSES_KEY, classes),
+                serializeArrayEntry(PROPERTIES_KEY, properties),
+                serializeArrayEntry(TABLES_KEY, relationNames),
                 reformulationTime - creationTime,
                 wasCached);
         outputStream.println(json);
@@ -148,6 +176,24 @@ public class QueryLoggerImpl implements QueryLogger {
         sparqlQueryString = sparqlQuery;
     }
 
+    @Override
+    public void setSparqlIQ(IQ sparqlIQ) {
+        if (disabled || (!settings.areClassesAndPropertiesIncludedIntoQueryLog()))
+            return;
+
+        ClassesAndProperties classesAndProperties = classAndPropertyExtractor.extractClassesAndProperties(sparqlIQ);
+        classes = classesAndProperties.getClasses();
+        properties = classesAndProperties.getProperties();
+    }
+
+    @Override
+    public void setPlannedQuery(IQ plannedQuery) {
+        if (disabled || (!settings.areTablesIncludedIntoQueryLog()))
+            return;
+
+        relationNames = relationNameExtractor.extractRelationNames(plannedQuery);
+    }
+
     protected void declareException(Exception e, String exceptionType) {
         if (disabled)
             return;
@@ -175,5 +221,14 @@ public class QueryLoggerImpl implements QueryLogger {
 
     protected String escapeDoubleQuotes(String value) {
         return value.replaceAll("\"", "\\\"");
+    }
+
+    protected String serializeArrayEntry(String key, ImmutableSet<? extends Object> arguments) {
+        if (arguments == null)
+            return "";
+
+        return String.format("[%s]", arguments.stream()
+                .map(a -> escapeDoubleQuotes(a.toString()))
+                .collect(Collectors.joining(", ")));
     }
 }

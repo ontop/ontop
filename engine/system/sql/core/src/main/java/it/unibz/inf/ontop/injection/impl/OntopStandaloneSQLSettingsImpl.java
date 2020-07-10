@@ -48,12 +48,7 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public boolean arePropertiesIncludedIntoQueryLog() {
-        return getRequiredBoolean(PROPERTIES_INCLUDED_QUERY_LOGGING);
-    }
-
-    @Override
-    public boolean areClassesIncludedIntoQueryLog() {
+    public boolean areClassesAndPropertiesIncludedIntoQueryLog() {
         return getRequiredBoolean(CLASSES_INCLUDED_QUERY_LOGGING);
     }
 

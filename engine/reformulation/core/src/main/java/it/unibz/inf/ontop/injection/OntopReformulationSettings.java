@@ -10,8 +10,7 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     boolean isQueryLoggingEnabled();
     boolean isSparqlQueryIncludedIntoQueryLog();
     boolean isReformulatedQueryIncludedIntoQueryLog();
-    boolean arePropertiesIncludedIntoQueryLog();
-    boolean areClassesIncludedIntoQueryLog();
+    boolean areClassesAndPropertiesIncludedIntoQueryLog();
     boolean areTablesIncludedIntoQueryLog();
 
     long getQueryCacheMaxSize();
@@ -33,10 +32,8 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     String SPARQL_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeSparqlQuery";
     // Includes the reformulated query into the query log
     String REFORMULATED_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeReformulatedQuery";
-    // Includes properties into the query log
-    String PROPERTIES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeProperties";
-    // Includes classes into the query log
-    String CLASSES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeClasses";
+    // Includes classes and properties into the query log
+    String CLASSES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeClassesAndProperties";
     // Includes DB tables/views into the query log
     String TABLES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeTables";
 

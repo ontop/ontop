@@ -25,6 +25,10 @@ public interface QueryLogger {
 
     void setSparqlQuery(String sparqlQuery);
 
+    void setSparqlIQ(IQ sparqlIQ);
+
+    void setPlannedQuery(IQ plannedQuery);
+
     interface Factory {
         QueryLogger create();
     }

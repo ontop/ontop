@@ -53,12 +53,7 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
-    public boolean arePropertiesIncludedIntoQueryLog() {
-        return getRequiredBoolean(PROPERTIES_INCLUDED_QUERY_LOGGING);
-    }
-
-    @Override
-    public boolean areClassesIncludedIntoQueryLog() {
+    public boolean areClassesAndPropertiesIncludedIntoQueryLog() {
         return getRequiredBoolean(CLASSES_INCLUDED_QUERY_LOGGING);
     }
 
