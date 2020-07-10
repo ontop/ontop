@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -35,15 +36,8 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String TIMESTAMP_KEY = "@timestamp";
     protected static final String MESSAGE_KEY = "message";
     protected static final String QUERY_ID_KEY = "queryId";
-    private static final String APPLICATION_KEY = "application";
-    private static final String PAYLOAD_KEY = "payload";
-
-    protected static final String CLASSES_KEY = "classesUsedInQuery";
-    protected static final String PROPERTIES_KEY = "propertiesUsedInQuery";
-    protected static final String TABLES_KEY = "tables";
-
-    private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-    private static final Logger REGULAR_LOGGER = LoggerFactory.getLogger(QueryLoggerImpl.class);
+    protected static final String APPLICATION_KEY = "application";
+    protected static final String PAYLOAD_KEY = "payload";
     public static final String QUERY_RESULT_SET_UNBLOCKED = "query:result-set-unblocked";
     public static final String QUERY_LAST_RESULT_FETCHED = "query:last-result-fetched";
     public static final String EXECUTION_AND_FETCHING_DURATION_KEY = "executionAndFetchingDuration";
@@ -53,6 +47,13 @@ public class QueryLoggerImpl implements QueryLogger {
     public static final String REFORMULATION_DURATION_KEY = "reformulationDuration";
     public static final String REFORMULATION_CACHE_HIT_KEY = "reformulationCacheHit";
     public static final String QUERY_REFORMULATED = "query:reformulated";
+
+    protected static final String CLASSES_KEY = "classesUsedInQuery";
+    protected static final String PROPERTIES_KEY = "propertiesUsedInQuery";
+    protected static final String TABLES_KEY = "tables";
+
+    private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+    private static final Logger REGULAR_LOGGER = LoggerFactory.getLogger(QueryLoggerImpl.class);
 
 
     private final UUID queryId;
@@ -104,7 +105,8 @@ public class QueryLoggerImpl implements QueryLogger {
         if (disabled)
             return;
 
-        try (JsonGenerator js = jsonFactory.createGenerator(outputStream)) {
+        StringWriter stringWriter = new StringWriter();
+        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
             js.writeStartObject();
             js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(System.currentTimeMillis()));
             js.writeStringField(MESSAGE_KEY, QUERY_REFORMULATED);
@@ -143,6 +145,7 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException ex) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
+        outputStream.println(stringWriter.toString());
     }
 
     @Override
@@ -153,7 +156,8 @@ public class QueryLoggerImpl implements QueryLogger {
         if (reformulationTime == -1)
             throw new IllegalStateException("Reformulation should have been declared as finished");
 
-        try (JsonGenerator js = jsonFactory.createGenerator(outputStream)) {
+        StringWriter stringWriter = new StringWriter();
+        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
             js.writeStartObject();
             js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(unblockedResulSetTime));
             js.writeStringField(MESSAGE_KEY, QUERY_RESULT_SET_UNBLOCKED);
@@ -165,7 +169,9 @@ public class QueryLoggerImpl implements QueryLogger {
             js.writeEndObject();
         } catch (IOException e) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
+            return;
         }
+        outputStream.println(stringWriter.toString());
     }
 
     @Override
@@ -177,7 +183,8 @@ public class QueryLoggerImpl implements QueryLogger {
         if (unblockedResulSetTime == -1)
             throw new IllegalStateException("Result set should have been declared as unblocked");
 
-        try (JsonGenerator js = jsonFactory.createGenerator(outputStream)) {
+        StringWriter stringWriter = new StringWriter();
+        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
             js.writeStartObject();
             js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(lastResultFetchedTime));
             js.writeStringField(MESSAGE_KEY, QUERY_LAST_RESULT_FETCHED);
@@ -192,6 +199,7 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException e) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
         }
+        outputStream.println(stringWriter.toString());
     }
 
     @Override
@@ -246,7 +254,8 @@ public class QueryLoggerImpl implements QueryLogger {
         if (disabled)
             return;
 
-        try (JsonGenerator js = jsonFactory.createGenerator(outputStream)) {
+        StringWriter stringWriter = new StringWriter();
+        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
             js.writeStartObject();
             js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(System.currentTimeMillis()));
             js.writeStringField(MESSAGE_KEY, exceptionType);
@@ -259,6 +268,7 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException ex) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
+        outputStream.println(stringWriter.toString());
     }
 
     protected String serializeTimestamp(long time) {
