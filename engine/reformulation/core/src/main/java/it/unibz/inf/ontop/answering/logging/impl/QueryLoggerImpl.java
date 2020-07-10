@@ -105,6 +105,8 @@ public class QueryLoggerImpl implements QueryLogger {
         if (disabled)
             return;
 
+        reformulationTime = System.currentTimeMillis();
+
         StringWriter stringWriter = new StringWriter();
         try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
             js.writeStartObject();

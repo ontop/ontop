@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -13,20 +12,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Iterator;
+import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.OntopReformulationSettings.*;
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static java.util.stream.Collectors.joining;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 
 public class QuadsTest {
   private static final String CREATE_SCRIPT = "src/test/resources/quads/create.sql";
@@ -39,6 +37,7 @@ public class QuadsTest {
   private static final String URL = "jdbc:h2:mem:job";
   private static final String USER = "sa";
   private static final String PASSWORD = "sa";
+  private static final Logger LOGGER = LoggerFactory.getLogger(QuadsTest.class);
 
   private Connection conn;
 
@@ -71,11 +70,15 @@ public class QuadsTest {
     int expectedCardinality = 30;
     String sql = execute(queryQuad, expectedCardinality);
 
-    System.out.println("SQL Query: \n" + sql);
+    LOGGER.debug("SQL Query: \n" + sql);
   }
 
 
   private String execute(String query, int expectedCardinality) throws Exception {
+
+    Properties properties = new Properties();
+    properties.setProperty(QUERY_LOGGING, "true");
+    properties.setProperty(REFORMULATED_INCLUDED_QUERY_LOGGING, "true");
 
     OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -84,6 +87,7 @@ public class QuadsTest {
             .jdbcUrl(URL)
             .jdbcUser(USER)
             .jdbcPassword(PASSWORD)
+            .properties(properties)
             .enableTestMode()
             .build();
     OntopOWLReasoner reasoner = factory.createReasoner(config);
