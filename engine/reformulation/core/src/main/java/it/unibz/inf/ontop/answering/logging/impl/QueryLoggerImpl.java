@@ -27,8 +27,8 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String SPARQL_QUERY_KEY = "sparqlQuery";
     protected static final String REFORMULATED_QUERY_KEY = "reformulatedQuery";
 
-    protected static final String CLASSES_KEY = "classes";
-    protected static final String PROPERTIES_KEY = "properties";
+    protected static final String CLASSES_KEY = "classesUsedInQuery";
+    protected static final String PROPERTIES_KEY = "propertiesUsedInQuery";
     protected static final String TABLES_KEY = "tables";
 
     private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
