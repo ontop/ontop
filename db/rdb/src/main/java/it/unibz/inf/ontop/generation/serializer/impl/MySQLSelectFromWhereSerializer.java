@@ -22,10 +22,9 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
-                // quotes, doubles backslashes and escapes single quotes
-                return "'" + constant.replace("\\", "\\\\")
-                        .replace("'", "\\'") + "'";
-//                        .replaceAll("(?<!')'(?!')", "\\\\'") + "'";
+                // parent method + doubles backslashes
+                return super.serializeStringConstant(constant)
+                        .replace("\\", "\\\\");
             }
         });
     }

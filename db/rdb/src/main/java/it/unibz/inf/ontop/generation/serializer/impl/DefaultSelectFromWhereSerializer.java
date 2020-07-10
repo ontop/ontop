@@ -398,9 +398,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected String serializeStringConstant(String constant) {
-            // quotes and duplicates isolated single quotes
-            //TODO: determine why isolated single quotes, rather than single quotes
-//            return "'" + constant.replaceAll("(?<!')'(?!')", "''") + "'";
+            // duplicates single quotes, and adds outermost quotes
             return "'" + constant.replace("'", "''") + "'";
         }
     }
