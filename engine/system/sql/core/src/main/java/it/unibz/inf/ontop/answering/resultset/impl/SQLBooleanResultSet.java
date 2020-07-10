@@ -46,6 +46,7 @@ public class SQLBooleanResultSet implements BooleanResultSet {
         try {
             set.close();
         } catch (SQLException e) {
+            queryLogger.declareConnectionException(e);
             throw new OntopConnectionException(e);
         }
     }
@@ -62,6 +63,7 @@ public class SQLBooleanResultSet implements BooleanResultSet {
         try {
             return set.next();
         } catch (SQLException e) {
+            queryLogger.declareConnectionException(e);
             throw new OntopConnectionException(e);
         }
     }

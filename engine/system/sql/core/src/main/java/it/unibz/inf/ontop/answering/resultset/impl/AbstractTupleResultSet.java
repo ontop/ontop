@@ -47,7 +47,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
         try {
             return rs.getFetchSize();
         } catch (Exception e) {
-            throw new OntopConnectionException(e.getMessage());
+            throw buildConnectionException(e);
         }
     }
 
@@ -67,7 +67,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
                 // Moves cursor one result ahead
                 foundNextElement = moveCursor();
             } catch (Exception e) {
-                throw new OntopConnectionException(e);
+                throw buildConnectionException(e);
             }
         }
         lastCalledIsHasNext = false;
@@ -87,7 +87,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
                 if (foundNextElement)
                     rowCount++;
             } catch (Exception e) {
-                throw new OntopConnectionException(e);
+                throw buildConnectionException(e);
             }
         }
         if (!foundNextElement)
@@ -105,9 +105,14 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
         try {
             rs.close();
         } catch (Exception e) {
-            throw new OntopConnectionException(e);
+            throw buildConnectionException(e);
         }
     }
 
     protected abstract OntopBindingSet readCurrentRow() throws OntopConnectionException;
+
+    protected OntopConnectionException buildConnectionException(Exception e) {
+        queryLogger.declareConnectionException(e);
+        return new OntopConnectionException(e);
+    }
 }

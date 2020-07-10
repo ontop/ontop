@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  */
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
@@ -56,14 +57,16 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
 	// store results in case of describe queries
 	private final boolean storeResults;
+    private final QueryLogger queryLogger;
     private final TermFactory termFactory;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
 
     public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
-                                       boolean storeResults, TermFactory termFactory,
+                                       boolean storeResults, QueryLogger queryLogger, TermFactory termFactory,
                                        org.apache.commons.rdf.api.RDF rdfFactory) throws OntopResultConversionException, OntopConnectionException {
 		this.tupleResultSet = tupleResultSet;
 		this.constructTemplate = constructTemplate;
+        this.queryLogger = queryLogger;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
         Extension ex = constructTemplate.getExtension();
@@ -145,6 +148,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                         tripleAssertions.add(assertion);
                 }
                 catch (InconsistentOntologyException e) {
+                    queryLogger.declareConversionException(e);
                     throw new OntopResultConversionException("InconsistentOntologyException: " +
                             predicateName + " " + subjectConstant + " " + objectConstant);
                 }
