@@ -428,7 +428,7 @@ fragment RIGHT_PART_TAIL_EXT_MAND
   ;
 
 fragment IRIREF_INNER_CHAR
-  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | ';' | UCHAR)
+  :  (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | ';' | UCHAR)
   ;
 
 fragment IRIREF_INNER_CHAR_EXT
@@ -436,5 +436,5 @@ fragment IRIREF_INNER_CHAR_EXT
   ;
 
 fragment VARIABLE_CHAR
-  : (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | '$' | UCHAR)
+  : (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | '$' | UCHAR)
   ;
