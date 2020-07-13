@@ -64,6 +64,16 @@ public class OntopOBDAToR2RMLTest {
         runCommand(argv);
     }
 
+    @Test
+    public void testOntopOBDA2R2RML_quotation_marks (){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/mapping-booktutorial.obda",
+                "-o", "src/test/resources/output/mapping-booktutorial.ttl"
+        };
+        runCommand(argv);
+    }
+
+
     private void runCommand(String[] args) {
         Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();
 
