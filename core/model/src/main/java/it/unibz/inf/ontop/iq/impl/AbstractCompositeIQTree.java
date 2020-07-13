@@ -25,11 +25,17 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     private final ConcreteIQTreeCache treeCache;
     private static final String TAB_STR = "   ";
 
-    /**
+    /*
      * LAZY
      */
     @Nullable
     private ImmutableSet<Variable> knownVariables;
+
+    /*
+     * LAZY
+     */
+    @Nullable
+    private String string;
 
     // Non final
     private boolean hasBeenSuccessfullyValidate;
@@ -109,7 +115,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public String toString() {
-        return printSubtree(this, "");
+        if (string == null)
+            string = printSubtree(this, "");
+        return string;
     }
 
     /**
