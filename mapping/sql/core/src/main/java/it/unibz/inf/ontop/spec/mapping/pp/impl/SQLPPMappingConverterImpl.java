@@ -167,34 +167,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 }
             }
             catch (JSQLParserException e) {
-                try {
-                    // net.sf.jsqlparser.parser.TokenMgrException: Lexical error at line 1, column 165.
-                    if (e.getCause() instanceof TokenMgrException) {
-                        Pattern pattern = Pattern.compile("at line (\\d+), column (\\d+)");
-                        Matcher matcher = pattern.matcher(e.getCause().getMessage());
-                        if (matcher.find()) {
-                            int line = Integer.parseInt(matcher.group(1));
-                            int col = Integer.parseInt(matcher.group(2));
-                            String sourceQueryLine = sourceQuery.split("\n")[line - 1];
-                            final int MAX_LENGTH = 40;
-                            if (sourceQueryLine.length() > MAX_LENGTH) {
-                                sourceQueryLine = sourceQueryLine.substring(sourceQueryLine.length() - MAX_LENGTH);
-                                if (sourceQueryLine.length() > 2 * MAX_LENGTH)
-                                    sourceQueryLine = sourceQueryLine.substring(0, 2 * MAX_LENGTH);
-                                col = MAX_LENGTH;
-                            }
-                            LOGGER.warn("FAILED TO PARSE: " + sourceQueryLine + "\n" +
-                                    Strings.repeat(" ", "FAILED TO PARSE: ".length() + col - 2) + "^\n" + e.getCause());
-                        }
-                        else
-                            LOGGER.warn("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
-                    }
-                    else
-                        LOGGER.warn("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
-                }
-                catch (Exception e1) {
-                    // NOP
-                }
+                if (LOGGER.isWarnEnabled())
+                    LOGGER.warn("FAILED TO PARSE: {} {}", sourceQuery, getJSQLParserErrorMessage(sourceQuery, e));
+                
                 ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
                 attributes = sqae.getAttributes(sourceQuery);
             }
@@ -202,7 +177,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
                 attributes = sqae.getAttributes(sourceQuery);
             }
-            System.out.println("PARSER VIEW FOR " + sourceQuery);
+            LOGGER.warn("PARSER VIEW FOR {}", sourceQuery);
             ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
             return sqp.translateParserView(view);
         }
@@ -211,5 +186,33 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     + " \nProblem location: source query of triplesMap \n["
                     +  mappingAssertion.getTriplesMapProvenance().getProvenanceInfo() + "]");
         }
+    }
+
+    private static String getJSQLParserErrorMessage(String sourceQuery, JSQLParserException e) {
+        try {
+            // net.sf.jsqlparser.parser.TokenMgrException: Lexical error at line 1, column 165.
+            if (e.getCause() instanceof TokenMgrException) {
+                Pattern pattern = Pattern.compile("at line (\\d+), column (\\d+)");
+                Matcher matcher = pattern.matcher(e.getCause().getMessage());
+                if (matcher.find()) {
+                    int line = Integer.parseInt(matcher.group(1));
+                    int col = Integer.parseInt(matcher.group(2));
+                    String sourceQueryLine = sourceQuery.split("\n")[line - 1];
+                    final int MAX_LENGTH = 40;
+                    if (sourceQueryLine.length() > MAX_LENGTH) {
+                        sourceQueryLine = sourceQueryLine.substring(sourceQueryLine.length() - MAX_LENGTH);
+                        if (sourceQueryLine.length() > 2 * MAX_LENGTH)
+                            sourceQueryLine = sourceQueryLine.substring(0, 2 * MAX_LENGTH);
+                        col = MAX_LENGTH;
+                    }
+                    return "FAILED TO PARSE: " + sourceQueryLine + "\n" +
+                            Strings.repeat(" ", "FAILED TO PARSE: ".length() + col - 2) + "^\n" + e.getCause();
+                }
+            }
+        }
+        catch (Exception e1) {
+            // NOP
+        }
+        return e.getCause().toString();
     }
 }
