@@ -560,9 +560,8 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test
+    @Test // polygon vs. polygon intersection is a polygon
     public void testSelectIntersection() throws Exception {
-        //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
@@ -573,12 +572,120 @@ public class GeoSPARQLTest {
                 "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertFalse(val.startsWith("POLYGON ((0.9100"));
+        //assertFalse(val.startsWith("POLYGON ((0.9100"));
+        //assertEquals("POLYGON ((2 2, 7 2, 7 5, 2 5, 2 2))", val);
+        assertEquals("POLYGON ((2 2, 2 5, 7 5, 7 2, 2 2))", val);
     }
 
-    @Test
+    @Test // polygon vs. polygon intersection is a line
+    public void testSelectIntersection2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":13 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":14 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        //assertEquals("LINESTRING (0 3, 3 3)", val);
+        assertEquals("LINESTRING (3 3, 0 3)", val);
+    }
+
+    @Test // polygon vs. polygon intersection is a point
+    public void testSelectIntersection3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":7 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertEquals("POINT (2 2)", val);
+    }
+
+    @Test // polygon vs. line intersection is a line
+    public void testSelectIntersection4() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertEquals("LINESTRING (1 2, 8 2)", val);
+    }
+
+    @Test // polygon vs. point intersection is a point
+    public void testSelectIntersection5() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":11 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":13 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertEquals("POINT (2 2)", val);
+    }
+
+    @Test // line vs. line intersection is a point
+    public void testSelectIntersection6() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":12 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertEquals("POINT (2 2)", val);
+    }
+
+    @Test // line vs. point intersection is a point
+    public void testSelectIntersection7() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":11 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertEquals("POINT (2 2)", val);
+    }
+
+    @Test // case of disjoint polygons
+    public void testSelectIntersection8() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":5 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":7 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:intersection(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertEquals("POLYGON EMPTY", val);
+    }
+
+    @Test // polygon vs. polygon difference - remainder of first polygon
+    // case when first polygon is within the other, so nothing remains
     public void testSelectDifference() throws Exception {
-        //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
@@ -589,59 +696,184 @@ public class GeoSPARQLTest {
                 "BIND(geof:difference(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertFalse(val.startsWith("POLYGON ((0.9100"));
+        assertEquals("POLYGON EMPTY", val);
     }
 
-    @Test
-    public void testSelectSymDifference() throws Exception {
-        //language=TEXT
+    @Test // polygon vs. polygon difference - remainder of first polygon
+    // case when second polygon is within the other, diff exists
+    public void testSelectDifference2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:difference(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // Output is polygon with hole
+        assertEquals("POLYGON ((1 1, 1 7, 8 7, 8 1, 1 1), (2 2, 7 2, 7 5, 2 5, 2 2))", val);
+    }
+
+    @Test // line vs. line difference - remainder of first line
+    public void testSelectDifference3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":9 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:difference(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        //assertEquals("LINESTRING(10 2, 3 2)", val);
+        assertEquals("LINESTRING (3 2, 10 2)", val);
+    }
+
+    @Test // polygon vs. line difference - no effect
+    public void testSelectDifference4() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":10 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:difference(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // In theory no effect, in practice the intersecting line adds 2 vertices
+        assertEquals("POLYGON ((8 2, 8 1, 1 1, 1 2, 1 7, 8 7, 8 2))", val);
+    }
+
+    @Test // polygon vs. point difference - no effect
+    public void testSelectDifference5() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "\n" +
                 "SELECT ?x WHERE {\n" +
                 ":1 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                ":11 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:difference(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // No effect
+        assertEquals("POLYGON ((2 2, 2 5, 7 5, 7 2, 2 2))", val);
+    }
+
+    @Test // Polygon vs Polygon
+    public void testSelectSymDifference() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":5 a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND(geof:symDifference(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertFalse(val.startsWith("POLYGON ((0.9100"));
+        // Multipolygon output
+        assertEquals("MULTIPOLYGON (((7 3, 7 2, 2 2, 2 5, 3 5, 3 3, 7 3)), ((7 3, 7 5, 3 5, 3 6, 8 6, 8 3, 7 3)))", val);
     }
 
-    @Test
-    public void testSelectUnion() throws Exception {
-        //language=TEXT
+    @Test // Line vs Line
+    public void testSelectSymDifference2() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "\n" +
                 "SELECT ?x WHERE {\n" +
-                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":15 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:symDifference(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // Multiline output
+        assertEquals("MULTILINESTRING ((1 2, 2 2), (10 2, 11 2))", val);
+    }
+
+    @Test // polygon + polygon
+    public void testSelectUnion() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":13 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":14 a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND(geof:union(?xWkt, ?yWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertFalse(val.startsWith("POLYGON ((0.9100"));
+        // All vertices are preserved in union
+        assertEquals("POLYGON ((3 3, 3 0, 0 0, 0 3, 0 6, 3 6, 3 3))", val);
     }
 
-    @Test
-    public void testSelectEnvelope() throws Exception {
-        //language=TEXT
+    @Test // line + line
+    public void testSelectUnion2() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "\n" +
                 "SELECT ?x WHERE {\n" +
-                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":10 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":15 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:union(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // All vertices are preserved in union
+        assertEquals("MULTILINESTRING ((1 2, 2 2), (2 2, 10 2), (10 2, 11 2))", val);
+    }
+
+    @Test // envelope of triangle is rectangle
+    public void testSelectEnvelope() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":16 a :Geom; geo:asWKT ?xWkt.\n" +
                 "BIND(geof:envelope(?xWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertFalse(val.startsWith("POLYGON ((0.9100"));
+        assertEquals("POLYGON ((2 2, 2 4, 6 4, 6 2, 2 2))", val);
     }
 
-    @Test
+    @Test // envelope of vertical line is still the vertical line
+    public void testSelectEnvelope2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":12 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:envelope(?xWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // lines parallel to x or y axis have no envelopes
+        assertEquals("LINESTRING (2 1, 2 10)", val);
+    }
+
+    @Test // envelope of point is the very same point
+    public void testSelectEnvelope3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":11 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:envelope(?xWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // lines parallel to x or y axis have no envelopes
+        assertEquals("POINT (2 2)", val);
+    }
+
+    @Test // polygon boundary
     public void testSelectBoundary() throws Exception {
-        //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
@@ -651,40 +883,25 @@ public class GeoSPARQLTest {
                 "BIND(geof:boundary(?xWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertFalse(val.startsWith("POLYGON ((0.9100"));
+        assertEquals("LINEARRING (2 2, 7 2, 7 5, 2 5, 2 2)", val);
     }
 
     @Test
     public void testSelectConvexHull() throws Exception {
-        //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "\n" +
                 "SELECT ?x WHERE {\n" +
-                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":17 a :Geom; geo:asWKT ?xWkt.\n" +
                 "BIND(geof:convexHull(?xWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertFalse(val.startsWith("POLYGON ((0.9100"));
+        assertEquals("POLYGON ((2 2, 7 7, 6 2, 2 2))", val);
     }
 
-    @Test // To be reviewed whether this is a real use case
+    @Test // Boolean Relate - Check for equality
     public void testAskRelate() throws Exception {
-        String query = "PREFIX : <http://ex.org/> \n" +
-                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
-                "ASK WHERE {\n" +
-                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
-                "FILTER (geof:relate(?xWkt, ?yWkt, geof:sfContains))\n" +
-                "}\n";
-        boolean val = runQueryAndReturnBooleanX(query);
-        assertFalse(val);
-    }
-
-    @Test // Check for equality
-    public void testAskRelate2() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
@@ -698,8 +915,8 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test // Check for within
-    public void testAskRelate3() throws Exception {
+    @Test // Boolean relate - Check for within condition
+    public void testAskRelate2() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
@@ -713,8 +930,8 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test // Retrieve matrix
-    public void testSelectRelate4() throws Exception {
+    @Test // String relate - Retrieve matrix
+    public void testSelectRelate3() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
@@ -742,21 +959,21 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test // Sub-polygon contained properly, non-tangential
+    @Test // Sub-polygon contained properly, tangential
     public void testAskRcc8Tpp() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "ASK WHERE {\n" +
-                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                ":7 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":6 a :Geom; geo:asWKT ?yWkt.\n" +
                 "FILTER (geof:rcc8tpp(?xWkt, ?yWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertFalse(val);
+        assertTrue(val);
     }
 
-    @Test // Sub-polygon contained properly non-tangential
+    @Test // Sub-polygon contains properly, non-tangential
     public void testAskRcc8Ntppi() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -770,19 +987,59 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test // Sub-polygon contained properly, non-tangential
+    @Test // Sub-polygon contains properly, tangential
     public void testAskRcc8Tppi() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "ASK WHERE {\n" +
-                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                ":6 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":7 a :Geom; geo:asWKT ?yWkt.\n" +
                 "FILTER (geof:rcc8tppi(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // No geometry self intersections
+    public void testAskIsSimple() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":6 a :Geom; geo:isSimple ?xWkt.\n" +
+                "FILTER ((?xWkt))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertFalse(val);
     }
+
+    @Test // Non-empty
+    public void testAskIsEmpty() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":6 a :Geom; geo:isEmpty ?xWkt.\n" +
+                "FILTER ((?xWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
+    }
+
+    /*@Test // Empty
+    public void testSelectIsEmpty2() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "SELECT ?x WHERE {\n" +
+                ":18 a :Geom; geo:isEmpty ?xWkt.\n" +
+                "BIND(?xWkt as ?x)\n" +
+                //"FILTER ((?xWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }*/
 
     /*@Test // ST_SRID retrieves an integer
     public void testSelectGetSRID() throws Exception {
