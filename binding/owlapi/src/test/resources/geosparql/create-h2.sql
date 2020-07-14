@@ -11,4 +11,4 @@ INSERT INTO "GEOMS" VALUES (9, 'LINESTRING(1 2, 2 2, 3 2)', 'short horizontal li
 INSERT INTO "GEOMS" VALUES (10, 'LINESTRING(1 2, 10 2)', 'long horizontal line');
 INSERT INTO "GEOMS" VALUES (11, 'POINT(2 2)', 'point');
 INSERT INTO "GEOMS" VALUES (12, 'LINESTRING(2 1, 2 10)', 'long vertical line');
-
+INSERT INTO "GEOMS" VALUES (13, 'POLYGON((0 0, 3 0, 3 3, 0 3, 0 0))', 'intersecting polygon');

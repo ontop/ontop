@@ -16,6 +16,7 @@ public class GeofEhInsideFunctionSymbolImpl  extends AbstractGeofBooleanFunction
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTWithin(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        final String matrix_pattern = "TFF*FFT**";
+        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1), termFactory.getDBStringConstant(matrix_pattern));
     }
 }

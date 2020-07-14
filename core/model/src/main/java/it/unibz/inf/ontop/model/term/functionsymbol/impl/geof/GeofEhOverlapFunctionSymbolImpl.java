@@ -16,6 +16,7 @@ public class GeofEhOverlapFunctionSymbolImpl  extends AbstractGeofBooleanFunctio
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTOverlaps(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        final String matrix_pattern = "T*T***T**";
+        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1), termFactory.getDBStringConstant(matrix_pattern));
     }
 }

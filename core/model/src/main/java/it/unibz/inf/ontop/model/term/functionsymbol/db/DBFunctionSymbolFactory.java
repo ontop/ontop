@@ -313,8 +313,13 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBConvexHull();
     FunctionSymbol getDBDifference();
     DBBooleanFunctionSymbol getDBRelate();
+    FunctionSymbol getDBRelateMatrix();
+    DBFunctionSymbol getDBGetSRID();
 
-    /*
-    FunctionSymbol getDBSTGetSRID();
-    */
+    DBFunctionSymbol getDBDimension();
+    DBFunctionSymbol getDBCoordinateDimension();
+    //DBFunctionSymbol getDBSpatialDimension();
+    DBBooleanFunctionSymbol getDBIsEmpty();
+    DBBooleanFunctionSymbol getDBIsSimple();
+    //FunctionSymbol getDBHasSerialization();
 }

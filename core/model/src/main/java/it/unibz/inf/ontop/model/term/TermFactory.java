@@ -607,11 +607,24 @@ public interface TermFactory {
 	ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableTerm getDBRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
-	/*
-	ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1);
-	*/
+
+	ImmutableTerm getDBRelateMatrix(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableTerm getDBGetSRID(ImmutableTerm arg1);
 
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 
 	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableTerm getDBDimension(ImmutableTerm arg1);
+
+	ImmutableTerm getDBCoordinateDimension(ImmutableTerm arg1);
+
+	//ImmutableTerm getDBSpatialDimension(ImmutableTerm arg1);
+
+	ImmutableTerm getDBIsSimple(ImmutableTerm arg1);
+
+	ImmutableTerm getDBIsEmpty(ImmutableTerm arg1);
+
+	//ImmutableTerm getDBHasSerialization(ImmutableTerm arg1);
 }

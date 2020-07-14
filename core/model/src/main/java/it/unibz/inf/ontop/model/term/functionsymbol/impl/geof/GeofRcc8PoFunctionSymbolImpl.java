@@ -16,6 +16,8 @@ public class GeofRcc8PoFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSy
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTOverlaps(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        //return termFactory.getDBSTOverlaps(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        final String matrix_pattern = "TTTTTTTTT";
+        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1), termFactory.getDBStringConstant(matrix_pattern));
     }
 }

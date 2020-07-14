@@ -82,7 +82,7 @@ public class GeoSPARQLTest {
         assertEquals("<http://ex.org/1>", val);
     }
 
-    @Test
+    @Test // Polygon within polygon
     public void testAskWithin() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -252,7 +252,7 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test // point within linestring
+    @Test // point within line
     public void testAskWithin5() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -264,6 +264,34 @@ public class GeoSPARQLTest {
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
+    }
+
+    @Test // polygon within polygon with overlapping edge
+    public void testAskWithin6() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":7 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfWithin(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+    @Test // polygon not fully within other polygon
+    public void testAskWithin7() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "FILTER (geof:sfWithin(?xWkt, ?yWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertFalse(val);
     }
 
     @Test
@@ -685,6 +713,21 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
+    @Test // Retrieve matrix
+    public void testSelectRelate4() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":2 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:relate(?xWkt, ?yWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertFalse(val.startsWith("TTT"));
+    }
+
     @Test // Sub-polygon contained properly non-tangential
     public void testAskRcc8Ntpp() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
@@ -741,6 +784,19 @@ public class GeoSPARQLTest {
         assertFalse(val);
     }
 
+    /*@Test // ST_SRID retrieves an integer
+    public void testSelectGetSRID() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "SELECT ?x WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:getSRID(?xWkt) as ?x) .\n" +
+                "}\n";
+        Integer val = runQueryAndReturnIntegerX(query);
+        assertEquals(4444, val, 1);
+    }*/
+
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
@@ -766,6 +822,16 @@ public class GeoSPARQLTest {
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
             return ind1.getLiteral();
+        }
+    }
+
+    private Integer runQueryAndReturnIntegerX(String query) throws Exception {
+        try (OWLStatement st = conn.createStatement()) {
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
+            assertTrue(rs.hasNext());
+            final OWLBindingSet bindingSet = rs.next();
+            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
+            return ind1.parseInteger();
         }
     }
 }

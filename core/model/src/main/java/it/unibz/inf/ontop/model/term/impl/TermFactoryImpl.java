@@ -652,12 +652,6 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIntersection(), ImmutableList.of(arg1, arg2));
     }
 
-    /*@Override
-    public ImmutableTerm getDBSTGetSRID(ImmutableTerm arg1) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTGetSRID(), arg1);
-    }
-    */
-
     @Override
     public ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUnion(), ImmutableList.of(arg1, arg2));
@@ -692,6 +686,46 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableTerm getDBRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
         return getImmutableExpression(dbFunctionSymbolFactory.getDBRelate(), arg1, arg2, arg3);
     }
+
+    @Override
+    public ImmutableTerm getDBRelateMatrix(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRelateMatrix(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBGetSRID(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBGetSRID(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBDimension(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDimension(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBCoordinateDimension(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCoordinateDimension(), ImmutableList.of(arg1));
+    }
+
+    /*@Override
+    public ImmutableTerm getDBSpatialDimension(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSpatialDimension(), ImmutableList.of(arg1));
+    }*/
+
+    @Override
+    public ImmutableTerm getDBIsSimple(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIsSimple(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBIsEmpty(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIsEmpty(), ImmutableList.of(arg1));
+    }
+
+    /*@Override
+    public ImmutableTerm getDBHasSerialization(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBHasSerialization(), ImmutableList.of(arg1));
+    }*/
 
     @Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {
