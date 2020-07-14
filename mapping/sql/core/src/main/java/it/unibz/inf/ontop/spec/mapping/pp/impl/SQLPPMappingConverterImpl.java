@@ -183,14 +183,14 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                     sourceQueryLine = sourceQueryLine.substring(0, 2 * MAX_LENGTH);
                                 col = MAX_LENGTH;
                             }
-                            System.out.println("FAILED TO PARSE: " + sourceQueryLine + "\n" +
+                            LOGGER.warn("FAILED TO PARSE: " + sourceQueryLine + "\n" +
                                     Strings.repeat(" ", "FAILED TO PARSE: ".length() + col - 2) + "^\n" + e.getCause());
                         }
                         else
-                            System.out.println("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
+                            LOGGER.warn("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
                     }
                     else
-                        System.out.println("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
+                        LOGGER.warn("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
                 }
                 catch (Exception e1) {
                     // NOP
