@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public class GeofEhDisjointFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofEhDisjointFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_EH_DISJOINT", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_EH_DISJOINT", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override

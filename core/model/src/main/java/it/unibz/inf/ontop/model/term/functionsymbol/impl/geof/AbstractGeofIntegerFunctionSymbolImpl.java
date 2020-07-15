@@ -12,25 +12,25 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractGeofBooleanFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
-    private final RDFDatatype xsdBooleanType;
+public abstract class AbstractGeofIntegerFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+    private final RDFDatatype xsdIntegerType;
 
-    protected AbstractGeofBooleanFunctionSymbolImpl(
+    protected AbstractGeofIntegerFunctionSymbolImpl(
             @Nonnull String functionSymbolName,
             @Nonnull IRI functionIRI,
             //RDFDatatype wktLiteralType,
             ImmutableList<TermType> inputTypes,
-            RDFDatatype xsdBooleanType) {
-        //super(functionSymbolName, functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType));
+            RDFDatatype xsdIntegerType) {
         super(functionSymbolName, functionIRI, inputTypes);
-        this.xsdBooleanType = xsdBooleanType;
+        this.xsdIntegerType = xsdIntegerType;
     }
 
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return Optional.of(TermTypeInference.declareTermType(xsdBooleanType));
+        return Optional.of(TermTypeInference.declareTermType(xsdIntegerType));
     }
 
     @Override
@@ -39,17 +39,17 @@ public abstract class AbstractGeofBooleanFunctionSymbolImpl extends ReduciblePos
 
         return termFactory.getConversion2RDFLexical(
                 dbTypeFactory.getDBBooleanType(),
-                computeDBBooleanTerm(subLexicalTerms, typeTerms, termFactory),
-                xsdBooleanType);
+                computeDBTerm(subLexicalTerms, typeTerms, termFactory),
+                xsdIntegerType);
     }
 
-    protected abstract ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                                          ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory);
+    protected abstract ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
+                                                   ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory);
 
 
     @Override
     protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, VariableNullability variableNullability) {
-        return termFactory.getRDFTermTypeConstant(xsdBooleanType);
+        return termFactory.getRDFTermTypeConstant(xsdIntegerType);
     }
 
     @Override

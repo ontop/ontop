@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public class GeofSfTouchesFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofSfTouchesFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_SF_TOUCHES", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_SF_TOUCHES", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override

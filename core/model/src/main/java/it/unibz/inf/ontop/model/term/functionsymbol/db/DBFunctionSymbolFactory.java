@@ -293,8 +293,6 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBSTCovers();
     DBBooleanFunctionSymbol getDBSTContainsProperly();
 
-    //DBBooleanFunctionSymbol getDBSTRelate();
-
     DBFunctionSymbol getDBSTDistance();
 
     DBFunctionSymbol getDBSTDistanceSphere();
@@ -308,12 +306,23 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBBuffer();
 
     FunctionSymbol getDBIntersection();
-    /*FunctionSymbol getDBSTRelate();
-    FunctionSymbol getDBSTBoundary();
-    FunctionSymbol getDBSTSymDifference();
-    FunctionSymbol getDBSTGetSRID();
-    FunctionSymbol getDBSTUnion();
-    FunctionSymbol getDBSTEnvelope();
-    FunctionSymbol getDBSTConvexHull();
-    FunctionSymbol getDBSTDifference();*/
+
+    FunctionSymbol getDBBoundary();
+
+    FunctionSymbol getDBSymDifference();
+
+    FunctionSymbol getDBUnion();
+    FunctionSymbol getDBEnvelope();
+    FunctionSymbol getDBConvexHull();
+    FunctionSymbol getDBDifference();
+    DBBooleanFunctionSymbol getDBRelate();
+    FunctionSymbol getDBRelateMatrix();
+    DBFunctionSymbol getDBGetSRID();
+
+    DBFunctionSymbol getDBDimension();
+    DBFunctionSymbol getDBCoordinateDimension();
+    //DBFunctionSymbol getDBSpatialDimension();
+    DBBooleanFunctionSymbol getDBIsEmpty();
+    DBBooleanFunctionSymbol getDBIsSimple();
+    //FunctionSymbol getDBHasSerialization();
 }

@@ -15,13 +15,13 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class GeofIntersectionFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
-    public GeofIntersectionFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType) {
-        super("GEOF_INTERSECTION", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), wktLiteralType);
+public class GeofConvexHullFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
+    public GeofConvexHullFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType) {
+        super("GEOF_CONVEXHULL", functionIRI, ImmutableList.of(wktLiteralType), wktLiteralType);
     }
 
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBAsText(termFactory.getDBIntersection(subLexicalTerms.get(0), subLexicalTerms.get(1)));
+        return termFactory.getDBAsText(termFactory.getDBConvexHull(subLexicalTerms.get(0)));
     }
 }

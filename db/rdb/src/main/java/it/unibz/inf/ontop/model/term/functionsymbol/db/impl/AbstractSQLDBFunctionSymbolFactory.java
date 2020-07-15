@@ -73,6 +73,20 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ST_ASTEXT = "ST_ASTEXT";
     private static final String ST_BUFFER = "ST_BUFFER";
     private static final String ST_INTERSECTION = "ST_INTERSECTION";
+    private static final String ST_CONVEXHULL = "ST_CONVEXHULL";
+    private static final String ST_BOUNDARY = "ST_BOUNDARY";
+    private static final String ST_ENVELOPE = "ST_ENVELOPE";
+    private static final String ST_DIFFERENCE = "ST_DIFFERENCE";
+    private static final String ST_SYMDIFFERENCE = "ST_SYMDIFFERENCE";
+    private static final String ST_UNION = "ST_UNION";
+    private static final String ST_RELATE = "ST_RELATE";
+    private static final String ST_SRID = "ST_SRID";
+    private static final String ST_DIMENSION = "ST_DIMENSION";
+    private static final String ST_COORDDIM = "ST_COORDDIM";
+    //private static final String ST_ = "ST_SRID";
+    private static final String ST_ISSIMPLE = "ST_ISSIMPLE";
+    private static final String ST_ISEMPTY = "ST_ISEMPTY";
+    //private static final String ST_ = "ST_SRID";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -296,6 +310,58 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol intersectionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_INTERSECTION, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_INTERSECTION, 2, intersectionSymbol);
+
+        DBFunctionSymbol boundarySymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_BOUNDARY, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_BOUNDARY, 2, boundarySymbol);
+
+        DBFunctionSymbol convexhullSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_CONVEXHULL, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_CONVEXHULL, 2, convexhullSymbol);
+
+        DBFunctionSymbol differenceSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIFFERENCE, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_DIFFERENCE, 2, differenceSymbol);
+
+        DBFunctionSymbol symdifferenceSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_SYMDIFFERENCE, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_SYMDIFFERENCE, 2, symdifferenceSymbol);
+
+        DBFunctionSymbol envelopeSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ENVELOPE, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_ENVELOPE, 2, envelopeSymbol);
+
+        DBFunctionSymbol unionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_UNION, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_UNION, 2, unionSymbol);
+
+        DBFunctionSymbol relateSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_RELATE, 3, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_RELATE, 3, relateSymbol);
+
+        DBFunctionSymbol relatematrixSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_RELATE, 2, dbStringType,
+                abstractRootDBType);
+        builder.put(ST_RELATE, 2, relatematrixSymbol);
+
+        DBFunctionSymbol getsridSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_SRID, 1, dbIntType, false,
+                abstractRootDBType);
+        builder.put(ST_SRID, 2, getsridSymbol);
+
+        DBFunctionSymbol getdimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIMENSION, 1, dbIntType, false,
+                abstractRootDBType);
+        builder.put(ST_DIMENSION, 2, getdimensionSymbol);
+
+        DBFunctionSymbol getcoordinatedimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_COORDDIM, 1, dbIntType, false,
+                abstractRootDBType);
+        builder.put(ST_COORDDIM, 2, getcoordinatedimensionSymbol);
+
+        DBFunctionSymbol getissimpleSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ISSIMPLE, 1, dbIntType, false,
+                abstractRootDBType);
+        builder.put(ST_ISSIMPLE, 2, getissimpleSymbol);
+
+        DBFunctionSymbol getisemptySymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ISEMPTY, 1, dbIntType, false,
+                abstractRootDBType);
+        builder.put(ST_ISEMPTY, 2, getisemptySymbol);
 
         return builder.build();
     }
@@ -948,6 +1014,71 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public FunctionSymbol getDBIntersection() {
         return getRegularDBFunctionSymbol(ST_INTERSECTION, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBBoundary() {
+        return getRegularDBFunctionSymbol(ST_BOUNDARY, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBConvexHull() {
+        return getRegularDBFunctionSymbol(ST_CONVEXHULL, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBDifference() {
+        return getRegularDBFunctionSymbol(ST_DIFFERENCE, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBEnvelope() {
+        return getRegularDBFunctionSymbol(ST_ENVELOPE, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBSymDifference() {
+        return getRegularDBFunctionSymbol(ST_SYMDIFFERENCE, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBUnion() {
+        return getRegularDBFunctionSymbol(ST_UNION, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRelate() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_RELATE, 3);
+    }
+
+    @Override
+    public FunctionSymbol getDBRelateMatrix() {
+        return getRegularDBFunctionSymbol(ST_RELATE, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBGetSRID() {
+        return getRegularDBFunctionSymbol(ST_SRID, 1);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDimension() {
+        return getRegularDBFunctionSymbol(ST_DIMENSION, 1);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCoordinateDimension() {
+        return getRegularDBFunctionSymbol(ST_COORDDIM, 1);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsSimple() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_ISSIMPLE, 1);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsEmpty() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_ISEMPTY, 1);
     }
 
     @Override

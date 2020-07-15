@@ -11,11 +11,12 @@ import javax.annotation.Nonnull;
 public class GeofEhCoveredByFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofEhCoveredByFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_EH_COVEREDBY", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_EH_COVEREDBY", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTCoveredBy(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        final String matrix_pattern = "TFF*TFT**";
+        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1), termFactory.getDBStringConstant(matrix_pattern));
     }
 }

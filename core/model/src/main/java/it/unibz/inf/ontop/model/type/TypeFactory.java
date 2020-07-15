@@ -72,4 +72,8 @@ public interface TypeFactory {
     default RDFDatatype getWktLiteralDatatype() {
         return getDatatype(GEO.GEO_WKT_LITERAL);
     }
+
+	default RDFDatatype getXsdAnyUri() {
+		return getDatatype(XSD.ANYURI);
+	}
 }

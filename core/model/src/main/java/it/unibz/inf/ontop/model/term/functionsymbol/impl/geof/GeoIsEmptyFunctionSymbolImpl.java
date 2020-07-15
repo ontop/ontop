@@ -8,14 +8,13 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class GeofEhCoversFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
-
-    public GeofEhCoversFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_EH_COVERS", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
+public class GeoIsEmptyFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
+    public GeoIsEmptyFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
+        super("GEO_ISEMPTY", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTCovers(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        return termFactory.getDBIsEmpty(subLexicalTerms.get(0));
     }
 }

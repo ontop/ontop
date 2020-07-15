@@ -618,6 +618,81 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public FunctionSymbol getDBBoundary() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public FunctionSymbol getDBConvexHull() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public FunctionSymbol getDBDifference() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public FunctionSymbol getDBEnvelope() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public FunctionSymbol getDBSymDifference() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public FunctionSymbol getDBUnion() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRelate() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRelateMatrix() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDimension() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCoordinateDimension() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    /*@Override
+    public DBFunctionSymbol getDBSpatialDimension() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }*/
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsSimple() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsEmpty() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    /*@Override
+    public DBFunctionSymbol getDBHasSerialization() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }*/
+
+    @Override
+    public DBFunctionSymbol getDBGetSRID() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }

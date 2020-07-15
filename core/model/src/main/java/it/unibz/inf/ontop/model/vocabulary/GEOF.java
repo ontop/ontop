@@ -7,6 +7,9 @@ public class GEOF {
 
     public static final String PREFIX = "http://www.opengis.net/def/function/geosparql/";
 
+    // Prefix for properties
+    public static final String PREFIX_PROP = "http://www.opengis.net/ont/geosparql/";
+
     // Simple Feature functions
     public static final IRI SF_EQUALS;
 
@@ -80,7 +83,19 @@ public class GEOF {
 
     public static final IRI UNION;
 
+    // Relate with boolean results
     public static final IRI RELATE;
+
+    // Relate with string result
+    public static final IRI RELATEM;
+
+    // Properties
+    public static final IRI DIMENSION;
+    public static final IRI COORDINATEDIMENSION;
+    //public static final IRI SPATIALDIMENSION;
+    public static final IRI ISEMPTY;
+    public static final IRI ISSIMPLE;
+    //public static final IRI HASSERIALIZATION;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -158,7 +173,24 @@ public class GEOF {
 
         UNION = factory.createIRI(PREFIX + "union");
 
+        // Boolean result
         RELATE = factory.createIRI(PREFIX + "relate");
+
+        // String result
+        RELATEM = factory.createIRI(PREFIX + "relate");
+
+        // Properties
+        DIMENSION = factory.createIRI(PREFIX_PROP + "dimension");
+
+        COORDINATEDIMENSION = factory.createIRI(PREFIX_PROP + "coordinateDimension");
+
+        //SPATIALDIMENSION = factory.createIRI(PREFIX_PROP + "spatialDimension");
+
+        ISSIMPLE = factory.createIRI(PREFIX_PROP + "isSimple");
+
+        ISEMPTY = factory.createIRI(PREFIX_PROP + "isEmpty");
+
+        //HASSERIALIZATION = factory.createIRI(PREFIX_PROP + "hasSerialization");
 
     }
 }

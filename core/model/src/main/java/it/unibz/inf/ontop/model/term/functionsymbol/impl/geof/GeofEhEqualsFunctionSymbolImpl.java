@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 public class GeofEhEqualsFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofEhEqualsFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
-        super("GEOF_EH_EQUALS", functionIRI, wktLiteralType, xsdBooleanType);
+        super("GEOF_EH_EQUALS", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
