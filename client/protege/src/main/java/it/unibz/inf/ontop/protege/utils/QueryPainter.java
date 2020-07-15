@@ -360,7 +360,7 @@ public class QueryPainter {
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
-			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
+			throw new Exception("Unable to parse the mapping target: " + input + ", " + parsingException);
 		}
 		input = doc.getText(0, doc.getLength());
 
