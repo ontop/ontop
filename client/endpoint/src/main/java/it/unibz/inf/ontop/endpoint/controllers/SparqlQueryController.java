@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.jsonld.JSONLDWriter;
 import org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
@@ -155,10 +156,15 @@ public class SparqlQueryController {
                 if ("*/*".equals(accept) || accept.contains("turtle")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/turtle;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new TurtleWriter(bao), response);
+                } else if (accept.contains("rdf+json")) {
+                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/rdf+json;charset=UTF-8");
+                    evaluateGraphQuery(graphQuery, new RDFJSONWriter(bao, RDFFormat.RDFJSON), response);
                 } else if (accept.contains("json")) {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8");
-                    evaluateGraphQuery(graphQuery, new RDFJSONWriter(bao, RDFFormat.JSONLD), response);
-                } else if (accept.contains("xml")) {
+                    // specification of rdf/json, recommend the use of json-ld (we use it as default)
+                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/ld+json;charset=UTF-8");
+                    evaluateGraphQuery(graphQuery, new JSONLDWriter(bao), response);
+                }
+                else if (accept.contains("xml")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/rdf+xml;charset=UTF-8");
                     evaluateGraphQuery(graphQuery, new RDFXMLWriter(bao), response);
                 } else {

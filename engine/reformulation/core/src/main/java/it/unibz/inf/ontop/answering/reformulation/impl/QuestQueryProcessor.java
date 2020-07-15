@@ -39,6 +39,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final QueryUnfolder queryUnfolder;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
+	private static boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
 	private final ExecutorRegistry executorRegistry;
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
@@ -82,43 +83,54 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		IQ cachedQuery = queryCache.get(inputQuery);
 		if (cachedQuery != null) {
-			queryLogger.declareReformulationFinishedAndSerialize(true);
+			queryLogger.declareReformulationFinishedAndSerialize(cachedQuery,true);
 			return cachedQuery;
 		}
 
 		try {
-			log.debug("SPARQL query:\n{}", inputQuery.getInputString());
+			if (IS_DEBUG_ENABLED)
+				log.debug("SPARQL query:\n{}", inputQuery.getInputString());
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
 			log.debug("Parsed query converted into IQ (after normalization):\n{}", convertedIQ);
+
+			queryLogger.setSparqlIQ(convertedIQ);
 
             try {
                 log.debug("Start the rewriting process...");
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 
-                log.debug("Rewritten IQ:\n{}",rewrittenIQ);
+                if (IS_DEBUG_ENABLED)
+                	log.debug("Rewritten IQ:\n{}",rewrittenIQ);
 
                 log.debug("Start the unfolding...");
 
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
                 	log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
-					queryLogger.declareReformulationFinishedAndSerialize(false);
+					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
 					return unfoldedIQ;
 				}
-                log.debug("Unfolded query: \n" + unfoldedIQ.toString());
+
+                // These IQ can be large so getting the string can be expensive
+                if (IS_DEBUG_ENABLED)
+                	log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, executorRegistry);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery, executorRegistry);
-				log.debug("Planned query: \n" + plannedQuery);
+				if (IS_DEBUG_ENABLED)
+					log.debug("Planned query: \n" + plannedQuery);
+
+				queryLogger.setPlannedQuery(plannedQuery);
 
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
-				queryLogger.declareReformulationFinishedAndSerialize(false);
+				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				return executableQuery;
 
 			}
             catch (OntopReformulationException e) {
+            	queryLogger.declareReformulationException(e);
                 throw e;
             }
         }
@@ -128,9 +140,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		 */
 		catch (Exception e) {
 			log.warn("Unexpected exception: " + e.getMessage(), e);
-			// TODO: involve the query logger
-			throw new OntopReformulationException(e);
-			//throw new OntopReformulationException("Error rewriting and unfolding into SQL\n" + e.getMessage());
+			OntopReformulationException exception = new OntopReformulationException(e);
+			queryLogger.declareReformulationException(exception);
+			throw exception;
 		}
 	}
 
@@ -140,7 +152,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
 
-		log.debug("Resulting native query: \n{}", executableQuery);
+		if (IS_DEBUG_ENABLED)
+			log.debug("Resulting native query: \n{}", executableQuery);
 
 		return executableQuery;
 	}
@@ -151,9 +164,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 */
 	@Override
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
-		log.debug("SPARQL query:\n{}", query.getInputString());
+		if (IS_DEBUG_ENABLED)
+			log.debug("SPARQL query:\n{}", query.getInputString());
 		IQ convertedIQ = query.translate(inputQueryTranslator);
-		log.debug("Parsed query converted into IQ:\n{}", convertedIQ);
+		if (IS_DEBUG_ENABLED)
+			log.debug("Parsed query converted into IQ:\n{}", convertedIQ);
 		try {
 			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 			return rewrittenIQ.toString();

@@ -6,13 +6,19 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 @Singleton
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
     private PostgresSelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory));
+        super(new DefaultSQLTermSerializer(termFactory) {
+            @Override
+            protected String castFloatingConstant(String value, DBTermType dbType) {
+                return String.format("%s::%s", value, dbType.getCastName());
+            }
+        });
     }
 
     @Override

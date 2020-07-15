@@ -57,7 +57,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
                         ));
             }
         } catch (SQLException e) {
-            throw new OntopConnectionException(e);
+            throw buildConnectionException(e);
         }
         return new SQLOntopBindingSet(
                 signature,

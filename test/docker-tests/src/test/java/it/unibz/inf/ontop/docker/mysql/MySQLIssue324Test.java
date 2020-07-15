@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * https://github.com/ontop/ontop/issues/324
  */
-@Ignore("TODO: enable pushing the latest MySQL image")
 public class MySQLIssue324Test extends AbstractVirtualModeTest {
 
     static final String owlFile = "/mysql/issue324/ontology.ttl";

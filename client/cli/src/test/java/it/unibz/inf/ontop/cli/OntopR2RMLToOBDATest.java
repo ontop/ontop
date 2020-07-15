@@ -38,7 +38,16 @@ public class OntopR2RMLToOBDATest {
     public void testOntopR2RMLToOBDA3 (){
         String[] argv = {"mapping", "to-obda",
                 "-i", "src/test/resources/mapping-blankNode.ttl",
-                "-o", "src/test/resources/mapping-blankNode.obda"
+                "-o", "src/test/resources/output/mapping-blankNode.obda"
+        };
+        runCommand(argv);
+    }
+
+    @Test
+    public void testOntopR2RMLToOBDANamedGraph (){
+        String[] argv = {"mapping", "to-obda",
+                "-i", "src/test/resources/mapping-named-graph.ttl",
+                "-o", "src/test/resources/output/mapping-named-graph.obda"
         };
         runCommand(argv);
     }

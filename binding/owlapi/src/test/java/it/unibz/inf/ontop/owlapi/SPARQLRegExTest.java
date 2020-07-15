@@ -156,11 +156,17 @@ public class SPARQLRegExTest {
 		}
 	}
 
-	/**
-	 * Test use of two aliases to same table
-	 * 
-	 * @throws Exception
-	 */
+	@Test
+	public void testIssue72() throws Exception {
+		String query = "SELECT DISTINCT * WHERE {\n" +
+				"?s a <http://www.opendatasemanticuplift.org/vocab/class/Data_Centre_List_Five> .\n" +
+				"?s ?p ?lit .\n" +
+				"FILTER regex(?lit, \"^(?i)Zzdl2*(?-i)\") .\n" +
+				"?s <http://www.w3.org/2000/01/rdf-schema#label> ?label .\n" +
+				"}";
+		runTests(query, 0);
+	}
+
 	@Test
 	public void testSingleColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?name, \"ABA\")}";

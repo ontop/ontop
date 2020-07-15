@@ -39,20 +39,20 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     @Override
     protected List<String> getAbsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.5000\"^^xsd:decimal");
-        expectedValues.add("\"5.7500\"^^xsd:decimal");
-        expectedValues.add("\"6.7000\"^^xsd:decimal");
-        expectedValues.add("\"1.5000\"^^xsd:decimal");
+        expectedValues.add("\"8.500000\"^^xsd:decimal");
+        expectedValues.add("\"5.750000\"^^xsd:decimal");
+        expectedValues.add("\"6.700000\"^^xsd:decimal");
+        expectedValues.add("\"1.500000\"^^xsd:decimal");
         return expectedValues;
     }
 
     @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.00, 43.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 23.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 34.00\"^^xsd:string");
-        expectedValues.add("\"0.00, 10.00\"^^xsd:string");
+        expectedValues.add("\"0.0000000000000000000, 43.0000000000000000000\"^^xsd:string");
+        expectedValues.add("\"0.0000000000000000000, 23.0000000000000000000\"^^xsd:string");
+        expectedValues.add("\"0.0000000000000000000, 34.0000000000000000000\"^^xsd:string");
+        expectedValues.add("\"0.0000000000000000000, 10.0000000000000000000\"^^xsd:string");
         return expectedValues;
     }
 
@@ -83,5 +83,12 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     @Test
     public void testREPLACE() throws Exception {
         super.testREPLACE();
+    }
+
+    @Override
+    protected List<String> getConstantIntegerDivideExpectedResults() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.500000\"^^xsd:decimal");
+        return expectedValues;
     }
 }

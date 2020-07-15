@@ -1,69 +1,26 @@
 # Ontop-endpoint
 
-## How to use this image
+## Introduction
 
-The image `ontop/ontop-endpoint` is for fast setting up an Ontop SPARQL endpoint. 
-One can either use `ontop/ontop-endpoint` directly, or create a dedicated image based on this image.   
+The image `ontop/ontop-endpoint` is the standard solution for setting up Ontop SPARQL endpoint. 
+One can either use `ontop/ontop-endpoint` directly, or create a dedicated image based on this image.
 
-## Example
+## Environment variables
+Here is a list of environment variables that directly correspond to arguments of the CLI `ontop-endpoint`command. Please refer to [its documentation page for more details about these arguments](https://ontop-vkg.org/guide/cli.html#ontop-endpoint).
 
-Assume that the following files are in the working directory:  
-
-```console
-.
-├── input
-│   ├── university-complete.docker.properties
-│   ├── university-complete.obda
-│   └── university-complete.ttl
-└── jdbc
-    └── h2-1.4.196.jar
-```
-
-### Use `ontop/ontop-endpoint` directly
-
-You can start an Ontop SPARQL endpoint by using the `ontop/ontop-endpoint` image directly:
+- `ONTOP_MAPPING_FILE` (required). Corresponds to the argument `--mapping`.
+-  `ONTOP_PROPERTIES_FILE` (required). Corresponds to the argument `--properties`.
+-   `ONTOP_ONTOLOGY_FILE` (optional). Corresponds to the argument `--ontology`.
+- `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
+- `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
+- `ONTOP_CORS_ALLOWED_ORIGINS` (optional). Corresponds to the argument `--cors-allowed-origins`.
+- `ONTOP_PORTAL_FILE` (optional). Corresponds to the argument `--portal`.
+- `ONTOP_DEV_MODE` (optional). Corresponds to the argument `--dev`.
+-  `ONTOP_LAZY_INIT` (optional). Corresponds to the argument `--lazy`.
 
 
-#### Linux/Mac
-```console
-docker run --rm -it \
--v $PWD/input:/opt/ontop/input \
--v $PWD/jdbc:/opt/ontop/jdbc \
--e ONTOP_ONTOLOGY_FILE=/opt/ontop/input/university-complete.ttl \
--e ONTOP_MAPPING_FILE=/opt/ontop/input/university-complete.obda \
--e ONTOP_PROPERTIES_FILE=/opt/ontop/input/university-complete.docker.properties \
--p 8080:8080 ontop/ontop-endpoint
-```
+## Tutorial
 
-#### Windows
-```console
-docker run --rm -it ^
--v %CD%/input:/opt/ontop/input ^
--v %CD%/jdbc:/opt/ontop/jdbc ^
--e ONTOP_ONTOLOGY_FILE=/opt/ontop/input/university-complete.ttl ^
--e ONTOP_MAPPING_FILE=/opt/ontop/input/university-complete.obda ^
--e ONTOP_PROPERTIES_FILE=/opt/ontop/input/university-complete.docker.properties ^
--p 8080:8080 ontop/ontop-endpoint
-```
+A complete tutorial is provided on the Ontop Website: https://ontop-vkg.org/tutorial/endpoint/endpoint-docker.html
 
-
-### Create a dedicated image 
-
-In case you need to deploy a self-contained image, you can write a complete `Dockerfile`:
-
-```dockerfile
-FROM ontop/ontop-endpoint
-WORKDIR /opt/ontop
-COPY input/university-complete.ttl input/university-complete.obda input/university-complete.docker.properties input/ 
-COPY jdbc/h2-1.4.196.jar jdbc/
-EXPOSE 8080
-ENTRYPOINT ./entrypoint.sh
-```
-
-Then, run the commands to build and run the Docker image:
-
-```console
-$ docker build -t my-ontop-endpoint .
-$ docker run -it --rm --name my-running-ontop-endpoint -p 8080:8080 my-ontop-endpoint
-```
 

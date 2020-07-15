@@ -14,6 +14,7 @@ public class OntopVirtualRepositoryBean {
     @Bean
     private OntopVirtualRepository setupVirtualRepository(@Value("${mapping}") String mappings,
                                                           @Value("${ontology:#{null}}") String ontology,
+                                                          @Value("${xml-catalog:#{null}}") String xmlCatalog,
                                                           @Value("${properties}") String properties,
                                                           @Value("${constraint:#{null}}") String constraint,
                                                           @Value("${lazy:false}") boolean lazy) throws RepositoryException {
@@ -27,6 +28,9 @@ public class OntopVirtualRepositoryBean {
 
         if ((ontology != null) && (!ontology.isEmpty()))
             builder.ontologyFile(ontology);
+
+        if ((xmlCatalog != null) && (!xmlCatalog.isEmpty()))
+            builder.xmlCatalogFile(xmlCatalog);
 
         if (constraint !=null && !constraint.isEmpty())
             builder.basicImplicitConstraintFile(constraint);

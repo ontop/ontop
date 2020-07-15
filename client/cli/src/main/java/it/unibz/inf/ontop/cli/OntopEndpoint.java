@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 @Command(name = "endpoint",
         description = "Start a SPARQL endpoint powered by Ontop")
-public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
+public class OntopEndpoint extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"--portal"}, title = "endpoint portal file",
             description = "endpoint portal file (including title and queries)")
@@ -51,6 +51,9 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
         if (this.owlFile != null)
             argList.add("--ontology=" + this.owlFile);
+
+        if (this.xmlCatalogFile != null)
+            argList.add("--xml-catalog=" + this.xmlCatalogFile);
 
         if (this.constraintFile != null)
             argList.add("--constraint=" + this.constraintFile);

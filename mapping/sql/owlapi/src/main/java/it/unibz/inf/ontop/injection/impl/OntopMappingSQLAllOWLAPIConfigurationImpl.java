@@ -83,6 +83,11 @@ public class OntopMappingSQLAllOWLAPIConfigurationImpl extends OntopMappingSQLAl
             return ontologyBuilderFragment.ontologyFile(owlFile);
         }
 
+        @Override
+        public B xmlCatalogFile(@Nonnull String file) {
+            return ontologyBuilderFragment.xmlCatalogFile(file);
+        }
+
         void declareOntologyDefined() {
             if (isOBDASpecificationAssigned())
                 throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");

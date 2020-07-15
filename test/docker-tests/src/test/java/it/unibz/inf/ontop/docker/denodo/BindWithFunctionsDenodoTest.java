@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.docker.denodo;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -77,7 +78,7 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
         expectedValues.add("\"14\"^^xsd:integer");
         expectedValues.add("\"8\"^^xsd:integer");
         expectedValues.add("\"21\"^^xsd:integer");
-        expectedValues.add("\"4\"^^xsd:integer");
+        expectedValues.add("\"5\"^^xsd:integer");
 
         return expectedValues;
     }
@@ -85,20 +86,25 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getHoursExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"3\"^^xsd:integer");
-        expectedValues.add("\"3\"^^xsd:integer");
-        expectedValues.add("\"2\"^^xsd:integer");
-        expectedValues.add("\"22\"^^xsd:integer");
+        expectedValues.add("\"12\"^^xsd:integer");
+        expectedValues.add("\"12\"^^xsd:integer");
+        expectedValues.add("\"11\"^^xsd:integer");
+        expectedValues.add("\"7\"^^xsd:integer");
         return expectedValues;
+    }
+
+    @Override
+    protected List<String> getConstantIntegerDivideExpectedResults() {
+        return ImmutableList.of("\"0.500000\"^^xsd:decimal");
     }
 
     @Override
     protected List<String> getStrExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1967-11-04T22:50:00.000000-08:00\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T03:30:00.000000-08:00\"^^xsd:string");
-        expectedValues.add("\"2014-07-14T03:47:52.000000-07:00\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T02:23:06.000000-07:00\"^^xsd:string");
+        expectedValues.add("\"1967-11-05T07:50:00.000000+01:00\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T12:30:00.000000+01:00\"^^xsd:string");
+        expectedValues.add("\"2014-07-14T12:47:52.000000+02:00\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T11:23:06.000000+02:00\"^^xsd:string");
 
         return expectedValues;
     }

@@ -87,7 +87,7 @@ public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements Tu
             Object realValue = rs.getObject(column);
             return realValue;
         } catch (Exception e) {
-            throw new OntopConnectionException(e);
+            throw buildConnectionException(e);
         }
     }
 }

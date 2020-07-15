@@ -381,10 +381,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             DBTermType dbType = constant.getType();
 
             switch (dbType.getCategory()) {
-                case INTEGER:
                 case DECIMAL:
                 case FLOAT_DOUBLE:
                     // TODO: handle the special case of not-a-number!
+                    return castFloatingConstant(constant.getValue(), dbType);
+                case INTEGER:
                 case BOOLEAN:
                     return constant.getValue();
                 default:
@@ -392,9 +393,13 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             }
         }
 
+        protected String castFloatingConstant(String value, DBTermType dbType) {
+            return String.format("CAST(%s AS %s)", value, dbType.getCastName());
+        }
+
         protected String serializeStringConstant(String constant) {
-            // quotes and duplicates isolated single quotes
-            return "'" + constant.replaceAll("(?<!')'(?!')", "''") + "'";
+            // duplicates single quotes, and adds outermost quotes
+            return "'" + constant.replace("'", "''") + "'";
         }
     }
 }

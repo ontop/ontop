@@ -92,7 +92,8 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         IQ newIQ = newTree.equals(tree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-        LOGGER.debug(String.format("Planned IQ: %s\n", newIQ));
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug(String.format("Planned IQ: %s\n", newIQ));
         return newIQ;
     }
 

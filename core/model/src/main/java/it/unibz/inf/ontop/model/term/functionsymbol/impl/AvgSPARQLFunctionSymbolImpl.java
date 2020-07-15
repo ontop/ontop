@@ -28,7 +28,7 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
     private static final String DEFAULT_AGG_VAR_NAME = "avg1";
 
     protected AvgSPARQLFunctionSymbolImpl(RDFTermType rootRdfTermType, boolean isDistinct) {
-        super("SP_AVG", SPARQL.AVG, isDistinct, rootRdfTermType, DEFAULT_AGG_VAR_NAME);
+        super("SP_AVG"+ (isDistinct ? "_DISTINCT" : ""), SPARQL.AVG, isDistinct, rootRdfTermType, DEFAULT_AGG_VAR_NAME);
     }
 
     @Override
