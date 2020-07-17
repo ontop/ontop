@@ -225,6 +225,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROWNUM";
+    }
+
+    @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
         return new OracleNullRejectingDBConcatFunctionSymbol(arity, dbStringType, abstractRootDBType);
     }

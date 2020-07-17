@@ -41,6 +41,7 @@ public class SPARQL {
     public static final String MAX = "MAX";
     public static final String SAMPLE = "SAMPLE";
     public static final String GROUP_CONCAT = "GROUP_CONCAT";
+    public static final String BNODE = "BNODE";
     /**
      * Although it is directly mapped in SPARQL 1.1 to fn:year-from-dateTime, in practice all SPARQL implementations
      * extend it to also support xsd:date, not just xsd:dateTime. Therefore it cannot be mapped directly to such a
