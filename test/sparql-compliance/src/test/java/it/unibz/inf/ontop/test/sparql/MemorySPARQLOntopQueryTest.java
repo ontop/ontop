@@ -144,19 +144,10 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// of the original data no support for custom datatype
 			exprBuiltInManifest + "sameTerm-simple",
 
-			// TODO: fix it (fatal error). str(?o) = "zzz" when ?o is sometimes a number
-			exprBuiltInManifest + "dawg-str-3",
-
-			// TODO: fix it (fatal error). str(?o) = "" when ?o is sometimes a number
-			exprBuiltInManifest + "dawg-str-4",
-
 			/* DATA-R2: EXPR-EQUALS   */
 
 			//missing and unexpected bindings, no custom datatypes supported
 			exprEqualsManifest + "eq-2-2",
-
-			// TODO: fix it (fatal error). str(?o) = "zzz" when ?o is sometimes a number
-			exprEqualsManifest + "eq-4",
 
 			// SI is not supporting arbitrary datatypes and lexical terms are normalized
 			exprEqualsManifest + "eq-2-1",
