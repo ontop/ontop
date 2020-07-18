@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
@@ -99,6 +100,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol nonDistinctGroupConcat;
     // Created in init()
     private DBFunctionSymbol distinctGroupConcat;
+
+    // Created in init()
+    private DBFunctionSymbol rowUniqueStrFct;
+    // Created in init()
+    private DBFunctionSymbol rowNumberFct;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -339,6 +345,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         nonDistinctGroupConcat = createDBGroupConcat(dbStringType, false);
         distinctGroupConcat = createDBGroupConcat(dbStringType, true);
+
+        rowUniqueStrFct = createDBRowUniqueStr();
+        rowNumberFct = createDBRowNumber();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -845,6 +854,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBRowUniqueStr() {
+        return rowUniqueStrFct;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRowNumber() {
+        return rowNumberFct;
+    }
+
+    @Override
     public DBFunctionSymbol getDBCount(int arity, boolean isDistinct) {
         if (arity > 1) {
             throw new IllegalArgumentException("COUNT is 0-ary or unary");
@@ -1070,6 +1089,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 (t, c, f) -> serializeCurrentDateTime(type, t, c, f));
     }
 
+    protected DBFunctionSymbol createDBRowUniqueStr() {
+        return new DBFunctionSymbolWithSerializerImpl("ROW_UNIQUE_STR", ImmutableList.of(), dbStringType, true,
+                (t, c, f) -> serializeDBRowUniqueStr(c, f));
+    }
+
+    protected DBFunctionSymbol createDBRowNumber() {
+        return new DBFunctionSymbolWithSerializerImpl("ROW_NUMBER", ImmutableList.of(), dbIntegerType, true,
+                (t, c, f) -> serializeDBRowNumber(c, f));
+    }
+
+
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) ;
@@ -1217,6 +1247,18 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                       TermFactory termFactory) {
         return "CURRENT_" + type;
     }
+
+    /**
+     * By default, uses the row number
+     */
+    protected String serializeDBRowUniqueStr(Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        ImmutableFunctionalTerm newTerm = termFactory.getDBCastFunctionalTerm(dbStringType,
+                termFactory.getImmutableFunctionalTerm(getDBRowNumber()));
+
+        return termConverter.apply(newTerm);
+    }
+
+    protected abstract String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory);
 
 
     @Override

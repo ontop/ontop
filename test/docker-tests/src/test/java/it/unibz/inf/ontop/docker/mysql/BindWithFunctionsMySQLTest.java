@@ -110,4 +110,18 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+    @Ignore("Not supported by MySQL < 8.0.2. TODO: enable it after updating the DB")
+    @Test
+    @Override
+    public void testBNODE0() throws Exception {
+        super.testBNODE0();
+    }
+
+    @Ignore("Not supported by MySQL < 8.0.2. TODO: enable it after updating the DB")
+    @Test
+    @Override
+    public void testBNODE1() throws Exception {
+        super.testBNODE1();
+    }
+
 }

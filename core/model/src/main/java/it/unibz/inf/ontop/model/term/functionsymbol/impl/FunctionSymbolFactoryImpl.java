@@ -210,6 +210,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_TZ", SPARQL.TZ,
                 xsdDatetime, xsdString, false, TermFactory::getDBTz),
+                new UnaryBnodeSPARQLFunctionSymbolImpl(xsdString, bnodeType),
                 new NowSPARQLFunctionSymbolImpl(xsdDatetime),
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
@@ -330,6 +331,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 return Optional.of(createSPARQLStrUUIDFunctionSymbol());
             case SPARQL.COALESCE:
                 return getSPARQLCoalesceFunctionSymbol(arity);
+            case SPARQL.BNODE:
+                if (arity == 0)
+                    return Optional.of(createZeroArySPARQLBnodeFunctionSymbol());
+                // Otherwise, default case
             default:
                 return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
         }
@@ -371,6 +376,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 ? Optional.empty()
                 : Optional.of(coalesceMap
                 .computeIfAbsent(arity, a -> new CoalesceSPARQLFunctionSymbolImpl(a, typeFactory.getAbstractRDFTermType())));
+    }
+
+    private SPARQLFunctionSymbol createZeroArySPARQLBnodeFunctionSymbol() {
+        return new ZeroAryBnodeSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getBlankNodeType());
     }
 
     /**
