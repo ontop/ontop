@@ -44,6 +44,7 @@ import org.eclipse.rdf4j.query.algebra.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
@@ -205,7 +206,21 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             else {
                 constant = termFactory.getConstantBNode(vc.getValue().stringValue());
             }
-        } else {
+        }
+        else if (ve instanceof BNodeGenerator) {
+            // See https://www.w3.org/TR/sparql11-query/#tempatesWithBNodes
+            String rowId = bindingSet.getRowUUIDStr();
+
+            String label = Optional.ofNullable(((BNodeGenerator) ve).getNodeIdExpr())
+                    // If defined, we expected the b-node label to be constant (as appearing in the CONSTRUCT block)
+                    .filter(e -> e instanceof ValueConstant)
+                    .map(v -> ((ValueConstant) v).getValue().stringValue())
+                    .map(s -> s + rowId)
+                    .orElseGet(() -> node_name + rowId);
+
+            constant = termFactory.getConstantBNode(label);
+        }
+        else {
             constant = bindingSet.getConstant(node_name);
         }
         return constant;

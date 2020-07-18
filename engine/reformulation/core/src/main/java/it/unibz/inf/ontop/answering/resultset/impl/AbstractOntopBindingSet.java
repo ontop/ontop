@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.joining;
 
@@ -17,6 +18,10 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
     //LinkedHashMap to preserve variable ordering
     private final LinkedHashMap<String, OntopBinding> bindingMap;
+
+    // LAZY
+    @Nullable
+    private String uuid;
 
     AbstractOntopBindingSet(LinkedHashMap<String, OntopBinding> bindingMap) {
         this.bindingMap = bindingMap;
@@ -66,6 +71,13 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     @Override
     public boolean hasBinding(String bindingName) {
         return bindingMap.containsKey(bindingName);
+    }
+
+    @Override
+    public synchronized String getRowUUIDStr() {
+        if (uuid == null)
+            uuid = UUID.randomUUID().toString();
+        return uuid;
     }
 
     @Override
