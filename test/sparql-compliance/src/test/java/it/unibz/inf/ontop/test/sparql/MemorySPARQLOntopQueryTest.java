@@ -119,9 +119,9 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 			/* DATA-R2: CONSTRUCT Null pointer exception */
 
-			// TODO: make the result non-empty
+			// Results look correct. Possible problem from RD4J (graph isomorphism). TODO: test more recent RDF4J.
 			constructManifest + "construct-3",
-			// TODO: make the result non-empty
+			// Results look correct. Possible problem from RD4J (graph isomorphism). TODO: test more recent RDF4J.
 			constructManifest + "construct-4",
 
 			/* DATA-R2: DISTINCT */
