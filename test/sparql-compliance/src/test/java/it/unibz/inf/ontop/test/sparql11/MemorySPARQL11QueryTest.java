@@ -41,10 +41,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* FUNCTIONS*/
 
-			//bnode not supported in SPARQL transformation
-			functionsManifest + "bnode01",
-			functionsManifest + "bnode02",
-
 			// the SI does not preserve the original timezone
 			functionsManifest + "hours",
 			// the SI does not preserve the original timezone
@@ -88,11 +84,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//TZ is not supported in H2
 			functionsManifest + "tz",
 
-			/* CONSTRUCT not supported yet*/
-			//Projection cannot be cast to Reduced in rdf4j
-//			constructManifest + "constructwhere01",
-//			constructManifest + "constructwhere02",
-//			constructManifest + "constructwhere03",
 			//problem importing dataset
 			constructManifest + "constructwhere04",
 
