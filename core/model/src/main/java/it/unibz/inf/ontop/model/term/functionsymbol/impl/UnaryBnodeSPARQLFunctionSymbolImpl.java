@@ -16,8 +16,10 @@ public class UnaryBnodeSPARQLFunctionSymbolImpl extends AbstractBnodeSPARQLFunct
 
     @Override
     protected ImmutableTerm buildLexicalTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory) {
+        ImmutableTerm subLexicalTerm = extractLexicalTerm(newTerms.get(0), termFactory);
+
         return termFactory.getImmutableFunctionalTerm(
                 termFactory.getDBFunctionSymbolFactory().getBnodeStringTemplateFunctionSymbol("_:{}/{}"),
-                newTerms.get(0), termFactory.getDBRowUniqueStr());
+                subLexicalTerm, termFactory.getDBRowUniqueStr());
     }
 }

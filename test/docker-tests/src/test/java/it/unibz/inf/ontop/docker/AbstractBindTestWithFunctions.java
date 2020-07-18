@@ -1373,6 +1373,42 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
+    @Test
+    public void testBNODE0() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT DISTINCT ?b ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   BIND (BNODE() AS ?b)\n"
+                + "   BIND (\"cst\" AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testBNODE1() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT DISTINCT ?b ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   BIND (BNODE(\"b1\") AS ?b)\n"
+                + "   BIND (\"cst\" AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {

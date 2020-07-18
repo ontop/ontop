@@ -1391,10 +1391,19 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             }
             //Others: ListMemberOperator
         }
+        if (expr instanceof BNodeGenerator) {
+            Optional<ImmutableTerm> term = Optional.ofNullable(((BNodeGenerator) expr).getNodeIdExpr())
+                    .map(t -> getTerm(t, knownVariables));
+
+            SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                    SPARQL.BNODE, term.isPresent() ? 1 : 0);
+            return term
+                    .map(t -> termFactory.getImmutableFunctionalTerm(functionSymbol, t))
+                    .orElseGet(() -> termFactory.getImmutableFunctionalTerm(functionSymbol));
+        }
         // other subclasses
         // SubQueryValueOperator
         // If
-        // BNodeGenerator
         throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
     }
 

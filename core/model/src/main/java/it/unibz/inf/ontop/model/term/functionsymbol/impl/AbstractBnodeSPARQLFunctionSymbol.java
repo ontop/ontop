@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
@@ -53,9 +54,14 @@ public abstract class AbstractBnodeSPARQLFunctionSymbol extends SPARQLFunctionSy
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
 
-        return termFactory.getRDFFunctionalTerm(
-                buildLexicalTerm(newTerms, termFactory),
-                termFactory.getRDFTermTypeConstant(bnodeType));
+        // Decomposes
+        if (newTerms.stream().allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof Constant))) {
+            return termFactory.getRDFFunctionalTerm(
+                    buildLexicalTerm(newTerms, termFactory),
+                    termFactory.getRDFTermTypeConstant(bnodeType));
+        }
+
+        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     protected abstract ImmutableTerm buildLexicalTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory);
