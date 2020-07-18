@@ -71,6 +71,8 @@ public interface FunctionSymbolFactory {
 
     SPARQLAggregationFunctionSymbol getSPARQLGroupConcatFunctionSymbol(String separator, boolean isDistinct);
 
+    SPARQLFunctionSymbol getIRIFunctionSymbol(String baseIRI);
+    SPARQLFunctionSymbol getIRIFunctionSymbol();
 
     /**
      * Special function capturing the EBV logic

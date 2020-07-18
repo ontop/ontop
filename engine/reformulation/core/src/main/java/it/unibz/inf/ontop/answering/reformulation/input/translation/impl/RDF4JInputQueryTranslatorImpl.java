@@ -1401,6 +1401,16 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                     .map(t -> termFactory.getImmutableFunctionalTerm(functionSymbol, t))
                     .orElseGet(() -> termFactory.getImmutableFunctionalTerm(functionSymbol));
         }
+        if (expr instanceof IRIFunction) {
+            ImmutableTerm argument = getTerm(((IRIFunction) expr).getArg(), knownVariables);
+            Optional<String> optionalBaseIRI = Optional.ofNullable(((IRIFunction) expr).getBaseURI());
+
+            SPARQLFunctionSymbol functionSymbol = optionalBaseIRI
+                    .map(functionSymbolFactory::getIRIFunctionSymbol)
+                    .orElseGet(functionSymbolFactory::getIRIFunctionSymbol);
+
+            return termFactory.getImmutableFunctionalTerm(functionSymbol, argument);
+        }
         // other subclasses
         // SubQueryValueOperator
         // If
