@@ -616,7 +616,7 @@ public interface TermFactory {
 
 	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
 
-	ImmutableTerm getDBDimension(ImmutableTerm arg1);
+	/*ImmutableTerm getDBDimension(ImmutableTerm arg1);
 
 	ImmutableTerm getDBCoordinateDimension(ImmutableTerm arg1);
 
@@ -626,5 +626,5 @@ public interface TermFactory {
 
 	ImmutableTerm getDBIsEmpty(ImmutableTerm arg1);
 
-	//ImmutableTerm getDBHasSerialization(ImmutableTerm arg1);
+	//ImmutableTerm getDBHasSerialization(ImmutableTerm arg1);*/
 }

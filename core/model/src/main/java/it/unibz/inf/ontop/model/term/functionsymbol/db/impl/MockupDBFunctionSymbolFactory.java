@@ -657,7 +657,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
-    @Override
+    /*@Override
     public DBFunctionSymbol getDBDimension() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
@@ -667,10 +667,10 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
-    /*@Override
+    *//*@Override
     public DBFunctionSymbol getDBSpatialDimension() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }*/
+    }*//*
 
     @Override
     public DBBooleanFunctionSymbol getDBIsSimple() {
@@ -681,7 +681,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     public DBBooleanFunctionSymbol getDBIsEmpty() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
-
+*/
     /*@Override
     public DBFunctionSymbol getDBHasSerialization() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");

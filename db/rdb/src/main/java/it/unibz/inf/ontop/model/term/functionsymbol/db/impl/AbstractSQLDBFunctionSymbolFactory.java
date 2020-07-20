@@ -83,10 +83,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private static final String ST_SRID = "ST_SRID";
     private static final String ST_DIMENSION = "ST_DIMENSION";
     private static final String ST_COORDDIM = "ST_COORDDIM";
-    //private static final String ST_ = "ST_SRID";
+    //private static final String ST_ = "ST_SPATIALDIMENSION???";
     private static final String ST_ISSIMPLE = "ST_ISSIMPLE";
     private static final String ST_ISEMPTY = "ST_ISEMPTY";
-    //private static final String ST_ = "ST_SRID";
+    private static final String ST_LENGTH = "ST_LENGTH";
+    //private static final String ST_ = "ST_HASSERIALIZATION????";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -177,6 +178,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType dbDoubleType = dbTypeFactory.getDBDoubleType();
+        DBTermType dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
@@ -347,11 +349,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_SRID, 2, getsridSymbol);
 
-        DBFunctionSymbol getdimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIMENSION, 1, dbIntType, false,
+        /*DBFunctionSymbol getdimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIMENSION, 1, dbIntType, false,
                 abstractRootDBType);
-        builder.put(ST_DIMENSION, 2, getdimensionSymbol);
+        builder.put(ST_DIMENSION, 2, getdimensionSymbol);*/
 
-        DBFunctionSymbol getcoordinatedimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_COORDDIM, 1, dbIntType, false,
+        /*DBFunctionSymbol getcoordinatedimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_COORDDIM, 1, dbIntType, false,
                 abstractRootDBType);
         builder.put(ST_COORDDIM, 2, getcoordinatedimensionSymbol);
 
@@ -361,7 +363,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol getisemptySymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ISEMPTY, 1, dbIntType, false,
                 abstractRootDBType);
-        builder.put(ST_ISEMPTY, 2, getisemptySymbol);
+        builder.put(ST_ISEMPTY, 2, getisemptySymbol);*/
 
         return builder.build();
     }
@@ -1061,12 +1063,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return getRegularDBFunctionSymbol(ST_SRID, 1);
     }
 
-    @Override
+    /*@Override
     public DBFunctionSymbol getDBDimension() {
         return getRegularDBFunctionSymbol(ST_DIMENSION, 1);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public DBFunctionSymbol getDBCoordinateDimension() {
         return getRegularDBFunctionSymbol(ST_COORDDIM, 1);
     }
@@ -1079,7 +1081,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBBooleanFunctionSymbol getDBIsEmpty() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_ISEMPTY, 1);
-    }
+    }*/
 
     @Override
     public DBFunctionSymbol getDBSTTransform() {
