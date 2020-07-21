@@ -57,7 +57,7 @@ public class DBIriStringResolverFunctionSymbolImpl extends AbstractTypedDBFuncti
                 argLexical,
                 termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(termFactory.getDBStringConstant(baseIRI.toString()), argLexical)));
 
-        return termConverter.apply(functionalTerm);
+        return termConverter.apply(functionalTerm.simplify());
     }
 
     @Override
