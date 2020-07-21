@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -22,13 +23,13 @@ public class IriSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
 
     private final RDFDatatype xsdStringType;
     private final ObjectRDFType iriType;
-    private final String baseIRI;
+    private final IRI baseIRI;
 
     protected IriSPARQLFunctionSymbolImpl(RDFTermType abstractRDFType, RDFDatatype xsdStringType, ObjectRDFType iriType) {
         this(null, abstractRDFType, xsdStringType, iriType);
     }
 
-    public IriSPARQLFunctionSymbolImpl(@Nullable String baseIRI, RDFTermType abstractRDFTermType, RDFDatatype xsdStringType, ObjectRDFType iriType) {
+    public IriSPARQLFunctionSymbolImpl(@Nullable IRI baseIRI, RDFTermType abstractRDFTermType, RDFDatatype xsdStringType, ObjectRDFType iriType) {
         super("SP_IRI", SPARQL.IRI, ImmutableList.of(abstractRDFTermType));
         this.xsdStringType = xsdStringType;
         this.iriType = iriType;
@@ -46,18 +47,11 @@ public class IriSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
         if (baseIRI == null)
             return argLexical;
 
-        ImmutableExpression condition = termFactory.getConjunction(
-                termFactory.getIsAExpression(typeTerms.get(0), xsdStringType),
-                // TODO: have a close look at the IRI resolution rules
-                // URL (http, mailto) or URN (urn)
-                termFactory.getDBNot(termFactory.getDBRegexpMatches(ImmutableList.of(argLexical, termFactory.getDBStringConstant("^[a-zA-Z]+:")))));
-
-
         return termFactory.getIfThenElse(
-                condition,
-                termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
-                        termFactory.getDBStringConstant(baseIRI), argLexical)),
-                // IRI
+                termFactory.getIsAExpression(typeTerms.get(0), xsdStringType),
+                // xsd:string case
+                termFactory.getDBIriStringResolution(baseIRI, argLexical),
+                // IRI case
                 argLexical);
     }
 

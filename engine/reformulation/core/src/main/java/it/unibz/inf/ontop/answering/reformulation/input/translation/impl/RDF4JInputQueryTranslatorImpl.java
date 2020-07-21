@@ -1403,7 +1403,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         }
         if (expr instanceof IRIFunction) {
             ImmutableTerm argument = getTerm(((IRIFunction) expr).getArg(), knownVariables);
-            Optional<String> optionalBaseIRI = Optional.ofNullable(((IRIFunction) expr).getBaseURI());
+            Optional<org.apache.commons.rdf.api.IRI> optionalBaseIRI = Optional.ofNullable(((IRIFunction) expr).getBaseURI())
+                    .map(rdfFactory::createIRI);
 
             SPARQLFunctionSymbol functionSymbol = optionalBaseIRI
                     .map(functionSymbolFactory::getIRIFunctionSymbol)

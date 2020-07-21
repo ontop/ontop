@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<String, SPARQLAggregationFunctionSymbol> distinctSparqlGroupConcatMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> nonDistinctSparqlGroupConcatMap;
     // TODO: use a cache with a limited budget
-    private final Map<String, SPARQLFunctionSymbol> sparqlIRIMap;
+    private final Map<IRI, SPARQLFunctionSymbol> sparqlIRIMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
@@ -360,7 +361,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public synchronized SPARQLFunctionSymbol getIRIFunctionSymbol(String baseIRI) {
+    public synchronized SPARQLFunctionSymbol getIRIFunctionSymbol(IRI baseIRI) {
         return sparqlIRIMap.computeIfAbsent(baseIRI, b -> new IriSPARQLFunctionSymbolImpl(b,
                 typeFactory.getAbstractRDFTermType(), typeFactory.getXsdStringDatatype(),
                 typeFactory.getIRITermType()));

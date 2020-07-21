@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.UUID;
 
@@ -243,6 +244,8 @@ public interface DBFunctionSymbolFactory {
      * Returns a different number for each row (e.g. ROWNUM of Oracle)
      */
     DBFunctionSymbol getDBRowNumber();
+
+    DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
 
     //-------------
     // Aggregation

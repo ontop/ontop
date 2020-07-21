@@ -1232,7 +1232,7 @@ public class BindWithFunctionsTest {
     public void testIRI7() throws Exception {
         String queryBind = "BASE <http://example.org/>\n" +
                 "SELECT ?w  {" +
-                "VALUES ?v { \"john\" \"ernest\" \"http://example.org/alice\" } \n" +
+                "{ VALUES ?v { \"john\" \"ernest\" \"http://example.org/alice\" } } UNION { BIND (str(rand()) AS ?v) } \n" +
                 "BIND(IRI(?v) AS ?w)\n" +
                 "VALUES ?y { <http://example.org/john> <http://otherdomain.org/ernest> } \n" +
                 "FILTER (?w = ?y)\n" +

@@ -538,6 +538,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBRowUniqueStr();
 
+	ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical);
+
 	//-------------
 	// Aggregation
 	//-------------
@@ -552,5 +554,4 @@ public interface TermFactory {
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
 
 	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
-
 }
