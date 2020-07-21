@@ -1498,6 +1498,21 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
+    @Test
+    public void testIRI7() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "VALUES ?v { \"john\" \"ernest\" \"http://example.org/alice\" } \n" +
+                "BIND(IRI(?v) AS ?w)\n" +
+                "VALUES ?y { <http://example.org/john> <http://otherdomain.org/ernest> } \n" +
+                "FILTER (?w = ?y)\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
