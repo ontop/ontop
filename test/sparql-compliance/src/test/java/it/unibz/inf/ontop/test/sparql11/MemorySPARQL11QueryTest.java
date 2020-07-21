@@ -36,14 +36,10 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			/* AGGREGATES */
-			// TODO: support IF
+			// TODO: support xsd:double cast
 			aggregatesManifest + "agg-err-02",
 
 			/* FUNCTIONS*/
-
-			//bnode not supported in SPARQL transformation
-			functionsManifest + "bnode01",
-			functionsManifest + "bnode02",
 
 			// the SI does not preserve the original timezone
 			functionsManifest + "hours",
@@ -51,11 +47,8 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "day",
 
 			//not supported in SPARQL transformation
-			functionsManifest + "if01",
-			functionsManifest + "if02",
 			functionsManifest + "in01",
 			functionsManifest + "in02",
-			functionsManifest + "iri01",
 
 			//not supported in H2 transformation
 			functionsManifest + "md5-01",
@@ -88,11 +81,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//TZ is not supported in H2
 			functionsManifest + "tz",
 
-			/* CONSTRUCT not supported yet*/
-			//Projection cannot be cast to Reduced in rdf4j
-//			constructManifest + "constructwhere01",
-//			constructManifest + "constructwhere02",
-//			constructManifest + "constructwhere03",
 			//problem importing dataset
 			constructManifest + "constructwhere04",
 

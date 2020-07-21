@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
@@ -1101,5 +1102,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     protected abstract String getUUIDNameInDialect();
+
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROW_NUMBER() OVER ()";
+    }
 
 }

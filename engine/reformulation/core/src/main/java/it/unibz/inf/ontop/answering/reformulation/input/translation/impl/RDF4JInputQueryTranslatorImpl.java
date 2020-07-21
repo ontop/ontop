@@ -1391,10 +1391,41 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             }
             //Others: ListMemberOperator
         }
+        if (expr instanceof BNodeGenerator) {
+            Optional<ImmutableTerm> term = Optional.ofNullable(((BNodeGenerator) expr).getNodeIdExpr())
+                    .map(t -> getTerm(t, knownVariables));
+
+            SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                    SPARQL.BNODE, term.isPresent() ? 1 : 0);
+            return term
+                    .map(t -> termFactory.getImmutableFunctionalTerm(functionSymbol, t))
+                    .orElseGet(() -> termFactory.getImmutableFunctionalTerm(functionSymbol));
+        }
+        if (expr instanceof IRIFunction) {
+            ImmutableTerm argument = getTerm(((IRIFunction) expr).getArg(), knownVariables);
+            Optional<org.apache.commons.rdf.api.IRI> optionalBaseIRI = Optional.ofNullable(((IRIFunction) expr).getBaseURI())
+                    .map(rdfFactory::createIRI);
+
+            SPARQLFunctionSymbol functionSymbol = optionalBaseIRI
+                    .map(functionSymbolFactory::getIRIFunctionSymbol)
+                    .orElseGet(functionSymbolFactory::getIRIFunctionSymbol);
+
+            return termFactory.getImmutableFunctionalTerm(functionSymbol, argument);
+        }
+        if (expr instanceof If) {
+            If ifExpr = (If) expr;
+
+            SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                    SPARQL.IF, 3);
+
+            return termFactory.getImmutableFunctionalTerm(
+                    functionSymbol,
+                    convertToXsdBooleanTerm(getTerm(ifExpr.getCondition(), knownVariables)),
+                    getTerm(ifExpr.getResult(), knownVariables),
+                    getTerm(ifExpr.getAlternative(), knownVariables));
+        }
         // other subclasses
         // SubQueryValueOperator
-        // If
-        // BNodeGenerator
         throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
     }
 

@@ -38,10 +38,10 @@
 				</Component>
 				<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
 					value="it.unibz.infobda.protege4.RDBMSInspectorViewComponent"/> </Component> -->
-				<Component label="Mapping Assistant - BETA">
-					<Property id="pluginId"
-						value="it.unibz.inf.ontop.protege.MappingAssistantViewComponent" />
-				</Component>
+<!--				<Component label="Mapping Assistant - BETA">-->
+<!--					<Property id="pluginId"-->
+<!--						value="it.unibz.inf.ontop.protege.MappingAssistantViewComponent" />-->
+<!--				</Component>-->
 			</CNode>
 		</VSNode>
 	</VSNode>

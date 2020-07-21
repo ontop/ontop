@@ -358,6 +358,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public DBFunctionSymbol getDBIfThenElse() {
         return new MockupDBIfElseNullFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
@@ -498,6 +503,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     protected DBBooleanFunctionSymbol createDefaultInequality(InequalityLabel inequalityLabel) {
         return new DefaultDBDefaultInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
     }
+
 
     @Override
     public DBBooleanFunctionSymbol getDBIsStringEmpty() {

@@ -91,4 +91,11 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
         expectedValues.add("\"0.500000\"^^xsd:decimal");
         return expectedValues;
     }
+
+    @Test
+    @Ignore("TODO: support regex")
+    @Override
+    public void testIRI7() throws Exception {
+        super.testIRI7();
+    }
 }
