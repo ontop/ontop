@@ -1244,6 +1244,17 @@ public class BindWithFunctionsTest {
     }
 
     @Test
+    public void testIRI8() throws Exception {
+        String queryBind = "BASE <http://example.org/project1#data/>\n" +
+                "SELECT ?w {" +
+                "BIND(IRI(\"john\") AS ?w)\n" +
+                "} ";
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/project1#data/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
     public void testIF1() throws Exception {
         String queryBind = "SELECT (COALESCE(IF(\"rrr\" * \"2\"^^xsd:integer, \"1\", \"2\"), \"other\") AS ?w)  {} ";
 
@@ -1296,6 +1307,7 @@ public class BindWithFunctionsTest {
         expectedValues.add("\"other\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
     }
+
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
