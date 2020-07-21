@@ -325,12 +325,12 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBDifference();
     DBBooleanFunctionSymbol getDBRelate();
     FunctionSymbol getDBRelateMatrix();
-    DBFunctionSymbol getDBGetSRID();
+    FunctionSymbol getDBGetSRID();
 
-    DBFunctionSymbol getDBDimension();
-    DBFunctionSymbol getDBCoordinateDimension();
+    //DBFunctionSymbol getDBDimension();
+    //DBFunctionSymbol getDBCoordinateDimension();
     //DBFunctionSymbol getDBSpatialDimension();
-    DBBooleanFunctionSymbol getDBIsEmpty();
-    DBBooleanFunctionSymbol getDBIsSimple();
+    //DBBooleanFunctionSymbol getDBIsEmpty();
+    //DBBooleanFunctionSymbol getDBIsSimple();
     //FunctionSymbol getDBHasSerialization();
 }

@@ -15,5 +15,7 @@ INSERT INTO "GEOMS" VALUES (13, 'POLYGON((0 0, 3 0, 3 3, 0 3, 0 0))', 'intersect
 INSERT INTO "GEOMS" VALUES (14, 'POLYGON((0 3, 3 3, 3 6, 0 6, 0 3))', 'intersecting polygon');
 INSERT INTO "GEOMS" VALUES (15, 'LINESTRING(2 2, 11 2)', 'long horizontal line');
 INSERT INTO "GEOMS" VALUES (16, 'POLYGON((2 2, 6 2, 4 4, 2 2))', 'triangle');
-INSERT INTO "GEOMS" VALUES (17, 'GEOMETRYCOLLECTION(POLYGON((2 2, 6 2, 4 4, 2 2)),POINT(7 7))', 'polygon + point');
+INSERT INTO "GEOMS" VALUES (17, 'GEOMETRYCOLLECTION(POLYGON((2 2, 6 2, 4 4, 2 2)), POINT(7 7))', 'polygon + point');
 INSERT INTO "GEOMS" VALUES (18, 'POLYGON EMPTY', 'empty');
+INSERT INTO "GEOMS" VALUES (19, 'GEOMETRYCOLLECTION(POLYGON((2 2, 6 2, 4 4, 2 2)), POLYGON((0 3, 3 3, 3 6, 0 6, 0 3)))', 'polygon + polygon');
+INSERT INTO "GEOMS" VALUES (20, 'POLYGON ((0 2, 0 6, 6 6, 6 2, 0 2))', 'Not Simple Geom');

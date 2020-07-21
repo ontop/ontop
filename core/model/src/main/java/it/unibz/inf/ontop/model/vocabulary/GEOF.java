@@ -173,10 +173,10 @@ public class GEOF {
 
         UNION = factory.createIRI(PREFIX + "union");
 
-        // Boolean result
+        // geof:relate --> Boolean result
         RELATE = factory.createIRI(PREFIX + "relate");
 
-        // String result
+        // geof:relate --> String result
         RELATEM = factory.createIRI(PREFIX + "relate");
 
         // Properties

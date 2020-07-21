@@ -688,7 +688,7 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBGetSRID(), ImmutableList.of(arg1));
     }
 
-    @Override
+    /*@Override
     public ImmutableTerm getDBDimension(ImmutableTerm arg1) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDimension(), ImmutableList.of(arg1));
     }
@@ -696,14 +696,14 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableTerm getDBCoordinateDimension(ImmutableTerm arg1) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCoordinateDimension(), ImmutableList.of(arg1));
-    }
+    }*/
 
     /*@Override
     public ImmutableTerm getDBSpatialDimension(ImmutableTerm arg1) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSpatialDimension(), ImmutableList.of(arg1));
     }*/
 
-    @Override
+    /*@Override
     public ImmutableTerm getDBIsSimple(ImmutableTerm arg1) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIsSimple(), ImmutableList.of(arg1));
     }
@@ -711,7 +711,7 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableTerm getDBIsEmpty(ImmutableTerm arg1) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIsEmpty(), ImmutableList.of(arg1));
-    }
+    }*/
 
     /*@Override
     public ImmutableTerm getDBHasSerialization(ImmutableTerm arg1) {

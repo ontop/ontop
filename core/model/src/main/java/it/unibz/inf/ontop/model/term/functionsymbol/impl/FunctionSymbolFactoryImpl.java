@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEnvelopeFuncti
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSymDifferenceFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofUnionFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRelateFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRelateMatrixFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofGetSRIDFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWithinFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfContainsFunctionSymbolImpl;
@@ -46,10 +45,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppiFunct
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8PoFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppiFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoDimensionFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoCoordinateDimensionFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoIsEmptyFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoIsSimpleFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.GEOF;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
@@ -318,11 +313,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 /*
                  * Geo Properties
                  */
-                new GeoDimensionFunctionSymbolImpl(GEOF.DIMENSION, wktLiteral, xsdInteger),
+                /*new GeoDimensionFunctionSymbolImpl(GEOF.DIMENSION, wktLiteral, xsdInteger),
                 new GeoCoordinateDimensionFunctionSymbolImpl(GEOF.COORDINATEDIMENSION, wktLiteral, xsdInteger),
                 //new GeoSpatialDimensionFunctionSymbolImpl(GEOF.SPATIALDIMENSION, wktLiteral, xsdInteger),
                 new GeoIsEmptyFunctionSymbolImpl(GEOF.ISSIMPLE, wktLiteral, xsdBoolean),
-                new GeoIsSimpleFunctionSymbolImpl(GEOF.ISEMPTY, wktLiteral, xsdBoolean),
+                new GeoIsSimpleFunctionSymbolImpl(GEOF.ISEMPTY, wktLiteral, xsdBoolean),*/
                 //new GeoHasSerializationFunctionSymbolImpl(GEOF.HASSERIALIZATION, wktLiteral, iriType),
                 /*
                  * Geo Properties
@@ -338,7 +333,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral, iriType),
                 new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral, iriType),
                 new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral, iriType),
-                new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, xsdInteger),
+                //new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, xsdDecimal),
+                new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, xsdAnyUri),
                 new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType),
                 new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
                 new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean),
