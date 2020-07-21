@@ -1139,6 +1139,110 @@ public class BindWithFunctionsTest {
         checkReturnedValues(queryBind, expectedValues);
     }
 
+    @Test
+    public void testIRI1() throws Exception {
+        String queryBind = "SELECT ?w  {" +
+                "BIND(IRI(\"http://example.org/john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI1_2() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"http://example.org/john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI2() throws Exception {
+        String queryBind = "SELECT ?w  {" +
+                "BIND(IRI(<http://example.org/john>) AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI3() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI4() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(URI(\"john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI5() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"urn:john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<urn:john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI6() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"mailto:john@somewhere.org\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<mailto:john@somewhere.org>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI7() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "{ VALUES ?v { \"john\" \"ernest\" \"http://example.org/alice\" } } UNION { BIND (str(rand()) AS ?v) } \n" +
+                "BIND(IRI(?v) AS ?w)\n" +
+                "VALUES ?y { <http://example.org/john> <http://otherdomain.org/ernest> } \n" +
+                "FILTER (?w = ?y)\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

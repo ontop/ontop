@@ -12,7 +12,7 @@ public class ZeroAryBnodeSPARQLFunctionSymbolImpl extends AbstractBnodeSPARQLFun
     private final UUID uuid;
 
     protected ZeroAryBnodeSPARQLFunctionSymbolImpl(UUID uuid, RDFTermType bnodeType) {
-        super("SP_RAND" + uuid, ImmutableList.of(), bnodeType);
+        super("SP_BNODE" + uuid, ImmutableList.of(), bnodeType);
         this.uuid = uuid;
     }
 

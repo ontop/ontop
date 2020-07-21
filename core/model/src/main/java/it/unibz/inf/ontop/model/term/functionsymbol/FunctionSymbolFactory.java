@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -71,6 +72,8 @@ public interface FunctionSymbolFactory {
 
     SPARQLAggregationFunctionSymbol getSPARQLGroupConcatFunctionSymbol(String separator, boolean isDistinct);
 
+    SPARQLFunctionSymbol getIRIFunctionSymbol(IRI baseIRI);
+    SPARQLFunctionSymbol getIRIFunctionSymbol();
 
     /**
      * Special function capturing the EBV logic

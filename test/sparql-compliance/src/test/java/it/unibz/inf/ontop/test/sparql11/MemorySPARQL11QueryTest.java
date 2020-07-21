@@ -51,7 +51,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "if02",
 			functionsManifest + "in01",
 			functionsManifest + "in02",
-			functionsManifest + "iri01",
 
 			//not supported in H2 transformation
 			functionsManifest + "md5-01",

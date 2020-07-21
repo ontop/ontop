@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 public class UnaryBnodeSPARQLFunctionSymbolImpl extends AbstractBnodeSPARQLFunctionSymbol {
 
     protected UnaryBnodeSPARQLFunctionSymbolImpl(RDFDatatype xsdString, RDFTermType bnodeType) {
-        super(SPARQL.BNODE + "_1", ImmutableList.of(xsdString), bnodeType);
+        super("SP_" + SPARQL.BNODE + "_1", ImmutableList.of(xsdString), bnodeType);
     }
 
     @Override

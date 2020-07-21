@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -225,6 +226,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
+    private final Map<IRI, DBFunctionSymbol> iriStringResolverMap;
+
     private final Map<DBTermType, DBFunctionSymbol> distinctSumMap;
     private final Map<DBTermType, DBFunctionSymbol> regularSumMap;
 
@@ -272,6 +275,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.castMap = new ConcurrentHashMap<>();
         this.iriTemplateMap = new ConcurrentHashMap<>();
         this.bnodeTemplateMap = new ConcurrentHashMap<>();
+        this.iriStringResolverMap = new ConcurrentHashMap<>();
         this.numericInequalityMap = new ConcurrentHashMap<>();
         this.booleanInequalityMap = new ConcurrentHashMap<>();
         this.stringInequalityMap = new ConcurrentHashMap<>();
@@ -864,6 +868,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBIriStringResolver(IRI baseIRI) {
+        return iriStringResolverMap.computeIfAbsent(baseIRI, this::createDBIriStringResolver);
+    }
+
+    @Override
     public DBFunctionSymbol getDBCount(int arity, boolean isDistinct) {
         if (arity > 1) {
             throw new IllegalArgumentException("COUNT is 0-ary or unary");
@@ -1165,6 +1174,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new SimplifiableTypedNullFunctionSymbol(termType);
     }
 
+    protected DBFunctionSymbol createDBIriStringResolver(IRI baseIRI) {
+        return new DBIriStringResolverFunctionSymbolImpl(baseIRI, "^[a-zA-Z]+:", rootDBType, dbStringType);
+    }
 
     protected abstract String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter,
@@ -1259,6 +1271,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected abstract String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory);
+
 
 
     @Override
