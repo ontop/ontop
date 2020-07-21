@@ -36,7 +36,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			/* AGGREGATES */
-			// TODO: support IF
+			// TODO: support xsd:double cast
 			aggregatesManifest + "agg-err-02",
 
 			/* FUNCTIONS*/
@@ -47,8 +47,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "day",
 
 			//not supported in SPARQL transformation
-			functionsManifest + "if01",
-			functionsManifest + "if02",
 			functionsManifest + "in01",
 			functionsManifest + "in02",
 

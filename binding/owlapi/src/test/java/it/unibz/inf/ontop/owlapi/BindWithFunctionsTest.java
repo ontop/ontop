@@ -1243,6 +1243,60 @@ public class BindWithFunctionsTest {
         checkReturnedValues(queryBind, expectedValues);
     }
 
+    @Test
+    public void testIF1() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(\"rrr\" * \"2\"^^xsd:integer, \"1\", \"2\"), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF2() throws Exception {
+        String queryBind = "SELECT (IF(1 < 2, \"first\", \"second\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"first\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF3() throws Exception {
+        String queryBind = "SELECT (IF(1 > 2, \"first\", \"second\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"second\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF4() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(1 < 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF5() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(1 > 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"second\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF6() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(1 > 2, \"first\", \"rrr\" * \"2\"^^xsd:integer), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

@@ -220,6 +220,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 xsdDatetime, xsdString, false, TermFactory::getDBTz),
                 new UnaryBnodeSPARQLFunctionSymbolImpl(xsdString, bnodeType),
                 new NowSPARQLFunctionSymbolImpl(xsdDatetime),
+                new IfSPARQLFunctionSymbolImpl(xsdBoolean, abstractRDFType),
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
                 new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),

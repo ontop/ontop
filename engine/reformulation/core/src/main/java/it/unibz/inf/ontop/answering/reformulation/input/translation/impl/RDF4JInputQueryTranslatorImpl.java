@@ -1412,9 +1412,20 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
             return termFactory.getImmutableFunctionalTerm(functionSymbol, argument);
         }
+        if (expr instanceof If) {
+            If ifExpr = (If) expr;
+
+            SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                    SPARQL.IF, 3);
+
+            return termFactory.getImmutableFunctionalTerm(
+                    functionSymbol,
+                    convertToXsdBooleanTerm(getTerm(ifExpr.getCondition(), knownVariables)),
+                    getTerm(ifExpr.getResult(), knownVariables),
+                    getTerm(ifExpr.getAlternative(), knownVariables));
+        }
         // other subclasses
         // SubQueryValueOperator
-        // If
         throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
     }
 
