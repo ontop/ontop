@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.answering.logging.impl;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -59,6 +61,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private final UUID queryId;
     private final long creationTime;
     private final PrintStream outputStream;
+    private final ImmutableMultimap<String, String> httpHeaders;
     private final OntopReformulationSettings settings;
     private final boolean disabled;
     private final String applicationName;
@@ -76,17 +79,20 @@ public class QueryLoggerImpl implements QueryLogger {
     @Nullable
     private String sparqlQueryString;
 
-    @Inject
-    protected QueryLoggerImpl(OntopReformulationSettings settings,
+    @AssistedInject
+    protected QueryLoggerImpl(@Assisted ImmutableMultimap<String, String> httpHeaders,
+                              OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor) {
-        this(System.out, settings, classAndPropertyExtractor, relationNameExtractor);
+        this(System.out, httpHeaders, settings, classAndPropertyExtractor, relationNameExtractor);
     }
 
-    protected QueryLoggerImpl(PrintStream outputStream, OntopReformulationSettings settings,
+    protected QueryLoggerImpl(PrintStream outputStream, ImmutableMultimap<String, String> httpHeaders,
+                              OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor) {
         this.outputStream = outputStream;
+        this.httpHeaders = httpHeaders;
         this.settings = settings;
         this.classAndPropertyExtractor = classAndPropertyExtractor;
         this.relationNameExtractor = relationNameExtractor;

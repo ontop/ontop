@@ -19,6 +19,7 @@
  */
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import org.eclipse.rdf4j.model.IRI;
@@ -44,15 +45,17 @@ public abstract class AbstractOntopQuery implements Query {
     private final ParsedQuery initialParsedQuery;
     private final String baseIRI;
     protected final OntopConnection conn;
+    private final ImmutableMultimap<String, String> httpHeaders;
     protected int queryTimeout;
     protected MapBindingSet bindings = new MapBindingSet();
 
     protected AbstractOntopQuery(String queryString, String baseIRI,
                                  ParsedQuery initialParsedQuery, OntopConnection conn,
-                                 OntopSystemSettings settings) {
+                                 ImmutableMultimap<String, String> httpHeaders, OntopSystemSettings settings) {
         this.queryString = queryString;
         this.baseIRI = baseIRI;
         this.conn = conn;
+        this.httpHeaders = httpHeaders;
         this.queryTimeout = settings.getDefaultQueryTimeout()
                 .orElse(0);
         this.initialParsedQuery = initialParsedQuery;
@@ -148,6 +151,10 @@ public abstract class AbstractOntopQuery implements Query {
         else {
             return QueryParserUtil.parseQuery(QueryLanguage.SPARQL, getQueryString(), baseIRI);
         }
+    }
+
+    protected ImmutableMultimap<String, String> getHttpHeaders() {
+        return httpHeaders;
     }
 
 
