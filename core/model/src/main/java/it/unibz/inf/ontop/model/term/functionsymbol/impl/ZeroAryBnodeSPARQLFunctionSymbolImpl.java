@@ -20,7 +20,7 @@ public class ZeroAryBnodeSPARQLFunctionSymbolImpl extends AbstractBnodeSPARQLFun
     protected ImmutableTerm buildLexicalTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory) {
         return termFactory.getNullRejectingDBConcatFunctionalTerm(
                 ImmutableList.of(
-                        termFactory.getDBStringConstant("_:" + uuid),
+                        termFactory.getDBStringConstant(uuid.toString()),
                         termFactory.getDBRowUniqueStr()));
     }
 }
