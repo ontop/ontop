@@ -143,11 +143,15 @@ public  class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implement
                 .orElseGet(IncrementalEvaluation::declareIsFalse);
     }
 
-    /**
-     * NB: to prevent some optimization
-     */
     @Override
     protected boolean tolerateNulls() {
+        return false;
+    }
+
+    /**
+     * Disable it when non simplifiable
+     */
+    protected boolean enableIfElseNullLifting() {
         return !isSimplifiable;
     }
 }
