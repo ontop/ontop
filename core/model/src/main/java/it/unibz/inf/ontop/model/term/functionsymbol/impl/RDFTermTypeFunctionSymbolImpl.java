@@ -32,7 +32,7 @@ public  class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implement
                                             ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap,
                                             boolean isSimplifiable) {
         super("RDF_TYPE" + extractConversionMapString(conversionMap),
-                ImmutableList.of(typeFactory.getDBTypeFactory().getDBBooleanType()));
+                ImmutableList.of(typeFactory.getDBTypeFactory().getDBLargeIntegerType()));
         metaType = typeFactory.getMetaRDFTermType();
         this.dictionary = dictionary;
         this.conversionMap = conversionMap;
@@ -143,15 +143,23 @@ public  class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implement
                 .orElseGet(IncrementalEvaluation::declareIsFalse);
     }
 
+    /**
+     * NB: to prevent some optimization
+     */
     @Override
     protected boolean tolerateNulls() {
-        return false;
+        return !isSimplifiable;
     }
 
     /**
-     * Disable it when non simplifiable
+     * Still allows the IsNotNull evaluation, even if in "not-simplifiable" mode.
+     *
+     * Important because the "not-simplifiable" functional term may be blocked in IS_NOT_NULL condition in a filter.
      */
-    protected boolean enableIfElseNullLifting() {
-        return !isSimplifiable;
+    @Override
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                                   VariableNullability variableNullability) {
+        return termFactory.getDBIsNotNull(terms.get(0))
+                .evaluate(variableNullability, true);
     }
 }
