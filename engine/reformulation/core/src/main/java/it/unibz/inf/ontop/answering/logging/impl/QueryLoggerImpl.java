@@ -62,7 +62,7 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String PROPERTIES_KEY = "propertiesUsedInQuery";
     protected static final String TABLES_KEY = "tables";
     protected static final String HTTP_HEADERS_KEY = "httpHeaders";
-    protected static final String QUERY_TEMPLATE_KEY = "queryTemplate";
+    protected static final String QUERY_TEMPLATE_KEY = "extractedQueryTemplate";
     protected static final String HASH_KEY = "hash";
     protected static final String PARAMETERS_KEY = "parameters";
 
