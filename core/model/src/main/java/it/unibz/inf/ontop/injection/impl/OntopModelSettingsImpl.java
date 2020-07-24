@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -185,6 +186,10 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
         Properties p = new Properties();
         p.putAll(properties);
         return p;
+    }
+
+    protected Enumeration<Object> getPropertyKeys() {
+        return properties.keys();
     }
 
 
