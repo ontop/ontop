@@ -51,6 +51,11 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
+    public boolean isQueryTemplateExtractionEnabled() {
+        return getRequiredBoolean(QUERY_TEMPLATE_EXTRACTION);
+    }
+
+    @Override
     public boolean isSparqlQueryIncludedIntoQueryLog() {
         return getRequiredBoolean(SPARQL_INCLUDED_QUERY_LOGGING);
     }

@@ -10,16 +10,17 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     boolean isDistinctPostProcessingEnabled();
 
     boolean isQueryLoggingEnabled();
+    boolean isQueryTemplateExtractionEnabled();
     boolean isSparqlQueryIncludedIntoQueryLog();
     boolean isReformulatedQueryIncludedIntoQueryLog();
     boolean areClassesAndPropertiesIncludedIntoQueryLog();
     boolean areTablesIncludedIntoQueryLog();
 
+    ImmutableSet<String> getHttpHeaderNamesToLog();
+
     long getQueryCacheMaxSize();
 
     String getApplicationName();
-
-    ImmutableSet<String> getHttpHeaderNamesToLog();
 
 
     //--------------------------
@@ -40,7 +41,6 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     String CLASSES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeClassesAndProperties";
     // Includes DB tables/views into the query log
     String TABLES_INCLUDED_QUERY_LOGGING = "ontop.queryLogging.includeTables";
-
     String HTTP_HEADER_INCLUDED_QUERY_LOGGING_PREFIX = "ontop.queryLogging.includeHttpHeader.";
-
+    String QUERY_TEMPLATE_EXTRACTION = "ontop.queryLogging.extractQueryTemplate";
 }
