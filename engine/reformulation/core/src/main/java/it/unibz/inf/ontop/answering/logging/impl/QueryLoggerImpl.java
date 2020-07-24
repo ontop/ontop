@@ -23,6 +23,8 @@ import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 public class QueryLoggerImpl implements QueryLogger {
@@ -53,9 +55,11 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String CLASSES_KEY = "classesUsedInQuery";
     protected static final String PROPERTIES_KEY = "propertiesUsedInQuery";
     protected static final String TABLES_KEY = "tables";
+    protected static final String HTTP_HEADERS_KEY = "httpHeaders";
 
     private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     private static final Logger REGULAR_LOGGER = LoggerFactory.getLogger(QueryLoggerImpl.class);
+
 
 
     private final UUID queryId;
@@ -144,6 +148,9 @@ public class QueryLoggerImpl implements QueryLogger {
             }
             js.writeNumberField(REFORMULATION_DURATION_KEY, reformulationTime - creationTime);
             js.writeBooleanField(REFORMULATION_CACHE_HIT_KEY, wasCached);
+
+            writeHttpHeaders(js);
+
             if (sparqlQueryString != null)
                 js.writeStringField(SPARQL_QUERY_KEY, sparqlQueryString);
             if (settings.isReformulatedQueryIncludedIntoQueryLog())
@@ -154,6 +161,20 @@ public class QueryLoggerImpl implements QueryLogger {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
         outputStream.println(stringWriter.toString());
+    }
+
+    private void writeHttpHeaders(JsonGenerator js) throws IOException {
+        js.writeObjectFieldStart(HTTP_HEADERS_KEY);
+        ImmutableSet<String> namesToLog = settings.getHttpHeaderNamesToLog();
+
+        for (Map.Entry<String, Collection<String>> e : httpHeaders.asMap().entrySet()) {
+            String normalizedKey = e.getKey().toLowerCase();
+            if (namesToLog.contains(normalizedKey)) {
+                // We only consider the first value
+                js.writeStringField(normalizedKey, e.getValue().iterator().next());
+            }
+        }
+        js.writeEndObject();
     }
 
     @Override

@@ -184,6 +184,7 @@ public abstract class QuestStatement implements OntopStatement {
 	@Override
 	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopConnectionException, OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+
 		if (inputQuery instanceof SelectQuery) {
 			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders, this::executeSelectQuery);
 		}
