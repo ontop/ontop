@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -77,10 +78,15 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
                                                                      VariableNullability variableNullability,
                                                                      boolean lookForIsNull) {
 
+        // Removes duplicates to avoid returning false in cases like OR2(IS_NOT_NULL(b),IS_NOT_NULL(b))
+        ImmutableList<ImmutableTerm> distinctTerms = newTerms.stream()
+                .distinct()
+                .collect(ImmutableCollectors.toList());
+
         // { index -> termToNullify }
-        ImmutableMap<Integer, ImmutableTerm> termToNullifyMap = IntStream.range(0, newTerms.size())
+        ImmutableMap<Integer, ImmutableTerm> termToNullifyMap = IntStream.range(0, distinctTerms.size())
                 .boxed()
-                .map(i -> Maps.immutableEntry(i, Optional.of(newTerms.get(i))
+                .map(i -> Maps.immutableEntry(i, Optional.of(distinctTerms.get(i))
                         .filter(t -> t instanceof ImmutableExpression)
                         .map(t -> (ImmutableExpression) t)
                         .filter(e -> (e.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
@@ -92,12 +98,13 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
                         e -> e.getValue().get()));
 
         return termToNullifyMap.entrySet().stream()
-                .reduce(newTerms,
-                        (ts, e) -> IntStream.range(0, newTerms.size())
+                .reduce(distinctTerms,
+                        (ts, e) -> IntStream.range(0, distinctTerms.size())
                                 .boxed()
                                 .map(i -> e.getKey().equals(i)
                                         ? ts.get(i)
-                                        // Only tries to nullify other entries
+                                        // Only tries to nullify other entries.
+                                        // NB: nullifying only replaces the same syntactic term by NULL
                                         : Nullifiers.nullify(ts.get(i), e.getValue(), termFactory)
                                             .simplify(variableNullability))
                                 .collect(ImmutableCollectors.toList()),
