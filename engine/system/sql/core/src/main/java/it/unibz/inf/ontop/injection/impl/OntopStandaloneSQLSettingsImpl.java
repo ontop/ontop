@@ -39,6 +39,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isQueryTemplateExtractionEnabled() {
+        return systemSettings.isQueryTemplateExtractionEnabled();
+    }
+
+    @Override
     public boolean isSparqlQueryIncludedIntoQueryLog() {
         return getRequiredBoolean(SPARQL_INCLUDED_QUERY_LOGGING);
     }
