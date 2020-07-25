@@ -42,38 +42,38 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.google.guava</groupId>-->
+<!--            <artifactId>guava</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.main</artifactId>
-            <version>4.4.1</version>
+            <version>5.4.0</version>
             <scope>provided</scope>
         </dependency>
 
         <!-- dependencies available from Protege: end -->
 
         <!-- not sure if this is really needed -->
-        <dependency>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>error_prone_annotations</artifactId>
-            <version>2.0.15</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.google.errorprone</groupId>-->
+<!--            <artifactId>error_prone_annotations</artifactId>-->
+<!--&lt;!&ndash;            <version>2.0.15</version>&ndash;&gt;-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>4.4</version>
+            <version>4.6</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+<!--            <version>3.4</version>-->
         </dependency>
 
         <dependency>
@@ -90,19 +90,19 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-osgi</artifactId>
-            <version>4.5.2</version>
+            <version>4.5.10</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore-osgi</artifactId>
-            <version>4.4.4</version>
+            <version>4.4.12</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore-nio</artifactId>
-            <version>4.4.4</version>
+            <version>4.4.12</version>
         </dependency>
 
         <dependency>
@@ -403,11 +403,11 @@
         </dependency>
 
         <!-- antlr4 transitive dependencies start -->
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>3.5.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.antlr</groupId>-->
+<!--            <artifactId>antlr-runtime</artifactId>-->
+<!--&lt;!&ndash;            <version>3.5.2</version>&ndash;&gt;-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.abego.treelayout</groupId>
@@ -433,11 +433,11 @@
             <!--<artifactId>opencsv</artifactId>-->
             <!--<version>2.0</version>-->
         <!--</dependency>-->
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>stringtemplate</artifactId>
-            <version>4.0.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.antlr</groupId>-->
+<!--            <artifactId>stringtemplate</artifactId>-->
+<!--&lt;!&ndash;            <version>4.0.2</version>&ndash;&gt;-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.apache.tomcat</groupId>
@@ -520,6 +520,10 @@
             <artifactId>rdf4j-queryrender</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-trig</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
         </dependency>
@@ -558,6 +562,7 @@
             <artifactId>commons-rdf-rdf4j</artifactId>
             <version>${commons-rdf.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-rdf-simple</artifactId>
@@ -565,10 +570,21 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.jsonld-java</groupId>
-            <artifactId>jsonld-java</artifactId>
-            <version>0.12.1</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>failureaccess</artifactId>
+            <version>1.0.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>provided</scope>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.jsonld-java</groupId>-->
+<!--            <artifactId>jsonld-java</artifactId>-->
+<!--&lt;!&ndash;            <version>0.12.1</version>&ndash;&gt;-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -629,7 +645,7 @@
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
-                        <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,*</Import-Package>
+                        <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*</Import-Package>
 
                         <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                             or protege wont load it -->
