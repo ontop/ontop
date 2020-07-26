@@ -933,6 +933,12 @@
                 <artifactId>fluent-hc</artifactId>
                 <version>4.5.10</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>5.6.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
