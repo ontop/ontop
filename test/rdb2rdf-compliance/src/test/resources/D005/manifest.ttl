@@ -7,7 +7,7 @@
 	dcterms:title "One table, three columns, three rows, two duplicate tuples, no primary key" ;
 	dcterms:identifier "D005-1table3columns3rows2duplicates" ;
 	rdb2rdftest:sqlScriptFile "create.sql";
-	rdb2rdftest:relatedTestCase <dg0005>, <tc0005a>,  <tc0005b> ;
+	rdb2rdftest:relatedTestCase <dg0005>, <dg0005-modified>, <tc0005a>, <tc0005a-modified>,  <tc0005b>, <tc0005b-modified> ;
 .
 
 <dg0005> a rdb2rdftest:DirectMapping ;	
@@ -19,6 +19,18 @@
 	rdb2rdftest:database <d005> ;
 	rdb2rdftest:hasExpectedOutput true ;
 	rdb2rdftest:output "directGraph.ttl" ;
+.
+
+# MODIFIED (double not using the engineering notation)
+<dg0005-modified> a rdb2rdftest:DirectMapping ;
+	dcterms:title "Generation of BlankNodes from duplicate tuples (modified)";
+	dcterms:identifier "DirectGraphTC0005" ;
+	test:purpose "Tests the generation of Blank Nodes for duplicate tuples" ;
+	test:specificationReference "#no-pk" ;
+	test:reviewStatus test:unreviewed ;
+	rdb2rdftest:database <d005> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph-modified.ttl" ;
 .
 
 <tc0005a> a rdb2rdftest:R2RML ;	
