@@ -642,6 +642,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryparser-serql</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.github.jsonld-java</groupId>
                 <artifactId>jsonld-java</artifactId>
                 <version>0.13.0</version>
