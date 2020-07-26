@@ -7,7 +7,7 @@
     <version>4.0.0-rc-2-SNAPSHOT</version>
 
     <name>ontop</name>
-    <url>http://ontop.inf.unibz.it/</url>
+    <url>http://ontop-vkg.org/</url>
 
     <licenses>
         <license>
@@ -632,12 +632,6 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-sail-memory</artifactId>
-                <version>${rdf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.rdf4j</groupId>
-                <artifactId>rdf4j-rio-trig</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
 

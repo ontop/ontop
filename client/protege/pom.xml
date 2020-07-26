@@ -580,11 +580,6 @@
             <artifactId>guava</artifactId>
             <scope>provided</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.github.jsonld-java</groupId>-->
-<!--            <artifactId>jsonld-java</artifactId>-->
-<!--&lt;!&ndash;            <version>0.12.1</version>&ndash;&gt;-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -645,7 +640,7 @@
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
-                        <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*</Import-Package>
+                        <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*;-split-package:=merge-last</Import-Package>
 
                         <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                             or protege wont load it -->
