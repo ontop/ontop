@@ -54,10 +54,6 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
         builder.putAll(super.createNormalizationTable());
 
-        // BOOL
-        DBTermType boolType = dbTypeFactory.getDBTermType(BOOL_STR);
-        builder.put(boolType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(boolType));
-
         //TIMESTAMP
         DBTermType timeStamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
@@ -148,7 +144,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     public DBFunctionSymbol getDBSubString3() {
         return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
     }
-    
+
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
         return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
