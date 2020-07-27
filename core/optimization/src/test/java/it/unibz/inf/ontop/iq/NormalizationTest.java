@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Ignore;
@@ -2119,6 +2120,143 @@ public class NormalizationTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
 
         normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testDisjunctionSameIsNotNull() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
+
+        RDFTermTypeConstant enTerm = TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("en"));
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                TERM_FACTORY.getDBCoalesce(B, B),
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getDBIsNotNull(B),
+                                                TERM_FACTORY.getDBIsNotNull(B)),
+                                        enTerm))
+                                ));
+
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR2,
+                ImmutableMap.of( 1, B));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                B,
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(B),
+                                        enTerm))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, dataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testDisjunctionSimilarIsNotNull() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
+
+        RDFTermTypeConstant enTerm = TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("en"));
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                TERM_FACTORY.getDBCoalesce(B, B),
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getDBIsNotNull(TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(B, TERM_FACTORY.getDBStringConstant("stuff")))),
+                                                TERM_FACTORY.getDBIsNotNull(TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(B, TERM_FACTORY.getDBStringConstant("other"))))),
+                                        enTerm))
+                ));
+
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR2,
+                ImmutableMap.of( 1, B));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                B,
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(B),
+                                        enTerm))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, dataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testLJOnConstantWithLangTags() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
+
+        DBConstant intConstant = TERM_FACTORY.getDBIntegerConstant(54);
+
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        ImmutableFunctionalTerm lexicalTerm = TERM_FACTORY.getDBCastFunctionalTerm(
+                dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType(), A);
+
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFFunctionalTerm(lexicalTerm, L)));
+
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(
+                TERM_FACTORY.getStrictEquality(TERM_FACTORY.getDBStringConstant("en"), TERM_FACTORY.getLangTypeFunctionalTerm(L)));
+
+        ExtensionalDataNode leftChild = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR2, ImmutableMap.of(0, intConstant));
+
+
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(topConstructionNode.getChildVariables());
+
+        RDFTermTypeConstant enConstant = TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("en"));
+
+        ConstructionNode rightConstruction1 = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        L, enConstant));
+
+        ConstructionNode rightConstruction2 = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        L, TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("de"))));
+
+        ExtensionalDataNode rightDataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR2, ImmutableMap.of(0, intConstant, 1, A));
+        ExtensionalDataNode rightDataNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE2_AR2, ImmutableMap.of(0, intConstant, 1, A));
+
+        NaryIQTree unionTree = IQ_FACTORY.createNaryIQTree(unionNode,
+                ImmutableList.of(
+                        IQ_FACTORY.createUnaryIQTree(rightConstruction1, rightDataNode1),
+                        IQ_FACTORY.createUnaryIQTree(rightConstruction2, rightDataNode2)));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode,
+                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, leftChild, unionTree));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ConstructionNode newTopConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFFunctionalTerm(lexicalTerm,
+                        TERM_FACTORY.getIfElseNull(
+                                TERM_FACTORY.getDBIsNotNull(A),
+                                enConstant))));
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                newTopConstructionNode,
+                IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                        IQ_FACTORY.createLeftJoinNode(),
+                        leftChild,
+                        rightDataNode1));
+
+        normalizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
     }
 
 

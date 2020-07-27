@@ -2,13 +2,19 @@ package it.unibz.inf.ontop.answering.logging.impl;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
+import com.google.common.hash.Hashing;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
+import it.unibz.inf.ontop.answering.logging.impl.QueryTemplateExtractor.QueryTemplateExtraction;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.model.term.GroundTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
@@ -18,9 +24,13 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class QueryLoggerImpl implements QueryLogger {
@@ -51,14 +61,20 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String CLASSES_KEY = "classesUsedInQuery";
     protected static final String PROPERTIES_KEY = "propertiesUsedInQuery";
     protected static final String TABLES_KEY = "tables";
+    protected static final String HTTP_HEADERS_KEY = "httpHeaders";
+    protected static final String QUERY_TEMPLATE_KEY = "extractedQueryTemplate";
+    protected static final String HASH_KEY = "hash";
+    protected static final String PARAMETERS_KEY = "parameters";
 
     private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     private static final Logger REGULAR_LOGGER = LoggerFactory.getLogger(QueryLoggerImpl.class);
+;
 
 
     private final UUID queryId;
     private final long creationTime;
     private final PrintStream outputStream;
+    private final ImmutableMultimap<String, String> httpHeaders;
     private final OntopReformulationSettings settings;
     private final boolean disabled;
     private final String applicationName;
@@ -67,6 +83,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private long unblockedResulSetTime;
     private final ClassAndPropertyExtractor classAndPropertyExtractor;
     private final RelationNameExtractor relationNameExtractor;
+    private final QueryTemplateExtractor queryTemplateExtractor;
 
     @Nullable
     private ImmutableSet<IRI> classes, properties;
@@ -76,20 +93,28 @@ public class QueryLoggerImpl implements QueryLogger {
     @Nullable
     private String sparqlQueryString;
 
-    @Inject
-    protected QueryLoggerImpl(OntopReformulationSettings settings,
+    @Nullable
+    private QueryTemplateExtraction queryTemplate;
+
+    @AssistedInject
+    protected QueryLoggerImpl(@Assisted ImmutableMultimap<String, String> httpHeaders,
+                              OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
-                              RelationNameExtractor relationNameExtractor) {
-        this(System.out, settings, classAndPropertyExtractor, relationNameExtractor);
+                              RelationNameExtractor relationNameExtractor,
+                              QueryTemplateExtractor queryTemplateExtractor) {
+        this(System.out, httpHeaders, settings, classAndPropertyExtractor, relationNameExtractor, queryTemplateExtractor);
     }
 
-    protected QueryLoggerImpl(PrintStream outputStream, OntopReformulationSettings settings,
+    protected QueryLoggerImpl(PrintStream outputStream, ImmutableMultimap<String, String> httpHeaders,
+                              OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
-                              RelationNameExtractor relationNameExtractor) {
+                              RelationNameExtractor relationNameExtractor, QueryTemplateExtractor queryTemplateExtractor) {
         this.outputStream = outputStream;
+        this.httpHeaders = httpHeaders;
         this.settings = settings;
         this.classAndPropertyExtractor = classAndPropertyExtractor;
         this.relationNameExtractor = relationNameExtractor;
+        this.queryTemplateExtractor = queryTemplateExtractor;
         this.queryId = UUID.randomUUID();
         creationTime = System.currentTimeMillis();
         applicationName = settings.getApplicationName();
@@ -138,6 +163,10 @@ public class QueryLoggerImpl implements QueryLogger {
             }
             js.writeNumberField(REFORMULATION_DURATION_KEY, reformulationTime - creationTime);
             js.writeBooleanField(REFORMULATION_CACHE_HIT_KEY, wasCached);
+
+            writeHttpHeaders(js);
+            writeQueryTemplateExtraction(js);
+
             if (sparqlQueryString != null)
                 js.writeStringField(SPARQL_QUERY_KEY, sparqlQueryString);
             if (settings.isReformulatedQueryIncludedIntoQueryLog())
@@ -148,6 +177,41 @@ public class QueryLoggerImpl implements QueryLogger {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
         outputStream.println(stringWriter.toString());
+    }
+
+    private void writeHttpHeaders(JsonGenerator js) throws IOException {
+        js.writeObjectFieldStart(HTTP_HEADERS_KEY);
+        ImmutableSet<String> namesToLog = settings.getHttpHeaderNamesToLog();
+
+        for (Map.Entry<String, Collection<String>> e : httpHeaders.asMap().entrySet()) {
+            String normalizedKey = e.getKey().toLowerCase();
+            if (namesToLog.contains(normalizedKey)) {
+                // We only consider the first value
+                js.writeStringField(normalizedKey, e.getValue().iterator().next());
+            }
+        }
+        js.writeEndObject();
+    }
+
+    private void writeQueryTemplateExtraction(JsonGenerator js) throws IOException {
+        if (queryTemplate == null)
+            return;
+        js.writeObjectFieldStart(QUERY_TEMPLATE_KEY);
+
+        // TODO: update Guava
+        @SuppressWarnings("UnstableApiUsage")
+        String iqHash = Hashing.sha256()
+                .hashString(queryTemplate.getIq().toString(), StandardCharsets.UTF_8)
+                .toString();
+        js.writeStringField(HASH_KEY, iqHash);
+
+        js.writeObjectFieldStart(PARAMETERS_KEY);
+        for (Map.Entry<GroundTerm, Variable> e : queryTemplate.getParameterMap().entrySet()) {
+            js.writeStringField(e.getValue().toString(), e.getKey().toString());
+        }
+        js.writeEndObject();
+        js.writeEndObject();
+
     }
 
     @Override
@@ -236,12 +300,20 @@ public class QueryLoggerImpl implements QueryLogger {
 
     @Override
     public void setSparqlIQ(IQ sparqlIQ) {
-        if (disabled || (!settings.areClassesAndPropertiesIncludedIntoQueryLog()))
+        if (disabled)
             return;
 
-        ClassesAndProperties classesAndProperties = classAndPropertyExtractor.extractClassesAndProperties(sparqlIQ);
-        classes = classesAndProperties.getClasses();
-        properties = classesAndProperties.getProperties();
+        if(settings.areClassesAndPropertiesIncludedIntoQueryLog()) {
+            ClassesAndProperties classesAndProperties = classAndPropertyExtractor.extractClassesAndProperties(sparqlIQ);
+            classes = classesAndProperties.getClasses();
+            properties = classesAndProperties.getProperties();
+        }
+
+        if (settings.isQueryTemplateExtractionEnabled()) {
+            Optional<QueryTemplateExtraction> extraction = queryTemplateExtractor.extract(sparqlIQ);
+
+            extraction.ifPresent(e -> queryTemplate = e);
+        }
     }
 
     @Override

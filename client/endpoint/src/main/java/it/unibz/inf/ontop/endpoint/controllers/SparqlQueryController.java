@@ -1,6 +1,11 @@
 package it.unibz.inf.ontop.endpoint.controllers;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.rdf4j.repository.impl.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VersionInfo;
 
 import org.eclipse.rdf4j.query.BooleanQuery;
@@ -36,9 +41,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,8 +80,8 @@ public class SparqlQueryController {
             @RequestParam(value = "query") String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri,
-            HttpServletResponse response) {
-        execQuery(accept, query, defaultGraphUri, namedGraphUri, response);
+            HttpServletRequest request, HttpServletResponse response) {
+        execQuery(request, accept, query, defaultGraphUri, namedGraphUri, response);
     }
 
     @RequestMapping(value = "/sparql",
@@ -85,8 +92,8 @@ public class SparqlQueryController {
             @RequestParam(value = "query") String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri,
-            HttpServletResponse response) {
-        execQuery(accept, query, defaultGraphUri, namedGraphUri, response);
+            HttpServletRequest request, HttpServletResponse response) {
+        execQuery(request, accept, query, defaultGraphUri, namedGraphUri, response);
     }
 
     @RequestMapping(value = "/sparql",
@@ -97,14 +104,20 @@ public class SparqlQueryController {
             @RequestBody String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri,
-            HttpServletResponse response) {
-        execQuery(accept, query, defaultGraphUri, namedGraphUri, response);
+            HttpServletRequest request, HttpServletResponse response) {
+        execQuery(request, accept, query, defaultGraphUri, namedGraphUri, response);
     }
 
-    private void execQuery(String accept, String query, String[] defaultGraphUri, String[] namedGraphUri,
+    private void execQuery(HttpServletRequest request, String accept, String query, String[] defaultGraphUri, String[] namedGraphUri,
                            HttpServletResponse response) {
-        try (RepositoryConnection connection = repository.getConnection()) {
-            Query q = connection.prepareQuery(QueryLanguage.SPARQL, query);
+
+        ImmutableMultimap<String, String> httpHeaders = Collections.list(request.getHeaderNames()).stream()
+                .flatMap(k -> Collections.list(request.getHeaders(k)).stream()
+                        .map(v -> Maps.immutableEntry(k, v)))
+                .collect(ImmutableCollectors.toMultimap());
+
+        try (OntopRepositoryConnection connection = repository.getConnection()) {
+            Query q = connection.prepareQuery(QueryLanguage.SPARQL, query, httpHeaders);
             OutputStream bao = response.getOutputStream();
 
             if (q instanceof TupleQuery) {

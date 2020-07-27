@@ -19,7 +19,7 @@ public class UnaryBnodeSPARQLFunctionSymbolImpl extends AbstractBnodeSPARQLFunct
         ImmutableTerm subLexicalTerm = extractLexicalTerm(newTerms.get(0), termFactory);
 
         return termFactory.getImmutableFunctionalTerm(
-                termFactory.getDBFunctionSymbolFactory().getBnodeStringTemplateFunctionSymbol("_:{}/{}"),
+                termFactory.getDBFunctionSymbolFactory().getBnodeStringTemplateFunctionSymbol("{}/{}"),
                 subLexicalTerm, termFactory.getDBRowUniqueStr());
     }
 }

@@ -1,15 +1,23 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Properties;
 
 public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implements OntopReformulationSettings {
 
     private static final String DEFAULT_FILE = "reformulation-default.properties";
     private final OntopOptimizationSettings optimizationSettings;
+
+    // LAZY
+    @Nullable
+    private ImmutableSet<String> httpHeaderNamesToLog;
 
     OntopReformulationSettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
@@ -43,6 +51,11 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
+    public boolean isQueryTemplateExtractionEnabled() {
+        return getRequiredBoolean(QUERY_TEMPLATE_EXTRACTION);
+    }
+
+    @Override
     public boolean isSparqlQueryIncludedIntoQueryLog() {
         return getRequiredBoolean(SPARQL_INCLUDED_QUERY_LOGGING);
     }
@@ -70,5 +83,23 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     @Override
     public String getApplicationName() {
         return getRequiredProperty(APPLICATION_NAME);
+    }
+
+    @Override
+    public synchronized ImmutableSet<String> getHttpHeaderNamesToLog() {
+        if (httpHeaderNamesToLog == null) {
+            httpHeaderNamesToLog = Collections.list(getPropertyKeys()).stream()
+                    .filter(k -> k instanceof String)
+                    .map(k -> (String) k)
+                    .filter(k -> k.startsWith(HTTP_HEADER_INCLUDED_QUERY_LOGGING_PREFIX))
+                    .filter(k -> getBoolean(k)
+                            .filter(b -> b)
+                            .isPresent())
+                    .map(k -> k.substring(HTTP_HEADER_INCLUDED_QUERY_LOGGING_PREFIX.length()))
+                    //Normalization
+                    .map(String::toLowerCase)
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return httpHeaderNamesToLog;
     }
 }

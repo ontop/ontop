@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.input.GraphSPARQLQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
@@ -32,8 +33,9 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 	private final boolean isConstruct;
 
 	public OntopGraphQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection ontopConnection,
-						   RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
-		super(queryString, baseIRI, parsedQuery, ontopConnection, settings);
+						   ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory inputQueryFactory,
+						   OntopSystemSettings settings) {
+		super(queryString, baseIRI, parsedQuery, ontopConnection, httpHeaders, settings);
 		// TODO: replace by something stronger (based on the parsed query)
 		this.isConstruct = SPARQLQueryUtility.isConstructQuery(queryString);
 
@@ -57,7 +59,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery);
 		try (
 				OntopStatement stm = conn.createStatement();
-				SimpleGraphResultSet res = stm.execute(query)
+				SimpleGraphResultSet res = stm.execute(query, getHttpHeaders())
 		){
 			
 			Map<String, String> namespaces = new HashMap<>();

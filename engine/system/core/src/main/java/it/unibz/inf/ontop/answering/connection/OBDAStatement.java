@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.answering.connection;
 
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.exception.*;
@@ -13,6 +14,9 @@ public interface OBDAStatement extends AutoCloseable {
 
 	<R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException,
 	OntopConnectionException, OntopResultConversionException;
+
+	<R extends OBDAResultSet> R execute(InputQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
+			throws OntopReformulationException, OntopQueryEvaluationException, OntopConnectionException, OntopResultConversionException;
 
 	int getMaxRows() throws OntopConnectionException;
 

@@ -224,7 +224,7 @@ echo " Building Ontop CLI distribution package     "
 echo "-----------------------------------------"
 echo ""
 
-mvn assembly:assembly
+mvn assembly:single
 rm -fr ${ONTOP_CLI}
 mkdir -p ${ONTOP_CLI}
 echo "[INFO] Copying files..."

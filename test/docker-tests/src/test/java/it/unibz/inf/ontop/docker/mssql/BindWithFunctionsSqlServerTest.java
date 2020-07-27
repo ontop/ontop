@@ -49,10 +49,10 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0000000000000000000, 43.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0.0000000000000000000, 23.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0.0000000000000000000, 34.0000000000000000000\"^^xsd:string");
-        expectedValues.add("\"0.0000000000000000000, 10.0000000000000000000\"^^xsd:string");
+        expectedValues.add("\"0E-19, 43.0000000000000000000\"^^xsd:string");
+        expectedValues.add("\"0E-19, 23.0000000000000000000\"^^xsd:string");
+        expectedValues.add("\"0E-19, 34.0000000000000000000\"^^xsd:string");
+        expectedValues.add("\"0E-19, 10.0000000000000000000\"^^xsd:string");
         return expectedValues;
     }
 

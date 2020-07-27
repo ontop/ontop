@@ -143,7 +143,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblDatabasePassword = new javax.swing.JLabel();
         lblJdbcDriver = new javax.swing.JLabel();
         lblConnectionStatus = new javax.swing.JLabel();
-        cmdHelp = new javax.swing.JButton();
         pnlInformation = new javax.swing.JPanel();
 
         setFocusable(false);
@@ -336,22 +335,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 10, 10);
         pnlDataSourceParameters.add(lblConnectionStatus, gridBagConstraints);
 
-        cmdHelp.setFont(new java.awt.Font("Dialog", 1, 13)); // NOI18N
-        cmdHelp.setForeground(new java.awt.Color(53, 113, 163));
-        cmdHelp.setIcon(IconLoader.getImageIcon("images/gtk-help.png"));
-        cmdHelp.setText("<HTML><U>Help</U></HTML>");
-        cmdHelp.setToolTipText("For information on JDBC connections go to: https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC");
-        cmdHelp.setBorderPainted(false);
-        cmdHelp.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdHelpActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        pnlDataSourceParameters.add(cmdHelp, gridBagConstraints);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -465,7 +448,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton cmdHelp;
     private javax.swing.JButton cmdTestConnection;
     private javax.swing.JLabel lblConnectionStatus;
     private javax.swing.JLabel lblDatabasePassword;

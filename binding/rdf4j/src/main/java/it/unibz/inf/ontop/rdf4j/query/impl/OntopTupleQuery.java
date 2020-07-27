@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
@@ -23,8 +24,8 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 	private final RDF4JInputQueryFactory factory;
 
 	public OntopTupleQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection conn,
-						   RDF4JInputQueryFactory factory, OntopSystemSettings settings) {
-		super(queryString, baseIRI, parsedQuery, conn, settings);
+						   ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory factory, OntopSystemSettings settings) {
+		super(queryString, baseIRI, parsedQuery, conn, httpHeaders, settings);
 		this.factory = factory;
 	}
 
@@ -39,7 +40,7 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
 				SelectQuery inputQuery = factory.createSelectQuery(getQueryString(), getParsedQuery());
-				res = stm.execute(inputQuery);
+				res = stm.execute(inputQuery, getHttpHeaders());
 			} catch (OntopQueryAnsweringException e) {
 				long end = System.currentTimeMillis();
 				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){

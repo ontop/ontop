@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 
@@ -38,6 +39,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isQueryTemplateExtractionEnabled() {
+        return systemSettings.isQueryTemplateExtractionEnabled();
+    }
+
+    @Override
     public boolean isSparqlQueryIncludedIntoQueryLog() {
         return getRequiredBoolean(SPARQL_INCLUDED_QUERY_LOGGING);
     }
@@ -65,6 +71,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     @Override
     public String getApplicationName() {
         return getRequiredProperty(APPLICATION_NAME);
+    }
+
+    @Override
+    public ImmutableSet<String> getHttpHeaderNamesToLog() {
+        return systemSettings.getHttpHeaderNamesToLog();
     }
 
     @Override

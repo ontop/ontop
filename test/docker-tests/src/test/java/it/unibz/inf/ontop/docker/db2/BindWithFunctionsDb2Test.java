@@ -91,10 +91,10 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\".00, 43.00\"^^xsd:string");
-        expectedValues.add("\".00, 23.00\"^^xsd:string");
-        expectedValues.add("\".00, 34.00\"^^xsd:string");
-        expectedValues.add("\".00, 10.00\"^^xsd:string");
+        expectedValues.add("\"0.00, 43.00\"^^xsd:string");
+        expectedValues.add("\"0.00, 23.00\"^^xsd:string");
+        expectedValues.add("\"0.00, 34.00\"^^xsd:string");
+        expectedValues.add("\"0.00, 10.00\"^^xsd:string");
         return expectedValues;
     }
 

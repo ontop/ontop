@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -16,16 +15,12 @@ import java.util.function.Function;
 
 public class DBIriStringResolverFunctionSymbolImpl extends AbstractTypedDBFunctionSymbol {
 
-    protected final URI baseIRI;
+    protected final IRI baseIRI;
     protected final String iriPrefixRegex;
 
     protected DBIriStringResolverFunctionSymbolImpl(IRI baseIRI, String iriPrefixRegex, DBTermType rootDBType, DBTermType dbStringType) {
         super("IRI_RESOLVE_" + baseIRI, ImmutableList.of(rootDBType), dbStringType);
-        try {
-            this.baseIRI = new URI(baseIRI.getIRIString());
-        } catch (URISyntaxException e) {
-            throw new MinorOntopInternalBugException("Was not expecting a invalid base IRI: " + baseIRI);
-        }
+        this.baseIRI = baseIRI;
         this.iriPrefixRegex = iriPrefixRegex;
     }
 
@@ -35,9 +30,14 @@ public class DBIriStringResolverFunctionSymbolImpl extends AbstractTypedDBFuncti
         ImmutableTerm newTerm = newTerms.get(0);
 
         if (newTerm instanceof DBConstant) {
-            // TODO: see if the standard URI resolution is robust or not for IRIs in general
-            URI newIRI = baseIRI.resolve(((DBConstant) newTerm).getValue());
-            return termFactory.getDBStringConstant(newIRI.toString());
+            String arg = ((DBConstant) newTerm).getValue();
+            boolean isAbsoluteIRI;
+            try {
+                isAbsoluteIRI = (new URI(arg)).isAbsolute();
+            } catch (URISyntaxException e) {
+                isAbsoluteIRI = false;
+            }
+            return termFactory.getDBStringConstant(isAbsoluteIRI ? arg : baseIRI.getIRIString() + arg);
         }
         else
             return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
