@@ -167,8 +167,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 }
             }
             catch (JSQLParserException e) {
-                if (LOGGER.isWarnEnabled())
-                    LOGGER.warn("FAILED TO PARSE: {} {}", sourceQuery, getJSQLParserErrorMessage(sourceQuery, e));
+                // TODO: LOGGER.warn() should be instead after revising the logging policy
+                System.out.println(String.format("FAILED TO PARSE: %s %s", sourceQuery, getJSQLParserErrorMessage(sourceQuery, e)));
                 
                 ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
                 attributes = sqae.getAttributes(sourceQuery);
@@ -177,7 +177,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
                 attributes = sqae.getAttributes(sourceQuery);
             }
-            LOGGER.warn("PARSER VIEW FOR {}", sourceQuery);
+            // TODO: LOGGER.warn() should be instead after revising the logging policy
+            System.out.println("PARSER VIEW FOR " + sourceQuery);
             ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
             return sqp.translateParserView(view);
         }
