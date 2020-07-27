@@ -2121,6 +2121,82 @@ public class NormalizationTest {
         normalizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Test
+    public void testDisjunctionSameIsNotNull() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
+
+        RDFTermTypeConstant enTerm = TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("en"));
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                TERM_FACTORY.getDBCoalesce(B, B),
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getDBIsNotNull(B),
+                                                TERM_FACTORY.getDBIsNotNull(B)),
+                                        enTerm))
+                                ));
+
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR2,
+                ImmutableMap.of( 1, B));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                B,
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(B),
+                                        enTerm))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, dataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testDisjunctionSimilarIsNotNull() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
+
+        RDFTermTypeConstant enTerm = TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("en"));
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                TERM_FACTORY.getDBCoalesce(B, B),
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDisjunction(
+                                                TERM_FACTORY.getDBIsNotNull(TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(B, TERM_FACTORY.getDBStringConstant("stuff")))),
+                                                TERM_FACTORY.getDBIsNotNull(TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(B, TERM_FACTORY.getDBStringConstant("other"))))),
+                                        enTerm))
+                ));
+
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR2,
+                ImmutableMap.of( 1, B));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getRDFFunctionalTerm(
+                                B,
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(B),
+                                        enTerm))));
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, dataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
 
     private static void normalizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial IQ: " + initialIQ );

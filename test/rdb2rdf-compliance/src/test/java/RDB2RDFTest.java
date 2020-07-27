@@ -76,57 +76,48 @@ public class RDB2RDFTest {
 	 * Following tests are failing due to various different reasons and bugs and are excluded manually.
 	 */
 	private static final Set<String> IGNORE = ImmutableSet.of(
-			// Column appearing in the template: {Name} is not equivalent to {\"Name\"} and should be therefore not accepted
-			//"tc0002f",
 			// Should reject an undefined SQL version
 			"tc0003a",
-			// Should create duplicate blank nodes
+			// Limitation of bnode isomorphism detection + xsd:double encoding (engineering notation was expected)
 			"dg0005",
-			// Modified (different XSD.DOUBLE lexical form)
+			// Limitation of bnode isomorphism detection
+			"dg0005-modified",
+			// Different XSD.DOUBLE lexical form; was expecting the engineering notation. Modified version added.
 			"tc0005a",
-			// Modified (different XSD.DOUBLE lexical form)
+			// Different XSD.DOUBLE lexical form; was expecting the engineering notation. Modified version added.
 			"tc0005b",
 			// Expect an exception when processing the mapping (non-IRI for named graph) TODO: throw it
 			"tc0007h",
-			// The SQL should not be rejected
-			//"tc0009a",
-			// The SQL should not be rejected
-			//"tc0009b",
 			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
 			"tc0009d",
 			// TODO: fix: too much escaping for the curly brackets in the string
 			"tc0010c",
 			// Modified (different XSD.DOUBLE lexical form)
 			"dg0012",
-			// Incomplete results
+			// Direct mapping and bnodes: row unique ids are not considered, leadinq to incomplete results
+			// (e.g. Bob-London should appear twice). TODO: fix it
 			"dg0012-modified",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0012a",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0012e",
-			//
-			//"dg0014",
-			//
-			//"tc0014b",
-			// Less results than expected.
-			// "tc0014c",
 			// Should reject an invalid language tag
 			"tc0015b",
 			// Double + timezone was not expected to be added. Same for milliseconds.
 			"dg0016",
-			// Modified (different XSD.DOUBLE lexical form)
+			// Different XSD.DOUBLE lexical form. Modified version added.
 			"tc0016b",
 			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
 			"tc0016c",
 			// Wrong data IRI created. TODO: fix it
 			"tc0016e",
-			// Excessive IRI encoding done for extreme-east asia characters
+			// Excessive IRI encoding done for extreme-east asia characters. TODO: fix it
 			"dg0017",
-			// Padding spaces missing in literals. TODO: fix it
+			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"dg0018",
-			// Padding spaces missing in literals. TODO: fix it
+			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"tc0018a",
-			// Should create an IRI based on a column and the "base" prefix. TODO: at least throw a better exception
+			// Should create an IRI based on a column and the base IRI. TODO: support the base IRI in R2RML
 			"tc0019a",
 			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
 			"tc0019b",

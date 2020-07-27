@@ -35,4 +35,6 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
      *         otherwise.
      */
     boolean hasBinding(String bindingName);
+
+    String getRowUUIDStr();
 }
