@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -28,12 +29,15 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.TokenMgrException;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -163,7 +167,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 }
             }
             catch (JSQLParserException e) {
-                System.out.println("FAILED TO PARSE: " + sourceQuery + " " + e.getCause());
+                // TODO: LOGGER.warn() should be instead after revising the logging policy
+                System.out.println(String.format("FAILED TO PARSE: %s %s", sourceQuery, getJSQLParserErrorMessage(sourceQuery, e)));
+                
                 ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
                 attributes = sqae.getAttributes(sourceQuery);
             }
@@ -171,6 +177,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
                 attributes = sqae.getAttributes(sourceQuery);
             }
+            // TODO: LOGGER.warn() should be instead after revising the logging policy
             System.out.println("PARSER VIEW FOR " + sourceQuery);
             ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
             return sqp.translateParserView(view);
@@ -180,5 +187,33 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     + " \nProblem location: source query of triplesMap \n["
                     +  mappingAssertion.getTriplesMapProvenance().getProvenanceInfo() + "]");
         }
+    }
+
+    private static String getJSQLParserErrorMessage(String sourceQuery, JSQLParserException e) {
+        try {
+            // net.sf.jsqlparser.parser.TokenMgrException: Lexical error at line 1, column 165.
+            if (e.getCause() instanceof TokenMgrException) {
+                Pattern pattern = Pattern.compile("at line (\\d+), column (\\d+)");
+                Matcher matcher = pattern.matcher(e.getCause().getMessage());
+                if (matcher.find()) {
+                    int line = Integer.parseInt(matcher.group(1));
+                    int col = Integer.parseInt(matcher.group(2));
+                    String sourceQueryLine = sourceQuery.split("\n")[line - 1];
+                    final int MAX_LENGTH = 40;
+                    if (sourceQueryLine.length() > MAX_LENGTH) {
+                        sourceQueryLine = sourceQueryLine.substring(sourceQueryLine.length() - MAX_LENGTH);
+                        if (sourceQueryLine.length() > 2 * MAX_LENGTH)
+                            sourceQueryLine = sourceQueryLine.substring(0, 2 * MAX_LENGTH);
+                        col = MAX_LENGTH;
+                    }
+                    return "FAILED TO PARSE: " + sourceQueryLine + "\n" +
+                            Strings.repeat(" ", "FAILED TO PARSE: ".length() + col - 2) + "^\n" + e.getCause();
+                }
+            }
+        }
+        catch (Exception e1) {
+            // NOP
+        }
+        return e.getCause().toString();
     }
 }
