@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Ignore;
@@ -2203,10 +2204,13 @@ public class NormalizationTest {
 
         DBConstant intConstant = TERM_FACTORY.getDBIntegerConstant(54);
 
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        ImmutableFunctionalTerm lexicalTerm = TERM_FACTORY.getDBCastFunctionalTerm(
+                dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType(), A);
+
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFFunctionalTerm(
-                        TERM_FACTORY.getConversion2RDFLexical(A, TYPE_FACTORY.getXsdStringDatatype()), L)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFFunctionalTerm(lexicalTerm, L)));
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(
                 TERM_FACTORY.getStrictEquality(TERM_FACTORY.getDBStringConstant("en"), TERM_FACTORY.getLangTypeFunctionalTerm(L)));
@@ -2240,8 +2244,10 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
         ConstructionNode newTopConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFFunctionalTerm(
-                        TERM_FACTORY.getConversion2RDFLexical(A, TYPE_FACTORY.getXsdStringDatatype()), enConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getRDFFunctionalTerm(lexicalTerm,
+                        TERM_FACTORY.getIfElseNull(
+                                TERM_FACTORY.getDBIsNotNull(A),
+                                enConstant))));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
                 newTopConstructionNode,
