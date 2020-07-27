@@ -39,6 +39,11 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			// TODO: support xsd:double cast
 			aggregatesManifest + "agg-err-02",
 
+			// TODO: Find a right version of H2. Fail on 1.4.196
+			aggregatesManifest + "agg-groupconcat-01",
+			aggregatesManifest + "agg-groupconcat-02",
+			aggregatesManifest + "agg-groupconcat-03",
+
 			/* FUNCTIONS*/
 
 			// the SI does not preserve the original timezone

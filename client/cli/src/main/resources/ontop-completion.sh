@@ -49,7 +49,7 @@ function _complete_ontop_command_query() {
   COMMANDS=$1
 
   FLAG_OPTS="--disable-reasoning --enable-annotations"
-  ARG_OPTS="-m -o -p -q --mapping -t --properties --query --ontology --output"
+  ARG_OPTS="-m -o -p -q --mapping -t --properties --constraint -x --xml-catalog --ontology -c --query --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -57,12 +57,22 @@ function _complete_ontop_command_query() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
+      -x|--xml-catalog)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
       -m|--mapping)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
       -t|--ontology)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -c|--constraint)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
@@ -99,7 +109,7 @@ function _complete_ontop_command_materialize() {
   COMMANDS=$1
 
   FLAG_OPTS="--disable-reasoning --enable-annotations --no-streaming --separate-files"
-  ARG_OPTS="-m -o -p --mapping -t --properties -f --format --ontology --output"
+  ARG_OPTS="-m -o -p --mapping -t --properties --constraint -x --xml-catalog --ontology -c -f --format --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -107,12 +117,22 @@ function _complete_ontop_command_materialize() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
+      -x|--xml-catalog)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
       -m|--mapping)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
       -t|--ontology)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -c|--constraint)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
@@ -149,7 +169,7 @@ function _complete_ontop_command_bootstrap() {
   COMMANDS=$1
 
   FLAG_OPTS=""
-  ARG_OPTS="-m -p -b --mapping --base-iri -t --properties --ontology"
+  ARG_OPTS="-m -p -b --mapping -c --base-iri -t --properties --constraint --ontology"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -163,6 +183,11 @@ function _complete_ontop_command_bootstrap() {
         return 0
         ;;
       -t|--ontology)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -c|--constraint)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
@@ -194,7 +219,7 @@ function _complete_ontop_command_validate() {
   COMMANDS=$1
 
   FLAG_OPTS=""
-  ARG_OPTS="-m -p --mapping -t --properties --ontology"
+  ARG_OPTS="-m -p --mapping -c -t --properties --constraint --ontology"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -208,6 +233,11 @@ function _complete_ontop_command_validate() {
         return 0
         ;;
       -t|--ontology)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -c|--constraint)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
@@ -233,8 +263,8 @@ function _complete_ontop_command_endpoint() {
   PREV_WORD=${COMP_WORDS[COMP_CWORD-1]}
   COMMANDS=$1
 
-  FLAG_OPTS="--lazy"
-  ARG_OPTS="-m -p --mapping -t --properties --port --cors-allowed-origins --ontology"
+  FLAG_OPTS="--disable-reasoning --lazy --dev --enable-annotations"
+  ARG_OPTS="-m -o -p --mapping -t --properties --constraint -x --xml-catalog --ontology --portal -c --port --cors-allowed-origins --output"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -242,7 +272,27 @@ function _complete_ontop_command_endpoint() {
     ARG_VALUES=
     ARG_GENERATED_VALUES=
     case ${PREV_WORD} in
+      -x|--xml-catalog)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
       -m|--mapping)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -c|--constraint)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -p|--properties)
+        COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      --portal)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
@@ -262,8 +312,43 @@ function _complete_ontop_command_endpoint() {
         echo ${COMPREPLY[@]}
         return 0
         ;;
+      -o|--output)
+        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+    esac
+  fi
+
+  ARGUMENTS=
+  COMPREPLY=( $(compgen -W "${FLAG_OPTS} ${ARG_OPTS} ${ARGUMENTS}" -- ${CURR_WORD}) )
+  echo ${COMPREPLY[@]}
+  return 0
+}
+
+function _complete_ontop_command_extractdbmetadata() {
+  # Get completion data
+  COMPREPLY=()
+  CURR_WORD=${COMP_WORDS[COMP_CWORD]}
+  PREV_WORD=${COMP_WORDS[COMP_CWORD-1]}
+  COMMANDS=$1
+
+  FLAG_OPTS=""
+  ARG_OPTS="-o -p --properties --output"
+
+  $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
+  SAW_ARG=$?
+  if [[ ${SAW_ARG} -eq 0 ]]; then
+    ARG_VALUES=
+    ARG_GENERATED_VALUES=
+    case ${PREV_WORD} in
       -p|--properties)
         COMPREPLY=( $(compgen -o default -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      -o|--output)
+        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0
         ;;
@@ -285,7 +370,7 @@ function _complete_ontop() {
     CURR_CMD=${COMP_WORDS[1]}
   fi
 
-  COMMANDS="help endpoint materialize query --version bootstrap validate"
+  COMMANDS="help endpoint extract-db-metadata materialize query --version bootstrap validate"
   if [[ ${COMP_CWORD} -eq 1 ]]; then
     COMPREPLY=()
     COMPREPLY=( $(compgen -W "${COMMANDS}" -- ${CURR_WORD}) )
@@ -319,6 +404,10 @@ function _complete_ontop() {
       ;;
     endpoint)
       COMPREPLY=( $(_complete_ontop_command_endpoint "${COMMANDS}" ) )
+      return $?
+      ;;
+    extract-db-metadata)
+      COMPREPLY=( $(_complete_ontop_command_extractdbmetadata "${COMMANDS}" ) )
       return $?
       ;;
   esac
