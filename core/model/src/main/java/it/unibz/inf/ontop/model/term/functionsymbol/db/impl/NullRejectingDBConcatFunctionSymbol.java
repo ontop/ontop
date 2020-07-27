@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
@@ -27,15 +28,19 @@ public class NullRejectingDBConcatFunctionSymbol extends AbstractDBConcatFunctio
     }
 
     @Override
+    protected String extractString(Constant constant) {
+        if (constant.isNull())
+            throw new MinorOntopInternalBugException("Was expecting a non-null constant. Should be reached this point");
+        return constant.getValue();
+    }
+
+    @Override
     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
-    /**
-     * TODO: allow post-processing
-     */
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
+        return true;
     }
 }
