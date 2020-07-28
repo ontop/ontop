@@ -9,5 +9,13 @@ rdfs:   http://www.w3.org/2000/01/rdf-schema#
 mappingId	geoms
 target		:{ID} a :Geom ; geo:asWKT {THE_GEOM}^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
 source		SELECT * FROM GEOMS;
+
+mappingId	geoms
+target		:crs84/{ID} a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/OGC/1.3/CRS84> {THE_GEOM}"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM GEOMS WHERE ID=3
+
+mappingId	geoms
+target		:epsg3044/21 a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> {THE_GEOM}"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM GEOMS WHERE ID=21
 ]]
 

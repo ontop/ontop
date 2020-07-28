@@ -1079,7 +1079,36 @@ public class GeoSPARQLTest {
                 "BIND(geof:getSRID(?xWkt) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
-        assertEquals("<http://www.opengis.net/def/crs/OGC/1.3/CRS84>", val);
+        assertEquals("http://www.opengis.net/def/crs/OGC/1.3/CRS84", val);
+    }
+
+    @Test // ST_SRID retrieves an integer
+    public void testSelectGetSRIDCRS84() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/crs84/3> a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:getSRID(?xWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // val has type "xsd:anyURI"
+        assertEquals("http://www.opengis.net/def/crs/OGC/1.3/CRS84", val);
+    }
+
+
+    @Test // ST_SRID retrieves an integer
+    public void testSelectGetSRIDEPSG() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/epsg3044/21> a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:getSRID(?xWkt) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // val has type "xsd:anyURI"
+        assertEquals("http://www.opengis.net/def/crs/EPSG/0/3044", val);
     }
 
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
