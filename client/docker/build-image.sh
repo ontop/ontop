@@ -7,7 +7,7 @@ ONTOP_HOME=${CURRENT_DIR}/../..
 cd ${ONTOP_HOME}
 ${ONTOP_HOME}/mvnw clean install -DskipTests
 cd build/distribution
-${ONTOP_HOME}/mvnw assembly:assembly
+${ONTOP_HOME}/mvnw assembly:single
 cd target
 rm -rf ontop
 unzip -o ontop-cli*.zip -d ontop
