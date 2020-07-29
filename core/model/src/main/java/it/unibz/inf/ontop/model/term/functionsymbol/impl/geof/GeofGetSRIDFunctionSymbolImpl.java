@@ -35,6 +35,7 @@ public class GeofGetSRIDFunctionSymbolImpl extends AbstractGeofIRIFunctionSymbol
             NonGroundFunctionalTerm f = (NonGroundFunctionalTerm) term;
             FunctionSymbol fs = f.getFunctionSymbol();
             if (fs instanceof DBConcatFunctionSymbol) {
+                // TEMPLATE FOUND!
                 // DBConcatFunctionSymbol concat = (DBConcatFunctionSymbol) fs;
                 if (f.getTerm(0) instanceof DBConstant) {
                     DBConstant t = (DBConstant) f.getTerm(0);
