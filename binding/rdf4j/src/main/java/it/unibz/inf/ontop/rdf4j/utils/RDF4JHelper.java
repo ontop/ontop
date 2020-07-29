@@ -61,6 +61,10 @@ public class RDF4JHelper {
 	}
 
 	public static Statement createStatement(Assertion assertion) {
+
+		if( assertion instanceof NamedAssertion ){
+			return createStatement((NamedAssertion) assertion);
+		}
 		if (assertion instanceof ObjectPropertyAssertion) {
 			return createStatement((ObjectPropertyAssertion) assertion);
 		} else if (assertion instanceof DataPropertyAssertion) {
@@ -73,6 +77,55 @@ public class RDF4JHelper {
 			throw new RuntimeException("Unsupported assertion: " + assertion);
 		}
 	}
+
+	// Davide> TODO Make this method nicer
+	private static Statement createStatement(NamedAssertion assertion) {
+
+		if( assertion.assertion() instanceof ObjectPropertyAssertion ){
+			ObjectPropertyAssertion wrapped = (ObjectPropertyAssertion) assertion.assertion();
+			return fact.createStatement(getResource(wrapped.getSubject()),
+				createURI(wrapped.getProperty().getIRI().getIRIString()),
+				getResource(wrapped.getObject()), createURI(assertion.graph()));
+		}
+		if( assertion.assertion() instanceof DataPropertyAssertion ){
+			ObjectPropertyAssertion wrapped = (ObjectPropertyAssertion) assertion.assertion();
+			return fact.createStatement(getResource(wrapped.getSubject()),
+				createURI(wrapped.getProperty().getIRI().getIRIString()),
+				getResource(wrapped.getObject()), createURI(assertion.graph()));
+		}
+		if( assertion.assertion() instanceof ObjectPropertyAssertion ){
+			DataPropertyAssertion wrapped = (DataPropertyAssertion) assertion.assertion();
+			return fact.createStatement(getResource(wrapped.getSubject()),
+				createURI(wrapped.getProperty().getIRI().getIRIString()),
+				getLiteral(wrapped.getValue()), createURI(assertion.graph()));
+		}
+		if( assertion.assertion() instanceof AnnotationAssertion ) {
+			AnnotationAssertion wrapped = (AnnotationAssertion) assertion.assertion();
+			Constant constant = wrapped.getValue();
+
+			if (constant instanceof RDFLiteralConstant) {
+				return fact.createStatement(getResource(wrapped.getSubject()),
+						createURI(wrapped.getProperty().getIRI().getIRIString()),
+						getLiteral((RDFLiteralConstant) constant), createURI(assertion.graph()));
+			} else if (constant instanceof ObjectConstant) {
+				return fact.createStatement(getResource(wrapped.getSubject()),
+						createURI(wrapped.getProperty().getIRI().getIRIString()),
+						getResource((ObjectConstant) constant), createURI(assertion.graph()));
+			} else {
+				throw new RuntimeException("Unsupported constant for an annotation property!"
+						+ constant);
+			}
+		}
+		if (assertion.assertion() instanceof  ClassAssertion){
+			ClassAssertion wrapped = (ClassAssertion) assertion.assertion();
+			Statement result = fact.createStatement(getResource(wrapped.getIndividual()),
+				RDF.TYPE,
+				createURI(wrapped.getConcept().getIRI().getIRIString()), createURI(assertion.graph()));
+			return result;
+		}
+		return null;
+	}
+
 
 	private static Statement createStatement(ObjectPropertyAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getSubject()),
