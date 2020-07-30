@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop-client</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.0.0-rc-2-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
