@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop-mapping-sql</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.0.0</version>
+        <version>4.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>ontop-mapping-native</artifactId>
