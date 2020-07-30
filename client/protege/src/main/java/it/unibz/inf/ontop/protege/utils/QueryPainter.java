@@ -23,18 +23,14 @@ package it.unibz.inf.ontop.protege.utils;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.swing.*;
@@ -176,11 +172,7 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
-		TargetQueryParser textParser = new TurtleOBDASQLParser(
-		        apic.getMutablePrefixManager().getPrefixMap(),
-                apic.getTermFactory(),
-				apic.getTargetAtomFactory(),
-				apic.getRdfFactory());
+		TargetQueryParser textParser = apic.createTargetQueryParser();
 		ImmutableList<TargetAtom> query = textParser.parse(text);
 
 		if (query == null) {
@@ -368,7 +360,7 @@ public class QueryPainter {
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
-			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
+			throw new Exception("Unable to parse the mapping target: " + input + ", " + parsingException);
 		}
 		input = doc.getText(0, doc.getLength());
 
@@ -455,8 +447,7 @@ public class QueryPainter {
 
 	private ImmutableList<TargetAtom> parse(String query, PrefixManager man) {
 		try {
-            TargetQueryParser textParser = new TurtleOBDASQLParser(man.getPrefixMap(),
-					apic.getTermFactory(), apic.getTargetAtomFactory(), apic.getRdfFactory());
+            TargetQueryParser textParser = apic.createTargetQueryParser(man.getPrefixMap());
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;

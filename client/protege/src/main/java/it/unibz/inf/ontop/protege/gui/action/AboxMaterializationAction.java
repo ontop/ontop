@@ -1,24 +1,5 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
-/*
- * #%L
- * ontop-protege
- * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -41,11 +22,6 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
-import org.semanticweb.owlapi.io.WriterDocumentTarget;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -57,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 
 /***
@@ -71,11 +46,9 @@ public class AboxMaterializationAction extends ProtegeAction {
     private static final long serialVersionUID = -1211395039869926309L;
 
     private static final String RDF_XML = "RDF/XML";
-    private static final String OWL_XML = "OWL/XML";
+//    private static final String OWL_XML = "OWL/XML";
     private static final String TURTLE = "Turtle";
     private static final String NTRIPLES = "N-Triples";
-
-    private static final boolean DO_STREAM_RESULTS = true;
 
     private OWLWorkspace workspace;
     private OWLModelManager modelManager;
@@ -120,7 +93,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         //combo box for output format,
         JLabel lFormat = new JLabel("Output format:\t");
-        String[] fileOptions = {RDF_XML, OWL_XML, TURTLE, NTRIPLES};
+        String[] fileOptions = {RDF_XML, TURTLE, NTRIPLES};
         final JComboBox comboFormats = new JComboBox(fileOptions);
         //should be enabled only when radio button export is selected
         comboFormats.setEnabled(false);
@@ -190,13 +163,9 @@ public class AboxMaterializationAction extends ProtegeAction {
                 OWLOntology ontology = modelManager.getActiveOntology();
                 OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
                 MaterializationParams params = MaterializationParams.defaultBuilder()
-                        .enableDBResultsStreaming(DO_STREAM_RESULTS)
                         .build();
                 final long startTime = System.currentTimeMillis();
                 switch (format) {
-                    case OWL_XML:
-                        stats = exportWithOWLAPI(configuration, params, file);
-                        break;
                     case TURTLE:
                     case RDF_XML:
                     case NTRIPLES:
@@ -206,17 +175,11 @@ public class AboxMaterializationAction extends ProtegeAction {
                         throw new Exception("Unknown format: " + format);
                 }
                 final long endTime = System.currentTimeMillis();
-                if (stats == null) {
-                    String msg = "Materialization failed.";
-                    log.error(msg);
-                    JOptionPane.showMessageDialog(workspace, msg);
-                } else {
-                    JOptionPane.showMessageDialog(this.workspace,
-                            "Task is completed" + lineSeparator + "Nr. of triples: " + stats.getCount()
-                                    + lineSeparator + "Vocabulary size: " + stats.getVocabSize()
-                                    + lineSeparator + "Elapsed time: " + (endTime - startTime) + " ms.", "Done",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
+                JOptionPane.showMessageDialog(this.workspace,
+                        "Task is completed" + lineSeparator + "Nr. of triples: " + stats.getCount()
+                                + lineSeparator + "Vocabulary size: " + stats.getVocabSize()
+                                + lineSeparator + "Elapsed time: " + (endTime - startTime) + " ms.", "Done",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -255,38 +218,6 @@ public class AboxMaterializationAction extends ProtegeAction {
         }
     }
 
-    private MaterializationStats exportWithOWLAPI(OntopSQLOWLAPIConfiguration configuration, MaterializationParams params,
-                                                  File file) throws OWLException, OBDASpecificationException, IOException {
-
-        MaterializationStats stats;
-        try (MaterializedGraphOWLResultSet graphResultSet = OntopOWLAPIMaterializer.defaultMaterializer(
-                configuration,
-                params
-        ).materialize()) {
-
-            HashSet<OWLAxiom> axiomSet = new HashSet();
-            while (graphResultSet.hasNext()) {
-                axiomSet.add(graphResultSet.next());
-            }
-            OutputStream out = new FileOutputStream(file);
-            BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(
-                    out,
-                    StandardCharsets.UTF_8
-            ));
-            OWLManager.createOWLOntologyManager().createOntology(axiomSet).saveOntology(
-                    new OWLXMLDocumentFormat(),
-                    new WriterDocumentTarget(fileWriter)
-            );
-            fileWriter.close();
-            out.close();
-            stats = new MaterializationStats(
-                    graphResultSet.getTripleCountSoFar(),
-                    graphResultSet.getSelectedVocabulary().size()
-            );
-        }
-        return stats;
-    }
-
 
     private void materializeOnto(OWLOntology ontology, OWLOntologyManager ontoManager) {
 
@@ -302,7 +233,6 @@ public class AboxMaterializationAction extends ProtegeAction {
                 OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
 
                 MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-                        .enableDBResultsStreaming(DO_STREAM_RESULTS)
                         .build();
                 OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(configuration, materializationParams);
                 MaterializedGraphOWLResultSet graphResultSet = materializer.materialize();

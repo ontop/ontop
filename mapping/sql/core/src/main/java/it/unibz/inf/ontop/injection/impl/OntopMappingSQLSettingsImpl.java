@@ -3,8 +3,9 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 
-import java.util.Optional;
 import java.util.Properties;
+
+import static it.unibz.inf.ontop.injection.impl.OntopSQLCoreSettingsImpl.loadSQLCoreProperties;
 
 
 public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implements OntopMappingSQLSettings {
@@ -18,7 +19,7 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopSQLCoreSettingsImpl.loadDefaultOBDAProperties();
+        Properties properties = loadSQLCoreProperties(userProperties);
         properties.putAll(loadDefaultMappingSQLProperties());
         properties.putAll(userProperties);
         return properties;
@@ -43,12 +44,13 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
         return sqlSettings.getJdbcUser();
     }
 
+    @Override
     public String getJdbcPassword() {
         return sqlSettings.getJdbcPassword();
     }
 
     @Override
-    public Optional<String> getJdbcDriver() {
+    public String getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }
 }

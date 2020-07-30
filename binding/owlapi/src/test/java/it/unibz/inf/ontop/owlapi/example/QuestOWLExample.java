@@ -76,11 +76,10 @@ public class QuestOWLExample {
 
             long t1 = System.currentTimeMillis();
             TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-            int columnSize = rs.getColumnCount();
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                for (int idx = 1; idx <= columnSize; idx++) {
-                    OWLObject binding = bindingSet.getOWLObject(idx);
+                for (String name: rs.getSignature()) {
+                    OWLObject binding = bindingSet.getOWLObject(name);
                     System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");
                 }
                 System.out.print("\n");

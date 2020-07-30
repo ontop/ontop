@@ -14,6 +14,8 @@ public interface OntopSystemSQLSettings extends OntopSystemSettings, OntopReform
     int getConnectionPoolInitialSize();
     int getConnectionPoolMaxSize();
 
+    int getFetchSize();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -24,4 +26,9 @@ public interface OntopSystemSQLSettings extends OntopSystemSettings, OntopReform
     // Connection timeout (in ms)
     String CONNECTION_TIMEOUT = "jdbc.pool.connectionTimeout";
     String KEEP_ALIVE = "jdbc.pool.keepAlive";
+
+    /*
+     * If <= 0, the fetch size is ignored
+     */
+    String FETCH_SIZE = "jdbc.fetchSize";
 }

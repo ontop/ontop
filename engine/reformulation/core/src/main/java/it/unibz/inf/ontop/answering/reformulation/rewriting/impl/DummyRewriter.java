@@ -25,12 +25,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.constraints.FullLinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.FullLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -52,7 +51,7 @@ import java.util.function.Function;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private FullLinearInclusionDependencies<RDFAtomPredicate> sigma;
+    private FullLinearInclusionDependenciesImpl<RDFAtomPredicate> sigma;
 
     protected final IntermediateQueryFactory iqFactory;
     protected final AtomFactory atomFactory;
@@ -70,7 +69,7 @@ public class DummyRewriter implements QueryRewriter {
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
-        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
+        FullLinearInclusionDependenciesImpl.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependenciesImpl.builder(coreUtilsFactory, atomFactory);
 
         Variable x = termFactory.getVariable("x");
         Variable y = termFactory.getVariable("y");
@@ -85,7 +84,7 @@ public class DummyRewriter implements QueryRewriter {
         sigma = builder.build();
     }
 
-    protected FullLinearInclusionDependencies<RDFAtomPredicate> getSigma() {
+    protected FullLinearInclusionDependenciesImpl<RDFAtomPredicate> getSigma() {
         return sigma;
     }
 
@@ -103,8 +102,8 @@ public class DummyRewriter implements QueryRewriter {
         }));
 	}
 
-	private <T extends DataNode<AtomPredicate>> ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<T> bgp) {
-        ArrayList<T> list = new ArrayList<>(bgp); // mutable copy
+	private ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<IntensionalDataNode> bgp) {
+        ArrayList<IntensionalDataNode> list = new ArrayList<>(bgp); // mutable copy
         // this loop has to remain sequential (no streams)
         for (int i = 0; i < list.size(); i++) {
             DataAtom<RDFAtomPredicate> atom = (DataAtom)list.get(i).getProjectionAtom();
@@ -113,7 +112,7 @@ public class DummyRewriter implements QueryRewriter {
                 DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
                 if (j != i && derived.contains(curr)) {
                     ImmutableSet<Variable> variables = list.stream()
-                            .map(DataNode::getProjectionAtom)
+                            .map(IntensionalDataNode::getProjectionAtom)
                             .filter(a -> (a != curr))
                             .flatMap(a -> a.getVariables().stream())
                             .collect(ImmutableCollectors.toSet());
@@ -133,7 +132,7 @@ public class DummyRewriter implements QueryRewriter {
     private static <T> void traverseDAG(EquivalencesDAG<T> dag,
                                         java.util.function.Predicate<T> filter,
                                         Function<T, DataAtom<RDFAtomPredicate>> translate,
-                                        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder) {
+                                        FullLinearInclusionDependenciesImpl.Builder<RDFAtomPredicate> builder) {
         for (Equivalences<T> node : dag)
             for (Equivalences<T> subNode : dag.getSub(node))
                 for (T sub : subNode)

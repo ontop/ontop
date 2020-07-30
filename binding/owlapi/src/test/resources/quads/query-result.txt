@@ -1,0 +1,150 @@
+0
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person1>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+1
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+2
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+3
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person4>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+4
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person1>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+5
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+6
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+7
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person4>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
+8
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#job1>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Job>
+9
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#job2>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Job>
+10
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#job3>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Job>
+11
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#job1>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Job>
+12
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#job2>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Job>
+13
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#job3>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Job>
+14
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person1>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job1>
+15
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job1>
+16
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job2>
+17
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person4>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job3>
+18
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person1>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job1>
+19
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job1>
+20
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job2>
+21
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person4>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job3>
+22
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person1>
+	predicate	rdfs:label
+	object	"Person 1"^^xsd:string
+23
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	rdfs:label
+	object	"Person 2"^^xsd:string
+24
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	rdfs:label
+	object	"Person 3"^^xsd:string
+25
+	g	<http://example.org/graphs/spiderman>
+	subject	<http://www.semanticweb.org/test#person4>
+	predicate	rdfs:label
+	object	"Person 4"^^xsd:string
+26
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person1>
+	predicate	rdfs:label
+	object	"Person 1"^^xsd:string
+27
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	rdfs:label
+	object	"Person 2"^^xsd:string
+28
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	rdfs:label
+	object	"Person 3"^^xsd:string
+29
+	g	<http://example.org/graphs/batman>
+	subject	<http://www.semanticweb.org/test#person4>
+	predicate	rdfs:label
+	object	"Person 4"^^xsd:string

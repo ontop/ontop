@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.owlapi;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -42,8 +40,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class URITemplateMatcherTest {
 
@@ -61,37 +58,30 @@ public class URITemplateMatcherTest {
 	@Before
 	public void setUp() throws Exception {
 
+		sqlConnection = DriverManager.getConnection(url, username, password);
 
-
-		sqlConnection = DriverManager
-				.getConnection(url, username, password);
-
-		FileReader reader = new FileReader("src/test/resources/template/smallDatasetURIconstants.sql");
-		BufferedReader in = new BufferedReader(reader);
-		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
-		runner.runScript(in);
+		try (FileReader reader = new FileReader("src/test/resources/template/smallDatasetURIconstants.sql")) {
+			BufferedReader in = new BufferedReader(reader);
+			SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
+			runner.runScript(in);
+		}
 	}
 
 	@After
 	public void tearDown() throws Exception {
 
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
-
 	}
 
 	@Test
 	public void testURIConstant() throws Exception {
-
 
 		String queryBind = "PREFIX : <http://www.ola.fr#>\n" +
 				"  PREFIX oboe-core: <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#>\n" +
@@ -100,8 +90,6 @@ public class URITemplateMatcherTest {
 				"             <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#Unit> . \n" +
 				"  }";
 
-
-
 		String results = runTestQuery(queryBind);
 		assertEquals("<http://www.ola.fr#measurement/unit/name/1>", results);
 	}
@@ -109,14 +97,11 @@ public class URITemplateMatcherTest {
 	@Test
 	public void testURIConstant2() throws Exception {
 
-
 		String queryBind = "PREFIX : <http://www.ola.fr#>\n" +
 				"  PREFIX oboe-core: <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#>\n" +
 				"  SELECT ?s {\n" +
 				"     <http://www.ola.fr#measurement/unit/name/1> a oboe-core:Measurement ; oboe-core:hasValue ?s \n" +
 				"  }";
-
-
 
 		String results = runTestQuery(queryBind);
 		assertEquals("<http://urlconstants.org/32>", results);
@@ -138,45 +123,39 @@ public class URITemplateMatcherTest {
 				.build();
 		OntopOWLReasoner reasoner = factory.createReasoner(config);
 
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
-
-
-		log.debug("Executing query: ");
-		log.debug("Query: \n{}", query);
-
-		long start = System.nanoTime();
-		TupleOWLResultSet res = st.executeSelectQuery(query);
-		long end = System.nanoTime();
-
-		double time = (end - start) / 1000;
 		String result = "";
-		int count = 0;
-		while (res.hasNext()) {
-            final OWLBindingSet bindingSet = res.next();
-            count += 1;
-			if (count == 1) {
-				for (int i = 1; i <= res.getColumnCount(); i++) {
-					log.debug("Example result " + res.getSignature().get(i - 1) + " = " + bindingSet.getOWLObject(i));
 
+		// Now we are ready for querying
+		try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
+
+			log.debug("Executing query: ");
+			log.debug("Query: \n{}", query);
+
+			long start = System.nanoTime();
+			TupleOWLResultSet res = st.executeSelectQuery(query);
+			long end = System.nanoTime();
+
+			long time = (end - start) / 1000;
+			int count = 0;
+			while (res.hasNext()) {
+				final OWLBindingSet bindingSet = res.next();
+				count += 1;
+				if (count == 1) {
+					for (String name : res.getSignature()) {
+						log.debug("Example result " + name + " = " + bindingSet.getOWLObject(name));
+					}
+					result = ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject("s"));
 				}
-				result = ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject("s"));
 			}
+			log.debug("Total results: {}", count);
+
+			assertNotEquals(0, count);
+
+			log.debug("Elapsed time: {} ms", time);
 		}
-		log.debug("Total results: {}", count);
-
-		assertFalse(count == 0);
-
-		log.debug("Elapsed time: {} ms", time);
-
-		conn.close();
 		reasoner.dispose();
 
 		return result;
-
-
-
 	}
 
 }

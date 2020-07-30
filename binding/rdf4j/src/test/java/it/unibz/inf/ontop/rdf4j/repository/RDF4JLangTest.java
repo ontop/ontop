@@ -17,7 +17,7 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        init(CREATE_DB_FILE, OBDA_FILE);
+        initOBDA(CREATE_DB_FILE, OBDA_FILE);
     }
 
     @AfterClass
@@ -35,5 +35,16 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
                 "}";
         int count = runQueryAndCount(query);
         assertEquals(2, count);
+    }
+
+    @Test
+    public void testLangMatches1() {
+        String query = "SELECT  *\n" +
+                "WHERE {\n" +
+                "  ?o rdfs:label ?label .\n" +
+                "  FILTER(LANGMATCHES(LANG(?label), \"de\"))\n" +
+                "}";
+        int count = runQueryAndCount(query);
+        assertEquals(1, count);
     }
 }

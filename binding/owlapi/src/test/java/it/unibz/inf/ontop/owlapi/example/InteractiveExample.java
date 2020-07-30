@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlapi.example;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -69,7 +68,6 @@ public class InteractiveExample {
 			/*
 			 * Print the query summary
 			 */
-				String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
 								
 				System.out.println();
 				System.out.println("The input SPARQL query:");
@@ -79,7 +77,7 @@ public class InteractiveExample {
 				
 				System.out.println("The output SQL query:");
 				System.out.println("=====================");
-				System.out.println(sqlQuery);
+				System.out.println(st.getExecutableQuery(sparqlQuery));
 				
 			}
 			catch(Exception e){

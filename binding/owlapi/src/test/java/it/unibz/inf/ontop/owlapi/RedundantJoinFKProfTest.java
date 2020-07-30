@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -14,16 +13,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -41,52 +37,16 @@ public class RedundantJoinFKProfTest {
 
     private Connection conn;
 
-
-
     @Before
     public void setUp() throws Exception {
-
         conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(CREATE_SCRIPT);
-
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, CREATE_SCRIPT);
     }
 
     @After
     public void tearDown() throws Exception {
-        dropTables();
+        executeFromFile(conn, DROP_SCRIPT);
         conn.close();
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(DROP_SCRIPT);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
-        conn.commit();
     }
 
     @Test
@@ -100,7 +60,8 @@ public class RedundantJoinFKProfTest {
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "SELECT * {\n" +
                 "?p a :Professor ; :teaches ?c .\n" +
-                "}";
+                "}\n" +
+                "ORDER BY ?p";
 
 
         List<String> expectedValues = new ArrayList<>();
@@ -137,10 +98,13 @@ public class RedundantJoinFKProfTest {
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            ExecutableQuery executableQuery = st.getExecutableQuery(query);
-            if (! (executableQuery instanceof SQLExecutableQuery))
-                throw new IllegalStateException("A SQLExecutableQuery was expected");
-            sql = ((SQLExecutableQuery)executableQuery).getSQL();
+            IQ executableQuery = st.getExecutableQuery(query);
+            sql = Optional.of(executableQuery.getTree())
+                    .filter(t -> t instanceof UnaryIQTree)
+                    .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                    .filter(n -> n instanceof NativeNode)
+                    .map(n -> ((NativeNode) n).getNativeQueryString())
+                    .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();

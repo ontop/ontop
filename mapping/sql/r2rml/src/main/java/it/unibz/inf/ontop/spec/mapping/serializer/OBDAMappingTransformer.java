@@ -1,280 +1,423 @@
 package it.unibz.inf.ontop.spec.mapping.serializer;
 
-/*
- * #%L
- * ontop-obdalib-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
 import com.google.common.collect.ImmutableList;
-import eu.optique.r2rml.api.R2RMLMappingManager;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.LanguageTag;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.utils.URITemplates;
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.search.EntitySearcher;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.Templates;
+import org.apache.commons.rdf.api.*;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 
 /**
  * Transform OBDA mappings in R2rml mappings
- * @author Sarah, Mindas, Timi, Guohui, Martin
+ * Initial @author s Sarah, Mindas, Timi, Guohui, Martin
+ *
+ * TODO: rename it R2RML serializer
  *
  */
 public class OBDAMappingTransformer {
 
-    private OWLOntology ontology;
-	private Set<OWLObjectProperty> objectProperties;
-    private Set<OWLDataProperty> dataProperties;
-
 	private final RDF rdfFactory;
-    private String baseIRIString;
+	private final TermFactory termFactory;
+	private String baseIRIString;
+	private final eu.optique.r2rml.api.MappingFactory mappingFactory;
 
-	OBDAMappingTransformer(RDF rdfFactory) {
-        this("urn:", rdfFactory);
+	OBDAMappingTransformer(RDF rdfFactory, TermFactory termFactory) {
+        this("urn:", rdfFactory, termFactory);
 	}
 
-    OBDAMappingTransformer(String baseIRIString, RDF rdfFactory) {
+    OBDAMappingTransformer(String baseIRIString, RDF rdfFactory, TermFactory termFactory) {
         this.baseIRIString = baseIRIString;
 		this.rdfFactory = rdfFactory;
+		this.termFactory = termFactory;
+		this.mappingFactory = RDF4JR2RMLMappingManager.getInstance().getMappingFactory();
 	}
 
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public TriplesMap getTriplesMap(SQLPPTriplesMap axiom,
-                                    PrefixManager prefixmng) {
+	public Stream<TriplesMap> getTriplesMaps(SQLPPTriplesMap triplesMap, PrefixManager prefixManager) {
 
-		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		ImmutableList<TargetAtom> tquery = axiom.getTargetAtoms();
+		SQLPPSourceQueryImpl squery = (SQLPPSourceQueryImpl) triplesMap.getSourceQuery();
+		ImmutableList<TargetAtom> targetAtoms = triplesMap.getTargetAtoms();
 
 		//triplesMap node
-		String mapping_id = axiom.getId();
+		String mapping_id = triplesMap.getId();
 
 		// check if mapping id is an iri
-		if (!mapping_id.contains(":")) {
-            mapping_id = baseIRIString + mapping_id;
-        }
-		BlankNodeOrIRI mainNode = rdfFactory.createIRI(mapping_id);
+		String mainNodeURLPrefix = (!mapping_id.contains(":"))
+				? baseIRIString + mapping_id
+				: mapping_id;
 
-        R2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
-		eu.optique.r2rml.api.MappingFactory mfact = mm.getMappingFactory();
-		
 		//Table
-		LogicalTable lt = mfact.createR2RMLView(squery.getSQLQuery());
-		
-		//SubjectMap
-		ImmutableFunctionalTerm uriTemplate = (ImmutableFunctionalTerm) tquery.get(0).getSubstitutedTerm(0); //URI("..{}..", , )
-		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
-		Template templs = mfact.createTemplate(subjectTemplate);
-		SubjectMap sm = mfact.createSubjectMap(templs);
+		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQL());
 
-		TriplesMap tm = mfact.createTriplesMap(lt, sm, mainNode);
-		
-		//process target query
-		for (TargetAtom func : tquery) {
+		ImmutableMultimap<ImmutableTerm, TargetAtom> targetAtomMultimap = targetAtoms.stream()
+				.collect(ImmutableCollectors.toMultimap(
+						a -> a.getSubstitutedTerm(0),
+						a -> a));
 
-			IRI predUri = null;
+		// Creates a triples map per subject map
+		return targetAtomMultimap.asMap().entrySet().stream()
+				.flatMap(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
+	}
 
-			Optional<Template> templp = Optional.empty();
+	private Stream<TriplesMap> extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
+										 Collection<TargetAtom> targetAtoms, String mainNodeURLPrefix,
+										 PrefixManager prefixManager) {
 
-			//triple
-			ImmutableFunctionalTerm predf = (ImmutableFunctionalTerm)func.getSubstitutedTerm(1);
+		ImmutableMap<Optional<ImmutableTerm>, Collection<TargetAtom>> graphMap = targetAtoms.stream()
+				.collect(ImmutableCollectors.toMultimap(
+						t -> Optional.of(t.getProjectionAtom())
+								.filter(a -> a.getArity() > 3)
+								.map(a -> t.getSubstitutedTerm(3)),
+						t -> t))
+				.asMap();
 
-			if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
-					if (predf.getTerms().size() == 1) { //fixed string
-						predUri = rdfFactory.createIRI(((ValueConstant)(predf.getTerm(0))).getValue());
-					}
-					else {
-						//template
-						predUri = rdfFactory.createIRI(URITemplates.getUriTemplateString(predf, prefixmng));
-                        templp = Optional.of(mfact.createTemplate(subjectTemplate));
-					}
-				}
+		return graphMap.entrySet().stream()
+				.map(e -> extractTriplesMap(logicalTable, substitutedTerm, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
+	}
 
-			//term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
+	private TriplesMap extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
+										 Optional<ImmutableTerm> graphTerm, Collection<TargetAtom> targetAtoms,
+										 String mainNodeURLPrefix, PrefixManager prefixManager) {
+		SubjectMap sm = extractSubjectMap(substitutedTerm, prefixManager);
 
-			ImmutableTerm object = func.getSubstitutedTerm(2);
+		// Make sure we don't create triples map with the same name in case of multiple named graphs
+		BlankNodeOrIRI mainNode = rdfFactory.createIRI(
+				graphTerm
+						.map(t -> mainNodeURLPrefix + "-" + UUID.randomUUID().toString())
+						.orElse(mainNodeURLPrefix));
 
-			//if the class IRI is constant
-			if (predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)
-					&& object instanceof ImmutableFunctionalTerm
-					&& ((ImmutableFunctionalTerm) object).getFunctionSymbol() instanceof URITemplatePredicate
-					&& ((ImmutableFunctionalTerm) object).getTerms().size() == 1) {
+		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, sm, mainNode);
 
-				IRI classIRI = rdfFactory.createIRI(((ValueConstant)(((ImmutableFunctionalTerm) object).getTerm(0))).getValue());
-					// The term is actually a SubjectMap (class)
-					//add class declaration to subject Map node
-					sm.addClass(classIRI);
+		graphTerm.map(g -> extractGraphMap(g, prefixManager))
+				.ifPresent(sm::addGraphMap);
 
-			} else {
+		ImmutableMap<Boolean, ImmutableList<TargetAtom>> targetAtomClassification = targetAtoms.stream()
+				.collect(ImmutableCollectors.partitioningBy(OBDAMappingTransformer::isConstantClassTargetAtom));
 
-				String predURIString = predUri.getIRIString();
+		// Constant classes
+		Optional.ofNullable(targetAtomClassification.get(true))
+				.map(Collection::stream)
+				.orElse(Stream.empty())
+				.map(this::extractClassIRIFromConstantClassTargetAtom)
+				.forEach(sm::addClass);
 
-				PredicateMap predM = templp.isPresent()?
-				mfact.createPredicateMap(templp.get()):
-				mfact.createPredicateMap(predUri);
-				ObjectMap obm = null; PredicateObjectMap pom = null;
 
-				org.semanticweb.owlapi.model.IRI propname = org.semanticweb.owlapi.model.IRI.create(predURIString);
-				OWLDataFactory factory =  OWLManager.getOWLDataFactory();
-				OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
-				OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
-
-				//add object declaration to predObj node
- 				if (object instanceof Variable){
-					if(ontology!= null && objectProperties.contains(objectProperty)){
-                        //we create an rr:column
-						obm = mfact.createObjectMap((((Variable) object).getName()));
-						obm.setTermType(R2RMLVocabulary.iri);
-					} else {
-                        if (ontology != null && dataProperties.contains(dataProperty)) {
-
-                            // column valued
-                            obm = mfact.createObjectMap(((Variable) object).getName());
-                            //set the datatype for the typed literal
-
-                            //Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
-                            Collection<OWLDataRange> ranges = EntitySearcher.getRanges(dataProperty, ontology);
-                            //assign the datatype if present
-                            if (ranges.size() == 1) {
-                                org.semanticweb.owlapi.model.IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();
-                                obm.setDatatype(rdfFactory.createIRI(dataRange.toString()));
-                            }
-
-                        } else {
-                            // column valued
-                            obm = mfact.createObjectMap(((Variable) object).getName());
-                        }
-                    }
-                    //we add the predicate object map in case of literal
-					pom = mfact.createPredicateObjectMap(predM, obm);
-					tm.addPredicateObjectMap(pom);
-				} 
- 				else if (object instanceof ImmutableFunctionalTerm) { //we create a template
-					//check if uritemplate we create a template, in case of datatype with single variable we create a column
- 					ImmutableFunctionalTerm o = (ImmutableFunctionalTerm) object;
- 					Predicate objectPred = o.getFunctionSymbol();
-					if (objectPred instanceof URITemplatePredicate || objectPred instanceof BNodePredicate) {
-						IRI termType = objectPred instanceof URITemplatePredicate?
-								R2RMLVocabulary.iri:
-								R2RMLVocabulary.blankNode;
-
-						ImmutableTerm objectTerm = o.getTerm(0);
-
-						if(objectTerm instanceof Variable)
-						{
-							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
-						}
-						else {
-
-							String objectURI = URITemplates.getUriTemplateString(o, prefixmng);
-							//add template object
-							//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.template, rdfFactory.createLiteral(objectURI)));
-							//obm.setTemplate(mfact.createTemplate(objectURI));
-							obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-						}
-						obm.setTermType(termType);
-					} else if (objectPred instanceof DatatypePredicate) {
-						ImmutableTerm objectTerm = o.getTerm(0);
-						
-						if (objectTerm instanceof Variable) {
-
-							// column valued
-							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
-							//set the datatype for the typed literal
-							obm.setTermType(R2RMLVocabulary.literal);
-							
-							RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
-							Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
-							if (optionalLangTag.isPresent()) {
-								obm.setLanguageTag(optionalLangTag.get().getFullString());
-							}
-							else {
-								obm.setDatatype(objectDatatype.getIRI());
-							}
-						} else if (objectTerm instanceof Constant) {
-							//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.constant, rdfFactory.createLiteral(((Constant) objectTerm).getValue())));
-							//obm.setConstant(rdfFactory.createLiteral(((Constant) objectTerm).getValue()).stringValue());
-							obm = mfact.createObjectMap(rdfFactory.createLiteral(((Constant) objectTerm).getValue(), rdfFactory.createIRI(objectPred.getName())));
-							
-						} else if(objectTerm instanceof ImmutableFunctionalTerm){
-							ImmutableFunctionalTerm functionalObjectTerm = (ImmutableFunctionalTerm) objectTerm;
-							
-							StringBuilder sb = new StringBuilder();
-							Predicate functionSymbol = functionalObjectTerm.getFunctionSymbol();
-							
-							if (functionSymbol == ExpressionOperation.CONCAT) { //concat
-								ImmutableList<? extends ImmutableTerm> terms = functionalObjectTerm.getTerms();
-								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
-								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
-								obm.setTermType(R2RMLVocabulary.literal);
-
-								RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
-								Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
-								if (optionalLangTag.isPresent()) {
-									obm.setLanguageTag(optionalLangTag.get().getFullString());
-								}
-							}
-						}
-						
-					}
-					pom = mfact.createPredicateObjectMap(predM, obm);
-					tm.addPredicateObjectMap(pom);
-				} else {
-					System.out.println("FOUND UNKNOWN: "+object.toString());
-				}
-			}
-			
-		}
+		// Other target atoms -> predicate object map
+		Optional.ofNullable(targetAtomClassification.get(false))
+				.map(Collection::stream)
+				.orElse(Stream.empty())
+				.map(a -> convertIntoPredicateObjectMap(a, prefixManager))
+				.forEach(tm::addPredicateObjectMap);
 
 		return tm;
 	}
-	
-	public OWLOntology getOntology() {
-		return ontology;
-	}
-	
-	public void setOntology(OWLOntology ontology) {
-		this.ontology = ontology;
-		if(ontology != null){
-            //gets all object properties from the ontology
-			objectProperties = ontology.getObjectPropertiesInSignature();
 
-            //gets all data properties from the ontology
-            dataProperties = ontology.getDataPropertiesInSignature();
+	private static boolean isConstantClassTargetAtom(TargetAtom targetAtom) {
+		return Optional.of(targetAtom.getProjectionAtom())
+				.filter(a -> a.getPredicate() instanceof RDFAtomPredicate)
+				.flatMap(a -> ((RDFAtomPredicate) a.getPredicate()).getClassIRI(targetAtom.getSubstitutedTerms()))
+				.isPresent();
+	}
+
+	private IRI extractClassIRIFromConstantClassTargetAtom(TargetAtom targetAtom) {
+		return Optional.of(targetAtom.getProjectionAtom())
+				.filter(a -> a.getPredicate() instanceof RDFAtomPredicate)
+				.flatMap(a -> ((RDFAtomPredicate) a.getPredicate()).getClassIRI(targetAtom.getSubstitutedTerms()))
+				.orElseThrow(() -> new IllegalArgumentException("The target atom is expected to have a constant class"));
+	}
+
+	private PredicateObjectMap convertIntoPredicateObjectMap(TargetAtom targetAtom, PrefixManager prefixManager) {
+		return mappingFactory.createPredicateObjectMap(
+				extractPredicateMap(targetAtom, prefixManager),
+				extractObjectMap(targetAtom, prefixManager));
+	}
+
+	private SubjectMap extractSubjectMap(ImmutableTerm substitutedTerm, PrefixManager prefixManager) {
+		return extractTermMap(substitutedTerm, true, false,
+				mappingFactory::createSubjectMap,
+				mappingFactory::createSubjectMap,
+				mappingFactory::createSubjectMap,
+				// TODO: allow blank nodes to appear in a subject map
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+				prefixManager);
+	}
+
+	private GraphMap extractGraphMap(ImmutableTerm substitutedTerm, PrefixManager prefixManager) {
+		return extractTermMap(substitutedTerm, true, false,
+				mappingFactory::createGraphMap,
+				mappingFactory::createGraphMap,
+				mappingFactory::createGraphMap,
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+				prefixManager);
+	}
+
+	private PredicateMap extractPredicateMap(TargetAtom targetAtom, PrefixManager prefixManager) {
+		return extractTermMap(targetAtom.getSubstitutedTerm(1), false, false,
+				mappingFactory::createPredicateMap,
+				mappingFactory::createPredicateMap,
+				mappingFactory::createPredicateMap,
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+				l -> {
+					throw new UnsupportedOperationException();
+				},
+		        prefixManager);
+	}
+
+	private ObjectMap extractObjectMap(TargetAtom targetAtom, PrefixManager prefixManager) {
+		return extractTermMap(targetAtom.getSubstitutedTerm(2), true, true,
+				mappingFactory::createObjectMap,
+				mappingFactory::createObjectMap,
+				mappingFactory::createObjectMap,
+				mappingFactory::createObjectMap,
+				mappingFactory::createObjectMap,
+				prefixManager);
+	}
+
+	private <T extends TermMap> T extractTermMap(ImmutableTerm substitutedTerm, boolean acceptBNode, boolean acceptLiterals,
+												 java.util.function.Function<Template, T> templateFct,
+												 java.util.function.Function<String, T> columnFct,
+												 java.util.function.Function<IRI, T> iriFct,
+												 java.util.function.Function<BlankNode, T> bNodeFct,
+												 java.util.function.Function<Literal, T> literalFct,
+												 PrefixManager prefixManager) {
+
+		ImmutableFunctionalTerm rdfFunctionalTerm = Optional.of(substitutedTerm)
+				.filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
+				.map(t -> convertIntoRDFFunctionalTerm((NonVariableTerm) t))
+				.filter(t -> t.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+				.orElseThrow(() -> new R2RMLSerializationException(
+						"Was expecting a RDFTerm functional or constant term, not " + substitutedTerm));
+
+		ImmutableTerm lexicalTerm = uncast(rdfFunctionalTerm.getTerm(0));
+
+		// Might be abstract (e.g. partially defined literal map)
+		RDFTermType termType = Optional.of(rdfFunctionalTerm.getTerm(1))
+				.filter(t -> t instanceof RDFTermTypeConstant)
+				.map(t -> (RDFTermTypeConstant) t)
+				.map(RDFTermTypeConstant::getRDFTermType)
+				.orElseThrow(() -> new R2RMLSerializationException(
+						"Was expecting a RDFTermTypeConstant in the mapping assertion, not "
+								+ rdfFunctionalTerm.getTerm(1)));
+
+		if (termType instanceof ObjectRDFType)
+			return extractIriOrBnodeTermMap(lexicalTerm, (ObjectRDFType) termType, acceptBNode,
+					templateFct, columnFct, iriFct, bNodeFct, prefixManager);
+		else if (termType instanceof RDFDatatype)
+			if (acceptLiterals)
+				return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
+			else
+				throw new MinorOntopInternalBugException("A literal term map has been found in an unexpected area: "
+						+ substitutedTerm);
+		else
+			throw new MinorOntopInternalBugException("An RDF termType must be either an object type or a datatype");
+	}
+
+	private ImmutableFunctionalTerm convertIntoRDFFunctionalTerm(NonVariableTerm term) {
+		if (term instanceof  RDFConstant) {
+			RDFConstant constant = (RDFConstant) term;
+			return termFactory.getRDFFunctionalTerm(
+					termFactory.getDBStringConstant(constant.getValue()),
+					termFactory.getRDFTermTypeConstant(constant.getType()));
+		}
+		else
+			return (ImmutableFunctionalTerm) term;
+	}
+
+	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm, ObjectRDFType termType, boolean acceptBNode,
+                                                           java.util.function.Function<Template, T> templateFct,
+                                                           java.util.function.Function<String, T> columnFct,
+                                                           java.util.function.Function<IRI, T> iriFct,
+                                                           java.util.function.Function<BlankNode, T> bNodeFct,
+                                                           PrefixManager prefixManager) {
+		if ((!acceptBNode) && termType.isBlankNode())
+			throw new MinorOntopInternalBugException("Bnode term map found in an unexpected area: " + lexicalTerm);
+
+		T termMap;
+		if (lexicalTerm instanceof DBConstant) { //fixed string
+			String lexicalString = ((DBConstant) lexicalTerm).getValue();
+			termMap = termType.isBlankNode()
+					? bNodeFct.apply(rdfFactory.createBlankNode(lexicalString))
+					: iriFct.apply(rdfFactory.createIRI(lexicalString));
+		}
+		else if (lexicalTerm instanceof Variable) {
+			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
+		}
+		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+			String templateString = getTemplate((ImmutableFunctionalTerm) lexicalTerm, prefixManager);
+			termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+		}
+		else {
+			throw new MinorOntopInternalBugException("Unexpected lexical term for an IRI/Bnode: " + lexicalTerm);
+		}
+
+		termMap.setTermType(termType.isBlankNode() ? R2RMLVocabulary.blankNode : R2RMLVocabulary.iri);
+		return termMap;
+	}
+
+	private String getTemplate(ImmutableFunctionalTerm lexicalTerm, PrefixManager prefixManager) {
+		FunctionSymbol functionSymbol = lexicalTerm.getFunctionSymbol();
+		if (functionSymbol instanceof BnodeStringTemplateFunctionSymbol) {
+			return "_:" + Templates.getTemplateString(lexicalTerm);
+		}
+		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
+			return expandPrefix(Templates.getTemplateString(lexicalTerm), prefixManager);
+		}
+		if (functionSymbol instanceof DBConcatFunctionSymbol){
+			return Templates.getDBConcatTemplateString(lexicalTerm);
+		}
+		throw new R2RMLSerializationException ("Unexpected function symbol "+functionSymbol + " in term "+lexicalTerm);
+	}
+
+	private String expandPrefix(String prefixedTemplate, PrefixManager prefixManager) {
+		String expandedTemplate = prefixedTemplate;
+		try {
+			expandedTemplate = prefixManager.getExpandForm(prefixedTemplate);
+		} catch (InvalidPrefixWritingException e){
+
+		}
+		return expandedTemplate;
+	}
+
+	/**
+	 * NB: T is assumed to be an ObjectMap
+	 */
+	private <T extends TermMap> T extractLiteralTermMap(ImmutableTerm lexicalTerm, RDFDatatype datatype,
+														java.util.function.Function<Template, T> templateFct,
+														java.util.function.Function<String, T> columnFct,
+														java.util.function.Function<Literal, T> literalFct) {
+		T termMap;
+		if (lexicalTerm instanceof Variable) {
+			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
+		}
+		else if (lexicalTerm instanceof DBConstant) {
+			String lexicalString = ((DBConstant) lexicalTerm).getValue();
+			Literal literal = datatype.getLanguageTag()
+					.map(lang -> rdfFactory.createLiteral(lexicalString, lang.getFullString()))
+					.orElseGet(() -> rdfFactory.createLiteral(lexicalString, datatype.getIRI()));
+			termMap = literalFct.apply(literal);
+		}
+		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+			Predicate functionSymbol = functionalLexicalTerm.getFunctionSymbol();
+
+			if (functionSymbol instanceof DBConcatFunctionSymbol) { //concat
+				termMap = templateFct.apply(mappingFactory.createTemplate(
+						TargetQueryRenderer.displayConcat(functionalLexicalTerm)));
+			} else
+				throw new R2RMLSerializationException("Unexpected function symbol: " + functionSymbol);
+		}
+		else {
+			throw new MinorOntopInternalBugException("Unexpected lexical term for a literal: " + lexicalTerm);
+		}
+
+		termMap.setTermType(R2RMLVocabulary.literal);
+
+		if (!(termMap instanceof ObjectMap))
+			throw new MinorOntopInternalBugException("The termMap was expected to be an ObjectMap");
+		ObjectMap objectMap = (ObjectMap) termMap;
+
+		Optional<LanguageTag> optionalLangTag = datatype.getLanguageTag();
+		if (optionalLangTag.isPresent())
+			objectMap.setLanguageTag(optionalLangTag.get().getFullString());
+		else if (!datatype.isAbstract()
+				&& !isOntopInternalRDFLiteral(datatype, lexicalTerm))
+			objectMap.setDatatype(datatype.getIRI());
+
+		return termMap;
+	}
+
+	/**
+	 * Ontop may use rdfs:literal internally for some terms whose datatype is not specified in the obda mapping.
+	 *  If the term is built from a column or pattern, then its datatype must be inferred from the DB schema (according to the R2RML spec),
+	 *  so the R2RML mapping should not use rr:datatype for this term map
+	 */
+	private boolean isOntopInternalRDFLiteral(RDFDatatype datatype, ImmutableTerm lexicalTerm) {
+		if(!datatype.equals(RDFS.LITERAL))
+			return false;
+		if(lexicalTerm instanceof Variable)
+			return true;
+		if(lexicalTerm instanceof ImmutableFunctionalTerm){
+			FunctionSymbol fs = ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol();
+			if(fs instanceof BnodeStringTemplateFunctionSymbol || fs instanceof IRIStringTemplateFunctionSymbol)
+				return true;
+		}
+		return false;
+	}
+
+	private ImmutableTerm uncast(ImmutableTerm lexicalTerm) {
+		return Optional.of(lexicalTerm)
+				.filter(t -> t instanceof ImmutableFunctionalTerm)
+				.map(t -> (ImmutableFunctionalTerm) t)
+				.map(t -> uncastFunction(t))
+				.orElse(lexicalTerm);
+	}
+
+	private ImmutableTerm uncastFunction(ImmutableFunctionalTerm fun) {
+			ImmutableList<ImmutableTerm> unCastArgs = fun.getTerms().stream()
+					.map(t -> uncast(t))
+					.collect(ImmutableCollectors.toList());
+			FunctionSymbol fs = fun.getFunctionSymbol();
+
+			if (fs instanceof DBTypeConversionFunctionSymbol
+					&& (((DBTypeConversionFunctionSymbol) fs).isTemporary())
+					&& fs.getArity() == 1)
+				return unCastArgs.iterator().next();
+			return termFactory.getImmutableFunctionalTerm(fs, unCastArgs);
+	}
+
+	/**
+	 * TODO: shall we consider as an internal bug or differently?
+	 */
+	static class R2RMLSerializationException extends OntopInternalBugException {
+
+		private R2RMLSerializationException(String message) {
+			super(message);
 		}
 	}
-	
+
 
 }

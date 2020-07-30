@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
-import org.apache.commons.rdf.api.RDF;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +44,8 @@ public class R2rmlConversionTest {
        }
 
 
-       SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, null,
-               config.getInjector().getInstance(RDF.class));
+       SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping,
+               config.getRdfFactory(), config.getTermFactory());
        return converter.getTripleMaps();
 
 
@@ -70,6 +69,18 @@ public class R2rmlConversionTest {
         for (TriplesMap triplesMap :triplesMaps){
             ObjectMap objectMap = triplesMap.getPredicateObjectMap(0).getObjectMap(0);
             assertEquals("\"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>", objectMap.getConstant().ntriplesString());
+            assertNull(objectMap.getTemplate());
+        }
+
+    }
+
+    @Test
+    public void testUntypedLiteral() throws Exception {
+        Collection<TriplesMap> triplesMaps = execute("src/test/resources/npd-literal-mapping.obda");
+        for (TriplesMap triplesMap :triplesMaps){
+            ObjectMap objectMap = triplesMap.getPredicateObjectMap(0).getObjectMap(0);
+            assertEquals("someColName", objectMap.getColumn());
+            assertNull(objectMap.getDatatype());
             assertNull(objectMap.getTemplate());
         }
 

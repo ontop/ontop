@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.ontology;
 
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import org.apache.commons.rdf.api.IRI;
 
 public interface OntologyBuilder {
@@ -109,7 +109,7 @@ public interface OntologyBuilder {
      * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
      */
 
-    void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
+    void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, RDFLiteralConstant v) throws InconsistentOntologyException;
 
     /**
      * inserts an annotation property assertion

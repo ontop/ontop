@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlapi;
 
 
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
@@ -20,25 +20,21 @@ import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-import static org.junit.Assert.assertTrue;
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 public class CanonicalIRIUniversityTest {
 
-
-    final String owlFile = "src/test/resources/canonicalIRI/university/univ-ontology.ttl";
-    final String obdaFile = "src/test/resources/canonicalIRI/university/univ-ontology.obda";
-    final String sparqlFile = "src/test/resources/canonicalIRI/university/univ-ontology.q";
+    private static final String owlFile = "src/test/resources/canonicalIRI/university/univ-ontology.ttl";
+    private static final String obdaFile = "src/test/resources/canonicalIRI/university/univ-ontology.obda";
+    private static final String sparqlFile = "src/test/resources/canonicalIRI/university/univ-ontology.q";
 
     private OntopOWLReasoner reasoner;
     private OntopOWLConnection conn;
-    Connection sqlConnection;
+    private Connection sqlConnection;
 
     private static final String JDBC_URL =  "jdbc:h2:mem:uni";
     private static final String JDBC_USER =  "sa";
@@ -48,10 +44,7 @@ public class CanonicalIRIUniversityTest {
     @Before
     public void setUp() throws Exception{
         sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-        java.sql.Statement s = sqlConnection.createStatement();
-        String text = new Scanner( new File("src/test/resources/canonicalIRI/university/dataset_dump.sql") ).useDelimiter("\\A").next();
-        s.execute(text);
-        s.close();
+        executeFromFile(sqlConnection, "src/test/resources/canonicalIRI/university/dataset_dump.sql");
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
@@ -70,8 +63,6 @@ public class CanonicalIRIUniversityTest {
 
         reasoner = factory.createReasoner(config);
         conn = reasoner.getConnection();
-
-
     }
 
     @After
@@ -79,13 +70,10 @@ public class CanonicalIRIUniversityTest {
         conn.close();
         reasoner.dispose();
         if (!sqlConnection.isClosed()) {
-            java.sql.Statement s = sqlConnection.createStatement();
-            try {
+            try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
-            } catch (SQLException sqle) {
-                System.out.println("Table not found, not dropping");
-            } finally {
-                s.close();
+            }
+            finally {
                 sqlConnection.close();
             }
         }
@@ -94,16 +82,13 @@ public class CanonicalIRIUniversityTest {
     @Ignore
     public void testUniversity() throws Exception {
 
-
 		/*
 		 * Prepare the data connection for querying.
 		 */
 //        String sparqlQuery = Files.lines(Paths.get(sparqlFile)).collect(joining("\n"));
 
 
-        try (
-                OntopOWLStatement st = conn.createStatement();
-        ) {
+        try (OntopOWLStatement st = conn.createStatement()) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
             qman.load(sparqlFile);
@@ -113,11 +98,10 @@ public class CanonicalIRIUniversityTest {
 
                     String sparqlQuery = query.getQuery();
                     TupleOWLResultSet res = st.executeSelectQuery(sparqlQuery);
-                    int columnSize = res.getColumnCount();
                     while (res.hasNext()) {
                         final OWLBindingSet bindingSet = res.next();
-                        for (int idx = 1; idx <= columnSize; idx++) {
-                            OWLObject binding = bindingSet.getOWLObject(idx);
+                        for (String name: res.getSignature()) {
+                            OWLObject binding = bindingSet.getOWLObject(name);
                             System.out.print(binding.toString() + ", ");
                         }
                         System.out.print("\n");
@@ -127,7 +111,7 @@ public class CanonicalIRIUniversityTest {
 			            * Print the query summary
 			         */
 
-                    ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
+                    IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
                     System.out.println();
                     System.out.println("The input SELECT SPARQL query:");
@@ -139,18 +123,9 @@ public class CanonicalIRIUniversityTest {
                     System.out.println("=====================");
                     System.out.println(executableQuery);
 
-
                     res.close();
-
-
-
-
                 }
             }
-
-
-
-
         }
     }
 
@@ -174,9 +149,8 @@ public class CanonicalIRIUniversityTest {
     }
 
     private void runSelectQuery(String query) throws OWLException {
-        OWLStatement st = conn.createStatement();
         ArrayList<String> retVal = new ArrayList<>();
-        try {
+        try (OWLStatement st = conn.createStatement()) {
             TupleOWLResultSet  rs = st.executeSelectQuery(query);
             while(rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
@@ -187,16 +161,8 @@ public class CanonicalIRIUniversityTest {
                     System.out.println((s + ":  " + rendering));
                 }
             }
-
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
-
-            } catch (Exception e) {
-                st.close();
-                assertTrue(false);
-            }
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }
@@ -211,7 +177,6 @@ public class CanonicalIRIUniversityTest {
                     "}\n";
 
         runSelectQuery(query);
-
     }
 
     @Test
@@ -226,8 +191,6 @@ public class CanonicalIRIUniversityTest {
                         "}";
 
         runSelectQuery(query);
-
-
     }
 
     @Test
@@ -242,8 +205,6 @@ public class CanonicalIRIUniversityTest {
                         "}";
 
         runSelectQuery(query);
-
-
     }
 
 }

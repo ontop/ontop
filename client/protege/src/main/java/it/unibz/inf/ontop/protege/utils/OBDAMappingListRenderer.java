@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.utils;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,9 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
@@ -35,10 +33,10 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 
-public class OBDAMappingListRenderer implements ListCellRenderer {
+public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 
 	private PrefixManager prefixManager;
-	
+
 	private JTextPane mapTextPane;
 	private JTextPane trgQueryTextPane;
 	private JTextPane srcQueryTextPane;
@@ -308,13 +306,13 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	}
 
 	@Override
-	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+	public Component getListCellRendererComponent(JList list, SQLPPTriplesMap value, int index, boolean isSelected, boolean cellHasFocus) {
 
 		//preferredWidth = list.getParent().getWidth(); //TODO: UNDERSTAND WHY BROKE
 		preferredWidth = list.getParent().getParent().getWidth();
 
 		minTextHeight = this.plainFontHeight + 6;
-		Component c = prepareRenderer((SQLPPTriplesMap) value, isSelected);
+		Component c = prepareRenderer(value, isSelected);
 		return c;
 	}
 
@@ -365,16 +363,23 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		return renderingComponent;
 	}
 
-	private void prepareTextPanes(SQLPPTriplesMap value, boolean selected) {
-		ImmutableList<TargetAtom> targetQuery = value.getTargetAtoms();
-		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
+	private void prepareTextPanes(SQLPPTriplesMap map, boolean selected) {
+//		ImmutableList<TargetAtom> targetQuery = map.getTargetAtoms();
+//		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
+		// TODO: the orElse part
+//		String trgQuery = map.getOptionalTargetString()
+//				.orElseGet(() -> TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager));
+
+		String trgQuery = TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager);
+
+		//String trgQuery = map.getOptionalTargetString();
  		trgQueryTextPane.setText(trgQuery);
 
- 		OBDASQLQuery sourceQuery = value.getSourceQuery();
+ 		SQLPPSourceQuery sourceQuery = map.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		srcQueryTextPane.setText(srcQuery);
-		
-		mapTextPane.setText(value.getId());
+
+		mapTextPane.setText(map.getId());
 
 		StyledDocument doc = trgQueryTextPane.getStyledDocument();
 		resetStyles(doc);

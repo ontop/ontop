@@ -4,21 +4,16 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * Tools for new-gen immutable unifying substitutions.
@@ -29,18 +24,14 @@ public class ImmutableUnificationTools {
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
-    private final ImmutabilityTools immutabilityTools;
-    private final TypeFactory typeFactory;
 
     @Inject
     private ImmutableUnificationTools(SubstitutionFactory substitutionFactory,
-                                      ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
-                                      ImmutabilityTools immutabilityTools, TypeFactory typeFactory) {
+                                      ImmutableSubstitutionTools substitutionTools,
+                                      UnifierUtilities unifierUtilities) {
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;
-        this.immutabilityTools = immutabilityTools;
-        this.typeFactory = typeFactory;
     }
 
     /**
@@ -143,42 +134,39 @@ public class ImmutableUnificationTools {
 
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
                                                                                    ImmutableList<T> args2) {
+        // TODO (ROMAN 12/02/20): why is it here?
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        // TODO: avoid use it
-        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size(), typeFactory);
-
-        Substitution mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableFunction(functionSymbol, args1),
-                immutabilityTools.convertToMutableFunction(functionSymbol, args2));
-
-        if (mutableSubstitution == null) {
-            return Optional.empty();
-        }
-        return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution))
-                .map(s -> (ImmutableSubstitution<T>)s);
+        return unifierUtilities.getMGU(args1, args2);
     }
 
-    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
-        Substitution mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableFunction(atom1),
-                immutabilityTools.convertToMutableFunction(atom2));
+    public Optional<ArgumentMapUnification> computeArgumentMapMGU(
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap1,
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap2) {
+        ImmutableSet<Integer> firstIndexes = argumentMap1.keySet();
+        ImmutableSet<Integer> secondIndexes = argumentMap2.keySet();
 
-        if (mutableSubstitution == null) {
-            return Optional.empty();
-        }
+        Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, secondIndexes);
 
-        ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : mutableSubstitution.getMap().entrySet()) {
-            VariableOrGroundTerm value = ImmutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = unifierUtilities.getMGU(
+                commonIndexes.stream()
+                        .map(argumentMap1::get)
+                        .collect(ImmutableCollectors.toList()),
+                commonIndexes.stream()
+                        .map(argumentMap2::get)
+                        .collect(ImmutableCollectors.toList()));
 
-            substitutionMapBuilder.put(entry.getKey(), value);
-        }
-
-        ImmutableSubstitution<VariableOrGroundTerm> immutableSubstitution = substitutionFactory.getSubstitution(
-                substitutionMapBuilder.build());
-        return Optional.of(immutableSubstitution);
+        return unifier
+                .map(u -> new ArgumentMapUnification(
+                        // Merges the argument maps and applies the unifier
+                        u.applyToArgumentMap(
+                                Sets.union(firstIndexes, secondIndexes).stream()
+                                        .collect(ImmutableCollectors.toMap(
+                                                i -> i,
+                                                i -> Optional.ofNullable((VariableOrGroundTerm) argumentMap1.get(i))
+                                                .orElseGet(() -> argumentMap2.get(i))))),
+                        u));
 
     }
 
@@ -195,7 +183,11 @@ public class ImmutableUnificationTools {
      * Computes one Most General Unifier (MGU) of (two) substitutions.
      */
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
-                                                                             ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
+                                                                      ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
+        if (substitution1.isEmpty())
+            return Optional.of((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)substitution2);
+        else if (substitution2.isEmpty())
+            Optional.of((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)substitution1);
 
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
         ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
@@ -220,13 +212,8 @@ public class ImmutableUnificationTools {
             ImmutableSubstitution<VariableOrGroundTerm> substitution1,
             ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
-        if (optionalMGUS.isPresent()) {
-            return Optional.of(substitutionTools.convertIntoVariableOrGroundTermSubstitution(
-                    optionalMGUS.get()));
-        }
-        else {
-            return Optional.empty();
-        }
+        return optionalMGUS
+                .map(substitutionTools::convertIntoVariableOrGroundTermSubstitution);
     }
 
 
@@ -423,23 +410,14 @@ public class ImmutableUnificationTools {
         return substitutionFactory.getSubstitution(ImmutableMap.copyOf(substitutionMap));
     }
 
-    /**
-     * TODO: get rid of it about refactoring the unification tools
-     */
-    private static class TemporaryFunctionSymbol extends PredicateImpl {
+    public static class ArgumentMapUnification {
+        public final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
+        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
 
-        private TemporaryFunctionSymbol(int arity, TypeFactory typeFactory) {
-            super("pred", createExpectedBaseTermTypeList(arity, typeFactory));
-        }
-
-        private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity, TypeFactory typeFactory) {
-            TermType rootTermType = typeFactory.getAbstractAtomicTermType();
-
-            return IntStream.range(0, arity)
-                    .boxed()
-                    .map(i -> rootTermType)
-                    .collect(ImmutableCollectors.toList());
+        public ArgumentMapUnification(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
+                                      ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+            this.argumentMap = argumentMap;
+            this.substitution = substitution;
         }
     }
-
 }

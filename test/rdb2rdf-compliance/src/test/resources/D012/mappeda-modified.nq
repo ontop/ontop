@@ -1,0 +1,4 @@
+_:BobSmith30 <http://example.com/amount> "30.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:BobSmith30 <http://xmlns.com/foaf/0.1/name> "Bob Smith" .
+_:SueJones20 <http://example.com/amount> "20.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:SueJones20 <http://xmlns.com/foaf/0.1/name> "Sue Jones" .

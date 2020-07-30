@@ -23,7 +23,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
@@ -36,16 +35,12 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.ValueFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
@@ -80,10 +75,54 @@ public class RDB2RDFTest {
 	/**
 	 * Following tests are failing due to various different reasons and bugs and are excluded manually.
 	 */
-	private static Set<String> IGNORE = ImmutableSet.of(
-		"tc0002f", "tc0002h", "tc0003a", "dg0005", "tc0007h", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0012",
-		"dg0014", "tc0014b", "tc0014c", "tc0015b", "dg0016", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a",
-		"tc0019b", "tc0020b", "dg0025"
+	private static final Set<String> IGNORE = ImmutableSet.of(
+			// Should reject an undefined SQL version
+			"tc0003a",
+			// Limitation of bnode isomorphism detection + xsd:double encoding (engineering notation was expected)
+			"dg0005",
+			// Limitation of bnode isomorphism detection
+			"dg0005-modified",
+			// Different XSD.DOUBLE lexical form; was expecting the engineering notation. Modified version added.
+			"tc0005a",
+			// Different XSD.DOUBLE lexical form; was expecting the engineering notation. Modified version added.
+			"tc0005b",
+			// Expect an exception when processing the mapping (non-IRI for named graph) TODO: throw it
+			"tc0007h",
+			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
+			"tc0009d",
+			// TODO: fix: too much escaping for the curly brackets in the string
+			"tc0010c",
+			// Modified (different XSD.DOUBLE lexical form)
+			"dg0012",
+			// Direct mapping and bnodes: row unique ids are not considered, leadinq to incomplete results
+			// (e.g. Bob-London should appear twice). TODO: fix it
+			"dg0012-modified",
+			// Modified (different XSD.DOUBLE lexical form)
+			"tc0012a",
+			// Modified (different XSD.DOUBLE lexical form)
+			"tc0012e",
+			// Should reject an invalid language tag
+			"tc0015b",
+			// Double + timezone was not expected to be added. Same for milliseconds.
+			"dg0016",
+			// Different XSD.DOUBLE lexical form. Modified version added.
+			"tc0016b",
+			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
+			"tc0016c",
+			// Wrong data IRI created. TODO: fix it
+			"tc0016e",
+			// Excessive IRI encoding done for extreme-east asia characters. TODO: fix it
+			"dg0017",
+			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
+			"dg0018",
+			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
+			"tc0018a",
+			// Should create an IRI based on a column and the base IRI. TODO: support the base IRI in R2RML
+			"tc0019a",
+			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
+			"tc0019b",
+			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
+			"tc0020b"
 	);
 
 	private static List<String> FAILURES = Lists.newArrayList();
@@ -193,11 +232,11 @@ public class RDB2RDFTest {
 		return params;
 	}
 
-	private static URL url(String path) throws IOException {
+	private static URL url(String path)  {
 		return path == null ? null : RDB2RDFTest.class.getResource(path);
 	}
 
-	private static InputStream stream(String path) throws IOException {
+	private static InputStream stream(String path) {
 		return RDB2RDFTest.class.getResourceAsStream(path);
 	}
 
@@ -306,7 +345,7 @@ public class RDB2RDFTest {
 				.build();
 	}
 
-	protected static void clearDB() throws Exception {
+	protected static void clearDB()  {
         try (java.sql.Statement s = SQL_CONN.createStatement()) {
             s.execute("DROP ALL OBJECTS DELETE FILES");
         } catch (SQLException sqle) {
@@ -360,17 +399,32 @@ public class RDB2RDFTest {
 		}
 
 
-		RepositoryConnection con = null;
-		try {
-			con = dataRep.getConnection();
-			String graphq = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
-			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, graphq);
+		try (RepositoryConnection con = dataRep.getConnection()) {
+			String tripleQuery = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
+			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, tripleQuery);
+			Set<Statement> triples = QueryResults.asSet(gquery.evaluate());
 
-			Set<Statement> actual = QueryResults.asSet(gquery.evaluate());
+			TupleQuery namedGraphQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+					"SELECT DISTINCT ?g WHERE { GRAPH ?g {?s ?p ?o } }");
+			ImmutableSet<Resource> namedGraphs = QueryResults.asSet(namedGraphQuery.evaluate()).stream()
+					.map(bs -> bs.getBinding("g"))
+					.map(Binding::getValue)
+					.map(v -> (Resource) v)
+					.collect(ImmutableCollectors.toSet());
+
+			String quadQuery = "CONSTRUCT {?s ?p ?o} WHERE { GRAPH ?g {?s ?p ?o} }";
+			Set<Statement> actual = new HashSet<>(triples);
+			for (Resource namedGraph : namedGraphs) {
+				GraphQuery query = con.prepareGraphQuery(quadQuery);
+				query.setBinding("g", namedGraph);
+				QueryResults.asSet(query.evaluate()).stream()
+						.map(s -> FACTORY.createStatement(s.getSubject(), s.getPredicate(), s.getObject(), namedGraph))
+						.forEach(actual::add);
+			}
 
 			Set<Statement> expected = ImmutableSet.of();
 			if (outputExpected) {
-				expected = stripNamedGraphs(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile).get()));
+				expected = Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile).get());
 			}
 
 			if (!Models.isomorphic(expected, actual)) {
@@ -381,9 +435,6 @@ public class RDB2RDFTest {
 			}
 		}
 		finally {
-			if (con != null) {
-				con.close();
-			}
 			dataRep.shutDown();
 		}
 	}
@@ -401,21 +452,6 @@ public class RDB2RDFTest {
 		Rio.write(actual, pw, RDFFormat.NQUADS);
 		pw.flush();
 		return sw.toString();
-	}
-
-	/**
-	 * Remove named graphs from expected answers since they are not supported
-	 */
-	private Set<Statement> stripNamedGraphs(Iterable<Statement> statements) {
-		Set<Statement> model = Sets.newHashSet();
-		for (Statement stmt : statements) {
-			if (stmt.getContext() != null) {
-				stmt = FACTORY.createStatement(stmt.getSubject(), stmt.getPredicate(), stmt.getObject());
-			}
-
-			model.add(stmt);
-		}
-		return model;
 	}
 }
 

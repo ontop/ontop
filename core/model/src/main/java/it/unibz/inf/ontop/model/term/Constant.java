@@ -22,16 +22,25 @@ package it.unibz.inf.ontop.model.term;
 
 import it.unibz.inf.ontop.model.type.TermType;
 
+import java.util.Optional;
+
 /**
- * This class defines a type of {@link Term} in which it has a constant
+ * This class defines a type of {@link ImmutableTerm} in which it has a constant
  * value.
  */
-public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
-
-	TermType getType();
+public interface Constant extends NonFunctionalTerm, GroundTerm {
 
 	// TODO: eliminate getValue from this interface
-	
-	public String getValue();
-	
+	String getValue();
+
+	/**
+	 * Empty if and only if is null.
+	 */
+	Optional<TermType> getOptionalType();
+
+	@Override
+	default boolean isDeterministic() {
+		return true;
+	}
+
 }

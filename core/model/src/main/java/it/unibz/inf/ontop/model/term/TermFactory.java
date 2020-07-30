@@ -22,98 +22,163 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface TermFactory {
 
 	/*
 	 * Built-in function predicates
 	 */
 
-	public Function getUriTemplate(Term...terms);
+	ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments);
 
-	public Function getUriTemplate(List<Term> terms);
-
-	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm...terms);
-
-	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms);
-	
-	public Function getUriTemplateForDatatype(String type);
-	
-
-	public Function getBNodeTemplate(List<Term> terms);
-
-	public Function getBNodeTemplate(Term... terms);
-
-	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms);
-
-	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms);
-	
-	/**
-	 * Construct a {@link Function} object. A function expression consists of
-	 * functional symbol (or functor) and one or more arguments.
-	 * 
-	 * @param functor
-	 *            the function symbol name.
-	 * @param terms
-	 *            a list of arguments.
-	 * @return the function object.
-	 */
-	public Function getFunction(Predicate functor, Term... terms);
-
-	Expression getExpression(OperationPredicate functor, List<Term> arguments);
-
-	ImmutableExpression getImmutableExpression(OperationPredicate functor, ImmutableTerm... arguments);
-
-	ImmutableExpression getImmutableExpression(OperationPredicate functor,
+	ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor,
 											   ImmutableList<? extends ImmutableTerm> arguments);
 
-	ImmutableExpression getImmutableExpression(Expression expression);
+	/**
+	 * Must be non-empty
+	 *
+	 * Does NOT take care of flattening conjunctions in the arguments
+	 */
+	ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
 
-	public Function getFunction(Predicate functor, List<Term> terms);
+	/**
+	 * Does NOT take care of flattening conjunctions in the arguments
+	 */
+	ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
 
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms);
+	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the arguments
+	 */
+	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
 
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms);
+	/**
+	 * Must be non-empty
+	 */
+	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
 
-	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms);
+	ImmutableExpression getDisjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
 
-	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms);
+	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the arguments
+	 */
+	Optional<ImmutableExpression> getDisjunction(Stream<ImmutableExpression> expressions);
+
+	ImmutableExpression getDBNot(ImmutableExpression expression);
+
+	/**
+	 * When filled with constants, evaluates to FALSE if one argument is FALSE or to NULL otherwise.
+	 *
+	 * Must be non-empty
+	 */
+	ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
+
+	/**
+	 * When filled with constants, evaluates to TRUE if one argument is TRUE or to NULL otherwise.
+	 *
+	 * Must be non-empty
+	 */
+	ImmutableExpression getTrueOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
+
+	/**
+	 * Compares a TermType term to a base type
+	 */
+	ImmutableExpression getIsAExpression(ImmutableTerm termTypeTerm, RDFTermType baseType);
 
 
-	public Expression getExpression(OperationPredicate functor, Term... arguments);
+	/**
+	 * See https://www.w3.org/TR/sparql11-query/#func-arg-compatibility
+	 */
+	ImmutableExpression getAreCompatibleRDFStringExpression(ImmutableTerm typeTerm1, ImmutableTerm typeTerm2);
+
+	/**
+	 * Just wraps the expression into an Evaluation object
+	 */
+	ImmutableExpression.Evaluation getEvaluation(ImmutableExpression expression);
+	ImmutableExpression.Evaluation getPositiveEvaluation();
+	ImmutableExpression.Evaluation getNegativeEvaluation();
+	ImmutableExpression.Evaluation getNullEvaluation();
+
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableTerm liftableTerm);
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
+			ImmutableTerm liftableTerm,
+			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
+
+
+
+	ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms);
+
+	ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms);
+
+	NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms);
+
+	NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms);
+
 
 	/*
 	 * Boolean function terms
 	 */
 
-	public Expression getFunctionEQ(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionNOT(Term term);
-
-	public Expression getFunctionAND(Term term1, Term term2);
-
-	public Expression getFunctionOR(Term term1, Term term2);
-
-	public Expression getFunctionIsTrue(Term term);
-
-	public Expression getFunctionIsNull(Term term);
-
-	public Expression getFunctionIsNotNull(Term term);
-
-	public Expression getLANGMATCHESFunction(Term term1, Term term2);
-
-	/*
-	 * Casting values cast(source-value AS destination-type)
+	/**
+	 * To be used when parsing the mapping and when an equality is found.
+	 * Is expected to replaced later by a proper equality (may be strict or not)
 	 */
-	public Expression getFunctionCast(Term term1, Term term2);
+	ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2);
+
+	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
+													ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
+
+	ImmutableExpression getLexicalInequality(InequalityLabel inequalityLabel,
+											 ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
+											 ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
+
+	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
+	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
+	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
+	ImmutableExpression getDBNonStrictDateEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
+
+	/**
+	 * Cannot be simplified --> has to be evaluated by the DB engine
+	 *
+	 * Only suitable for DB terms
+	 */
+	ImmutableExpression getDBNonStrictDefaultEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
+
+	ImmutableExpression getDBNumericInequality(InequalityLabel inequalityLabel, ImmutableTerm dbNumericTerm1,
+											   ImmutableTerm dbNumericTerm2);
+	ImmutableExpression getDBBooleanInequality(InequalityLabel inequalityLabel, ImmutableTerm dbBooleanTerm1,
+											   ImmutableTerm dbBooleanTerm2);
+	ImmutableExpression getDBStringInequality(InequalityLabel inequalityLabel, ImmutableTerm dbStringTerm1,
+											  ImmutableTerm dbStringTerm2);
+	ImmutableExpression getDBDatetimeInequality(InequalityLabel inequalityLabel, ImmutableTerm dbDatetimeTerm1,
+												ImmutableTerm dbDatetimeTerm2);
+	ImmutableExpression getDBDateInequality(InequalityLabel inequalityLabel, ImmutableTerm dbDateTerm1,
+											ImmutableTerm dbDateTerm2);
+
+	ImmutableExpression getDBDefaultInequality(InequalityLabel inequalityLabel, ImmutableTerm dbTerm1,
+											   ImmutableTerm dbTerm2);
 
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a
@@ -142,26 +207,40 @@ public interface TermFactory {
 	
 	public BNode getConstantBNode(String name);
 
-	public ValueConstant getBooleanConstant(boolean value);
+	/**
+	 * Returns a DB boolean constant
+	 */
+	DBConstant getDBBooleanConstant(boolean value);
 
-	ValueConstant getNullConstant();
+	/**
+	 * Returns a DB string constant
+	 */
+	DBConstant getXsdBooleanLexicalConstant(boolean value);
+
+	Constant getNullConstant();
+
+	/**
+	 * The resulting functional term may simplify to a regular NULL or not, depending on the DB system.
+	 *
+	 * Useful for PostgreSQL which has limited type inference capabilities when it comes to NULL and UNION (ALL).
+	 *
+	 */
+	ImmutableFunctionalTerm getTypedNull(DBTermType termType);
+
+	DBConstant getDBIntegerConstant(int value);
+
+	/**
+	 * Is empty if the DB does not support (and therefore does not store) not-a-number values
+	 */
+	Optional<DBConstant> getDoubleNaN();
 
 	/**
 	 * TODO: explain
 	 */
-	ValueConstant getProvenanceSpecialConstant();
-	
-	/**
-	 * Construct a {@link ValueConstant} object.
-	 * 
-	 * @param value
-	 *            the value of the constant.
-	 * @return the value constant.
-	 */
-	public ValueConstant getConstantLiteral(String value);
+	DBConstant getProvenanceSpecialConstant();
 
 	/**
-	 * Construct a {@link ValueConstant} object with a type definition.
+	 * Construct a {@link RDFLiteralConstant} object with a type definition.
 	 * <p>
 	 * Example:
 	 * <p>
@@ -176,13 +255,13 @@ public interface TermFactory {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	ValueConstant getConstantLiteral(String value, RDFDatatype type);
+	RDFLiteralConstant getRDFLiteralConstant(String value, RDFDatatype type);
 
-	ValueConstant getConstantLiteral(String value, IRI type);
+	RDFLiteralConstant getRDFLiteralConstant(String value, IRI type);
 
 
 	/**
-	 * Construct a {@link ValueConstant} object with a language tag.
+	 * Construct a {@link RDFLiteralConstant} object with a language tag.
 	 * <p>
 	 * Example:
 	 * <p>
@@ -196,15 +275,16 @@ public interface TermFactory {
 	 *            the language tag for the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getConstantLiteral(String value, String language);
+	RDFLiteralConstant getRDFLiteralConstant(String value, String language);
 
-	public Function getTypedTerm(Term value, String language);
-	public Function getTypedTerm(Term value, RDFDatatype type);
-	Function getTypedTerm(Term value, IRI datatype);
+	RDFConstant getRDFConstant(String lexicalValue, RDFTermType termType);
 
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI);
+	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, String language);
+	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, RDFDatatype type);
+	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, IRI datatypeIRI);
+
+	DBConstant getDBConstant(String value, DBTermType termType);
+	DBConstant getDBStringConstant(String value);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -221,10 +301,274 @@ public interface TermFactory {
 	 */
 	public Variable getVariable(String name);
 
+	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
 
-	DatatypePredicate getRequiredTypePredicate(RDFDatatype type);
+	ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term, TypeConstantDictionary dictionary,
+														 ImmutableSet<RDFTermTypeConstant> possibleConstants,
+														 boolean isSimplifiable);
 
-	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
+	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
-	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
+	/**
+	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString);
+
+	/**
+	 * At least one argument for the IRI functional term with an IRI template is required
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
+
+	/**
+	 * When fact IRIs are decomposed (so as to be included in the mapping)
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
+												 ImmutableList<DBConstant> arguments);
+
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+												   ImmutableList<? extends ImmutableTerm> arguments);
+
+	/**
+	 * NB: a fresh Bnode template is created
+	 */
+	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> terms);
+
+	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);
+	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
+
+	/**
+	 * The first sub-term encodes the index of the term to return.
+	 * Such values correspond to the following sub-terms
+	 *
+	 * For instance DB_IDX(1, "roger", "francis", "ernest") returns "francis"
+	 *
+	 */
+	ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableTerm... possibleValues);
+	ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableList<ImmutableTerm> possibleValues);
+
+	/**
+	 * May "normalize"
+	 */
+	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
+	ImmutableFunctionalTerm getConversion2RDFLexical(ImmutableTerm term, RDFTermType rdfTermType);
+
+	/**
+	 * May "denormalize"
+	 */
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
+														   RDFTermType rdfType);
+
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType);
+
+
+	/**
+	 * Used when building (a fragment of) the lexical part of an RDF term
+	 *   (either the full lexical value or a fragment involved in a template)
+	 * in a PRE-PROCESSED mapping assertion.
+	 *
+	 * This functional term must not appear in the final mapping
+	 */
+	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
+
+	ImmutableExpression getRDF2DBBooleanFunctionalTerm(ImmutableTerm xsdBooleanTerm);
+
+	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
+
+	ImmutableExpression getBooleanIfElseNull(ImmutableExpression condition, ImmutableExpression thenExpression);
+
+	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
+
+	/**
+	 * IF THEN, ELSE IF ..., ELSE
+	 *
+	 * whenPairs must not be empty
+	 *
+	 * doOrderingMatter: if false, the when pairs can be re-ordered
+	 */
+	ImmutableFunctionalTerm getDBCase(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
+									  ImmutableTerm defaultTerm, boolean doOrderingMatter);
+
+	/**
+	 * IF THEN, ELSE IF ..., ELSE NULL
+	 *
+	 * whenPairs must not be empty
+	 */
+	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
+											  boolean doOrderingMatter);
+
+	ImmutableExpression getDBBooleanCase(Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs,
+										 ImmutableExpression defaultValue, boolean doOrderingMatter);
+
+	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
+
+	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
+
+	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
+
+	ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
+
+	ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement,
+											   ImmutableTerm flags);
+
+	ImmutableExpression getDBStartsWith(ImmutableList<ImmutableTerm> terms);
+	ImmutableExpression getDBEndsWith(ImmutableList<? extends ImmutableTerm> terms);
+	ImmutableExpression getDBContains(ImmutableList<? extends ImmutableTerm> terms);
+	ImmutableExpression getDBRegexpMatches(ImmutableList<ImmutableTerm> terms);
+
+
+	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);
+
+	/**
+	 * At least two terms are expected
+	 */
+	ImmutableFunctionalTerm getNullRejectingDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms);
+
+    ImmutableFunctionalTerm getCommonDenominatorFunctionalTerm(ImmutableList<ImmutableTerm> typeTerms);
+
+	/**
+	 * terms must have at least two distinct elements
+	 */
+	ImmutableExpression getStrictEquality(ImmutableSet<ImmutableTerm> terms);
+
+	/**
+	 * terms must have at least two elements
+	 */
+	ImmutableExpression getStrictEquality(ImmutableList<? extends ImmutableTerm> terms);
+
+	ImmutableExpression getStrictEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
+
+	/**
+	 * terms must have at least two elements
+	 * Logically equivalent to NOT(STRICT_EQx(...))
+	 */
+	ImmutableExpression getStrictNEquality(ImmutableSet<ImmutableTerm> terms);
+
+	ImmutableExpression getDBIsStringEmpty(ImmutableTerm stringTerm);
+
+	/**
+	 * terms must have at least two elements
+	 * Logically equivalent to NOT(STRICT_EQx(...))
+	 */
+	ImmutableExpression getStrictNEquality(ImmutableList<? extends ImmutableTerm> terms);
+
+	ImmutableExpression getStrictNEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
+
+	/**
+	 * Wraps a DB boolean constant/variable into an ImmutableExpression
+	 */
+	ImmutableExpression getIsTrue(NonFunctionalTerm dbBooleanTerm);
+
+	ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from);
+
+	ImmutableFunctionalTerm getDBSubString3(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);
+
+	ImmutableFunctionalTerm getDBRight(ImmutableTerm stringTerm, ImmutableTerm lengthTerm);
+
+	ImmutableFunctionalTerm getDBUpper(ImmutableTerm stringTerm);
+
+	ImmutableFunctionalTerm getDBLower(ImmutableTerm stringTerm);
+
+	/**
+	 * Do NOT confuse it with the LANG SPARQL function
+	 */
+	ImmutableFunctionalTerm getLangTypeFunctionalTerm(ImmutableTerm rdfTypeTerm);
+
+	/**
+	 * Do NOT confuse it with the langMatches SPARQL function
+	 */
+	ImmutableExpression getLexicalLangMatches(ImmutableTerm langTagTerm, ImmutableTerm langRangeTerm);
+
+	TypeFactory getTypeFactory();
+
+    VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm);
+
+    ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm);
+
+	ImmutableFunctionalTerm getDBUUID(UUID uuid);
+
+	ImmutableFunctionalTerm getDBStrBefore(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBStrAfter(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableFunctionalTerm getDBCharLength(ImmutableTerm stringTerm);
+
+	ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm);
+	ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm);
+
+    ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm);
+	ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm);
+	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
+	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);
+
+	ImmutableFunctionalTerm getCommonPropagatedOrSubstitutedNumericType(ImmutableTerm rdfTypeTerm1,
+																		ImmutableTerm rdfTypeTerm2);
+
+	DBFunctionSymbolFactory getDBFunctionSymbolFactory();
+
+	/**
+	 * Minimalist substitution with minimal dependencies.
+	 * Designed to be used by FunctionSymbols.
+	 *
+	 * See the SubstitutionFactory for richer substitutions
+	 */
+	<T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
+
+	/**
+	 * TODO: find a better name
+	 *
+	 */
+	ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
+																  ImmutableTerm lexicalTerm1,
+																  ImmutableTerm lexicalTerm2,
+																  ImmutableTerm rdfTypeTerm);
+
+	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType dbNumericType,
+															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
+
+	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
+			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
+			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
+	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
+			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
+			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
+	/**
+	 * Using the SPARQL "=" operator
+	 *
+	 * Returns an XSD.BOOLEAN
+	 */
+	ImmutableFunctionalTerm getSPARQLNonStrictEquality(ImmutableTerm rdfTerm1, ImmutableTerm rdfTerm2);
+
+	/**
+	 * Returns an XSD.BOOLEAN
+	 */
+	ImmutableFunctionalTerm getSPARQLEffectiveBooleanValue(ImmutableTerm rdfTerm);
+
+	ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm);
+
+	ImmutableFunctionalTerm getDBRand(UUID uuid);
+
+	ImmutableFunctionalTerm getDBYearFromDatetime(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMonthFromDatetime(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBDayFromDatetime(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBHours(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBNow();
+
+	//-------------
+	// Aggregation
+	//-------------
+
+	ImmutableFunctionalTerm getDBCount(boolean isDistinct);
+    ImmutableFunctionalTerm getDBCount(ImmutableTerm subTerm, boolean isDistinct);
+
+	ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
+    ImmutableFunctionalTerm getDBAvg(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
+
+	ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType);
+    ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
+
+	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
 }

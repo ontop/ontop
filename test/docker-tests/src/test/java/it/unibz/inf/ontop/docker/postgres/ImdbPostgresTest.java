@@ -1,7 +1,14 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Test case for the IMDB database see wiki Example_MovieOntology
@@ -15,8 +22,24 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
     private static final String obdaFile = "/pgsql/imdb/movieontology.obda";
     private static final String propertyFile = "/pgsql/imdb/movieontology.properties";
 
-    public ImdbPostgresTest() {
-        super(owlFile, obdaFile, propertyFile);
+    private static OntopOWLReasoner REASONER;
+    private static OntopOWLConnection CONNECTION;
+
+    @BeforeClass
+    public static void before() throws OWLOntologyCreationException {
+        REASONER = createReasoner(owlFile, obdaFile, propertyFile);
+        CONNECTION = REASONER.getConnection();
+    }
+
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
     @Test
@@ -50,7 +73,8 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
 
-        countResults(query2, 15175);
+        // TODO: double-check: was 15175
+        countResults(15173, query2);
     }
 
     @Test
@@ -66,7 +90,7 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "}\n";
 
 
-        countResults(query, 7738);
+        countResults(7738, query);
     }
 
     @Test
@@ -77,7 +101,7 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "   $z a mo:Love .\n" +
                 "}\n";
 
-        countResults(query, 29405);
+        countResults(29405, query);
     }
 }
 

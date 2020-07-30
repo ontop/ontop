@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  */
 
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 
@@ -43,10 +43,10 @@ public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 
 	private final DataPropertyExpression prop;
 	private final ObjectConstant o1;
-	private final ValueConstant o2;
+	private final RDFLiteralConstant o2;
 
 
-	DataPropertyAssertionImpl(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2) {
+	DataPropertyAssertionImpl(DataPropertyExpression prop, ObjectConstant o1, RDFLiteralConstant o2) {
 		this.prop = prop;
 		this.o1 = o1;
 		this.o2 = o2;
@@ -58,7 +58,7 @@ public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 	}
 
 	@Override
-	public ValueConstant getValue() {
+	public RDFLiteralConstant getValue() {
 		return o2;
 	}
 

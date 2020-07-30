@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.owlapi.resultset.impl;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
 import org.semanticweb.owlapi.model.OWLException;
@@ -30,11 +30,7 @@ public class OntopOWLBinding implements OWLBinding {
     // TODO(xiao): how about null??
     @Override
     public OWLObject getValue() throws OWLException {
-        try {
-            return translate(ontopBinding.getValue());
-        } catch (OntopResultConversionException e) {
-            throw new OntopOWLException(e);
-        }
+        return translate(ontopBinding.getValue());
     }
 
     // TODO(xiao): duplicated code
@@ -42,6 +38,6 @@ public class OntopOWLBinding implements OWLBinding {
         if (c instanceof ObjectConstant)
             return translator.translate((ObjectConstant) c);
         else
-            return translator.translate((ValueConstant) c);
+            return translator.translate((RDFLiteralConstant) c);
     }
 }

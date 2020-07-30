@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.gui.action;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,37 +42,32 @@ import java.awt.event.ActionEvent;
 public class BootstrapAction extends ProtegeAction {
 
 	private static final long serialVersionUID = 8671527155950905524L;
-	
+
 	private OWLEditorKit editorKit = null;
 	private OWLWorkspace workspace;
 	private OWLModelManager owlManager;
 	private OBDAModelManager modelManager;
 	private String baseUri = "";
 
-	private OBDAModel currentModel;
-	private OBDADataSource currentSource;
-
-	private Logger log = LoggerFactory.getLogger(BootstrapAction.class);
+	private final Logger log = LoggerFactory.getLogger(BootstrapAction.class);
 
 	@Override
-	public void initialise() throws Exception {
+	public void initialise() {
 		editorKit = (OWLEditorKit) getEditorKit();
 		workspace = editorKit.getWorkspace();
 		owlManager = editorKit.getOWLModelManager();
-		modelManager = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class
-				.getName()));
+		modelManager = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName()));
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void dispose() {
 		// NOP
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-
-		currentModel = modelManager.getActiveOBDAModel();
+		OBDAModel currentModel = modelManager.getActiveOBDAModel();
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -95,7 +90,7 @@ public class BootstrapAction extends ProtegeAction {
 
 		if (res == JOptionPane.OK_OPTION) {
 
-			currentSource = currentModel.getDatasource();
+			OBDADataSource currentSource = currentModel.getDatasource();
 			if (currentSource != null) {
 				this.baseUri = base_uri.getText().trim();
 				if (baseUri.contains("#")) {
@@ -124,6 +119,12 @@ public class BootstrapAction extends ProtegeAction {
 								JOptionPane.showMessageDialog(workspace,
 										"Task is completed.", "Done",
 										JOptionPane.INFORMATION_MESSAGE);
+
+								// FORCE REPAINT!
+								// TODO(xiao): it is not clear whether the following really fixed the issue of the panel being blank
+								editorKit.getWorkspace().getSelectedTab().revalidate();
+								editorKit.getWorkspace().getSelectedTab().repaint();
+
 							} catch (Exception e) {
 								log.error(e.getMessage(), e);
 								JOptionPane
@@ -134,6 +135,7 @@ public class BootstrapAction extends ProtegeAction {
 					};
 					th.start();
 				}
+
 			}
 		}
 	}
@@ -145,14 +147,9 @@ public class BootstrapAction extends ProtegeAction {
 
 		}
 
-		public void run(String baseUri)
-				throws Exception {
-
+		public void run(String baseUri) throws Exception {
 			OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
-
-			new BootstrapGenerator(obdaModelManager, baseUri, owlManager, obdaModelManager.getJdbcTypeMapper());
-
-
+			new BootstrapGenerator(obdaModelManager, baseUri, owlManager);
 		}
 
 		@Override

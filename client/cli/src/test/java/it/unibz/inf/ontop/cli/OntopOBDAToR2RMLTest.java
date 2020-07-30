@@ -56,11 +56,19 @@ public class OntopOBDAToR2RMLTest {
     }
 
     @Test
-    public void testOntopOBDAToR2RML3 (){
+    public void testOntopR2RML2OBDA2R2RML (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/oreda_bootstrapped_mapping.obda",
-                "-t", "src/test/resources/oreda_bootstrapped_ontology.owl",
-                "-o", "src/test/resources/output/oreda_bootstrapped_mapping.r2rml"
+                "-i", "src/test/resources/mapping-northwind-named-graph.obda",
+                "-o", "src/test/resources/output/mapping-northwind-named-graph.r2rml"
+        };
+        runCommand(argv);
+    }
+
+    @Test
+    public void testOntopOBDA2R2RML_quotation_marks (){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/mapping-booktutorial.obda",
+                "-o", "src/test/resources/output/mapping-booktutorial.ttl"
         };
         runCommand(argv);
     }

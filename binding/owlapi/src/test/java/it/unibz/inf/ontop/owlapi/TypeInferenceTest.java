@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.answering.reformulation.generation.impl.TypeExtractor;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -16,19 +13,14 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertTrue;
 
 /**
  * test Type inference in the SQL Generator with the use of metadata when the value is unknown.
- * @see TypeExtractor
  */
 public class TypeInferenceTest {
 
@@ -46,51 +38,14 @@ public class TypeInferenceTest {
 
     @Before
     public void setUp() throws Exception {
-
         conn = DriverManager.getConnection(URL, USER, PASSWORD);
-
-
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(CREATE_DB_FILE);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, CREATE_DB_FILE);
     }
 
     @After
     public void tearDown() throws Exception {
-
-        dropTables();
+        executeFromFile(conn, DROP_DB_FILE);
         conn.close();
-
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(DROP_DB_FILE);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
-        conn.commit();
     }
 
     @Test

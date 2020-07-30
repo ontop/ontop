@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
@@ -10,23 +8,17 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertTrue;
 
 public class WktTest {
@@ -48,21 +40,7 @@ public class WktTest {
         String password = "sa";
 
         conn = DriverManager.getConnection(url, username, password);
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(CREATE_SCRIPT);
-
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, CREATE_SCRIPT);
     }
 
     @After
@@ -85,14 +63,6 @@ public class WktTest {
         checkReturnedValuesAndReturnSql(query, expectedValues);
     }
 
-    private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
-        int firstOccurrenceIndex = query.indexOf(pattern);
-        if (firstOccurrenceIndex >= 0) {
-            return query.substring(firstOccurrenceIndex + 1).contains(pattern);
-        }
-        return false;
-    }
-
     private void checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -111,9 +81,6 @@ public class WktTest {
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            ExecutableQuery executableQuery = st.getExecutableQuery(query);
-            if (! (executableQuery instanceof SQLExecutableQuery))
-                throw new IllegalStateException("A SQLExecutableQuery was expected");
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
@@ -125,9 +92,8 @@ public class WktTest {
                     i++;
                 }
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }

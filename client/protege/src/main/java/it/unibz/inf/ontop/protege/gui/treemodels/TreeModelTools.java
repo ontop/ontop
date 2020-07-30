@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.protege.gui.treemodels;
 
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.model.term.*;
 
 public class TreeModelTools {
 
@@ -28,8 +25,8 @@ public class TreeModelTools {
                     .anyMatch(t -> match(keyword, t));
 //        } else if (term instanceof Variable) {
 //            return ((Variable) term).getName().contains(keyword); // match found!
-        } else if (term instanceof ValueConstant) {
-            return ((ValueConstant) term).getValue().contains(keyword); // match found!
+        } else if (term instanceof RDFConstant) {
+            return ((RDFConstant) term).getValue().contains(keyword); // match found!
         } else
             return false;
     }

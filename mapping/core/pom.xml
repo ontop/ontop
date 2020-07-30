@@ -2,7 +2,7 @@
     <parent>
         <artifactId>ontop-mapping</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>3.0.1</version>
+        <version>4.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -82,18 +82,14 @@
         <plugin>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>
-            <version>4.7</version>
+            <version>4.8-1</version>
             <configuration>
                     <listener>false</listener>
                     <visitor>true</visitor>
-                    <!--<arguments>-->
-                        <!--<argument>-package</argument>-->
-                    <!--</arguments>-->
             </configuration>
             <executions>
                 <execution>
                     <id>antlr</id>
-                    <!--<phase>generate-sources</phase>-->
                     <goals>
                         <goal>antlr4</goal>
                     </goals>

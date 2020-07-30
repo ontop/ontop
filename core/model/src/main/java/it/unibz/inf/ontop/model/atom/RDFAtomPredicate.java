@@ -21,6 +21,14 @@ public interface RDFAtomPredicate extends AtomPredicate {
 
     Optional<IRI> getGraphIRI(ImmutableList<? extends ImmutableTerm> atomArguments);
 
+    /**
+     * the type of the three getters
+     */
+    @FunctionalInterface
+    interface ComponentGetter {
+        <T extends ImmutableTerm> T get(ImmutableList<T> atomArguments);
+    }
+
     <T extends ImmutableTerm> T getSubject(ImmutableList<T> atomArguments);
     <T extends ImmutableTerm> T getProperty(ImmutableList<T> atomArguments);
     <T extends ImmutableTerm> T getObject(ImmutableList<T> atomArguments);
@@ -29,9 +37,14 @@ public interface RDFAtomPredicate extends AtomPredicate {
     <T extends ImmutableTerm> ImmutableList<T> updateSPO(ImmutableList<T> originalArguments, T newSubject,
                                                          T newProperty, T newObject);
 
-    default <T extends ImmutableTerm> ImmutableList<T> updateSO(ImmutableList<T> originalArguments,
-                                                                T newSubject, T newObject) {
-        return updateSPO(originalArguments, newSubject, getProperty(originalArguments), newObject);
+
+    /**
+     * the type of the two updater methods
+     */
+
+    @FunctionalInterface
+    interface ComponentUpdater {
+        <T extends ImmutableTerm> ImmutableList<T> update(ImmutableList<T> originalArguments, T newComponent);
     }
 
     default <T extends ImmutableTerm> ImmutableList<T> updateSubject(ImmutableList<T> originalArguments, T newSubject) {

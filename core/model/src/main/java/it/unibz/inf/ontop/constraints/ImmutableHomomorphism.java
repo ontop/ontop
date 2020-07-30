@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
@@ -56,14 +55,8 @@ public class ImmutableHomomorphism {
                     .map(t -> applyToImmutableTerm(t, termFactory))
                     .collect(ImmutableCollectors.toList());
 
-            // Distinguishes the BooleanExpression from the other functional terms.
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-            if (functionSymbol instanceof OperationPredicate) {
-                return termFactory.getImmutableExpression((OperationPredicate) functionSymbol, terms);
-            }
-            else {
-                return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
-            }
+            return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
         }
         else {
             throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
@@ -75,7 +68,7 @@ public class ImmutableHomomorphism {
 
     @Override
     public boolean equals(Object other) {
-        if (other != null && other instanceof ImmutableHomomorphism) {
+        if (other instanceof ImmutableHomomorphism) {
             ImmutableHomomorphism o = (ImmutableHomomorphism)other;
             return this.map.equals(o.map);
         }

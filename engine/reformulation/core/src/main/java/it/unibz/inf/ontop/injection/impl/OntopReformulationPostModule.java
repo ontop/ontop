@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
@@ -12,7 +13,6 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.DummyRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 
 /**
  * POST-module: to be loaded after that all the dependencies of concrete implementations have been defined
@@ -37,13 +37,12 @@ public class OntopReformulationPostModule extends OntopAbstractModule {
         }
 
         bindFromSettings(QueryCache.class);
+        bindFromSettings(InputQueryTranslator.class);
 
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(
                         QueryUnfolder.class,
-                        NativeQueryGenerator.class,
-                        SameAsRewriter.class,
-                        InputQueryTranslator.class),
+                        NativeQueryGenerator.class),
                 TranslationFactory.class);
         install(reformulationFactoryModule);
 

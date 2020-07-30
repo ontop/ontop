@@ -22,12 +22,11 @@ package it.unibz.inf.ontop.docker.benchmark;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Ignore;
@@ -290,12 +289,6 @@ public class QuestOWLExample_OntowisTests {
 					count = 0;
 					while (rs.hasNext()) {
 						count ++;
-						for (int idx = 1; idx <= columnSize; idx++) {
-                            final OWLBindingSet next = rs.next();
-                            @SuppressWarnings("unused")
-							OWLObject binding = rs.next().getOWLObject(idx);
-							//System.out.print(binding.toString() + ", ");
-						}
 						//System.out.print("\n");
 					}
 					long t2 = System.currentTimeMillis();
@@ -308,8 +301,7 @@ public class QuestOWLExample_OntowisTests {
 				/*
 				 * Print the query summary
 				 */
-				DefaultOntopOWLStatement qst = (DefaultOntopOWLStatement) st;
-				String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
+				OntopOWLStatement qst = (OntopOWLStatement) st;
 
 				System.out.println();
 				System.out.println("The input SPARQL query:");
@@ -319,7 +311,7 @@ public class QuestOWLExample_OntowisTests {
 
 				System.out.println("The output SQL query:");
 				System.out.println("=====================");
-				System.out.println(sqlQuery);
+				System.out.println(qst.getExecutableQuery(sparqlQuery));
 
 				System.out.println("Query Execution Time:");
 				System.out.println("=====================");

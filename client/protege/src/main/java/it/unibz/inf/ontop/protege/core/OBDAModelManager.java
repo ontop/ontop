@@ -1,38 +1,13 @@
 package it.unibz.inf.ontop.protege.core;
 
-/*
- * #%L
- * ontop-protege
- * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.answering.reformulation.generation.impl.Relation2Predicate;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
-import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -82,7 +57,6 @@ public class OBDAModelManager implements Disposable {
 	private final OWLOntologyManager mmgr;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-	private final JdbcTypeMapper jdbcTypeMapper;
 
 	private QueryController queryController;
 
@@ -117,8 +91,6 @@ public class OBDAModelManager implements Disposable {
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
 	private final AtomFactory atomFactory;
-	private final Relation2Predicate relation2Predicate;
-	private final DatalogFactory datalogFactory;
 	private final TargetAtomFactory targetAtomFactory;
 
 	public OBDAModelManager(EditorKit editorKit) {
@@ -139,13 +111,12 @@ public class OBDAModelManager implements Disposable {
 		atomFactory = defaultInjector.getInstance(AtomFactory.class);
 		termFactory = defaultInjector.getInstance(TermFactory.class);
 		typeFactory = defaultInjector.getInstance(TypeFactory.class);
-		datalogFactory = defaultInjector.getInstance(DatalogFactory.class);
-		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
-		jdbcTypeMapper = defaultInjector.getInstance(JdbcTypeMapper.class);
 		targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		rdfFactory = defaultInjector.getInstance(RDF.class);
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
+		TargetQueryParserFactory targetQueryParserFactory = defaultInjector.getInstance(TargetQueryParserFactory.class);
+		SQLPPSourceQueryFactory sourceQueryFactory = defaultInjector.getInstance(SQLPPSourceQueryFactory.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
@@ -167,8 +138,8 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
-		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, jdbcTypeMapper, rdfFactory);
+		obdaModel = new OBDAModel(ppMappingFactory, prefixFormat, atomFactory, termFactory,
+				typeFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory, sourceQueryFactory);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -184,32 +155,8 @@ public class OBDAModelManager implements Disposable {
 		return configurationManager;
 	}
 
-	public AtomFactory getAtomFactory() {
-		return atomFactory;
-	}
-
-	public Relation2Predicate getRelation2Predicate() {
-		return relation2Predicate;
-	}
-
-	public TermFactory getTermFactory() {
-		return termFactory;
-	}
-
-	public DatalogFactory getDatalogFactory() {
-		return datalogFactory;
-	}
-
-	public JdbcTypeMapper getJdbcTypeMapper() {
-		return jdbcTypeMapper;
-	}
-
 	public TypeFactory getTypeFactory() {
 		return typeFactory;
-	}
-
-	public TargetAtomFactory getTargetAtomFactory() {
-		return targetAtomFactory;
 	}
 
 
@@ -224,11 +171,11 @@ public class OBDAModelManager implements Disposable {
 	public class OntologyRefactoringListener implements OWLOntologyChangeListener {
 
 		@Override
-		public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) throws OWLException {
-			Map<OWLEntity, OWLEntity> renamings = new HashMap<OWLEntity, OWLEntity>();
-			Set<OWLEntity> removals = new HashSet<OWLEntity>();
+		public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) {
+			Map<OWLEntity, OWLEntity> renamings = new HashMap<>();
+			Set<OWLEntity> removals = new HashSet<>();
 
-			for (int idx = 0; idx < changes.size(); idx++) {
+			for (int idx = 0; changes.size() > idx; idx++) {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
 					log.debug("Ontology ID changed");
@@ -373,12 +320,11 @@ public class OBDAModelManager implements Disposable {
 			// Applying the renaming to the OBDA model
 			OBDAModel obdamodel = getActiveOBDAModel();
 			for (OWLEntity olde : renamings.keySet()) {
-				OWLEntity removedEntity = olde;
-				OWLEntity newEntity = renamings.get(removedEntity);
+				OWLEntity newEntity = renamings.get(olde);
 
 				// This set of changes appears to be a "renaming" operation,
 				// hence we will modify the OBDA model accordingly
-				org.apache.commons.rdf.api.IRI removedIRI = getIRI(removedEntity);
+				org.apache.commons.rdf.api.IRI removedIRI = getIRI(olde);
 				org.apache.commons.rdf.api.IRI newIRI = getIRI(newEntity);
 
 				obdamodel.changePredicateIri(removedIRI, newIRI);
@@ -618,8 +564,17 @@ public class OBDAModelManager implements Disposable {
 				// adding type information to the mapping predicates
 				for (SQLPPTriplesMap mapping : obdaModel.generatePPMapping().getTripleMaps()) {
 					ImmutableList<TargetAtom> tq = mapping.getTargetAtoms();
-					if (!TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary()).isEmpty()) {
-						throw new Exception("Found an invalid target query: " + tq.toString());
+					final ImmutableList<org.apache.commons.rdf.api.IRI> invalidIRIs = TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary());
+					if (!invalidIRIs.isEmpty()) {
+						final StringBuilder stringBuilder = new StringBuilder();
+						stringBuilder.append("Found an invalid target query: \n  ");
+						stringBuilder.append("mappingId:\t").append(mapping.getId());
+						if (mapping.getOptionalTargetString().isPresent()) {
+							stringBuilder.append("\n  target:\t").append(mapping.getOptionalTargetString().get());
+						}
+						stringBuilder.append("\n  predicates not declared in the ontology: ").append(invalidIRIs);
+						final String message = stringBuilder.toString();
+						throw new Exception(message);
 					}
 				}
 			}

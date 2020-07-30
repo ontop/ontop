@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.spec.dbschema.tools.DBMetadataExtractorAndSerializer;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingDistinctTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 
@@ -19,6 +21,8 @@ public class OntopMappingPostModule extends OntopAbstractModule {
     public void configure() {
         bindFromSettings(MappingExtractor.class);
         bindFromSettings(MappingTransformer.class);
+        bindFromSettings(MappingDistinctTransformer.class);
         bindFromSettings(OBDASpecificationExtractor.class);
+        bindFromSettings(DBMetadataExtractorAndSerializer.class);
     }
 }

@@ -1,66 +1,40 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-/*
- * #%L
- * ontop-obdalib-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
-import org.eclipse.rdf4j.model.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class R2RMLParser {
 
-	List<ImmutableFunctionalTerm> classPredicates;
-	List<Resource> joinPredObjNodes;
-
-
-    RDF4JR2RMLMappingManager mapManager;
-	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
+	private final RDF4JR2RMLMappingManager manager;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
+	private final RDF rdfFactory;
+	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
-	/**
-	 * empty constructor
-	 * @param termFactory
-	 * @param typeFactory
-	 */
-	public R2RMLParser(TermFactory termFactory, TypeFactory typeFactory) {
+	@Inject
+	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory,
+					    DBFunctionSymbolFactory dbFunctionSymbolFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
-		mapManager = RDF4JR2RMLMappingManager.getInstance();
-		classPredicates = new ArrayList<ImmutableFunctionalTerm>();
-		joinPredObjNodes = new ArrayList<>();
+		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+		this.manager = RDF4JR2RMLMappingManager.getInstance();
+		this.rdfFactory = rdfFactory;
 	}
 
 	/**
@@ -68,8 +42,8 @@ public class R2RMLParser {
 	 * @param myGraph - the Graph to process
 	 * @return Collection<TriplesMap> - the collection of mappings
 	 */
-	public Collection<TriplesMap> getMappingNodes(Graph myGraph) throws InvalidR2RMLMappingException {
-		return mapManager.importMappings(myGraph);
+	public Collection<TriplesMap> extractTripleMaps(Graph myGraph) throws InvalidR2RMLMappingException {
+		return manager.importMappings(myGraph);
 	}
 
 	/**
@@ -77,520 +51,256 @@ public class R2RMLParser {
 	 * @param tm
 	 * @return
 	 */
-	public String getSQLQuery(TriplesMap tm) {
+	public String extractSQLQuery(TriplesMap tm) {
 		return tm.getLogicalTable().getSQLQuery();
 	}
 
-	/**
-	 * Get classes
-     * They can be retrieved only once, after retrieving everything is cleared.
-	 * @return
-	 */
-	public List<ImmutableFunctionalTerm> getClassPredicates() {
-		List<ImmutableFunctionalTerm> classes = new ArrayList<>();
-		for (ImmutableFunctionalTerm p : classPredicates)
-			classes.add(p);
-		classPredicates.clear();
-		return classes;
+
+	public Stream<IRI> extractClassIRIs(SubjectMap subjectMap) {
+		return subjectMap.getClasses().stream();
 	}
 
-	/**
-	 * Get predicates
-	 * @param tm
-	 * @return
-	 */
-	public Set<BlankNodeOrIRI> getPredicateObjects(TriplesMap tm) {
-		Set<BlankNodeOrIRI> predobjs = new HashSet<>();
-		for (PredicateObjectMap pobj : tm.getPredicateObjectMaps()) {
-			for (PredicateMap pm : pobj.getPredicateMaps()) {
-				BlankNodeOrIRI r = pm.getNode();
-				predobjs.add(r);
-			}
+	public ImmutableList<NonVariableTerm> extractGraphTerms(List<GraphMap> graphMaps) {
+
+		for (GraphMap graphMap : graphMaps) {
+			if (!graphMap.getTermType().equals(R2RMLVocabulary.iri))
+				throw new R2RMLParsingBugException("The graph map must be an IRI, not " + graphMap.getTermType());
 		}
-		return predobjs;
+		return graphMaps.stream()
+				.map(this::extractIRIorBnodeTerm)
+				.collect(ImmutableCollectors.toList());
 	}
 
-	public ImmutableTerm getSubjectAtom(TriplesMap tm) throws Exception {
-		return getSubjectAtom(tm, "");
+	public ImmutableTerm extractSubjectTerm(SubjectMap subjectMap) {
+		return extractIRIorBnodeTerm(subjectMap);
 	}
+
+	public ImmutableList<NonVariableTerm> extractPredicateTerms(PredicateObjectMap pom) {
+		return pom.getPredicateMaps().stream()
+				.map(this::extractIRITerm)
+				.collect(ImmutableCollectors.toList());
+	}
+
+	private NonVariableTerm extractIRITerm(TermMap termMap) {
+		if (!termMap.getTermType().equals(R2RMLVocabulary.iri))
+			throw new R2RMLParsingBugException("The term map must be an IRI, not " + termMap.getTermType());
+
+		return extractIRIorBnodeTerm(termMap);
+	}
+
+	private NonVariableTerm extractIRIorBnodeTerm(TermMap termMap) {
+		IRI termTypeIRI = termMap.getTermType();
+
+		boolean isIRI = termTypeIRI.equals(R2RMLVocabulary.iri);
+		if ((!isIRI) && (!termTypeIRI.equals(R2RMLVocabulary.blankNode)))
+			throw new R2RMLParsingBugException("Was expecting an IRI or a blank node, not a " + termTypeIRI);
+
+		// CONSTANT CASE
+		RDFTerm constant = termMap.getConstant();
+		if (constant != null) {
+			if (!isIRI)
+				throw new R2RMLParsingBugException("Constant blank nodes are not accepted in R2RML " +
+						"(should have been detected earlier)");
+			return termFactory.getConstantIRI(rdfFactory.createIRI(constant.toString()));
+		}
+
+		return Optional.ofNullable(termMap.getTemplate())
+				// TEMPLATE CASE
+				// TODO: should we use the Template object instead?
+				.map(Template::toString)
+				.map(s -> isIRI
+						? extractTemplateLexicalTerm(s, RDFCategory.IRI)
+						: extractTemplateLexicalTerm(s, RDFCategory.BNODE))
+				.map(l -> termFactory.getRDFFunctionalTerm(l,
+						termFactory.getRDFTermTypeConstant(isIRI
+								? typeFactory.getIRITermType()
+								: typeFactory.getBlankNodeType())))
+				// COLUMN case
+				.orElseGet(() -> Optional.ofNullable(termMap.getColumn())
+						.map(this::getVariable)
+						.map(lex -> termFactory.getRDFFunctionalTerm(
+								lex,
+								termFactory.getRDFTermTypeConstant(
+										isIRI ? typeFactory.getIRITermType() : typeFactory.getBlankNodeType())))
+						.orElseThrow(() -> new R2RMLParsingBugException("A term map is either constant-valued, " +
+								"column-valued or template-valued.")));
+	}
+
 
 	/**
-	 * Get subject
+	 * Extracts the object terms, they can be constants, columns or templates
 	 *
-	 * @param tm
-	 * @param joinCond
-	 * @return
-	 * @throws Exception
 	 */
-	public ImmutableTerm getSubjectAtom(TriplesMap tm, String joinCond) throws Exception {
-		ImmutableTerm subjectAtom = null;
-		String subj = "";
-		classPredicates.clear();
 
-		// SUBJECT
-		SubjectMap sMap = tm.getSubjectMap();
-
-		// process template declaration
-		IRI termType = sMap.getTermType();
-
-		// WORKAROUND for:
-		// SubjectMap.getTemplateString() throws NullPointerException when
-		// template == null
-		//
-		Template template = sMap.getTemplate();
-		if (template == null) {
-			subj = null;
-		} else {
-			subj = sMap.getTemplateString();
+	public ImmutableList<NonVariableTerm> extractRegularObjectTerms(PredicateObjectMap pom) {
+		ImmutableList.Builder<NonVariableTerm> termListBuilder = ImmutableList.builder();
+		for (ObjectMap om : pom.getObjectMaps()) {
+			termListBuilder.add(extractRegularObjectTerm(om));
 		}
-
-		if (subj != null) {
-			// create uri("...",var)
-			subjectAtom = getTermTypeAtom(subj, termType, joinCond);
-		}
-
-		// process column declaration
-		subj = sMap.getColumn();
-		if (subj != null) {
-			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
-
-				subjectAtom = termFactory.getImmutableUriTemplate(termFactory.getVariable(subj));
-
-			}
-			else {
-				// create uri("...",var)
-				subjectAtom = getTermTypeAtom(subj, termType, joinCond);
-			}
-		}
-
-		// process constant declaration
-        // TODO(xiao): toString() is suspicious
-        RDFTerm subjConstant = sMap.getConstant();
-		if (subjConstant != null) {
-			// create uri("...",var)
-            subj = subjConstant.toString();
-			subjectAtom = getURIFunction(subj, joinCond);
-		}
-
-
-		// process class declaration
-		List<IRI> classes = sMap.getClasses();
-		for (IRI o : classes) {
-            classPredicates.add( termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(o.getIRIString())));
-		}
-
-		if (subjectAtom == null)
-			throw new Exception("Error in parsing the subjectMap in node "
-					+ tm.toString());
-
-		return subjectAtom;
-
+		return termListBuilder.build();
 	}
 
-	/**
-	 * Get body predicates with templates
-	 * @param pom
-	 * @return
-	 * @throws Exception
-	 */
-	public List<ImmutableFunctionalTerm> getBodyURIPredicates(PredicateObjectMap pom) {
-		List<ImmutableFunctionalTerm> predicateAtoms = new ArrayList<>();
-
-		// process PREDICATEMAP
-		for (PredicateMap pm : pom.getPredicateMaps()) {
-
-			String pmConstant = pm.getConstant().toString();
-			if (pmConstant != null) {
-				ImmutableFunctionalTerm bodyPredicate = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(pmConstant));
-				predicateAtoms.add(bodyPredicate);
-			}
-
-			Template t = pm.getTemplate();
-			if (t != null) {
-				// create uri("...",var)
-				ImmutableFunctionalTerm predicateAtom = getURIFunction(t.toString());
-				predicateAtoms.add(predicateAtom);
-			}
-
-			// process column declaration
-			String c = pm.getColumn();
-			if (c != null) {
-				ImmutableFunctionalTerm predicateAtom = getURIFunction(c);
-				predicateAtoms.add(predicateAtom);
-			}
-		}
-		return predicateAtoms;
-
+	private NonVariableTerm extractRegularObjectTerm(ObjectMap om) {
+		return om.getTermType().equals(R2RMLVocabulary.literal)
+				? extractLiteral(om)
+				: extractIRIorBnodeTerm(om);
 	}
 
-	public ImmutableTerm getObjectAtom(PredicateObjectMap pom) {
-		return getObjectAtom(pom, "");
+	private NonVariableTerm extractLiteral(ObjectMap om) {
+		NonVariableTerm lexicalTerm = extractLiteralLexicalTerm(om);
+
+		// Datatype -> first try: language tag
+		RDFDatatype datatype =  Optional.ofNullable(om.getLanguageTag())
+				.filter(tag -> !tag.isEmpty())
+				.map(typeFactory::getLangTermType)
+				// Second try: explicit datatype
+				.orElseGet(() -> Optional.ofNullable(om.getDatatype())
+						.map(typeFactory::getDatatype)
+						// Third try: datatype of the constant
+						.orElseGet(() -> Optional.ofNullable(om.getConstant())
+										.map(c -> (Literal) c)
+										.map(Literal::getDatatype)
+										.map(typeFactory::getDatatype)
+								// Default case: RDFS.LITERAL (abstract, to be inferred later)
+										.orElseGet(typeFactory::getAbstractRDFSLiteral)));
+
+		return (NonVariableTerm) termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatype).simplify();
 	}
 
-	public boolean isConcat(String st) {
-		int i, j;
-		if ((i = st.indexOf("{")) > -1) {
-			if ((j = st.lastIndexOf("{")) > i) {
-				return true;
-			} else if ((i > 0) || ((j > 0) && (j < (st.length() - 1)))) {
-				return true;
-			}
-		}
 
-		return false;
-	}
+	private NonVariableTerm extractLiteralLexicalTerm(ObjectMap om) {
 
-	/**
-	 * Get the object atom, it can be a constant, a column or a template
-	 * 
-	 * @param pom
-	 * @param joinCond
-	 * @return
-	 * @throws Exception
-	 */
-	public ImmutableTerm getObjectAtom(PredicateObjectMap pom, String joinCond) {
-		ImmutableTerm objectAtom = null;
-		if (pom.getObjectMaps().isEmpty()) {
-			return null;
-		}
-		ObjectMap om = pom.getObjectMap(0);
-
-		String lan = om.getLanguageTag();
-		IRI datatype = om.getDatatype();
-
-		// we check if the object map is a constant (can be a iri or a literal)
-        // TODO(xiao): toString() is suspicious
-        RDFTerm constantObj = om.getConstant();
+		// CONSTANT
+		RDFTerm constantObj = om.getConstant();
 		if (constantObj != null) {
-			// boolean isURI = false;
-			// try {
-			// java.net.URI.create(obj);
-			// isURI = true;
-			// } catch (IllegalArgumentException e){
-			//
-			// }
-
-			// if the literal has a language property or a datatype property we
-			// create the function object later
-
-			if (lan != null || datatype != null) {
-				ValueConstant constantLiteral = termFactory.getConstantLiteral(((Literal) constantObj).getLexicalForm());
-				objectAtom = constantLiteral;
-
-			} else {
-
-				if (constantObj instanceof Literal){
-
-					ValueConstant constantLiteral = termFactory.getConstantLiteral(((Literal) constantObj).getLexicalForm());
-					Literal constantLit1 = (Literal) constantObj;
-
-					String lanConstant = om.getLanguageTag();
-					IRI datatypeConstant = constantLit1.getDatatype();
-
-					// we check if it is a literal with language tag
-
-					if (lanConstant != null) {
-						objectAtom = termFactory.getImmutableTypedTerm(constantLiteral, lanConstant);
-					}
-
-					// we check if it is a typed literal
-					else if (datatypeConstant != null) {
-						RDFDatatype type = typeFactory.getDatatype(datatypeConstant);
-						objectAtom = termFactory.getImmutableTypedTerm(constantLiteral, type);
-					}
-					else {
-
-						objectAtom = constantLiteral;
-								 // .RDFS_LITERAL;
-					}
-                } else if (constantObj instanceof IRI){
-                    objectAtom = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral( ((IRI) constantObj).getIRIString()));
-
-                }
+			if (constantObj instanceof Literal){
+				return termFactory.getDBStringConstant(((Literal) constantObj).getLexicalForm());
 			}
+			else
+				throw new R2RMLParsingBugException("Was expecting a Literal as constant, not a " + constantObj.getClass());
 		}
 
-		// we check if the object map is a column
-		// if it has a datatype or language property or its a iri we check it later
+		// COLUMN
 		String col = om.getColumn();
 		if (col != null) {
-			col = trim(col);
-
-			if (!joinCond.isEmpty()) {
-				col = joinCond + col;
-			}
-
-			objectAtom = termFactory.getVariable(col);
-
+			return getVariable(col);
 		}
 
-		// we check if the object map is a template (can be a iri, a literal or
-		// a blank node)
+		// TEMPLATE
 		Template t = om.getTemplate();
-		IRI typ = om.getTermType();
-		boolean concat = false;
 		if (t != null) {
-			//we check if the template is a literal
-			//then we check if the template includes concat 
-			concat = isConcat(t.toString());
-			if (typ.equals(R2RMLVocabulary.literal) && (concat)){
-				objectAtom = getTypedFunction(t.toString(), 4, joinCond);
-			}else {
-
-				// a template can be a rr:IRI, a
-				// rr:Literal or rr:BlankNode
-
-				// if the literal has a language property or a datatype property
-				// we
-				// create the function object later
-				if (lan != null || datatype != null) {
-					String value = t.getColumnName(0);
-					if (!joinCond.isEmpty()) {
-						value = joinCond + value;
-
-					}
-					objectAtom = termFactory.getVariable(value);
-				} else {
-					IRI type = om.getTermType();
-
-					// we check if the template is a IRI a simple literal or a
-					// blank
-					// node and create the function object
-					objectAtom = getTermTypeAtom(t.toString(), type, joinCond);
-				}
-			}
+			return extractTemplateLexicalTerm(t.toString(), RDFCategory.LITERAL);
 		}
-		else{
-			//assign iri template
-			TermMap.TermMapType termMapType = om.getTermMapType();
-			if(termMapType.equals(TermMap.TermMapType.CONSTANT_VALUED)){
-
-			} else if(termMapType.equals(TermMap.TermMapType.COLUMN_VALUED)){
-				if(typ.equals(R2RMLVocabulary.iri)) {
-					objectAtom = termFactory.getImmutableUriTemplate(objectAtom);
-				}
-			}
-
-		}
-
-		// we check if it is a literal with language tag
-
-		if (lan != null) {
-			objectAtom = termFactory.getImmutableTypedTerm(objectAtom, lan);
-		}
-
-		// we check if it is a typed literal
-		if (datatype != null) {
-			RDFDatatype type = typeFactory.getDatatype(datatype);
-			objectAtom = termFactory.getImmutableTypedTerm(objectAtom, type);
-		}
-
-		return objectAtom;
-	}
-
-	@Deprecated
-	public List<BlankNodeOrIRI> getJoinNodes(TriplesMap tm) {
-		List<BlankNodeOrIRI> joinPredObjNodes = new ArrayList<BlankNodeOrIRI>();
-		// get predicate-object nodes
-		Set<BlankNodeOrIRI> predicateObjectNodes = getPredicateObjects(tm);
-		return joinPredObjNodes;
+		throw new R2RMLParsingBugException("Was expecting a Constant/Column/Template");
 	}
 
 	/**
-	 * get a typed atom of a specific type
-	 * 
+	 * gets the lexical term of a template-valued term map
+	 *
+	 * @param templateString
 	 * @param type
-	 *            - iri, blanknode or literal
-	 * @param string
-	 *            - the atom as string
-	 * @return the contructed Function atom
-	 */
-	private ImmutableFunctionalTerm getTermTypeAtom(String string, Object type, String joinCond) {
-
-		if (type.equals(R2RMLVocabulary.iri)) {
-
-			return getURIFunction(string, joinCond);
-
-		} else if (type.equals(R2RMLVocabulary.blankNode)) {
-
-			return getTypedFunction(string, 2, joinCond);
-
-		} else if (type.equals(R2RMLVocabulary.literal)) {
-
-			return getTypedFunction(trim(string), 3, joinCond);
-		}
-		return null;
-	}
-
-	private ImmutableFunctionalTerm getURIFunction(String string, String joinCond) {
-		return getTypedFunction(string, 1, joinCond);
-	}
-
-	private ImmutableFunctionalTerm getURIFunction(String string) {
-		return getTypedFunction(string, 1);
-	}
-
-	public ImmutableFunctionalTerm getTypedFunction(String parsedString, int type) {
-		return getTypedFunction(parsedString, type, "");
-	}
-	
-	
-	//this function distinguishes curly bracket with back slash "\{" from curly bracket "{" 
-	private int getIndexOfCurlyB(String str){
-		int i;
-		int j;
-		i = str.indexOf("{");
-		j = str.indexOf("\\{");
-		
-		while((i-1 == j) && (j != -1)){		
-			i = str.indexOf("{",i+1);
-			j = str.indexOf("\\{",j+1);		
-		}	
-		return i;
-	}
-
-	/**
-	 * get a typed atom
-	 * 
-	 * @param parsedString
-	 *            - the content of atom
-	 * @param type
-	 *            - 0=constant uri, 1=uri or iri, 2=bnode, 3=literal 4=concat
-	 * @param joinCond
-	 *            - CHILD_ or PARENT_ prefix for variables
+	 *            IRI, BNODE, LITERAL§
 	 * @return the constructed Function atom
 	 */
-	public ImmutableFunctionalTerm getTypedFunction(String parsedString, int type,
-			String joinCond) {
+	private NonVariableTerm extractTemplateLexicalTerm(String templateString, RDFCategory type) {
 
-		List<ImmutableTerm> terms = new ArrayList<>();
-		String string = (parsedString);
-		if (!string.contains("{")) {
-			if (type == 1) {
-				if (!R2RMLVocabulary.isResourceString(string)) {
-					string = "{" + string + "}";
-				} else {
-					type = 0;
-				}
-			}
-			if(type == 2){
-				string = "{" + string + "}";
-			}
-		}
-		if (type == 1) {
-			string = R2RMLVocabulary.prefixUri(string);
+		// Non-final
+		String string = templateString;
+		if (!templateString.contains("{")) {
+			return termFactory.getDBStringConstant(templateString);
 		}
 
-		String str = string; //str for concat of constant literal
-		
+		if (type == RDFCategory.IRI) {
+			string = R2RMLVocabulary.prefixUri(templateString);
+		}
+
+		String suffix = string; // literal case
+
 		string = string.replace("\\{", "[");
 		string = string.replace("\\}", "]");
-		
-		String cons;
-		int i;
+
+		ImmutableList.Builder<NonVariableTerm> termListBuilder = ImmutableList.builder();
+
 		while (string.contains("{")) {
-			int end = string.indexOf("}");
-			int begin = string.lastIndexOf("{", end);
-			
-			// (Concat) if there is constant literal in template, adds it to terms list 
-			if (type == 4){
-				if ((i = getIndexOfCurlyB(str)) > 0){
-					cons = str.substring(0, i);
-					str = str.substring(str.indexOf("}", i)+1, str.length());
-					terms.add(termFactory.getConstantLiteral(cons));
-				}else{
-					str = str.substring(str.indexOf("}")+1);
+
+			// Literal: if there is constant string in template, adds it to the term list
+			if (type == RDFCategory.LITERAL) {
+				int i = suffix.indexOf("{");
+				int j = suffix.indexOf("\\{");
+
+				while ((i - 1 == j) && (j != -1)) {
+					i = suffix.indexOf("{",i + 1);
+					j = suffix.indexOf("\\{",j + 1);
+				}
+
+				if (i > 0) {
+					String cons = suffix.substring(0, i);
+					termListBuilder.add(termFactory.getDBStringConstant(cons));
+					suffix = suffix.substring(suffix.indexOf("}", i) + 1);
+				}
+				else {
+					suffix = suffix.substring(suffix.indexOf("}") + 1);
 				}
 			}
 
-			String var = trim(string.substring(begin + 1, end));
+			int end = string.indexOf("}");
+			int begin = string.lastIndexOf("{", end);
+			String var = string.substring(begin + 1, end);
+			termListBuilder.add(getVariable(var));
 
-			// trim for making variable
-			terms.add(termFactory.getVariable(joinCond + (var)));
+			string = string.substring(0, begin) + "[]" + string.substring(end + 1);
+		}
+		if (type == RDFCategory.LITERAL && !suffix.isEmpty()) {
+			termListBuilder.add(termFactory.getDBStringConstant(suffix));
+		}
 
-			string = string.replaceFirst("\\{\"" + var + "\"\\}", "[]");
-			string = string.replaceFirst("\\{" + var + "\\}", "[]");
-			
-		}
-		if(type == 4){
-			if (!str.equals("")){
-				cons = str;
-				terms.add(termFactory.getConstantLiteral(cons));
-			}
-		}
-	
 		string = string.replace("[", "{");
 		string = string.replace("]", "}");
 
-		ImmutableTerm uriTemplate = null;
+		ImmutableList<NonVariableTerm> terms = termListBuilder.build();
+
 		switch (type) {
-		// constant uri
-		case 0:
-			uriTemplate = termFactory.getConstantLiteral(string);
-			terms.add(0, uriTemplate); // the URI template is always on the
-										// first position in the term list
-			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
-			// URI or IRI
-		case 1:
-			uriTemplate = termFactory.getConstantLiteral(string);
-			terms.add(0, uriTemplate); // the URI template is always on the
-										// first position in the term list
-			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
-			// BNODE
-		case 2:
-//			if(!string.equals("{}")){
-				uriTemplate = termFactory.getConstantLiteral(string);
-				terms.add(0, uriTemplate);
-//			}
-			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
-			// simple LITERAL
-		case 3:
-			uriTemplate = terms.remove(0);
-			// pred = typeFactory.getRequiredTypePredicate(); //
-			// the URI template is always on the first position in the term list
-			// terms.add(0, uriTemplate);
-			return termFactory.getImmutableTypedTerm(uriTemplate, XSD.STRING);
-		case 4://concat
-			ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
-            for(int j=2;j<terms.size();j++){
-                f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
-            }
-            return f;
+			case IRI:
+				return termFactory.getImmutableFunctionalTerm(
+						dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(string),
+						terms);
+			case BNODE:
+				return termFactory.getImmutableFunctionalTerm(
+						dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(string),
+						terms);
+			case LITERAL:
+				switch (terms.size()) {
+					case 0:
+						return termFactory.getDBStringConstant("");
+					case 1:
+						return terms.get(0);
+					default:
+						return termFactory.getNullRejectingDBConcatFunctionalTerm(terms);
+				}
+			default:
+				throw new R2RMLParsingBugException("Unexpected type code: " + type);
 		}
-		return null;
+	}
+
+
+	private ImmutableFunctionalTerm getVariable(String variableName) {
+		return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));
 	}
 
 	/**
-	 * method that trims a string of all its double apostrophes from beginning
-	 * and end
-	 * 
-	 * @param string
-	 *            - to be trimmed
-	 * @return the string without any quotes
+	 * Bug most likely coming from the R2RML library, but we classify as an "internal" bug
 	 */
-	private String trim(String string) {
+	private static class R2RMLParsingBugException extends OntopInternalBugException {
 
-		while (string.startsWith("\"") && string.endsWith("\"")) {
-
-			string = string.substring(1, string.length() - 1);
+		protected R2RMLParsingBugException(String message) {
+			super(message);
 		}
-		return string;
 	}
 
-	/**
-	 * method to trim a string of its leading or trailing quotes but one
-	 * 
-	 * @param string
-	 *            - to be trimmed
-	 * @return the string left with one leading and trailing quote
-	 */
-	private String trimTo1(String string) {
-
-		while (string.startsWith("\"\"") && string.endsWith("\"\"")) {
-
-			string = string.substring(1, string.length() - 1);
-		}
-		return string;
+	private enum RDFCategory {
+		IRI,
+		BNODE,
+		LITERAL
 	}
 
 

@@ -8,13 +8,24 @@ package it.unibz.inf.ontop.iq;
  * Immutable
  *
  * TODO: enrich it
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
+@Deprecated
 public interface IQProperties {
 
-    boolean isLifted();
+    boolean isNormalizedForOptimization();
+
+    boolean areDistinctAlreadyRemoved();
 
     /**
      * Creates a NEW (immutable) object
      */
-    IQProperties declareLifted();
+    IQProperties declareNormalizedForOptimization();
+
+    IQProperties declareDistinctRemovalWithoutEffect();
+
+    IQProperties declareDistinctRemovalWithEffect();
+
+    IQTreeCache convertIQTreeCache();
 }

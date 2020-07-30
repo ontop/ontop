@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
@@ -348,8 +347,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
             @Override
             public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
                 removeResultTable();
-                // UGLY!!! SQL-specific!
-                return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
+				// TODO: should we show the SQL query only?
+				return st.getExecutableQuery(query).toString();
             }
 
             @Override

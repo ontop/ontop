@@ -23,9 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.vocabulary.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.listener.ThrowingErrorListener;
@@ -33,21 +31,13 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import java.util.Map;
+import java.util.function.Supplier;
+
 
 public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 
-	private final TurtleOBDAVisitor visitor;
-
-	private final Map<String, String> prefixes;
-
-	/**
-	 * Default constructor;
-	 */
-	public AbstractTurtleOBDAParser(TurtleOBDAVisitor visitor) {
-		this.visitor = visitor;
-		this.prefixes = ImmutableMap.of();
-	}
+	private final ImmutableMap<String, String> prefixes;
+	private final Supplier<TurtleOBDAVisitor> visitorSupplier;
 
 	/**
 	 * Constructs the parser object with prefixes. These prefixes will
@@ -55,9 +45,10 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * (i.e., the directives @BASE and @PREFIX).
 	 *
 	 */
-	public AbstractTurtleOBDAParser(Map<String, String> prefixes, TurtleOBDAVisitor visitor) {
+	public AbstractTurtleOBDAParser(ImmutableMap<String, String> prefixes,
+									Supplier<TurtleOBDAVisitor> visitorSupplier) {
 		this.prefixes = prefixes;
-		this.visitor = visitor;
+		this.visitorSupplier = visitorSupplier;
 	}
 
 	/**
@@ -92,7 +83,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 			parser.removeErrorListeners();
 			parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
-			return (ImmutableList<TargetAtom>)visitor.visitParse(parser.parse());
+			return (ImmutableList<TargetAtom>)visitorSupplier.get().visitParse(parser.parse());
 		} catch (RuntimeException e) {
 			throw new TargetQueryParserException(e.getMessage(), e);
 		}

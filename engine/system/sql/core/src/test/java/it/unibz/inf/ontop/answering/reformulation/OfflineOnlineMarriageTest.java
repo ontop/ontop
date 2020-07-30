@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.answering.logging.impl.QueryLoggerImpl;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
@@ -15,17 +15,22 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSQLConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Optional;
 
+import static java.util.stream.Collectors.joining;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 
@@ -41,8 +46,7 @@ public class OfflineOnlineMarriageTest {
     private static final String JDBC_USER = "sa";
     private static final String JDBC_PASSWORD = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(OfflineOnlineMarriageTest.class);
-    private static final String PERSON_QUERY_STRING = "PREFIX : <http://example.org/marriage/voc#>\n" +
-            "\n" +
+    private static final String PERSON_QUERY_STRING = "PREFIX : <http://example.org/marriage/voc#>\n\n" +
             "SELECT DISTINCT ?x \n" +
             "WHERE {\n" +
             "  ?x a :Person .\n" +
@@ -60,20 +64,11 @@ public class OfflineOnlineMarriageTest {
 
         CONN = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
 
-        Statement st = CONN.createStatement();
-
-        FileReader reader = new FileReader(CREATE_DB_FILE);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
+        try (Statement st = CONN.createStatement()) {
+            String s = Files.lines(Paths.get(CREATE_DB_FILE)).collect(joining());
+            st.executeUpdate(s);
+            CONN.commit();
         }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        CONN.commit();
     }
 
     @AfterClass
@@ -88,8 +83,15 @@ public class OfflineOnlineMarriageTest {
 
         SelectQuery query = inputQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
 
-        SQLExecutableQuery executableQuery = (SQLExecutableQuery) queryReformulator.reformulateIntoNativeQuery(query);
-        String sqlQuery = executableQuery.getSQL();
+
+        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query,
+                queryReformulator.getQueryLoggerFactory().create());
+        String sqlQuery = Optional.of(executableQuery.getTree())
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> ((NativeNode) n).getNativeQueryString())
+                .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
 
         assertFalse(sqlQuery.isEmpty());
         LOGGER.info(sqlQuery);

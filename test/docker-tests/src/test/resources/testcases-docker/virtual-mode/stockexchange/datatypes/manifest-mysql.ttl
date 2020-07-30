@@ -12,9 +12,9 @@
       :literal-1 :literal-2
       :string-1 :string-2 :string-3
       :integer-1 :integer-2 :integer-3
-      :pos-integer-1 :pos-integer-2 :pos-integer-3
+      :pos-integer-1 :pos-integer-2 :pos-integer-3 :pos-integer-2-bis :pos-integer-3-bis
       :neg-integer-1 :neg-integer-2 :neg-integer-3
-      :decimal-1 :decimal-2 :decimal-3
+      :decimal-1 :decimal-2 :decimal-3 :decimal-2-bis :decimal-3-bis
       :pos-decimal-1 :pos-decimal-2 :pos-decimal-3
       :neg-decimal-1 :neg-decimal-2 :neg-decimal-3
       :double-1 :double-2 :double-3
@@ -27,7 +27,7 @@
       :datetime-3h :datetime-3i :datetime-3j
       :boolean-1a :boolean-1b :boolean-1c :boolean-1d
       :boolean-2a :boolean-2b :boolean-2c :boolean-2d
-      :boolean-3a :boolean-3b :boolean-3c :boolean-3d
+      :boolean-3a :boolean-3b :boolean-3c :boolean-3d :boolean-3e :boolean-3f
     ) .
 
 :literal-1 rdf:type mf:QueryEvaluationTest ;
@@ -149,6 +149,17 @@
     mf:mappings <stockexchange-mysql.obda> ;
 	mf:parameters <stockexchange-mysql.properties> .
 
+:pos-integer-2-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10-bis: PositiveInteger without quotes" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <pos-integer-2-bis.rq> ] ;
+    mf:result <pos-integer-2-bis.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mysql.obda> ;
+	mf:parameters <stockexchange-mysql.properties> .
+
     
 :pos-integer-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q11: PositiveInteger with xsd:integer" ;
@@ -161,6 +172,16 @@
     mf:mappings <stockexchange-mysql.obda> ;
 	mf:parameters <stockexchange-mysql.properties> .
 
+:pos-integer-3-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q11-bis: PositiveInteger with xsd:integer" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <pos-integer-3-bis.rq> ] ;
+    mf:result <pos-integer-3-bis.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mysql.obda> ;
+	mf:parameters <stockexchange-mysql.properties> .
     
 :neg-integer-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q12: NegativeInteger with quotes" ;
@@ -221,6 +242,16 @@
     mf:mappings <stockexchange-mysql.obda> ;
 	mf:parameters <stockexchange-mysql.properties> .
 
+:decimal-2-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q16-bis: Decimal without quotes" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <decimal-2-bis.rq> ] ;
+    mf:result <decimal-2-bis.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mysql.obda> ;
+	mf:parameters <stockexchange-mysql.properties> .
     
 :decimal-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q17: Decimal with xsd:decimal" ;
@@ -233,6 +264,16 @@
     mf:mappings <stockexchange-mysql.obda> ;
 	mf:parameters <stockexchange-mysql.properties> .
 
+:decimal-3-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q17-bis: Decimal with xsd:decimal" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <decimal-3-bis.rq> ] ;
+    mf:result <decimal-3-bis.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mysql.obda> ;
+	mf:parameters <stockexchange-mysql.properties> .
     
 :pos-decimal-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q18: PositiveDecimal with quotes" ;
@@ -745,6 +786,30 @@
     mf:action
             [ qt:query <boolean-3d.rq> ] ;
     mf:result <boolean-3d.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mysql.obda> ;
+	mf:parameters <stockexchange-mysql.properties> .
+
+
+:boolean-3e rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q61: String of Boolean equal to capital TRUE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <boolean-3e.rq> ] ;
+    mf:result <boolean-3e.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mysql.obda> ;
+	mf:parameters <stockexchange-mysql.properties> .
+
+
+:boolean-3f rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q62: String of Boolean equal to true" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <boolean-3f.rq> ] ;
+    mf:result <boolean-3f.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-mysql.obda> ;
 	mf:parameters <stockexchange-mysql.properties> .

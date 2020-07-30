@@ -1,111 +1,143 @@
 package it.unibz.inf.ontop.docker;
 
-/*
- * #%L
- * ontop-quest-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.MessageDigest;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /***
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
- * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  */
 
 public abstract class AbstractBindTestWithFunctions {
 
-    private final String owlfile;
-    private final String obdafile;
-    private final String propertiesfile;
-
     protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
+    private final OntopOWLReasoner reasoner;
+    private final OWLConnection conn;
 
 
-    protected AbstractBindTestWithFunctions(String owlfile, String obdafile, String propertiesfile) {
-        this.owlfile =  this.getClass().getResource(owlfile).toString();
-        this.obdafile =  this.getClass().getResource(obdafile).toString();
-        this.propertiesfile =  this.getClass().getResource(propertiesfile).toString();
+    protected AbstractBindTestWithFunctions(OntopOWLReasoner reasoner) {
+        this.reasoner = reasoner;
+        this.conn = reasoner.getConnection();
     }
 
-    private void runTests(String query) throws Exception {
-
-        // Creating a new instance of the reasoner
+    protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
+        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
+        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdafile)
-                .ontologyFile(owlfile)
-                .propertyFile(propertiesfile)
+                .nativeOntopMappingFile(obdaFile)
+                .ontologyFile(owlFile)
+                .propertyFile(propertiesFile)
                 .enableTestMode()
                 .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        return factory.createReasoner(config);
+    }
 
-        // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
-        OWLStatement st = conn.createStatement();
+    public OntopOWLReasoner getReasoner() {
+        return reasoner;
+    }
 
+    public OWLConnection getConnection() {
+        return conn;
+    }
 
-        int i = 0;
+    private void runTests(String query) throws Exception {
+        try (OWLStatement st = conn.createStatement()) {
+            int i = 0;
+            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                while (rs.hasNext()) {
+                    final OWLBindingSet bindingSet = rs.next();
+                    OWLObject ind1 = bindingSet.getOWLObject("w");
 
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                OWLObject ind1 = bindingSet.getOWLObject("w");
-
-
-                System.out.println(ind1);
-                i++;
+                    log.debug(ind1.toString());
+                    i++;
+                }
+                assertTrue(i > 0);
             }
-            assertTrue(i > 0);
-
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            conn.close();
-            reasoner.dispose();
         }
+    }
+
+    @Test
+    public void testAndBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
+                + "}\n" +
+                "ORDER BY ?w";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testAndBindDistinct() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT DISTINCT ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
+                + "}\n" +
+                "ORDER BY ?w";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testOrBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT DISTINCT ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") || CONTAINS(?title,\"Book\")) AS ?w)\n"
+                + "}\n"
+                + "ORDER BY ?w";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
 
@@ -219,7 +251,7 @@ public abstract class AbstractBindTestWithFunctions {
 	 */
 
     @Test
-    public void testHash() throws Exception {
+    public void testHashSHA256() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -228,18 +260,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (SHA256(?title) AS ?w)\n"
+                + "   BIND (SHA256(str(?title)) AS ?w)\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
-            StringBuffer hexString = new StringBuffer();
+            StringBuilder hexString = new StringBuilder();
 
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
-                if(hex.length() == 1) hexString.append('0');
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
 
@@ -251,6 +283,29 @@ public abstract class AbstractBindTestWithFunctions {
 
     }
 
+    @Ignore
+    @Test
+    public void testHashMd5() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testHashSHA1() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testHashSHA384() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testHashSHA512() throws Exception {
+
+    }
 
 	/*
 	 * Tests for functions on strings.
@@ -400,8 +455,29 @@ public abstract class AbstractBindTestWithFunctions {
 
         checkReturnedValues(queryBind, expectedValues);
     }
+
     @Test
-    public void testContains() throws Exception {
+    public void testContainsBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(CONTAINS(?title,\"Semantic\") AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testContainsFilter() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -416,7 +492,6 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");
         checkReturnedValues(queryBind, expectedValues);
-
     }
 
 
@@ -471,7 +546,7 @@ public abstract class AbstractBindTestWithFunctions {
 
 
     @Test
-    public void testBindWithBefore() throws Exception {
+    public void testBindWithBefore1() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -482,23 +557,46 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getBindWithBeforeExpectedValues());
+        checkReturnedValues(queryBind, getBindWithBefore1ExpectedValues());
 
     }
 
-    protected List<String> getBindWithBeforeExpectedValues() {
+    protected List<String> getBindWithBefore1ExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\"The Seman\"@en");
-        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduc\"@en");
 
         return expectedValues;
     }
 
+    @Test
+    public void testBindWithBefore2() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (STRBEFORE(?title,\"\") AS ?w)\n"
+                + "}";
+        checkReturnedValues(queryBind, getBindWithBefore2ExpectedValues());
+    }
+
+    protected List<String> getBindWithBefore2ExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        return expectedValues;
+    }
+
 
     @Test
-    public void testBindWithAfter() throws Exception {
+    public void testBindWithAfter1() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -509,16 +607,40 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getBindWithAfterExpectedValues());
+        checkReturnedValues(queryBind, getBindWithAfter1ExpectedValues());
+    }
+
+    protected List<String> getBindWithAfter1ExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"^^xsd:string");
+        expectedValues.add("\" Semantic Web\"@en");
+        expectedValues.add("\"\"^^xsd:string");
+        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
+        return expectedValues;
+    }
+
+    @Test
+    public void testBindWithAfter2() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (STRAFTER(?title,\"\") AS ?w)\n"
+                + "}";
+
+        checkReturnedValues(queryBind, getBindWithAfter2ExpectedValues());
 
     }
 
-    protected List<String> getBindWithAfterExpectedValues() {
+    protected List<String> getBindWithAfter2ExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
-        expectedValues.add("\" Semantic Web\"@en");
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
+        expectedValues.add("\"SPARQL Tutorial\"@en");
+        expectedValues.add("\"The Semantic Web\"@en");
+        expectedValues.add("\"Crime and Punishment\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
 
         return expectedValues;
     }
@@ -746,7 +868,31 @@ public abstract class AbstractBindTestWithFunctions {
         runTests(queryBind);
     }
 
-    //    @Test timezone is not supported in h2
+    @Test
+    public void testDivide() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND ((?p / 2) AS ?w)\n"
+                + "}";
+
+
+        checkReturnedValues(queryBind, getDivideExpectedValues());
+    }
+
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.250000\"^^xsd:decimal");
+        expectedValues.add("\"11.500000\"^^xsd:decimal");
+        expectedValues.add("\"16.750000\"^^xsd:decimal");
+        expectedValues.add("\"5.000000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
+    @Test
     public void testTZ() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -763,81 +909,496 @@ public abstract class AbstractBindTestWithFunctions {
 
     protected List<String> getTZExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
+        expectedValues.add("\"08:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
+        expectedValues.add("\"00:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
 
         return expectedValues;
     }
-//        @Test see results of datetime with locale
-    public void testDatetime() throws Exception {
 
-        TermFactory termFactory = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
-        String value = "Jan 31 2013 9:32AM";
+    @Test
+    public void testBound() throws Exception {
 
-        DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.CHINA);
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (BOUND(?title) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   OPTIONAL{ \n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER (STRSTARTS(?title, \"T\"))\n"
+                + "   } \n"
+                + "}";
 
-        java.util.Date date;
-        try {
-            date = df.parse(value);
-            Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(termFactory.getConstantLiteral(ts.toString().replace(' ', 'T'), XSD.DATETIME));
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
 
-        } catch (ParseException pe) {
+    }
 
-            throw new RuntimeException(pe);
-        }
+
+    /**
+     * Currently equalities between lang strings are treated as RDFTermEqual.
+     *
+     * Therefore != is always false or null (which corresponds to false under 2VL)
+     *
+     * THIS COULD CHANGE IN THE FUTURE as we could extend the SPARQL spec
+     * (TODO: see how other systems behave)
+     */
+    @Test
+    public void testRDFTermEqual1() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?y ns:discount ?discount2 .\n"
+                + "   ?y dc:title ?title2 .\n"
+                + "   FILTER (?discount = ?discount2 && ?title != ?title2)\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testRDFTermEqual2() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?y ns:discount ?discount2 .\n"
+                + "   ?y dc:title ?title2 .\n"
+                + "   FILTER (?discount = ?discount2 && str(?title) != str(?title2))\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testSameTerm() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?y ns:discount ?discount2 .\n"
+                + "   ?y dc:title ?title2 .\n"
+                + "   FILTER(sameTerm(?discount, ?discount2) && !sameTerm(?title, ?title2))\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testIsIRI() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isIRI(?title) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testIsBlank() throws Exception {
+            //no example data
+    }
+
+    @Test
+    public void testIsLiteral() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isLiteral(?discount) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testIsNumeric() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isNumeric(?discount) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testStr() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (str(?year) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   } ORDER BY ?year ";
+
+        checkReturnedValues(queryBind, getStrExpectedValues());
+
+    }
+
+    protected List<String> getStrExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1970-11-05T07:50:00.000000\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T12:30:00.000000\"^^xsd:string");
+        expectedValues.add("\"2014-06-05T18:47:52.000000\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T09:23:06.000000\"^^xsd:string");
+
+        return expectedValues;
+    }
+
+
+    @Test
+    public void testLang() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (lang(?title) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   }  ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    //In SPARQL 1.0, the DATATYPE function was not defined for literals with a language tag
+    @Test
+    public void testDatatype() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (?discount AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   FILTER ( datatype(?discount) = xsd:decimal)\n"
+                + "   }  ";
+
+        checkReturnedValues(queryBind, getDatatypeExpectedValues());
+    }
+
+    protected List<String> getDatatypeExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.20\"^^xsd:decimal");
+        expectedValues.add("\"0.25\"^^xsd:decimal");
+        expectedValues.add("\"0.20\"^^xsd:decimal");
+        expectedValues.add("\"0.15\"^^xsd:decimal");
+
+        return expectedValues;
+    }
+
+
+
+    @Test
+    public void testConcat() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \", ?description) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x dc:description ?description .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment | good\"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial | good\"^^xsd:string");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition | good\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web | bad\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testLangMatches() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (BOUND(?title) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   OPTIONAL{\n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER(langMatches( lang(?title), \"EN\" )) \n"
+                + "   } } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testREGEX() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (BOUND(?title) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   OPTIONAL{\n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER(REGEX( ?title, \"Semantic\" )) \n"
+                + "   } } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testREPLACE() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?w WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x dc:description ?description .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND(REPLACE(?title, \"Second\", \"First\") AS ?w) .\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment\"@en");
+        expectedValues.add("\"SPARQL Tutorial\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, First Edition\"@en");
+        expectedValues.add("\"The Semantic Web\"@en");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantFloatDivide() throws Exception {
+        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:float AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:float");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantFloatIntegerDivide() throws Exception {
+        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1\"^^xsd:integer AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:float");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantFloatDecimalDivide() throws Exception {
+        String queryBind = "SELECT (\"0.5\"^^xsd:float / \"1.0\"^^xsd:decimal AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:float");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantFloatDoubleDivide() throws Exception {
+        String queryBind = "SELECT (\"1.0\"^^xsd:float / \"2.0\"^^xsd:double AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:double");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantDoubleDoubleDivide() throws Exception {
+        String queryBind = "SELECT (\"1.0\"^^xsd:double / \"2.0\"^^xsd:double AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:double");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testConstantIntegerDivide() throws Exception {
+        String queryBind = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?w)  {} ";
+
+
+        checkReturnedValues(queryBind, getConstantIntegerDivideExpectedResults());
+    }
+
+    protected List<String> getConstantIntegerDivideExpectedResults() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.5\"^^xsd:decimal");
+        return expectedValues;
+    }
+
+    @Test
+    public void testCoalesceDivideByZeroInt() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"1\"^^xsd:integer / \"0\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceDivideByZeroDecimal() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"1\"^^xsd:decimal / \"0\"^^xsd:decimal, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidDivide1() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" / \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidDivide2() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"2\"^^xsd:integer / \"rrr\", \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidSum() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" + \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidSub() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" - \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testCoalesceInvalidTimes() throws Exception {
+        String queryBind = "SELECT (COALESCE(\"rrr\" * \"2\"^^xsd:integer, \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Ignore("TODO: support it, by using a case")
+    @Test
+    public void testDivideByZeroFloat() throws Exception {
+        String queryBind = "SELECT (\"1\"^^xsd:integer / \"0.0\"^^xsd:float AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"INF\"^^xsd:float");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdafile)
-                .ontologyFile(owlfile)
-                .enableTestMode()
-                .propertyFile(propertiesfile)
-                .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
+        try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
+            int i = 0;
+            List<String> returnedValues = new ArrayList<>();
+            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                while (rs.hasNext()) {
+                    final OWLBindingSet bindingSet = rs.next();
+                    OWLObject ind1 = bindingSet.getOWLObject("w");
 
+                    // log.debug(ind1.toString());
 
-        // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
-        OWLStatement st = conn.createStatement();
-
-
-
-        int i = 0;
-        List<String> returnedValues = new ArrayList<>();
-        try {
-            TupleOWLResultSet rs = st.executeSelectQuery(query);
-            while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                OWLObject ind1 = bindingSet.getOWLObject("w");
-
-                // log.debug(ind1.toString());
-
-                if (ind1 != null) {
-                    String value = ToStringRenderer.getInstance().getRendering(ind1);
-                    returnedValues.add(value);
-                    System.out.println(value);
-                } else {
-                    returnedValues.add(null);
+                    if (ind1 != null) {
+                        String value = ToStringRenderer.getInstance().getRendering(ind1);
+                        returnedValues.add(value);
+                        log.debug(value);
+                    }
+                    else {
+                        returnedValues.add(null);
+                    }
+                    i++;
                 }
-                i++;
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            conn.close();
-            reasoner.dispose();
+            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), expectedValues, returnedValues);
+            assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);
         }
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
-
     }
 
 

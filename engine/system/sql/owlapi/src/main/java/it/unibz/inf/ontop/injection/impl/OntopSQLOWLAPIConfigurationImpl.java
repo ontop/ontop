@@ -78,6 +78,11 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         }
 
         @Override
+        public B xmlCatalogFile(@Nonnull String xmlCatalogFile) {
+            return ontologyBuilderFragment.xmlCatalogFile(xmlCatalogFile);
+        }
+
+        @Override
         public B ontologyFile(@Nonnull URL url) {
             return ontologyBuilderFragment.ontologyFile(url);
         }

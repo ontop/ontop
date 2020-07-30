@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -338,6 +337,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 break;
             optionalAncestor = getParent(ancestor);
         }
+        // Root reached
+        if (!optionalAncestor.isPresent())
+            requiredVariableBuilder.addAll(getProjectionAtom().getVariables());
 
         ImmutableSet<Variable> requiredVariables = requiredVariableBuilder.build();
         /*

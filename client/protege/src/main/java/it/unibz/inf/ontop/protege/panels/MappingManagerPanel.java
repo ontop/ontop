@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialConfiguration;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -36,8 +36,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.utils.IDGenerator;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -255,7 +253,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         txtFilter = new javax.swing.JTextField();
         chkFilter = new javax.swing.JCheckBox();
         mappingScrollPane = new javax.swing.JScrollPane();
-        mappingList = new javax.swing.JList<>();
+        mappingList = new JList<SQLPPTriplesMap>();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -608,7 +606,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			// Computing the next available ID
 			int new_index = -1;
 			for (int index = 0; index < 999999999; index++) {
-				if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
+				if (controller.indexOf(id + "(" + index + ")") == -1) {
 					new_index = index;
 					break;
 				}
@@ -730,7 +728,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 listOfFilters.add(filter);
         }
         // TODO(xiao):
-        //  We may need to import other functionality (but probabaly never used) from the old ANTLR file:
+        //  We may need to import other functionality (but probably never used) from the old ANTLR file:
         //  ontop/client/protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingFilter.g
 
 //		if (textToParse != null) {
@@ -771,7 +769,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		model.setFocusedSource(newSource.getSourceID());
 
 		mappingList.revalidate();
-
 	}
 
 

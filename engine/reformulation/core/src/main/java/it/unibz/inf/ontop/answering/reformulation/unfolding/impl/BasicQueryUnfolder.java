@@ -27,6 +27,9 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * See TranslationFactory for creating a new instance.
+ */
 public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
     private final Mapping mapping;

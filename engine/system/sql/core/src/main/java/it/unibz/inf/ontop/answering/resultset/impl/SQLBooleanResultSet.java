@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 
@@ -29,10 +30,12 @@ import java.sql.SQLException;
 public class SQLBooleanResultSet implements BooleanResultSet {
 
     private final ResultSet set;
+    private final QueryLogger queryLogger;
     private boolean hasRead;
 
-    public SQLBooleanResultSet(ResultSet set) {
+    public SQLBooleanResultSet(ResultSet set, QueryLogger queryLogger) {
         this.set = set;
+        this.queryLogger = queryLogger;
         this.hasRead = false;
     }
 
@@ -55,6 +58,7 @@ public class SQLBooleanResultSet implements BooleanResultSet {
         if (hasRead)
             throw new IllegalStateException("getValue() can only called once!");
         hasRead = true;
+        queryLogger.declareLastResultRetrievedAndSerialize(1);
         try {
             return set.next();
         } catch (SQLException e) {

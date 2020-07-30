@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.BNode;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
@@ -30,13 +30,9 @@ import java.util.stream.Stream;
 /**
  * Implementation for BNodes.
  */
-public class BNodeConstantImpl implements BNode {
-
-	private static final long serialVersionUID = 214867118996974157L;
+public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode {
 
 	private final String name;
-
-	private final int identifier;
 	private final ObjectRDFType type;
 
 	/**
@@ -44,22 +40,18 @@ public class BNodeConstantImpl implements BNode {
 	 */
 	protected BNodeConstantImpl(String name, TypeFactory typeFactory) {
 		this.name = name;
-		this.identifier = name.hashCode();
 		this.type = typeFactory.getBlankNodeType();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof BNodeConstantImpl)) {
-			return false;
-		}
-		BNodeConstantImpl uri2 = (BNodeConstantImpl) obj;
-		return this.identifier == uri2.identifier;
+	public boolean equals(Object other) {
+		return (other instanceof BNodeConstantImpl &&
+				this.name.equals(((BNodeConstantImpl) other).name));
 	}
 
 	@Override
 	public int hashCode() {
-		return identifier;
+		return name.hashCode();
 	}
 
 	@Override
@@ -72,11 +64,6 @@ public class BNodeConstantImpl implements BNode {
 	}
 
 	@Override
-	public BNode clone() {
-		return this;
-	}
-
-	@Override
 	public boolean isGround() {
 		return true;
 	}
@@ -84,6 +71,19 @@ public class BNodeConstantImpl implements BNode {
 	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
+	}
+
+	@Override
+	public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+		if (otherTerm instanceof Constant) {
+			if (((Constant) otherTerm).isNull())
+				return IncrementalEvaluation.declareIsNull();
+			return equals(otherTerm)
+					? IncrementalEvaluation.declareIsTrue()
+					: IncrementalEvaluation.declareIsFalse();
+		}
+		else
+			return otherTerm.evaluateStrictEq(this, variableNullability);
 	}
 
 	@Override

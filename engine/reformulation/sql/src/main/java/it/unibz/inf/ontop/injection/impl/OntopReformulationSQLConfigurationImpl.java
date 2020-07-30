@@ -41,6 +41,7 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
         return settings;
     }
 
+    @Override
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
                 Stream.concat(

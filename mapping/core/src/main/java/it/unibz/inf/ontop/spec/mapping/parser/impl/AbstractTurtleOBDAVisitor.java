@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -14,12 +16,14 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Stateful! See currentSubject.
+ */
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
     // Column placeholder pattern
@@ -38,15 +42,26 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
      */
     private ImmutableTerm currentSubject;
 
+    /**
+     * Davide> The current graph
+     */
+    private ImmutableTerm currentGraphLabel;
+
     protected String error = "";
     private final TermFactory termFactory;
     private final RDF rdfFactory;
+    private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
+    private final OntopMappingSettings settings;
 
-    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
+    protected AbstractTurtleOBDAVisitor(TermFactory termFactory, TypeFactory typeFactory,
+                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory,
+                                     OntopMappingSettings settings) {
+        this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.rdfFactory = rdfFactory;
         this.termFactory = termFactory;
+        this.settings = settings;
     }
 
     public String getError() {
@@ -58,40 +73,38 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     private ImmutableTerm typeTerm(String text, IRI datatype) {
-        ValueConstant integerConstant = termFactory.getConstantLiteral(text, datatype);
-        return termFactory.getImmutableTypedTerm(integerConstant, datatype);
+        return termFactory.getRDFLiteralConstant(text, datatype);
     }
 
     protected ImmutableTerm constructIRI(String text) {
         ImmutableTerm toReturn = null;
         final String PLACEHOLDER = "{}";
-        List<ImmutableTerm> terms = new LinkedList<>();
         List<FormatString> tokens = parseIRI(text);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
-                ValueConstant uriTemplate = termFactory.getConstantLiteral(token.toString()); // a single URI template
-                toReturn = termFactory.getImmutableUriTemplate(uriTemplate);
+                IRI iri = rdfFactory.createIRI(token.toString());
+                toReturn = termFactory.getConstantIRI(iri);
             } else if (token instanceof ColumnString) {
-                // a single URI template
+                // the IRI string is coming from the DB (no escaping needed)
                 Variable column = termFactory.getVariable(token.toString());
-                toReturn = termFactory.getImmutableUriTemplate(column);
+                toReturn = termFactory.getIRIFunctionalTerm(column, true);
             }
         } else {
             StringBuilder sb = new StringBuilder();
+            List<ImmutableTerm> terms = new ArrayList<>();
             for (FormatString token : tokens) {
                 if (token instanceof FixedString) { // if part of URI template
                     sb.append(token.toString());
                 } else if (token instanceof ColumnString) {
                     sb.append(PLACEHOLDER);
                     Variable column = termFactory.getVariable(token.toString());
-                    terms.add(column);
+                    terms.add(termFactory.getPartiallyDefinedToStringCast(column));
                 }
             }
-            ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
-            terms.add(0, uriTemplate);
-            toReturn = termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+            String iriTemplate = sb.toString(); // complete IRI template
+            toReturn = termFactory.getIRIFunctionalTerm(iriTemplate, ImmutableList.copyOf(terms));
         }
         return toReturn;
     }
@@ -130,7 +143,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         while (m.find()) {
             args.add(termFactory.getVariable(m.group(1)));
         }
-        return termFactory.getImmutableBNodeTemplate(args.build());
+        return termFactory.getFreshBnodeFunctionalTerm(args.build());
     }
 
     private interface FormatString {
@@ -201,7 +214,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             if (i > 0) {
                 st = str.substring(0, i);
                 st = st.replace("\\\\", "");
-                terms.add(termFactory.getConstantLiteral(st));
+                terms.add(termFactory.getDBStringConstant(st));
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
                 j = str.indexOf("}");
@@ -213,13 +226,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
         if (!str.equals("")) {
             str = str.replace("\\\\", "");
-            terms.add(termFactory.getConstantLiteral(str));
+            terms.add(termFactory.getDBStringConstant(str));
         }
         return terms;
     }
 
     //this function returns nested concats
-    //in case of more than two terms need to be concatted
     private ImmutableTerm getNestedConcat(String str) {
         List<ImmutableTerm> terms;
         terms = addToTermsList(str);
@@ -227,11 +239,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             return terms.get(0);
         }
 
-        ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
-        for (int j = 2; j < terms.size(); j++) {
-            f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
-        }
-        return f;
+        return termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.copyOf(terms));
     }
 
 
@@ -263,7 +271,17 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Stream<TargetAtom> visitTriplesStatement(TriplesStatementContext ctx) {
-        return visitTriples(ctx.triples());
+
+        TriplesContext triples = ctx.triples();
+        if( triples != null ){
+            return visitTriples(triples);
+        }
+        else{
+            QuadsContext quads = ctx.quads();
+            if( quads != null )
+                return visitQuads(quads);
+            else throw new IllegalArgumentException("Not triple nor quads");
+        }
     }
 
     @Override
@@ -288,6 +306,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
+    public Stream<TargetAtom> visitQuads(QuadsContext ctx) {
+        currentGraphLabel = visitGraph(ctx.graph());
+        return ctx.triples().stream().flatMap(this::visitTriples);
+    }
+
+    @Override
     public Stream<TargetAtom> visitPredicateObjectList(PredicateObjectListContext ctx) {
         return ctx.predicateObject().stream()
                 .flatMap(this::visitPredicateObject);
@@ -295,9 +319,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Stream<TargetAtom> visitPredicateObject(PredicateObjectContext ctx) {
-        return visitObjectList(ctx.objectList())
-                .map(t -> targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), t));
+        Stream<TargetAtom> result = visitObjectList(ctx.objectList()).map(object ->
+                currentGraphLabel == null ? targetAtomFactory.getTripleTargetAtom(currentSubject,
+                        visitVerb(ctx.verb()), object) : targetAtomFactory.getQuadTargetAtom(currentSubject,
+                        visitVerb(ctx.verb()), object, currentGraphLabel));
+        return result;
+
+        //   return visitObjectList(ctx.objectList())
+        //         .map(t -> targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), t));
     }
+
+
+
 
     @Override
     public ImmutableTerm visitVerb(VerbContext ctx) {
@@ -305,7 +338,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (rc != null) {
             return visitResource(rc);
         }
-        return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
+        return termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
     }
 
     @Override
@@ -322,7 +355,26 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
         VariableContext vc = ctx.variable();
         if (vc != null) {
-            return visitVariable(vc);
+            return termFactory.getIRIFunctionalTerm(visitVariable(vc), true);
+        }
+        BlankContext bc = ctx.blank();
+        if (bc != null) {
+            return visitBlank(bc);
+        }
+        return null;
+    }
+
+    // Davide> Quads support
+    @Override
+    public ImmutableTerm visitGraph(GraphContext ctx){
+        if (ctx == null) return null;
+        ResourceContext rc = ctx.resource();
+        if (rc != null) {
+            return visitResource(rc);
+        }
+        VariableContext vc = ctx.variable();
+        if (vc != null) {
+            return termFactory.getIRIFunctionalTerm(visitVariable(vc), true);
         }
         BlankContext bc = ctx.blank();
         if (bc != null) {
@@ -333,7 +385,14 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableTerm visitObject(ObjectContext ctx) {
-        return (ImmutableTerm) visit(ctx.children.iterator().next());
+        ImmutableTerm term = (ImmutableTerm) visit(ctx.children.iterator().next());
+        return (term instanceof Variable)
+                ? termFactory.getRDFLiteralFunctionalTerm(
+                        termFactory.getPartiallyDefinedToStringCast((Variable) term),
+                    // We give the abstract datatype RDFS.LITERAL when it is not determined yet
+                    // --> The concrete datatype be inferred afterwards
+                            RDFS.LITERAL)
+                : term;
     }
 
     @Override
@@ -352,15 +411,25 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public ImmutableTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
-        return termFactory.getImmutableTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
+    public ImmutableFunctionalTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
+                visitVariable(ctx.variable()));
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
-    public ImmutableTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
-        Variable var = visitVariable(ctx.variable());
+    public ImmutableFunctionalTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
+                visitVariable(ctx.variable()));
         IRI iri = visitIri(ctx.iri());
-        return termFactory.getImmutableTypedTerm(var, iri);
+
+        if ((!settings.areAbstractDatatypesToleratedInMapping())
+            && typeFactory.getDatatype(iri).isAbstract())
+            // TODO: throw a better exception (invalid input)
+            throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
+                    + iri + "\nSet the property "
+                    + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
     }
 
     @Override
@@ -401,9 +470,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         ImmutableTerm literal = visitLitString(lsc);
         LanguageTagContext lc = ctx.languageTag();
         if (lc != null) {
-            return termFactory.getImmutableTypedTerm(literal, visitLanguageTag(lc));
+            return termFactory.getRDFLiteralFunctionalTerm(literal, visitLanguageTag(lc));
         }
-        return termFactory.getImmutableTypedTerm(literal, XSD.STRING);
+        return termFactory.getRDFLiteralFunctionalTerm(literal, XSD.STRING)
+                .simplify();
     }
 
     @Override
@@ -412,14 +482,15 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (str.contains("{")) {
             return getNestedConcat(str);
         }
-        return termFactory.getConstantLiteral(str.substring(1, str.length() - 1), XSD.STRING); // without the double quotes
+        return termFactory.getDBStringConstant(str.substring(1, str.length() - 1)); // without the double quotes
     }
 
     @Override
     public ImmutableTerm visitTypedLiteral(TypedLiteralContext ctx) {
         ImmutableTerm stringValue = visitLitString(ctx.litString());
         IRI iriRef = visitIri(ctx.iri());
-        return termFactory.getImmutableTypedTerm(stringValue, iriRef);
+        return termFactory.getRDFLiteralFunctionalTerm(stringValue, iriRef)
+                .simplify();
     }
 
     @Override

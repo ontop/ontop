@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * All its children are expected to project its projected variables
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorNode {
 
@@ -23,4 +25,9 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
      * To be called on already lifted tree.
      */
     boolean hasAChildWithLiftableDefinition(Variable variable, ImmutableList<IQTree> children);
+
+    /**
+     * Makes the tree be distinct
+     */
+    IQTree makeDistinct(ImmutableList<IQTree> children);
 }

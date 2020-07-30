@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.si.impl;
 
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.repository.impl.SIRepository;
@@ -25,16 +26,19 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
     OntopSemanticIndexLoaderImpl(SIRepository repo, Connection connection, Properties properties, Optional<OWLOntology> tbox) {
         this.connection = connection;
 
+        Properties newProperties = new Properties();
+        newProperties.putAll(properties);
+        // The SI unfortunately does not provide unique constraints... and is not robust to DISTINCTs in a sub-query
+        newProperties.putIfAbsent(OntopModelSettings.CARDINALITY_MODE, "LOOSE");
+
         OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ppMapping(repo.createMappings())
-                .properties(properties)
+                .properties(newProperties)
                 .jdbcUrl(repo.getJdbcUrl())
                 .jdbcUser(repo.getUser())
                 .jdbcPassword(repo.getPassword())
-                //TODO: remove it (required by Tomcat...)
-                .jdbcDriver("org.h2.Driver")
-                .keepPermanentDBConnection(true)
-                .iriDictionary(repo.getUriMap());
+                .jdbcDriver(repo.getJdbcDriver())
+                .keepPermanentDBConnection(true);
 
         tbox.ifPresent(builder::ontology);
 

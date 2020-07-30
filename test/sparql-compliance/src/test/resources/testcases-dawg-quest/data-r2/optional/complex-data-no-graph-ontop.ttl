@@ -1,0 +1,51 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix ex:        <http://example.org/things#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+<tag:alice@example:foafUri>
+    foaf:mbox   <mailto:alice@example.net>;
+    foaf:name   "Alice";
+    foaf:nick   "WhoMe?";
+    foaf:depiction   <http://example.com/alice.png> .
+
+<tag:bert@example:foafUri>
+    foaf:mbox   <mailto:bert@example.net> ;
+    foaf:nick   "BigB" ;
+    foaf:name   "Bert" .
+
+<tag:eve@example:foafUri>
+    foaf:mbox   <mailto:eve@example.net> ;
+    foaf:firstName   "Eve" .
+
+<tag:john@example:foafUri>
+    foaf:mbox   <mailto:john@example.net> ;
+    foaf:nick   "jDoe";
+    foaf:isPrimaryTopicOf <http://example.com/people/johnDoe> .
+
+_:a rdf:type foaf:Person ;
+    foaf:name "Eve" ;
+    ex:empId "9"^^xsd:integer .
+
+_:b rdf:type foaf:Person ;
+    foaf:name "Alice" ;
+    ex:empId "29"^^xsd:integer ;
+    ex:healthplan ex:HealthPlanD.
+
+_:c rdf:type foaf:Person ;
+    foaf:name "Fred" ;
+    ex:empId "27"^^xsd:integer .
+
+_:e foaf:name "Bob" ;
+    ex:empId "23"^^xsd:integer ;
+    ex:healthplan ex:HealthPlanC.
+
+_:f foaf:name "Bob" ;
+    ex:empId "30"^^xsd:integer;
+    ex:healthplan ex:HealthPlanB.
+
+_:g rdf:type foaf:Person;
+    ex:ssn "000000000";
+    foaf:name   "Bert";
+    ex:department "DeptA" ;
+    ex:healthplan ex:HealthPlanA.

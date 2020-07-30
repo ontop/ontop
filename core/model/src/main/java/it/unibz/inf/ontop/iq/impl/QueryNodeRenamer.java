@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -43,7 +45,9 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
-        return iqFactory.createExtensionalDataNode(renameDataAtom(extensionalDataNode.getProjectionAtom()));
+        return iqFactory.createExtensionalDataNode(
+                extensionalDataNode.getRelationDefinition(),
+                renamingSubstitution.applyToArgumentMap(extensionalDataNode.getArgumentMap()));
     }
 
     @Override
@@ -72,6 +76,12 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public ConstructionNode transform(ConstructionNode constructionNode) {
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
                 renameSubstitution(constructionNode.getSubstitution()));
+    }
+
+    @Override
+    public AggregationNode transform(AggregationNode aggregationNode) throws QueryNodeTransformationException {
+        return iqFactory.createAggregationNode(renameProjectedVars(aggregationNode.getGroupingVariables()),
+                renameSubstitution(aggregationNode.getSubstitution()));
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
@@ -115,7 +125,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
 
-    private DataAtom renameDataAtom(DataAtom<? extends AtomPredicate> atom) {
+    private DataAtom<AtomPredicate> renameDataAtom(DataAtom<AtomPredicate> atom) {
         ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
         for (VariableOrGroundTerm term : atom.getArguments()) {
             argListBuilder.add(renamingSubstitution.applyToTerm(term));
@@ -132,7 +142,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return Optional.of(renameBooleanExpression(expression));
     }
 
-    private ImmutableSubstitution<ImmutableTerm> renameSubstitution(ImmutableSubstitution<ImmutableTerm> substitution) {
+    private <T extends ImmutableTerm> ImmutableSubstitution<T> renameSubstitution(ImmutableSubstitution<T> substitution) {
         return renamingSubstitution.applyRenaming(substitution);
     }
 }

@@ -6,8 +6,8 @@ ns:  http://example.org/ns#
 
 [MappingDeclaration] @collection [[
 mappingId	mapping1
-target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} .
-source	SELECT id, title, price, discount, publication_date FROM books
+target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_datetime} ; ns:pubDate {publication_date} .
+source	SELECT id, title, price, discount, publication_datetime, publication_date  FROM books
 
 mappingId	mapping2
 target	:{id}  dc:description {description}@en .

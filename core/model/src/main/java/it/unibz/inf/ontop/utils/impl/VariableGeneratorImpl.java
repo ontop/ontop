@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 /**
  * Beware: not thread-safe!
+ *
+ * See CoreUtilsFactory for building new instances
  */
 public class VariableGeneratorImpl implements VariableGenerator {
 
@@ -24,8 +26,11 @@ public class VariableGeneratorImpl implements VariableGenerator {
     private final TermFactory termFactory;
     private int count;
 
+    /**
+     * TODO: please use as much as possible the assisted inject pattern
+     */
     @AssistedInject
-    private VariableGeneratorImpl(@Assisted Collection<Variable> knownVariables, TermFactory termFactory) {
+    public VariableGeneratorImpl(@Assisted Collection<Variable> knownVariables, TermFactory termFactory) {
         this(knownVariables, termFactory, 0);
     }
 
@@ -53,7 +58,7 @@ public class VariableGeneratorImpl implements VariableGenerator {
                 ? matcher.group(1)
                 : DEFAULT_PREFIX;
 
-        return generateNewVariable(prefix);
+        return generateNewVariableFromPrefix(prefix);
     }
 
     @Override
@@ -67,10 +72,15 @@ public class VariableGeneratorImpl implements VariableGenerator {
 
     @Override
     public Variable generateNewVariable() {
-        return generateNewVariable(DEFAULT_PREFIX);
+        return generateNewVariableFromPrefix(DEFAULT_PREFIX);
     }
 
-    private Variable generateNewVariable(String prefix) {
+    @Override
+    public Variable generateNewVariable(String suggestedString) {
+        return generateNewVariableIfConflicting(termFactory.getVariable(suggestedString));
+    }
+
+    private Variable generateNewVariableFromPrefix(String prefix) {
         String newVariableName;
         do {
             newVariableName = prefix + (count++);

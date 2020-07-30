@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.resultset.impl.SQLDistinctTupleResultSet;
+import it.unibz.inf.ontop.answering.resultset.impl.DistinctJDBCTupleResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link SQLDistinctTupleResultSet}
+ * Use the class {@link DistinctJDBCTupleResultSet}
  */
 
 public class DistinctResultSetTest { //
@@ -143,7 +143,8 @@ public class DistinctResultSetTest { //
             final OWLBindingSet bindingSet = rs.next();
             count++;
             for (int i = 1; i <= rs.getColumnCount(); i++) {
-                log.debug(rs.getSignature().get(i-1) + "=" + bindingSet.getOWLObject(i));
+                String bindingName = rs.getSignature().get(i - 1);
+                log.debug(bindingName + "=" + bindingSet.getOWLObject(bindingName));
             }
 
         }

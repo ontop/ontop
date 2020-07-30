@@ -22,8 +22,11 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 
+/**
+ * See TargetQueryParserFactory for creating a new instance.
+ */
 public interface TargetQueryParser {
 
 	ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException;

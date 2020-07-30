@@ -28,7 +28,7 @@ package it.unibz.inf.ontop.spec.ontology;
  */
 
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 
 /**
  * Represents DataPropertyAssertion from the OWL 2 QL Specification
@@ -50,5 +50,5 @@ public interface DataPropertyAssertion extends Assertion {
 	
 	ObjectConstant getSubject();
 	
-	ValueConstant getValue();
+	RDFLiteralConstant getValue();
 }

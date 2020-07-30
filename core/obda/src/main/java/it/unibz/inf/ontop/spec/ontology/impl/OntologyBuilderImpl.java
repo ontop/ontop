@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.IRI;
@@ -83,7 +83,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
             }
 
             @Override
-            public DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException {
+            public DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, RDFLiteralConstant v) throws InconsistentOntologyException {
                 return OntologyBuilderImpl.createDataPropertyAssertion(new DataPropertyExpressionImpl(rdfFactory.createIRI(dp)), o, v);
             }
         };
@@ -465,7 +465,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - inconsistency if the property is bot
      */
 
-    public static DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
+    public static DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, RDFLiteralConstant o2) throws InconsistentOntologyException {
         if (dpe.isTop())
             return null;
         if (dpe.isBottom())
@@ -503,7 +503,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     }
 
     @Override
-    public void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException {
+    public void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, RDFLiteralConstant v) throws InconsistentOntologyException {
         checkSignature(dpe);
         DataPropertyAssertion assertion = createDataPropertyAssertion(dpe, o, v);
         if (assertion != null)

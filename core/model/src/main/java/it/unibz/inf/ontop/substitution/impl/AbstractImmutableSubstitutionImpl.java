@@ -4,10 +4,9 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -20,86 +19,46 @@ import java.util.stream.Stream;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
-        implements ImmutableSubstitution<T> {
+        extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
 
     final AtomFactory atomFactory;
-    final TermFactory termFactory;
     final SubstitutionFactory substitutionFactory;
-    private final ValueConstant nullValue;
 
     protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory, TermFactory termFactory,
                                                 SubstitutionFactory substitutionFactory) {
+        super(termFactory);
         this.atomFactory = atomFactory;
-        this.termFactory = termFactory;
-        this.nullValue = termFactory.getNullConstant();
         this.substitutionFactory = substitutionFactory;
     }
 
-    @Override
-    public ImmutableTerm apply(ImmutableTerm term) {
-        if (term instanceof Constant) {
-            return term;
-        }
-        else if (term instanceof Variable) {
-            return applyToVariable((Variable) term);
-        }
-        else if (term instanceof ImmutableFunctionalTerm) {
-            return applyToFunctionalTerm((ImmutableFunctionalTerm) term);
-        }
-        else {
-            throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
-        }
-    }
 
     @Override
-    public ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-        if (isEmpty())
-            return functionalTerm;
-
-        ImmutableList.Builder<ImmutableTerm> subTermsBuilder = ImmutableList.builder();
-
-        for (ImmutableTerm subTerm : functionalTerm.getTerms()) {
-            subTermsBuilder.add(apply(subTerm));
-        }
-        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-
-        /*
-         * Distinguishes the BooleanExpression from the other functional terms.
-         */
-        if (functionSymbol instanceof OperationPredicate) {
-            return termFactory.getImmutableExpression((OperationPredicate) functionSymbol,
-                    subTermsBuilder.build());
-        }
-        else {
-            return termFactory.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
-        }
-    }
-
-    @Override
-    public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression) {
-        return (ImmutableExpression) apply(booleanExpression);
-    }
-
-    @Override
-    public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
+    public <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException {
         ImmutableList<? extends ImmutableTerm> newArguments = apply(atom.getArguments());
 
-        for (ImmutableTerm subTerm : newArguments) {
-            if (!(subTerm instanceof VariableOrGroundTerm))
-                throw new ConversionException("The sub-term: " + subTerm + " is not a VariableOrGroundTerm");
-
+        if (!newArguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)) {
+            throw new ConversionException("The substitution applied to a DataAtom has " +
+                    " produced some non-VariableOrGroundTerm arguments " + newArguments);
         }
 
-        return atomFactory.getDataAtom(atom.getPredicate(),
-                (ImmutableList<? extends VariableOrGroundTerm>) newArguments);
+        return atomFactory.getDataAtom(atom.getPredicate(), (ImmutableList<VariableOrGroundTerm>) newArguments);
     }
 
     @Override
-    public ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms) {
-        return terms.stream()
-                .map(this::apply)
-                .collect(ImmutableCollectors.toList());
+    public ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
+            throws ConversionException {
+        ImmutableMap<Integer, ? extends ImmutableTerm> newArgumentMap = argumentMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> apply(e.getValue())));
+
+        if (!newArgumentMap.values().stream().allMatch(t -> t instanceof VariableOrGroundTerm)) {
+            throw new ConversionException("The substitution applied to an argument map has " +
+                    " produced some non-VariableOrGroundTerm arguments " + newArgumentMap);
+        }
+        return (ImmutableMap<Integer, ? extends VariableOrGroundTerm>) newArgumentMap;
     }
 
     @Override
@@ -141,7 +100,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
 
-        /**
+        /*
          * For all variables in the domain of f
          */
 
@@ -149,7 +108,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             substitutionMap.put(gEntry.getKey(), apply(gEntry.getValue()));
         }
 
-        /**
+        /*
          * For the other variables (in the local domain but not in f)
          */
         for (Map.Entry<Variable, ? extends ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
@@ -187,7 +146,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
             T otherTerm = otherMap.get(otherVariable);
 
-            /**
+            /*
              * TODO: explain
              */
             if (isDefining(otherVariable) && (!get(otherVariable).equals(otherTerm))) {
@@ -219,14 +178,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     public Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
             ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
         if (otherSubstitution.isEmpty())
-            return Optional.of((ImmutableSubstitution<? extends ImmutableTerm>)this);
+            return Optional.of(this);
         else if(isEmpty())
             return Optional.of(otherSubstitution);
 
         ImmutableMap<Variable, T> localMap = getImmutableMap();
         ImmutableSet<? extends Map.Entry<Variable, ? extends ImmutableTerm>> otherEntrySet = otherSubstitution.getImmutableMap().entrySet();
 
-        /**
+        /*
          * Checks for multiple entries of the same variable
          */
         if (otherEntrySet.stream()
@@ -345,66 +304,22 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> normalizeValues() {
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability) {
+        return simplifyValues(Optional.of(variableNullability));
+    }
+
+    @Override
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues() {
+        return simplifyValues(Optional.empty());
+    }
+
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
         return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
-                .map(e -> Maps.immutableEntry(e.getKey(), (ImmutableTerm) e.getValue()))
-                .map(this::applyNullNormalization)
-                .collect(ImmutableCollectors.toMap()));
-    }
-
-    /**
-     * Most functional terms do not accept NULL as arguments. If this happens, they become NULL.
-     */
-    private Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
-            Map.Entry<Variable, ImmutableTerm> substitutionEntry) {
-        ImmutableTerm value = substitutionEntry.getValue();
-        if (value instanceof ImmutableFunctionalTerm) {
-            ImmutableTerm newValue = normalizeFunctionalTerm((ImmutableFunctionalTerm) value);
-            return newValue.equals(value)
-                    ? substitutionEntry
-                    : new AbstractMap.SimpleEntry<>(substitutionEntry.getKey(), newValue);
-        }
-        return substitutionEntry;
-    }
-
-    private ImmutableTerm normalizeFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-        if (isSupportingNullArguments(functionalTerm)) {
-            return functionalTerm;
-        }
-
-        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getTerms().stream()
-                .map(arg -> (arg instanceof ImmutableFunctionalTerm)
-                        ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
-                        : arg)
-                .collect(ImmutableCollectors.toList());
-        if (newArguments.stream()
-                .anyMatch(arg -> arg.equals(nullValue))) {
-            return nullValue;
-        }
-
-        return termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
-    }
-
-    /**
-     * TODO: move it elsewhere
-     */
-    private static boolean isSupportingNullArguments(ImmutableFunctionalTerm functionalTerm) {
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-        if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation)functionSymbol) {
-                case IS_NOT_NULL:
-                case IS_NULL:
-                    // TODO: add COALESCE, EXISTS, NOT EXISTS
-                    return true;
-                default:
-                    return false;
-            }
-        }
-        else if ((functionSymbol instanceof URITemplatePredicate)
-                || (functionSymbol instanceof BNodePredicate)) {
-            return false;
-        }
-        return true;
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> variableNullability
+                                .map(n -> e.getValue().simplify(n))
+                                .orElseGet(() -> e.getValue().simplify()))));
     }
 
     protected Optional<ImmutableExpression> convertIntoBooleanExpression(
@@ -413,7 +328,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         List<ImmutableExpression> equalities = new ArrayList<>();
 
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, entry.getKey(), entry.getValue()));
+            equalities.add(termFactory.getStrictEquality(entry.getKey(), entry.getValue()));
         }
 
         switch(equalities.size()) {
@@ -426,8 +341,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 // Non-final
                 ImmutableExpression aggregateExpression = equalityIterator.next();
                 while (equalityIterator.hasNext()) {
-                    aggregateExpression = termFactory.getImmutableExpression(ExpressionOperation.AND, aggregateExpression,
-                            equalityIterator.next());
+                    aggregateExpression = termFactory.getConjunction(aggregateExpression, equalityIterator.next());
                 }
                 return Optional.of(aggregateExpression);
         }

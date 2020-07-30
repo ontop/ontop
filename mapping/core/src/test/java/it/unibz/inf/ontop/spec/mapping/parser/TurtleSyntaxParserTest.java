@@ -26,9 +26,8 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import junit.framework.TestCase;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -49,13 +48,15 @@ public class TurtleSyntaxParserTest {
 
 	private final static Logger log = LoggerFactory.getLogger(TurtleSyntaxParserTest.class);
     private final SpecificationFactory specificationFactory;
+	private final TargetQueryParser parser;
 
-    public TurtleSyntaxParserTest() {
+	public TurtleSyntaxParserTest() {
 		OntopMappingConfiguration configuration = OntopMappingConfiguration
 				.defaultBuilder().build();
 		Injector injector = configuration.getInjector();
         specificationFactory = injector.getInstance(SpecificationFactory.class);
-    }
+		parser = TARGET_QUERY_PARSER_FACTORY.createParser(getPrefixManager().getPrefixMap());
+	}
 
     @Test
 	public void test_1_1() {
@@ -160,7 +161,7 @@ public class TurtleSyntaxParserTest {
 	@Test
 	public void test_4_2_1() {
 		final boolean result = parse(":Person-{id} :firstName \"John\"^^rdfs:Literal .");
-		TestCase.assertFalse(result);
+		TestCase.assertTrue(result);
 	}
 
 	@Test
@@ -328,8 +329,6 @@ public class TurtleSyntaxParserTest {
 
 
 	private boolean compareCQIE(String input, int countBody) {
-		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),
-                TERM_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
 		ImmutableList<TargetAtom> mapping;
 		try {
 			mapping = parser.parse(input);
@@ -345,9 +344,6 @@ public class TurtleSyntaxParserTest {
 
 
 	private boolean parse(String input) {
-		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),
-                TERM_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
-
 		ImmutableList<TargetAtom> mapping;
 		try {
 			mapping = parser.parse(input);

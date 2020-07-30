@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.owlapi;
 
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -11,19 +12,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 public class RepeatedColumnNameTest {
     private static final String CREATE_SCRIPT = "src/test/resources/test/repeatedCN/repeatedCN_create.sql";
@@ -34,55 +33,21 @@ public class RepeatedColumnNameTest {
     private static final String URL = "jdbc:h2:mem:professor";
     private static final String USER = "sa";
     private static final String PASSWORD = "sa";
+    private static final Logger LOGGER = LoggerFactory.getLogger(RepeatedColumnNameTest.class);
 
     private Connection conn;
 
 
-
     @Before
     public void setUp() throws Exception {
-
         conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(CREATE_SCRIPT);
-
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, CREATE_SCRIPT);
     }
 
     @After
     public void tearDown() throws Exception {
-        dropTables();
+        executeFromFile(conn, DROP_SCRIPT);
         conn.close();
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(DROP_SCRIPT);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
-        conn.commit();
     }
 
     @Test
@@ -98,13 +63,12 @@ public class RepeatedColumnNameTest {
                 "?p a :Professor.\n" +
                 "}";
 
-
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1/1>");
         expectedValues.add("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/2/2>");
         String sql = execute(query, expectedValues);
 
-        System.out.println("SQL Query: \n" + sql);
+        LOGGER.debug("SQL Query: \n" + sql);
 
 //        assertFalse(NO_OPTIMIZATION_MSG, sql.contains("professors"));
 //        assertFalse(NO_OPTIMIZATION_MSG, sql.contains("PROFESSORS"));
@@ -133,10 +97,13 @@ public class RepeatedColumnNameTest {
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            ExecutableQuery executableQuery = st.getExecutableQuery(query);
-            if (! (executableQuery instanceof SQLExecutableQuery))
-                throw new IllegalStateException("A SQLExecutableQuery was expected");
-            sql = ((SQLExecutableQuery)executableQuery).getSQL();
+            IQ executableQuery = st.getExecutableQuery(query);
+            sql = Optional.of(executableQuery.getTree())
+                    .filter(t -> t instanceof UnaryIQTree)
+                    .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                    .filter(n -> n instanceof NativeNode)
+                    .map(n -> ((NativeNode) n).getNativeQueryString())
+                    .orElseThrow(() -> new RuntimeException("The executable query was expected to have a construction and a native node"));
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
@@ -145,9 +112,8 @@ public class RepeatedColumnNameTest {
                 java.lang.System.out.println(ind1);
                 i++;
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }

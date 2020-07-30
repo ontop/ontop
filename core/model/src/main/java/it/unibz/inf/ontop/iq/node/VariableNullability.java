@@ -1,16 +1,28 @@
 package it.unibz.inf.ontop.iq.node;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Collection;
 
 /**
  * TODO: find a better name
  *
  * IMMUTABLE
+ *
+ * See CoreUtilsFactory for creating new instances
+ *
  */
 public interface VariableNullability {
 
+    /**
+     * NB: for variables outside its scope, returns true (as it does not know anything about them)
+     */
     boolean isPossiblyNullable(Variable variable);
 
     /**
@@ -20,23 +32,24 @@ public interface VariableNullability {
     boolean canPossiblyBeNullSeparately(ImmutableSet<Variable> variables);
 
     /**
+     * Generalization to arbitrary terms
+     */
+    boolean canPossiblyBeNullSeparately(ImmutableList<? extends ImmutableTerm> terms);
+
+    /**
      * All the variables of a group are always null at the same time (guaranteed).
      *
      */
     ImmutableSet<ImmutableSet<Variable>> getNullableGroups();
 
-    /**
-     * Creates a new (immutable) VariableNullability
-     *
-     * For each entry (k,v) where k is a novel variable,
-     *  - if (k == v): create a new nullable group for k
-     *
-     *  - else k is bound to v and therefore is added to the nullable group of v.
-     *
-     *  Invalid input entry:
-     *    - k is already in a nullable group
-     *    - v != k is not already in a nullable group
-     *
-     */
-    VariableNullability appendNewVariables(ImmutableMap<Variable, Variable> nullabilityBindings);
+    VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                               ImmutableSet<Variable> projectedVariables);
+
+    VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
+
+    default ImmutableSet<Variable> getNullableVariables() {
+        return getNullableGroups().stream()
+                .flatMap(Collection::stream)
+                .collect(ImmutableCollectors.toSet());
+    }
 }

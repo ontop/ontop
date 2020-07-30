@@ -4,10 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
@@ -40,13 +38,11 @@ public class OWLAPITranslatorOWL2QL {
 	private static final boolean nestedQualifiedExistentials = true; // TEMPORARY FIX
 
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final RDF rdfFactory;
 
     @Inject
-    private OWLAPITranslatorOWL2QL(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
+    private OWLAPITranslatorOWL2QL(TermFactory termFactory, RDF rdfFactory) {
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
     }
 
@@ -622,7 +618,7 @@ public class OWLAPITranslatorOWL2QL {
         public void visit(OWLDataPropertyAssertionAxiom ax) {
             try {
                 IRIConstant c1 = getIndividual(ax.getSubject());
-                ValueConstant c2 = getValueOfLiteral(ax.getObject());
+                RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
                 DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), builder.dataProperties());
 
                 builder.addDataPropertyAssertion(dpe, c1, c2);
@@ -1021,7 +1017,7 @@ public class OWLAPITranslatorOWL2QL {
 
     public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
         IRIConstant c1 = getIndividual(ax.getSubject());
-        ValueConstant c2 = getValueOfLiteral(ax.getObject());
+        RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
 
         DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), dataProperties);
         return OntologyBuilderImpl.createDataPropertyAssertion(dpe, c1, c2);
@@ -1088,13 +1084,12 @@ public class OWLAPITranslatorOWL2QL {
         return termFactory.getConstantIRI(rdfFactory.createIRI(ind.asOWLNamedIndividual().getIRI().toString()));
     }
 
-    private ValueConstant getValueOfLiteral(OWLLiteral object) {
+    private RDFLiteralConstant getValueOfLiteral(OWLLiteral object) {
         if (!object.getLang().isEmpty()) {
-            return termFactory.getConstantLiteral(object.getLiteral(), object.getLang());
+            return termFactory.getRDFLiteralConstant(object.getLiteral(), object.getLang());
         }
         else {
-            RDFDatatype type = typeFactory.getDatatype(rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
-            return termFactory.getConstantLiteral(object.getLiteral(), type);
+            return termFactory.getRDFLiteralConstant(object.getLiteral(), rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
         }
     }
 

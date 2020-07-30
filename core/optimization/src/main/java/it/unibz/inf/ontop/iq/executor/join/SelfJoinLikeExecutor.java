@@ -1,12 +1,11 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
@@ -20,6 +19,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -28,7 +29,7 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 
 public class SelfJoinLikeExecutor {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelfJoinLikeExecutor.class);
 
     /**
      * TODO: explain
@@ -38,41 +39,28 @@ public class SelfJoinLikeExecutor {
     protected static final class AtomUnificationException extends Exception {
     }
 
-    /**
-     * Unchecked temporary variant of AtomUnificationException, so that the functional style can still be used.
-     */
-    private static final class AtomUnificationRuntimeException extends RuntimeException {
-        public final AtomUnificationException checkedException;
-
-        public AtomUnificationRuntimeException(AtomUnificationException e) {
-            this.checkedException = e;
-        }
-    }
-
 
     /**
      * TODO: explain
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected static class PredicateLevelProposal {
 
         private final ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions;
-        private final ImmutableCollection<ExtensionalDataNode> removedDataNodes;
+        private final Optional<ImmutableExpression> isNotNullConjunction;
 
         public PredicateLevelProposal(ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
-                                      ImmutableCollection<ExtensionalDataNode> removedDataNodes) {
+                                      Optional<ImmutableExpression> isNotNullConjunction) {
             this.substitutions = substitutions;
-            this.removedDataNodes = removedDataNodes;
+            this.isNotNullConjunction = isNotNullConjunction;
         }
 
         public ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> getSubstitutions() {
             return substitutions;
         }
 
-        /**
-         * Not unified
-         */
-        public ImmutableCollection<ExtensionalDataNode> getRemovedDataNodes() {
-            return removedDataNodes;
+        public Optional<ImmutableExpression> getIsNotNullConjunction() {
+            return isNotNullConjunction;
         }
     }
 
@@ -83,67 +71,21 @@ public class SelfJoinLikeExecutor {
     protected static class ConcreteProposal {
 
         private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
-        private final ImmutableCollection<DataNode> removedDataNodes;
+        private final Optional<ImmutableExpression> optionalIsNotNullExpression;
 
         public ConcreteProposal(Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
-                                ImmutableCollection<DataNode> removedDataNodes) {
+                                Optional<ImmutableExpression> optionalIsNotNullExpression) {
             this.optionalSubstitution = optionalSubstitution;
-            this.removedDataNodes = removedDataNodes;
-        }
-
-        public ImmutableCollection<DataNode> getDataNodesToRemove() {
-            return removedDataNodes;
+            this.optionalIsNotNullExpression = optionalIsNotNullExpression;
         }
 
         public Optional<ImmutableSubstitution<VariableOrGroundTerm>> getOptionalSubstitution() {
             return optionalSubstitution;
         }
 
-        public boolean shouldOptimize() {
-            return !removedDataNodes.isEmpty();
-        }
 
-
-    }
-
-    /**
-     * Mutable object (for efficiency)
-     */
-    private static class Dominance {
-
-        private final List<ExtensionalDataNode> locallyDominants;
-        private final Set<ExtensionalDataNode> removalNodes;
-
-        public Dominance() {
-            this(Lists.newArrayList(), Sets.newHashSet());
-        }
-
-        private Dominance(List<ExtensionalDataNode> locallyDominants, Set<ExtensionalDataNode> removalNodes) {
-            this.locallyDominants = locallyDominants;
-            this.removalNodes = removalNodes;
-        }
-
-        public Dominance update(Collection<ExtensionalDataNode> sameRowDataNodes) {
-            ExtensionalDataNode locallyDominantNode = sameRowDataNodes.stream()
-                    .filter(locallyDominants::contains)
-                    .findFirst()
-                    .orElseGet(() -> sameRowDataNodes.stream()
-                                .findFirst()
-                                .orElseThrow(() -> new IllegalStateException("Should be at least one node")));
-            locallyDominants.add(locallyDominantNode);
-
-            /**
-             * Adds all the non-dominants to the removal set.
-             */
-            sameRowDataNodes.stream()
-                    .filter(n -> n != locallyDominantNode)
-                    .forEach(removalNodes::add);
-
-            return this;
-        }
-
-        private final ImmutableSet<ExtensionalDataNode> getRemovalNodes() {
-            return ImmutableSet.copyOf(removalNodes);
+        public Optional<ImmutableExpression> getOptionalIsNotNullExpression() {
+            return optionalIsNotNullExpression;
         }
     }
 
@@ -158,129 +100,50 @@ public class SelfJoinLikeExecutor {
     }
 
 
-    private final SubstitutionFactory substitutionFactory;
     private final ImmutableUnificationTools unificationTools;
+    private final TermFactory termFactory;
 
-    protected SelfJoinLikeExecutor(SubstitutionFactory substitutionFactory, ImmutableUnificationTools unificationTools) {
-        this.substitutionFactory = substitutionFactory;
+    protected SelfJoinLikeExecutor(ImmutableUnificationTools unificationTools, TermFactory termFactory) {
         this.unificationTools = unificationTools;
+        this.termFactory = termFactory;
     }
 
 
-    protected static ImmutableMultimap<RelationPredicate, ExtensionalDataNode> extractDataNodes(ImmutableList<QueryNode> siblings) {
-        ImmutableMultimap.Builder<RelationPredicate, ExtensionalDataNode> mapBuilder = ImmutableMultimap.builder();
+    protected static ImmutableMultimap<RelationDefinition, ExtensionalDataNode> extractDataNodes(ImmutableList<QueryNode> siblings) {
+        ImmutableMultimap.Builder<RelationDefinition, ExtensionalDataNode> mapBuilder = ImmutableMultimap.builder();
         for (QueryNode node : siblings) {
             if (node instanceof ExtensionalDataNode) {
                 ExtensionalDataNode dataNode = (ExtensionalDataNode) node;
-                mapBuilder.put(dataNode.getProjectionAtom().getPredicate(), dataNode);
+                mapBuilder.put(dataNode.getRelationDefinition(), dataNode);
             }
         }
         return mapBuilder.build();
     }
 
-    /**
-     * groupingMap groups data nodes that are being joined on the unique constraints
-     *
-     * creates proposal to unify redundant nodes
-     */
-    protected PredicateLevelProposal proposeForGroupingMap(
-            ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, ExtensionalDataNode> groupingMap)
-    throws AtomUnificationException {
+    protected Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
+            ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
+            ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialDataNodeMap,
+            ImmutableList<Variable> priorityVariables)
+            throws AtomUnificationException {
 
-        ImmutableCollection<Collection<ExtensionalDataNode>> dataNodeGroups = groupingMap.asMap().values();
+        ImmutableMap<Variable, Collection<RelationDefinition>> occurrenceVariableMap = initialDataNodeMap.asMap().entrySet().stream()
+                .flatMap(e -> e.getValue().stream()
+                        .flatMap(n -> n.getVariables().stream())
+                        .map(v -> Maps.immutableEntry(v, e.getKey())))
+                .collect(ImmutableCollectors.toMultimap()).asMap();
 
-        try {
-            /*
-             * Collection of unifying substitutions
-             */
-            ImmutableSet<ImmutableSubstitution<VariableOrGroundTerm>> unifyingSubstitutions =
-                    dataNodeGroups.stream()
-                            .filter(g -> g.size() > 1)
-                            .map(redundantNodes -> {
-                                    try {
-                                        return unifyRedundantNodes(redundantNodes);
-                                    } catch (AtomUnificationException e) {
-                                        throw new AtomUnificationRuntimeException(e);
-                                    }
-                            })
-                            .filter(s -> !s.isEmpty())
-                            .collect(ImmutableCollectors.toSet());
-            /*
-             * All the nodes that have been at least once dominated (--> could thus be removed).
-             *
-             * Not parallellizable
-             */
-            ImmutableSet<ExtensionalDataNode> removableNodes = ImmutableSet.copyOf(dataNodeGroups.stream()
-                    .filter(sameRowDataNodes -> sameRowDataNodes.size() > 1)
-                    .reduce(
-                            new Dominance(),
-                            Dominance::update,
-                            (dom1, dom2) -> {
-                                throw new IllegalStateException("Cannot be run in parallel");
-                            })
-                    .getRemovalNodes());
-
-            return new PredicateLevelProposal(unifyingSubstitutions, removableNodes);
-
-            /*
-             * Trick: rethrow the exception
-              */
-        } catch (AtomUnificationRuntimeException e) {
-            throw e.checkedException;
-        }
-    }
-
-    protected Optional<ConcreteProposal> createConcreteProposal(
-            ImmutableList<PredicateLevelProposal> predicateProposals,
-            ImmutableList<Variable> priorityVariables) {
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
-        try {
-            optionalMergedSubstitution = mergeSubstitutions(extractSubstitutions(predicateProposals), priorityVariables);
-        } catch (AtomUnificationException e) {
-            return Optional.empty();
-        }
-
-        ImmutableSet<DataNode> removedDataNodes =predicateProposals.stream()
-                .flatMap(p -> p.getRemovedDataNodes().stream())
+        // Variables appearing for for more one relation predicate
+        ImmutableSet<Variable> sharedVariables = occurrenceVariableMap.entrySet().stream()
+                .filter(e -> ImmutableSet.copyOf(e.getValue()).size() > 1)
+                .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toSet());
-
-        if (removedDataNodes.isEmpty()
-                && (! optionalMergedSubstitution.isPresent()))
-            return Optional.empty();
-
-        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, removedDataNodes));
-    }
-
-
-    protected ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(
-            Collection<ExtensionalDataNode> redundantNodes) throws AtomUnificationException {
-        // Non-final
-        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = substitutionFactory.getSubstitution();
+        ImmutableSet<Variable> nonSharedVariables = Sets.difference(occurrenceVariableMap.keySet(), sharedVariables)
+                .immutableCopy();
 
         /*
-         * Should normally not be called in this case.
+         * For performance purposes, we can detach some fragments from the substitution to be "unified" with the following atom.
          */
-        if (redundantNodes.size() < 2) {
-            // Empty substitution
-            return accumulatedSubstitution;
-        }
-
-        Iterator<ExtensionalDataNode> nodeIterator = redundantNodes.iterator();
-
-        // Non-final
-        DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
-        while (nodeIterator.hasNext()) {
-            DataAtom newAtom = nodeIterator.next().getProjectionAtom();
-            // May throw an exception
-            accumulatedSubstitution = updateSubstitution(accumulatedSubstitution, accumulatedAtom, newAtom);
-            accumulatedAtom = accumulatedSubstitution.applyToDataAtom(accumulatedAtom);
-        }
-        return accumulatedSubstitution;
-    }
-
-    protected Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
-            ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions, ImmutableList<Variable> priorityVariables)
-            throws AtomUnificationException {
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> nonSharedSubstitutionListBuilder = ImmutableList.builder();
 
         // Non-final
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution = Optional.empty();
@@ -288,8 +151,25 @@ public class SelfJoinLikeExecutor {
         for (ImmutableSubstitution<VariableOrGroundTerm> substitution : substitutions) {
             if (!substitution.isEmpty()) {
                 if (optionalAccumulatedSubstitution.isPresent()) {
+
+                    ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = optionalAccumulatedSubstitution.get();
+
+                    /*
+                     * Before the following unification, we detach a fragment about non-shared variables from the accumulated substitution
+                     *
+                     * Particularly useful when dealing with tables with a large number of columns (e.g. views after collapsing some JSON objects)
+                     *
+                     */
+                    ImmutableSubstitution<VariableOrGroundTerm> nonSharedSubstitution = accumulatedSubstitution.reduceDomainToIntersectionWith(nonSharedVariables);
+                    if (!nonSharedSubstitution.isEmpty())
+                        nonSharedSubstitutionListBuilder.add(nonSharedSubstitution);
+
+                    ImmutableSubstitution<VariableOrGroundTerm> substitutionToUnify = nonSharedSubstitution.isEmpty()
+                            ? accumulatedSubstitution
+                            : accumulatedSubstitution.reduceDomainToIntersectionWith(sharedVariables);
+
                     Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMGUS = unificationTools.computeAtomMGUS(
-                            optionalAccumulatedSubstitution.get(), substitution);
+                            substitutionToUnify, substitution);
                     if (optionalMGUS.isPresent()) {
                         optionalAccumulatedSubstitution = optionalMGUS;
                     }
@@ -305,6 +185,11 @@ public class SelfJoinLikeExecutor {
         }
 
         return optionalAccumulatedSubstitution
+                .map(s -> Stream.concat(
+                            nonSharedSubstitutionListBuilder.build().stream(),
+                            Stream.of(s))
+                        .reduce((v1, v2) -> v2.composeWith2(v1))
+                        .orElseThrow(() -> new MinorOntopInternalBugException("At least one substitution was expected")))
                 .map(s -> s.orientate(priorityVariables));
     }
 
@@ -317,71 +202,19 @@ public class SelfJoinLikeExecutor {
         return substitutionListBuilder.build();
     }
 
-    /**
-     * TODO: explain
-     */
-    private ImmutableSubstitution<VariableOrGroundTerm> updateSubstitution(
-            final ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution,
-            final DataAtom accumulatedAtom,  final DataAtom newAtom) throws AtomUnificationException {
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution =
-                unificationTools.computeAtomMGU(accumulatedAtom, newAtom);
-
-        if (optionalSubstitution.isPresent()) {
-            if (accumulatedSubstitution.isEmpty()) {
-                return optionalSubstitution.get();
-            }
-            else {
-                Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution =
-                        unificationTools.computeAtomMGUS(accumulatedSubstitution, optionalSubstitution.get());
-                if (optionalAccumulatedSubstitution.isPresent()) {
-                    return optionalAccumulatedSubstitution.get();
-                }
-                /*
-                 * Cannot unify the two substitutions
-                 */
-                else {
-                    // TODO: log a warning
-                    throw new AtomUnificationException();
-                }
-            }
-        }
-        /*
-         * Cannot unify the two atoms
-         */
-        else {
-            // TODO: log a warning
-            throw new AtomUnificationException();
-        }
-    }
-
-
-    /**
-     * Returns the list of the terms from atom corresponding
-     * to the positions
-     * TODO: explain
-     */
-    protected static ImmutableList<VariableOrGroundTerm> extractArguments(DataAtom atom,
-                                                                          ImmutableList<Integer> positions) {
-        ImmutableList.Builder<VariableOrGroundTerm> listBuilder = ImmutableList.builder();
-        int atomLength = atom.getArguments().size();
-
-        for (Integer keyIndex : positions) {
-            if (keyIndex > atomLength) {
-                // TODO: find another exception
-                throw new RuntimeException("The key index does not respect the arity of the atom " + atom);
-            }
-            else {
-                listBuilder.add(atom.getTerm(keyIndex - 1));
-            }
-        }
-        return listBuilder.build();
-    }
-
     protected <N extends JoinOrFilterNode> NodeCentricOptimizationResults<N> updateJoinNodeAndPropagateSubstitution(
             IntermediateQuery query,
             QueryTreeComponent treeComponent,
             N joinNode,
             ConcreteProposal proposal) throws EmptyQueryException {
+
+        Optional<ImmutableExpression> optionalFilter = joinNode.getOptionalFilterCondition()
+                .map(f -> proposal.getOptionalIsNotNullExpression()
+                        .map(f2 -> termFactory.getConjunction(f, f2))
+                        .orElse(f))
+                .map(Optional::of)
+                .orElseGet(proposal::getOptionalIsNotNullExpression);
+
         switch(treeComponent.getChildren(joinNode).size()) {
             case 0:
                 throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
@@ -393,7 +226,6 @@ public class SelfJoinLikeExecutor {
                  */
             case 1:
                 QueryNode uniqueChild = treeComponent.getFirstChild(joinNode).get();
-                Optional<ImmutableExpression> optionalFilter = joinNode.getOptionalFilterCondition();
 
                 if (optionalFilter.isPresent()) {
                     QueryNode filterNode = query.getFactory().createFilterNode(optionalFilter.get());
@@ -419,7 +251,7 @@ public class SelfJoinLikeExecutor {
              * Multiple children, keep a join node BUT MOVES ITS CONDITION ABOVE (in a filter)
              */
             default:
-                N newJoinNode = joinNode.getOptionalFilterCondition()
+                N newJoinNode = optionalFilter
                         .map(cond -> {
                             FilterNode parentFilter = query.getFactory().createFilterNode(cond);
                             treeComponent.insertParent(joinNode, parentFilter);

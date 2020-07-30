@@ -1,32 +1,18 @@
 package it.unibz.inf.ontop.docker.mysql;
 
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -44,13 +30,29 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
     static final String obdaFile = "/mysql/conference/secondmapping-test.obda";
 	static final String propertyFile = "/mysql/conference/secondmapping-test.properties";
 
-	public ConferenceConcatMySQLTest() {
-		super(owlFile, obdaFile, propertyFile);
+	private static OntopOWLReasoner REASONER;
+	private static OntopOWLConnection CONNECTION;
+
+	@BeforeClass
+	public static void before() throws OWLOntologyCreationException {
+		REASONER = createReasoner(owlFile, obdaFile, propertyFile);
+		CONNECTION = REASONER.getConnection();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
+	}
+
+	@AfterClass
+	public static void after() throws OWLException {
+		CONNECTION.close();
+		REASONER.dispose();
 	}
 
 	private void runTests(String query1) throws Exception {
 
-		OWLStatement st = conn.createStatement();
+		OWLStatement st = createStatement();
 
 
 		try {
@@ -63,9 +65,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
 
 		} finally {
-
-			conn.close();
-			reasoner.dispose();
+			st.close();
 		}
 	}
 

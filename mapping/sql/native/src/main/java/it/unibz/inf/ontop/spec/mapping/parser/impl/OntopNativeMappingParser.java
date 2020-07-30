@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,26 +24,23 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +60,6 @@ import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.
  */
 public class OntopNativeMappingParser implements SQLMappingParser {
 
-
     public enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
         /* Mapping decl.: */mappingId, target, source
@@ -80,27 +76,25 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     public static final String END_COLLECTION_SYMBOL = "]]";
     protected static final String COMMENT_SYMBOL = ";";
 
-    private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
+    private final TargetQueryParserFactory targetQueryParserFactory;
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
-    private final TermFactory termFactory;
-    private final TargetAtomFactory targetAtomFactory;
-    private final RDF rdfFactory;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
-                                     SQLPPMappingFactory ppMappingFactory, TermFactory termFactory,
-                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
+                                     TargetQueryParserFactory targetQueryParserFactory,
+                                     SQLPPMappingFactory ppMappingFactory,
+                                     SQLPPSourceQueryFactory sourceQueryFactory) {
+        this.targetQueryParserFactory = targetQueryParserFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
-        this.termFactory = termFactory;
-        this.targetAtomFactory = targetAtomFactory;
-        this.rdfFactory = rdfFactory;
+        this.sourceQueryFactory = sourceQueryFactory;
     }
 
     /**
@@ -109,7 +103,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      *
      */
     @Override
-    public SQLPPMapping parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+    public SQLPPMapping parse(File file) throws InvalidMappingException, MappingIOException {
         checkFile(file);
         try (Reader reader = new FileReader(file)) {
             return load(reader, specificationFactory, ppMappingFactory, file.getName());
@@ -119,12 +113,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, MappingIOException {
         return load(reader, specificationFactory, ppMappingFactory, ".obda file");
     }
 
     @Override
-    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Graph mappingGraph)  {
         throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
                 "to the OntopNativeMappingParser is thus invalid.");
     }
@@ -148,14 +142,14 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      */
 	private SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, String fileName)
-            throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
+            throws MappingIOException, InvalidMappingExceptionWithIndicator {
 
         final Map<String, String> prefixes = new HashMap<>();
         final List<SQLPPTriplesMap> mappings = new ArrayList<>();
         final List<Indicator> invalidMappingIndicators = new ArrayList<>();
 
         List<TargetQueryParser> parsers = null;
-		
+
 		String line;
 
         try (LineNumberReader lineNumberReader = new LineNumberReader(reader)) {
@@ -214,18 +208,9 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
         ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(mappings);
 
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream())
-                        .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
-                        .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t),
-                termFactory);
-
-        MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
-        return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
+        return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, prefixManager);
 	}
-    
+
     /*
      * Helper methods related to load file.
      */
@@ -248,7 +233,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      * @return The updated mapping set of the current source
      * @throws IOException
      */
-    private static List<SQLPPTriplesMap> readMappingDeclaration(LineNumberReader reader,
+    private List<SQLPPTriplesMap> readMappingDeclaration(LineNumberReader reader,
                                                                 List<TargetQueryParser> parsers,
                                                                 List<Indicator> invalidMappingIndicators)
             throws IOException {
@@ -257,13 +242,14 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
+        String targetString = null;
         ImmutableList<TargetAtom> targetQuery = null;
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
-        
+
         String line;
-        for(line = reader.readLine(); 
-        		line != null && !line.trim().equals(END_COLLECTION_SYMBOL); 
+        for(line = reader.readLine();
+        		line != null && !line.trim().equals(END_COLLECTION_SYMBOL);
         		line = reader.readLine()) {
             int lineNumber = reader.getLineNumber();
             if (line.isEmpty()) {
@@ -271,7 +257,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 	            	// Save the mapping to the model (if valid) at this point
 	                if (isMappingValid) {
 	                    currentSourceMappings =
-                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings);
+                                addNewMapping(mappingId, sourceQuery.toString(), targetString, targetQuery, currentSourceMappings);
 	                    mappingId = "";
 	                    sourceQuery = null;
 	                    targetQuery = null;
@@ -291,7 +277,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
             if (!isMappingValid) {
             	continue; // skip if the mapping is invalid
             }
-            
+
             String[] tokens = line.split("[\t| ]+", 2);
 
             String label;
@@ -315,7 +301,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                     isMappingValid = false;
                 }
             } else if (currentLabel.equals(Label.target.name())) {
-                String targetString = value;
+                targetString = value;
                 if (targetString.isEmpty()) { // empty or not
                     invalidMappingIndicators.add(new Indicator(lineNumber, mappingId, TARGET_QUERY_IS_BLANK));
                     isMappingValid = false;
@@ -349,14 +335,14 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                 throw new IOException(msg);
             }
         }
-        
+
         if (line == null) {
         	throw new IOException(String.format("End collection symbol %s is missing.", END_COLLECTION_SYMBOL));
         }
-        
+
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
-            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings);
+            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetString, targetQuery, currentSourceMappings);
         }
 
         return currentSourceMappings;
@@ -371,32 +357,24 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 				return parse;
             } catch (TargetQueryParserException e) {
             	exceptions.put(parser, e);
-            }     
+            }
     	}
 		throw new UnparsableTargetQueryException(exceptions);
     }
 
-	private static int getSeparatorLength(String input, int beginIndex) {
-		int count = 0;
-		for (int i = beginIndex; i < input.length(); i++) {
-			if (input.charAt(i) != '\u0009' || input.charAt(i) != '\t') { // a tab
-				break;
-			}
-			count++;
-		}
-		return count;
-	}
-
-    private static List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
+    private List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
+                                                       String targetString,
                                                        ImmutableList<TargetAtom> targetQuery,
                                                        List<SQLPPTriplesMap> currentSourceMappings) {
         SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(
-                mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+                mappingId, sourceQueryFactory.createSourceQuery(sourceQuery), targetString, targetQuery);
+
+        // TODO (ROMAN, 12/04/20): the contains test is useless because OntopNativeSQLPPTriplesMap does not override equals
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }
         else {
-            LOG.warn("Duplicate mapping %s", mappingId);
+            LOG.warn("Duplicate mapping {}", mappingId);
         }
         return currentSourceMappings;
     }
@@ -406,10 +384,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         return line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0;
     }
 
-    private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
-        List<TargetQueryParser> parsers = new ArrayList<>();
-        // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, targetAtomFactory, rdfFactory));
-        return ImmutableList.copyOf(parsers);
+    private List<TargetQueryParser> createParsers(ImmutableMap<String, String> prefixes) {
+        return ImmutableList.of(targetQueryParserFactory.createParser(prefixes));
     }
 }

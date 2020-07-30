@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
 
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 
@@ -26,13 +25,7 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration, Ontop
 
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
 
-        B enableFullMetadataExtraction(boolean obtainFullMetadata);
-
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
-
-        B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion);
-
-        B dbMetadata(@Nonnull DBMetadata dbMetadata);
 
         B enableDefaultDatatypeInference(boolean inferDefaultDatatype);
 

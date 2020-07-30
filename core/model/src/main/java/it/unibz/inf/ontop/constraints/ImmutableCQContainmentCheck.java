@@ -35,10 +35,10 @@ public interface ImmutableCQContainmentCheck<P extends AtomPredicate> {
         {
             Iterator<ImmutableCQ<P>> iterator = queries.iterator();
             while (iterator.hasNext()) {
-                ImmutableCQ query = iterator.next();
+                ImmutableCQ<P> query = iterator.next();
                 ListIterator<ImmutableCQ<P>> iterator2 = queries.listIterator(queries.size());
                 while (iterator2.hasPrevious()) {
-                    ImmutableCQ query2 = iterator2.previous();
+                    ImmutableCQ<P> query2 = iterator2.previous();
                     if (query2 == query)
                         break;
                     if (isContainedIn(query, query2)) {
@@ -52,10 +52,10 @@ public interface ImmutableCQContainmentCheck<P extends AtomPredicate> {
         {
             ListIterator<ImmutableCQ<P>> iterator = queries.listIterator(queries.size());
             while (iterator.hasPrevious()) {
-                ImmutableCQ query = iterator.previous();
+                ImmutableCQ<P> query = iterator.previous();
                 Iterator<ImmutableCQ<P>> iterator2 = queries.iterator();
                 while (iterator2.hasNext()) {
-                    ImmutableCQ query2 = iterator2.next();
+                    ImmutableCQ<P> query2 = iterator2.next();
                     if (query2 == query)
                         break;
                     if (isContainedIn(query, query2)) {

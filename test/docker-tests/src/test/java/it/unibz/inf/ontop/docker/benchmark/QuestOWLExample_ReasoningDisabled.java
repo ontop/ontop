@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.docker.benchmark;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -376,7 +376,7 @@ public class QuestOWLExample_ReasoningDisabled {
                 .ontologyFile(getClass().getResource(owlfile).getPath())
                 .propertyFile(getClass().getResource(Settings.propertyFile).getPath())
                 .tMappingExclusionConfig(tMapConfig)
-                .enableIRISafeEncoding(false)
+                //.enableIRISafeEncoding(false)
                 .build();
         this.reasoner = factory.createReasoner(config);
 		/*
@@ -497,17 +497,9 @@ public class QuestOWLExample_ReasoningDisabled {
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
                 TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-                int columnSize = rs.getColumnCount();
                 count = 0;
                 while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
                     count ++;
-                    for (int idx = 1; idx <= columnSize; idx++) {
-                        @SuppressWarnings("unused")
-                        OWLObject binding = bindingSet.getOWLObject(idx);
-                        //System.out.print(binding.toString() + ", ");
-                    }
-                    //System.out.print("\n");
                 }
                 long t2 = System.currentTimeMillis();
                 //time = time + (t2-t1);
@@ -519,7 +511,7 @@ public class QuestOWLExample_ReasoningDisabled {
 				/*
 				 * Print the query summary
 				 */
-                String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
+                IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -529,7 +521,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 System.out.println("The output SQL query:");
                 System.out.println("=====================");
-                System.out.println(sqlQuery);
+                System.out.println(executableQuery);
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");

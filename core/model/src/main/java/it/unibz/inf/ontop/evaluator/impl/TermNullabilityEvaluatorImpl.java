@@ -1,57 +1,42 @@
 package it.unibz.inf.ontop.evaluator.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheBuilderSpec;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Map;
 
 
 @Singleton
 public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
+    private static final long TERM_EVALUATOR_CACHE_SIZE = 10000;
     private final SubstitutionFactory substitutionFactory;
-    private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
-    private final DatalogTools datalogTools;
-    private final ValueConstant valueNull;
-    private final ExpressionEvaluator defaultExpressionEvaluator;
+    private final Constant valueNull;
+    private final CoreUtilsFactory coreUtilsFactory;
+
+    // Made stable in more recent versions of Guava (NB: we cannot update because of Protégé)
+    @SuppressWarnings("UnstableApiUsage")
+    private final Cache<Map.Entry<ImmutableExpression, ImmutableSet<Variable>>, Boolean> cache;
 
     @Inject
     private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
-                                         TypeFactory typeFactory, DatalogTools datalogTools,
-                                         ExpressionEvaluator defaultExpressionEvaluator) {
+                                         CoreUtilsFactory coreUtilsFactory) {
         this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
-        this.datalogTools = datalogTools;
         this.valueNull = termFactory.getNullConstant();
-        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
-    }
-
-    @Override
-    public boolean isNullable(ImmutableTerm term, ImmutableSet<Variable> nullableVariables) {
-
-        if (term instanceof ImmutableFunctionalTerm) {
-            return isFunctionalTermNullable((ImmutableFunctionalTerm) term, nullableVariables);
-        }
-        else if (term instanceof Constant) {
-            return term.equals(valueNull);
-        }
-        else if (term instanceof Variable) {
-            return nullableVariables.contains(term);
-        }
-        else {
-            throw new IllegalStateException("Unexpected immutable term");
-        }
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.cache = CacheBuilder.newBuilder()
+                .maximumSize(TERM_EVALUATOR_CACHE_SIZE)
+                .build();
     }
 
     @Override
@@ -59,13 +44,18 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, valueNull)
                 .applyToBooleanExpression(expression);
 
-        EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
-                .evaluateExpression(nullCaseExpression);
-        return evaluationResult.isEffectiveFalse();
+        return nullCaseExpression.evaluate2VL(coreUtilsFactory.createDummyVariableNullability(expression))
+                .isEffectiveFalse();
     }
 
     @Override
     public boolean isFilteringNullValues(ImmutableExpression expression, ImmutableSet<Variable> tightVariables) {
+        Map.Entry<ImmutableExpression, ImmutableSet<Variable>> entry = Maps.immutableEntry(expression, tightVariables);
+
+        Boolean cacheResult = cache.getIfPresent(entry);
+        if (cacheResult != null)
+            return cacheResult;
+
         ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(
                 tightVariables.stream()
                         .collect(ImmutableCollectors.toMap(
@@ -73,40 +63,9 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
                                 v -> valueNull)))
                 .applyToBooleanExpression(expression);
 
-        EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
-                .evaluateExpression(nullCaseExpression);
-        return evaluationResult.isEffectiveFalse();
-    }
-
-    private boolean isFunctionalTermNullable(ImmutableFunctionalTerm functionalTerm,
-                                             ImmutableSet<Variable> nullableVariables) {
-        if (functionalTerm instanceof ImmutableExpression) {
-            return isExpressionNullable((ImmutableExpression)functionalTerm, nullableVariables);
-        }
-        else {
-            return hasNullableArgument(functionalTerm, nullableVariables);
-        }
-    }
-
-    private boolean hasNullableArgument(ImmutableFunctionalTerm functionalTerm, ImmutableSet<Variable> nullableVariables) {
-        return functionalTerm.getTerms().stream()
-                .anyMatch(t -> isNullable(t, nullableVariables));
-    }
-
-    private boolean isExpressionNullable(ImmutableExpression expression, ImmutableSet<Variable> nullableVariables) {
-        OperationPredicate functionSymbol = expression.getFunctionSymbol();
-
-        if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation) functionSymbol) {
-                case IS_NOT_NULL:
-                case IS_NULL:
-                    return false;
-                default:
-                    break;
-            }
-        }
-        // TODO: support COALESCE and IF-THEN-ELSE (they will need to use isFilteringNullValue)
-
-        return hasNullableArgument(expression, nullableVariables);
+        boolean result = nullCaseExpression.evaluate2VL(coreUtilsFactory.createDummyVariableNullability(expression))
+                .isEffectiveFalse();
+        cache.put(entry, result);
+        return result;
     }
 }

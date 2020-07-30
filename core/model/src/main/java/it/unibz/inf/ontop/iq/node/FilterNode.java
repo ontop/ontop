@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * TODO: explain
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNode {
 

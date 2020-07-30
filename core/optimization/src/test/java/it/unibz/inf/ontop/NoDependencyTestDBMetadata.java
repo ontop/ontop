@@ -1,76 +1,69 @@
 package it.unibz.inf.ontop;
 
-import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 
-import java.sql.Types;
-
-import static it.unibz.inf.ontop.OptimizationTestingTools.createDummyMetadata;
+import static it.unibz.inf.ontop.OptimizationTestingTools.createMetadataProviderBuilder;
 
 public class NoDependencyTestDBMetadata {
 
-    public static final RelationPredicate TABLE1_AR1;
-    public static final RelationPredicate TABLE2_AR1;
-    public static final RelationPredicate TABLE3_AR1;
-    public static final RelationPredicate TABLE4_AR1;
-    public static final RelationPredicate TABLE5_AR1;
+    public static final RelationDefinition TABLE1_AR1;
+    public static final RelationDefinition TABLE2_AR1;
+    public static final RelationDefinition TABLE3_AR1;
+    public static final RelationDefinition TABLE4_AR1;
+    public static final RelationDefinition TABLE5_AR1;
 
-    public static final RelationPredicate TABLE1_AR2;
-    public static final RelationPredicate TABLE2_AR2;
-    public static final RelationPredicate TABLE3_AR2;
-    public static final RelationPredicate TABLE4_AR2;
-    public static final RelationPredicate TABLE5_AR2;
-    public static final RelationPredicate TABLE6_AR2;
+    public static final RelationDefinition TABLE1_AR2;
+    public static final RelationDefinition TABLE2_AR2;
+    public static final RelationDefinition TABLE3_AR2;
+    public static final RelationDefinition TABLE4_AR2;
+    public static final RelationDefinition TABLE5_AR2;
+    public static final RelationDefinition TABLE6_AR2;
 
-    public static final RelationPredicate TABLE1_AR3;
-    public static final RelationPredicate TABLE2_AR3;
-    public static final RelationPredicate TABLE3_AR3;
-    public static final RelationPredicate TABLE4_AR3;
-    public static final RelationPredicate TABLE5_AR3;
-    public static final RelationPredicate TABLE6_AR3;
+    public static final RelationDefinition TABLE1_AR3;
+    public static final RelationDefinition TABLE2_AR3;
+    public static final RelationDefinition TABLE3_AR3;
+    public static final RelationDefinition TABLE4_AR3;
+    public static final RelationDefinition TABLE5_AR3;
+    public static final RelationDefinition TABLE6_AR3;
 
-    public static final RelationPredicate TABLE7_AR4;
+    public static final RelationDefinition TABLE7_AR4;
 
-    public static final BasicDBMetadata DB_METADATA;
+    public static final RelationDefinition INT_TABLE1_AR2;
+    public static final RelationDefinition INT_TABLE2_AR2;
+    public static final RelationDefinition INT_TABLE1_NULL_AR2;
+    public static final RelationDefinition INT_TABLE2_NULL_AR2;
+    public static final RelationDefinition INT_TABLE1_NULL_AR3;
 
-    private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
-                                                             int tableNumber, int arity) {
-        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                "TABLE" + tableNumber + "AR" + arity));
-        for (int i=1 ; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), Types.VARCHAR, null, false);
-        }
-        return tableDef.getAtomPredicate();
-    }
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
+        TABLE1_AR1 = builder.createRelationWithStringAttributes(1, 1, false);
+        TABLE2_AR1 = builder.createRelationWithStringAttributes(2, 1, false);
+        TABLE3_AR1 = builder.createRelationWithStringAttributes(3, 1, false);
+        TABLE4_AR1 = builder.createRelationWithStringAttributes(4, 1, false);
+        TABLE5_AR1 = builder.createRelationWithStringAttributes(5, 1, false);
 
-        TABLE1_AR1 = createRelationPredicate(dbMetadata, idFactory, 1, 1);
-        TABLE2_AR1 = createRelationPredicate(dbMetadata, idFactory, 2, 1);
-        TABLE3_AR1 = createRelationPredicate(dbMetadata, idFactory, 3, 1);
-        TABLE4_AR1 = createRelationPredicate(dbMetadata, idFactory, 4, 1);
-        TABLE5_AR1 = createRelationPredicate(dbMetadata, idFactory, 5, 1);
+        TABLE1_AR2 = builder.createRelationWithStringAttributes(1, 2, false);
+        TABLE2_AR2 = builder.createRelationWithStringAttributes(2, 2, false);
+        TABLE3_AR2 = builder.createRelationWithStringAttributes(3, 2, false);
+        TABLE4_AR2 = builder.createRelationWithStringAttributes(4, 2, false);
+        TABLE5_AR2 = builder.createRelationWithStringAttributes(5, 2, false);
+        TABLE6_AR2 = builder.createRelationWithStringAttributes(6, 2, false);
 
-        TABLE1_AR2 = createRelationPredicate(dbMetadata, idFactory, 1, 2);
-        TABLE2_AR2 = createRelationPredicate(dbMetadata, idFactory, 2, 2);
-        TABLE3_AR2 = createRelationPredicate(dbMetadata, idFactory, 3, 2);
-        TABLE4_AR2 = createRelationPredicate(dbMetadata, idFactory, 4, 2);
-        TABLE5_AR2 = createRelationPredicate(dbMetadata, idFactory, 5, 2);
-        TABLE6_AR2 = createRelationPredicate(dbMetadata, idFactory, 6, 2);
+        TABLE1_AR3 = builder.createRelationWithStringAttributes(1, 3, false);
+        TABLE2_AR3 = builder.createRelationWithStringAttributes(2, 3, false);
+        TABLE3_AR3 = builder.createRelationWithStringAttributes(3, 3, false);
+        TABLE4_AR3 = builder.createRelationWithStringAttributes(4, 3, false);
+        TABLE5_AR3 = builder.createRelationWithStringAttributes(5, 3, false);
+        TABLE6_AR3 = builder.createRelationWithStringAttributes(6, 3, false);
 
-        TABLE1_AR3 = createRelationPredicate(dbMetadata, idFactory, 1, 3);
-        TABLE2_AR3 = createRelationPredicate(dbMetadata, idFactory, 2, 3);
-        TABLE3_AR3 = createRelationPredicate(dbMetadata, idFactory, 3, 3);
-        TABLE4_AR3 = createRelationPredicate(dbMetadata, idFactory, 4, 3);
-        TABLE5_AR3 = createRelationPredicate(dbMetadata, idFactory, 5, 3);
-        TABLE6_AR3 = createRelationPredicate(dbMetadata, idFactory, 6, 3);
+        TABLE7_AR4 = builder.createRelationWithStringAttributes(7, 4, false);
 
-        TABLE7_AR4 = createRelationPredicate(dbMetadata, idFactory, 7, 4);
+        INT_TABLE1_AR2 = builder.createRelationWithIntAttributes(1, 2, false);
+        INT_TABLE2_AR2 = builder.createRelationWithIntAttributes(2, 2, false);
 
-        dbMetadata.freeze();
-        DB_METADATA = dbMetadata;
+        INT_TABLE1_NULL_AR2 = builder.createRelationWithIntAttributes(1, 2, true);
+        INT_TABLE2_NULL_AR2 = builder.createRelationWithIntAttributes(2, 2, true);
+        INT_TABLE1_NULL_AR3 = builder.createRelationWithIntAttributes(1, 3, true);
     }
-
 }

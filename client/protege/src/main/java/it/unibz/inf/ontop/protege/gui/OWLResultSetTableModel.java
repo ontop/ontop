@@ -158,6 +158,8 @@ public class OWLResultSetTableModel implements TableModel {
 			return;
 		}
 
+		List<String> signature = results.getSignature();
+
 		for (int rows_fetched = 0; results.hasNext() && !stopFetching && (isFetchingAll() || rows_fetched < size); rows_fetched++) {
 			String[] crow = new String[numcols];
             final OWLBindingSet bindingSet = results.next();
@@ -165,7 +167,7 @@ public class OWLResultSetTableModel implements TableModel {
 				if(stopFetching)
 					break;
 
-                OWLPropertyAssertionObject constant = bindingSet.getOWLPropertyAssertionObject(j + 1);
+                OWLPropertyAssertionObject constant = bindingSet.getOWLPropertyAssertionObject(signature.get(j));
 				if (constant != null) {
                     crow[j] = ToStringRenderer.getInstance().getRendering(constant);
 				}
@@ -200,13 +202,14 @@ public class OWLResultSetTableModel implements TableModel {
 			if(stopFetching)
 				return null;
 			// Append first the already fetched tuples
-			tabularData.addAll(resultsTable); 
+			tabularData.addAll(resultsTable);
+			List<String> signature = results.getSignature();
 			// Append the rest
 			while (!stopFetching && results.hasNext()) {
                 final OWLBindingSet bindingSet = results.next();
                 String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
-					OWLPropertyAssertionObject constant = bindingSet.getOWLPropertyAssertionObject(j + 1);
+					OWLPropertyAssertionObject constant = bindingSet.getOWLPropertyAssertionObject(signature.get(j));
 					if (constant != null) {
 						crow[j] = constant.toString();
 					}

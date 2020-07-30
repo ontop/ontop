@@ -84,7 +84,7 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	@Override
 	public List<String> getOrderedNamespaces() {
 		ArrayList<String> namespaceList = new ArrayList<>(getPrefixMap().values());
-		namespaceList.sort(Collections.reverseOrder());
+		Collections.sort(namespaceList, Collections.reverseOrder());
 		return namespaceList;
 	}
 

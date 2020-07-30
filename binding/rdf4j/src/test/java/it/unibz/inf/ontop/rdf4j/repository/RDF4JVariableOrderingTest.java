@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.junit.AfterClass;
@@ -16,7 +17,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Checks whether the order of variables in the returned binding set is identical to the order in the SPARQL query (in particular, may differ from the natural ordering of variables)
+ * Checks whether the order of variables in the returned binding set is identical to the order in the SPARQL query
+ * (in particular, may differ from the natural ordering of variables)
  * Reproduces issue #291
  */
 public class RDF4JVariableOrderingTest extends AbstractRDF4JTest {
@@ -25,7 +27,7 @@ public class RDF4JVariableOrderingTest extends AbstractRDF4JTest {
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        init(CREATE_DB_FILE, MAPPING_FILE);
+        initOBDA(CREATE_DB_FILE, MAPPING_FILE);
     }
 
     @AfterClass
@@ -50,7 +52,7 @@ public class RDF4JVariableOrderingTest extends AbstractRDF4JTest {
         assertEquals(
                 ImmutableList.of("i", "v", "l"),
                 ImmutableList.copyOf(bindingSet.iterator()).stream()
-                        .map(b -> b.getName())
+                        .map(Binding::getName)
                         .collect(ImmutableCollectors.toList())
         );
         result.close();

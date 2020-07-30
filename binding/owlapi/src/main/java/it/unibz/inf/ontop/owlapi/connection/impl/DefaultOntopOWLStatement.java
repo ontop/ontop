@@ -25,8 +25,8 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
@@ -142,14 +142,6 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		return new OntopGraphOWLResultSet(resultSet);
 	}
 
-	public int getFetchSize() throws OntopOWLException {
-		try {
-			return st.getFetchSize();
-		} catch (OntopConnectionException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
 	public int getMaxRows() throws OntopOWLException {
 		try {
 			return st.getMaxRows();
@@ -169,14 +161,6 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	public int getQueryTimeout() throws OntopOWLException {
 		try {
 			return st.getQueryTimeout();
-		} catch (OntopConnectionException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	public void setFetchSize(int rows) throws OntopOWLException {
-		try {
-			st.setFetchSize(rows);
 		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
@@ -223,7 +207,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public ExecutableQuery getExecutableQuery(String query) throws OntopOWLException {
+	public IQ getExecutableQuery(String query) throws OntopOWLException {
 		try {
 			return st.getExecutableQuery(parseQueryString(query));
 		} catch (OntopReformulationException e) {

@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.apache.commons.rdf.api.IRI;
@@ -32,40 +32,30 @@ import java.util.stream.Stream;
 /**
  * Provides a storage to put the URI constant.
  */
-public class IRIConstantImpl implements IRIConstant {
+public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConstant {
 
-	private final int identifier;
 	private final IRI iri;
 	private final ObjectRDFType type;
 
 	protected IRIConstantImpl(IRI iri, TypeFactory typeFactory) {
 		this.iri = iri;
-		this.identifier = iri.hashCode();
 		this.type = typeFactory.getIRITermType();
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof IRIConstantImpl)) {
-			return false;
-		}
-		IRIConstantImpl uri2 = (IRIConstantImpl) obj;
-		return this.identifier == uri2.identifier;
+	public boolean equals(Object other) {
+		return (other instanceof IRIConstantImpl &&
+					this.iri.equals(((IRIConstantImpl) other).iri));
 	}
 
 	@Override
 	public int hashCode() {
-		return identifier;
+		return iri.hashCode();
 	}
 
 	@Override
 	public IRI getIRI() {
 		return iri;
-	}
-
-	@Override
-	public IRIConstant clone() {
-		return this;
 	}
 
 	@Override
@@ -86,6 +76,19 @@ public class IRIConstantImpl implements IRIConstant {
 	@Override
 	public ObjectRDFType getType() {
 		return type;
+	}
+
+	@Override
+	public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+		if (otherTerm instanceof Constant) {
+			if (((Constant) otherTerm).isNull())
+				return IncrementalEvaluation.declareIsNull();
+			return equals(otherTerm)
+					? IncrementalEvaluation.declareIsTrue()
+					: IncrementalEvaluation.declareIsFalse();
+		}
+		else
+			return otherTerm.evaluateStrictEq(this, variableNullability);
 	}
 
 	@Deprecated

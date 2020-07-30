@@ -3,14 +3,11 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -36,7 +33,6 @@ public class UnknownDatatypeMappingTest {
     private static final String DROP_SCRIPT = DIR + "drop-db.sql";
     private static final String DEFAULT_OWL_FILE = DIR + "marriage.ttl";
     private static TestConnectionManager TEST_MANAGER;
-    private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -84,7 +80,7 @@ public class UnknownDatatypeMappingTest {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_tochar_function.obda");
     }
 
-    @Test(expected = InvalidMappingExceptionWithIndicator.class)
+    @Test(expected = UnknownDatatypeException.class)
     public void testMappingRDFSLiteralFunction() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_rdfsliteral.obda");
     }
@@ -93,7 +89,7 @@ public class UnknownDatatypeMappingTest {
         RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .findFirst().get();
 
-        Optional<DatatypePredicate> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
+        Optional<IRI> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
                 .map(i -> mapping.getRDFPropertyDefinition(triplePredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -104,15 +100,19 @@ public class UnknownDatatypeMappingTest {
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
-                .map(ImmutableFunctionalTerm::getFunctionSymbol)
-                .filter(p -> p instanceof DatatypePredicate)
-                .map(p -> (DatatypePredicate) p)
+                .flatMap(t-> t.inferType()
+                        .flatMap(TermTypeInference::getTermType)
+                        .map(Stream::of)
+                        .orElseGet(Stream::empty))
+                .filter(t -> t instanceof RDFDatatype)
+                .map(t -> (RDFDatatype)t)
+                .map(RDFDatatype::getIRI)
                 .findFirst();
 
         assertTrue("A datatype was expected", optionalDatatype.isPresent());
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        DatatypePredicate datatype = optionalDatatype.get();
+        IRI datatype = optionalDatatype.get();
 
-        assertEquals(TERM_FACTORY.getRequiredTypePredicate(expectedType), datatype);
+        assertEquals(expectedType, datatype);
     }
 }

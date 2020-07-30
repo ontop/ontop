@@ -18,8 +18,6 @@ import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -83,17 +81,8 @@ public class OntopOBDAToR2RML implements OntopCommand {
             return;
         }
 
-        OWLOntology ontology;
-        try {
-            ontology = config.loadInputOntology().orElse(null);
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-            System.exit(1);
-            return;
-        }
-
-        SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, ontology,
-                config.getRdfFactory());
+        SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, config.getRdfFactory(),
+                config.getTermFactory());
 
         final Collection<TriplesMap> tripleMaps = converter.getTripleMaps();
 //        final RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();

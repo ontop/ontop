@@ -5,11 +5,11 @@ quest:		http://obda.org/quest#
 [MappingDeclaration] @collection [[
 mappingId	mapping1
 target	<{uri}> a :{val}_{code} .
-source	SELECT "val", "uri", "code" FROM "table1" where code > 0
+source	SELECT "val", "uri", "code" FROM "table1" where "code" > 0
 
 mappingId	mapping2
 target	<{uri}> :{role}_{code1} {val} .
-source	SELECT "val", "uri", "code", "role" FROM "table1" where code > 0
+source	SELECT "val", "uri", "code", "role" FROM "table1" where "code" > 0
 
 ]]
 

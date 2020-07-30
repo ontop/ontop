@@ -6,38 +6,20 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
+ *
+ * See SubstitutionFactory for creating new instances
+ *
+ * NB: implementations depend of the AtomFactory
  */
-public interface ImmutableSubstitution<T extends ImmutableTerm> {
-
-    ImmutableMap<Variable, T> getImmutableMap();
-
-    boolean isDefining(Variable variable);
-
-    ImmutableSet<Variable> getDomain();
-
-    T get(Variable variable);
-
-    boolean isEmpty();
-
-    /**
-     * Applies the substitution to an immutable term.
-     */
-    ImmutableTerm apply(ImmutableTerm term);
-
-    /**
-     * This method can be applied to simple variables
-     */
-    ImmutableTerm applyToVariable(Variable variable);
-
-    ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
-
-    ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
+public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSubstitution<T> {
 
     /**
      * Only guaranteed for T extends VariableOrGroundTerm.
@@ -45,15 +27,23 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> {
      * If T == ImmutableTerm, throws a ConversionException if
      * a substituted term is not a VariableOrGroundTerm.
      */
-    DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
+    <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException;
 
-    ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
+    /**
+     * Only guaranteed for T extends VariableOrGroundTerm.
+     * <p>
+     * If T == ImmutableTerm, throws a ConversionException if
+     * a substituted term is not a VariableOrGroundTerm.
+     */
+    ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
+            throws ConversionException;
 
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
             throws ConversionException;
 
     /**
-     * Returns "(g o f)" where g is this substitution.
+     * Viewing a substitution as a function (takes a term, returns a term).
+     * This method yield the substitution "(g o f)" where g is this substitution.
      * NB: (g o f)(x) = g(f(x))
      */
     ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f);
@@ -104,5 +94,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> {
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
 
-    ImmutableSubstitution<ImmutableTerm> normalizeValues();
+    ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability);
+
+    ImmutableSubstitution<ImmutableTerm> simplifyValues();
+
 }

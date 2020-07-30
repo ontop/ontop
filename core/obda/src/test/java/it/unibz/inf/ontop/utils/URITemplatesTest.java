@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
-import java.util.Arrays;
-
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,52 +38,60 @@ public class URITemplatesTest {
 	@SuppressWarnings("unchecked")
     @Test
 	public void testFormat(){
-		assertEquals("http://example.org/A/1", URITemplates.format("http://example.org/{}/{}", "A", 1));
+		assertEquals("http://example.org/A/1", Templates.format("http://example.org/{}/{}", "A", 1));
 		
-		assertEquals("http://example.org/A", URITemplates.format("http://example.org/{}", "A"));
+		assertEquals("http://example.org/A", Templates.format("http://example.org/{}", "A"));
 		
-		assertEquals("http://example.org/A/1", URITemplates.format("http://example.org/{}/{}", Arrays.asList("A", 1)));
+		assertEquals("http://example.org/A/1", Templates.format("http://example.org/{}/{}", Arrays.asList("A", 1)));
 		
-		assertEquals("http://example.org/A", URITemplates.format("http://example.org/{}", Arrays.asList("A")));
+		assertEquals("http://example.org/A", Templates.format("http://example.org/{}", Arrays.asList("A")));
 
-        assertEquals("http://example.org/A", URITemplates.format("{}", Arrays.asList("http://example.org/A")));
+        assertEquals("http://example.org/A", Templates.format("{}", Arrays.asList("http://example.org/A")));
 	}
 
     @Test
     public void testGetUriTemplateString1(){
-        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}"), //
-                TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"));
-        assertEquals("http://example.org/{X}/{Y}", URITemplates.getUriTemplateString(f1));
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}", //
+                ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
+        assertEquals("http://example.org/{X}/{Y}", Templates.getTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString2(){
-        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("{}"), //
-                TERM_FACTORY.getVariable("X"));
-        assertEquals("{X}", URITemplates.getUriTemplateString(f1));
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}",
+                ImmutableList.of(TERM_FACTORY.getVariable("X")));
+        assertEquals("{X}", Templates.getTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString3(){
 
-        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("{}/"), //
-                TERM_FACTORY.getVariable("X"));
-        assertEquals("{X}/", URITemplates.getUriTemplateString(f1));
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}/", //
+                ImmutableList.of(TERM_FACTORY.getVariable("X")));
+        assertEquals("{X}/", Templates.getTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString4(){
 
-        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}/"), //
-                TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"));
-        assertEquals("http://example.org/{X}/{Y}/", URITemplates.getUriTemplateString(f1));
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/", //
+                ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
+        assertEquals("http://example.org/{X}/{Y}/", Templates.getTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString5(){
 
-        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}/{}"), //
-                TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"), TERM_FACTORY.getVariable("X"));
-        assertEquals("http://example.org/{X}/{Y}/{X}", URITemplates.getUriTemplateString(f1));
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/{}", //
+                ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"), TERM_FACTORY.getVariable("X")));
+        assertEquals("http://example.org/{X}/{Y}/{X}", Templates.getTemplateString(f1));
+    }
+
+    /**
+     * Functional term corresponding to the lexical term
+     */
+    private ImmutableFunctionalTerm createIRITemplateFunctionalTerm(String iriTemplate,
+                                                                    ImmutableList<? extends ImmutableTerm> arguments) {
+        return (ImmutableFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(iriTemplate, arguments).getTerm(0);
     }
 }

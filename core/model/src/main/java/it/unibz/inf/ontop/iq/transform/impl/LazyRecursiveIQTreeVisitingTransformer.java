@@ -42,6 +42,11 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
     public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) { return transformUnaryNode(tree, rootNode, child); }
 
     @Override
+    public IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
+        return transformUnaryNode(tree, aggregationNode, child);
+    }
+
+    @Override
     public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) { return transformUnaryNode(tree, rootNode, child); }
 
     @Override

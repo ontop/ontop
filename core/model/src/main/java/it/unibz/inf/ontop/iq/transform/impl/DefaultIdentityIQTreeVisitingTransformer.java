@@ -42,6 +42,11 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
     }
 
     @Override
+    public IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child) {
+        return tree;
+    }
+
+    @Override
     public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
         return tree;
     }

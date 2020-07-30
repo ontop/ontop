@@ -18,7 +18,7 @@ public class RDF4JNullMetaMappingTest extends AbstractRDF4JTest {
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        init(CREATE_DB_FILE, MAPPING_FILE);
+        initOBDA(CREATE_DB_FILE, MAPPING_FILE);
     }
 
     @AfterClass
@@ -27,7 +27,7 @@ public class RDF4JNullMetaMappingTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void testVariableOrdering() {
+    public void test() {
         String query = "" +
                 "PREFIX : <http://example.org/>\n"+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"+

@@ -13,6 +13,9 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
  * TODO: describe
  *
  * Can create only one intermediateQuery (to be used once).
+ *
+ * See IntermediateQueryFactory for creating a new instance.
+ *
  */
 public interface IntermediateQueryBuilder {
 

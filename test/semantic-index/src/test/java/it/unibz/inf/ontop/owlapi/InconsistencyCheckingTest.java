@@ -21,17 +21,19 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
-import junit.framework.TestCase;
+import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.Properties;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
-public class InconsistencyCheckingTest extends TestCase{
+public class InconsistencyCheckingTest {
 
 	private OntopOWLReasoner reasoner;
 	private OWLOntology ontology;
@@ -51,7 +53,7 @@ public class InconsistencyCheckingTest extends TestCase{
 	OWLNamedIndividual b = NamedIndividual(IRI.create(prefix + "b"));
 	OWLNamedIndividual c = NamedIndividual(IRI.create(prefix + "c"));
 	
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = Ontology(manager, //
@@ -90,9 +92,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
-		assertFalse(consistent);
-
+		assertFalse(reasoner.isConsistent());
 	} 
 	
 	@Test
@@ -105,10 +105,8 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
-		assertFalse(consistent);
-
-	} 
+		assertFalse(reasoner.isConsistent());
+	}
 	
 	@Test
 	public void testDisjointDataPropInconsistency() throws Exception {
@@ -120,9 +118,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
-		assertFalse(consistent);
-
+		assertFalse(reasoner.isConsistent());
 	} 
 	
 	@Test
@@ -135,9 +131,7 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
-		assertFalse(consistent);
-
+		assertFalse(reasoner.isConsistent());
 	} 
 	
 	@Test
@@ -150,8 +144,6 @@ public class InconsistencyCheckingTest extends TestCase{
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isConsistent();
-		assertFalse(consistent);
-
+		assertFalse(reasoner.isConsistent());
 	} 
 }

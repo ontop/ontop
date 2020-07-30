@@ -3,8 +3,9 @@ package it.unibz.inf.ontop.model.type;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.Optional;
-
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface TypeFactory {
 
 	RDFDatatype getLangTermType(String languageTag);
@@ -21,6 +22,8 @@ public interface TypeFactory {
 	RDFDatatype getUnsupportedDatatype();
 
 	RDFDatatype getAbstractOntopNumericDatatype();
+	RDFDatatype getAbstractOntopDateOrDatetimeDatatype();
+
 	RDFDatatype getAbstractRDFSLiteral();
 
 	TermType getAbstractAtomicTermType();
@@ -29,12 +32,12 @@ public interface TypeFactory {
 
 	ObjectRDFType getAbstractObjectRDFType();
 
-	default RDFDatatype getXsdIntegerDatatype() {
-		return getDatatype(XSD.INTEGER);
+	default ConcreteNumericRDFDatatype getXsdIntegerDatatype() {
+		return (ConcreteNumericRDFDatatype) getDatatype(XSD.INTEGER);
 	}
 
-	default RDFDatatype getXsdDecimalDatatype() {
-		return getDatatype(XSD.DECIMAL);
+	default ConcreteNumericRDFDatatype getXsdDecimalDatatype() {
+		return (ConcreteNumericRDFDatatype) getDatatype(XSD.DECIMAL);
 	}
 
 	default RDFDatatype getXsdStringDatatype() {
@@ -45,15 +48,23 @@ public interface TypeFactory {
 		return getDatatype(XSD.BOOLEAN);
 	}
 
-	default RDFDatatype getXsdDoubleDatatype() {
-		return getDatatype(XSD.DOUBLE);
+	default ConcreteNumericRDFDatatype getXsdDoubleDatatype() {
+		return (ConcreteNumericRDFDatatype)  getDatatype(XSD.DOUBLE);
 	}
 
-	default RDFDatatype getXsdFloatDatatype() {
-		return getDatatype(XSD.FLOAT);
+	default ConcreteNumericRDFDatatype getXsdFloatDatatype() {
+		return (ConcreteNumericRDFDatatype)  getDatatype(XSD.FLOAT);
 	}
 
 	default RDFDatatype getXsdDatetimeDatatype() {
 		return getDatatype(XSD.DATETIME);
 	}
+
+	default RDFDatatype getXsdDatetimeStampDatatype() {
+		return getDatatype(XSD.DATETIMESTAMP);
+	}
+
+	MetaRDFTermType getMetaRDFTermType();
+
+	DBTypeFactory getDBTypeFactory();
 }

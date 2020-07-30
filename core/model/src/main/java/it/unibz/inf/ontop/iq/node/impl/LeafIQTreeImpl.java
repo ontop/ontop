@@ -39,7 +39,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
         return this;
     }
 
@@ -88,7 +88,12 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator) {
+        return this;
+    }
+
+    @Override
+    public IQTree removeDistincts() {
         return this;
     }
 }

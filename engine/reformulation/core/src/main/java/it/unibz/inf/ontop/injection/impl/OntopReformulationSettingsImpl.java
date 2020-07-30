@@ -33,12 +33,22 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
-    public boolean isIRISafeEncodingEnabled() {
-        return getRequiredBoolean(SQL_GENERATE_REPLACE);
+    public boolean isDistinctPostProcessingEnabled() {
+        return getRequiredBoolean(DISTINCT_RESULTSET);
     }
 
     @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return getRequiredBoolean(DISTINCT_RESULTSET);
+    public boolean isQueryLoggingEnabled() {
+        return getRequiredBoolean(QUERY_LOGGING);
+    }
+
+    @Override
+    public long getQueryCacheMaxSize() {
+        return getRequiredLong(QUERY_CACHE_MAX_SIZE);
+    }
+
+    @Override
+    public String getApplicationName() {
+        return getRequiredProperty(APPLICATION_NAME);
     }
 }

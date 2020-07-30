@@ -1,39 +1,20 @@
 package it.unibz.inf.ontop.docker.postgres;
 
-/*
- * #%L
- * ontop-quest-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
-
-
-
-import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
- * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  *
  */
 
@@ -43,8 +24,19 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     private static final String obdafile = "/pgsql/bind/sparqlBindPostgreSQL.obda";
     private static final String propertiesfile = "/pgsql/bind/sparqlBindPostgreSQL.properties";
 
-    public BindWithFunctionsPostgreSQLTest() {
-        super(owlfile, obdafile, propertiesfile);
+    private static OntopOWLReasoner REASONER;
+    private static OWLConnection CONNECTION;
+
+    public BindWithFunctionsPostgreSQLTest() throws OWLOntologyCreationException {
+        super(createReasoner(owlfile, obdafile, propertiesfile));
+        REASONER = getReasoner();
+        CONNECTION = getConnection();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
     @Override
@@ -57,10 +49,11 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
-    @Ignore("Not yet supported")
+    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
     @Test
     @Override
-    public void testHash() {
+    public void testHashSHA256() throws Exception {
+        super.testHashSHA256();
     }
 
     @Override
@@ -70,6 +63,19 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         expectedValues.add("\"12\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
         expectedValues.add("\"7\"^^xsd:integer");
+        return expectedValues;
+    }
+
+    /**
+     * TODO: re-ajust the DB entries (34 instead of 33.5, 23 instead of 22.5)
+     */
+    @Override
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.5000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"11.5000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"17.0000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"5.0000000000000000\"^^xsd:decimal");
         return expectedValues;
     }
 
@@ -108,10 +114,39 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     @Override
     protected List<String> getTZExpectedValues() {
     List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2:0\"");
-        expectedValues.add("\"1:0\"");
-        expectedValues.add("\"2:0\"");
-        expectedValues.add("\"1:0\"");
+        expectedValues.add("\"02:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
+        expectedValues.add("\"02:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getStrExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1967-11-05T07:50:00+01:00\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T12:30:00+01:00\"^^xsd:string");
+        expectedValues.add("\"2014-07-14T12:47:52+02:00\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T11:23:06+02:00\"^^xsd:string");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getDatatypeExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.2\"^^xsd:decimal");
+        expectedValues.add("\"0.25\"^^xsd:decimal");
+        expectedValues.add("\"0.2\"^^xsd:decimal");
+        expectedValues.add("\"0.15\"^^xsd:decimal");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getConstantIntegerDivideExpectedResults() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.50000000000000000000\"^^xsd:decimal");
         return expectedValues;
     }
 

@@ -88,14 +88,14 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 				.build();
 
 		runOWLAPITest("src/test/resources/mysql/materializer/materializeOWL.owl",
-				27, 3, configuration);
+				26, 3, configuration);
 	}
 	
 	public void testOWLApiModeOnto() throws Exception {
 		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
 
 		runOWLAPITest("src/test/resources/mysql/materializer/materializeOWL2.owl",
-				51, 5, configuration);
+				49, 5, configuration);
 	}
 
 	private static OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> createConfigurationBuilder() {
@@ -112,13 +112,13 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			throws IOException, OBDASpecificationException {
 		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
 				.build();
-		runRDF4JTest(filePath, handlerConstructor, 27, 3, configuration);
+		runRDF4JTest(filePath, handlerConstructor, 26, 3, configuration);
 	}
 
 	private void runRDF4JTestWithOntology(String filePath, Function<Writer, RDFHandler> handlerConstructor)
 			throws IOException, OBDASpecificationException {
 		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
-		runRDF4JTest(filePath, handlerConstructor, 51, 5, configuration);
+		runRDF4JTest(filePath, handlerConstructor, 49, 5, configuration);
 	}
 
 	private void runRDF4JTest(String filePath, Function<Writer, RDFHandler> handlerConstructor,
@@ -132,7 +132,6 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			System.out.println(outfile);
 
 			MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-					.enableDBResultsStreaming(DO_STREAM_RESULTS)
 					.build();
 
 			RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
@@ -171,7 +170,6 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			manager = ontology.getOWLOntologyManager();
 
 			MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-					.enableDBResultsStreaming(DO_STREAM_RESULTS)
 					.build();
 
 			OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(

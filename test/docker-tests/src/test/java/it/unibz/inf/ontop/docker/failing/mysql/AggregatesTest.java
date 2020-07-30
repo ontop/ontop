@@ -1,28 +1,15 @@
 package it.unibz.inf.ontop.docker.failing.mysql;
 
-/*
- * #%L
- * ontop-quest-owlapi3
- * %%
- * Copyright (C) 2009 - 2013 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 @Ignore("Not supported yet")
 public class AggregatesTest extends AbstractVirtualModeTest {
@@ -31,8 +18,24 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 	private static final String obdafile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 	private static final String propertiesfile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 
-	public AggregatesTest() {
-		super(owlfile, obdafile, propertiesfile);
+	private static OntopOWLReasoner REASONER;
+	private static OntopOWLConnection CONNECTION;
+
+	@BeforeClass
+	public static void before() throws OWLOntologyCreationException {
+		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
+		CONNECTION = REASONER.getConnection();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
+	}
+
+	@AfterClass
+	public static void after() throws OWLException {
+		CONNECTION.close();
+		REASONER.dispose();
 	}
 
 //	@Override
@@ -112,33 +115,33 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 	@Test
 	public void testAggrCount() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		countResults(query, 1);
+		countResults(1, query);
 	}
 
 
 	@Test
 	public void testAggrCount2() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
-		countResults(query, 1);
+		countResults(1, query);
 	}
 
 	@Test
 	public void testAggrCount3() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?value) AS ?count) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value } GROUP BY ?x";
-		countResults(query, 4);
+		countResults(4, query);
 	}
 
 	@Test
 	public void testAggrCount4() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x (COUNT(?y) AS ?count) WHERE { ?x :belongsToCompany ?y } GROUP BY ?x";
 		//String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?y WHERE { ?x :belongsToCompany ?y } ";
-		countResults(query, 10);
+		countResults(10, query);
 	}
 
 	@Test
 	public void testAggrCount5() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (COUNT(?x) AS ?count) WHERE {?x a :Transaction. }";
-		countResults(query,1);
+		countResults(1, query);
 	}
 	
 	/*
@@ -162,24 +165,24 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 	@Test
 	public void testAggrAVG() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?broker (AVG(?value) AS ?vavg) WHERE {?x :isExecutedBy ?broker. ?x :amountOfTransaction ?value } GROUP BY ?broker";
-		countResults(query,1);
+		countResults(1, query);
 	}
 
 	@Test
 	public void testAggrSUM() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (SUM(?value) AS ?sum) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		countResults(query,1);
+		countResults(1, query);
 	}
 
 	@Test
 	public void testAggrMIN() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (MIN(?value) AS ?min) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		countResults(query,1);
+		countResults(1, query);
 	}
 
 	@Test
 	public void testAggrMAX() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT (MAX(?value) AS ?max) WHERE {?x a :Transaction. ?x :amountOfTransaction ?value }";
-		countResults(query,1);
+		countResults(1, query);
 	}
 }

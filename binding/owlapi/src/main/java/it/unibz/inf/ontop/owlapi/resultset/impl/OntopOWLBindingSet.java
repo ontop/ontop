@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -32,12 +32,12 @@ public class OntopOWLBindingSet implements OWLBindingSet {
     }
 
     @Override
-    public List<String> getBindingNames() throws OWLException {
+    public List<String> getBindingNames() {
         return ontopBindingSet.getBindingNames();
     }
 
     @Override
-    public OWLBinding getBinding(String bindingName) throws OWLException {
+    public OWLBinding getBinding(String bindingName) {
         final OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
         if (ontopBinding == null) {
             return null;
@@ -46,75 +46,46 @@ public class OntopOWLBindingSet implements OWLBindingSet {
         }
     }
 
-
     @Override
-    public OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException {
+    public OWLPropertyAssertionObject getOWLPropertyAssertionObject(String bindingName) throws OWLException {
         try {
-            return translate(ontopBindingSet.getConstant(column));
+            return translate(ontopBindingSet.getConstant(bindingName));
         } catch (Exception e) {
-            throw new OntopOWLException(e + " Column: " + column);
+            throw new OntopOWLException(e + " Column: " + bindingName);
         }
     }
 
     @Override
-    public OWLIndividual getOWLIndividual(int column) throws OWLException {
+    public OWLIndividual getOWLIndividual(String bindingName) throws OWLException {
         try {
-            return (OWLIndividual) translate(ontopBindingSet.getConstant(column));
-        } catch (Exception e) {
-            throw new OntopOWLException(e);
-        }
-    }
-
-    @Override
-    public OWLIndividual getOWLIndividual(String column) throws OWLException {
-        try {
-            return (OWLIndividual) translate(ontopBindingSet.getConstant(column));
+            return (OWLIndividual) translate(ontopBindingSet.getConstant(bindingName));
         } catch (Exception e) {
             throw new OntopOWLException(e);
         }
     }
 
     @Override
-    public OWLNamedIndividual getOWLNamedIndividual(int column) throws OWLException {
+    public OWLNamedIndividual getOWLNamedIndividual(String bindingName) throws OWLException {
         try {
-            return (OWLNamedIndividual) translate(ontopBindingSet.getConstant(column));
+            return (OWLNamedIndividual) translate(ontopBindingSet.getConstant(bindingName));
         } catch (Exception e) {
             throw new OntopOWLException(e);
         }
     }
 
     @Override
-    public OWLAnonymousIndividual getOWLAnonymousIndividual(int column) throws OWLException {
+    public OWLAnonymousIndividual getOWLAnonymousIndividual(String bindingName ) throws OWLException {
         try {
-            return (OWLAnonymousIndividual) translate(ontopBindingSet.getConstant(column));
-        } catch (Exception e) {
-            throw new OntopOWLException(e);
-        }
-    }
-
-
-    @Override
-    public OWLLiteral getOWLLiteral(int column) throws OWLException {
-        try {
-            return (OWLLiteral) translate(ontopBindingSet.getConstant(column));
+            return (OWLAnonymousIndividual) translate(ontopBindingSet.getConstant(bindingName));
         } catch (Exception e) {
             throw new OntopOWLException(e);
         }
     }
 
     @Override
-    public OWLLiteral getOWLLiteral(String column) throws OWLException {
+    public OWLLiteral getOWLLiteral(String bindingName) throws OWLException {
         try {
-            return (OWLLiteral) translate(ontopBindingSet.getConstant(column));
-        } catch (Exception e) {
-            throw new OntopOWLException(e);
-        }
-    }
-
-    @Override
-    public OWLObject getOWLObject(int column) throws OWLException {
-        try {
-            return translate(ontopBindingSet.getConstant(column));
+            return (OWLLiteral) translate(ontopBindingSet.getConstant(bindingName));
         } catch (Exception e) {
             throw new OntopOWLException(e);
         }
@@ -129,15 +100,15 @@ public class OntopOWLBindingSet implements OWLBindingSet {
         }
     }
 
+    @Override
+    public String toString() {
+        return ontopBindingSet.toString();
+    }
+
     private OWLPropertyAssertionObject translate(Constant c) {
         if (c instanceof ObjectConstant)
             return translator.translate((ObjectConstant) c);
         else
-            return translator.translate((ValueConstant) c);
-    }
-
-    @Override
-    public String toString() {
-        return ontopBindingSet.toString();
+            return translator.translate((RDFLiteralConstant) c);
     }
 }

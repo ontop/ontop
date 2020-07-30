@@ -76,8 +76,6 @@ public class TreeWitnessRewriterH2Test{
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLPPMapping obdaModel = null;
-	private OWLOntology ontology;
 
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
 

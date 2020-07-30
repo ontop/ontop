@@ -7,4 +7,6 @@ package it.unibz.inf.ontop.model.term;
  *
  */
 public interface GroundTerm extends VariableOrGroundTerm, NonVariableTerm {
+
+    boolean isDeterministic();
 }

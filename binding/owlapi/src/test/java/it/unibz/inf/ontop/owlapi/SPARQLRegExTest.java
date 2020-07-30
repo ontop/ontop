@@ -80,41 +80,31 @@ public class SPARQLRegExTest {
 
 		System.out.println("Test");
 
-		try {
-
-			sqlConnection = DriverManager
-					.getConnection(url, username, password);
+		sqlConnection = DriverManager
+				.getConnection(url, username, password);
 
 
-			FileReader reader = new FileReader(
-					"src/test/resources/regex/sparql-regex-test.sql");
-			BufferedReader in = new BufferedReader(reader);
-			SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true,
-					false);
-			runner.runScript(in);
+		FileReader reader = new FileReader(
+				"src/test/resources/regex/sparql-regex-test.sql");
+		BufferedReader in = new BufferedReader(reader);
+		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true,
+				false);
+		runner.runScript(in);
 
-			
-			// Creating a new instance of the reasoner
-			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.nativeOntopMappingFile(obdafile)
-					.ontologyFile(owlfile)
-					.enableFullMetadataExtraction(false)
-					.jdbcUrl(url)
-					.jdbcUser(username)
-					.jdbcPassword(password)
-					.enableTestMode()
-					.build();
-	        reasoner = factory.createReasoner(config);
-	        
-			// Now we are ready for querying
-			conn = reasoner.getConnection();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			log.error(e.getMessage(), e);
-			throw e;
-		}
 
+		// Creating a new instance of the reasoner
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.enableTestMode()
+				.build();
+		reasoner = factory.createReasoner(config);
+		// Now we are ready for querying
+		conn = reasoner.getConnection();
 	}
 
 	@AfterClass
@@ -129,13 +119,10 @@ public class SPARQLRegExTest {
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -143,23 +130,17 @@ public class SPARQLRegExTest {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			/*
-			 * boolean hasNext = rs.hasNext();
-			 */
-			// assertTrue(rs.hasNext());
 			int count = 0;
 			while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                for (int i = 1; i <= rs.getColumnCount(); i++) {
-					OWLObject ind1 = bindingSet.getOWLObject(i);
+				for (String name: rs.getSignature()) {
+					OWLObject ind1 = bindingSet.getOWLObject(name);
 					System.out.println(" Result: " + ind1.toString());
 				}
 				count += 1;
-
 			}
 			Assert.assertEquals(numberOfResults, count);
 
@@ -168,25 +149,24 @@ public class SPARQLRegExTest {
 			 * ind2.toString()); assertEquals("\"value1\"", val.toString());
 			 */
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				Assert.assertTrue(false);
-			}
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}
 	}
 
-	/**
-	 * Test use of two aliases to same table
-	 * 
-	 * @throws Exception
-	 */
+	@Test
+	public void testIssue72() throws Exception {
+		String query = "SELECT DISTINCT * WHERE {\n" +
+				"?s a <http://www.opendatasemanticuplift.org/vocab/class/Data_Centre_List_Five> .\n" +
+				"?s ?p ?lit .\n" +
+				"FILTER regex(?lit, \"^(?i)Zzdl2*(?-i)\") .\n" +
+				"?s <http://www.w3.org/2000/01/rdf-schema#label> ?label .\n" +
+				"}";
+		runTests(query, 0);
+	}
+
 	@Test
 	public void testSingleColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?name, \"ABA\")}";

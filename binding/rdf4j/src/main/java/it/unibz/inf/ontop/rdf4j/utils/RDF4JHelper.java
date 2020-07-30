@@ -28,7 +28,7 @@ public class RDF4JHelper {
 	/**
 	 * TODO: could we have a RDF sub-class of ValueConstant?
 	 */
-	public static Literal getLiteral(ValueConstant literal)
+	public static Literal getLiteral(RDFLiteralConstant literal)
 	{
         Objects.requireNonNull(literal);
 		TermType type = literal.getType();
@@ -48,8 +48,8 @@ public class RDF4JHelper {
             return null;
 
         Value value = null;
-        if (c instanceof ValueConstant) {
-            value = RDF4JHelper.getLiteral((ValueConstant) c);
+        if (c instanceof RDFLiteralConstant) {
+            value = RDF4JHelper.getLiteral((RDFLiteralConstant) c);
         } else if (c instanceof ObjectConstant){
             value = RDF4JHelper.getResource((ObjectConstant) c);
         }
@@ -90,10 +90,10 @@ public class RDF4JHelper {
 	private static Statement createStatement(AnnotationAssertion assertion) {
 		Constant constant = assertion.getValue();
 
-		if (constant instanceof ValueConstant) {
+		if (constant instanceof RDFLiteralConstant) {
 			return fact.createStatement(getResource(assertion.getSubject()),
 					createURI(assertion.getProperty().getIRI().getIRIString()),
-					getLiteral((ValueConstant) constant));
+					getLiteral((RDFLiteralConstant) constant));
 		} else if (constant instanceof ObjectConstant)  {
 			return fact.createStatement(getResource(assertion.getSubject()),
 					createURI(assertion.getProperty().getIRI().getIRIString()),

@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.materialization.impl;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -62,7 +42,6 @@ import java.util.stream.Stream;
  */
 public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
-	private static int FETCH_SIZE = 50000;
 	private final MaterializationParams params;
 	private final InputQueryFactory inputQueryFactory;
 	private final OntopQueryEngine queryEngine;
@@ -158,7 +137,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
 		private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
 		private final InputQueryFactory inputQueryFactory;
-		private final boolean doStreamResults, canBeIncomplete;
+		private final boolean canBeIncomplete;
 
 		private final OntopQueryEngine queryEngine;
 		private final UnmodifiableIterator<VocabularyEntry> vocabularyIterator;
@@ -184,15 +163,9 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			this.vocabularyIterator = vocabulary.values().iterator();
 
 			this.queryEngine = queryEngine;
-			this.doStreamResults = params.isDBResultStreamingEnabled();
 			this.canBeIncomplete = params.canMaterializationBeIncomplete();
 			this.inputQueryFactory = inputQueryFactory;
 			this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
-
-			if (doStreamResults) {
-				// Autocommit must be OFF (needed for autocommit)
-				//ontopConnection.setAutoCommit(false);
-			}
 
 			counter = 0;
 			// Lately initiated
@@ -253,9 +226,6 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
 				try {
 					tmpStatement = ontopConnection.createStatement();
-					if (doStreamResults) {
-						tmpStatement.setFetchSize(FETCH_SIZE);
-					}
 					tmpGraphResultSet = tmpStatement.execute(query);
 
 					if (tmpGraphResultSet.hasNext()) {

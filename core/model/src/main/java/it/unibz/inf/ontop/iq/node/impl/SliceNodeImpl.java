@@ -4,19 +4,18 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -52,31 +51,68 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     /**
-     * Blocks substitutions
+     * Does not lift unions, blocks them
      */
     @Override
-    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.liftBinding(variableGenerator);
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
+        return iqFactory.createUnaryIQTree(this, child);
+    }
+
+    @Override
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        if ((limit != null) && limit == 0)
+            return iqFactory.createEmptyNode(child.getVariables());
+
+        IQTree newChild = child.normalizeForOptimization(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
-        if (newChildRoot instanceof SliceNode)
-            return liftSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
+        if (newChildRoot instanceof ConstructionNode)
+            return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
+        else if (newChildRoot instanceof SliceNode)
+            return mergeWithSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
+        else if ((newChildRoot instanceof TrueNode)
+                || ((newChildRoot instanceof AggregationNode)
+                    && ((AggregationNode) newChildRoot).getGroupingVariables().isEmpty()))
+            return offset > 0
+                    ? iqFactory.createEmptyNode(child.getVariables())
+                    : newChild;
+        else if ((newChildRoot instanceof DistinctNode)
+                && (offset == 0)
+                && getLimit()
+                    .filter(l -> l <= 1)
+                    .isPresent())
+            // Distinct can be eliminated
+            return normalizeForOptimization(((UnaryIQTree) child).getChild(), variableGenerator, currentIQProperties);
         else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
-    /**
-     * TODO: implement it seriously
-     */
-    private IQTree liftSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
-        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+    private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
+                                         VariableGenerator variableGenerator) {
+        IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, childTree.getChild())
+                .normalizeForOptimization(variableGenerator);
+        return iqFactory.createUnaryIQTree(childConstructionNode, newSliceLevelTree,
+                iqFactory.createIQProperties().declareNormalizedForOptimization());
     }
 
-    @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-        throw new RuntimeException("TODO: implement it");
+    private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
+        long newOffset = offset + newChildRoot.getOffset();
+        Optional<Long> newLimit = newChildRoot.getLimit()
+                .map(cl -> Math.max(cl - offset, 0L))
+                .map(cl -> getLimit()
+                        .map(l -> Math.min(cl, l))
+                        .orElse(cl))
+                .map(Optional::of)
+                // No limit in the child
+                .orElseGet(this::getLimit);
+
+        SliceNode newSliceNode = newLimit
+                .map(l -> iqFactory.createSliceNode(newOffset, l))
+                .orElseGet(() -> iqFactory.createSliceNode(newOffset));
+
+        return iqFactory.createUnaryIQTree(newSliceNode, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     @Override
@@ -94,12 +130,52 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
+        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
+    }
+
+    @Override
+    public boolean isDistinct(IQTree tree, IQTree child) {
+        if (limit != null && limit <= 1)
+            return true;
+        return child.isDistinct();
+    }
+
+    @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformSlice(tree, this, child);
     }
 
     @Override
+    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
+        return visitor.visitSlice(this, child);
+    }
+
+    @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
+    }
+
+    @Override
+    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+        IQTree newChild = child.removeDistincts();
+
+        IQProperties newProperties = newChild.equals(child)
+                ? iqProperties.declareDistinctRemovalWithoutEffect()
+                : iqProperties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
+        return child.inferUniqueConstraints();
+    }
+
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return child.getNotInternallyRequiredVariables();
     }
 
     @Override
@@ -110,11 +186,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public SliceNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 
@@ -172,5 +243,13 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return SLICE_STR
                 + (offset > 0 ? " offset=" + offset : "")
                 + (limit == null ? "" : " limit=" + limit);
+    }
+
+    /**
+     * Stops constraints
+     */
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, child);
     }
 }

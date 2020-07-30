@@ -22,18 +22,12 @@ package it.unibz.inf.ontop.docker.db2;
 
 import it.unibz.inf.ontop.docker.AbstractConstraintTest;
 
-import java.io.IOException;
-
-
 public class Db2ConstraintTest extends AbstractConstraintTest {
 
 	private static final String propertyFile = "/db2/bind/db2-smallbooks.properties";
 
-
-	public Db2ConstraintTest(String method) throws IOException {
+	// TODO: CHECK THAT THE DATABASE CONTAINS THE TABLES
+	public Db2ConstraintTest(String method) {
 		super(method, propertyFile);
-
-
 	}
-
 }

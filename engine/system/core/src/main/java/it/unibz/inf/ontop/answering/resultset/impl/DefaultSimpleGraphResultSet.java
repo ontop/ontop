@@ -28,8 +28,9 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
@@ -42,6 +43,7 @@ import org.eclipse.rdf4j.query.algebra.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
@@ -137,7 +139,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                         }
                         else {
                             assertion = builder.createDataPropertyAssertion(predicateName,
-                                    subjectConstant, (ValueConstant) objectConstant);
+                                    subjectConstant, (RDFLiteralConstant) objectConstant);
                         }
                     }
                     if (assertion != null)
@@ -186,23 +188,35 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
         if (extMap != null) {
             ve = extMap.get(node_name);
-            if (ve != null && ve instanceof Var)
-                throw new OntopResultConversionException("Invalid query. Found unbound variable: " + ve);
         }
 
 //		if (node_name.charAt(0) == '-') {
-        if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
-            org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
+        if (ve instanceof ValueConstant) {
+            ValueConstant vc = (ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
                 constant = termFactory.getConstantIRI(rdfFactory.createIRI(vc.getValue().stringValue()));
             }
             else if (vc.getValue() instanceof Literal) {
-                constant = termFactory.getConstantLiteral(vc.getValue().stringValue());
+                constant = termFactory.getRDFLiteralConstant(vc.getValue().stringValue(), XSD.STRING);
             }
             else {
                 constant = termFactory.getConstantBNode(vc.getValue().stringValue());
             }
-        } else {
+        }
+        else if (ve instanceof BNodeGenerator) {
+            // See https://www.w3.org/TR/sparql11-query/#tempatesWithBNodes
+            String rowId = bindingSet.getRowUUIDStr();
+
+            String label = Optional.ofNullable(((BNodeGenerator) ve).getNodeIdExpr())
+                    // If defined, we expected the b-node label to be constant (as appearing in the CONSTRUCT block)
+                    .filter(e -> e instanceof ValueConstant)
+                    .map(v -> ((ValueConstant) v).getValue().stringValue())
+                    .map(s -> s + rowId)
+                    .orElseGet(() -> node_name + rowId);
+
+            constant = termFactory.getConstantBNode(label);
+        }
+        else {
             constant = bindingSet.getConstant(node_name);
         }
         return constant;

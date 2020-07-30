@@ -64,7 +64,7 @@ public class ConstructionNodeTools {
 
         ImmutableSubstitution<ImmutableTerm> eta = unificationTools.computeMGUS(formerTheta, tau)
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + tau
-                        + " is incompatible with " + this));
+                        + " is incompatible with " + formerTheta));
 
         // Due to the current implementation of MGUS, the normalization should have no effect
         // (already in a normal form). Here for safety.

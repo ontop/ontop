@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -32,8 +33,18 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public boolean isIRISafeEncodingEnabled() {
-        return systemSettings.isIRISafeEncodingEnabled();
+    public boolean isQueryLoggingEnabled() {
+        return getRequiredBoolean(QUERY_LOGGING);
+    }
+
+    @Override
+    public long getQueryCacheMaxSize() {
+        return getRequiredLong(QUERY_CACHE_MAX_SIZE);
+    }
+
+    @Override
+    public String getApplicationName() {
+        return getRequiredProperty(APPLICATION_NAME);
     }
 
     @Override
@@ -62,7 +73,32 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public int getFetchSize() {
+        return systemSettings.getFetchSize();
+    }
+
+    @Override
+    public Optional<Integer> getDefaultQueryTimeout() {
+        return getInteger(DEFAULT_QUERY_TIMEOUT);
+    }
+
+    @Override
     public boolean isPermanentDBConnectionEnabled() {
         return systemSettings.isPermanentDBConnectionEnabled();
+    }
+
+    @Override
+    public Optional<Integer> getHttpMaxAge() {
+        return systemSettings.getHttpMaxAge();
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleWhileRevalidate() {
+        return systemSettings.getHttpStaleWhileRevalidate();
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleIfError() {
+        return systemSettings.getHttpStaleIfError();
     }
 }

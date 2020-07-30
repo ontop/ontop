@@ -93,7 +93,7 @@ public class OWLAPIIndividualTranslator {
 			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
 	}
 	
-	public OWLLiteral translate(ValueConstant v) {
+	public OWLLiteral translate(RDFLiteralConstant v) {
 		if (v == null)
 			return null;
 		
@@ -131,8 +131,8 @@ public class OWLAPIIndividualTranslator {
 	}
 
 	public OWLAnnotationValue translateAnnotationValue(Constant constant) {
-		if (constant instanceof ValueConstant)
-			return translate((ValueConstant) constant);
+		if (constant instanceof RDFLiteralConstant)
+			return translate((RDFLiteralConstant) constant);
 		else if (constant instanceof IRIConstant)
 			return IRI.create(((IRIConstant) constant).getIRI().getIRIString());
 		else if (constant instanceof BNode)
@@ -144,7 +144,7 @@ public class OWLAPIIndividualTranslator {
 
 
 	private static class UnexceptedAssertionTermException extends OntopInternalBugException {
-		UnexceptedAssertionTermException(Term term) {
+		UnexceptedAssertionTermException(Constant term) {
 			super("Unexpected term in an assertion (cannot be converted to OWLAPI): " + term);
 		}
 	}

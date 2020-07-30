@@ -6,8 +6,10 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -26,7 +28,9 @@ public interface IQTree {
 
     IQTree acceptTransformer(IQTreeVisitingTransformer transformer);
 
-    IQTree liftBinding(VariableGenerator variableGenerator);
+    <T> T acceptVisitor(IQVisitor<T> visitor);
+
+    IQTree normalizeForOptimization(VariableGenerator variableGenerator);
 
     /**
      * Tries to lift unions when they have incompatible definitions
@@ -34,11 +38,8 @@ public interface IQTree {
      *
      * Union branches with compatible definitions are kept together
      *
-     * Assumes that a "regular" binding lift has already been applied
-     *   --> the remaining "non-lifted" definitions are conflicting with
-     *       others.
      */
-    IQTree liftIncompatibleDefinitions(Variable variable);
+    IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator);
 
     default boolean isLeaf() {
         return getChildren().isEmpty();
@@ -54,6 +55,20 @@ public interface IQTree {
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint);
+
+    /**
+     * Particular type of descending substitution: only renaming some variables by external ones.
+     *
+     * Isolated from regular descending substitutions as it preserves the properties of the tree
+     * (e.g. it remains normalized if it was already)
+     *
+     */
+    IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
+
+    /**
+     * Identical to applyFreshRenaming, but also applies to non projected variables
+     */
+    IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 
     /**
      * Applies the descending substitution WITHOUT applying any additional optimization.
@@ -74,6 +89,11 @@ public interface IQTree {
     boolean isConstructed(Variable variable);
 
     /**
+     * Returns true if it guarantees that all its results will be distinct
+     */
+    boolean isDistinct();
+
+    /**
      * Returns true if corresponds to a EmptyNode
      */
     boolean isDeclaredAsEmpty();
@@ -90,6 +110,11 @@ public interface IQTree {
      *
      */
     IQTree propagateDownConstraint(ImmutableExpression constraint);
+
+    /**
+     * TODO: find a better name
+     */
+    IQTree removeDistincts();
 
     void validate() throws InvalidIntermediateQueryException;
 
@@ -115,4 +140,19 @@ public interface IQTree {
      *
      */
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions();
+
+    /**
+     * NOT guaranteed to return all the unique constraints (MAY BE INCOMPLETE)
+     *
+     * Set of sets of determinants.
+     *
+     * Warning: some determinants may be nullable!
+     */
+    ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
+
+    /**
+     * Variables that are the tree proposes for removal if the ancestor trees do not need them.
+     */
+    ImmutableSet<Variable> getNotInternallyRequiredVariables();
+
 }

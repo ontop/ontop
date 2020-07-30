@@ -1,12 +1,8 @@
 package it.unibz.inf.ontop.si.impl;
 
-
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
@@ -40,10 +36,9 @@ public class RDF4JGraphLoading {
         graphURLs.addAll(dataset.getDefaultGraphs());
         graphURLs.addAll(dataset.getNamedGraphs());
 
-        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-        Injector injector = defaultConfiguration.getInjector();
+        LoadingConfiguration loadingConfiguration = new LoadingConfiguration();
 
-        RDF rdfFactory = injector.getInstance(RDF.class);
+        RDF rdfFactory = loadingConfiguration.getRdfFactory();
 
         CollectRDFVocabulary collectVocabulary = new CollectRDFVocabulary(rdfFactory);
         for (IRI graphURL : graphURLs) {
@@ -51,15 +46,13 @@ public class RDF4JGraphLoading {
         }
         Ontology vocabulary = collectVocabulary.vb.build();
 
-        SIRepository repo = new SIRepository(vocabulary.tbox(), defaultConfiguration.getTermFactory(),
-                defaultConfiguration.getTypeFactory(),
-                injector.getInstance(TargetAtomFactory.class));
+        SIRepository repo = new SIRepository(vocabulary.tbox(), loadingConfiguration);
         Connection connection = repo.createConnection();
 
         //  Load the data
         SemanticIndexRDFHandler insertData = new SemanticIndexRDFHandler(repo, connection,
-                defaultConfiguration.getTypeFactory(), defaultConfiguration.getTermFactory(),
-                injector.getInstance(RDF.class));
+                loadingConfiguration.getTypeFactory(), loadingConfiguration.getTermFactory(),
+                rdfFactory);
 
         for (IRI graphURL : graphURLs) {
             processRDF(insertData, graphURL);
@@ -187,16 +180,16 @@ public class RDF4JGraphLoading {
                 else if (object instanceof Literal) {
                     Literal l = (Literal) object;
                     Optional<String> lang = l.getLanguage();
-                    final ValueConstant c2;
+                    final RDFLiteralConstant c2;
                     if (!lang.isPresent()) {
                         IRI datatype = l.getDatatype();
                         RDFDatatype type = (datatype == null)
                                 ? typeFactory.getXsdStringDatatype()
                                 : typeFactory.getDatatype(rdfFactory.createIRI(datatype.stringValue()));
-                        c2 = termFactory.getConstantLiteral(l.getLabel(), type);
+                        c2 = termFactory.getRDFLiteralConstant(l.getLabel(), type);
                     }
                     else {
-                        c2 = termFactory.getConstantLiteral(l.getLabel(), lang.get());
+                        c2 = termFactory.getRDFLiteralConstant(l.getLabel(), lang.get());
                     }
                     return builder.createDataPropertyAssertion(predicateName, c, c2);
                 }

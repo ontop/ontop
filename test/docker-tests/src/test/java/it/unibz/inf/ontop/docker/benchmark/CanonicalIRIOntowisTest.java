@@ -558,17 +558,8 @@ public class CanonicalIRIOntowisTest {
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
                 TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-                int columnSize = rs.getColumnCount();
-                count = 0;
                 while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
                     count ++;
-                    for (int idx = 1; idx <= columnSize; idx++) {
-                        @SuppressWarnings("unused")
-                        OWLObject binding = bindingSet.getOWLObject(idx);
-//                        System.out.print(binding.toString() + ", ");
-                    }
-//                    System.out.print("\n");
                 }
                 long t2 = System.currentTimeMillis();
                 //time = time + (t2-t1);

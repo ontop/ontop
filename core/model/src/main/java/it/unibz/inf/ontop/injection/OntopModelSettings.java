@@ -27,11 +27,11 @@ public interface OntopModelSettings {
          * (allows to optimize more)
          */
         LOOSE,
-        /**
-         * Cardinality is preserved in case a cardinality-sensitive
-         * aggregation function is detected.
-         */
-        STRICT_FOR_AGGREGATION,
+//        /**
+//         * Cardinality is preserved in case a cardinality-sensitive
+//         * aggregation function is detected.
+//         */
+//        STRICT_FOR_AGGREGATION,
         /**
          * Cardinality is strictly preserved
          */

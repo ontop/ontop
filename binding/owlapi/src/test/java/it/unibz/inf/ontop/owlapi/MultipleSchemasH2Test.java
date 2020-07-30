@@ -64,7 +64,6 @@ public class MultipleSchemasH2Test {
             OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .nativeOntopMappingFile(obdafile)
                     .ontologyFile(owlfile)
-                    .enableFullMetadataExtraction(false)
                     .jdbcUrl(url)
                     .jdbcUser(username)
                     .jdbcPassword(password)

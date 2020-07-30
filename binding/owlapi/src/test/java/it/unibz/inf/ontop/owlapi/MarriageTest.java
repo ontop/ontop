@@ -34,12 +34,11 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -57,26 +56,10 @@ public class MarriageTest {
 	private static Connection CONNECTION;
 	private static OntopOWLReasoner REASONER;
 
-
 	@BeforeClass
 	public static void setUp() throws Exception {
-
 		CONNECTION = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
-
-		Statement st = CONNECTION.createStatement();
-
-		FileReader reader = new FileReader(CREATE_DB_FILE);
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		CONNECTION.commit();
+		executeFromFile(CONNECTION, CREATE_DB_FILE);
 
 		OntopOWLFactory owlFactory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()

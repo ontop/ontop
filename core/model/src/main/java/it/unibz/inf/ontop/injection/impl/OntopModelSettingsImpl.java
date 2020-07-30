@@ -139,11 +139,25 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
      */
     Optional<Integer> getInteger(String key) {
         String value = (String) get(key);
-        return Optional.ofNullable(Integer.parseInt(value));
+        return Optional.ofNullable((value == null) ? null : Integer.parseInt(value));
+    }
+
+    /**
+     * Returns the long value of the given key.
+     */
+    Optional<Long> getLong(String key) {
+        String value = (String) get(key);
+        return Optional.ofNullable((value == null) ? null : Long.parseLong(value));
     }
 
     int getRequiredInteger(String key) {
         return getInteger(key)
+                .orElseThrow(() -> new InvalidOntopConfigurationException(key + " is required but missing " +
+                        "(must have a default value)"));
+    }
+
+    long getRequiredLong(String key) {
+        return getLong(key)
                 .orElseThrow(() -> new InvalidOntopConfigurationException(key + " is required but missing " +
                         "(must have a default value)"));
     }

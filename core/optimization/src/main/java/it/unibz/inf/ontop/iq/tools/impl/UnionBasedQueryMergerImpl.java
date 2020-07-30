@@ -5,14 +5,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -44,32 +42,13 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     @Override
     public Optional<IQ> mergeDefinitions(Collection<IQ> predicateDefinitions) {
-        return mergeDefinitions(predicateDefinitions, Optional.empty());
-    }
 
-    @Override
-    public Optional<IQ> mergeDefinitions(Collection<IQ> predicateDefinitions,
-                                                        ImmutableQueryModifiers topModifiers) {
-        return mergeDefinitions(predicateDefinitions, Optional.of(topModifiers));
-    }
-
-    /**
-     * The optional modifiers are for the top construction node above the UNION (if any).
-     *
-     * TODO: refactor it so that the definitive intermediate query is directly constructed.
-     */
-    private Optional<IQ> mergeDefinitions(Collection<IQ> predicateDefinitions,
-                                          Optional<ImmutableQueryModifiers> optionalTopModifiers) {
         if (predicateDefinitions.isEmpty())
             return Optional.empty();
 
         IQ firstDefinition = predicateDefinitions.iterator().next();
         if (predicateDefinitions.size() == 1) {
-            if (optionalTopModifiers.isPresent())
-                return Optional.of(iqFactory.createIQ(firstDefinition.getProjectionAtom(),
-                        optionalTopModifiers.get().insertAbove(firstDefinition.getTree(), iqFactory)));
-            else
-                return Optional.of(firstDefinition);
+            return Optional.of(firstDefinition);
         }
 
         DistinctVariableOnlyDataAtom projectionAtom = firstDefinition.getProjectionAtom();
@@ -111,11 +90,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
         IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(projectionAtom.getVariables()),
                 unionChildren);
 
-        IQTree tree = optionalTopModifiers
-                .map(m -> m.insertAbove(unionTree, iqFactory))
-                .orElse(unionTree);
-
-        return Optional.of(iqFactory.createIQ(projectionAtom, tree));
+        return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));
     }
 
     /**
