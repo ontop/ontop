@@ -75,7 +75,7 @@ public class OntopMaterializerTest {
 	private static final String username = "sa";
 	private static final String password = "";
 
-	private Connection conn;
+	private static Connection conn;
 
 	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final RDF rdfFactory;
@@ -149,7 +149,7 @@ public class OntopMaterializerTest {
 	}
 
 	@BeforeClass
-	public void createDB() {
+	public static void createDB() {
 		try {
 			conn = DriverManager.getConnection(url, username, password);
 			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
@@ -165,7 +165,7 @@ public class OntopMaterializerTest {
 	}
 
 	@AfterClass
-	public void closeConnection(){
+	public static void closeConnection(){
 		try {
 			conn.close();
 		} catch (SQLException e) {
