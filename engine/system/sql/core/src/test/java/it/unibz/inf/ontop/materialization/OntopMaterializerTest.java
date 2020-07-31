@@ -47,16 +47,20 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Stream;
@@ -72,6 +76,8 @@ public class OntopMaterializerTest {
 	private static final String url = "jdbc:h2:mem:aboxdump";
 	private static final String username = "sa";
 	private static final String password = "";
+
+	private Connection conn;
 
 	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final RDF rdfFactory;
@@ -144,6 +150,32 @@ public class OntopMaterializerTest {
 				.jdbcDriver(driver);
 	}
 
+	@Before
+	public void createDB() {
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection(url, username, password);
+			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
+			try (Statement st = conn.createStatement()) {
+				st.executeUpdate(s);
+				conn.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} catch (SQLException | IOException e){
+			e.printStackTrace();
+		}
+	}
+
+	@After
+	public void closeConnection(){
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Test(expected = InvalidOntopConfigurationException.class)
 	public void testNoSource()  {
 		OntopStandaloneSQLConfiguration.defaultBuilder().build();
@@ -159,14 +191,6 @@ public class OntopMaterializerTest {
 				.build();
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-
-		Connection conn = DriverManager.getConnection(url, username, password);
-
-		try (Statement st = conn.createStatement()) {
-			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
-			st.executeUpdate(s);
-			conn.commit();
-		}
 
 		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
@@ -190,7 +214,7 @@ public class OntopMaterializerTest {
 			assertEquals(15, count);
 		}
 
-		conn.close();
+		// conn.close();
 	}
 
 	@Test
@@ -240,7 +264,7 @@ public class OntopMaterializerTest {
 			assertEquals(15, count);
 		}
 
-		conn.close();
+		// conn.close();
 	}
 
 	private SQLPPMapping createMapping()  {
