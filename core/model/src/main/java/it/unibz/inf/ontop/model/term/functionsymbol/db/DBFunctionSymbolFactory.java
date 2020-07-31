@@ -77,7 +77,7 @@ public interface DBFunctionSymbolFactory {
     /**
      * IF THEN, ELSE IF ..., ELSE
      *
-     * Arity must be odd and >= 3
+     * Arity must be odd and {@code >= 3 }
      *
      * doOrderingMatter: if false, the when pairs can be re-ordered
      */
@@ -112,7 +112,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getR2RMLIRISafeEncode();
 
     /**
-     * arity must be >= 2
+     * arity must be {@code >= 2 }
      *
      * Returns a function symbol that does NOT tolerate NULLs
      *
@@ -120,7 +120,7 @@ public interface DBFunctionSymbolFactory {
     DBConcatFunctionSymbol getNullRejectingDBConcat(int arity);
 
     /**
-     * arity must be >= 2
+     * arity must be {@code >= 2}
      *
      * No guarantee on the semantics (dialect-specific!).
      * Please consider the use of getNullRejectingDBConcat(...)
@@ -131,12 +131,12 @@ public interface DBFunctionSymbolFactory {
     DBConcatFunctionSymbol getDBConcatOperator(int arity);
 
     /**
-     * arity must be >= 2
+     * arity must be {@code >= 2 }
      */
     DBAndFunctionSymbol getDBAnd(int arity);
 
     /**
-     * arity must be >= 2
+     * arity must be {@code >= 2 }
      */
     DBOrFunctionSymbol getDBOr(int arity);
 
@@ -252,7 +252,7 @@ public interface DBFunctionSymbolFactory {
     //-------------
 
     /**
-     * arity <= 1
+     * {@code arity <= 1 }
      */
     DBFunctionSymbol getDBCount(int arity, boolean isDistinct);
 

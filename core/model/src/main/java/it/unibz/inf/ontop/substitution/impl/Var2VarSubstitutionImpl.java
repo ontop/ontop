@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Immutable { Variable --> Variable } substitution.
+ * Immutable {@code  Variable --> Variable } substitution.
  */
 public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<Variable> implements Var2VarSubstitution {
 

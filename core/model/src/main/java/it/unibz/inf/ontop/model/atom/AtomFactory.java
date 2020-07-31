@@ -39,7 +39,7 @@ public interface AtomFactory {
 
     /**
      * TODO: change the generic-type to RDFAtomPredicate?
-     * Davide> For provenance TODO: Add quads version for each method in this intereface
+     * Davide: For provenance TODO: Add quads version for each method in this intereface
      */
     DataAtom<AtomPredicate> getIntensionalQuadAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
                                                      VariableOrGroundTerm object, VariableOrGroundTerm graph);

@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 public interface ExtendedProjectionNode extends ExplicitVariableProjectionNode, UnaryOperatorNode {
 
     /**
-     * (Some) projected variable --> transformed variable
+     * {@code (Some) projected variable --> transformed variable}
      */
     ImmutableSubstitution<? extends ImmutableTerm> getSubstitution();
 

@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
- * Arity >= 2
+ * Arity {@code >= 2}
  */
 public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
