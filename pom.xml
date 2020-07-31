@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
@@ -117,7 +118,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+        <!--  <maven.javadoc.failOnError>false</maven.javadoc.failOnError>-->
 
         <!-- for org.codehaus.mojo:license-maven-plugin -->
         <license.licenseName>apache_v2</license.licenseName>
@@ -277,7 +278,7 @@
                                 <requireMavenVersion>
                                     <version>3.6.0</version>
                                 </requireMavenVersion>
-                                <dependencyConvergence />
+                                <dependencyConvergence/>
                             </rules>
                         </configuration>
                     </execution>

@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 /**
- * Cannot be simplified --> has to be evaluated by the DB engine
+ * Cannot be simplified {@code ---> } has to be evaluated by the DB engine
  *
  * Only suitable for DB terms
  */

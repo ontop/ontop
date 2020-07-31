@@ -84,7 +84,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     /**
      *" "this o f"
      *
-     * Equivalent to the function x -> this.apply(f.apply(x))
+     * Equivalent to the function x {@code ->} this.apply(f.apply(x))
      *
      * Follows the formal definition of a the composition of two substitutions.
      *
