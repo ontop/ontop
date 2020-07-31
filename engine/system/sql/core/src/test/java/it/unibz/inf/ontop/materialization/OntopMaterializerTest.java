@@ -47,9 +47,7 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +148,7 @@ public class OntopMaterializerTest {
 				.jdbcDriver(driver);
 	}
 
-	@Before
+	@BeforeClass
 	public void createDB() {
 		try {
 			conn = DriverManager.getConnection(url, username, password);
@@ -166,7 +164,7 @@ public class OntopMaterializerTest {
 		}
 	}
 
-	@After
+	@AfterClass
 	public void closeConnection(){
 		try {
 			conn.close();
