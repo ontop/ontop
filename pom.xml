@@ -106,6 +106,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.2.0</version>
                         <configuration>
                             <doclint>none</doclint>
                         </configuration>
@@ -117,7 +118,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+        <!--  <maven.javadoc.failOnError>false</maven.javadoc.failOnError>-->
 
         <!-- for org.codehaus.mojo:license-maven-plugin -->
         <license.licenseName>apache_v2</license.licenseName>
@@ -310,6 +311,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
