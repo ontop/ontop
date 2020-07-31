@@ -152,7 +152,6 @@ public class OntopMaterializerTest {
 
 	@Before
 	public void createDB() {
-		Connection conn = null;
 		try {
 			conn = DriverManager.getConnection(url, username, password);
 			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
