@@ -227,14 +227,6 @@ public class OntopMaterializerTest {
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = DriverManager.getConnection(url, username, password);
-
-		try (Statement st = conn.createStatement()) {
-			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
-			st.executeUpdate(s);
-			conn.commit();
-		}
-
 		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
 
