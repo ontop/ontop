@@ -135,7 +135,7 @@ public class SimpleMaterializerTest {
 
     // Davide> Named Graphs Simple Test
     @Test
-    public void runMaterializationWithReasoningNamedNQuads() throws Exception {
+    public void runMaterializationWithReasoningNQuads() throws Exception {
         String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning_named.nq";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping_named.obda";
@@ -145,5 +145,17 @@ public class SimpleMaterializerTest {
         assertEquals(5, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
         assertEquals(2, numOfAnnotationAssertions(outFile));
+    }
+
+     @Test
+    public void runMaterializationWithoutReasoningNQuads() throws Exception {
+        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning.rdf";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "nquads",
+                "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
+        assertEquals(3, numOfClassAssertions(outFile));
+        assertEquals(0, numOfObjectPropertyAssertions(outFile));
     }
 }
