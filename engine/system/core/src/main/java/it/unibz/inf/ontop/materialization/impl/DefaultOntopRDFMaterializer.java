@@ -295,12 +295,20 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		// Davide> Builds (named) assertions out of (quad) results
 		private Assertion toConstruct(OntopBindingSet tuple) throws OntopReformulationException, OntopConnectionException, OntopResultConversionException, OntopQueryEvaluationException {
 
-			String s = tuple.getBinding("s").getValue().getValue();
+			String s = tuple.getBinding("s").getValue().toString();
 			String p = lastSeenPredicate.isClass() ? "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : lastSeenPredicate.getIRIString();
-			String o = lastSeenPredicate.isClass() ? "<" + lastSeenPredicate.getIRIString() + ">" : "\"" + tuple.getBinding("o").getValue().getValue() + "\""; //+"\"^^"+tuple.getBinding("o").getValue().getType();
+			// String o = lastSeenPredicate.isClass() ? "<" + lastSeenPredicate.getIRIString() + ">" : "\"" + tuple.getBinding("o").getValue().getValue() + "\""; //+"\"^^"+tuple.getBinding("o").getValue().getType();
+			String o = lastSeenPredicate.isClass() ? "<" + lastSeenPredicate.getIRIString() + ">" : tuple.getBinding("o").getValue().toString(); //+"\"^^"+tuple.getBinding("o").getValue().getType();
 			String g = tuple.hasBinding("g") ? tuple.getBinding("g").getValue().getValue() : null;
-			String constructTemplateContext = "CONSTRUCT {<%s> <%s> %s} WHERE {}"; // {GRAPH <%s> {<%s> <%s> %s}}";
-			String constructTemplate = "CONSTRUCT {<%s> <%s> %s} WHERE {}";
+			String constructTemplateContext = "CONSTRUCT {%s <%s> %s} WHERE {}"; // {GRAPH <%s> {<%s> <%s> %s}}";
+			String constructTemplate = "CONSTRUCT {%s <%s> %s} WHERE {}";
+
+			// Davide> Clean language tag: "aaa"^^@en -> "aaa"@en
+			if( o.contains("@") ){
+				String temp = o.replace("^^","");
+				o = temp;
+			}
+
 
 			if( g != null ){
 				// Quad
@@ -318,7 +326,9 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 				return aN;
 			}
 
-			ConstructQuery query = inputQueryFactory.createConstructQuery(String.format(constructTemplate,s,p,o));
+			String queryString = String.format(constructTemplate,s,p,o);
+
+			ConstructQuery query = inputQueryFactory.createConstructQuery(queryString);
 			OntopStatement tmpStatement = ontopConnection.createStatement();
 			SimpleGraphResultSet tmpGraphResultSet = tmpStatement.execute(query);
 			Assertion a = tmpGraphResultSet.hasNext() ? tmpGraphResultSet.next() : null; // TODO Davide> Add Exception
