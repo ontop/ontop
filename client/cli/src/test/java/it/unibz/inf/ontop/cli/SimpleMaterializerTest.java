@@ -133,34 +133,7 @@ public class SimpleMaterializerTest {
         return ontology.getAxioms(AxiomType.ANNOTATION_ASSERTION).size();
     }
 
-    // Davide> Named Graphs Simple Tests
-    @Test
-    public void runMaterializationWithReasoningNamedTurtle() throws Exception {
-        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning_named.ttl";
-        String ontoFile = "src/test/resources/test/simplemapping.owl";
-        String mappingFile = "src/test/resources/test/simplemapping_named.obda";
-        String propertiesFile = "src/test/resources/test/simplemapping.properties";
-        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "turtle",
-                "-o", outFile, "-p", propertiesFile);
-        assertEquals(5, numOfClassAssertions(outFile));
-        assertEquals(0, numOfObjectPropertyAssertions(outFile));
-        assertEquals(2, numOfAnnotationAssertions(outFile));
-    }
-
-    @Test
-    public void runMaterializationWithReasoningNamedNTriples() throws Exception {
-        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning_named.nt";
-        String ontoFile = "src/test/resources/test/simplemapping.owl";
-        String mappingFile = "src/test/resources/test/simplemapping_named.obda";
-        String propertiesFile = "src/test/resources/test/simplemapping.properties";
-        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "ntriples",
-                "-o", outFile, "-p", propertiesFile);
-        assertEquals(5, numOfClassAssertions(outFile));
-        assertEquals(0, numOfObjectPropertyAssertions(outFile));
-        assertEquals(2, numOfAnnotationAssertions(outFile));
-    }
-
-    @Ignore
+    // Davide> Named Graphs Simple Test
     @Test
     public void runMaterializationWithReasoningNamedNQuads() throws Exception {
         String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning_named.nq";

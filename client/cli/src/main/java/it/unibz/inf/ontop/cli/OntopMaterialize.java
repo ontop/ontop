@@ -17,6 +17,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.eclipse.rdf4j.rio.nquads.NQuadsWriter;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
@@ -64,6 +65,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final String RDF_XML = "rdfxml";
     private static final String TURTLE = "turtle";
     private static final String NTRIPLES = "ntriples";
+    private static final String NQUADS = "nquads";
 
 
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
@@ -75,7 +77,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES})
+    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES, NQUADS})
     public String format = RDF_XML;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -325,6 +327,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     return ".ttl";
                 case NTRIPLES:
                     return ".nt";
+                case NQUADS:
+                    return  ".nq";
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
@@ -342,6 +346,10 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     NTriplesWriter btw  = new NTriplesWriter(writer);
                     btw.set(BasicWriterSettings.PRETTY_PRINT, false);
                     return btw;
+                case NQUADS:
+                    NQuadsWriter nqw = new NQuadsWriter(writer);
+                    nqw.set(BasicWriterSettings.PRETTY_PRINT, false);
+                    return nqw;
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
