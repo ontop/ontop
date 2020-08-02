@@ -106,12 +106,6 @@ public class OntopOntologyMaterializerTest extends TestCase {
 			LOGGER.debug("Assertions:");
 			while (resultSet.hasNext()) {
 				Assertion assertion = resultSet.next();
-				if( assertion.toString().equals("http://www.semanticweb.org/ontologies/MaterializeTest.owl#q" +
-						"(<http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/1>, " +
-						"\"http://www.semanticweb.org/ontologies/MaterializeTest.owl#id/3\")")){
-					System.out.println("DEBUG!!");
-				}
-				LOGGER.debug(assertion.toString());
 
 				if (assertion instanceof ClassAssertion)
 					classAss++;
