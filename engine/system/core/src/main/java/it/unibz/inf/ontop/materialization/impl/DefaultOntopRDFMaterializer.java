@@ -73,11 +73,11 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		private static final String PROPERTY_QUERY = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
         private static final String CLASS_QUERY = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
-        private static final String SELECT_PROPERTY_QUERY_CONTEXT = "SELECT ?s ?o ?g WHERE {GRAPH ?g {?s <%s> ?o}}"; // Davide> TODO
-		private static final String SELECT_CLASS_QUERY_CONTEXT = "SELECT ?s ?g WHERE {GRAPH ?g {?s a <%s>}}"; // Davide> TODO
+        private static final String SELECT_PROPERTY_QUERY_CONTEXT = "SELECT DISTINCT ?s ?o ?g WHERE {GRAPH ?g {?s <%s> ?o}}"; // Davide> TODO
+		private static final String SELECT_CLASS_QUERY_CONTEXT = "SELECT DISTINCT ?s ?g WHERE {GRAPH ?g {?s a <%s>}}"; // Davide> TODO
 
-		private static final String SELECT_PROPERTY_QUERY = "SELECT ?s ?o WHERE {?s <%s> ?o}"; // Davide> TODO
-		private static final String SELECT_CLASS_QUERY = "SELECT ?s WHERE {?s a <%s>}"; // Davide> TODO
+		private static final String SELECT_PROPERTY_QUERY = "SELECT DISTINCT ?s ?o WHERE {?s <%s> ?o}"; // Davide> TODO
+		private static final String SELECT_CLASS_QUERY = "SELECT DISTINCT ?s WHERE {?s a <%s>}"; // Davide> TODO
 		boolean isClass(){
 			return arity == 1;
 		}
@@ -297,14 +297,15 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
 			String s = tuple.getBinding("s").getValue().getValue();
 			String p = lastSeenPredicate.isClass() ? "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : lastSeenPredicate.getIRIString();
-			String o = lastSeenPredicate.isClass() ? "<" + lastSeenPredicate.getIRIString() + ">" : tuple.getBinding("o").getValue().toString(); //+"\"^^"+tuple.getBinding("o").getValue().getType();
+			String o = lastSeenPredicate.isClass() ? "<" + lastSeenPredicate.getIRIString() + ">" : "\"" + tuple.getBinding("o").getValue().getValue() + "\""; //+"\"^^"+tuple.getBinding("o").getValue().getType();
 			String g = tuple.hasBinding("g") ? tuple.getBinding("g").getValue().getValue() : null;
-			String constructTemplateContext = "CONSTRUCT {<%s> <%s> %s} WHERE {GRAPH <%s> {<%s> <%s> %s}}";
-			String constructTemplate = "CONSTRUCT {<%s> <%s> %s} WHERE {<%s> <%s> %s}";
+			String constructTemplateContext = "CONSTRUCT {<%s> <%s> %s} WHERE {}"; // {GRAPH <%s> {<%s> <%s> %s}}";
+			String constructTemplate = "CONSTRUCT {<%s> <%s> %s} WHERE {}";
 
 			if( g != null ){
 				// Quad
-				String queryString = String.format(constructTemplateContext,s,p,o,g,s,p,o);
+				// String queryString = String.format(constructTemplateContext,s,p,o,g,s,p,o);
+				String queryString = String.format(constructTemplateContext,s,p,o);
 				ConstructQuery query = inputQueryFactory.createConstructQuery(queryString);
 				OntopStatement tmpStatement = ontopConnection.createStatement();
 				SimpleGraphResultSet tmpGraphResultSet = tmpStatement.execute(query);
@@ -317,7 +318,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 				return aN;
 			}
 
-			ConstructQuery query = inputQueryFactory.createConstructQuery(String.format(constructTemplate,s,p,o,s,p,o));
+			ConstructQuery query = inputQueryFactory.createConstructQuery(String.format(constructTemplate,s,p,o));
 			OntopStatement tmpStatement = ontopConnection.createStatement();
 			SimpleGraphResultSet tmpGraphResultSet = tmpStatement.execute(query);
 			Assertion a = tmpGraphResultSet.hasNext() ? tmpGraphResultSet.next() : null; // TODO Davide> Add Exception

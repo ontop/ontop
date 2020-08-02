@@ -30,10 +30,7 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -103,6 +100,9 @@ public class OntopOntologyMaterializerTest extends TestCase {
 		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
 			int classAss = 0, propAss = 0, objAss = 0;
 
+			// Davide> TODO: Remove following lines
+			PrintWriter writer = new PrintWriter("src/test/resources/materializer/output_assertions.txt");
+
 			LOGGER.debug("Assertions:");
 			while (resultSet.hasNext()) {
 				Assertion assertion = resultSet.next();
@@ -110,13 +110,16 @@ public class OntopOntologyMaterializerTest extends TestCase {
 
 				if (assertion instanceof ClassAssertion)
 					classAss++;
-
-				else if (assertion instanceof ObjectPropertyAssertion)
+				else if (assertion instanceof ObjectPropertyAssertion) {
 					objAss++;
-
-				else // DataPropertyAssertion
+				}
+				else { // DataPropertyAssertion
 					propAss++;
+					writer.println(assertion.toString());
+				}
 			}
+			writer.flush(); // Davide> TODO Remove
+			writer.close();
 			assertEquals(6, classAss); //2 classes * 3 data rows for T1
 			assertEquals(40, propAss); //2 properties * 7 tables * 3 data rows each T2-T8 - 2 redundant
 			assertEquals(3, objAss); //3 data rows for T9
