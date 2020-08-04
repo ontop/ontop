@@ -182,6 +182,75 @@ public class GeoSPARQLTest {
     }
 
     @Test
+    public void testSelectDistance_Kilometre_CRS84() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/crs84/22> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/crs84/23> a :Geom; geo:asWKT ?yWkt.\n" +
+                //":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND((geof:distance(?xWkt, ?yWkt, uom:metre)/1000) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(339.241, val, 1.0);
+    }
+
+    @Test
+    public void testSelectDistance_Kilometre_EPSG4326() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/epsg4326/24> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/epsg4326/25> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND((geof:distance(?xWkt, ?yWkt, uom:metre)/1000) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(339.241, val, 1.0);
+    }
+
+    @Test // Test with hardcoded NoSRID input
+    public void testSelectDistance_Kilometre_fixedinput() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND((geof:distance(?xWkt, 'POINT(-0.0754 51.5055)'^^geo:wktLiteral, uom:metre)/1000) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(339.241, val, 1.0);
+    }
+
+    @Test // Test fails due to template hard coded input
+    public void testSelectDistance_Kilometre_EPSG4326_fixedinput() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                //":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/crs84/22> a :Geom; geo:asWKT ?xWkt.\n" +
+                //"<http://ex.org/epsg4326/25> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND((geof:distance(?xWkt, '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POINT(-0.0754 51.5055)'^^geo:wktLiteral, uom:metre)/1000) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(339.241, val, 1.0);
+    }
+
+    @Test
     public void testSelectDistance_Degree() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
@@ -199,7 +268,7 @@ public class GeoSPARQLTest {
     }
 
     @Test
-    public void testSelectDistance_Degree2() throws Exception {
+    public void testSelectDistance_Degree_EPSG4326() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -207,8 +276,8 @@ public class GeoSPARQLTest {
                 "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
                 "\n" +
                 "SELECT ?x WHERE {\n" +
-                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
-                ":4 a :Geom; geo:asWKT ?yWkt.\n" +
+                "<http://ex.org/epsg4326/24> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/epsg4326/25> a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND(geof:distance(?xWkt, ?yWkt, uom:degree) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);

@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.Literal;
 
 import javax.annotation.Nonnull;
 
@@ -40,91 +41,81 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
 
         String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
-        ImmutableTerm term0 = subLexicalTerms.get(0);
-        ImmutableTerm term1 = subLexicalTerms.get(1);
+        ImmutableTerm[] subLexicalGeoms = {subLexicalTerms.get(0), subLexicalTerms.get(1)};
+        // Array to store SRIDs
+        String[] srids = new String[2];
+        int nextSRIDIndex = 0;
+        // Array to store geometries
+        ImmutableTerm[] geom = new ImmutableTerm[2];
+        int nextGeomIndex = 0;
 
-        //CASE 1: SRIDs re both defined
-        //NOTE 1: CRS84 & EPSG4326 not interchangeable, CRS84 & NoSRID not interchangeable
+        //STEP 1: Retrieve SRIDs and the respective geometry representation
+        //NOTE 1: CRS84 & EPSG4326 considered different SRID, but CRS84 & NoSRID the same
         //NOTE 2: WGS84 considered equivalent only to CRS84 and EPSG4326
-        // Check if both are non-ground functional terms
-        if (term0 instanceof NonGroundFunctionalTerm && term1 instanceof NonGroundFunctionalTerm) {
-            NonGroundFunctionalTerm f0 = (NonGroundFunctionalTerm) term0;
-            FunctionSymbol fs0 = f0.getFunctionSymbol();
-            NonGroundFunctionalTerm f1 = (NonGroundFunctionalTerm) term1;
-            FunctionSymbol fs1 = f1.getFunctionSymbol();
-            if (fs0 instanceof DBConcatFunctionSymbol && fs1 instanceof DBConcatFunctionSymbol) {
-                // DBConcatFunctionSymbol concat = (DBConcatFunctionSymbol) fs;
-                if (f0.getTerm(0) instanceof DBConstant && f1.getTerm(0) instanceof DBConstant) {
-                    // Retrieve IRI as string
-                    DBConstant t0 = (DBConstant) f0.getTerm(0);
-                    String tt0 = t0.getValue();
-                    DBConstant t1 = (DBConstant) f1.getTerm(0);
-                    String tt1 = t1.getValue();
-                    if (tt0.startsWith("<") && tt0.indexOf(">") > 0 &&
-                            tt1.startsWith("<") && tt1.indexOf(">") > 0) {
-                        // Retrieve SRIDs as strings
-                        String srid0 = tt0.substring(32, tt0.indexOf(">"));
-                        String srid1 = tt1.substring(32, tt1.indexOf(">"));
-                        // Check srid-s are identical
-                        if(srid0.equals(srid1)) {
-                            // Retrieve geometries
-                            ImmutableTerm geom0 = f0.getTerm(1);
-                            ImmutableTerm geom1 = f1.getTerm(1);
-                            if (unit.equals(UOM.METRE.getIRIString())) {
-                                if (srid0.equals(defaultSRID)) {
-                                    // Flip Coordinates for CRS84, since default is EPSG4326
-                                    return termFactory.getDBSTDistanceSphere(
-                                            termFactory.getDBSTFlipCoordinates(geom0),
-                                            termFactory.getDBSTFlipCoordinates(geom1));
-                                } else if (srid0.equals(defaultEPSG)) {
-                                    // Reverse order for EPSG 4326
-                                    return termFactory.getDBSTDistanceSphere(geom0, geom1);
-                                } else {
-                                    return termFactory.getDBSTDistance(geom0, geom1);
-                                }
-                            } else if (unit.equals(UOM.DEGREE.getIRIString())) {
-                                // ST_DISTANCE
-                                return termFactory.getDBSTDistance(geom0, geom1);
-                            } else if (unit.equals(UOM.RADIAN.getIRIString())) {
-                                // ST_DISTANCE / 180 * PI
-                                double ratio = PI / 180;
-                                DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
-                                DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-                                DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
-                                ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(geom0, geom1);
-                                return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType()));
-                            } else {
-                                throw new IllegalArgumentException("Unexpected unit: " + unit);
-                            }
+        for (ImmutableTerm term : subLexicalGeoms) {
+            if (term instanceof NonGroundFunctionalTerm) {
+                NonGroundFunctionalTerm f0 = (NonGroundFunctionalTerm) term;
+                FunctionSymbol fs0 = f0.getFunctionSymbol();
+                // For cases where a template is defined, retrieve SRID and add to array
+                if (fs0 instanceof DBConcatFunctionSymbol) {
+                    // DBConcatFunctionSymbol concat = (DBConcatFunctionSymbol) fs;
+                    if (f0.getTerm(0) instanceof DBConstant) {
+                        // Retrieve IRI as string
+                        DBConstant t0 = (DBConstant) f0.getTerm(0);
+                        String tt0 = t0.getValue();
+                        if (tt0.startsWith("<") && tt0.indexOf(">") > 0) {
+                            // Retrieve SRIDs as strings
+                            srids[nextSRIDIndex] = tt0.substring(32, tt0.indexOf(">"));
                         } else {
-                            throw new IllegalArgumentException("SRIDs do not match");
+                            srids[nextSRIDIndex] = defaultSRID;
                         }
+                        nextSRIDIndex++;
                     }
+                    // For cases with a template, save the geometry for analysis
+                    geom[nextGeomIndex] = f0.getTerm(1);
+                } else {
+                    // Cases with no template, set SRID to default and save geometry
+                    srids[nextSRIDIndex] = defaultSRID;
+                    geom[nextGeomIndex] = subLexicalTerms.get(nextGeomIndex);
+                    nextSRIDIndex++;
                 }
+            } else {
+                // Cases with user geometry input in query
+                // NOTE: Cannot deal with cases when there is a template
+                srids[nextSRIDIndex] = defaultSRID;
+                geom[nextGeomIndex] = subLexicalTerms.get(nextGeomIndex);
+                nextSRIDIndex++;
             }
+            nextGeomIndex++;
         }
 
-        // CASE 2 - No SRID is defined
-        if (unit.equals(UOM.METRE.getIRIString())) {
-            // ST_DISTANCESPHERE
-            // Flip Coordinates for CRS84, since default is EPSG4326
-            return termFactory.getDBSTDistanceSphere(//subLexicalTerms.get(0), subLexicalTerms.get(1));
-                    termFactory.getDBSTFlipCoordinates(subLexicalTerms.get(0)),
-                    termFactory.getDBSTFlipCoordinates(subLexicalTerms.get(1)));
-        } else if (unit.equals(UOM.DEGREE.getIRIString())) {
-            // ST_DISTANCE
-            return termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
-        } else if (unit.equals(UOM.RADIAN.getIRIString())) {
-            // ST_DISTANCE / 180 * PI
-            double ratio = PI / 180;
-            DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
-            DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-            DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
-            ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(subLexicalTerms.get(0), subLexicalTerms.get(1));
-            return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType()));
+        // STEP 2: If the SRIDs do match, calculate distance, otherwise throw exception
+        if(srids[0].equals(srids[1])) {
+            if (unit.equals(UOM.METRE.getIRIString())) {
+                if (srids[0].equals(defaultSRID)) {
+                    // Reverse order for EPSG 4326
+                    return termFactory.getDBSTDistanceSphere(geom[0], geom[1]);
+                } else if (srids[0].equals(defaultEPSG)) {
+                    return termFactory.getDBSTDistanceSphere(geom[0], geom[1]);
+                } else {
+                    return termFactory.getDBSTDistance(geom[0], geom[1]);
+                }
+            } else if (unit.equals(UOM.DEGREE.getIRIString())) {
+                // ST_DISTANCE
+                return termFactory.getDBSTDistance(geom[0], geom[1]);
+            } else if (unit.equals(UOM.RADIAN.getIRIString())) {
+                // ST_DISTANCE / 180 * PI
+                double ratio = PI / 180;
+                DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
+                DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+                DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
+                ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(geom[0], geom[1]);
+                return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType()));
+            } else {
+                throw new IllegalArgumentException("Unexpected unit: " + unit);
+            }
         } else {
-            throw new IllegalArgumentException("Unexpected unit: " + unit);
+            throw new IllegalArgumentException("SRIDs do not match");
         }
-
     }
 }
