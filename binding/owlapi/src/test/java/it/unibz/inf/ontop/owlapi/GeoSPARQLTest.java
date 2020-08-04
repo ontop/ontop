@@ -1248,6 +1248,19 @@ public class GeoSPARQLTest {
         assertEquals("http://www.opengis.net/def/crs/EPSG/0/3044", val);
     }
 
+    @Test // ST_SRID retrieves an integer
+    public void testSelectGetSRIDEPSG_Constant() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "SELECT ?x WHERE {\n" +
+                "BIND(geof:getSRID('<http://www.opengis.net/def/crs/EPSG/0/3044> POINT(668683.853 5122640.964)'^^geo:wktLiteral) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // val has type "xsd:anyURI"
+        assertEquals("http://www.opengis.net/def/crs/EPSG/0/3044", val);
+    }
+
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
