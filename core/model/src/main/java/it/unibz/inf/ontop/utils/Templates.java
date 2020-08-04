@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.utils;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -88,10 +88,7 @@ public class Templates {
     /**
      * This method instantiates the input uri template by arguments
      * <p>
-     * <p>
-     * <p>
      * Example:
-     * <p>
      * <p>
      * {@code  URITemplates.format("http://example.org/{}/{}", "A", 1)} results {@code "http://example.org/A/1" }
      *
@@ -109,7 +106,7 @@ public class Templates {
      * <p>
      * For instance:
      * <pre>
-     * http://example.org/{}/{}/{}(X, Y, X) -> "http://example.org/{X}/{Y}/{X}"
+     * {@code http://example.org/{}/{}/{}(X, Y, X) -> "http://example.org/{X}/{Y}/{X}"}
      * </pre>
      *
      * @param lexicalFunctionalTerm URI or BNode Function

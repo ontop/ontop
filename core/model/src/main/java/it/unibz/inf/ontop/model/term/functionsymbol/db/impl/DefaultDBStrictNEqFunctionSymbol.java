@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * TODO: should it make it a non-DB boolean function symbol?
- *  --> that is, downgrading to a non-strict equality?
+ *  {@code ---> } that is, downgrading to a non-strict equality?
  */
 public class DefaultDBStrictNEqFunctionSymbol extends AbstractDBStrictEqNeqFunctionSymbol {
     private static String OPERATOR = " <> ";

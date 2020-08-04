@@ -61,7 +61,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
     /**
      * Is expected to always have an effect on the tree it receives as argument.
      *
-     * ---> Not called for trees not having any variable to remove.
+     * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
     protected static class VariableRemoverTransformer implements IQTreeVisitingTransformer {

@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 /**
  * The SPARQL function must be reducible to DB functions and RDF construction and testing functions
  *
- * Arity >= 1
+ * Arity {@code >= 1 }
  */
 public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
 
@@ -96,7 +96,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
 
     /***
      * MUST detect ALL the cases where the SPARQL function would produce an error (that is a NULL)
-     * ---> the resulting condition must determine if the output of the SPARQL function is NULL (evaluates to FALSE or NULL)
+     * {@code ---> } the resulting condition must determine if the output of the SPARQL function is NULL (evaluates to FALSE or NULL)
      *      or not (evaluates to TRUE).
      *
      * Default implementation, can be overridden

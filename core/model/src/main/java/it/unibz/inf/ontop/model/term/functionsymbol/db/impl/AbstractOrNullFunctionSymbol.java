@@ -12,10 +12,10 @@ import java.util.stream.IntStream;
 
 /**
  * Implementing the ternary logic for situations like:
- *
+ *{@code
  *   * NULL AND y AND ... --> FalseOrNull
  *   * NULL OR y OR ... ---> TrueOrNull
- *
+ *}
  *   N-ary (at least 1)
  */
 public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymbolImpl {

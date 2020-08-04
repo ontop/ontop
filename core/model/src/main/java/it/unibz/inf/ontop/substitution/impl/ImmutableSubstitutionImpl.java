@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 
 /**
- * Wrapper above an ImmutableMap<Variable, ImmutableTerm> map.
+ * Wrapper above an {@code ImmutableMap<Variable, ImmutableTerm>} map.
  */
 
 public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends AbstractImmutableSubstitutionImpl<T> {

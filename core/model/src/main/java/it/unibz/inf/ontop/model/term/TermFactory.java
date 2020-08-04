@@ -139,7 +139,7 @@ public interface TermFactory {
 	ImmutableExpression getDBNonStrictDateEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
 	/**
-	 * Cannot be simplified --> has to be evaluated by the DB engine
+	 * Cannot be simplified {@code -->} has to be evaluated by the DB engine
 	 *
 	 * Only suitable for DB terms
 	 */
@@ -171,9 +171,9 @@ public interface TermFactory {
 	 * Examples:
 	 * <p>
 	 * <code>
-	 * http://example.org/some/paths <br />
-	 * http://example.org/some/paths/to/resource#frag01 <br />
-	 * ftp://example.org/resource.txt <br />
+	 * http://example.org/some/paths <br>
+	 * http://example.org/some/paths/to/resource#frag01 <br>
+	 * ftp://example.org/resource.txt <br>
 	 * </code>
 	 * <p>
 	 * are all well-formed URI strings.
@@ -224,7 +224,7 @@ public interface TermFactory {
 	 * Example:
 	 * <p>
 	 * <code>
-	 * "Person"^^xsd:String <br />
+	 * "Person"^^xsd:String <br>
 	 * 22^^xsd:Integer
 	 * </code>
 	 *
@@ -245,7 +245,7 @@ public interface TermFactory {
 	 * Example:
 	 * <p>
 	 * <code>
-	 * "This is American English"@en-US <br />
+	 * "This is American English"@en-US
 	 * </code>
 	 *
 	 * @param value
@@ -270,7 +270,7 @@ public interface TermFactory {
 	 * dollar sign ('$') or a question mark sign ('?'), e.g.:
 	 * <p>
 	 * <code>
-	 * pred($x) <br />
+	 * pred($x) <br>
 	 * func(?x, ?y)
 	 * </code>
 	 *

@@ -48,8 +48,6 @@ public class R2RMLParser {
 
 	/**
 	 * Get SQL query of the TriplesMap
-	 * @param tm
-	 * @return
 	 */
 	public String extractSQLQuery(TriplesMap tm) {
 		return tm.getLogicalTable().getSQLQuery();

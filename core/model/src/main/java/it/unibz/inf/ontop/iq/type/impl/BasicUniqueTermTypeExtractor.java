@@ -159,7 +159,7 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
         /**
          * Returns the first type found for a variable.
          *
-         * If multiple types could have been found -> not matching -> will be later eliminated
+         * If multiple types could have been found -- not matching -- will be later eliminated
          *
          */
         @Override
