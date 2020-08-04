@@ -71,6 +71,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected static final String ST_SETSRID = "ST_SETSRID";
 
+    protected static final String ST_FLIP_COORDINATES = "ST_FLIPCOORDINATES";
+
     protected static final String ST_ASTEXT = "ST_ASTEXT";
     private static final String ST_BUFFER = "ST_BUFFER";
     private static final String ST_INTERSECTION = "ST_INTERSECTION";
@@ -349,6 +351,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol getsridSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_SRID, 1, dbIntType, false,
                 abstractRootDBType);
         builder.put(ST_SRID, 2, getsridSymbol);
+
+        DBFunctionSymbol flipCoordinatesSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_FLIP_COORDINATES, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_FLIP_COORDINATES, 1, flipCoordinatesSymbol);
 
         /*DBFunctionSymbol getdimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIMENSION, 1, dbIntType, false,
                 abstractRootDBType);
@@ -1007,6 +1013,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public FunctionSymbol getDBAsText() {
         return getRegularDBFunctionSymbol(ST_ASTEXT, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBSTFlipCoordinates() {
+        return getRegularDBFunctionSymbol(ST_FLIP_COORDINATES, 1);
     }
 
     @Override

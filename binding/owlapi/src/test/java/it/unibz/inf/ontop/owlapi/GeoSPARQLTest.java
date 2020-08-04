@@ -96,7 +96,7 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test
+    @Test // Case when no SRID is defined - Default SRID is EPSG4326
     public void testSelectDistance_Metre() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
@@ -111,6 +111,57 @@ public class GeoSPARQLTest {
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
         assertEquals(339241, val, 1.0);
+    }
+
+    @Test // Case when SRIDs defined are both CRS84
+    public void testSelectDistance_Metre_CRS84() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/crs84/22> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/crs84/23> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(339241, val, 1.0);
+    }
+
+    @Test // Case when SRIDs defined are both EPSG4326
+    public void testSelectDistance_Metre_EPSG4326() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/epsg4326/24> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/epsg4326/25> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(339241, val, 1.0);
+    }
+
+    @Test // Case when SRIDs defined are both EPSG3044 (Non WGS84) - Cartesian
+    public void testSelectDistance_Metre_EPSG3044() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/epsg3044/21> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/epsg3044/26> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(1.41, val, 0.1);
     }
 
     @Test
@@ -132,6 +183,23 @@ public class GeoSPARQLTest {
 
     @Test
     public void testSelectDistance_Degree() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":4 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:degree) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(3.55, val, 0.01);
+    }
+
+    @Test
+    public void testSelectDistance_Degree2() throws Exception {
         //language=TEXT
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +

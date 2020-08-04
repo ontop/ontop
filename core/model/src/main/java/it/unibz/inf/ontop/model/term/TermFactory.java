@@ -571,6 +571,8 @@ public interface TermFactory {
 
 	ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2);
 
+	ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1);
+
 	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
