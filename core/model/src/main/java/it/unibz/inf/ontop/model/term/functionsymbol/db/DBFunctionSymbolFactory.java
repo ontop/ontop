@@ -312,6 +312,8 @@ public interface DBFunctionSymbolFactory {
 
     FunctionSymbol getDBAsText();
 
+    FunctionSymbol getDBSTFlipCoordinates();
+
     FunctionSymbol getDBBuffer();
 
     FunctionSymbol getDBIntersection();

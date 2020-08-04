@@ -629,6 +629,11 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTFlipCoordinates(), ImmutableList.of(arg1));
+    }
+
+    @Override
     public ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBuffer(), ImmutableList.of(arg1, arg2));
     }
