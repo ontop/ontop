@@ -31,23 +31,28 @@ public class GeofGetSRIDFunctionSymbolImpl extends AbstractGeofIRIFunctionSymbol
 
         ImmutableTerm term = subLexicalTerms.get(0);
 
-        if (term instanceof NonGroundFunctionalTerm) {
-            NonGroundFunctionalTerm f = (NonGroundFunctionalTerm) term;
-            FunctionSymbol fs = f.getFunctionSymbol();
-            if (fs instanceof DBConcatFunctionSymbol) {
-                // TEMPLATE FOUND!
-                // DBConcatFunctionSymbol concat = (DBConcatFunctionSymbol) fs;
-                if (f.getTerm(0) instanceof DBConstant) {
-                    DBConstant t = (DBConstant) f.getTerm(0);
-                    String tt = t.getValue();
-                    if (tt.startsWith("<") && tt.indexOf(">") > 0) {
-                        String srid = tt.substring(1, tt.indexOf(">"));
-                        return termFactory.getDBStringConstant(srid);
-                    }
-                }
-            }
-        }
+        Optional<ImmutableTerm> immutableTerm = Optional.of(term)
+                // template is a NonGroundFunctionalTerm
+                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
+                // template uses DBConcatFunctionSymbol as the functional symbol
+                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
+                // the first argument is the string starting with the IRI of the SRID
+                .map(t -> t.getTerm(0));
 
-        return termFactory.getDBStringConstant(defSRID);
+        return getSRIDFromDbConstant(termFactory, immutableTerm);
+
+    }
+
+    private DBConstant getSRIDFromDbConstant(TermFactory termFactory, Optional<ImmutableTerm> immutableTerm) {
+        return immutableTerm
+                // the first argument has to be a constant
+                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
+                .map(Constant::getValue)
+                // the SRID is enclosed by "<" and ">
+                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                // extract the SRID out of the string
+                .map(v -> termFactory.getDBStringConstant(v.substring(1, v.indexOf(">"))))
+                // otherwise, returns the default SRID
+                .orElse(termFactory.getDBStringConstant(defSRID));
     }
 }
