@@ -1,18 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.SPARQLFunctionSymbolImpl;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
-import it.unibz.inf.ontop.model.vocabulary.GEOF;
-import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
@@ -31,22 +22,33 @@ public class GeofGetSRIDFunctionSymbolImpl extends AbstractGeofIRIFunctionSymbol
 
         ImmutableTerm term = subLexicalTerms.get(0);
 
-        if (term instanceof NonGroundFunctionalTerm) {
-            NonGroundFunctionalTerm f = (NonGroundFunctionalTerm) term;
-            FunctionSymbol fs = f.getFunctionSymbol();
-            if (fs instanceof DBConcatFunctionSymbol) {
-                // DBConcatFunctionSymbol concat = (DBConcatFunctionSymbol) fs;
-                if (f.getTerm(0) instanceof DBConstant) {
-                    DBConstant t = (DBConstant) f.getTerm(0);
-                    String tt = t.getValue();
-                    if (tt.startsWith("<") && tt.indexOf(">") > 0) {
-                        String srid = tt.substring(1, tt.indexOf(">"));
-                        return termFactory.getDBStringConstant(srid);
-                    }
-                }
-            }
-        }
+        String sridString = getSRIDFromDbConstant(Optional.of(term))
+                .orElseGet(
+                        // template
+                        () -> getSRIDFromDbConstant(getArg0FromTemplate(term))
+                                // otherwise, returns the default SRID
+                                .orElse(defSRID));
+        return termFactory.getDBStringConstant(sridString);
+    }
 
-        return termFactory.getDBStringConstant(defSRID);
+    private Optional<ImmutableTerm> getArg0FromTemplate(ImmutableTerm term) {
+        return Optional.of(term)
+                // template is a NonGroundFunctionalTerm
+                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
+                // template uses DBConcatFunctionSymbol as the functional symbol
+                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
+                // the first argument is the string starting with the IRI of the SRID
+                .map(t -> t.getTerm(0));
+    }
+
+    private Optional<String> getSRIDFromDbConstant(Optional<ImmutableTerm> immutableTerm) {
+        return immutableTerm
+                // the first argument has to be a constant
+                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
+                .map(Constant::getValue)
+                // the SRID is enclosed by "<" and ">
+                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                // extract the SRID out of the string
+                .map(v -> v.substring(1, v.indexOf(">")));
     }
 }

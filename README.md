@@ -6,7 +6,6 @@
 | Branch    | build status  |
 |-----------|---------------|
 | [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
-| [version3](https://github.com/ontop/ontop/tree/version3) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=version3)](https://travis-ci.org/ontop/ontop)|
 | [version4](https://github.com/ontop/ontop/tree/version4) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=version4)](https://travis-ci.org/ontop/ontop)|
 
 

@@ -24,7 +24,7 @@ public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends 
 
     /**
      * Type of the input is not checked as it cannot be a source of SPARQL errors.
-     *   --> such a type error would correspond to an internal bug.
+     *  {@code  -->} such a type error would correspond to an internal bug.
      *
      *  Effective Boolean Values (EBVs) are expected to be ALREADY wrapped into a specialized function.
      *

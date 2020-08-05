@@ -64,13 +64,7 @@ public interface ForeignKeyConstraint {
 
     /**
      * creates a single-attribute foreign key
-     *
-     * @param name
-     * @param attribute
-     * @param referencedAttribute
-     * @return
      */
-
     static void of(String name, Attribute attribute, Attribute referencedAttribute) {
         builder(name, (DatabaseRelationDefinition)attribute.getRelation(), (DatabaseRelationDefinition)referencedAttribute.getRelation())
                 .add(attribute.getIndex(), referencedAttribute.getIndex()).build();
