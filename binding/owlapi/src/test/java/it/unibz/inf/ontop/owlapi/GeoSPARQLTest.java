@@ -241,9 +241,7 @@ public class GeoSPARQLTest {
                 "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
                 "\n" +
                 "SELECT ?x WHERE {\n" +
-                //":3 a :Geom; geo:asWKT ?xWkt.\n" +
                 "<http://ex.org/crs84/22> a :Geom; geo:asWKT ?xWkt.\n" +
-                //"<http://ex.org/epsg4326/25> a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND((geof:distance(?xWkt, '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POINT(-0.0754 51.5055)'^^geo:wktLiteral, uom:metre)/1000) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
