@@ -18,13 +18,16 @@ import org.apache.commons.rdf.api.Literal;
 
 import javax.annotation.Nonnull;
 
+import java.util.List;
+import java.util.Optional;
+
 import static java.lang.Math.PI;
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
     FunctionSymbolFactory functionSymbolFactory;
-    public static final String defaultSRID = "OGC/1.3/CRS84";
-    public static final String defaultEPSG = "EPSG/0/4326";
+    public static final String defaultSRID = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
+    public static final String defaultEPSG = "http://www.opengis.net/def/crs/EPSG/0/4326";
 
     public GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType, FunctionSymbolFactoryImpl functionSymbolFactory) {
         super("GEOF_DISTANCE", functionIRI,
@@ -41,7 +44,148 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
 
         String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
+        //ImmutableList subLexicalGeoms = ImmutableList.of(subLexicalTerms.get(0), subLexicalTerms.get(1));
         ImmutableTerm[] subLexicalGeoms = {subLexicalTerms.get(0), subLexicalTerms.get(1)};
+        // Array to store SRIDs
+        String[] sridString = new String[2];
+        int sridStringIndex = 0;
+        // Array to store geometries
+        //ImmutableTerm[] geom = new ImmutableTerm[2];
+        int nextGeomIndex = 0;
+
+        for (ImmutableTerm term : subLexicalGeoms) {
+            sridString[sridStringIndex] = getSRIDFromDbConstant(Optional.of(term))
+                    .orElseGet(
+                            // template
+                            () -> getSRIDFromDbConstant(getArg0FromTemplate(term))
+                                    // otherwise, returns the default SRID
+                                    .orElse(defaultSRID));
+            sridStringIndex++;
+        }
+
+        ImmutableTerm geom0 = getArg1FromDbConstant(subLexicalTerms.get(0), termFactory)
+                .orElseGet(
+                        // Manutal input
+                        () -> getArg1FromTemplate(subLexicalTerms.get(0))
+                            .orElse(subLexicalTerms.get(0)));
+        //ImmutableTerm geom1 = getArg1FromTemplate(subLexicalTerms.get(1)).orElse(subLexicalTerms.get(1));
+        ImmutableTerm geom1 = getArg1FromDbConstant(subLexicalTerms.get(1), termFactory)
+                .orElseGet(
+                        // Manutal input
+                        () -> getArg1FromTemplate(subLexicalTerms.get(1))
+                                .orElse(subLexicalTerms.get(1)));
+        /*for (ImmutableTerm term : subLexicalGeoms) {
+            geom[nextGeomIndex] = (getArg1FromTemplate(term));
+            nextGeomIndex++;
+        }*/
+
+
+        //sridString[0] = "CRS84";
+        //sridString[1] = "CRS84";
+
+        if(sridString[0].equals(sridString[1])) {
+            if (unit.equals(UOM.METRE.getIRIString())) {
+                if (sridString[0].equals(defaultSRID)) {
+                    // Reverse order for EPSG 4326
+                    //return termFactory.getDBSTDistanceSphere(geom[0], geom[1]);
+                    return termFactory.getDBSTDistanceSphere(geom0, geom1);
+                } else if (sridString[0].equals(defaultEPSG)) {
+                    //return termFactory.getDBSTDistanceSphere(geom[0], geom[1]);
+                    return termFactory.getDBSTDistanceSphere(geom0, geom1);
+                } else {
+                    //return termFactory.getDBSTDistance(geom[0], geom[1]);
+                    return termFactory.getDBSTDistance(geom0, geom1);
+                }
+            } else if (unit.equals(UOM.DEGREE.getIRIString())) {
+                // ST_DISTANCE
+                //return termFactory.getDBSTDistance(geom[0], geom[1]);
+                return termFactory.getDBSTDistance(geom0, geom1);
+            } else if (unit.equals(UOM.RADIAN.getIRIString())) {
+                // ST_DISTANCE / 180 * PI
+                double ratio = PI / 180;
+                DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
+                DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+                DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
+                //ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(geom[0], geom[1]);
+                ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(geom0, geom1);
+                return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType()));
+            } else {
+                throw new IllegalArgumentException("Unexpected unit: " + unit);
+            }
+        } else {
+            throw new IllegalArgumentException("SRIDs do not match");
+        }
+        //return termFactory.getDBStringConstant(sridString);
+    }
+
+    private Optional<ImmutableTerm> getArg0FromTemplate(ImmutableTerm term) {
+        return Optional.of(term)
+                // template is a NonGroundFunctionalTerm
+                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
+                // template uses DBConcatFunctionSymbol as the functional symbol
+                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
+                // the first argument is the string starting with the IRI of the SRID
+                .map(t -> t.getTerm(0));
+    }
+
+    private Optional<String> getSRIDFromDbConstant(Optional<ImmutableTerm> immutableTerm) {
+        return immutableTerm
+                // the first argument has to be a constant
+                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
+                .map(Constant::getValue)
+                // the SRID is enclosed by "<" and ">
+                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                // extract the SRID out of the string
+                .map(v -> v.substring(1, v.indexOf(">")));
+    }
+
+    private Optional<ImmutableTerm> getArg1FromTemplate(ImmutableTerm term) {//ImmutableList<ImmutableTerm> newterms) {
+        return Optional.of(term)
+                //.stream()
+                // template is a NonGroundFunctionalTerm
+                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
+                // template uses DBConcatFunctionSymbol as the functional symbol
+                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
+                // the first argument is the string starting with the IRI of the SRID
+                .map(t -> t.getTerm(1));
+                //.orElse(term);
+    }
+
+    private Optional<ImmutableTerm> getArg1FromDbConstant(ImmutableTerm immutableTerm, TermFactory termFactory) {
+        return Optional.of(immutableTerm)
+                // the first argument has to be a constant
+                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
+                .map(Constant::getValue)
+                // the SRID is enclosed by "<" and ">
+                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                // extract the SRID out of the string
+                .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">")+1)));
+                //.map(s -> (ImmutableTerm) termFactory.getDBStringConstant(s));
+    }
+
+   /* private ImmutableTerm getImmutable(Optional<ImmutableTerm> immutableTerm) {
+        ImmutableTerm kx = getArg1FromTemplate(immutableTerm);
+        return kx;*/
+                //.map(t -> (ImmutableTerm) t);
+
+                // set srid condition here
+
+                //.map(t <- t.getFun);
+                //.map(t -> (ImmutableTerm) term);
+                // the first argument has to be a constant
+                //.filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
+                //.map(Constant::getValue)
+                // the SRID is enclosed by "<" and ">
+                //.filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                // extract the SRID out of the string
+                //.map(v -> v.substring(1, v.indexOf(">")));
+    //}
+
+
+
+
+
+        /*ImmutableTerm[] subLexicalGeoms = {subLexicalTerms.get(0), subLexicalTerms.get(1)};
         // Array to store SRIDs
         String[] srids = new String[2];
         int nextSRIDIndex = 0;
@@ -117,5 +261,5 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         } else {
             throw new IllegalArgumentException("SRIDs do not match");
         }
-    }
+    }*/
 }
