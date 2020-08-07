@@ -306,6 +306,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBSTDistanceSphere();
 
+    DBFunctionSymbol getDBSTDistanceSpheroid();
+
     DBFunctionSymbol getDBSTTransform();
 
     DBFunctionSymbol getDBSTSetSRID();

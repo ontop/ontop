@@ -644,6 +644,11 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistanceSpheroid(), ImmutableList.of(arg1, arg2, arg3));
+    }
+
+    @Override
     public ImmutableTerm getDBIntersection(ImmutableTerm arg1, ImmutableTerm arg2) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIntersection(), ImmutableList.of(arg1, arg2));
     }

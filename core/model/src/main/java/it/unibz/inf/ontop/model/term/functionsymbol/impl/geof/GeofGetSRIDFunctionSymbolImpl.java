@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class GeofGetSRIDFunctionSymbolImpl extends AbstractGeofIRIFunctionSymbolImpl {//AbstractGeofIRIFunctionSymbolImpl {
 
-    public static final String defSRID = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
+    public static final String defaultSRID = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
 
     public GeofGetSRIDFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdAnyUri) {
         super("GEOF_GETSRID", functionIRI, ImmutableList.of(wktLiteralType), xsdAnyUri);
@@ -27,7 +27,7 @@ public class GeofGetSRIDFunctionSymbolImpl extends AbstractGeofIRIFunctionSymbol
                         // template
                         () -> getSRIDFromDbConstant(getArg0FromTemplate(term))
                                 // otherwise, returns the default SRID
-                                .orElse(defSRID));
+                                .orElse(defaultSRID));
         return termFactory.getDBStringConstant(sridString);
     }
 

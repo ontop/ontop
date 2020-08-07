@@ -1149,7 +1149,7 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test // Geocollection with point vs polygon
+   /* @Test // Geocollection with point vs polygon
     public void testAskRcc8Tppi2() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -1161,9 +1161,9 @@ public class GeoSPARQLTest {
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
-    }
+    }*/
 
-    @Test // Polygon vs point
+    /*@Test // Polygon vs point
     public void testAskRcc8Tppi3() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -1175,7 +1175,7 @@ public class GeoSPARQLTest {
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
-    }
+    }*/
 
     /*@Test // No geometry self intersections
     public void testAskIsSimple() throws Exception {

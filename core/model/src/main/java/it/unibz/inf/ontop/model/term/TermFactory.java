@@ -575,6 +575,8 @@ public interface TermFactory {
 
 	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
 
+	ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
+
 	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableTerm getDBIntersection(ImmutableTerm arg1, ImmutableTerm arg2);
