@@ -19,14 +19,8 @@ public class GeofSfWithinFunctionSymbolImpl extends AbstractGeofBooleanFunctionS
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTWithin(unwrapSTAsText(subLexicalTerms.get(0)), unwrapSTAsText(subLexicalTerms.get(1))).simplify();
+        return termFactory.getDBSTWithin(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 
-    private ImmutableTerm unwrapSTAsText(ImmutableTerm term) {
-        return Optional.of(term)
-                .filter(t -> t instanceof NonGroundFunctionalTerm).map(NonGroundFunctionalTerm.class::cast)
-                .filter(t -> t.getFunctionSymbol().getName().startsWith("ST_ASTEXT"))
-                .map(t -> t.getTerm(0))
-                .orElse(term);
-    }
+
 }

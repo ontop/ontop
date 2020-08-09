@@ -3,10 +3,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -254,47 +252,47 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         builder.put(NULLIF_STR, 2, nullIfFunctionSymbol);
 
         // GEO Functions
-        DBFunctionSymbol withinFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_WITHIN, 2, dbBooleanType,
+        DBFunctionSymbol withinFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_WITHIN, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_WITHIN, 2, withinFunctionSymbol);
 
-        DBFunctionSymbol containsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_CONTAINS, 2, dbBooleanType,
+        DBFunctionSymbol containsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_CONTAINS, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_CONTAINS, 2, containsFunctionSymbol);
 
-        DBFunctionSymbol crossesFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_CROSSES, 2, dbBooleanType,
+        DBFunctionSymbol crossesFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_CROSSES, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_CROSSES, 2, crossesFunctionSymbol);
 
-        DBFunctionSymbol disjointFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_DISJOINT, 2, dbBooleanType,
+        DBFunctionSymbol disjointFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_DISJOINT, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_DISJOINT, 2, disjointFunctionSymbol);
 
-        DBFunctionSymbol equalsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_EQUALS, 2, dbBooleanType,
+        DBFunctionSymbol equalsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_EQUALS, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_EQUALS, 2, equalsFunctionSymbol);
 
-        DBFunctionSymbol intersectsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_INTERSECTS, 2, dbBooleanType,
+        DBFunctionSymbol intersectsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_INTERSECTS, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_INTERSECTS, 2, intersectsFunctionSymbol);
 
-        DBFunctionSymbol overlapsFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_OVERLAPS, 2, dbBooleanType,
+        DBFunctionSymbol overlapsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_OVERLAPS, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_OVERLAPS, 2, overlapsFunctionSymbol);
 
-        DBFunctionSymbol touchesFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_TOUCHES, 2, dbBooleanType,
+        DBFunctionSymbol touchesFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_TOUCHES, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_TOUCHES, 2, touchesFunctionSymbol);
 
-        DBFunctionSymbol coversFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_COVERS, 2, dbBooleanType,
+        DBFunctionSymbol coversFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_COVERS, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_COVERS, 2, coversFunctionSymbol);
 
-        DBFunctionSymbol coveredbyFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_COVEREDBY, 2, dbBooleanType,
+        DBFunctionSymbol coveredbyFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_COVEREDBY, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_COVEREDBY, 2, coveredbyFunctionSymbol);
 
-        DBFunctionSymbol containsproperlyFunctionSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_CONTAINSPROPERLY, 2, dbBooleanType,
+        DBFunctionSymbol containsproperlyFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_CONTAINSPROPERLY, 2, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_CONTAINSPROPERLY, 2, containsproperlyFunctionSymbol);
 
