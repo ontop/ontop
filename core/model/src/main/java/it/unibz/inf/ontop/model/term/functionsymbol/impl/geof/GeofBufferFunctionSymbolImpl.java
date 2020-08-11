@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.sis.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.annotation.Nonnull;
 
@@ -22,7 +24,8 @@ import static java.lang.Math.PI;
 public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
     FunctionSymbolFactory functionSymbolFactory;
     public static final String defaultSRID = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
-    public static final String defaultEPSG = "http://www.opengis.net/def/crs/EPSG/0/4326";
+    //public static final String defaultEPSG = "http://www.opengis.net/def/crs/EPSG/0/4326";
+    public static final String defaultEllipsoid = "WGS 84";
 
     public GeofBufferFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype decimalType, ObjectRDFType iriType) {
         super("GEOF_BUFFER", functionIRI, ImmutableList.of(wktLiteralType, decimalType, iriType), wktLiteralType);
@@ -37,7 +40,6 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
 
         String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
         ImmutableTerm term = subLexicalTerms.get(0);
-        //ImmutableTerm geom0 = term0;
 
         DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
@@ -53,8 +55,24 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
         ImmutableTerm geom = getArg1FromUserInput(term, termFactory)
                 .orElseGet(
                         // Manutal input
-                        () -> getArg1FromTemplate(subLexicalTerms.get(0))
-                                .orElse(subLexicalTerms.get(0)));
+                        () -> getArg1FromTemplate(term)
+                                .orElse(term));
+
+        // Given the SRID - retrieve the respective ellipsoid
+        String ellipsoidString;
+        String SRIDcode;
+        if (getCRS(sridString)) {
+            //SRIDcode = "CRS:84";
+            ellipsoidString = defaultEllipsoid;
+        } else {
+            //Other EPSG codes
+            SRIDcode = "EPSG:" + sridString.substring(sridString.length()-4);
+            try {
+                ellipsoidString = getEllipsoid(SRIDcode);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Unsupported or invalid SRID provided");
+            }
+        }
 
         if (unit.equals(UOM.METRE.getIRIString())) {
             final double EARTH_MEAN_RADIUS_METER = 6370986;
@@ -62,7 +80,7 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
             ImmutableFunctionalTerm distanceInDegree = termFactory.getImmutableFunctionalTerm(times, subLexicalTerms.get(1), ratioConstant);
             // If WGS84, return spheroid
-            if (sridString.equals(defaultSRID) || sridString.equals(defaultEPSG)) {
+            if (ellipsoidString.equals(defaultEllipsoid)) {
                 return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distanceInDegree));
             } else {
                 return termFactory.getDBAsText(termFactory.getDBBuffer(geom, subLexicalTerms.get(1)));
@@ -123,5 +141,17 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
                 .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
                 // extract the geometry out of the string
                 .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">")+1)));
+    }
+
+    private String getEllipsoid(String v) throws Exception{
+        // Retrieve coordinate reference system and respective ellipsoid
+        CoordinateReferenceSystem source = CRS.forCode(v);
+        return (source.getName().getCode());
+    }
+
+    private boolean getCRS(String sridval) {
+        // Check whether it is the default CRS
+        return sridval
+                .contains("CRS84");
     }
 }

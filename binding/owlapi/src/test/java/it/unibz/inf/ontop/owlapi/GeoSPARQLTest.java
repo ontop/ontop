@@ -299,6 +299,23 @@ public class GeoSPARQLTest {
         assertEquals(0.062, val, 0.001);
     }
 
+    @Test // Test distance function when an input is not a point
+    public void testSelectDistance_Radian_NonPoints() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":5 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":11 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:radian) as ?x) .\n" +
+                "}\n";
+        double val = runQueryAndReturnDoubleX(query);
+        assertEquals(0.002, val, 0.001);
+    }
+
     @Test
     public void testSelectBuffer() throws Exception {
         //language=TEXT
@@ -495,6 +512,19 @@ public class GeoSPARQLTest {
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
     }
+
+    /*@Test // polygons
+    public void testAskIntersects3() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                "FILTER (geof:sfIntersects(?xWkt, '<http://www.opengis.net/def/crs/EPSG/0/3044> POLYGON((3 3, 8 3, 8 6, 3 6, 3 3)))'^^geo:wktLiteral)))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }*/
 
     @Test
     public void testAskTouches() throws Exception {
