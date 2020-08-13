@@ -22,6 +22,6 @@ public class GeofUnionFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolIm
 
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBAsText(termFactory.getDBUnion(subLexicalTerms.get(0), subLexicalTerms.get(1)));
+        return termFactory.getDBUnion(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

@@ -17,6 +17,6 @@ public class GeofEhContainsFunctionSymbolImpl  extends AbstractGeofBooleanFuncti
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         final String matrix_pattern = "T*TFF*FF*";
-        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1), termFactory.getDBStringConstant(matrix_pattern));
+        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1), termFactory.getDBStringConstant(matrix_pattern)).simplify();
     }
 }

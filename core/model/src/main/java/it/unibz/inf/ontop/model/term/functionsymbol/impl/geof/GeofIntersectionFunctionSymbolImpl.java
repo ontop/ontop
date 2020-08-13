@@ -22,6 +22,6 @@ public class GeofIntersectionFunctionSymbolImpl extends AbstractGeofWKTFunctionS
 
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBAsText(termFactory.getDBIntersection(subLexicalTerms.get(0), subLexicalTerms.get(1)));
+        return termFactory.getDBIntersection(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

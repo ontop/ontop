@@ -16,6 +16,6 @@ public class GeofSfIntersectsFunctionSymbolImpl extends AbstractGeofBooleanFunct
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTIntersects(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        return termFactory.getDBSTIntersects(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

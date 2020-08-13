@@ -313,7 +313,7 @@ public class GeoSPARQLTest {
                 "BIND(geof:distance(?xWkt, ?yWkt, uom:radian) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
-        assertEquals(0.002, val, 0.001);
+        assertEquals(0.0245, val, 0.001);
     }
 
     @Test
@@ -513,18 +513,31 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    /*@Test // polygons
+    @Test // test intersect with user input geometry (not template)
     public void testAskIntersects3() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
                 "ASK WHERE {\n" +
                 ":1 a :Geom; geo:asWKT ?xWkt.\n" +
-                "FILTER (geof:sfIntersects(?xWkt, '<http://www.opengis.net/def/crs/EPSG/0/3044> POLYGON((3 3, 8 3, 8 6, 3 6, 3 3)))'^^geo:wktLiteral)))\n" +
+                "FILTER (geof:sfIntersects(?xWkt, 'POLYGON((3 3, 8 3, 8 6, 3 6, 3 3))'^^geo:wktLiteral))\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
-    }*/
+    }
+
+    @Test // test intersect with user input geometry (template)
+    public void testAskIntersects4() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                "FILTER (geof:sfIntersects(?xWkt, '<http://www.opengis.net/def/crs/EPSG/0/3044> POLYGON((3 3, 8 3, 8 6, 3 6, 3 3))'^^geo:wktLiteral))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
 
     @Test
     public void testAskTouches() throws Exception {
@@ -924,6 +937,40 @@ public class GeoSPARQLTest {
         String val = runQueryAndReturnString(query);
         // No effect
         assertEquals("POLYGON ((2 2, 2 5, 7 5, 7 2, 2 2))", val);
+    }
+
+    @Test // polygon vs. polygon difference - remainder of first polygon
+    // case when second polygon is within the other, diff exists - ALSO case with teamplate
+    public void testSelectDifference6() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                //":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:difference(?xWkt, 'POLYGON((2 2, 7 2, 7 5, 2 5, 2 2))'^^geo:wktLiteral) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // No effect
+        assertEquals("POLYGON ((1 1, 1 7, 8 7, 8 1, 1 1), (2 2, 7 2, 7 5, 2 5, 2 2))", val);
+    }
+
+    @Test // polygon vs. polygon difference - remainder of first polygon
+    // case when second polygon is within the other, diff exists - ALSO case with full teamplate
+    public void testSelectDifference7() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                ":2 a :Geom; geo:asWKT ?xWkt.\n" +
+                //":1 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:difference(?xWkt, '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POLYGON((2 2, 7 2, 7 5, 2 5, 2 2))'^^geo:wktLiteral) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        // No effect
+        assertEquals("POLYGON ((1 1, 1 7, 8 7, 8 1, 1 1), (2 2, 7 2, 7 5, 2 5, 2 2))", val);
     }
 
     @Test // Polygon vs Polygon

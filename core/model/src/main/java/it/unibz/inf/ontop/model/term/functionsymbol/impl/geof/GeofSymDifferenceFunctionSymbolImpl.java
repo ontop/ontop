@@ -22,6 +22,6 @@ public class GeofSymDifferenceFunctionSymbolImpl extends AbstractGeofWKTFunction
 
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBAsText(termFactory.getDBSymDifference(subLexicalTerms.get(0), subLexicalTerms.get(1)));
+        return termFactory.getDBSymDifference(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

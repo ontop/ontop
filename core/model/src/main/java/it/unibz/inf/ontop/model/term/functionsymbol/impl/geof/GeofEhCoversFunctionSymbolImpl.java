@@ -16,6 +16,6 @@ public class GeofEhCoversFunctionSymbolImpl  extends AbstractGeofBooleanFunction
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTCovers(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        return termFactory.getDBSTCovers(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

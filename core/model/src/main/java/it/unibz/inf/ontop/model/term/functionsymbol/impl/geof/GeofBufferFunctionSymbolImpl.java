@@ -81,19 +81,19 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
             ImmutableFunctionalTerm distanceInDegree = termFactory.getImmutableFunctionalTerm(times, subLexicalTerms.get(1), ratioConstant);
             // If WGS84, return spheroid
             if (ellipsoidString.equals(defaultEllipsoid)) {
-                return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distanceInDegree));
+                return termFactory.getDBBuffer(geom, distanceInDegree).simplify();
             } else {
-                return termFactory.getDBAsText(termFactory.getDBBuffer(geom, subLexicalTerms.get(1)));
+                return termFactory.getDBBuffer(geom, subLexicalTerms.get(1)).simplify();
             }
         } else if (unit.equals(UOM.DEGREE.getIRIString())) {
             // ST_BUFFER
-            return termFactory.getDBAsText(termFactory.getDBBuffer(geom, subLexicalTerms.get(1)));
+            return termFactory.getDBBuffer(geom, subLexicalTerms.get(1)).simplify();
         } else if (unit.equals(UOM.RADIAN.getIRIString())) {
             // ST_AsTexT(ST_BUFFER(geom, distance))
             final double ratio = 180 / PI;
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
             ImmutableFunctionalTerm distanceInDegree = termFactory.getImmutableFunctionalTerm(times, subLexicalTerms.get(1), ratioConstant);
-            return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distanceInDegree));
+            return termFactory.getDBBuffer(geom, distanceInDegree).simplify();
         } else {
             throw new IllegalArgumentException("Unexpected unit: " + unit);
         }

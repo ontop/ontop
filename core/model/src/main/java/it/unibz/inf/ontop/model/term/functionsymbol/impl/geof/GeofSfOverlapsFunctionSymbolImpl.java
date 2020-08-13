@@ -16,6 +16,6 @@ public class GeofSfOverlapsFunctionSymbolImpl extends AbstractGeofBooleanFunctio
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTOverlaps(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        return termFactory.getDBSTOverlaps(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

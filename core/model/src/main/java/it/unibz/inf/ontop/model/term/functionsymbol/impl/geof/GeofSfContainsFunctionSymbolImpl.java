@@ -16,6 +16,6 @@ public class GeofSfContainsFunctionSymbolImpl extends AbstractGeofBooleanFunctio
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTContains(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        return termFactory.getDBSTContains(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

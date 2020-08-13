@@ -16,6 +16,6 @@ public class GeofSfEqualsFunctionSymbolImpl extends AbstractGeofBooleanFunctionS
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTEquals(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        return termFactory.getDBSTEquals(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

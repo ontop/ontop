@@ -16,6 +16,6 @@ public class GeofEhDisjointFunctionSymbolImpl  extends AbstractGeofBooleanFuncti
 
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTDisjoint(subLexicalTerms.get(0), subLexicalTerms.get(1));
+        return termFactory.getDBSTDisjoint(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
     }
 }

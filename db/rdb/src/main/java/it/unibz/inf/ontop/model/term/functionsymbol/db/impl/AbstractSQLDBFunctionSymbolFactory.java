@@ -296,15 +296,15 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_CONTAINSPROPERLY, 2, containsproperlyFunctionSymbol);
 
-        DBFunctionSymbol distanceFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE, 2, dbDoubleType, false,
+        DBFunctionSymbol distanceFunctionSymbol = new GeoDBTypedFunctionSymbol(ST_DISTANCE, 2, dbDoubleType, false,
                 abstractRootDBType);
         builder.put(ST_DISTANCE, 2, distanceFunctionSymbol);
 
-        DBFunctionSymbol distanceSphereFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE_SPHERE, 2, dbDoubleType, false,
+        DBFunctionSymbol distanceSphereFunctionSymbol = new GeoDBTypedFunctionSymbol(ST_DISTANCE_SPHERE, 2, dbDoubleType, false,
                 abstractRootDBType);
         builder.put(ST_DISTANCE_SPHERE, 2, distanceSphereFunctionSymbol);
 
-        DBFunctionSymbol distanceSpheroidFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DISTANCE_SPHEROID, 3, dbDoubleType, false,
+        DBFunctionSymbol distanceSpheroidFunctionSymbol = new GeoDBTypedFunctionSymbol(ST_DISTANCE_SPHEROID, 3, dbDoubleType, false,
                 abstractRootDBType);
         builder.put(ST_DISTANCE_SPHEROID, 2, distanceSpheroidFunctionSymbol);
 
@@ -312,59 +312,59 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 abstractRootDBType);
         builder.put(ST_ASTEXT, 1, asTextSymbol);
 
-        DBFunctionSymbol bufferSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_BUFFER, 2, dbStringType, false,
+        DBFunctionSymbol bufferSymbol = new GeoDBTypedFunctionSymbol(ST_BUFFER, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_BUFFER, 2, bufferSymbol);
 
-        DBFunctionSymbol intersectionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_INTERSECTION, 2, dbStringType, false,
+        DBFunctionSymbol intersectionSymbol = new GeoDBTypedFunctionSymbol(ST_INTERSECTION, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_INTERSECTION, 2, intersectionSymbol);
 
-        DBFunctionSymbol boundarySymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_BOUNDARY, 1, dbStringType, false,
+        DBFunctionSymbol boundarySymbol = new GeoDBTypedFunctionSymbol(ST_BOUNDARY, 1, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_BOUNDARY, 2, boundarySymbol);
 
-        DBFunctionSymbol convexhullSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_CONVEXHULL, 1, dbStringType, false,
+        DBFunctionSymbol convexhullSymbol = new GeoDBTypedFunctionSymbol(ST_CONVEXHULL, 1, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_CONVEXHULL, 2, convexhullSymbol);
 
-        DBFunctionSymbol differenceSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIFFERENCE, 2, dbStringType, false,
+        DBFunctionSymbol differenceSymbol = new GeoDBTypedFunctionSymbol(ST_DIFFERENCE, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_DIFFERENCE, 2, differenceSymbol);
 
-        DBFunctionSymbol symdifferenceSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_SYMDIFFERENCE, 2, dbStringType, false,
+        DBFunctionSymbol symdifferenceSymbol = new GeoDBTypedFunctionSymbol(ST_SYMDIFFERENCE, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_SYMDIFFERENCE, 2, symdifferenceSymbol);
 
-        DBFunctionSymbol envelopeSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ENVELOPE, 1, dbStringType, false,
+        DBFunctionSymbol envelopeSymbol = new GeoDBTypedFunctionSymbol(ST_ENVELOPE, 1, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_ENVELOPE, 2, envelopeSymbol);
 
-        DBFunctionSymbol unionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_UNION, 2, dbStringType, false,
+        DBFunctionSymbol unionSymbol = new GeoDBTypedFunctionSymbol(ST_UNION, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_UNION, 2, unionSymbol);
 
-        DBFunctionSymbol relateSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_RELATE, 3, dbBooleanType,
+        DBFunctionSymbol relateSymbol = new GeoDBBooleanFunctionSymbol(ST_RELATE, 3, dbBooleanType,
                 abstractRootDBType);
         builder.put(ST_RELATE, 3, relateSymbol);
 
-        DBFunctionSymbol relatematrixSymbol = new DefaultSQLSimpleDBBooleanFunctionSymbol(ST_RELATE, 2, dbStringType,
+        DBFunctionSymbol relatematrixSymbol = new GeoDBTypedFunctionSymbol(ST_RELATE, 2, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_RELATE, 2, relatematrixSymbol);
 
-        DBFunctionSymbol getsridSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_SRID, 1, dbIntType, false,
+        DBFunctionSymbol getsridSymbol = new GeoDBTypedFunctionSymbol(ST_SRID, 1, dbIntType, false,
                 abstractRootDBType);
         builder.put(ST_SRID, 2, getsridSymbol);
 
-        DBFunctionSymbol flipCoordinatesSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_FLIP_COORDINATES, 1, dbStringType, false,
+        /*DBFunctionSymbol flipCoordinatesSymbol = new GeoDBTypedFunctionSymbol(ST_FLIP_COORDINATES, 1, dbStringType, false,
                 abstractRootDBType);
         builder.put(ST_FLIP_COORDINATES, 1, flipCoordinatesSymbol);
 
-        /*DBFunctionSymbol getdimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIMENSION, 1, dbIntType, false,
+        DBFunctionSymbol getdimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_DIMENSION, 1, dbIntType, false,
                 abstractRootDBType);
-        builder.put(ST_DIMENSION, 2, getdimensionSymbol);*/
+        builder.put(ST_DIMENSION, 2, getdimensionSymbol);
 
-        /*DBFunctionSymbol getcoordinatedimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_COORDDIM, 1, dbIntType, false,
+        DBFunctionSymbol getcoordinatedimensionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_COORDDIM, 1, dbIntType, false,
                 abstractRootDBType);
         builder.put(ST_COORDDIM, 2, getcoordinatedimensionSymbol);
 

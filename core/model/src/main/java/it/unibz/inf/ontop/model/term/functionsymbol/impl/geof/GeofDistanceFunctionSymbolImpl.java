@@ -21,14 +21,8 @@ import static java.lang.Math.PI;
 
 import org.apache.sis.internal.referencing.provider.EPSGName;
 //import org.apache.sis.referencing.*;
-//import org.apache.sis.referencing.factory.sql.EPSGFactory;
 import org.apache.sis.referencing.CRS;
-//import org.apache.sis.non-free:sis-epsg;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-//import org.opengis.referencing.crs.GeographicCRS;
-//import org.apache.sis.referencing.factory.*;
-//import org.apache.sis.referencing.factory.IdentifiedObjectFinder;
-//import org.opengis.util.FactoryException.*;
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
@@ -87,10 +81,6 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
             //SRIDcode = "CRS:84";
             ellipsoidString = defaultEllipsoid;
         } else {
-
-            long start = System.currentTimeMillis();
-            //execute logic in between
-
             //Other EPSG codes
             SRIDcode = "EPSG:" + sridString[0].substring(sridString[0].length()-4);
             try {
@@ -98,8 +88,6 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
             } catch (Exception e) {
                 throw new IllegalArgumentException("Unsupported or invalid SRID provided");
             }
-            long end = System.currentTimeMillis();
-            System.out.println("DEBUG: Logic A took " + (end - start) + " MilliSeconds");
         }
 
 
@@ -111,14 +99,14 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
                 if (ellipsoidString.equals(defaultEllipsoid)) {
                     //final String measurement_spheroid = "SPHEROID[\"WGS 84\",6378137,298.257223563]";
                     //return termFactory.getDBSTDistanceSpheroid(geom[0], geom[1],termFactory.getDBStringConstant(measurement_spheroid));
-                    return termFactory.getDBSTDistanceSphere(geom[0], geom[1]);
+                    return termFactory.getDBSTDistanceSphere(geom[0], geom[1]).simplify();
                 // If non-WGS84, use Cartesian distance
                 } else {
-                    return termFactory.getDBSTDistance(geom[0], geom[1]);
+                    return termFactory.getDBSTDistance(geom[0], geom[1]).simplify();
                 }
             } else if (unit.equals(UOM.DEGREE.getIRIString())) {
                 // ST_DISTANCE
-                return termFactory.getDBSTDistance(geom[0], geom[1]);
+                return termFactory.getDBSTDistance(geom[0], geom[1]).simplify();
             } else if (unit.equals(UOM.RADIAN.getIRIString())) {
                 // ST_DISTANCE / 180 * PI
                 double ratio = PI / 180;

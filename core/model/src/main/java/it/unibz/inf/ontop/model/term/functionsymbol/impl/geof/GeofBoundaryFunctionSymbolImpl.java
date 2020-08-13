@@ -22,6 +22,6 @@ public class GeofBoundaryFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbo
 
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBAsText(termFactory.getDBBoundary(subLexicalTerms.get(0)));
+        return termFactory.getDBAsText(termFactory.getDBBoundary(subLexicalTerms.get(0))).simplify();
     }
 }
