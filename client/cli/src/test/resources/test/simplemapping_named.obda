@@ -9,5 +9,9 @@ source		SELECT id FROM TABLE1 WHERE id < 5
 mappingId	mapping-B
 target		GRAPH <http://www.ciao.it> { :{id} a :B } .
 source		SELECT id FROM TABLE1 WHERE id = 7
+
+mappingId	mapping-C
+target		GRAPH <http://www.ciao.it/{id}> { :{id} a :C } .
+source		SELECT id FROM TABLE1
 ]]
 

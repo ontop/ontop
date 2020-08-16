@@ -21,6 +21,7 @@ import org.eclipse.rdf4j.rio.nquads.NQuadsWriter;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
+import org.eclipse.rdf4j.rio.trig.TriGWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -66,7 +67,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final String TURTLE = "turtle";
     private static final String NTRIPLES = "ntriples";
     private static final String NQUADS = "nquads";
-
+    private static final String TRIG = "trig";
 
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
             title = "output", description = "output file (default) or prefix (only for --separate-files)")
@@ -77,7 +78,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES, NQUADS})
+    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES, NQUADS, TRIG})
     public String format = RDF_XML;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -329,6 +330,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     return ".nt";
                 case NQUADS:
                     return  ".nq";
+                case TRIG:
+                    return ".trig";
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
@@ -350,6 +353,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     NQuadsWriter nqw = new NQuadsWriter(writer);
                     nqw.set(BasicWriterSettings.PRETTY_PRINT, false);
                     return nqw;
+                case TRIG:
+                    TriGWriter ntw = new TriGWriter(writer);
+                    return ntw;
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }

@@ -149,11 +149,36 @@ public class SimpleMaterializerTest {
 
      @Test
     public void runMaterializationWithoutReasoningNQuads() throws Exception {
-        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning.rdf";
+        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning.nq";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
         String propertiesFile = "src/test/resources/test/simplemapping.properties";
         Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "nquads",
+                "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
+        assertEquals(3, numOfClassAssertions(outFile));
+        assertEquals(0, numOfObjectPropertyAssertions(outFile));
+    }
+
+    @Test
+    public void runMaterializationWithReasoningTrig() throws Exception {
+        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning_named.trig";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping_named.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "trig",
+                "-o", outFile, "-p", propertiesFile);
+        assertEquals(5, numOfClassAssertions(outFile));
+        assertEquals(0, numOfObjectPropertyAssertions(outFile));
+        assertEquals(2, numOfAnnotationAssertions(outFile));
+    }
+
+    @Test
+    public void runMaterializationWithoutReasoningTrig() throws Exception {
+        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning.trig";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "trig",
                 "-o", outFile, "--disable-reasoning", "-p", propertiesFile);
         assertEquals(3, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
