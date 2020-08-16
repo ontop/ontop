@@ -11,22 +11,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>eu.optique-project</groupId>
-            <artifactId>r2rml-api-jena-binding</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-rdf-jena</artifactId>
-            <version>${commons-rdf.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-core</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-owlapi</artifactId>
             <version>${project.version}</version>

@@ -7,23 +7,13 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
-import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
-import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
-import org.apache.commons.rdf.jena.JenaGraph;
-import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.graph.Graph;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.Collection;
 
 @Command(name = "to-r2rml",
         description = "Convert ontop native mapping format (.obda) to R2RML format")
@@ -63,7 +53,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
                 .jdbcUser("")
                 .jdbcPassword("");
 
-        if (!Strings.isNullOrEmpty(owlFile)){
+        if (!Strings.isNullOrEmpty(owlFile)) {
             configBuilder.ontologyFile(owlFile);
         }
 
@@ -84,20 +74,9 @@ public class OntopOBDAToR2RML implements OntopCommand {
         SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, config.getRdfFactory(),
                 config.getTermFactory());
 
-        final Collection<TriplesMap> tripleMaps = converter.getTripleMaps();
-//        final RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
-//        final RDF4JGraph rdf4JGraph = mm.exportMappings(tripleMaps);
-//        final JenaRDF jena = new JenaRDF();
-//        final Graph jenaGraph = jena.asJenaGraph(rdf4JGraph);
-
-        final JenaR2RMLMappingManager mm = JenaR2RMLMappingManager.getInstance();
-        final JenaGraph jenaGraph = mm.exportMappings(tripleMaps);
-        final Graph graph = new JenaRDF().asJenaGraph(jenaGraph);
-
         try {
-            // use Jena to output pretty turtle syntax
-            RDFDataMgr.write(new FileOutputStream(out), graph, RDFFormat.TURTLE_PRETTY) ;
-        } catch (FileNotFoundException e) {
+            converter.write(out);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
