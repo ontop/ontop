@@ -50,6 +50,7 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String PAYLOAD_KEY = "payload";
     public static final String QUERY_RESULT_SET_UNBLOCKED = "query:result-set-unblocked";
     public static final String QUERY_LAST_RESULT_FETCHED = "query:last-result-fetched";
+    public static final String MERGED_MSG = "query:all";
     public static final String EXECUTION_AND_FETCHING_DURATION_KEY = "executionAndFetchingDuration";
     public static final String RESULT_COUNT_KEY = "resultCount";
     public static final String TOTAL_DURATION_KEY = "totalDuration";
@@ -79,6 +80,8 @@ public class QueryLoggerImpl implements QueryLogger {
     private final boolean disabled;
     private final String applicationName;
     private final JsonFactory jsonFactory;
+    private final boolean isDecompositionEnabled;
+    private final boolean isMergingEnabled;
     private long reformulationTime;
     private long unblockedResulSetTime;
     private final ClassAndPropertyExtractor classAndPropertyExtractor;
@@ -95,6 +98,11 @@ public class QueryLoggerImpl implements QueryLogger {
 
     @Nullable
     private QueryTemplateExtraction queryTemplate;
+
+    @Nullable
+    private IQ reformulatedQuery;
+    @Nullable
+    private Boolean wasReformulationCached;
 
     @AssistedInject
     protected QueryLoggerImpl(@Assisted ImmutableMultimap<String, String> httpHeaders,
@@ -123,6 +131,8 @@ public class QueryLoggerImpl implements QueryLogger {
         jsonFactory = new JsonFactory();
 
         this.disabled = !settings.isQueryLoggingEnabled();
+        this.isDecompositionEnabled = settings.isQueryLoggingDecompositionEnabled();
+        this.isMergingEnabled = (!isDecompositionEnabled) || (!settings.areQueryLoggingDecompositionAndMergingMutuallyExclusive());
     }
 
     @Override
@@ -132,51 +142,63 @@ public class QueryLoggerImpl implements QueryLogger {
 
         reformulationTime = System.currentTimeMillis();
 
-        StringWriter stringWriter = new StringWriter();
-        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
-            js.writeStartObject();
-            js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(System.currentTimeMillis()));
-            js.writeStringField(MESSAGE_KEY, QUERY_REFORMULATED);
-            js.writeStringField(APPLICATION_KEY, applicationName);
-            js.writeObjectFieldStart(PAYLOAD_KEY);
-            js.writeStringField(QUERY_ID_KEY, queryId.toString());
-            // Classes
-            if (classes != null) {
-                js.writeArrayFieldStart(CLASSES_KEY);
-                for (IRI klass : classes)
-                    js.writeString(klass.getIRIString());
-                js.writeEndArray();
+        if (isDecompositionEnabled) {
+            StringWriter stringWriter = new StringWriter();
+            try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
+                js.writeStartObject();
+                js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(System.currentTimeMillis()));
+                js.writeStringField(MESSAGE_KEY, QUERY_REFORMULATED);
+                js.writeStringField(APPLICATION_KEY, applicationName);
+                js.writeObjectFieldStart(PAYLOAD_KEY);
+                js.writeStringField(QUERY_ID_KEY, queryId.toString());
+                writeReformulationSpecificFields(reformulatedQuery, wasCached, js);
+                js.writeEndObject();
+                js.writeEndObject();
+            } catch (IOException ex) {
+                REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
             }
-            // Properties
-            if (properties != null) {
-                js.writeArrayFieldStart(PROPERTIES_KEY);
-                for (IRI p : properties)
-                    js.writeString(p.getIRIString());
-                js.writeEndArray();
-            }
-            // Relations
-            if (relationNames != null) {
-                js.writeArrayFieldStart(TABLES_KEY);
-                for (String n : relationNames)
-                    js.writeString(n);
-                js.writeEndArray();
-            }
-            js.writeNumberField(REFORMULATION_DURATION_KEY, reformulationTime - creationTime);
-            js.writeBooleanField(REFORMULATION_CACHE_HIT_KEY, wasCached);
-
-            writeHttpHeaders(js);
-            writeQueryTemplateExtraction(js);
-
-            if (sparqlQueryString != null)
-                js.writeStringField(SPARQL_QUERY_KEY, sparqlQueryString);
-            if (settings.isReformulatedQueryIncludedIntoQueryLog())
-                js.writeStringField(REFORMULATED_QUERY_KEY, reformulatedQuery.toString());
-            js.writeEndObject();
-            js.writeEndObject();
-        } catch (IOException ex) {
-            REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
+            outputStream.println(stringWriter.toString());
         }
-        outputStream.println(stringWriter.toString());
+
+        if (isMergingEnabled) {
+            this.reformulatedQuery = reformulatedQuery;
+            this.wasReformulationCached = wasCached;
+        }
+
+    }
+
+    protected void writeReformulationSpecificFields(IQ reformulatedQuery, boolean wasCached, JsonGenerator js) throws IOException {
+        // Classes
+        if (classes != null) {
+            js.writeArrayFieldStart(CLASSES_KEY);
+            for (IRI klass : classes)
+                js.writeString(klass.getIRIString());
+            js.writeEndArray();
+        }
+        // Properties
+        if (properties != null) {
+            js.writeArrayFieldStart(PROPERTIES_KEY);
+            for (IRI p : properties)
+                js.writeString(p.getIRIString());
+            js.writeEndArray();
+        }
+        // Relations
+        if (relationNames != null) {
+            js.writeArrayFieldStart(TABLES_KEY);
+            for (String n : relationNames)
+                js.writeString(n);
+            js.writeEndArray();
+        }
+        js.writeNumberField(REFORMULATION_DURATION_KEY, reformulationTime - creationTime);
+        js.writeBooleanField(REFORMULATION_CACHE_HIT_KEY, wasCached);
+
+        writeHttpHeaders(js);
+        writeQueryTemplateExtraction(js);
+
+        if (sparqlQueryString != null)
+            js.writeStringField(SPARQL_QUERY_KEY, sparqlQueryString);
+        if (settings.isReformulatedQueryIncludedIntoQueryLog())
+            js.writeStringField(REFORMULATED_QUERY_KEY, reformulatedQuery.toString());
     }
 
     private void writeHttpHeaders(JsonGenerator js) throws IOException {
@@ -219,25 +241,33 @@ public class QueryLoggerImpl implements QueryLogger {
         if (disabled)
             return;
         unblockedResulSetTime = System.currentTimeMillis();
+
         if (reformulationTime == -1)
             throw new IllegalStateException("Reformulation should have been declared as finished");
 
-        StringWriter stringWriter = new StringWriter();
-        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
-            js.writeStartObject();
-            js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(unblockedResulSetTime));
-            js.writeStringField(MESSAGE_KEY, QUERY_RESULT_SET_UNBLOCKED);
-            js.writeStringField(APPLICATION_KEY, applicationName);
-            js.writeObjectFieldStart(PAYLOAD_KEY);
-            js.writeStringField(QUERY_ID_KEY, queryId.toString());
-            js.writeNumberField(EXECUTION_BEFORE_UNBLOCKING_DURATION_KEY, unblockedResulSetTime - reformulationTime);
-            js.writeEndObject();
-            js.writeEndObject();
-        } catch (IOException e) {
-            REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
-            return;
+        if (isDecompositionEnabled) {
+
+            StringWriter stringWriter = new StringWriter();
+            try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
+                js.writeStartObject();
+                js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(unblockedResulSetTime));
+                js.writeStringField(MESSAGE_KEY, QUERY_RESULT_SET_UNBLOCKED);
+                js.writeStringField(APPLICATION_KEY, applicationName);
+                js.writeObjectFieldStart(PAYLOAD_KEY);
+                js.writeStringField(QUERY_ID_KEY, queryId.toString());
+                writeResultSetUnblockedSpecificFields(js);
+                js.writeEndObject();
+                js.writeEndObject();
+            } catch (IOException e) {
+                REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
+                return;
+            }
+            outputStream.println(stringWriter.toString());
         }
-        outputStream.println(stringWriter.toString());
+    }
+
+    protected void writeResultSetUnblockedSpecificFields(JsonGenerator js) throws IOException {
+        js.writeNumberField(EXECUTION_BEFORE_UNBLOCKING_DURATION_KEY, unblockedResulSetTime - reformulationTime);
     }
 
     @Override
@@ -249,23 +279,34 @@ public class QueryLoggerImpl implements QueryLogger {
         if (unblockedResulSetTime == -1)
             throw new IllegalStateException("Result set should have been declared as unblocked");
 
-        StringWriter stringWriter = new StringWriter();
-        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
-            js.writeStartObject();
-            js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(lastResultFetchedTime));
-            js.writeStringField(MESSAGE_KEY, QUERY_LAST_RESULT_FETCHED);
-            js.writeStringField(APPLICATION_KEY, applicationName);
-            js.writeObjectFieldStart(PAYLOAD_KEY);
-            js.writeStringField(QUERY_ID_KEY, queryId.toString());
-            js.writeNumberField(EXECUTION_AND_FETCHING_DURATION_KEY, lastResultFetchedTime - reformulationTime);
-            js.writeNumberField(TOTAL_DURATION_KEY, lastResultFetchedTime - creationTime);
-            js.writeNumberField(RESULT_COUNT_KEY, resultCount);
-            js.writeEndObject();
-            js.writeEndObject();
-        } catch (IOException e) {
-            REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
+        if (isDecompositionEnabled) {
+
+            StringWriter stringWriter = new StringWriter();
+            try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
+                js.writeStartObject();
+                js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(lastResultFetchedTime));
+                js.writeStringField(MESSAGE_KEY, QUERY_LAST_RESULT_FETCHED);
+                js.writeStringField(APPLICATION_KEY, applicationName);
+                js.writeObjectFieldStart(PAYLOAD_KEY);
+                js.writeStringField(QUERY_ID_KEY, queryId.toString());
+                writeLastResultRetrievedSpecificFields(js, lastResultFetchedTime, resultCount);
+                js.writeEndObject();
+                js.writeEndObject();
+            } catch (IOException e) {
+                REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
+            }
+            outputStream.println(stringWriter.toString());
         }
-        outputStream.println(stringWriter.toString());
+
+        if (isMergingEnabled) {
+            serializeMergedMessage(lastResultFetchedTime, resultCount);
+        }
+    }
+
+    protected void writeLastResultRetrievedSpecificFields(JsonGenerator js, long lastResultFetchedTime, long resultCount) throws IOException {
+        js.writeNumberField(EXECUTION_AND_FETCHING_DURATION_KEY, lastResultFetchedTime - reformulationTime);
+        js.writeNumberField(TOTAL_DURATION_KEY, lastResultFetchedTime - creationTime);
+        js.writeNumberField(RESULT_COUNT_KEY, resultCount);
     }
 
     @Override
@@ -347,5 +388,29 @@ public class QueryLoggerImpl implements QueryLogger {
 
     protected String serializeTimestamp(long time) {
         return DATE_FORMAT.format(new Timestamp(time));
+    }
+
+    /**
+     * Optional summary message
+     */
+    protected void serializeMergedMessage(long lastResultFetchedTime, long resultCount) {
+        StringWriter stringWriter = new StringWriter();
+        try (JsonGenerator js = jsonFactory.createGenerator(stringWriter)) {
+            js.writeStartObject();
+            js.writeStringField(TIMESTAMP_KEY, serializeTimestamp(lastResultFetchedTime));
+            js.writeStringField(MESSAGE_KEY, MERGED_MSG);
+            js.writeStringField(APPLICATION_KEY, applicationName);
+            js.writeObjectFieldStart(PAYLOAD_KEY);
+            js.writeStringField(QUERY_ID_KEY, queryId.toString());
+            //noinspection ConstantConditions
+            writeReformulationSpecificFields(reformulatedQuery, wasReformulationCached, js);
+            writeResultSetUnblockedSpecificFields(js);
+            writeLastResultRetrievedSpecificFields(js, lastResultFetchedTime, resultCount);
+            js.writeEndObject();
+            js.writeEndObject();
+        } catch (IOException e) {
+            REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
+        }
+        outputStream.println(stringWriter.toString());
     }
 }

@@ -64,6 +64,16 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isQueryLoggingDecompositionEnabled() {
+        return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION);
+    }
+
+    @Override
+    public boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive() {
+        return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE);
+    }
+
+    @Override
     public long getQueryCacheMaxSize() {
         return getRequiredLong(QUERY_CACHE_MAX_SIZE);
     }
