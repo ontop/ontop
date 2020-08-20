@@ -166,7 +166,7 @@ public class QueryTemplateExtractor {
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             IQTree newLeft = leftChild.acceptTransformer(this);
-            IQTree newRight = leftChild.acceptTransformer(this);
+            IQTree newRight = rightChild.acceptTransformer(this);
 
             Optional<ImmutableExpression> newCondition = rootNode.getOptionalFilterCondition()
                     .flatMap(this::transformFilterCondition);
