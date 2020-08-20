@@ -22,6 +22,7 @@ public class GeofEnvelopeFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbo
 
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBAsText(termFactory.getDBEnvelope(subLexicalTerms.get(0))).simplify();
+        //return termFactory.getDBAsText(termFactory.getDBEnvelope(subLexicalTerms.get(0))).simplify();
+        return (termFactory.getDBEnvelope(subLexicalTerms.get(0))).simplify();
     }
 }

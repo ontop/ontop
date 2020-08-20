@@ -316,6 +316,26 @@ public class GeoSPARQLTest {
         assertEquals(0.0245, val, 0.001);
     }
 
+    @Test // Case when ST_DWITHIN might be faster
+    public void testSelectDistance_Metre_DWithin() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                ":3 a :Geom; geo:asWKT ?xWkt.\n" +
+                ":4 a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+                "FILTER(?x < 350000) .\n" +
+                "}\n";
+        //double val = runQueryAndReturnDoubleX(query);
+        //assertEquals(339241, val, 1.0);
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
     @Test
     public void testSelectBuffer() throws Exception {
         //language=TEXT
