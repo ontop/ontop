@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,10 +31,8 @@ public class R2RMLVocabulary {
     /**
 	 * Returns true if the passed string is a resource.
 	 *
-	 * @param resource
-	 * @return
      */
-    public static final boolean isResourceString(String resource) {
+    public static boolean isResourceString(String resource) {
 		return 	resource.startsWith("http://")
 				|| resource.startsWith("https://")
 				|| resource.startsWith("urn:");
@@ -44,10 +42,8 @@ public class R2RMLVocabulary {
 	 * Pre-pends the passed resource string with a default prefix in order
 	 * to make it into a valid URI.
 	 *
-	 * @param resource
-	 * @return
      */
-    public static final String prefixUri(String resource) {
+    public static String prefixUri(String resource) {
 		if ( !isResourceString(resource)) {
 			return "http://example.com/base/" + resource;
 		} else {
@@ -57,7 +53,7 @@ public class R2RMLVocabulary {
 
 	public static final RDF4J rdf4j = new RDF4J();
 	public static final IRI TriplesMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#TriplesMap");
-	
+
 	public static final IRI logicalTable = rdf4j.createIRI("http://www.w3.org/ns/r2rml#logicalTable");
 	public static final IRI tableName = rdf4j.createIRI("http://www.w3.org/ns/r2rml#tableName");
 	public static final IRI baseTableOrView = rdf4j.createIRI("http://www.w3.org/ns/r2rml#baseTableOrView");

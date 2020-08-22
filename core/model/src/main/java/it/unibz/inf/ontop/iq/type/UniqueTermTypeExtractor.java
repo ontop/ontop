@@ -24,10 +24,10 @@ public interface UniqueTermTypeExtractor {
      * If multiple types are detected in an UNION or a CONSTRUCTION node, throws a NonUniqueTermTypeException.
      *
      * For data nodes and joins, multiple term types due to multiple occurrences of a VARIABLE is not a problem
-     *  --> the filter condition will fail (as STRICT equality is required). Any type can be therefore returned.
+     *  {@code ---> } the filter condition will fail (as STRICT equality is required). Any type can be therefore returned.
      *
      * DO NOT use it when you don't have such a uniqueness guarantee
-     * (-> NonUniqueTermTypeException is interpreted as an internal bug)
+     * ({@code ---> }NonUniqueTermTypeException is interpreted as an internal bug)
      *
      */
     Optional<TermType> extractUniqueTermType(ImmutableTerm term, IQTree subTree) throws NonUniqueTermTypeException;

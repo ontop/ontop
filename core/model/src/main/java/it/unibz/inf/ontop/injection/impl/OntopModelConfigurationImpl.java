@@ -54,7 +54,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     /**
      * "Slave" configuration (in case of multiple inheritance)
-     *  --> uses the injector of another configuration
+     *  {@code -->} uses the injector of another configuration
      */
     protected OntopModelConfigurationImpl(@Nonnull OntopModelSettings settings, @Nonnull OntopModelConfigurationOptions options,
                                           @Nonnull Supplier<Injector> injectorSupplier) {

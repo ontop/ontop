@@ -18,7 +18,8 @@ public interface DBIfThenFunctionSymbol extends DBFunctionSymbol {
     /**
      * Pushes a unary boolean function symbol down to the "then" arguments
      *
-     * For instance, f(CASE(c1, t1, c2, t2, t3), t4) -> BOOL_CASE(c1, f(t1,t4), c2, f(t2,t4), f(t3,t4))
+     * For instance,
+     * {@code f(CASE(c1, t1, c2, t2, t3), t4) -> BOOL_CASE(c1, f(t1,t4), c2, f(t2,t4), f(t3,t4))}
      */
     ImmutableExpression pushDownExpression(ImmutableExpression expression,
                                            int indexOfDBIfThenFunctionSymbol,

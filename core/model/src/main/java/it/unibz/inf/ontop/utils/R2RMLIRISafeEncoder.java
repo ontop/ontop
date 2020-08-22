@@ -22,7 +22,6 @@ public class R2RMLIRISafeEncoder {
      * <li>Percent-encode each octet [RFC3986]</li>
      * </ul>
      * <p>
-     * <p>
      * <a href="https://tools.ietf.org/html/rfc3987">RFC 3987</a> 2.2.  ABNF for IRI References and IRIs
      * <pre>
      * iunreserved = ALPHA / DIGIT / "-" / "." / "_" / "~" / ucschar
@@ -33,7 +32,6 @@ public class R2RMLIRISafeEncoder {
      *            / %xA0000-AFFFD / %xB0000-BFFFD / %xC0000-CFFFD
      *            / %xD0000-DFFFD / %xE1000-EFFFD
      * </pre>
-     * <p>
      * <p>
      *
      * We only implement the encoding for the range of basic latin (\u0020 - \u007F) for performance reason.
@@ -99,10 +97,7 @@ public class R2RMLIRISafeEncoder {
      * be restored to their original characters (e.g., ' ').
      * This is necessary to transform some URIs into the original database values.
      *
-     * @param encodedURI
-     * @return
      */
-
     public static String decode(String encodedURI) {
 
         int length = encodedURI.length();
