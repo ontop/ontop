@@ -85,19 +85,19 @@ public class RDF4JHelper {
 			ObjectPropertyAssertion wrapped = (ObjectPropertyAssertion) assertion.assertion();
 			return fact.createStatement(getResource(wrapped.getSubject()),
 				createURI(wrapped.getProperty().getIRI().getIRIString()),
-				getResource(wrapped.getObject()), createURI(assertion.graph()));
+				getResource(wrapped.getObject()), getResource(assertion.getGraph()));
 		}
 		if( assertion.assertion() instanceof DataPropertyAssertion ){
 			ObjectPropertyAssertion wrapped = (ObjectPropertyAssertion) assertion.assertion();
 			return fact.createStatement(getResource(wrapped.getSubject()),
 				createURI(wrapped.getProperty().getIRI().getIRIString()),
-				getResource(wrapped.getObject()), createURI(assertion.graph()));
+				getResource(wrapped.getObject()), getResource(assertion.getGraph()));
 		}
 		if( assertion.assertion() instanceof ObjectPropertyAssertion ){
 			DataPropertyAssertion wrapped = (DataPropertyAssertion) assertion.assertion();
 			return fact.createStatement(getResource(wrapped.getSubject()),
 				createURI(wrapped.getProperty().getIRI().getIRIString()),
-				getLiteral(wrapped.getValue()), createURI(assertion.graph()));
+				getLiteral(wrapped.getValue()), getResource(assertion.getGraph()));
 		}
 		if( assertion.assertion() instanceof AnnotationAssertion ) {
 			AnnotationAssertion wrapped = (AnnotationAssertion) assertion.assertion();
@@ -106,11 +106,11 @@ public class RDF4JHelper {
 			if (constant instanceof RDFLiteralConstant) {
 				return fact.createStatement(getResource(wrapped.getSubject()),
 						createURI(wrapped.getProperty().getIRI().getIRIString()),
-						getLiteral((RDFLiteralConstant) constant), createURI(assertion.graph()));
+						getLiteral((RDFLiteralConstant) constant), getResource(assertion.getGraph()));
 			} else if (constant instanceof ObjectConstant) {
 				return fact.createStatement(getResource(wrapped.getSubject()),
 						createURI(wrapped.getProperty().getIRI().getIRIString()),
-						getResource((ObjectConstant) constant), createURI(assertion.graph()));
+						getResource((ObjectConstant) constant), getResource(assertion.getGraph()));
 			} else {
 				throw new RuntimeException("Unsupported constant for an annotation property!"
 						+ constant);
@@ -120,7 +120,7 @@ public class RDF4JHelper {
 			ClassAssertion wrapped = (ClassAssertion) assertion.assertion();
 			Statement result = fact.createStatement(getResource(wrapped.getIndividual()),
 				RDF.TYPE,
-				createURI(wrapped.getConcept().getIRI().getIRIString()), createURI(assertion.graph()));
+				createURI(wrapped.getConcept().getIRI().getIRIString()), getResource(assertion.getGraph()));
 			return result;
 		}
 		return null;
