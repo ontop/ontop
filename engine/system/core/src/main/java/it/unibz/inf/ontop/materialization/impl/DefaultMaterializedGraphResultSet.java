@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -42,18 +43,21 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
     private final UnmodifiableIterator<VocabularyEntry> vocabularyIterator;
     private final ABoxAssertionSupplier builder;
 
+
     private int counter;
     @Nullable
     private OntopConnection ontopConnection;
     @Nullable
     private OntopStatement tmpStatement;
     @Nullable
-    private TupleResultSet tmpContextResultSet = null;
-
+    private TupleResultSet tmpContextResultSet;
 
     private Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
     private final List<IRI> possiblyIncompleteClassesAndProperties;
     private VocabularyEntry lastSeenPredicate;
+    private IRIConstant lastSeenPredicateIRI;
+
+    private final IRIConstant rdfTypeIRI;
 
 
     DefaultMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
@@ -73,6 +77,9 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
 
         counter = 0;
+
+        rdfTypeIRI = termFactory.getConstantIRI(RDF.TYPE.getIRIString());
+
         // Lately initiated
         ontopConnection = null;
         tmpStatement = null;
@@ -122,7 +129,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
              */
             VocabularyEntry predicate = vocabularyIterator.next();
 
-            SelectQuery query = inputQueryFactory.createSelectQuery(predicate.getSelectQuadQuery());
+            SelectQuery query = inputQueryFactory.createSelectQuery(predicate.getSelectQuery());
 
             try {
                 tmpStatement = ontopConnection.createStatement();
@@ -130,20 +137,9 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
                 if (tmpContextResultSet.hasNext()) {
                     lastSeenPredicate = predicate;
+                    lastSeenPredicateIRI = termFactory.getConstantIRI(lastSeenPredicate.getIRIString());
+
                     return true;
-                } else {
-                    // Davide> Try triples (ugly, TODO refactor)
-                    tmpContextResultSet.close();
-                    tmpStatement.close();
-
-                    query = inputQueryFactory.createSelectQuery(predicate.getSelectQuery());
-                    tmpStatement = ontopConnection.createStatement();
-                    tmpContextResultSet = tmpStatement.execute(query);
-
-                    if (tmpContextResultSet.hasNext()) {
-                        lastSeenPredicate = predicate;
-                        return true;
-                    }
                 }
             } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                 if (canBeIncomplete) {
@@ -160,19 +156,18 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
         return false;
     }
 
-    // Davide> Builds (named) assertions out of (quad) results
-    private Assertion toAssertion(OntopBindingSet tuple) throws OntopReformulationException, OntopConnectionException, OntopResultConversionException, OntopQueryEvaluationException {
-
+    /**
+     * Builds (named) assertions out of (quad) results
+     */
+    private Assertion toAssertion(OntopBindingSet tuple) throws OntopResultConversionException {
         ObjectConstant s = (ObjectConstant) tuple.getConstant("s");
-        RDFConstant p = lastSeenPredicate.isClass() ? termFactory.getConstantIRI(RDF.TYPE.getIRIString()) : termFactory.getConstantIRI(lastSeenPredicate.getIRIString());
-        RDFConstant o = lastSeenPredicate.isClass() ? termFactory.getConstantIRI(lastSeenPredicate.getIRIString()) : tuple.getConstant("o"); //+"\"^^"+tuple.getBinding("o").getValue().getType();
+        ObjectConstant p = lastSeenPredicate.isClass() ? rdfTypeIRI : lastSeenPredicateIRI;
+        RDFConstant o = lastSeenPredicate.isClass() ? lastSeenPredicateIRI : tuple.getConstant("o");
         ObjectConstant g = (ObjectConstant)tuple.getConstant("g");
-
         Assertion a = SimpleGraphResultSet.getAssertion(builder, s, p, o);
         if (g != null) {
             a = NamedAssertion.of(a, g);
         }
-
         return a;
     }
 
@@ -180,11 +175,10 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
     public Assertion next() throws OntopQueryAnsweringException {
         counter++;
 
-        OntopBindingSet resultTuple = null;
+        OntopBindingSet resultTuple;
         try {
             resultTuple = tmpContextResultSet.next();
-            Assertion result = toAssertion(resultTuple);
-            return result;
+            return toAssertion(resultTuple);
         } catch (OntopConnectionException e) {
             try {
                 tmpContextResultSet.close();

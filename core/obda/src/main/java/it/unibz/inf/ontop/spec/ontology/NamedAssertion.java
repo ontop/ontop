@@ -18,7 +18,7 @@ public class NamedAssertion implements Assertion {
         return new NamedAssertion(assertion, graph);
     }
 
-    public Assertion assertion(){
+    public Assertion getAssertion(){
         return assertion;
     }
 

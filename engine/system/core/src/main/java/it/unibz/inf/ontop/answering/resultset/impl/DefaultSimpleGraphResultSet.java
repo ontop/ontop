@@ -66,10 +66,12 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		this.constructTemplate = constructTemplate;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
+        builder = OntologyBuilderImpl.assertionSupplier(this.rdfFactory);
+
         Extension ex = constructTemplate.getExtension();
         if (ex != null) {
             extMap = ex.getElements().stream()
-                    .collect(ImmutableCollectors.toMap(e -> e.getName(), e -> e.getExpr()));
+                    .collect(ImmutableCollectors.toMap(ExtensionElem::getName, ExtensionElem::getExpr));
         }
         else
             extMap = null;
@@ -82,7 +84,6 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 results.addAll(processResults(tupleResultSet.next()));
             }
         }
-        builder = OntologyBuilderImpl.assertionSupplier(this.rdfFactory);
     }
 
 

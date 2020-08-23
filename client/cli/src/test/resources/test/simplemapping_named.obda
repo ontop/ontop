@@ -17,5 +17,9 @@ source		SELECT id FROM TABLE1
 mappingId	mapping-P
 target		GRAPH <http://www.ciao.it/{id}> { :{id} :P :{attr1} } .
 source		SELECT id, attr1 FROM TABLE1
+
+mappingId	mapping-P-default-graph
+target		:{id} :P :{attr1} .
+source		SELECT id, attr1 FROM TABLE1
 ]]
 

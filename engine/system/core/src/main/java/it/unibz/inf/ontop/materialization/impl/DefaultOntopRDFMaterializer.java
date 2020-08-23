@@ -105,11 +105,4 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
                 .map(p -> new VocabularyEntry(p, 1));
         return Stream.concat(vocabularyClassStream, vocabularyPropertyStream);
     }
-
-
-	private static class NonURIPredicateInVocabularyException extends OntopInternalBugException {
-        NonURIPredicateInVocabularyException(String vocabularyPredicate) {
-            super("A non-URI predicate has been found in the vocabulary: " + vocabularyPredicate);
-        }
-    }
 }
