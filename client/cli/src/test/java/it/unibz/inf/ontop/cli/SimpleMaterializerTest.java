@@ -193,4 +193,14 @@ public class SimpleMaterializerTest {
         // NO rdfs:label and rdfs:comments from the ontology
         assertEquals(4, numOfAnnotationAssertions(outFile));
     }
+
+    @Test
+    public void runMaterializationWithReasoningTrig_multi_files() throws Exception {
+        String outFile = "src/test/resources/output/";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping_named.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "trig",
+                "-o", outFile, "-p", propertiesFile, "--separate-files");
+    }
 }
