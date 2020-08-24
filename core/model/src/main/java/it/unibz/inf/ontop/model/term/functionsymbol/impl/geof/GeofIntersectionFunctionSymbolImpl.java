@@ -16,7 +16,7 @@ import org.apache.commons.rdf.api.IRI;
 import javax.annotation.Nonnull;
 
 public class GeofIntersectionFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
-    public GeofIntersectionFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType) {
+    public GeofIntersectionFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType) {
         super("GEOF_INTERSECTION", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), wktLiteralType);
     }
 

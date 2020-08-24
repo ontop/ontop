@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolFactoryImpl;
@@ -15,11 +14,8 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-import java.util.Optional;
-
 import static java.lang.Math.PI;
 
-import org.apache.sis.internal.referencing.provider.EPSGName;
 //import org.apache.sis.referencing.*;
 import org.apache.sis.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -27,7 +23,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
     FunctionSymbolFactory functionSymbolFactory;
-    public static final String defaultSRID = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
     //public static final String defaultEPSG = "http://www.opengis.net/def/crs/EPSG/0/4326";
     public static final String defaultEllipsoid = "WGS 84";
 
@@ -56,23 +51,11 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
 
         // Retrieve the SRIDs for each geometry
         for (ImmutableTerm term : subLexicalGeoms) {
-            // Get the respective SRIDs
-            sridString[sridIndex] = getSRIDFromDbConstant(Optional.of(term))
-                    .orElseGet(
-                            // template
-                            () -> getSRIDFromDbConstant(getArg0FromTemplate(term))
-                                    // otherwise, returns the default SRID
-                                    .orElse(defaultSRID));
-
-            // Get the respective geometries
-            geom[sridIndex] = getArg1FromUserInput(term, termFactory)
-                    .orElseGet(
-                            // If template then
-                            () -> getArg1FromTemplate(term)
-                                    .orElse(term));
+            SridGeomPair pair = GeoUtils.getSridGeomPair(termFactory, term);
+            sridString[sridIndex] = pair.getSrid();
+            geom[sridIndex] = pair.getGeometry();
             sridIndex++;
         }
-
 
         // Given the SRID - retrieve the respective ellipsoid
         String ellipsoidString;
@@ -123,57 +106,14 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         }
     }
 
-    private Optional<ImmutableTerm> getArg0FromTemplate(ImmutableTerm term) {
-        return Optional.of(term)
-                // template is a NonGroundFunctionalTerm
-                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
-                // template uses DBConcatFunctionSymbol as the functional symbol
-                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
-                // the first argument is the string starting with the IRI of the SRID
-                .map(t -> t.getTerm(0));
-    }
-
-    private Optional<String> getSRIDFromDbConstant(Optional<ImmutableTerm> immutableTerm) {
-        return immutableTerm
-                // the first argument has to be a constant
-                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
-                .map(Constant::getValue)
-                // the SRID is enclosed by "<" and ">
-                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
-                // extract the SRID out of the string
-                .map(v -> v.substring(1, v.indexOf(">")));
-    }
-
-    private Optional<ImmutableTerm> getArg1FromTemplate(ImmutableTerm term) {
-        return Optional.of(term)
-                // template is a NonGroundFunctionalTerm
-                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
-                // template uses DBConcatFunctionSymbol as the functional symbol
-                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
-                // the first argument is the string starting with the IRI of the SRID
-                .map(t -> t.getTerm(1));
-    }
-
-    private Optional<ImmutableTerm> getArg1FromUserInput(ImmutableTerm immutableTerm, TermFactory termFactory) {
-        return Optional.of(immutableTerm)
-                // template is NOT a NonGroundFunctionalTerm, but a string user input
-                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
-                .map(Constant::getValue)
-                // the SRID is enclosed by "<" and ">
-                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
-                // extract the geometry out of the string
-                .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">")+1)));
-    }
-
     private String getEllipsoid(String v) throws Exception{
         // Retrieve coordinate reference system and respective ellipsoid
         CoordinateReferenceSystem source = CRS.forCode(v);
-        return (source.getName().getCode());
+        return source.getName().getCode();
     }
 
     private boolean getCRS(String sridval) {
         // Check whether it is the default CRS
-        return sridval
-                .contains("CRS84");
+        return sridval.contains("CRS84");
     }
 }
