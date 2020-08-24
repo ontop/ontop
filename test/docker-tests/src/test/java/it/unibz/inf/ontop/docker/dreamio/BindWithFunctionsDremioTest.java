@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker.denodo;
+package it.unibz.inf.ontop.docker.dreamio;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
@@ -14,22 +14,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Executed with Denodo over Postgresql.
+ * Executed with Dremio over Postgresql.
  * The Docker image and data for the Postgresql DB can be found at:
  * https://github.com/ontop/ontop-dockertests/tree/master/pgsql
- * The parameters to connect to Postgresql from Denodo are in "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.properties"
+ * The parameters to connect to Postgresql from Dremio are in "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.properties"
  */
 @Ignore
-public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
+public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
 
-    private static final String owlfile = "/denodo/bind/sparqlBind.owl";
-    private static final String obdafile = "/denodo/bind/sparqlBindDenodo.obda";
-    private static final String propertyfile = "/denodo/bind/sparqlBindDenodo.properties";
+    private static final String owlfile = "/dremio/bind/sparqlBind.owl";
+    private static final String obdafile = "/dremio/bind/sparqlBindDremio.obda";
+    private static final String propertyfile = "/dremio/bind/sparqlBindDremio.properties";
 
     private static OntopOWLReasoner REASONER;
     private static OWLConnection CONNECTION;
 
-    public BindWithFunctionsDenodoTest() throws OWLOntologyCreationException {
+    public BindWithFunctionsDremioTest() throws OWLOntologyCreationException {
         super(createReasoner(owlfile, obdafile, propertyfile));
         REASONER = getReasoner();
         CONNECTION = getConnection();
@@ -128,65 +128,5 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
         expectedValues.add("\"17.00000000000000000000\"^^xsd:decimal");
         expectedValues.add("\"5.00000000000000000000\"^^xsd:decimal");
         return expectedValues;
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    /**
-     * Regex in SELECT clause not supported
-     */
-    public void testREGEX() {
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    public void testUuid() {
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    public void testStrUuid() {
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    public void testTZ() {
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    /**
-     * Denodo cannot parse a logical AND in the ORDER BY clause
-     */
-    public void testAndBind() {
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    /**
-     * See testAndBind() for an explanation
-     */
-    public void testAndBindDistinct() {
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    /**
-     * See testAndBind() for an explanation
-     */
-    public void testOrBind() {
-    }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    public void testHashSHA256() {
     }
 }
