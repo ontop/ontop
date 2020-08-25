@@ -980,6 +980,73 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Test
+    public void testLeftJoinDenormalized1() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, B));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(2, B));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode2, dataNode3));
+
+        ImmutableExpression expression = TERM_FACTORY.getDBIsNotNull(B);
+
+        BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(expression),
+                dataNode1,
+                joinTree);
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode, leftJoinTree));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, dataNode2);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    /**
+     * TODO: support
+     */
+    @Ignore
+    @Test
+    public void testLeftJoinDenormalized2() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, B));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(2, C));
+
+        ImmutableExpression expression = TERM_FACTORY.getDBIsNotNull(C);
+
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(C, D),
+                SUBSTITUTION_FACTORY.getSubstitution(D, TERM_FACTORY.getProvenanceSpecialConstant()));
+
+        BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(expression),
+                dataNode1,
+                IQ_FACTORY.createUnaryIQTree(rightConstructionNode, dataNode2));
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(B, TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(D), C)));
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(topConstructionNode, leftJoinTree)));
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 2, B));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newDataNode1);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
 
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial query: "+ initialIQ);
