@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
@@ -11,6 +12,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * TODO: explain
@@ -196,12 +199,10 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(constructionNode, leftJoinNode);
-        ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, O1));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M1, N, O));
+        queryBuilder.init(projectionAtom, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M, 1, N));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(1, N, 2, O));
 
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
@@ -209,11 +210,8 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
-        expectedQueryBuilder.addChild(constructionNode1, leftJoinNode1);
+        expectedQueryBuilder.init(projectionAtom, leftJoinNode1);
 
         expectedQueryBuilder.addChild(leftJoinNode1, dataNode1, LEFT);
         expectedQueryBuilder.addChild(leftJoinNode1, dataNode2, RIGHT);
@@ -241,10 +239,10 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(OF0, TWO), OF0)));
+                        TERM_FACTORY.getStrictEquality(F0, TWO), TWO)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
-                createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, OF0)));
+                createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, F0)));
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -272,7 +270,7 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(N, NULL));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
-        ExtensionalDataNode newDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(M, N1, ONE));
+        ExtensionalDataNode newDataNode =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M, 2, ONE));
         expectedQueryBuilder.addChild(constructionNode1, newDataNode);
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -301,7 +299,7 @@ public class LeftJoinOptimizationTest {
                         TERM_FACTORY.getNullConstant()));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
-        ExtensionalDataNode newDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(M, N1, ONE));
+        ExtensionalDataNode newDataNode =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M, 2, ONE));
         expectedQueryBuilder.addChild(constructionNode1, newDataNode);
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -351,10 +349,10 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(O, TWO), N1)));
+                        TERM_FACTORY.getStrictEquality(F0, TWO), NF1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
-                createExtensionalDataNode(TABLE1, ImmutableList.of(M, N1, O)));
+                createExtensionalDataNode(TABLE1, ImmutableList.of(M, NF1, F0)));
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -379,10 +377,10 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull( 
-                        TERM_FACTORY.getStrictEquality(O, N1), N1)));
+                        TERM_FACTORY.getStrictEquality(F0, NF1), NF1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
-                createExtensionalDataNode(TABLE1, ImmutableList.of(M, N1, O)));
+                createExtensionalDataNode(TABLE1, ImmutableList.of(M, NF1, F0)));
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -441,14 +439,12 @@ public class LeftJoinOptimizationTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
-
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(constructionNode1, joinNode);
+        expectedQueryBuilder.init(projectionAtom, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode1);
-        expectedQueryBuilder.addChild(joinNode, dataNode2);
+
+        ExtensionalDataNode newDataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M1, 1, N1));
+        expectedQueryBuilder.addChild(joinNode, newDataNode2);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -457,22 +453,20 @@ public class LeftJoinOptimizationTest {
     public void testLeftJoinElimination2() {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, M2, N1);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, constructionNode);
+
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.init(projectionAtom, leftJoinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE2a, ImmutableList.of(M, M1, M2));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1a, ImmutableList.of(M1, M2, N1, O1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, M1, 1, M2, 2, N1));
 
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(constructionNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode1);
         expectedQueryBuilder.addChild(joinNode, dataNode2);
 
@@ -483,21 +477,18 @@ public class LeftJoinOptimizationTest {
     public void testLeftJoinElimination3() {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, M2, N1);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE2a, ImmutableList.of(M, M1, M2));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1a, ImmutableList.of(M1, M, N1, O1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1a, ImmutableMap.of(0, M1, 1, M, 2, N1));
 
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.init(projectionAtom, leftJoinNode);
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
-        expectedQueryBuilder.addChild(constructionNode, leftJoinNode);
+        expectedQueryBuilder.init(projectionAtom, leftJoinNode);
         expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
@@ -508,12 +499,10 @@ public class LeftJoinOptimizationTest {
     public void testLeftJoinElimination4() {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.init(projectionAtom, leftJoinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE2, ImmutableList.of(M, M1, O));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M1, O1, N1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M1,  2, N1));
 
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
@@ -521,12 +510,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(constructionNode1, joinNode);
+        expectedQueryBuilder.init(projectionAtom, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode1);
         expectedQueryBuilder.addChild(joinNode, dataNode2);
 
@@ -569,12 +555,10 @@ public class LeftJoinOptimizationTest {
     public void testLeftJoinNonElimination1() {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(constructionNode, leftJoinNode);
-        ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE4, ImmutableList.of(M, N1, O));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(O, N, M1));
+        queryBuilder.init(projectionAtom, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(TABLE4, ImmutableMap.of(0, M, 2, O));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, O, 1, N));
 
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
@@ -590,7 +574,7 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getDBIsNotNull(N1));
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE2, ImmutableList.of(M, M1, O));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M1, O1, N1));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M1, 2, N1));
 
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, leftJoinNode);
@@ -601,9 +585,8 @@ public class LeftJoinOptimizationTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(constructionNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode1);
         expectedQueryBuilder.addChild(joinNode, dataNode2);
 
@@ -631,12 +614,12 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N1,
-                        TERM_FACTORY.getIfElseNull( expression, N1F0)));
+                        TERM_FACTORY.getIfElseNull( TERM_FACTORY.getStrictEquality(F0, TWO), N1F1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(newConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode1);
-        ExtensionalDataNode newDataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M1, N1F0, O1));
+        ExtensionalDataNode newDataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M1, N1F1, F0));
         expectedQueryBuilder.addChild(joinNode, newDataNode2);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
@@ -684,7 +667,7 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, O1));
         ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N1, O));
-        ExtensionalDataNode dataNode3 =  createExtensionalDataNode(TABLE3, ImmutableList.of(M1, N2, O2));
+        ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
@@ -695,11 +678,8 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
-        expectedQueryBuilder.addChild(constructionNode1, joinNode);
+        expectedQueryBuilder.init(projectionAtom, joinNode);
         ExtensionalDataNode dataNode5 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, O));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
         expectedQueryBuilder.addChild(joinNode, dataNode3);
@@ -717,7 +697,7 @@ public class LeftJoinOptimizationTest {
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, O1));
         ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N1, O));
-        ExtensionalDataNode dataNode3 =  createExtensionalDataNode(TABLE3, ImmutableList.of(M1, N1, O2));
+        ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(1, N1));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
@@ -747,11 +727,9 @@ public class LeftJoinOptimizationTest {
     public void testSelfJoinNullableUniqueConstraint() {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, M, N);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(constructionNode, leftJoinNode);
-        ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE5, ImmutableList.of(M, N1));
+        queryBuilder.init(projectionAtom, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(TABLE5, ImmutableMap.of(0, M));
         ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE5, ImmutableList.of(M, N));
 
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
@@ -782,14 +760,12 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(constructionNode1, joinNode);
+        expectedQueryBuilder.init(projectionAtom, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode1);
-        expectedQueryBuilder.addChild(joinNode, dataNode2);
+        ExtensionalDataNode newDataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M1, 1, N1));
+        expectedQueryBuilder.addChild(joinNode, newDataNode2);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -805,14 +781,14 @@ public class LeftJoinOptimizationTest {
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(constructionNode, leftJoinNode);
-        ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE2, ImmutableList.of(M, M1, O));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(1, M1));
 
         ImmutableExpression o1IsNotNull = TERM_FACTORY.getDBIsNotNull(O1);
         FilterNode rightFilterNode = IQ_FACTORY.createFilterNode(o1IsNotNull);
 
         ImmutableFunctionalTerm uri1O1Term = generateURI1(O1);
 
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M1, N1, O1));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, M1, 2, O1));
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(M1, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, uri1O1Term));
 
@@ -901,6 +877,10 @@ public class LeftJoinOptimizationTest {
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
+    /**
+     * TODO: clean it up
+     */
+    @Ignore
     @Test
     public void testLeftJoinEliminationConstructionNode2_2() {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -965,11 +945,48 @@ public class LeftJoinOptimizationTest {
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
+    /**
+     * TODO: support it
+     */
+    @Ignore
+    @Test
+    public void testLeftJoinOrder1() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, B));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, A));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B));
+
+        BinaryNonCommutativeIQTree leftJoinTree1 = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1,
+                dataNode2);
+
+        BinaryNonCommutativeIQTree leftJoinTree2 = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                leftJoinTree1,
+                dataNode3);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, leftJoinTree2);
+
+        BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode3,
+                dataNode2);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newLeftJoinTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial query: "+ initialIQ);
         System.out.println("Expected query: "+ expectedIQ);
         IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
         System.out.println("Optimized query: "+ optimizedIQ);
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     private static void optimizeAndCheck(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) {
