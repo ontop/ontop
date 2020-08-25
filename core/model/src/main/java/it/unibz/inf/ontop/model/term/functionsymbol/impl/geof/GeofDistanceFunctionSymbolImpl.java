@@ -20,6 +20,9 @@ import static java.lang.Math.PI;
 import org.apache.sis.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
     FunctionSymbolFactory functionSymbolFactory;
@@ -44,66 +47,70 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         // Get unit of distance i.e. degree, radian, metric;
         String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
 
-        ImmutableTerm[] subLexicalGeoms = {subLexicalTerms.get(0), subLexicalTerms.get(1)};
-        String[] sridString = new String[2];
-        ImmutableTerm[] geom = new ImmutableTerm[2];
-        int sridIndex = 0;
+        List<SridGeomPair> sridGeomPairs = subLexicalTerms.subList(0, 2).stream().map(
+                term -> GeoUtils.getSridGeomPair(termFactory, term)
+        ).collect(Collectors.toList());
 
-        // Retrieve the SRIDs for each geometry
-        for (ImmutableTerm term : subLexicalGeoms) {
-            SridGeomPair pair = GeoUtils.getSridGeomPair(termFactory, term);
-            sridString[sridIndex] = pair.getSrid();
-            geom[sridIndex] = pair.getGeometry();
-            sridIndex++;
+        String srid0 = sridGeomPairs.get(0).getSrid();
+        String srid1 = sridGeomPairs.get(1).getSrid();
+        ImmutableTerm geom0 = sridGeomPairs.get(0).getGeometry();
+        ImmutableTerm geom1 = sridGeomPairs.get(1).getGeometry();
+
+        String ellipsoidString = getEllipsoidString(srid0);
+
+        // If SRIDs are not identical throw error
+        if (!srid0.equals(srid1)) {
+            throw new IllegalArgumentException("SRIDs do not match");
+        } else {
+            // Check unit
+            switch (unit){
+                case UOM.METRE_STRING:
+                    if (ellipsoidString.equals(defaultEllipsoid)) {
+                        //final String measurement_spheroid = "SPHEROID[\"WGS 84\",6378137,298.257223563]";
+                        //return termFactory.getDBSTDistanceSpheroid(geom[0], geom[1],termFactory.getDBStringConstant(measurement_spheroid));
+                        return termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
+                        // If non-WGS84, use Cartesian distance
+                    } else {
+                        return termFactory.getDBSTDistance(geom0, geom1).simplify();
+                    }
+                case UOM.DEGREE_STRING:
+                    // ST_DISTANCE
+                    return termFactory.getDBSTDistance(geom0, geom1).simplify();
+                case UOM.RADIAN_STRING:
+                    // ST_DISTANCE / 180 * PI
+                    double ratio = PI / 180;
+                    DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
+                    DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+                    DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
+                    ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(geom0, geom1);
+                    DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
+                    return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, ratioConstant);
+                default:
+                    throw new IllegalArgumentException("Unexpected unit: " + unit);
+            }
+
         }
+    }
 
+    private String getEllipsoidString(String srid0) {
         // Given the SRID - retrieve the respective ellipsoid
         String ellipsoidString;
         String SRIDcode;
-        if (getCRS(sridString[0])) {
+
+        // Check whether it is the default CRS
+        if (srid0.contains("CRS84")) {
             //SRIDcode = "CRS:84";
             ellipsoidString = defaultEllipsoid;
         } else {
             //Other EPSG codes
-            SRIDcode = "EPSG:" + sridString[0].substring(sridString[0].length()-4);
+            SRIDcode = "EPSG:" + srid0.substring(srid0.length()-4);
             try {
                 ellipsoidString = getEllipsoid(SRIDcode);
             } catch (Exception e) {
                 throw new IllegalArgumentException("Unsupported or invalid SRID provided");
             }
         }
-
-
-        // If SRIDs are not identical throw error
-        if(sridString[0].equals(sridString[1])) {
-            // Check unit
-            if (unit.equals(UOM.METRE.getIRIString())) {
-                // If metric and WGS84, use ST_DISTANCESPHERE
-                if (ellipsoidString.equals(defaultEllipsoid)) {
-                    //final String measurement_spheroid = "SPHEROID[\"WGS 84\",6378137,298.257223563]";
-                    //return termFactory.getDBSTDistanceSpheroid(geom[0], geom[1],termFactory.getDBStringConstant(measurement_spheroid));
-                    return termFactory.getDBSTDistanceSphere(geom[0], geom[1]).simplify();
-                // If non-WGS84, use Cartesian distance
-                } else {
-                    return termFactory.getDBSTDistance(geom[0], geom[1]).simplify();
-                }
-            } else if (unit.equals(UOM.DEGREE.getIRIString())) {
-                // ST_DISTANCE
-                return termFactory.getDBSTDistance(geom[0], geom[1]).simplify();
-            } else if (unit.equals(UOM.RADIAN.getIRIString())) {
-                // ST_DISTANCE / 180 * PI
-                double ratio = PI / 180;
-                DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
-                DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-                DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
-                ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(geom[0], geom[1]);
-                return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType()));
-            } else {
-                throw new IllegalArgumentException("Unexpected unit: " + unit);
-            }
-        } else {
-            throw new IllegalArgumentException("SRIDs do not match");
-        }
+        return ellipsoidString;
     }
 
     private String getEllipsoid(String v) throws Exception{
@@ -112,8 +119,4 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         return source.getName().getCode();
     }
 
-    private boolean getCRS(String sridval) {
-        // Check whether it is the default CRS
-        return sridval.contains("CRS84");
-    }
 }
