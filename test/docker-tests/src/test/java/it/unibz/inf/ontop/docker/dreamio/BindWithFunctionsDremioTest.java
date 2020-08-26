@@ -19,7 +19,7 @@ import java.util.List;
  * https://github.com/ontop/ontop-dockertests/tree/master/pgsql
  * The parameters to connect to Postgresql from Dremio are in "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.properties"
  */
-//@Ignore
+@Ignore
 public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/dremio/bind/sparqlBind.owl";
