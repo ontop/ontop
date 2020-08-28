@@ -3,7 +3,7 @@
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.1</version>
 
     <name>ontop</name>
     <url>http://ontop-vkg.org/</url>
@@ -31,7 +31,7 @@
         <connection>scm:git:git@github.com:ontop/ontop.git</connection>
         <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
         <url>git@github.com:ontop/ontop.git</url>
-        <tag>ontop-4.0.0</tag>
+        <tag>ontop-4.0.1</tag>
     </scm>
 
     <developers>
