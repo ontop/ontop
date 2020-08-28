@@ -19,7 +19,7 @@ import java.util.List;
  * https://github.com/ontop/ontop-dockertests/tree/master/pgsql
  * The parameters to connect to Postgresql from Dremio are in "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.properties"
  */
-@Ignore
+//@Ignore
 public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/dremio/bind/sparqlBind.owl";
@@ -54,10 +54,10 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getDatatypeExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.2\"^^xsd:decimal");
-        expectedValues.add("\"0.25\"^^xsd:decimal");
-        expectedValues.add("\"0.2\"^^xsd:decimal");
-        expectedValues.add("\"0.15\"^^xsd:decimal");
+        expectedValues.add("\"0.200000\"^^xsd:decimal");
+        expectedValues.add("\"0.250000\"^^xsd:decimal");
+        expectedValues.add("\"0.200000\"^^xsd:decimal");
+        expectedValues.add("\"0.150000\"^^xsd:decimal");
 
         return expectedValues;
     }
@@ -85,27 +85,19 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     }
 
     @Override
-    protected List<String> getHoursExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"12\"^^xsd:integer");
-        expectedValues.add("\"12\"^^xsd:integer");
-        expectedValues.add("\"11\"^^xsd:integer");
-        expectedValues.add("\"7\"^^xsd:integer");
-        return expectedValues;
-    }
-
-    @Override
     protected List<String> getConstantIntegerDivideExpectedResults() {
-        return ImmutableList.of("\"0.500000\"^^xsd:decimal");
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.500000\"^^xsd:decimal");
+        return expectedValues;
     }
 
     @Override
     protected List<String> getStrExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1967-11-05T07:50:00.000000+01:00\"^^xsd:string");
-        expectedValues.add("\"2011-12-08T12:30:00.000000+01:00\"^^xsd:string");
-        expectedValues.add("\"2014-07-14T12:47:52.000000+02:00\"^^xsd:string");
-        expectedValues.add("\"2015-09-21T11:23:06.000000+02:00\"^^xsd:string");
+        expectedValues.add("\"1967-11-05T06:50:00+00:00\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T11:30:00+00:00\"^^xsd:string");
+        expectedValues.add("\"2014-07-14T10:47:52+00:00\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T09:23:06+00:00\"^^xsd:string");
 
         return expectedValues;
     }
@@ -113,20 +105,48 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getAbsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.6000000000000000000000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"5.7500000000000000000000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"6.8000000000000000000000000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"1.5000000000000000000000000000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"8.600000\"^^xsd:decimal");
+        expectedValues.add("\"5.750000\"^^xsd:decimal");
+        expectedValues.add("\"6.800000\"^^xsd:decimal");
+        expectedValues.add("\"1.500000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getHoursExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"6\"^^xsd:integer");
+        expectedValues.add("\"10\"^^xsd:integer");
+        expectedValues.add("\"9\"^^xsd:integer");
+        expectedValues.add("\"11\"^^xsd:integer");
         return expectedValues;
     }
 
     @Override
     protected List<String> getDivideExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"21.50000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"11.50000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"17.00000000000000000000\"^^xsd:decimal");
-        expectedValues.add("\"5.00000000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"21.500000\"^^xsd:decimal");
+        expectedValues.add("\"11.500000\"^^xsd:decimal");
+        expectedValues.add("\"17.000000\"^^xsd:decimal");
+        expectedValues.add("\"5.000000\"^^xsd:decimal");
         return expectedValues;
+    }
+
+    @Ignore("Not supported yet ")
+    @Test
+    @Override
+    public void testUuid() {
+    }
+
+    @Ignore("Not supported yet ")
+    @Test
+    @Override
+    public void testTZ() {
+    }
+
+    @Ignore("Not supported yet ")
+    @Test
+    @Override
+    public void testHashSHA256() {
     }
 }
