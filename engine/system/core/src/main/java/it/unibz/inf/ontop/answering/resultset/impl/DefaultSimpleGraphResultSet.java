@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,12 +28,9 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
@@ -60,6 +57,8 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
     private final TermFactory termFactory;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
 
+    ABoxAssertionSupplier builder;
+
     public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
                                        boolean storeResults, TermFactory termFactory,
                                        org.apache.commons.rdf.api.RDF rdfFactory) throws OntopResultConversionException, OntopConnectionException {
@@ -67,10 +66,12 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		this.constructTemplate = constructTemplate;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
+        builder = OntologyBuilderImpl.assertionSupplier(this.rdfFactory);
+
         Extension ex = constructTemplate.getExtension();
         if (ex != null) {
             extMap = ex.getElements().stream()
-                    .collect(ImmutableCollectors.toMap(e -> e.getName(), e -> e.getExpr()));
+                    .collect(ImmutableCollectors.toMap(ExtensionElem::getName, ExtensionElem::getExpr));
         }
         else
             extMap = null;
@@ -83,7 +84,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 results.addAll(processResults(tupleResultSet.next()));
             }
         }
-	}
+    }
 
 
     @Override
@@ -100,7 +101,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	/**
 	 * The method to actually process the current result set Row.
 	 * Construct a list of assertions from the current result set row.
-	 * In case of describe it is called to process and store all 
+	 * In case of describe it is called to process and store all
 	 * the results from a resultset.
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
@@ -109,46 +110,18 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             throws OntopResultConversionException, OntopConnectionException {
 
         List<Assertion> tripleAssertions = new ArrayList<>();
-        ABoxAssertionSupplier builder = OntologyBuilderImpl.assertionSupplier(rdfFactory);
+
 
         for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
             int size = peList.getElements().size();
-
             for (int i = 0; i < size / 3; i++) {
 
                 ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
                 Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
                 Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
-
-                // A triple can only be constructed when none of bindings is missing
-                if (subjectConstant == null || predicateConstant == null || objectConstant==null) {
-                    continue;
-                }
-
-                // Determines the type of assertion
-                String predicateName = predicateConstant.getValue();
-                try {
-                    Assertion assertion;
-                    if (predicateName.equals(RDF.TYPE.getIRIString())) {
-                        assertion = builder.createClassAssertion(objectConstant.getValue(), subjectConstant);
-                    }
-                    else {
-                        if ((objectConstant instanceof IRIConstant) || (objectConstant instanceof BNode)) {
-                            assertion = builder.createObjectPropertyAssertion(predicateName,
-                                    subjectConstant, (ObjectConstant) objectConstant);
-                        }
-                        else {
-                            assertion = builder.createDataPropertyAssertion(predicateName,
-                                    subjectConstant, (RDFLiteralConstant) objectConstant);
-                        }
-                    }
-                    if (assertion != null)
-                        tripleAssertions.add(assertion);
-                }
-                catch (InconsistentOntologyException e) {
-                    throw new OntopResultConversionException("InconsistentOntologyException: " +
-                            predicateName + " " + subjectConstant + " " + objectConstant);
-                }
+                Assertion assertion = SimpleGraphResultSet.getAssertion(builder, subjectConstant, predicateConstant, objectConstant);
+                if (assertion != null)
+                    tripleAssertions.add(assertion);
             }
         }
         return tripleAssertions;

@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>ontop-core</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>4.0.0</version>
+		<version>4.0.1</version>
 	</parent>
 	<artifactId>ontop-optimization</artifactId>
 	<name>ontop-optimization</name>

@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop-client</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.0.0</version>
+        <version>4.0.1</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -295,52 +295,52 @@
             <groupId>eu.optique-project</groupId>
             <artifactId>r2rml-api-rdf4j-binding</artifactId>
         </dependency>
-        <dependency>
-            <groupId>eu.optique-project</groupId>
-            <artifactId>r2rml-api-jena-binding</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>eu.optique-project</groupId>-->
+<!--            <artifactId>r2rml-api-jena-binding</artifactId>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-rdf-jena</artifactId>
-            <version>${commons-rdf.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-rdf-jena</artifactId>-->
+<!--            <version>${commons-rdf.version}</version>-->
+<!--        </dependency>-->
 
         <!-- transtiive closure of commons-rdf-jena starts -->
 
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-core</artifactId>
-            <version>${jena.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-iri</artifactId>
-            <version>${jena.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-base</artifactId>
-            <version>${jena.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-shaded-guava</artifactId>
-            <version>${jena.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-arq</artifactId>
-            <version>${jena.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.jena</groupId>-->
+<!--            <artifactId>jena-core</artifactId>-->
+<!--            <version>${jena.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.jena</groupId>-->
+<!--            <artifactId>jena-iri</artifactId>-->
+<!--            <version>${jena.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.jena</groupId>-->
+<!--            <artifactId>jena-base</artifactId>-->
+<!--            <version>${jena.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.jena</groupId>-->
+<!--            <artifactId>jena-shaded-guava</artifactId>-->
+<!--            <version>${jena.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.jena</groupId>-->
+<!--            <artifactId>jena-arq</artifactId>-->
+<!--            <version>${jena.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-compress</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-csv</artifactId>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>xerces</groupId>
@@ -541,10 +541,10 @@
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>aopalliance</groupId>
-			<artifactId>aopalliance</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>aopalliance</groupId>-->
+<!--			<artifactId>aopalliance</artifactId>-->
+<!--		</dependency>-->
 
         <dependency>
             <groupId>org.apache.commons</groupId>

@@ -3,7 +3,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-mapping-sql</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1</version>
     </parent>
     <artifactId>ontop-mapping-r2rml</artifactId>
     <dependencies>
@@ -65,11 +65,6 @@
         </dependency>
 
         <dependency>
-            <groupId>eu.optique-project</groupId>
-            <artifactId>r2rml-api-jena-binding</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>owlapi-impl</artifactId>
         </dependency>
@@ -78,10 +73,6 @@
             <artifactId>owlapi-apibinding</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-arq</artifactId>
-        </dependency>
 
     </dependencies>
 
