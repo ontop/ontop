@@ -47,17 +47,20 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -71,6 +74,8 @@ public class OntopMaterializerTest {
 	private static final String url = "jdbc:h2:mem:aboxdump";
 	private static final String username = "sa";
 	private static final String password = "";
+
+	private static Connection conn;
 
 	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final RDF rdfFactory;
@@ -88,6 +93,7 @@ public class OntopMaterializerTest {
 	private final ImmutableTerm age;
 	private final ImmutableTerm hasschool;
 	private final ImmutableTerm school;
+	private final ImmutableTerm graph;
 
 	private final IRI personIRI;
 	private final IRI fnIRI;
@@ -95,6 +101,7 @@ public class OntopMaterializerTest {
 	private final IRI ageIRI;
 	private final IRI hasschoolIRI;
 	private final IRI schoolIRI;
+	private final IRI graphIRI;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
 
@@ -118,7 +125,8 @@ public class OntopMaterializerTest {
 		lnIRI = rdfFactory.createIRI(PREFIX + "ln");
 		ageIRI = rdfFactory.createIRI(PREFIX + "age");
 		hasschoolIRI = rdfFactory.createIRI(PREFIX + "hasschool");
-		schoolIRI = rdfFactory.createIRI(PREFIX + "School");
+		schoolIRI = rdfFactory.createIRI(PREFIX + "school");
+		graphIRI = rdfFactory.createIRI(PREFIX + "graph");
 
 		xsdStringDt = typeFactory.getXsdStringDatatype();
 
@@ -129,6 +137,7 @@ public class OntopMaterializerTest {
 		age = termFactory.getConstantIRI(ageIRI);
 		hasschool = termFactory.getConstantIRI(hasschoolIRI);
 		school = termFactory.getConstantIRI(schoolIRI);
+		graph = termFactory.getConstantIRI(graphIRI);
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
@@ -139,13 +148,38 @@ public class OntopMaterializerTest {
 				.jdbcDriver(driver);
 	}
 
+	@BeforeClass
+	public static void createDB() {
+		try {
+			conn = DriverManager.getConnection(url, username, password);
+			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
+			try (Statement st = conn.createStatement()) {
+				st.executeUpdate(s);
+				conn.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} catch (SQLException | IOException e){
+			e.printStackTrace();
+		}
+	}
+
+	@AfterClass
+	public static void closeConnection(){
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Test(expected = InvalidOntopConfigurationException.class)
 	public void testNoSource()  {
 		OntopStandaloneSQLConfiguration.defaultBuilder().build();
 	}
 
 	@Test
-	public void testOneSource() throws Exception {
+	public void testOneSourceTriple() throws Exception {
 
     	SQLPPMapping ppMapping = createMapping();
 
@@ -154,14 +188,6 @@ public class OntopMaterializerTest {
 				.build();
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-
-		Connection conn = DriverManager.getConnection(url, username, password);
-
-		try (Statement st = conn.createStatement()) {
-			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
-			st.executeUpdate(s);
-			conn.commit();
-		}
 
 		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
@@ -185,10 +211,50 @@ public class OntopMaterializerTest {
 			assertEquals(15, count);
 		}
 
-		conn.close();
+		// conn.close();
 	}
 
+	@Test
+	public void testOneSourceQuad() throws Exception {
 
+    	SQLPPMapping ppMapping = createQuadMapping();
+//    	List<TargetAtom> atoms = ppMapping.getTripleMaps().iterator().next().getTargetAtoms();
+//		List<ImmutableTerm> substitutedTerms = atoms.iterator().next().getSubstitutedTerms(); // Davide> TODO Remove
+		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
+				.ppMapping(ppMapping)
+				.build();
+
+		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
+				.collect(ImmutableCollectors.toSet());
+
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
+
+		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(vocabulary)) {
+
+			ImmutableList.Builder<Assertion> rdfGraphBuilder = ImmutableList.builder();
+			while (materializationResultSet.hasNext()) {
+				// TODO Davide> Qua devo controllare in che grafo si trova
+				// TODO Se si trova in un grafo, allora sto metodo rdfGraphBuilder deve essere in grado
+				// TODO Il punto, e' che rdfGradphBuilder prende una Assertion, e le Assertion NON hanno il graph
+				// TODO E' possibile mettere il graph nelle Assertions? Magari "Named Assertion"?
+				rdfGraphBuilder.add(materializationResultSet.next());
+			}
+			ImmutableList<Assertion> assertions = rdfGraphBuilder.build();
+
+			LOGGER.debug("Assertions: \n");
+			assertions.forEach(a -> LOGGER.debug(a + "\n"));
+
+			assertEquals(15, assertions.size());
+
+			long count = materializationResultSet.getTripleCountSoFar();
+			assertEquals(15, count);
+		}
+
+		// conn.close();
+	}
 
 	private SQLPPMapping createMapping()  {
 
@@ -218,6 +284,34 @@ public class OntopMaterializerTest {
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), prefixManager);
 	}
 
+	private SQLPPMapping createQuadMapping()  {
+
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
+
+		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
+				"http://schools.com/person/{}-{}",
+				ImmutableList.of(
+					termFactory.getVariable("fn"),
+					termFactory.getVariable("ln")));
+
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getVariable("schooluri"), true);
+
+		RDFDatatype stringDatatype = xsdStringDt;
+
+		ImmutableList<TargetAtom> body =  ImmutableList.of(
+				targetAtomFactory.getQuadTargetAtom(personTemplate, type, person, graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, fn, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("fn"), stringDatatype), graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, ln, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("ln"), stringDatatype), graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, age, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("age"), stringDatatype), graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, hasschool, schoolTemplate, graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, school, schoolTemplate, graph)
+		);
+
+		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(IDGenerator.getNextUniqueID("MAPID-"), sourceQueryFactory.createSourceQuery(sql), body);
+
+		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), prefixManager);
+	}
 
 //	public void testTwoSources() throws Exception {
 //        try{

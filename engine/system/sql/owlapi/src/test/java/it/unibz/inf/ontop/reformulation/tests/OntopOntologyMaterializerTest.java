@@ -30,10 +30,7 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -103,18 +100,18 @@ public class OntopOntologyMaterializerTest extends TestCase {
 		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
 			int classAss = 0, propAss = 0, objAss = 0;
 
+//			// Davide> Debug
+//			PrintWriter writer = new PrintWriter("src/test/resources/materializer/output_assertions.txt");
+
 			LOGGER.debug("Assertions:");
 			while (resultSet.hasNext()) {
 				Assertion assertion = resultSet.next();
-				LOGGER.debug(assertion.toString());
 
 				if (assertion instanceof ClassAssertion)
 					classAss++;
-
 				else if (assertion instanceof ObjectPropertyAssertion)
 					objAss++;
-
-				else // DataPropertyAssertion
+				else  // DataPropertyAssertion
 					propAss++;
 			}
 			assertEquals(6, classAss); //2 classes * 3 data rows for T1
