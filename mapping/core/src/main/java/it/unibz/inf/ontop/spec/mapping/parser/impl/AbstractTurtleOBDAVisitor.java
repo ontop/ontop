@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -47,7 +46,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     /**
      * The current graph
      */
-    private ImmutableTerm currentGraphLabel;
+    private ImmutableTerm currentGraph;
     /**
      * The current subject term
      */
@@ -294,8 +293,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Stream<TargetAtom> visitQuadsStatement(QuadsStatementContext ctx) {
-        // set currentGraph
-        visitGraph(ctx.graph());
+        this.currentGraph = visitGraph(ctx.graph());
         return ctx.triplesStatement().stream().flatMap(this::visitTriplesStatement);
     }
 
@@ -329,9 +327,9 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     @Override
     public Stream<TargetAtom> visitPredicateObject(PredicateObjectContext ctx) {
         Stream<TargetAtom> result = visitObjectList(ctx.objectList()).map(object ->
-                currentGraphLabel == null ?
-                        targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), object)
-                        : targetAtomFactory.getQuadTargetAtom(currentSubject, visitVerb(ctx.verb()), object, currentGraphLabel));
+                currentGraph == null
+                        ? targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), object)
+                        : targetAtomFactory.getQuadTargetAtom(currentSubject, visitVerb(ctx.verb()), object, currentGraph));
         return result;
 
     }
