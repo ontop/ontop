@@ -87,10 +87,6 @@ base
   : ('@base' | '@BASE') IRIREF
   ;
 
-//quads
-//  : 'GRAPH' graph '{' triples+ '}'
-//  ;
-
 triples
   : subject  predicateObjectList
   ;

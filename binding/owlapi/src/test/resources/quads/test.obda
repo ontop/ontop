@@ -9,11 +9,11 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 
 mappingId	Person
-target		GRAPH <http://example.org/graphs/spiderman> { :person{idPerson} :hasJob :job{idJob} ; rdfs:label {name} } . GRAPH <http://example.org/graphs/batman> { :person{idPerson} :hasJob :job{idJob} ; rdfs:label {name} } .
+target		GRAPH <http://example.org/graphs/spiderman> { :person{idPerson} :hasJob :job{idJob} ; rdfs:label {name} } . GRAPH <http://example.org/graphs/batman> { :person{idPerson} :hasJob :job{idJob} ; rdfs:label {name} . }
 source		select idPerson, name, birthYear, idJob from Person
 
 mappingId	Job
-target		:job{idJob} :hasDescription {description} ; rdfs:label {description} . 
+target		:job{idJob} :hasDescription {description} ; rdfs:label {description} .
 source		select idJob, description from Job
 ]]
 
