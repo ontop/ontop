@@ -32,8 +32,10 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.eclipse.rdf4j.query.algebra.LeftJoin;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
@@ -119,35 +121,62 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
             return Optional.of(ImmutableList.of((ExtensionalDataNode)leftNode));
 
         else if (leftNode instanceof InnerJoinNode) {
-            return extractInnerJoinChildrenOnTheLeft(query, leftNode);
+            return extractInnerJoinChildrenOnTheLeft(query, (InnerJoinNode) leftNode,
+                    () -> extractConditionAndRightVariables(query, rightChild, ((InnerJoinNode) leftNode).getOptionalFilterCondition()));
         }
 
         /*
          * In case of "well-designed" LJs
          */
         else if (leftNode instanceof LeftJoinNode) {
-            ImmutableSet<Variable> rightVariables = query.getVariables(rightChild);
-            ImmutableSet<Variable> conditionAndRightVariables = optionalFilterCondition
-                    .map(c -> Sets.union(c.getVariables(), rightVariables).immutableCopy())
-                    .orElse(rightVariables);
+
+            ImmutableSet<Variable> conditionAndRightVariables = extractConditionAndRightVariables(query, rightChild, optionalFilterCondition);
             return findLeftDataNodeWithNonConflictingRight(query, (LeftJoinNode) leftNode, conditionAndRightVariables);
         }
 
         return Optional.empty();
     }
 
-    private Optional<ImmutableList<ExtensionalDataNode>> extractInnerJoinChildrenOnTheLeft(IntermediateQuery query, QueryNode leftNode) {
+    private ImmutableSet<Variable> extractConditionAndRightVariables(IntermediateQuery query, QueryNode rightChild, Optional<ImmutableExpression> optionalFilterCondition) {
+        ImmutableSet<Variable> rightVariables = query.getVariables(rightChild);
+        return optionalFilterCondition
+                .map(c -> Sets.union(c.getVariables(), rightVariables).immutableCopy())
+                .orElse(rightVariables);
+    }
+
+    private Optional<ImmutableList<ExtensionalDataNode>> extractInnerJoinChildrenOnTheLeft(IntermediateQuery query,
+                                                                                           InnerJoinNode leftNode,
+                                                                                           Supplier<ImmutableSet<Variable>> topMostConditionAndRightVariablesSupplier) {
         ImmutableList<QueryNode> children = query.getChildren(leftNode);
 
         /*
-         * ONLY if all the children of the join are extensional data nodes
-         *
-         * TODO: relax it
+         * Only extensional data nodes
          */
         if (children.stream().allMatch(c -> c instanceof ExtensionalDataNode))
             return Optional.of(children.stream()
                     .map(c -> (ExtensionalDataNode) c)
                     .collect(ImmutableCollectors.toList()));
+
+        /*
+         * Extensional data nodes and left joins
+         * NB: inner joins would have been expected to be already merged
+         */
+        if (children.stream().allMatch(c -> (c instanceof ExtensionalDataNode) || (c instanceof LeftJoinNode))) {
+
+            ImmutableSet<Variable> topMostConditionAndRightVariables = topMostConditionAndRightVariablesSupplier.get();
+            ImmutableList<Optional<ImmutableList<ExtensionalDataNode>>> extractions = children.stream()
+                    .map(c -> (c instanceof ExtensionalDataNode) ? Optional.of(ImmutableList.of((ExtensionalDataNode) c))
+                            : findLeftDataNodeWithNonConflictingRight(query, (LeftJoinNode) c, topMostConditionAndRightVariables))
+                    .collect(ImmutableCollectors.toList());
+
+            if (extractions.stream().anyMatch(o -> !o.isPresent()))
+                return Optional.empty();
+
+            return Optional.of(extractions.stream()
+                    .map(Optional::get)
+                    .flatMap(Collection::stream)
+                    .collect(ImmutableCollectors.toList()));
+        }
         return Optional.empty();
     }
 
@@ -179,7 +208,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
             return findLeftDataNodeWithNonConflictingRight(query, (LeftJoinNode) leftChild, topMostConditionAndRightVariables);
         }
         else if (leftChild instanceof InnerJoinNode) {
-            return extractInnerJoinChildrenOnTheLeft(query, leftChild);
+            return extractInnerJoinChildrenOnTheLeft(query, (InnerJoinNode) leftChild, () -> topMostConditionAndRightVariables);
         }
         else
             return Optional.empty();
