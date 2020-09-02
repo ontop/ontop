@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQProperties;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -63,7 +61,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .liftConditionAndMergeJoins();
 
             if (newState.equals(state))
-                return newState.createNormalizedTree(currentIQProperties);
+                return newState.liftLeftJoinAndCreateNormalizedTree(currentIQProperties);
             state = newState;
         }
 
@@ -284,10 +282,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .orElseGet(() -> updateConditionAndChildren(newCondition, newChildren));
         }
 
-        public IQTree createNormalizedTree(IQProperties currentIQProperties) {
+        public IQTree liftLeftJoinAndCreateNormalizedTree(IQProperties currentIQProperties) {
             IQProperties normalizedIQProperties = currentIQProperties.declareNormalizedForOptimization();
 
-            IQTree joinLevelTree = createJoinOrFilterOrEmpty(normalizedIQProperties);
+            IQTree joinLevelTree = createJoinOrFilterOrEmptyOrLiftLeft(normalizedIQProperties);
 
             if (joinLevelTree.isDeclaredAsEmpty())
                 return joinLevelTree;
@@ -307,8 +305,19 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             return nonNormalizedTree.normalizeForOptimization(variableGenerator);
         }
 
+        private boolean isLeftJoinToLiftAboveJoin(int i) {
+            IQTree currentChild = children.get(i);
+            if (currentChild.getRootNode() instanceof LeftJoinNode) {
+                BinaryNonCommutativeIQTree leftJoinTree = (BinaryNonCommutativeIQTree) currentChild;
 
-        private IQTree createJoinOrFilterOrEmpty(IQProperties normalizedIQProperties) {
+                // TODO: check right-specific variables are not used by other children of the inner join
+                return true;
+            }
+            return false;
+        }
+
+
+        private IQTree createJoinOrFilterOrEmptyOrLiftLeft(IQProperties normalizedIQProperties) {
             switch (children.size()) {
                 case 0:
                     return iqFactory.createTrueNode();
@@ -318,10 +327,47 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                             .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
                             .orElse(uniqueChild);
                 default:
-                    InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(joiningCondition);
-                    return iqFactory.createNaryIQTree(newJoinNode, children,
-                            normalizedIQProperties);
+                    return liftLeftJoin()
+                            .orElseGet(()-> iqFactory.createNaryIQTree(
+                                    iqFactory.createInnerJoinNode(joiningCondition),
+                                    children, normalizedIQProperties));
             }
+        }
+
+        /**
+         * Puts the LJ above the inner join if possible
+         */
+        protected Optional<IQTree> liftLeftJoin() {
+            Optional<Integer> ljChildToLiftIndex = IntStream.range(0, children.size())
+                    .filter(this::isLeftJoinToLiftAboveJoin)
+                    .boxed()
+                    .findFirst();
+
+            if (!ljChildToLiftIndex.isPresent())
+                return Optional.empty();
+
+            int index = ljChildToLiftIndex.get();
+            BinaryNonCommutativeIQTree ljChild = (BinaryNonCommutativeIQTree) children.get(index);
+
+            NaryIQTree newJoinOnLeft = iqFactory.createNaryIQTree(
+                    iqFactory.createInnerJoinNode(),
+                    Stream.concat(
+                            Stream.of(ljChild.getLeftChild()),
+                            IntStream.range(0, children.size())
+                                    .filter(i -> i != index)
+                                    .boxed()
+                                    .map(children::get))
+                            .collect(ImmutableCollectors.toList()));
+
+            BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(ljChild.getRootNode(), newJoinOnLeft,
+                    ljChild.getRightChild());
+
+            IQTree newTree = joiningCondition
+                    .map(iqFactory::createFilterNode)
+                    .map(t -> (IQTree) iqFactory.createUnaryIQTree(t, newLeftJoinTree))
+                    .orElse(newLeftJoinTree);
+
+            return Optional.of(newTree);
         }
 
         /**
