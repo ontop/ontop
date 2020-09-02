@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -305,13 +306,22 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             return nonNormalizedTree.normalizeForOptimization(variableGenerator);
         }
 
+        /**
+         * For safety (although conflicts are unlikely to appear)
+         */
         private boolean isLeftJoinToLiftAboveJoin(int i) {
             IQTree currentChild = children.get(i);
             if (currentChild.getRootNode() instanceof LeftJoinNode) {
                 BinaryNonCommutativeIQTree leftJoinTree = (BinaryNonCommutativeIQTree) currentChild;
 
-                // TODO: check right-specific variables are not used by other children of the inner join
-                return true;
+                Sets.SetView<Variable> rightSpecificVariables = Sets.difference(
+                        leftJoinTree.getRightChild().getVariables(),
+                        leftJoinTree.getLeftChild().getVariables());
+
+                return IntStream.range(0, children.size())
+                        .filter(j -> i != j)
+                        .noneMatch(j -> children.get(j).getVariables().stream()
+                                .anyMatch(rightSpecificVariables::contains));
             }
             return false;
         }
