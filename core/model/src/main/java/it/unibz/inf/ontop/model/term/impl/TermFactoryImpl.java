@@ -84,6 +84,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public IRIConstant getConstantIRI(String iri) {
+		return getConstantIRI(rdfFactory.createIRI(iri));
+	}
+
+	@Override
 	public RDFLiteralConstant getRDFLiteralConstant(String value, RDFDatatype type) {
 		return new RDFLiteralConstantImpl(value, type);
 	}
@@ -640,7 +645,7 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBDefaultInequality(inequalityLabel),
 				dbTerm1, dbTerm2);
 	}
-	
+
 	@Override
 	public BNode getConstantBNode(String name) {
 		return new BNodeConstantImpl(name, typeFactory);

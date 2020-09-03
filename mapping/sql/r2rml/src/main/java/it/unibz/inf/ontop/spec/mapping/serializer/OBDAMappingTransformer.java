@@ -41,7 +41,7 @@ import java.util.stream.Stream;
  * Transform OBDA mappings in R2rml mappings
  * Initial @author s Sarah, Mindas, Timi, Guohui, Martin
  *
- * TODO: rename it R2RML serializer
+ * TODO: rename it R2RML serializer
  *
  */
 public class OBDAMappingTransformer {
