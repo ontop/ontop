@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
@@ -64,13 +65,23 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
+    public Stream<Constant> getValueStream(Variable variable) {
+        int index = orderedVariables.indexOf(variable);
+        if (index < 0)
+            return Stream.empty();
+
+        return values.stream()
+                .map(t -> t.get(index));
+    }
+
+    @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
-        throw new RuntimeException("TODO: Support");
+        visitor.visit(this);
     }
 
     @Override
     public ValuesNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        throw new RuntimeException("TODO: Support");
+        return transformer.transform(this);
     }
 
     @Override
@@ -122,7 +133,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
-        throw new RuntimeException("TODO: Support");
+        return visitor.visitValues(this);
     }
 
     @Override
@@ -199,6 +210,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public ValuesNode clone() {
         return iqFactory.createValuesNode(orderedVariables, values);
+    }
+
+    @Override
+    public ImmutableList<Variable> getOrderedVariables() {
+        return orderedVariables;
     }
 
     @Override

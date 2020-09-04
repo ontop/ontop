@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Singleton
 public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
@@ -89,6 +90,22 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
         @Override
         public Optional<TermType> visitNative(NativeNode nativeNode) {
             return Optional.ofNullable(nativeNode.getTypeMap().get(variable));
+        }
+
+        @Override
+        public Optional<TermType> visitValues(ValuesNode valuesNode) {
+            ImmutableSet<TermType> termTypes = valuesNode.getValueStream(variable)
+                    .flatMap(c -> c.getOptionalType()
+                            .map(Stream::of)
+                            .orElseGet(Stream::empty))
+                    .collect(ImmutableCollectors.toSet());
+
+            if (termTypes.size() > 1)
+                throw new NonUniqueTermTypeException(String.format("Multiple term types found for %s: %s",
+                        variable, termTypes));
+
+            return termTypes.stream()
+                    .findAny();
         }
 
         @Override
