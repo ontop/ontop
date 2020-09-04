@@ -22,7 +22,7 @@ Compiling, packing, testing, etc.
 
 The project is a [Maven](http://maven.apache.org/) project. Compiling,
 running the unit tests, building the release binaries all can be done
-using maven.  Currently we use Maven 3 and Java 8 to build the
+using maven.  Currently, we use Maven 3 and Java 8 to build the
 project.
 
 
