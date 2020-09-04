@@ -128,7 +128,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        throw new RuntimeException("TODO: Support");
+        return transformer.transformValues(this);
     }
 
     @Override
