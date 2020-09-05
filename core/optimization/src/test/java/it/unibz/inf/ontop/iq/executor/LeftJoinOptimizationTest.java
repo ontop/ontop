@@ -944,11 +944,7 @@ public class LeftJoinOptimizationTest {
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
-
-    /**
-     * TODO: support it
-     */
-    @Ignore
+    
     @Test
     public void testLeftJoinOrder1() {
 

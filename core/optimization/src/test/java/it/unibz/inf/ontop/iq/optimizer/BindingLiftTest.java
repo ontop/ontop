@@ -1062,19 +1062,11 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
-        //construct innerjoin
-        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
-
-
 
         //construct union
-        UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(F0, BF1, F));
-        expectedQueryBuilder.addChild(expectedJoinNode, expectedUnionNode);
+        UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(F0, BF1, F, H));
+        expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode);
 
-        //construct right side join
-
-        expectedQueryBuilder.addChild(expectedJoinNode, createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(BF1, H)));
 
         //construct union left side
 
@@ -1088,9 +1080,17 @@ public class BindingLiftTest {
         LeftJoinNode expectedLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
         expectedQueryBuilder.addChild(expectedNodeOnLeft, expectedLeftJoinNode);
 
+        InnerJoinNode leftInnerJoinNode = IQ_FACTORY.createInnerJoinNode();
+
         //construct left side left join
-        expectedQueryBuilder.addChild(expectedLeftJoinNode,
-                createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, BF1)), LEFT);
+        expectedQueryBuilder.addChild(expectedLeftJoinNode, leftInnerJoinNode, LEFT);
+
+        ExtensionalDataNode newDataNode2 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(BF1, H));
+
+        expectedQueryBuilder.addChild(leftInnerJoinNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, BF1)));
+        expectedQueryBuilder.addChild(leftInnerJoinNode, newDataNode2);
+
+
         //construct right side left join
         expectedQueryBuilder.addChild(expectedLeftJoinNode,
                 createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, F)), RIGHT);
@@ -1101,8 +1101,11 @@ public class BindingLiftTest {
 
         expectedQueryBuilder.addChild(expectedUnionNode, expectedNodeOnRight);
 
-        expectedQueryBuilder.addChild(expectedNodeOnRight, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, BF1)));
+        InnerJoinNode rightInnerJoinNode = IQ_FACTORY.createInnerJoinNode();
+        expectedQueryBuilder.addChild(expectedNodeOnRight, rightInnerJoinNode);
 
+        expectedQueryBuilder.addChild(rightInnerJoinNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, BF1)));
+        expectedQueryBuilder.addChild(rightInnerJoinNode, newDataNode2.clone());
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();

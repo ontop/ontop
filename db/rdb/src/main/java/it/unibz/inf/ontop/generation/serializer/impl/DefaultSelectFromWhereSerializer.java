@@ -295,8 +295,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(s -> String.format("ON %s ", s))
                     .orElse("ON 1 = 1 ");
 
-            String sql = String.format("%s\n %s \n%s %s", left.getString(), operatorString, right.getString(), onString);
+            String sql = formatBinaryJoin(operatorString, left, right, onString);
             return new QuerySerializationImpl(sql, columnIDs);
+        }
+
+        protected String formatBinaryJoin(String operatorString, QuerySerialization left, QuerySerialization right, String onString) {
+            return String.format("%s\n %s \n%s %s", left.getString(), operatorString, right.getString(), onString);
         }
 
         @Override
