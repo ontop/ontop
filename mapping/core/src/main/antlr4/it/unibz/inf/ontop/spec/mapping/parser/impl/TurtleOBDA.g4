@@ -59,7 +59,7 @@ grammar TurtleOBDA;
  *------------------------------------------------------------------*/
 
 parse
-  : directiveStatement* triplesStatement+ EOF
+  : directiveStatement* (triplesStatement|quadsStatement)+ EOF
   ;
 
 directiveStatement
@@ -68,8 +68,11 @@ directiveStatement
 
 triplesStatement
   : triples '.'
-  | quads '.'
   ;
+
+quadsStatement
+    : 'GRAPH' graph '{' triplesStatement+ '}'
+    ;
 
 directive
   : base
@@ -82,10 +85,6 @@ prefixID
 
 base
   : ('@base' | '@BASE') IRIREF
-  ;
-
-quads
-  : 'GRAPH' graph '{' triples+ '}'
   ;
 
 triples
