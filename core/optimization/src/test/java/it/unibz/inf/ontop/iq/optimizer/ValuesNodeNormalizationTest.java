@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -11,6 +12,7 @@ import static junit.framework.TestCase.assertTrue;
 public class ValuesNodeNormalizationTest {
 
     @Test
+    @Ignore
     public void test1() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY
@@ -25,6 +27,7 @@ public class ValuesNodeNormalizationTest {
     }
 
     @Test
+    @Ignore
     public void test2() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY
@@ -39,6 +42,7 @@ public class ValuesNodeNormalizationTest {
     }
 
     @Test
+    @Ignore
     public void test3() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY
