@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -42,6 +43,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private final CoreUtilsFactory coreUtilsFactory;
     // LAZY
     private VariableNullability variableNullability;
+    // LAZY
+    private Boolean isDistinct;
 
     @AssistedInject
     protected ValuesNodeImpl(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
@@ -61,6 +64,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public ImmutableList<ImmutableList<Constant>> getValues() {
         return values;
+    }
+
+    @Override
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
+        return this;
     }
 
     @Override
@@ -107,7 +115,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        throw new RuntimeException("TODO: Support");
+        return (queryNode instanceof ValuesNode) && queryNode.isSyntacticallyEquivalentTo(this);
     }
 
     @Override
@@ -152,6 +160,12 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public boolean isDistinct() {
+        if (isDistinct == null) {
+            isDistinct = (values.size() == values.stream()
+                                                .unordered()
+                                                .distinct()
+                                                .count());
+        }
         throw new RuntimeException("TODO: Support");
     }
 
@@ -203,7 +217,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder(VALUES_NODE_STR + " " + orderedVariables);
+        String valuesString = values.stream().map(tuple -> tuple.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","," (",")")))
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString();
+        return VALUES_NODE_STR + " " + orderedVariables + valuesString;
+
+        /*StringBuilder stringBuilder = new StringBuilder(VALUES_NODE_STR + " " + orderedVariables);
         for (ImmutableList<Constant> tuple : values) {
             stringBuilder.append('\n');
             stringBuilder.append("  ");
@@ -212,6 +233,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                     .collect(Collectors.joining(",","(",")"))
             );
         }
-        return stringBuilder.toString();
+        return stringBuilder.toString();*/
     }
 }
