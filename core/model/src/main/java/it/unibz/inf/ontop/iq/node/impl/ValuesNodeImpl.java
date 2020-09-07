@@ -69,24 +69,23 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        UnaryOperatorNode constructionNode;
-        IQTree valuesNode;
-
         // Check if there is potential to create construction node
         ImmutableSet<Integer> singleValueVariableIndices = IntStream.range(0, orderedVariables.size())
-                .filter(i -> getValueStream(orderedVariables.get(i))
+                .filter(i -> 1 == getValueStream(orderedVariables.get(i))
                         .unordered()
                         .distinct()
-                        .count() == 1)
+                        .count())
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
 
         if (singleValueVariableIndices.size() > 0) {
+            // Can be normalized into a construction/child node pair. Start by creating ConstructionNode.
             ImmutableSubstitution<ImmutableTerm> substitutions = substitutionFactory.getSubstitution(
                     singleValueVariableIndices.stream()
                         .collect(ImmutableCollectors.toMap(orderedVariables::get, i -> values.get(0).get(i))));
-            constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
+            UnaryOperatorNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
 
+            // Create the child node as ValueNode, possibly reduce to TrueNode
             ImmutableSet<Integer> multiValueVariableIndices = IntStream.range(0, orderedVariables.size())
                     .filter(i -> !singleValueVariableIndices.contains(i))
                     .boxed()
@@ -100,22 +99,17 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                             .map(constants::get)
                             .collect(ImmutableCollectors.toList()))
                     .collect(ImmutableCollectors.toList());
-            valuesNode = possiblyReduceToTrueNode(iqFactory.createValuesNode(newValuesNodeVariables, newValuesNodeValues));
+            IQTree childNode = possiblyReduceToTrueNode(iqFactory.createValuesNode(newValuesNodeVariables, newValuesNodeValues));
 
-            return iqFactory.createUnaryIQTree(constructionNode, valuesNode);
+            return iqFactory.createUnaryIQTree(constructionNode, childNode);
         }
-        else {
-            return possiblyReduceToTrueNode(this);
-        }
+        return possiblyReduceToTrueNode(this);
     }
 
     private IQTree possiblyReduceToTrueNode(ValuesNode valuesNode) {
-        if ((valuesNode.getVariables().size() == 0) && (valuesNode.getValues().size() == 1)) {
-            return iqFactory.createTrueNode();
-        }
-        else {
-            return valuesNode;
-        }
+        return ((valuesNode.getVariables().size() == 0) && (valuesNode.getValues().size() == 1))
+                ? iqFactory.createTrueNode()
+                : valuesNode;
     }
 
 
@@ -197,12 +191,18 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        throw new RuntimeException("TODO: Support");
+        ImmutableList<Variable> newVariables = orderedVariables.stream()
+                .map(freshRenamingSubstitution::applyToVariable)
+                .collect(ImmutableCollectors.toList());
+
+        return newVariables.equals(orderedVariables)
+                ? this
+                : iqFactory.createValuesNode(newVariables, values);
     }
 
     @Override
     public IQTree applyFreshRenamingToAllVariables(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        throw new RuntimeException("TODO: Support");
+        return applyFreshRenaming(freshRenamingSubstitution);
     }
 
     @Override
@@ -223,7 +223,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                                 .distinct()
                                                 .count());
         }
-        throw new RuntimeException("TODO: Support");
+        return isDistinct;
     }
 
     @Override
@@ -286,16 +286,5 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
         return VALUES_NODE_STR + " " + orderedVariables + valuesString;
-
-        /*StringBuilder stringBuilder = new StringBuilder(VALUES_NODE_STR + " " + orderedVariables);
-        for (ImmutableList<Constant> tuple : values) {
-            stringBuilder.append('\n');
-            stringBuilder.append("  ");
-            stringBuilder.append(tuple.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(",","(",")"))
-            );
-        }
-        return stringBuilder.toString();*/
     }
 }
