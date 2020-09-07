@@ -154,6 +154,11 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         }
 
         @Override
+        public void visit(ValuesNode valuesNode) {
+            valuesNode.validate();
+        }
+
+        @Override
         public void visit(DistinctNode distinctNode) {
             if (query.getChildren(distinctNode).size() != 1) {
                 throw new InvalidIntermediateQueryException("DISTINCT node " + distinctNode

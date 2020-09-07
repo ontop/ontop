@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormaliz
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -23,6 +24,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Singleton
 public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemover {
@@ -113,6 +115,34 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         @Override
         public IQTree transformTrue(TrueNode rootNode) {
             return rootNode;
+        }
+
+        @Override
+        public IQTree transformValues(ValuesNode valuesNode) {
+
+            ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
+            int arity = orderedVariables.size();
+
+            ImmutableList<Integer> indexesToRemove = IntStream.range(0,arity)
+                    .filter(i -> variablesToRemove.contains(orderedVariables.get(i)))
+                    .boxed()
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<Variable> newOrderedVariables = IntStream.range(0,arity)
+                    .filter(i -> !indexesToRemove.contains(i))
+                    .boxed()
+                    .map(orderedVariables::get)
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<ImmutableList<Constant>> newValues = valuesNode.getValues().stream()
+                    .map(t -> IntStream.range(0, arity)
+                            .filter(i -> !indexesToRemove.contains(i))
+                            .boxed()
+                            .map(t::get)
+                            .collect(ImmutableCollectors.toList()))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createValuesNode(newOrderedVariables, newValues);
         }
 
         @Override

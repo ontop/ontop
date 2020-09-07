@@ -29,6 +29,11 @@ public abstract class AbstractPredicateExtractor<T extends LeafIQTree> implement
     }
 
     @Override
+    public Stream<T> visitValues(ValuesNode valuesNode) {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<T> visitNonStandardLeafNode(LeafIQTree leafNode) {
         return Stream.empty();
     }
