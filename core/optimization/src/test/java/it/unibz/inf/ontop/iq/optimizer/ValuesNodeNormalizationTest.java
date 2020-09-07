@@ -12,7 +12,6 @@ import static junit.framework.TestCase.assertTrue;
 public class ValuesNodeNormalizationTest {
 
     @Test
-    @Ignore
     public void test1() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY
@@ -27,7 +26,6 @@ public class ValuesNodeNormalizationTest {
     }
 
     @Test
-    @Ignore
     public void test2() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY
@@ -42,7 +40,6 @@ public class ValuesNodeNormalizationTest {
     }
 
     @Test
-    @Ignore
     public void test3() {
         // Create initial node
         IQTree initialTree = IQ_FACTORY
@@ -51,8 +48,21 @@ public class ValuesNodeNormalizationTest {
         // Create expected Tree
         IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
                 .createConstructionNode(ImmutableSet.of(X, Y), SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR, Y, TWO_STR)), IQ_FACTORY
-                    .createValuesNode(ImmutableList.of(), ImmutableList.of(ImmutableList.of(ONE_STR, TWO_STR), ImmutableList.of(ONE_STR, TWO_STR)))
+                    .createValuesNode(ImmutableList.of(), ImmutableList.of(ImmutableList.of(), ImmutableList.of()))
         );
+
+        assertTrue(baseTest(initialTree, expectedTree));
+    }
+
+    @Test
+    public void test4() {
+        // Create initial node
+        IQTree initialTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(), ImmutableList.of(ImmutableList.of()));
+
+        // Create expected Tree
+        IQTree expectedTree = IQ_FACTORY
+                .createTrueNode();
 
         assertTrue(baseTest(initialTree, expectedTree));
     }

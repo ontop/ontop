@@ -11,10 +11,7 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.QueryNodeVisitor;
-import it.unibz.inf.ontop.iq.node.ValuesNode;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -24,6 +21,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -42,6 +40,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableList<ImmutableList<Constant>> values;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final SubstitutionFactory substitutionFactory;
     // LAZY
     private VariableNullability variableNullability;
     // LAZY
@@ -51,12 +50,13 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     protected ValuesNodeImpl(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
                              @Assisted("values") ImmutableList<ImmutableList<Constant>> values,
                              IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory,
-                             OntopModelSettings settings) {
+                             OntopModelSettings settings, SubstitutionFactory substitutionFactory) {
         super(iqTreeTools, iqFactory);
         this.orderedVariables = orderedVariables;
         this.projectedVariables = ImmutableSet.copyOf(orderedVariables);
         this.values = values;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.substitutionFactory = substitutionFactory;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -69,7 +69,53 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        return this;
+        UnaryOperatorNode constructionNode;
+        IQTree valuesNode;
+
+        // Check if there is potential to create construction node
+        ImmutableSet<Integer> singleValueVariableIndices = IntStream.range(0, orderedVariables.size())
+                .filter(i -> getValueStream(orderedVariables.get(i))
+                        .unordered()
+                        .distinct()
+                        .count() == 1)
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+
+        if (singleValueVariableIndices.size() > 0) {
+            ImmutableSubstitution<ImmutableTerm> substitutions = substitutionFactory.getSubstitution(
+                    singleValueVariableIndices.stream()
+                        .collect(ImmutableCollectors.toMap(orderedVariables::get, i -> values.get(0).get(i))));
+            constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
+
+            ImmutableSet<Integer> multiValueVariableIndices = IntStream.range(0, orderedVariables.size())
+                    .filter(i -> !singleValueVariableIndices.contains(i))
+                    .boxed()
+                    .collect(ImmutableCollectors.toSet());
+            ImmutableList<Variable> newValuesNodeVariables =
+                    multiValueVariableIndices.stream()
+                    .map(orderedVariables::get)
+                    .collect(ImmutableCollectors.toList());
+            ImmutableList<ImmutableList<Constant>> newValuesNodeValues = values.stream()
+                    .map(constants -> multiValueVariableIndices.stream()
+                            .map(constants::get)
+                            .collect(ImmutableCollectors.toList()))
+                    .collect(ImmutableCollectors.toList());
+            valuesNode = possiblyReduceToTrueNode(iqFactory.createValuesNode(newValuesNodeVariables, newValuesNodeValues));
+
+            return iqFactory.createUnaryIQTree(constructionNode, valuesNode);
+        }
+        else {
+            return possiblyReduceToTrueNode(this);
+        }
+    }
+
+    private IQTree possiblyReduceToTrueNode(ValuesNode valuesNode) {
+        if ((valuesNode.getVariables().size() == 0) && (valuesNode.getValues().size() == 1)) {
+            return iqFactory.createTrueNode();
+        }
+        else {
+            return valuesNode;
+        }
     }
 
 
@@ -205,6 +251,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public void validate() throws InvalidIntermediateQueryException {
+        // Add type checking of value/variable
         if (orderedVariables.size() != projectedVariables.size()) {
             throw new InvalidIntermediateQueryException("Variables must be unique");
         }
