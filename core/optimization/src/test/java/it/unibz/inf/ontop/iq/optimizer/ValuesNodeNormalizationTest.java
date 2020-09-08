@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -63,6 +62,19 @@ public class ValuesNodeNormalizationTest {
         // Create expected Tree
         IQTree expectedTree = IQ_FACTORY
                 .createTrueNode();
+
+        assertTrue(baseTest(initialTree, expectedTree));
+    }
+
+    @Test
+    public void test5() {
+        // Create initial node
+        IQTree initialTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(X, Y), ImmutableList.of(ImmutableList.of(ONE_STR, TWO_STR), ImmutableList.of(THREE_STR, FOUR_STR)));
+
+        // Create expected Tree
+        IQTree expectedTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(X, Y), ImmutableList.of(ImmutableList.of(ONE_STR, TWO_STR), ImmutableList.of(THREE_STR, FOUR_STR)));
 
         assertTrue(baseTest(initialTree, expectedTree));
     }

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -26,6 +27,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,6 +43,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     private final ImmutableList<ImmutableList<Constant>> values;
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
+    private boolean isNormalized = false;
     // LAZY
     private VariableNullability variableNullability;
     // LAZY
@@ -69,7 +72,18 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     @Override
     public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
-        // Check if there is potential to create construction node
+        if (isNormalized)
+            return this;
+        Optional<ConstructionAndValues> lift = liftSingleValueVariables();
+        if (lift.isPresent()) {
+            LeafIQTree normalizedLeaf = furtherNormalize(lift.get().valuesNode);
+            return iqFactory.createUnaryIQTree(lift.get().constructionNode, normalizedLeaf,
+                    iqFactory.createIQProperties().declareNormalizedForOptimization());
+        }
+        return furtherNormalize(this);
+    }
+
+    private Optional<ConstructionAndValues> liftSingleValueVariables() {
         ImmutableSet<Integer> singleValueVariableIndices = IntStream.range(0, orderedVariables.size())
                 .filter(i -> 1 == getValueStream(orderedVariables.get(i))
                         .unordered()
@@ -78,20 +92,21 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
 
-        if (singleValueVariableIndices.size() > 0) {
+        if (!singleValueVariableIndices.isEmpty()) {
             // Can be normalized into a construction/child node pair. Start by creating ConstructionNode.
             ImmutableSubstitution<ImmutableTerm> substitutions = substitutionFactory.getSubstitution(
                     singleValueVariableIndices.stream()
-                        .collect(ImmutableCollectors.toMap(orderedVariables::get, i -> values.get(0).get(i))));
-            UnaryOperatorNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
+                            .collect(ImmutableCollectors.toMap(
+                                    orderedVariables::get,
+                                    i -> values.get(0).get(i))));
+            ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitutions);
 
             // Create the child node as ValueNode, possibly reduce to TrueNode
             ImmutableSet<Integer> multiValueVariableIndices = IntStream.range(0, orderedVariables.size())
                     .filter(i -> !singleValueVariableIndices.contains(i))
                     .boxed()
                     .collect(ImmutableCollectors.toSet());
-            ImmutableList<Variable> newValuesNodeVariables =
-                    multiValueVariableIndices.stream()
+            ImmutableList<Variable> newValuesNodeVariables = multiValueVariableIndices.stream()
                     .map(orderedVariables::get)
                     .collect(ImmutableCollectors.toList());
             ImmutableList<ImmutableList<Constant>> newValuesNodeValues = values.stream()
@@ -99,17 +114,24 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                             .map(constants::get)
                             .collect(ImmutableCollectors.toList()))
                     .collect(ImmutableCollectors.toList());
-            IQTree childNode = possiblyReduceToTrueNode(iqFactory.createValuesNode(newValuesNodeVariables, newValuesNodeValues));
+            ValuesNode valuesNode = iqFactory.createValuesNode(newValuesNodeVariables, newValuesNodeValues);
 
-            return iqFactory.createUnaryIQTree(constructionNode, childNode);
+            return Optional.of(new ConstructionAndValues(constructionNode, valuesNode));
         }
-        return possiblyReduceToTrueNode(this);
+        return Optional.empty();
     }
 
-    private IQTree possiblyReduceToTrueNode(ValuesNode valuesNode) {
-        return ((valuesNode.getVariables().size() == 0) && (valuesNode.getValues().size() == 1))
-                ? iqFactory.createTrueNode()
-                : valuesNode;
+    private LeafIQTree furtherNormalize(ValuesNode valuesNode) {
+        if (valuesNode.getValues().isEmpty()) {
+            return iqFactory.createEmptyNode(valuesNode.getVariables());
+        }
+        if ((valuesNode.getVariables().isEmpty()) && (valuesNode.getValues().size() == 1)) {
+            return iqFactory.createTrueNode();
+        }
+        if (valuesNode == this) {
+            isNormalized = true;
+        }
+        return valuesNode;
     }
 
 
@@ -286,5 +308,15 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
         return VALUES_NODE_STR + " " + orderedVariables + valuesString;
+    }
+
+    private static class ConstructionAndValues {
+        public final ConstructionNode constructionNode;
+        public final ValuesNode valuesNode;
+
+        private ConstructionAndValues(ConstructionNode constructionNode, ValuesNode valuesNode) {
+            this.constructionNode = constructionNode;
+            this.valuesNode = valuesNode;
+        }
     }
 }
