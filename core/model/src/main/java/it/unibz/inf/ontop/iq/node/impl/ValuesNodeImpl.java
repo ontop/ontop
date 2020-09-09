@@ -356,10 +356,19 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
         if (constraint.isGround())
             return this;
-        /*ImmutableExpression.Evaluation evaluation = constraint.evaluate(getVariableNullability());
-        if (evaluation.isEffectiveFalse())
-            return iqFactory.createEmptyNode(ImmutableSet.of());*/
-        return this;
+        getVariableNullability();
+        ImmutableList<ImmutableList<Constant>> newValues = values.stream()
+                .filter(constants -> ((ImmutableExpression) substitutionFactory.getSubstitution(
+                        IntStream.range(0, orderedVariables.size())
+                                .boxed()
+                                .collect(ImmutableCollectors.toMap(
+                                        orderedVariables::get,
+                                        constants::get)))
+                        .apply(constraint))
+                        .evaluate(variableNullability)
+                        .isEffectiveFalse())
+                .collect(ImmutableCollectors.toList());
+        return iqFactory.createValuesNode(getOrderedVariables(), newValues);
     }
 
     @Override
