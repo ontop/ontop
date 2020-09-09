@@ -412,4 +412,15 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         return substitutionFactory.getSubstitution(newMap);
     }
+
+    @Override
+    public ImmutableSubstitution<Constant> getConstantFragment() {
+        ImmutableMap<Variable, Constant> newMap = getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof Constant)
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (Constant) e.getValue()));
+
+        return substitutionFactory.getSubstitution(newMap);
+    }
 }

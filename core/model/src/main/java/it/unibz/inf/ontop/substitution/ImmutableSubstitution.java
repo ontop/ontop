@@ -86,7 +86,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
     ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment();
     ImmutableSubstitution<NonVariableTerm> getNonVariableTermFragment();
-
+    ImmutableSubstitution<Constant> getConstantFragment();
     ImmutableSubstitution<GroundTerm> getGroundTermFragment();
 
     /**

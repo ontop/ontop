@@ -84,18 +84,18 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test6applyDescSubstitution() {
+    public void test6substitutionNoChange() {
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
-        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, ONE_STR);
+        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(Y, ONE_STR);
         IQTree expectedTree = IQ_FACTORY
-                .createValuesNode(ImmutableList.of(), ImmutableList.of(ImmutableList.of()));
+                .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
 
         assertTrue(baseTestApplyDescSubstitution(initialTree, substitution, expectedTree));
     }
 
     @Test
-    public void test7applyDescSubstitution() {
+    public void test7substitutionConstant() {
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X, Y), ImmutableList.of(
                         ImmutableList.of(ONE_STR, TWO_STR),
@@ -111,7 +111,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test8applyDescSubstitution() {
+    public void test8substitutionFunction() {
         // Test handling of GroundFunctionalTerm
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
@@ -122,6 +122,41 @@ public class ValuesNodeTest {
                 .createConstructionNode(ImmutableSet.of()),IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
                     .createFilterNode(TERM_FACTORY.getStrictEquality(XF0, groundFunctionalTerm)), IQ_FACTORY
                         .createValuesNode(ImmutableList.of(XF0), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)))));
+
+        assertTrue(baseTestApplyDescSubstitution(initialTree, substitution, expectedTree));
+    }
+
+    @Test
+    public void test9substitutionVariable() {
+        // Test handling of GroundFunctionalTerm
+        IQTree initialTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(X, Y, Z), ImmutableList.of(
+                        ImmutableList.of(ONE_STR, TWO_STR, THREE_STR),
+                        ImmutableList.of(TWO_STR, TWO_STR, FOUR_STR)));
+        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, Y, Z, W);
+
+        IQTree expectedTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(Y, W), ImmutableList.of(ImmutableList.of(TWO_STR, FOUR_STR)));
+
+        assertTrue(baseTestApplyDescSubstitution(initialTree, substitution, expectedTree));
+    }
+
+    @Test
+    public void test10substitutionTriple() {
+        // Test handling of GroundFunctionalTerm & NonFunctionalTerm
+        IQTree initialTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(X, Y, Z, W), ImmutableList.of(
+                        ImmutableList.of(ONE_STR, TWO_STR, TWO_STR, TWO_STR),
+                        ImmutableList.of(TWO_STR, TWO_STR, TWO_STR, ONE_STR),
+                        ImmutableList.of(ONE_STR, TWO_STR, THREE_STR, FOUR_STR)));
+        GroundFunctionalTerm groundFunctionalTerm = (GroundFunctionalTerm) TERM_FACTORY.getDBContains(ImmutableList.of(THREE_STR, FOUR_STR));
+        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, groundFunctionalTerm, Y, Z, W, ONE_STR);
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
+                .createConstructionNode(ImmutableSet.of()),IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
+                    .createFilterNode(TERM_FACTORY.getStrictEquality(XF0, groundFunctionalTerm)), IQ_FACTORY
+                        .createValuesNode(ImmutableList.of(XF0, Z), ImmutableList.of(
+                                ImmutableList.of(TWO_STR, TWO_STR)))));
 
         assertTrue(baseTestApplyDescSubstitution(initialTree, substitution, expectedTree));
     }
