@@ -211,14 +211,8 @@ public class OntologyImpl implements Ontology {
     public UnclassifiedOntologyTBox unclassifiedTBox() { return unclassifiedTBox; }
 
 	@Override
-	public OntologyABox abox() {
-	    return new OntologyABox() {
-
-			@Override
-			public ImmutableSet<RDFFact> getAssertions() {
-				return assertions;
-			}
-		};
+	public ImmutableSet<RDFFact> abox() {
+	    return assertions;
     }
 
 

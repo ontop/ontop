@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
-import it.unibz.inf.ontop.spec.ontology.OntologyABox;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -58,16 +57,16 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled) {
+    public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts, boolean isOntologyAnnotationQueryingEnabled) {
 
-        ImmutableList<MappingAssertion> assertions = ontology.getAssertions().stream()
+        ImmutableList<MappingAssertion> assertions = facts.stream()
                 .map(fact -> new MappingAssertion(
                                     MappingAssertionIndex.ofProperty(rdfAtomPredicate, fact.getProperty().getIRI()),
                                     createIQ(fact),
                                     new ABoxFactProvenance(fact)))
                 .collect(ImmutableCollectors.toList());
 
-        LOGGER.debug("Appended {} assertions as fact rules", ontology.getAssertions().size());
+        LOGGER.debug("Appended {} assertions as fact rules", facts.size());
 
         return assertions;
     }
