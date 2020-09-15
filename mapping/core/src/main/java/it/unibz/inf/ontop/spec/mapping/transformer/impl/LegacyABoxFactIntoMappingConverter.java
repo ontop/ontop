@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
@@ -20,6 +21,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
@@ -61,7 +64,14 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
         ImmutableList<MappingAssertion> assertions = facts.stream()
                 .map(fact -> new MappingAssertion(
-                                    MappingAssertionIndex.ofProperty(rdfAtomPredicate, fact.getProperty().getIRI()),
+                                fact.isClassAssertion()
+                                        ? MappingAssertionIndex.ofClass(rdfAtomPredicate,
+                                            Optional.of(fact.getClassOrProperty())
+                                                    .filter(c -> c instanceof IRIConstant)
+                                                    .map(c -> ((IRIConstant) c).getIRI())
+                                                    .orElseThrow(() -> new RuntimeException(
+                                                            "TODO: support bnode for classes as mapping assertion index")))
+                                        : MappingAssertionIndex.ofProperty(rdfAtomPredicate, fact.getProperty().getIRI()),
                                     createIQ(fact),
                                     new ABoxFactProvenance(fact)))
                 .collect(ImmutableCollectors.toList());
