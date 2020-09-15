@@ -55,7 +55,7 @@ public class MappingSaturationTest {
     @Test
     public void testMappingSaturationInverses() throws InconsistentOntologyException {
 
-        OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY, TERM_FACTORY);
         ObjectPropertyExpression givesLecture = builder.declareObjectProperty(PROP_GIVES_LECTURE);
         ObjectPropertyExpression teaches = builder.declareObjectProperty(PROP_TEACHES);
         ObjectPropertyExpression givesLab =builder.declareObjectProperty(PROP_GIVES_LAB);

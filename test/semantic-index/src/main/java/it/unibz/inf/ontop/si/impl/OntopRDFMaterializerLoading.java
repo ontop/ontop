@@ -4,13 +4,13 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.si.repository.impl.SIRepository;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class OntopRDFMaterializerLoading {
 
                 Connection connection = repo.createConnection();
                 int count = repo.insertData(connection,
-                        new Iterator<Assertion>() {
+                        new Iterator<RDFFact>() {
                             @Override
                             public boolean hasNext() {
                                 try {
@@ -61,7 +61,7 @@ public class OntopRDFMaterializerLoading {
                                 }
                             }
                             @Override
-                            public Assertion next() {
+                            public RDFFact next() {
                                 try {
                                     return graphResultSet.next();
                                 }

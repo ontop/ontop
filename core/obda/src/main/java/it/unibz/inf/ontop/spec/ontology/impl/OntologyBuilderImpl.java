@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
-import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.IRI;
@@ -13,6 +11,8 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.util.*;
 import java.util.function.Function;
+
+import static it.unibz.inf.ontop.model.vocabulary.RDF.TYPE;
 
 public class OntologyBuilderImpl implements OntologyBuilder {
 
@@ -42,15 +42,14 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private final OntologyCategoryImpl<AnnotationProperty> annotationProperties;
 
     private final RDF rdfFactory;
+    private final TermFactory termFactory;
 
     // assertions
+    private final ImmutableSet.Builder<RDFFact> assertions = ImmutableSet.builder();
+    private final IRIConstant rdfType;
 
-    private final ImmutableList.Builder<ClassAssertion> classAssertions = ImmutableList.builder();
-    private final ImmutableList.Builder<ObjectPropertyAssertion> objectPropertyAssertions = ImmutableList.builder();
-    private final ImmutableList.Builder<DataPropertyAssertion> dataPropertyAssertions = ImmutableList.builder();
-    private final ImmutableList.Builder<AnnotationAssertion> annotationAssertions = ImmutableList.builder();
-
-    private OntologyBuilderImpl(RDF rdfFactory) {
+    private OntologyBuilderImpl(RDF rdfFactory, TermFactory termFactory) {
+        this.termFactory = termFactory;
         classes = new OntologyCategoryImpl<>(ClassImpl::new, CLASS_NOT_FOUND,"");
         objectProperties = new OntologyCategoryImpl<>(ObjectPropertyExpressionImpl::new, OBJECT_PROPERTY_NOT_FOUND,"");
         dataProperties = new OntologyCategoryImpl<>(DataPropertyExpressionImpl::new, DATA_PROPERTY_NOT_FOUND,"");
@@ -63,33 +62,14 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         dataProperties.map.put(OWL.TOP_DATA_PROPERTY, DataPropertyExpressionImpl.owlTopDataProperty);
         dataProperties.map.put(OWL.BOTTOM_DATA_PROPERTY, DataPropertyExpressionImpl.owlBottomDataProperty);
 
+        this.rdfType = termFactory.getConstantIRI(TYPE);
+
         this.rdfFactory = rdfFactory;
     }
 
-    public static OntologyBuilder builder(RDF rdfFactory) {
-        return new OntologyBuilderImpl(rdfFactory);
+    public static OntologyBuilder builder(RDF rdfFactory, TermFactory termFactory) {
+        return new OntologyBuilderImpl(rdfFactory, termFactory);
     }
-
-    public static ABoxAssertionSupplier assertionSupplier(RDF rdfFactory) {
-        return new ABoxAssertionSupplier() {
-            @Override
-            public ClassAssertion createClassAssertion(String c, ObjectConstant o) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createClassAssertion(new ClassImpl(rdfFactory.createIRI(c)), o);
-            }
-
-            @Override
-            public ObjectPropertyAssertion createObjectPropertyAssertion(String op, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createObjectPropertyAssertion(new ObjectPropertyExpressionImpl(rdfFactory.createIRI(op)), o1, o2);
-            }
-
-            @Override
-            public DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, RDFLiteralConstant v) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createDataPropertyAssertion(new DataPropertyExpressionImpl(rdfFactory.createIRI(dp)), o, v);
-            }
-        };
-    }
-
-
 
 
     static final class OntologyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
@@ -421,13 +401,13 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - inconsistency if the class is bot
      */
 
-    public static ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
+    private RDFFact createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
         if (ce.isTop())
             return null;
         if (ce.isBottom())
             throw new InconsistentOntologyException();
 
-        return new ClassAssertionImpl(ce, object);
+        return RDFFact.createTripleFact(object, rdfType, termFactory.getConstantIRI(ce.getIRI()));
     }
 
     /**
@@ -442,16 +422,16 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - swap the arguments to eliminate inverses
      */
 
-    public static ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
+    private RDFFact createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
         if (ope.isTop())
             return null;
         if (ope.isBottom())
             throw new InconsistentOntologyException();
 
         if (ope.isInverse())
-            return new ObjectPropertyAssertionImpl(ope.getInverse(), o2, o1);
+            return RDFFact.createTripleFact(o2, termFactory.getConstantIRI(ope.getInverse().getIRI()), o1);
         else
-            return new ObjectPropertyAssertionImpl(ope, o1, o2);
+            return RDFFact.createTripleFact(o1, termFactory.getConstantIRI(ope.getIRI()), o2);
     }
 
     /**
@@ -465,13 +445,13 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - inconsistency if the property is bot
      */
 
-    public static DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, RDFLiteralConstant o2) throws InconsistentOntologyException {
+    private RDFFact createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, RDFLiteralConstant o2) throws InconsistentOntologyException {
         if (dpe.isTop())
             return null;
         if (dpe.isBottom())
             throw new InconsistentOntologyException();
 
-        return new DataPropertyAssertionImpl(dpe, o1, o2);
+        return RDFFact.createTripleFact(o1, termFactory.getConstantIRI(dpe.getIRI()), o2);
     }
 
     /**
@@ -480,8 +460,8 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      * AnnotationSubject := IRI | AnonymousIndividual
      *
      */
-    public static AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
-        return new AnnotationAssertionImpl(ap,o,c);
+    private RDFFact createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, RDFConstant c) {
+        return RDFFact.createTripleFact(o, termFactory.getConstantIRI(ap.getIRI()), c);
     }
 
 
@@ -489,33 +469,33 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     @Override
     public void addClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException {
         checkSignature(ce);
-        ClassAssertion assertion = createClassAssertion(ce, o);
+        RDFFact assertion = createClassAssertion(ce, o);
         if (assertion != null)
-            classAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
     @Override
     public void addObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o) throws InconsistentOntologyException {
         checkSignature(ope);
-        ObjectPropertyAssertion assertion = createObjectPropertyAssertion(ope, o1, o);
+        RDFFact assertion = createObjectPropertyAssertion(ope, o1, o);
         if (assertion != null)
-            objectPropertyAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
     @Override
     public void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, RDFLiteralConstant v) throws InconsistentOntologyException {
         checkSignature(dpe);
-        DataPropertyAssertion assertion = createDataPropertyAssertion(dpe, o, v);
+        RDFFact assertion = createDataPropertyAssertion(dpe, o, v);
         if (assertion != null)
-            dataPropertyAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
     @Override
-    public void addAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
+    public void addAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, RDFConstant c) {
         checkSignature(ap);
-        AnnotationAssertion assertion = createAnnotationAssertion(ap, o, c);
+        RDFFact assertion = createAnnotationAssertion(ap, o, c);
         if (assertion != null)
-            annotationAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
 
@@ -529,7 +509,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
                 dataPropertyAxioms.inclusions.build(), dataPropertyAxioms.disjointness.build(),
                 subDataRangeAxioms.build(), reflexiveObjectPropertyAxioms.build(), irreflexiveObjectPropertyAxioms.build(),
                 functionalObjectPropertyAxioms.build(), functionalDataPropertyAxioms.build(),
-                classAssertions.build(), objectPropertyAssertions.build(), dataPropertyAssertions.build(), annotationAssertions.build());
+                assertions.build());
     }
 
 

@@ -350,7 +350,7 @@ public class RDBMSSIRepositoryManager {
 	}
 */
 
-	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
+	public int insertData(Connection conn, Iterator<RDFFact> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
 		// The precondition for the limit number must be greater or equal to one.
@@ -372,55 +372,27 @@ public class RDBMSSIRepositoryManager {
 
 		try {
 			while (data.hasNext()) {
-				Assertion ax = data.next();
+				RDFFact ax = data.next();
 
 				// log.debug("Inserting statement: {}", ax);
 				batchCount++;
 				commitCount++;
 
-				if (ax instanceof ClassAssertion) {
-					ClassAssertion ca = (ClassAssertion) ax; 
-					try {
-						process(conn, ca, uriidStm, stmMap);
-						success++;
-					}
-					catch (Exception e) {
-						IRI iri = ca.getConcept().getIRI();
-						Integer counter = failures.get(iri);
-						if (counter == null)
-							counter = 0;
-						failures.put(iri, counter + 1);
-					}
-				} 
-				else if (ax instanceof ObjectPropertyAssertion) {
-					ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
-					try {
-						process(conn, opa, uriidStm, stmMap);	
-						success++;
-					}
-					catch (Exception e) {
-						IRI iri = opa.getProperty().getIRI();
-						Integer counter = failures.get(iri);
-						if (counter == null) 
-							counter = 0;
-						failures.put(iri, counter + 1);
-					}
+				try {
+					process(conn, ax, uriidStm, stmMap);
+					success++;
 				}
-				else if (ax instanceof DataPropertyAssertion)  {
-					DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
-					try {
-						process(conn, dpa, uriidStm, stmMap);				
-						success++;					
-					}
-					catch (Exception e) {
-						IRI iri = dpa.getProperty().getIRI();
-						Integer counter = failures.get(iri);
-						if (counter == null) 
-							counter = 0;
-						failures.put(iri, counter + 1);
-					}
+				catch (Exception e) {
+					IRI iri = Optional.of(ax.getClassOrProperty())
+							.filter(c -> c instanceof IRIConstant)
+							.map(c -> (IRIConstant) c)
+							.orElseGet(ax::getProperty)
+							.getIRI();
+					Integer counter = failures.get(iri);
+					if (counter == null)
+						counter = 0;
+					failures.put(iri, counter + 1);
 				}
-
 
 				// Check if the batch count is already in the batch limit
 				if (batchCount == batchLimit) {
@@ -473,12 +445,33 @@ public class RDBMSSIRepositoryManager {
 		return success;
 	}
 
+	private void process(Connection conn, RDFFact ax, PreparedStatement uriidStm,
+						 Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+		if (ax.isClassAssertion() && (ax.getObject() instanceof IRIConstant)) {
+			IRI classIRI = ((IRIConstant) ax.getObject()).getIRI();
+			OClass cls = reasonerDag.classes().get(classIRI);
+			process(conn, ax, cls, uriidStm, stmMap);
+		}
+		else {
+			RDFConstant object = ax.getObject();
+			IRI propertyIri = ax.getProperty().getIRI();
 
-	private void process(Connection conn, ObjectPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+			if (object instanceof ObjectConstant) {
+				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(propertyIri);
+				process(conn, ax, ope, uriidStm, stmMap);
+			}
+			else if (object instanceof RDFLiteralConstant) {
+				DataPropertyExpression dpe = reasonerDag.dataProperties().get(propertyIri);
+				process(conn, ax, dpe, uriidStm, stmMap);
+			}
+		}
+	}
 
-		ObjectPropertyExpression ope0 = ax.getProperty();
+	private void process(Connection conn, RDFFact assertion, ObjectPropertyExpression ope0, PreparedStatement uriidStm,
+						 Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+
 		if (ope0.isInverse()) 
-			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
+			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + assertion);
 		
 		ObjectPropertyExpression ope = reasonerDag.objectPropertiesDAG().getCanonicalForm(ope0);
 				
@@ -488,13 +481,13 @@ public class RDBMSSIRepositoryManager {
 			// and so, it is not indexed -- swap the arguments 
 			// and replace the representative with its inverse 
 			// (which must be indexed)
-			o1 = ax.getObject();
-			o2 = ax.getSubject();
+			o1 = (ObjectConstant) assertion.getObject();
+			o2 = assertion.getSubject();
 			ope = ope.getInverse();
 		}
 		else {
-			o1 = ax.getSubject();			
-			o2 = ax.getObject();
+			o1 = assertion.getSubject();
+			o2 = (ObjectConstant) assertion.getObject();
 		}
 
 		int idx = cacheSI.getEntry(ope).getIndex();
@@ -521,17 +514,16 @@ public class RDBMSSIRepositoryManager {
 		view.addIndex(idx);
 	} 
 
-	private void process(Connection conn, DataPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+	private void process(Connection conn, RDFFact assertion, DataPropertyExpression dpe0, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 
 		// replace the property by its canonical representative
-		DataPropertyExpression dpe0 = ax.getProperty();
 		DataPropertyExpression dpe = reasonerDag.dataPropertiesDAG().getCanonicalForm(dpe0);
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
-		ObjectConstant subject = ax.getSubject();
+		ObjectConstant subject = assertion.getSubject();
 		int uri_id = getObjectConstantUriId(subject, uriidStm);
 
-		RDFLiteralConstant object = ax.getValue();
+		RDFLiteralConstant object = (RDFLiteralConstant) assertion.getObject();
 
 		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
 		//                       a a workaround, obtain the URI ID first, without triggering an exception here
@@ -591,7 +583,7 @@ public class RDBMSSIRepositoryManager {
 				break;
 			default:
 				// UNSUPPORTED DATATYPE
-				log.warn("Ignoring assertion: {}", ax);			
+				log.warn("Ignoring assertion: {}", assertion);
 				return;				
 		}
 		
@@ -603,14 +595,13 @@ public class RDBMSSIRepositoryManager {
 	}
 	
 		
-	private void process(Connection conn, ClassAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+	private void process(Connection conn, RDFFact assertion, OClass concept0, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 		
 		// replace concept by the canonical representative (which must be a concept name)
-		OClass concept0 = ax.getConcept();
 		OClass concept = (OClass)reasonerDag.classesDAG().getCanonicalForm(concept0);
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
-		ObjectConstant c1 = ax.getIndividual();
+		ObjectConstant c1 = assertion.getSubject();
 
 		SemanticIndexView view =  views.getView(c1.getType());
 	
