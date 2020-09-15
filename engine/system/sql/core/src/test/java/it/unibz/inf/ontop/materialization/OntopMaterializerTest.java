@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.materialization;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -43,6 +23,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -51,8 +32,6 @@ import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -60,7 +39,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -196,11 +174,11 @@ public class OntopMaterializerTest {
 
 		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(vocabulary)) {
 
-			ImmutableList.Builder<Assertion> rdfGraphBuilder = ImmutableList.builder();
+			ImmutableList.Builder<RDFFact> rdfGraphBuilder = ImmutableList.builder();
 			while (materializationResultSet.hasNext()) {
 				rdfGraphBuilder.add(materializationResultSet.next());
 			}
-			ImmutableList<Assertion> assertions = rdfGraphBuilder.build();
+			ImmutableList<RDFFact> assertions = rdfGraphBuilder.build();
 
 			LOGGER.debug("Assertions: \n");
 			assertions.forEach(a -> LOGGER.debug(a + "\n"));
@@ -234,7 +212,7 @@ public class OntopMaterializerTest {
 
 		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(vocabulary)) {
 
-			ImmutableList.Builder<Assertion> rdfGraphBuilder = ImmutableList.builder();
+			ImmutableList.Builder<RDFFact> rdfGraphBuilder = ImmutableList.builder();
 			while (materializationResultSet.hasNext()) {
 				// TODO Davide> Qua devo controllare in che grafo si trova
 				// TODO Se si trova in un grafo, allora sto metodo rdfGraphBuilder deve essere in grado
@@ -242,7 +220,7 @@ public class OntopMaterializerTest {
 				// TODO E' possibile mettere il graph nelle Assertions? Magari "Named Assertion"?
 				rdfGraphBuilder.add(materializationResultSet.next());
 			}
-			ImmutableList<Assertion> assertions = rdfGraphBuilder.build();
+			ImmutableList<RDFFact> assertions = rdfGraphBuilder.build();
 
 			LOGGER.debug("Assertions: \n");
 			assertions.forEach(a -> LOGGER.debug(a + "\n"));

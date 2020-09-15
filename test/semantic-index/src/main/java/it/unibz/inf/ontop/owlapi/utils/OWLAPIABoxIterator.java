@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.owlapi.utils;
 
-/*
- * #%L
- * ontop-obdalib-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
@@ -38,12 +18,12 @@ import java.util.NoSuchElementException;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class OWLAPIABoxIterator implements Iterator<Assertion> {
+public class OWLAPIABoxIterator implements Iterator<RDFFact> {
 
 	private final Iterator<OWLOntology> ontologiesIterator;
 
 	private Iterator<OWLAxiom> owlaxiomIterator = null;
-	private Assertion next = null;
+	private RDFFact next = null;
 
 	private final ClassifiedTBox tbox;
 	private final OWLAPITranslatorOWL2QL owlapiTranslator;
@@ -89,7 +69,7 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 	}
 
 	@Override
-	public Assertion next() {
+	public RDFFact next() {
 		while (true) {
 			try {
 				return nextInCurrentIterator();
@@ -122,13 +102,13 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 	 * @return
 	 * @throws NoSuchElementException
 	 */
-	private Assertion nextInCurrentIterator() throws NoSuchElementException {
+	private RDFFact nextInCurrentIterator() throws NoSuchElementException {
 
 		if (owlaxiomIterator == null)
 			throw new NoSuchElementException();
 
 		if (next != null) {
-			Assertion out = next;
+			RDFFact out = next;
 			next = null;
 			return out;
 		}
@@ -136,13 +116,13 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 		while (true) {
 			OWLAxiom currentABoxAssertion = owlaxiomIterator.next();
 	
-			Assertion ax = translate(currentABoxAssertion);
+			RDFFact ax = translate(currentABoxAssertion);
 			if (ax != null)
 				return ax;
 		}
 	}
 	
-	private Assertion translate(OWLAxiom axiom) {
+	private RDFFact translate(OWLAxiom axiom) {
 
 		try {
 			if (axiom instanceof OWLClassAssertionAxiom)
@@ -165,7 +145,7 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 		while (true) {
 			OWLAxiom currentABoxAssertion = owlaxiomIterator.next();
 
-			Assertion ax = translate(currentABoxAssertion);
+			RDFFact ax = translate(currentABoxAssertion);
 			if (ax != null) {
 				next = ax;
 				return true;

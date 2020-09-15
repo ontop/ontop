@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.owlapi.utils;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -120,7 +120,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 
 
 	private int count(Collection<OWLOntology> ontologies) {
-        Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ontologies, tbox, OWLAPI_TRANSLATOR);
+        Iterator<RDFFact> aboxit = new OWLAPIABoxIterator(ontologies, tbox, OWLAPI_TRANSLATOR);
         int count = 0;
         while (aboxit.hasNext()) {
             count += 1;

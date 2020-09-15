@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +106,7 @@ public class OntopOntologyMaterializerTest extends TestCase {
 
 			LOGGER.debug("Assertions:");
 			while (resultSet.hasNext()) {
-				Assertion assertion = resultSet.next();
+				RDFFact assertion = resultSet.next();
 
 				if (assertion instanceof ClassAssertion)
 					classAss++;
@@ -147,7 +148,7 @@ public class OntopOntologyMaterializerTest extends TestCase {
 
 			int classAss = 0, propAss = 0, objAss = 0;
 			while (resultSet.hasNext()) {
-				Assertion assertion = resultSet.next();
+				RDFFact assertion = resultSet.next();
 				LOGGER.debug(assertion + "\n");
 				if (assertion instanceof ClassAssertion)
 					classAss++;

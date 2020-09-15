@@ -56,10 +56,16 @@ public class OntologyImpl implements Ontology {
 
 	// assertions
 
+	@Deprecated
 	private final ImmutableList<ClassAssertion> classAssertions;
+	@Deprecated
 	private final ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions;
+	@Deprecated
 	private final ImmutableList<DataPropertyAssertion> dataPropertyAssertions;
+	@Deprecated
 	private final ImmutableList<AnnotationAssertion> annotationAssertions;
+
+	private final ImmutableSet<RDFFact> assertions;
 
 	// exception messages
 
@@ -135,25 +141,26 @@ public class OntologyImpl implements Ontology {
 	private final ImmutableOntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties;
 
 	OntologyImpl(ImmutableOntologyVocabularyCategoryImpl<OClass> classes,
-                 ImmutableOntologyVocabularyCategoryImpl<ObjectPropertyExpression> objectProperties,
-                 ImmutableSet<ObjectPropertyExpression> auxObjectProperties,
-                 ImmutableOntologyVocabularyCategoryImpl<DataPropertyExpression> dataProperties,
-                 ImmutableOntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties,
-                 ImmutableList<BinaryAxiom<ClassExpression>> classInclusions,
-                 ImmutableList<NaryAxiom<ClassExpression>> classDisjointness,
-                 ImmutableList<BinaryAxiom<ObjectPropertyExpression>> objectPropertyInclusions,
-                 ImmutableList<NaryAxiom<ObjectPropertyExpression>> objectPropertyDisjointness,
-                 ImmutableList<BinaryAxiom<DataPropertyExpression>> dataPropertyInclusions,
-                 ImmutableList<NaryAxiom<DataPropertyExpression>> dataPropertyDisjointness,
-                 ImmutableList<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms,
-                 ImmutableSet<ObjectPropertyExpression> reflexiveObjectPropertyAxioms,
-                 ImmutableSet<ObjectPropertyExpression> irreflexiveObjectPropertyAxioms,
-                 ImmutableSet<ObjectPropertyExpression> functionalObjectPropertyAxioms,
-                 ImmutableSet<DataPropertyExpression> functionalDataPropertyAxioms,
-                 ImmutableList<ClassAssertion> classAssertions,
-                 ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions,
-                 ImmutableList<DataPropertyAssertion> dataPropertyAssertions,
-                 ImmutableList<AnnotationAssertion> annotationAssertions) {
+				 ImmutableOntologyVocabularyCategoryImpl<ObjectPropertyExpression> objectProperties,
+				 ImmutableSet<ObjectPropertyExpression> auxObjectProperties,
+				 ImmutableOntologyVocabularyCategoryImpl<DataPropertyExpression> dataProperties,
+				 ImmutableOntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties,
+				 ImmutableList<BinaryAxiom<ClassExpression>> classInclusions,
+				 ImmutableList<NaryAxiom<ClassExpression>> classDisjointness,
+				 ImmutableList<BinaryAxiom<ObjectPropertyExpression>> objectPropertyInclusions,
+				 ImmutableList<NaryAxiom<ObjectPropertyExpression>> objectPropertyDisjointness,
+				 ImmutableList<BinaryAxiom<DataPropertyExpression>> dataPropertyInclusions,
+				 ImmutableList<NaryAxiom<DataPropertyExpression>> dataPropertyDisjointness,
+				 ImmutableList<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms,
+				 ImmutableSet<ObjectPropertyExpression> reflexiveObjectPropertyAxioms,
+				 ImmutableSet<ObjectPropertyExpression> irreflexiveObjectPropertyAxioms,
+				 ImmutableSet<ObjectPropertyExpression> functionalObjectPropertyAxioms,
+				 ImmutableSet<DataPropertyExpression> functionalDataPropertyAxioms,
+				 ImmutableList<ClassAssertion> classAssertions,
+				 ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions,
+				 ImmutableList<DataPropertyAssertion> dataPropertyAssertions,
+				 ImmutableList<AnnotationAssertion> annotationAssertions,
+				 ImmutableSet<RDFFact> assertions) {
 	    this.classes = classes;
 	    this.objectProperties = objectProperties;
 	    this.auxObjectProperties = auxObjectProperties;
@@ -174,8 +181,9 @@ public class OntologyImpl implements Ontology {
 	    this.irreflexiveObjectPropertyAxioms = irreflexiveObjectPropertyAxioms;
         this.functionalObjectPropertyAxioms = functionalObjectPropertyAxioms;
 	    this.functionalDataPropertyAxioms = functionalDataPropertyAxioms;
+		this.assertions = assertions;
 
-	    this.unclassifiedTBox = new UnclassifiedOntologyTBox();
+		this.unclassifiedTBox = new UnclassifiedOntologyTBox();
 	    this.tbox = ClassifiedTBoxImpl.classify(unclassifiedTBox);
     }
 
@@ -254,7 +262,12 @@ public class OntologyImpl implements Ontology {
 
             @Override
             public ImmutableList<AnnotationAssertion> getAnnotationAssertions() { return annotationAssertions; }
-        };
+
+			@Override
+			public ImmutableSet<RDFFact> getAssertions() {
+				return assertions;
+			}
+		};
     }
 
 

@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.spec.ontology.owlapi;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
@@ -18,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static it.unibz.inf.ontop.model.vocabulary.RDF.TYPE;
 
 /**
  * 
@@ -39,11 +38,13 @@ public class OWLAPITranslatorOWL2QL {
 
     private final TermFactory termFactory;
     private final RDF rdfFactory;
+    private final IRIConstant rdfType;
 
     @Inject
     private OWLAPITranslatorOWL2QL(TermFactory termFactory, RDF rdfFactory) {
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
+        this.rdfType = termFactory.getConstantIRI(TYPE);
     }
 
     public static class TranslationException extends Exception {
@@ -996,7 +997,7 @@ public class OWLAPITranslatorOWL2QL {
 
     // METHODS FOR TRANSLATING ASSERTIONS (used in OWLAPIABoxIterator)
 
-    public ClassAssertion translate(OWLClassAssertionAxiom ax, OntologyVocabularyCategory<OClass> classes) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLClassAssertionAxiom ax, OntologyVocabularyCategory<OClass> classes) throws TranslationException {
         OWLClassExpression classExpression = ax.getClassExpression();
         if (!(classExpression instanceof OWLClass))
             throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
@@ -1004,33 +1005,33 @@ public class OWLAPITranslatorOWL2QL {
         OClass concept = getOClass((OWLClass) classExpression, classes);
         IRIConstant c = getIndividual(ax.getIndividual());
 
-        return OntologyBuilderImpl.createClassAssertion(concept, c);
+        return RDFFact.createTripleFact(c, rdfType, termFactory.getConstantIRI(concept.getIRI()));
     }
 
-    public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) throws TranslationException, InconsistentOntologyException {
         IRIConstant c1 = getIndividual(ax.getSubject());
         IRIConstant c2 = getIndividual(ax.getObject());
 
         ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty(), objectProperties);
-        return OntologyBuilderImpl.createObjectPropertyAssertion(ope, c1, c2);
+        return RDFFact.createTripleFact(c1, termFactory.getConstantIRI(ope.getIRI()), c2);
     }
 
-    public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
         IRIConstant c1 = getIndividual(ax.getSubject());
         RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
 
         DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), dataProperties);
-        return OntologyBuilderImpl.createDataPropertyAssertion(dpe, c1, c2);
+        return RDFFact.createTripleFact(c1, termFactory.getConstantIRI(dpe.getIRI()), c2);
     }
 
 
-    public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax, OntologyVocabularyCategory<AnnotationProperty> annotationProperties) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLAnnotationAssertionAxiom ax, OntologyVocabularyCategory<AnnotationProperty> annotationProperties) throws TranslationException, InconsistentOntologyException {
 
         IRIConstant c1 = getIndividual(ax.getSubject());
-        Constant c2 = getValue(ax.getValue());
+        RDFConstant c2 = getValue(ax.getValue());
         AnnotationProperty ap = getPropertyExpression(ax.getProperty(), annotationProperties);
 
-        return OntologyBuilderImpl.createAnnotationAssertion(ap, c1, c2);
+        return RDFFact.createTripleFact(c1, termFactory.getConstantIRI(ap.getIRI()), c2);
     }
 
     // PRIVATE METHODS FOR TRANSLATING COMPONENTS OF ASSERTIONS
@@ -1101,7 +1102,7 @@ public class OWLAPITranslatorOWL2QL {
             throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + subject);
     }
 
-    private Constant getValue(OWLAnnotationValue value)  throws TranslationException {
+    private RDFConstant getValue(OWLAnnotationValue value)  throws TranslationException {
         try {
             if (value instanceof IRI) {
                 return termFactory.getConstantIRI(rdfFactory.createIRI(value.asIRI().get().toString()));

@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.answering.reformulation.input.GraphSPARQLQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,6 +15,7 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
@@ -42,7 +42,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 		this.inputQueryFactory = inputQueryFactory;
 	}
 
-	private Statement createStatement(Assertion assertion) {
+	private Statement createStatement(RDFFact assertion) {
 
 		Statement stm = RDF4JHelper.createStatement(assertion);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
@@ -66,7 +66,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 			List<Statement> results = new LinkedList<>();
 			if (res != null) {
 				while (res.hasNext()) {
-					Assertion as = res.next();
+					RDFFact as = res.next();
 					Statement st = createStatement(as);
 					if (st!=null)
 						results.add(st);

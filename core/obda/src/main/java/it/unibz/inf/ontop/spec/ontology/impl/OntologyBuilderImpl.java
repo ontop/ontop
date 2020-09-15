@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.IRI;
@@ -49,6 +50,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private final ImmutableList.Builder<ObjectPropertyAssertion> objectPropertyAssertions = ImmutableList.builder();
     private final ImmutableList.Builder<DataPropertyAssertion> dataPropertyAssertions = ImmutableList.builder();
     private final ImmutableList.Builder<AnnotationAssertion> annotationAssertions = ImmutableList.builder();
+    private final ImmutableSet.Builder<RDFFact> assertions = ImmutableSet.builder();
 
     private OntologyBuilderImpl(RDF rdfFactory) {
         classes = new OntologyCategoryImpl<>(ClassImpl::new, CLASS_NOT_FOUND,"");
@@ -70,7 +72,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         return new OntologyBuilderImpl(rdfFactory);
     }
 
-    public static ABoxAssertionSupplier assertionSupplier(RDF rdfFactory) {
+    public static ABoxAssertionSupplier assertionSupplier(RDF rdfFactory, TermFactory termFactory) {
         return new ABoxAssertionSupplier() {
             @Override
             public ClassAssertion createClassAssertion(String c, ObjectConstant o) throws InconsistentOntologyException {
@@ -529,7 +531,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
                 dataPropertyAxioms.inclusions.build(), dataPropertyAxioms.disjointness.build(),
                 subDataRangeAxioms.build(), reflexiveObjectPropertyAxioms.build(), irreflexiveObjectPropertyAxioms.build(),
                 functionalObjectPropertyAxioms.build(), functionalDataPropertyAxioms.build(),
-                classAssertions.build(), objectPropertyAssertions.build(), dataPropertyAssertions.build(), annotationAssertions.build());
+                classAssertions.build(), objectPropertyAssertions.build(), dataPropertyAssertions.build(), annotationAssertions.build(), assertions.build());
     }
 
 

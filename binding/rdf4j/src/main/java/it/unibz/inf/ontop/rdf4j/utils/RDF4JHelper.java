@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Objects;
 
@@ -39,7 +38,7 @@ public class RDF4JHelper {
                         fact.createIRI(type.getIRI().getIRIString())));
     }
 
-    public static Value getValue(Constant c) {
+    public static Value getValue(RDFConstant c) {
         if (c == null)
             return null;
 
@@ -56,64 +55,17 @@ public class RDF4JHelper {
         return fact.createIRI(uri);
     }
 
-    public static Statement createStatement(Assertion assertion) {
+    public static Statement createStatement(RDFFact assertion) {
 
-        if (assertion instanceof NamedAssertion) {
-            NamedAssertion namedAssertion = (NamedAssertion) assertion;
-            // recursion. first construct the statement without context
-            Statement statement = createStatement(namedAssertion.getAssertion());
-            // then add the context
-            return fact.createStatement(statement.getSubject(), statement.getPredicate(), statement.getObject(),
-                    getResource(namedAssertion.getGraph()));
-        }
-
-        if (assertion instanceof ObjectPropertyAssertion) {
-            return createStatement((ObjectPropertyAssertion) assertion);
-        } else if (assertion instanceof DataPropertyAssertion) {
-            return createStatement((DataPropertyAssertion) assertion);
-        } else if (assertion instanceof ClassAssertion) {
-            return createStatement((ClassAssertion) assertion);
-        } else if (assertion instanceof AnnotationAssertion) {
-            return createStatement((AnnotationAssertion) assertion);
-        } else {
-            throw new RuntimeException("Unsupported assertion: " + assertion);
-        }
-    }
-
-
-    private static Statement createStatement(ObjectPropertyAssertion assertion) {
-        return fact.createStatement(getResource(assertion.getSubject()),
-                createURI(assertion.getProperty().getIRI().getIRIString()),
-                getResource(assertion.getObject()));
-    }
-
-    private static Statement createStatement(DataPropertyAssertion assertion) {
-        return fact.createStatement(getResource(assertion.getSubject()),
-                createURI(assertion.getProperty().getIRI().getIRIString()),
-                getLiteral(assertion.getValue())
-        );
-    }
-
-    private static Statement createStatement(AnnotationAssertion assertion) {
-        Constant constant = assertion.getValue();
-
-        if (constant instanceof RDFLiteralConstant) {
-            return fact.createStatement(getResource(assertion.getSubject()),
-                    createURI(assertion.getProperty().getIRI().getIRIString()),
-                    getLiteral((RDFLiteralConstant) constant));
-        } else if (constant instanceof ObjectConstant) {
-            return fact.createStatement(getResource(assertion.getSubject()),
-                    createURI(assertion.getProperty().getIRI().getIRIString()),
-                    getResource((ObjectConstant) constant));
-        } else {
-            throw new RuntimeException("Unsupported constant for an annotation property!"
-                    + constant);
-        }
-    }
-
-    private static Statement createStatement(ClassAssertion assertion) {
-        return fact.createStatement(getResource(assertion.getIndividual()),
-                RDF.TYPE,
-                createURI(assertion.getConcept().getIRI().getIRIString()));
+        return assertion.getGraph()
+                .map(g -> fact.createStatement(
+                        getResource(assertion.getSubject()),
+                        createURI(assertion.getProperty().getIRI().getIRIString()),
+                        getValue(assertion.getObject()),
+                        getResource(g)))
+                .orElseGet(() -> fact.createStatement(
+                        getResource(assertion.getSubject()),
+                        createURI(assertion.getProperty().getIRI().getIRIString()),
+                        getValue(assertion.getObject())));
     }
 }
