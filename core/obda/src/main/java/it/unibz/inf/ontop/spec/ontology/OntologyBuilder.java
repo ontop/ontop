@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.ontology;
 
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import org.apache.commons.rdf.api.IRI;
 
@@ -119,7 +120,7 @@ public interface OntologyBuilder {
      * @param c
      */
 
-    void addAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
+    void addAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, RDFConstant c);
 
 
     // build

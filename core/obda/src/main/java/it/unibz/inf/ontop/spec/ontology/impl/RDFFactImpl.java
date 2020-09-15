@@ -108,4 +108,15 @@ public class RDFFactImpl implements RDFFact {
     public int hashCode() {
         return Objects.hashCode(getSubject(), getProperty(), getObject(), getGraph(), getClassOrProperty());
     }
+
+    @Override
+    public String toString() {
+        return "RDFFact{" +
+                "subject=" + subject +
+                ", property=" + property +
+                ", object=" + object +
+                ", graph=" + graph +
+                ", classOrProperty=" + classOrProperty +
+                '}';
+    }
 }

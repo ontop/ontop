@@ -41,7 +41,7 @@ public class RDF4JGraphLoading {
 
         RDF rdfFactory = loadingConfiguration.getRdfFactory();
 
-        CollectRDFVocabulary collectVocabulary = new CollectRDFVocabulary(rdfFactory);
+        CollectRDFVocabulary collectVocabulary = new CollectRDFVocabulary(rdfFactory, loadingConfiguration.getTermFactory());
         for (IRI graphURL : graphURLs) {
             processRDF(collectVocabulary, graphURL);
         }
@@ -68,9 +68,9 @@ public class RDF4JGraphLoading {
         private final OntologyBuilder vb;
         private final RDF rdfFactory;
 
-        CollectRDFVocabulary(RDF rdfFactory) {
+        CollectRDFVocabulary(RDF rdfFactory, TermFactory termFactory) {
             this.rdfFactory = rdfFactory;
-            this.vb = OntologyBuilderImpl.builder(rdfFactory);
+            this.vb = OntologyBuilderImpl.builder(rdfFactory, termFactory);
         }
 
         @Override

@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.spec.ontology.impl;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -55,15 +35,6 @@ public class OntologyImpl implements Ontology {
 	private final ImmutableSet<DataPropertyExpression> functionalDataPropertyAxioms;
 
 	// assertions
-
-	@Deprecated
-	private final ImmutableList<ClassAssertion> classAssertions;
-	@Deprecated
-	private final ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions;
-	@Deprecated
-	private final ImmutableList<DataPropertyAssertion> dataPropertyAssertions;
-	@Deprecated
-	private final ImmutableList<AnnotationAssertion> annotationAssertions;
 
 	private final ImmutableSet<RDFFact> assertions;
 
@@ -156,10 +127,6 @@ public class OntologyImpl implements Ontology {
 				 ImmutableSet<ObjectPropertyExpression> irreflexiveObjectPropertyAxioms,
 				 ImmutableSet<ObjectPropertyExpression> functionalObjectPropertyAxioms,
 				 ImmutableSet<DataPropertyExpression> functionalDataPropertyAxioms,
-				 ImmutableList<ClassAssertion> classAssertions,
-				 ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions,
-				 ImmutableList<DataPropertyAssertion> dataPropertyAssertions,
-				 ImmutableList<AnnotationAssertion> annotationAssertions,
 				 ImmutableSet<RDFFact> assertions) {
 	    this.classes = classes;
 	    this.objectProperties = objectProperties;
@@ -172,10 +139,6 @@ public class OntologyImpl implements Ontology {
 	    this.objectPropertyDisjointness = objectPropertyDisjointness;
 	    this.dataPropertyInclusions = dataPropertyInclusions;
 	    this.dataPropertyDisjointness = dataPropertyDisjointness;
-	    this.classAssertions = classAssertions;
-	    this.objectPropertyAssertions = objectPropertyAssertions;
-	    this.dataPropertyAssertions = dataPropertyAssertions;
-	    this.annotationAssertions = annotationAssertions;
 	    this.subDataRangeAxioms = subDataRangeAxioms;
 	    this.reflexiveObjectPropertyAxioms = reflexiveObjectPropertyAxioms;
 	    this.irreflexiveObjectPropertyAxioms = irreflexiveObjectPropertyAxioms;
@@ -250,18 +213,6 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public OntologyABox abox() {
 	    return new OntologyABox() {
-
-            @Override
-            public ImmutableList<ClassAssertion> getClassAssertions() { return classAssertions; }
-
-            @Override
-            public ImmutableList<ObjectPropertyAssertion> getObjectPropertyAssertions() { return objectPropertyAssertions; }
-
-            @Override
-            public ImmutableList<DataPropertyAssertion> getDataPropertyAssertions() { return dataPropertyAssertions; }
-
-            @Override
-            public ImmutableList<AnnotationAssertion> getAnnotationAssertions() { return annotationAssertions; }
 
 			@Override
 			public ImmutableSet<RDFFact> getAssertions() {

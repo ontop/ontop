@@ -69,7 +69,7 @@ public class OWLAPITranslatorOWL2QL {
         Set<OWLOntology> owls = owl.getOWLOntologyManager().getImportsClosure(owl);
         log.debug("Load ontologies called. Translating {} ontologies.", owls.size());
 
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, termFactory);
         for (OWLOntology o : owls) {
             extractOntoloyVocabulary(o, builder);
         }
@@ -960,7 +960,7 @@ public class OWLAPITranslatorOWL2QL {
         public void visit(OWLAnnotationAssertionAxiom ax) {
             try {
                 IRIConstant c1 = getIndividual(ax.getSubject());
-                Constant c2 = getValue(ax.getValue());
+                RDFConstant c2 = getValue(ax.getValue());
                 AnnotationProperty ap = getPropertyExpression(ax.getProperty(), builder.annotationProperties());
 
                 builder.addAnnotationAssertion(ap, c1, c2);
