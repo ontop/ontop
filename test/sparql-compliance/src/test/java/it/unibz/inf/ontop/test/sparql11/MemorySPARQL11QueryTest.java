@@ -97,10 +97,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//different format for number and not supported custom datatype
 			csvTscResManifest + "tsv03",
 
-			/* GROUPING */
-			// Multi-typed COALESCE as grouping condition TODO: support it
-			groupingManifest + "group04",
-
 			/* NEGATION
 			not supported yet */
             negationManifest + "subset-by-exclusion-nex-1",
