@@ -42,7 +42,7 @@ public class MappingTestingTools {
 
     public static final UnifierUtilities UNIFIER_UTILITIES;
 
-    public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
+    public static final FactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
     public static final MappingSaturator MAPPING_SATURATOR;
@@ -76,7 +76,7 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
+        A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(FactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
@@ -17,6 +14,7 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -31,7 +29,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     private final MappingVariableNameNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
-    private final ABoxFactIntoMappingConverter factConverter;
+    private final FactIntoMappingConverter factConverter;
     private final OntopMappingSettings settings;
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
     private final SpecificationFactory specificationFactory;
@@ -43,7 +41,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
                                       MappingSaturator mappingSaturator,
-                                      ABoxFactIntoMappingConverter inserter,
+                                      FactIntoMappingConverter inserter,
                                       OntopMappingSettings settings,
                                       MappingSameAsInverseRewriter sameAsInverseRewriter,
                                       SpecificationFactory specificationFactory,
@@ -62,10 +60,10 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, Optional<Ontology> ontology) {
+    public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
+                                       Optional<Ontology> ontology, ImmutableSet<RDFFact> facts) {
         if (ontology.isPresent()) {
-            ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(ontology.get().abox(),
-                    settings.isOntologyAnnotationQueryingEnabled());
+            ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
 
             ImmutableList<MappingAssertion> mappingWithFacts =
                     Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());

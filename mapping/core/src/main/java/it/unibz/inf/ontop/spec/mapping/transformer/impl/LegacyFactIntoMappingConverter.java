@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.transformer.FactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 
 
-public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
+public class LegacyFactIntoMappingConverter implements FactIntoMappingConverter {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactIntoMappingConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyFactIntoMappingConverter.class);
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -38,7 +38,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final RDFAtomPredicate rdfAtomPredicate;
 
     @Inject
-    public LegacyABoxFactIntoMappingConverter(CoreSingletons coreSingletons) {
+    public LegacyFactIntoMappingConverter(CoreSingletons coreSingletons) {
 
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
@@ -60,7 +60,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts, boolean isOntologyAnnotationQueryingEnabled) {
+    public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts) {
 
         ImmutableList<MappingAssertion> assertions = facts.stream()
                 .map(fact -> new MappingAssertion(
