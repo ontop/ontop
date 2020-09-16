@@ -8,6 +8,9 @@ import it.unibz.inf.ontop.spec.ontology.RDFFact;
 
 import java.util.stream.Stream;
 
+/**
+ * Does not extract any T-box axioms
+ */
 @Singleton
 public class NoTboxFactExtractor extends AbstractFactExtractor {
 
