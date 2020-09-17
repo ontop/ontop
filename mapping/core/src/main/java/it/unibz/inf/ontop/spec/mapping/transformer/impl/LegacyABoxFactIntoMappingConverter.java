@@ -101,11 +101,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
     private IQ createQuad(RDFFact rdfFact, ObjectConstant graph) {
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                        tripleAtom.getTerm(0), rdfFact.getSubject(),
-                        tripleAtom.getTerm(1), rdfFact.getProperty(),
-                        tripleAtom.getTerm(2), rdfFact.getObject(),
-                        tripleAtom.getTerm(3), graph));
+                quadAtom.getVariables(), substitutionFactory.getSubstitution(
+                        quadAtom.getTerm(0), rdfFact.getSubject(),
+                        quadAtom.getTerm(1), rdfFact.getProperty(),
+                        quadAtom.getTerm(2), rdfFact.getObject(),
+                        quadAtom.getTerm(3), graph));
 
         IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
         return iqFactory.createIQ(quadAtom, constructionTree);
