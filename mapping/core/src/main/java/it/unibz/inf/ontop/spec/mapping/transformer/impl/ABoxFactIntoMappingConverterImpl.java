@@ -103,8 +103,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     }
 
     private IQ createTriple(ImmutableList<RDFFact> rdfFacts) {
-        if (rdfFacts.isEmpty())
-            throw new RuntimeException("rdfFacts empty in createTriple pt1");
+
         ValuesNode valuesNode = iqFactory.createValuesNode(
                 ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
@@ -113,10 +112,10 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                                 (Constant) rdfFact.getObject()
                         ))
                         .collect(ImmutableCollectors.toList()));
-        if (rdfFacts.isEmpty())
-            throw new RuntimeException("rdfFacts empty in createTriple pt2");
+
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                tripleAtom.getVariables(), substitutionFactory.getSubstitution( // For RDF function: Use getRDFFunctionalTerm in TermFactory
+                                                                                // There is also RDFTermType.getClosestDBType()
                         tripleAtom.getTerm(0), rdfFacts.get(0).getSubject(),//valuesNode.getOrderedVariables().get(0),
                         tripleAtom.getTerm(1), rdfFacts.get(0).getProperty(),
                         tripleAtom.getTerm(2), rdfFacts.get(0).getObject()));//valuesNode.getOrderedVariables().get(1)));
@@ -126,8 +125,6 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     }
 
     private IQ createQuad(ImmutableList<RDFFact> rdfFacts, ObjectConstant graph) {
-        if (rdfFacts.isEmpty())
-            throw new RuntimeException("rdfFacts empty in createQuad pt1");
         ValuesNode valuesNode = iqFactory.createValuesNode(
                 ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
@@ -136,8 +133,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                                 (Constant) rdfFact.getObject()
                         ))
                         .collect(ImmutableCollectors.toList()));
-        if (rdfFacts.isEmpty())
-            throw new RuntimeException("rdfFacts empty in createQuad pt2");
+
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
                 quadAtom.getVariables(), substitutionFactory.getSubstitution(
                         quadAtom.getTerm(0), rdfFacts.get(0).getSubject(),//valuesNode.getOrderedVariables().get(0),

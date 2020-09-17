@@ -75,6 +75,9 @@ public class IQ2CQ {
         else if (node instanceof TrueNode) {
             return Optional.of(ImmutableList.of());
         }
+        else if (node instanceof ValuesNode) {
+            return Optional.of(ImmutableList.of());
+        }
         else if (node instanceof InnerJoinNode) {
             if (tree.getChildren().stream().anyMatch(c -> !(c.getRootNode() instanceof ExtensionalDataNode)))
                 return Optional.empty();
@@ -96,6 +99,9 @@ public class IQ2CQ {
             return ImmutableSet.of();
         }
         else if (node instanceof TrueNode) {
+            return ImmutableSet.of();
+        }
+        else if (node instanceof ValuesNode) {
             return ImmutableSet.of();
         }
         else if (node instanceof InnerJoinNode) {
