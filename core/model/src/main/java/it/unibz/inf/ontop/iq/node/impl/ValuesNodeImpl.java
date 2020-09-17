@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.eclipse.rdf4j.query.algebra.VariableScopeChange;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
