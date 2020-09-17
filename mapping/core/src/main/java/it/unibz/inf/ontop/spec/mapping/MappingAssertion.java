@@ -95,11 +95,11 @@ public class MappingAssertion {
             ImmutableList<? extends ImmutableTerm> substitutedArguments = getTerms();
 
             IRI propertyIRI = rdfAtomPredicate.getPropertyIRI(substitutedArguments)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term" + query));
+                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term " + query));
 
             index = propertyIRI.equals(RDF.TYPE)
                     ? MappingAssertionIndex.ofClass(rdfAtomPredicate, rdfAtomPredicate.getClassIRI(substitutedArguments)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term" + query)))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term " + query)))
                     : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
         }
         return index;

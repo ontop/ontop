@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.si.impl;
 
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -40,7 +41,7 @@ public class RDF4JGraphLoading {
 
         RDF rdfFactory = loadingConfiguration.getRdfFactory();
 
-        CollectRDFVocabulary collectVocabulary = new CollectRDFVocabulary(rdfFactory);
+        CollectRDFVocabulary collectVocabulary = new CollectRDFVocabulary(rdfFactory, loadingConfiguration.getTermFactory());
         for (IRI graphURL : graphURLs) {
             processRDF(collectVocabulary, graphURL);
         }
@@ -67,9 +68,9 @@ public class RDF4JGraphLoading {
         private final OntologyBuilder vb;
         private final RDF rdfFactory;
 
-        CollectRDFVocabulary(RDF rdfFactory) {
+        CollectRDFVocabulary(RDF rdfFactory, TermFactory termFactory) {
             this.rdfFactory = rdfFactory;
-            this.vb = OntologyBuilderImpl.builder(rdfFactory);
+            this.vb = OntologyBuilderImpl.builder(rdfFactory, termFactory);
         }
 
         @Override
@@ -92,7 +93,6 @@ public class RDF4JGraphLoading {
 
         private final SIRepository repository;
         private final Connection connection;
-        private final ABoxAssertionSupplier builder;
         private final TypeFactory typeFactory;
         private final TermFactory termFactory;
 
@@ -108,7 +108,6 @@ public class RDF4JGraphLoading {
             this.repository = repository;
             this.typeFactory = typeFactory;
             this.termFactory = termFactory;
-            this.builder = OntologyBuilderImpl.assertionSupplier(rdfFactory);
             this.connection = connection;
             this.rdfFactory = rdfFactory;
         }
@@ -129,8 +128,8 @@ public class RDF4JGraphLoading {
 
         private void loadBuffer() throws RDFHandlerException {
             try {
-                Iterator<Assertion> assertionIterator = buffer.stream()
-                        .map(st -> constructAssertion(st, builder))
+                Iterator<RDFFact> assertionIterator = buffer.stream()
+                        .map(st -> constructAssertion(st))
                         .iterator();
                 count += repository.insertData(connection, assertionIterator);
                 buffer.clear();
@@ -147,7 +146,10 @@ public class RDF4JGraphLoading {
          * predicate is not type and the object is URI or BNode. Its a data property
          * if the predicate is not rdf:type and the object is a Literal.
          */
-        private Assertion constructAssertion(Statement st, ABoxAssertionSupplier builder) {
+        private RDFFact constructAssertion(Statement st) {
+
+            if (st.getContext() != null)
+                throw new IllegalArgumentException("Quads are not supported by the SI");
 
             Resource subject = st.getSubject();
             final ObjectConstant c;
@@ -161,44 +163,36 @@ public class RDF4JGraphLoading {
                 throw new RuntimeException("Unsupported subject found in triple: "	+ st + " (Required URI or BNode)");
             }
 
-            String predicateName = st.getPredicate().stringValue();
+            IRIConstant property = termFactory.getConstantIRI(st.getPredicate().stringValue());
             Value object = st.getObject();
 
             // Create the assertion
-            try {
-                if (predicateName.equals(org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.stringValue() )) {
-                    return builder.createClassAssertion(object.stringValue(), c);
+            if (object instanceof IRI) {
+                ObjectConstant c2 = termFactory.getConstantIRI(rdfFactory.createIRI(object.stringValue()));
+                return RDFFact.createTripleFact(c, property, c2);
+            }
+            else if (object instanceof BNode) {
+                ObjectConstant c2 = termFactory.getConstantBNode(object.stringValue());
+                return RDFFact.createTripleFact(c, property, c2);
+            }
+            else if (object instanceof Literal) {
+                Literal l = (Literal) object;
+                Optional<String> lang = l.getLanguage();
+                final RDFLiteralConstant c2;
+                if (!lang.isPresent()) {
+                    IRI datatype = l.getDatatype();
+                    RDFDatatype type = (datatype == null)
+                            ? typeFactory.getXsdStringDatatype()
+                            : typeFactory.getDatatype(rdfFactory.createIRI(datatype.stringValue()));
+                    c2 = termFactory.getRDFLiteralConstant(l.getLabel(), type);
                 }
-                else if (object instanceof IRI) {
-                    ObjectConstant c2 = termFactory.getConstantIRI(rdfFactory.createIRI(object.stringValue()));
-                    return builder.createObjectPropertyAssertion(predicateName, c, c2);
+                else {
+                    c2 = termFactory.getRDFLiteralConstant(l.getLabel(), lang.get());
                 }
-                else if (object instanceof BNode) {
-                    ObjectConstant c2 = termFactory.getConstantBNode(object.stringValue());
-                    return builder.createObjectPropertyAssertion(predicateName, c, c2);
-                }
-                else if (object instanceof Literal) {
-                    Literal l = (Literal) object;
-                    Optional<String> lang = l.getLanguage();
-                    final RDFLiteralConstant c2;
-                    if (!lang.isPresent()) {
-                        IRI datatype = l.getDatatype();
-                        RDFDatatype type = (datatype == null)
-                                ? typeFactory.getXsdStringDatatype()
-                                : typeFactory.getDatatype(rdfFactory.createIRI(datatype.stringValue()));
-                        c2 = termFactory.getRDFLiteralConstant(l.getLabel(), type);
-                    }
-                    else {
-                        c2 = termFactory.getRDFLiteralConstant(l.getLabel(), lang.get());
-                    }
-                    return builder.createDataPropertyAssertion(predicateName, c, c2);
-                }
+                return RDFFact.createTripleFact(c, property, c2);
+            }
 
-                throw new RuntimeException("Unsupported object found in triple: " + st + " (Required URI, BNode or Literal)");
-            }
-            catch (InconsistentOntologyException e) {
-                throw new RuntimeException("InconsistentOntologyException: " + st);
-            }
+            throw new RuntimeException("Unsupported object found in triple: " + st + " (Required URI, BNode or Literal)");
         }
     }
 

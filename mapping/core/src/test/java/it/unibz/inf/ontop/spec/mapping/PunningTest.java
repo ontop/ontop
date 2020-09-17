@@ -78,7 +78,7 @@ public class PunningTest {
                 new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_IRI), propertyMappingAssertion, null),
                 new MappingAssertion(MappingAssertionIndex.ofClass(tp, CLASS_IRI), classMappingAssertion, null));
 
-        OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY, TERM_FACTORY);
         builder.declareClass(CLASS_IRI);
         builder.declareDataProperty(PROP_IRI);
         Ontology ontology = builder.build();

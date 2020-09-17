@@ -1,31 +1,10 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-/*
- * #%L
- * ontop-quest-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 public class OntopOntologyMaterializerTest extends TestCase {
@@ -98,25 +76,20 @@ public class OntopOntologyMaterializerTest extends TestCase {
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
 
 		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
-			int classAss = 0, propAss = 0, objAss = 0;
+			int factCount = 0;
 
 //			// Davide> Debug
 //			PrintWriter writer = new PrintWriter("src/test/resources/materializer/output_assertions.txt");
 
 			LOGGER.debug("Assertions:");
 			while (resultSet.hasNext()) {
-				Assertion assertion = resultSet.next();
-
-				if (assertion instanceof ClassAssertion)
-					classAss++;
-				else if (assertion instanceof ObjectPropertyAssertion)
-					objAss++;
-				else  // DataPropertyAssertion
-					propAss++;
+				RDFFact assertion = resultSet.next();
+				factCount++;
 			}
-			assertEquals(6, classAss); //2 classes * 3 data rows for T1
-			assertEquals(40, propAss); //2 properties * 7 tables * 3 data rows each T2-T8 - 2 redundant
-			assertEquals(3, objAss); //3 data rows for T9
+			//2 classes * 3 data rows for T1
+			//2 properties * 7 tables * 3 data rows each T2-T8 - 2 redundant
+			//3 data rows for T9
+			assertEquals(49, factCount);
 		}
 	}
 	
@@ -144,23 +117,16 @@ public class OntopOntologyMaterializerTest extends TestCase {
 
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
 		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
-
-			int classAss = 0, propAss = 0, objAss = 0;
+			int factCount = 0;
 			while (resultSet.hasNext()) {
-				Assertion assertion = resultSet.next();
+				RDFFact assertion = resultSet.next();
+				factCount++;
 				LOGGER.debug(assertion + "\n");
-				if (assertion instanceof ClassAssertion)
-					classAss++;
-
-				else if (assertion instanceof ObjectPropertyAssertion)
-					objAss++;
-
-				else // DataPropertyAssertion
-					propAss++;
 			}
-			assertEquals(6, classAss); //3 data rows x2 for subclass prop
-			assertEquals(40, propAss); //8 tables * 3 data rows each x2 for subclass - 2 redundant
-			assertEquals(3, objAss); //3 since no subprop for obj prop
+			//3 data rows x2 for subclass prop
+			//8 tables * 3 data rows each x2 for subclass - 2 redundant
+			//3 since no subprop for obj prop
+			assertEquals(49, factCount);
 		}
 	}
 }
