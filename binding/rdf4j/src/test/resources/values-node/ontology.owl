@@ -44,6 +44,18 @@
 <http://te.st/ValuesNodeTest#course/DataIntegration> rdf:type owl:NamedIndividual ,
                                                               :Course .
 
+###  http://te.st/ValuesNodeTest#course/Programming
+<http://te.st/ValuesNodeTest#course/Programming> rdf:type owl:NamedIndividual ,
+                                                              :Course .
+
+###  http://te.st/ValuesNodeTest#course/Mathematics
+<http://te.st/ValuesNodeTest#course/Mathematics> rdf:type owl:NamedIndividual ,
+                                                              :Course .
+
+###  http://te.st/ValuesNodeTest#course/Painting
+<http://te.st/ValuesNodeTest#course/Painting> rdf:type owl:NamedIndividual ,
+                                                              :Course .
+
 
 ###  http://te.st/ValuesNodeTest#teacher/Jane
 <http://te.st/ValuesNodeTest#teacher/Jane> rdf:type owl:NamedIndividual ,
@@ -64,6 +76,9 @@
 [ rdf:type owl:AllDifferent ;
   owl:distinctMembers ( <http://te.st/ValuesNodeTest#course/Algorithms>
                         <http://te.st/ValuesNodeTest#course/DataIntegration>
+                        <http://te.st/ValuesNodeTest#course/Programming>
+                        <http://te.st/ValuesNodeTest#course/Mathematics>
+                        <http://te.st/ValuesNodeTest#course/Painting>
                       )
 ] .
 

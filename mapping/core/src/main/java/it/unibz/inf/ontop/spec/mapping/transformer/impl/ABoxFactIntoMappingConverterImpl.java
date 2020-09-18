@@ -12,11 +12,10 @@ import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -44,6 +43,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     private final CoreUtilsFactory coreUtilsFactory;
     private final VariableGenerator projectedVariableGenerator;
     private final FunctionSymbolFactory functionSymbolFactory;
+    private final DBTypeFactory dbTypeFactory;
 
     private final DistinctVariableOnlyDataAtom tripleAtom;
     private final RDFAtomPredicate rdfAtomPredicate;
@@ -53,13 +53,15 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     @Inject
     protected ABoxFactIntoMappingConverterImpl(TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                                SubstitutionFactory substitutionFactory, AtomFactory atomFactory,
-                                               CoreUtilsFactory coreUtilsFactory, FunctionSymbolFactory functionSymbolFactory) {
+                                               CoreUtilsFactory coreUtilsFactory, FunctionSymbolFactory functionSymbolFactory,
+                                               TypeFactory typeFactory) {
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.functionSymbolFactory = functionSymbolFactory;
+        this.dbTypeFactory = typeFactory.getDBTypeFactory();
 
         projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
         tripleAtom = atomFactory.getDistinctTripleAtom(
@@ -71,54 +73,55 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
 
     @Override
     public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts, boolean isOntologyAnnotationQueryingEnabled) {
-
+        // Group facts by class name or property name (for properties != rdf:type)
         ImmutableMap<ObjectConstant, ImmutableList<RDFFact>> dict = facts.stream()
-                .filter(RDFFact::isClassAssertion)
                 .collect(ImmutableCollectors.toMap(RDFFact::getClassOrProperty, ImmutableList::of,
                         (a, b) -> Stream.concat(a.stream(), b.stream()).collect(ImmutableCollectors.toList())));
 
         ImmutableList<MappingAssertion> assertions = dict.entrySet().stream()
                 .map(entry -> new MappingAssertion(
-                        MappingAssertionIndex.ofClass(rdfAtomPredicate,
-                                Optional.of(entry.getKey())
-                                        .filter(c -> c instanceof IRIConstant)
-                                        .map(c -> ((IRIConstant) c).getIRI())
-                                        .orElseThrow(() -> new RuntimeException(
-                                                "TODO: support bnode for classes as mapping assertion index"))),
+                                entry.getValue().get(0).isClassAssertion()
+                                    ? MappingAssertionIndex.ofClass(rdfAtomPredicate,
+                                        Optional.of(entry.getKey())
+                                            .filter(c -> c instanceof IRIConstant)
+                                            .map(c -> ((IRIConstant) c).getIRI())
+                                            .orElseThrow(() -> new RuntimeException(
+                                                "TODO: support bnode for classes as mapping assertion index")))
+                                    : MappingAssertionIndex.ofProperty(rdfAtomPredicate, entry.getValue().get(0)
+                                        .getProperty().getIRI()),
                                 createIQ(entry.getValue()),
                                 new ABoxFactProvenance(entry.getValue())))
                 .collect(ImmutableCollectors.toList());
 
-        LOGGER.debug("Appended {} assertions as fact rules", facts.size());
+        LOGGER.debug("Transformed {} rdfFacts into {} mappingAssertions", facts.size(), assertions.size());
 
         return assertions;
     }
 
     private IQ createIQ(ImmutableList<RDFFact> rdfFacts) {
-        if (rdfFacts.isEmpty())
-            throw new RuntimeException("rdfFacts empty in createIQ");
-        return rdfFacts.get(0).getGraph()
-                .map(g -> createQuad(rdfFacts, g))
-                .orElseGet(() -> createTriple(rdfFacts));
+        return rdfFacts.get(0).isClassAssertion()
+                    ? rdfFacts.get(0).getGraph()
+                        .map(g -> createQuad(rdfFacts, g))
+                        .orElseGet(() -> createTriple(rdfFacts))
+                    : rdfFacts.get(0).getGraph()
+                        .map(g -> createQuadProperty(rdfFacts, g))
+                        .orElseGet(() -> createTripleProperty(rdfFacts));
     }
 
     private IQ createTriple(ImmutableList<RDFFact> rdfFacts) {
-
         ValuesNode valuesNode = iqFactory.createValuesNode(
-                ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
+                ImmutableList.of(projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                rdfFact.getSubject(),
-                                (Constant) rdfFact.getObject()
-                        ))
+                                (Constant) rdfFact.getSubject()))
                         .collect(ImmutableCollectors.toList()));
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                tripleAtom.getVariables(), substitutionFactory.getSubstitution( // For RDF function: Use getRDFFunctionalTerm in TermFactory
-                                                                                // There is also RDFTermType.getClosestDBType()
-                        tripleAtom.getTerm(0), rdfFacts.get(0).getSubject(),//valuesNode.getOrderedVariables().get(0),
+                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                        tripleAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
                         tripleAtom.getTerm(1), rdfFacts.get(0).getProperty(),
-                        tripleAtom.getTerm(2), rdfFacts.get(0).getObject()));//valuesNode.getOrderedVariables().get(1)));
+                        tripleAtom.getTerm(2), rdfFacts.get(0).getObject()));
 
         IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
         return iqFactory.createIQ(tripleAtom, iqTree);
@@ -126,19 +129,70 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
 
     private IQ createQuad(ImmutableList<RDFFact> rdfFacts, ObjectConstant graph) {
         ValuesNode valuesNode = iqFactory.createValuesNode(
-                ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
+                ImmutableList.of(projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                rdfFact.getSubject(),
-                                (Constant) rdfFact.getObject()
-                        ))
+                                (Constant) rdfFact.getSubject()))
                         .collect(ImmutableCollectors.toList()));
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
                 quadAtom.getVariables(), substitutionFactory.getSubstitution(
-                        quadAtom.getTerm(0), rdfFacts.get(0).getSubject(),//valuesNode.getOrderedVariables().get(0),
+                        quadAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
                         quadAtom.getTerm(1), rdfFacts.get(0).getProperty(),
-                        quadAtom.getTerm(2), rdfFacts.get(0).getObject(),//valuesNode.getOrderedVariables().get(1),
+                        quadAtom.getTerm(2), rdfFacts.get(0).getObject(),
+                        quadAtom.getTerm(3), graph));
+
+        IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
+        return iqFactory.createIQ(quadAtom, iqTree);
+    }
+
+    private IQ createTripleProperty(ImmutableList<RDFFact> rdfFacts) {
+        ValuesNode valuesNode = iqFactory.createValuesNode(
+                ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
+                rdfFacts.stream()
+                        .map(rdfFact -> ImmutableList.of(
+                                (Constant) rdfFact.getSubject(),
+                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
+                                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory))))
+                .collect(ImmutableCollectors.toList()));
+
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
+                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                        tripleAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
+                        tripleAtom.getTerm(1), rdfFacts.get(0).getProperty(),
+                        tripleAtom.getTerm(2),
+                            termFactory.getRDFFunctionalTerm(
+                                termFactory.getConversion2RDFLexical(valuesNode.getOrderedVariables().get(1),
+                                        termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType()).getRDFTermType()),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getObject().getType()))));
+
+        IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
+        return iqFactory.createIQ(tripleAtom, iqTree);
+    }
+
+    private IQ createQuadProperty(ImmutableList<RDFFact> rdfFacts, ObjectConstant graph) {
+        ValuesNode valuesNode = iqFactory.createValuesNode(
+                ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
+                rdfFacts.stream()
+                        .map(rdfFact -> ImmutableList.of(
+                                (Constant) rdfFact.getSubject(),
+                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
+                                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory))))
+                        .collect(ImmutableCollectors.toList()));
+
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
+                quadAtom.getVariables(), substitutionFactory.getSubstitution(
+                        quadAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
+                        quadAtom.getTerm(1),
+                            rdfFacts.get(0).getProperty(),
+                        quadAtom.getTerm(2),
+                            termFactory.getRDFFunctionalTerm(
+                                    termFactory.getConversion2RDFLexical(valuesNode.getOrderedVariables().get(1),
+                                            termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType()).getRDFTermType()),
+                                    termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getObject().getType())),
                         quadAtom.getTerm(3), graph));
 
         IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
