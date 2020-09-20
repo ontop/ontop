@@ -64,16 +64,20 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
             str, before, str);
         }
 
+    /**
+     * Dremio has a SPLIT_PART(string, pattern, index), but this function would fail for several occurrence of "pattern" in "string"
+     */
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
         return String.format(
-                "SUBSTR(%s, " +
-                        "POSITION(%s IN %s) + LENGTH(%s)," +
-                        "LENGTH(%s) * POSITION(%s IN %s))",
-                str, before, str, before, str, before, str);
+                "CASE "+
+                        "WHEN LENGTH(%s) > 0 AND POSITION(%s IN %s) = 0 THEN '' "+
+                        "ELSE SUBSTR(%s, POSITION(%s IN %s) + LENGTH(%s)) "+
+                "END",
+                before, before, str, str, before, str, before);
     }
 
     @Override

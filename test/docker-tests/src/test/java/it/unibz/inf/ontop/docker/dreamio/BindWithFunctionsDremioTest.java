@@ -149,4 +149,10 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     @Override
     public void testHashSHA256() {
     }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testStrUuid() {
+    }
 }
