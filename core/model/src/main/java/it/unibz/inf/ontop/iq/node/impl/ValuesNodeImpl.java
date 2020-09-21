@@ -308,41 +308,40 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                                                                ConstructionAndFilterAndValues constructionAndFilterAndValues) {
         ImmutableList<ImmutableList<Constant>> oldValues = constructionAndFilterAndValues.valuesNode.getValues();
 
-        ImmutableList<ImmutableTerm> renamedVariables = substitutionFactory.getInjectiveVar2VarSubstitution(
-                variableSubstitutionFragment.getImmutableMap())
-                .apply(constructionAndFilterAndValues.valuesNode.getOrderedVariables());
+        ImmutableList<ImmutableTerm> renamedVariables =  constructionAndFilterAndValues.valuesNode.getOrderedVariables().stream()
+                .map(variableSubstitutionFragment::applyToVariable)
+                .collect(ImmutableCollectors.toList());
 
-        if (renamedVariables.size() != ImmutableSet.of(renamedVariables).size()) {
+        if (renamedVariables.equals(constructionAndFilterAndValues.valuesNode.getOrderedVariables()))
+            return constructionAndFilterAndValues;
 
-            ImmutableSet<Integer> newVariableIndices = IntStream.range(0, renamedVariables.size())
-                    .filter(i -> !renamedVariables.subList(0, i).contains(renamedVariables.get(i)))
-                    .boxed()
-                    .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Integer> newVariableIndices = IntStream.range(0, renamedVariables.size())
+                .filter(i -> !renamedVariables.subList(0, i).contains(renamedVariables.get(i)))
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
 
-            ImmutableList<Variable> newVariables = IntStream.range(0, renamedVariables.size())
+        ImmutableList<Variable> newVariables = IntStream.range(0, renamedVariables.size())
+                .filter(newVariableIndices::contains)
+                .boxed()
+                .map(i -> (Variable) renamedVariables.get(i))
+                .collect(ImmutableCollectors.toList());
+
+        // Stream in Stream in Stream, can be optimized?
+        ImmutableList<ImmutableList<Constant>> newValues = oldValues.stream()
+                .filter(constants -> IntStream.range(0, renamedVariables.size())
+                        .allMatch(i -> IntStream.range(0, oldValues.size())
+                                .allMatch(j -> constants.get(i).equals(constants.get(j)) ||
+                                        !(renamedVariables.get(i).equals(renamedVariables.get(j))))))
+                .map(constants -> IntStream.range(0, constants.size())
                     .filter(newVariableIndices::contains)
                     .boxed()
-                    .map(i -> (Variable) renamedVariables.get(i))
-                    .collect(ImmutableCollectors.toList());
+                    .map(constants::get)
+                    .collect(ImmutableCollectors.toList()))
+                .collect(ImmutableCollectors.toList());
 
-            // Stream in Stream in Stream, can be optimized?
-            ImmutableList<ImmutableList<Constant>> newValues = oldValues.stream()
-                    .filter(constants -> IntStream.range(0, renamedVariables.size())
-                            .allMatch(i -> IntStream.range(0, oldValues.size())
-                                    .allMatch(j -> constants.get(i).equals(constants.get(j)) ||
-                                            !(renamedVariables.get(i).equals(renamedVariables.get(j))))))
-                    .map(constants -> IntStream.range(0, constants.size())
-                        .filter(newVariableIndices::contains)
-                        .boxed()
-                        .map(constants::get)
-                        .collect(ImmutableCollectors.toList()))
-                    .collect(ImmutableCollectors.toList());
-
-            return new ConstructionAndFilterAndValues(constructionAndFilterAndValues.constructionNode,
-                    constructionAndFilterAndValues.filterNode,
-                    iqFactory.createValuesNode(newVariables, newValues));
-        }
-        return constructionAndFilterAndValues;
+        return new ConstructionAndFilterAndValues(constructionAndFilterAndValues.constructionNode,
+                constructionAndFilterAndValues.filterNode,
+                iqFactory.createValuesNode(newVariables, newValues));
     }
 
     private IQTree buildTreeFromCFV(ConstructionAndFilterAndValues constructionAndFilterAndValues) {

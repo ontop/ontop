@@ -143,7 +143,22 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test10substitutionTriple() {
+    public void test10trivialSubstitutionVariable() {
+        // Test handling of GroundFunctionalTerm
+        IQTree initialTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(X), ImmutableList.of(
+                        ImmutableList.of(ONE_STR)));
+        ImmutableSubstitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(X, Y);
+
+        IQTree expectedTree = IQ_FACTORY
+                .createValuesNode(ImmutableList.of(Y), ImmutableList.of(
+                        ImmutableList.of(ONE_STR)));
+
+        assertTrue(baseTestApplyDescSubstitution(initialTree, substitution, expectedTree));
+    }
+
+    @Test
+    public void test11substitutionTriple() {
         // Test handling of GroundFunctionalTerm & NonFunctionalTerm
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X, Y, Z, W), ImmutableList.of(
@@ -163,7 +178,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test11propagateDownConstraint() {
+    public void test12propagateDownConstraint() {
         IQTree initialTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY
                 .createFilterNode(TERM_FACTORY.getDBNumericInequality(LT, X, TERM_FACTORY.getDBIntegerConstant(2))), IQ_FACTORY
                     .createValuesNode(ImmutableList.of(X, Y), ImmutableList.of(ImmutableList.of(ONE, TWO), ImmutableList.of(TWO, ONE), ImmutableList.of(TWO, TWO))));
