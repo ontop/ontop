@@ -109,17 +109,15 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     }
 
     private IQ createTriple(ImmutableList<RDFFact> rdfFacts) {
-        ValuesNode valuesNode = iqFactory.createValuesNode(
-                ImmutableList.of(projectedVariableGenerator.generateNewVariable()),
-                rdfFacts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                (Constant) rdfFact.getSubject()))
-                        .collect(ImmutableCollectors.toList()));
+        ValuesNode valuesNode = createDBValuesNode(rdfFacts);
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
                 tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                        tripleAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
-                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
+                        tripleAtom.getTerm(0),
+                        termFactory.getRDFFunctionalTerm(
+                                termFactory.getConversion2RDFLexical(valuesNode.getOrderedVariables().get(0),
+                                        termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType()).getRDFTermType()),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getObject().getType())),
                         tripleAtom.getTerm(1), rdfFacts.get(0).getProperty(),
                         tripleAtom.getTerm(2), rdfFacts.get(0).getObject()));
 
@@ -128,17 +126,15 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     }
 
     private IQ createQuad(ImmutableList<RDFFact> rdfFacts, ObjectConstant graph) {
-        ValuesNode valuesNode = iqFactory.createValuesNode(
-                ImmutableList.of(projectedVariableGenerator.generateNewVariable()),
-                rdfFacts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                (Constant) rdfFact.getSubject()))
-                        .collect(ImmutableCollectors.toList()));
+        ValuesNode valuesNode = createDBValuesNode(rdfFacts);
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
                 quadAtom.getVariables(), substitutionFactory.getSubstitution(
-                        quadAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
-                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
+                        quadAtom.getTerm(0),
+                            termFactory.getRDFFunctionalTerm(
+                                termFactory.getConversion2RDFLexical(valuesNode.getOrderedVariables().get(0),
+                                        termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType()).getRDFTermType()),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getObject().getType())),
                         quadAtom.getTerm(1), rdfFacts.get(0).getProperty(),
                         quadAtom.getTerm(2), rdfFacts.get(0).getObject(),
                         quadAtom.getTerm(3), graph));
@@ -148,19 +144,15 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     }
 
     private IQ createTripleProperty(ImmutableList<RDFFact> rdfFacts) {
-        ValuesNode valuesNode = iqFactory.createValuesNode(
-                ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
-                rdfFacts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                (Constant) rdfFact.getSubject(),
-                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
-                                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory))))
-                .collect(ImmutableCollectors.toList()));
+        ValuesNode valuesNode = createDBValuesNode(rdfFacts);
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
                 tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                        tripleAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
-                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
+                        tripleAtom.getTerm(0),
+                            termFactory.getRDFFunctionalTerm(
+                                termFactory.getConversion2RDFLexical(valuesNode.getOrderedVariables().get(0),
+                                        termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType()).getRDFTermType()),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getObject().getType())),
                         tripleAtom.getTerm(1), rdfFacts.get(0).getProperty(),
                         tripleAtom.getTerm(2),
                             termFactory.getRDFFunctionalTerm(
@@ -173,19 +165,15 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     }
 
     private IQ createQuadProperty(ImmutableList<RDFFact> rdfFacts, ObjectConstant graph) {
-        ValuesNode valuesNode = iqFactory.createValuesNode(
-                ImmutableList.of(projectedVariableGenerator.generateNewVariable(), projectedVariableGenerator.generateNewVariable()),
-                rdfFacts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                (Constant) rdfFact.getSubject(),
-                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
-                                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory))))
-                        .collect(ImmutableCollectors.toList()));
+        ValuesNode valuesNode = createDBValuesNode(rdfFacts);
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
                 quadAtom.getVariables(), substitutionFactory.getSubstitution(
-                        quadAtom.getTerm(0), termFactory.getRDFFunctionalTerm(valuesNode.getOrderedVariables().get(0),
-                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType())),
+                        quadAtom.getTerm(0),
+                            termFactory.getRDFFunctionalTerm(
+                                termFactory.getConversion2RDFLexical(valuesNode.getOrderedVariables().get(0),
+                                        termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getSubject().getType()).getRDFTermType()),
+                                termFactory.getRDFTermTypeConstant(rdfFacts.get(0).getObject().getType())),
                         quadAtom.getTerm(1),
                             rdfFacts.get(0).getProperty(),
                         quadAtom.getTerm(2),
@@ -197,6 +185,29 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
 
         IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
         return iqFactory.createIQ(quadAtom, iqTree);
+    }
+
+    private ValuesNode createDBValuesNode(ImmutableList<RDFFact> rdfFacts) {
+        // Two cases, class assertion or not
+        return rdfFacts.get(0).isClassAssertion()
+                ?   iqFactory.createValuesNode(
+                        ImmutableList.of(projectedVariableGenerator.generateNewVariable()),
+                        rdfFacts.stream()
+                            .map(rdfFact -> ImmutableList.of(
+                                    (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
+                                            rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory))))
+                            .collect(ImmutableCollectors.toList()))
+                :   iqFactory.createValuesNode(
+                        ImmutableList.of(projectedVariableGenerator.generateNewVariable(),
+                                projectedVariableGenerator.generateNewVariable()),
+                        rdfFacts.stream()
+                            .map(rdfFact -> ImmutableList.of(
+                                    (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
+                                            rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory)),
+                                    termFactory.getDBConstant(rdfFact.getObject().getValue(),
+                                            rdfFact.getObject().getType().getClosestDBType(dbTypeFactory))))
+                            .collect(ImmutableCollectors.toList()));
+
     }
 
     private static class ABoxFactProvenance implements PPMappingAssertionProvenance {

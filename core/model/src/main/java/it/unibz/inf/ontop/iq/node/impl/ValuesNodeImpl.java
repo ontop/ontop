@@ -278,30 +278,33 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
     private ConstructionAndFilterAndValues substituteConstants(ImmutableSubstitution<? extends Constant> substitution,
                                            ConstructionAndFilterAndValues constructionAndFilterAndValues) {
-        ValuesNode valuesNode = constructionAndFilterAndValues.valuesNode;
+        ValuesNode formerValuesNode = constructionAndFilterAndValues.valuesNode;
+        ImmutableList<Variable> formerOrderedVariables = formerValuesNode.getOrderedVariables();
+        ImmutableList<ImmutableList<Constant>> formerValues = formerValuesNode.getValues();
+        int formerArity = formerOrderedVariables.size();
 
-        ImmutableSet<Integer> substitutionVariableIndices = IntStream.range(0, valuesNode.getOrderedVariables().size())
-                .filter(i -> substitution.getImmutableMap().containsKey(valuesNode.getOrderedVariables().get(i)))
+        ImmutableSet<Integer> substitutionVariableIndices = IntStream.range(0, formerArity)
+                .filter(i -> substitution.getImmutableMap().containsKey(formerOrderedVariables.get(i)))
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<Variable> newVariables = IntStream.range(0, valuesNode.getOrderedVariables().size())
+        ImmutableList<Variable> newOrderedVariables = IntStream.range(0, formerArity)
                 .filter(i -> !substitutionVariableIndices.contains(i))
                 .boxed()
-                .map(i -> valuesNode.getOrderedVariables().get(i))
+                .map(formerOrderedVariables::get)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<ImmutableList<Constant>> newValues = valuesNode.getValues().stream()
-                .filter(constants -> substitutionVariableIndices.stream()
-                        .allMatch(i -> constants.get(i).equals(substitution.get(valuesNode.getOrderedVariables().get(i)))))
-                .map(constants -> constants.stream()
-                        .filter(constant -> !substitutionVariableIndices.contains(constants.indexOf(constant)))
+        ImmutableList<ImmutableList<Constant>> newValues = formerValues.stream()
+                .filter(tuple -> substitutionVariableIndices.stream()
+                        .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
+                .map(tuple -> tuple.stream()
+                        .filter(constant -> !substitutionVariableIndices.contains(tuple.indexOf(constant)))
                         .collect(ImmutableCollectors.toList()))
                 .collect(ImmutableCollectors.toList());
 
         return new ConstructionAndFilterAndValues(constructionAndFilterAndValues.constructionNode,
                 constructionAndFilterAndValues.filterNode,
-                iqFactory.createValuesNode(newVariables, newValues));
+                iqFactory.createValuesNode(newOrderedVariables, newValues));
     }
 
     private static ConstructionAndFilterAndValues substituteVariables(Var2VarSubstitution variableSubstitutionFragment,
