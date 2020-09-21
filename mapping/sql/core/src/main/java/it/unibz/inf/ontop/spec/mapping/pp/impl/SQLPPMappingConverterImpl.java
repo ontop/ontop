@@ -74,7 +74,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     re.getDataAtoms().stream()
                             .collect(ImmutableCollectors.toList()),
                     termFactory.getConjunction(re.getFilterAtoms().stream()),
-                    iqFactory);
+                    coreSingletons);
 
             Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
 

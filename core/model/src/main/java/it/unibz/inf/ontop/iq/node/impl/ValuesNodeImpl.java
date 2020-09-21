@@ -212,7 +212,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public ValuesNode applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         ImmutableList<Variable> newVariables = orderedVariables.stream()
                 .map(freshRenamingSubstitution::applyToVariable)
                 .collect(ImmutableCollectors.toList());

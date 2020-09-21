@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -27,15 +28,15 @@ public class TMappingRule {
 	// an OR-connected list of AND-connected atomic filters
 	private final ImmutableList<ImmutableList<ImmutableExpression>> filter;
 
-	public TMappingRule(IQ iq, TermFactory termFactory, IntermediateQueryFactory iqFactory) {
+	public TMappingRule(IQ iq, CoreSingletons coreSingletons) {
 		this.projectionAtom = iq.getProjectionAtom();
 		this.headTerms = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
 
 		IQTree tree = iq.getTree().getChildren().get(0);
-		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree).get();
+		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons).get();
 		ImmutableSet<ImmutableExpression> joinConditions = IQ2CQ.getFilterExpressions(tree);
 
-		// maps all non-constants to fresh variables
+		// maps all non-variables to fresh variables
 		//    this is required for more extensive use of OR
 		//    for example R(x,y) :- T(x,y,22) and R(x,y) :- T(x,y,23) will be replaced by
 		//    R(x,y) :- T(x,y,z) AND ((z = 22) OR (z = 23))
@@ -49,6 +50,8 @@ public class TMappingRule {
 				.distinct()
 				.collect(ImmutableCollectors.toMap(t -> t, t -> variableGenerator.generateNewVariable()));
 
+		IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+
 		this.extensionalNodes = dataAtoms.stream()
 					.map(n -> iqFactory.createExtensionalDataNode(
 							n.getRelationDefinition(),
@@ -57,6 +60,8 @@ public class TMappingRule {
 											Map.Entry::getKey,
 											e -> valueMap.getOrDefault(e.getValue(), e.getValue())))))
 					.collect(ImmutableCollectors.toList());
+
+		TermFactory termFactory = coreSingletons.getTermFactory();
 
 		ImmutableList<ImmutableExpression> filterAtoms = Stream.concat(
 				joinConditions.stream(),
@@ -83,7 +88,11 @@ public class TMappingRule {
 		this.filter = baseRule.filter;
 	}
 
-	public IQ asIQ(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+	public IQ asIQ(CoreSingletons coreSingletons) {
+
+		IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+		TermFactory termFactory = coreSingletons.getTermFactory();
+		SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
 		Optional<ImmutableExpression> mergedConditions = termFactory.getDisjunction(
@@ -101,7 +110,7 @@ public class TMappingRule {
 		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(
 						iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution),
-						IQ2CQ.toIQTree(extensionalNodes, mergedConditions, iqFactory)));
+						IQ2CQ.toIQTree(extensionalNodes, mergedConditions, coreSingletons)));
 	}
 
 	public ImmutableList<ImmutableTerm> getHeadTerms() { return headTerms;  }
