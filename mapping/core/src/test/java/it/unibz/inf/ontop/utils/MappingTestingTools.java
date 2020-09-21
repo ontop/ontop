@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
@@ -42,6 +44,7 @@ public class MappingTestingTools {
 
     public static final UnifierUtilities UNIFIER_UTILITIES;
 
+    public static final FactExtractor FACT_EXTRACTOR;
     public static final FactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
@@ -53,6 +56,8 @@ public class MappingTestingTools {
     public static final IQConverter IQ_CONVERTER;
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
+
+    public static final OWLAPITranslatorOWL2QL OWLAPI_TRANSLATOR;
 
     public static final DatabaseRelationDefinition TABLE1_AR2;
     public static final DatabaseRelationDefinition TABLE2_AR2;
@@ -76,6 +81,7 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        FACT_EXTRACTOR = injector.getInstance(FactExtractor.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(FactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
@@ -92,6 +98,8 @@ public class MappingTestingTools {
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
+
+        OWLAPI_TRANSLATOR = injector.getInstance(OWLAPITranslatorOWL2QL.class);
 
         OfflineMetadataProviderBuilder2 builder = createMetadataProviderBuilder();
         TABLE1_AR2 = builder.createRelationPredicate(1, 2);

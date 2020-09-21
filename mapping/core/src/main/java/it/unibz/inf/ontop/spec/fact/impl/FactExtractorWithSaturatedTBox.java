@@ -44,7 +44,7 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
         onProperty = termFactory.getConstantIRI(OWL.ON_PROPERTY);
         owlThing = termFactory.getConstantIRI(OWL.THING);
         rdfProperty = termFactory.getConstantIRI(RDF.PROPERTY);
-        dataProperty = termFactory.getConstantIRI(OWL.DATA_PROPERTY);
+        dataProperty = termFactory.getConstantIRI(OWL.DATATYPE_PROPERTY);
         objectProperty = termFactory.getConstantIRI(OWL.OBJECT_PROPERTY);
     }
 
@@ -121,7 +121,8 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                 extractSub(dag, subClassOrSubProperty, expressionIdMap));
     }
 
-    private <T extends DescriptionBT> Stream<RDFFact> extractSub(EquivalencesDAG<T> dag, IRIConstant subPredicateProperty, ImmutableMap<DescriptionBT, ObjectConstant> expressionIdMap) {
+    private <T extends DescriptionBT> Stream<RDFFact> extractSub(EquivalencesDAG<T> dag, IRIConstant subPredicateProperty,
+                                                                 ImmutableMap<DescriptionBT, ObjectConstant> expressionIdMap) {
         return dag.stream()
                     .flatMap(supEq -> supEq.getMembers().stream()
                             .flatMap(sup -> dag.getSub(supEq).stream()
@@ -152,7 +153,7 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                             classId,
                             expressionIdMap.get(((ObjectSomeValuesFrom) e).getProperty())));
         }
-        else if (e instanceof DataPropertyExpression) {
+        else if (e instanceof DataSomeValuesFrom) {
             return Stream.concat(
                     common,
                     extractFactsFromRestriction(

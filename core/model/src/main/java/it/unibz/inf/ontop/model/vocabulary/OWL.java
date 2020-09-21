@@ -32,6 +32,6 @@ public class OWL {
     public static final IRI SOME_VALUES_FROM = RDF_FACTORY.createIRI(PREFIX + "someValuesFrom");
 
     public static final IRI OBJECT_PROPERTY = RDF_FACTORY.createIRI(PREFIX + "ObjectProperty");
-    public static final IRI DATA_PROPERTY = RDF_FACTORY.createIRI(PREFIX + "DataProperty");
+    public static final IRI DATATYPE_PROPERTY = RDF_FACTORY.createIRI(PREFIX + "DatatypeProperty");
     public static final IRI INVERSE_OF = RDF_FACTORY.createIRI(PREFIX + "inverseOf");
 }

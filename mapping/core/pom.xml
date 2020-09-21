@@ -68,6 +68,22 @@
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-apibinding</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.unibz.inf.ontop</groupId>
+            <artifactId>ontop-ontology-owlapi</artifactId>
+            <version>4.1.0-beta-1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
