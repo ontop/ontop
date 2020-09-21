@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
 import java.util.stream.Stream;
 
@@ -28,5 +29,8 @@ public interface ValuesNode extends LeafIQTree {
     @Override
     ValuesNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
+
+    @Override
+    ValuesNode applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 
 }

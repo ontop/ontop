@@ -4,20 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.LazyRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -45,7 +41,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
             @Override
             public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children0) {
 
-                Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree);
+                Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree, coreSingletons);
 
                 ImmutableList<Variable> answerVariables = Stream.concat(
                         constructionNode.getSubstitution().getImmutableMap().values().stream()
@@ -85,7 +81,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         currentIndex++;
                 }
 
-                return IQ2CQ.toIQTree(children, rootNode.getOptionalFilterCondition(), iqFactory);
+                return IQ2CQ.toIQTree(children, rootNode.getOptionalFilterCondition(), coreSingletons);
             }
         }));
 
