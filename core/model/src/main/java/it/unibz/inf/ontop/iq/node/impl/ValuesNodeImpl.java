@@ -246,7 +246,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             constructionAndFilterAndValues = substituteConstants(constantSubstitutionFragment, constructionAndFilterAndValues);
         }
         if (!variableSubstitutionFragment.isEmpty()) {
-            constructionAndFilterAndValues = substituteVariables(variableSubstitutionFragment, constructionAndFilterAndValues);
+            constructionAndFilterAndValues = substituteVariables(variableSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
         }
         return buildTreeFromCFV(constructionAndFilterAndValues);
     }
@@ -304,44 +304,53 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 iqFactory.createValuesNode(newVariables, newValues));
     }
 
-    private ConstructionAndFilterAndValues substituteVariables(Var2VarSubstitution variableSubstitutionFragment,
-                                                               ConstructionAndFilterAndValues constructionAndFilterAndValues) {
-        ImmutableList<ImmutableList<Constant>> oldValues = constructionAndFilterAndValues.valuesNode.getValues();
+    private static ConstructionAndFilterAndValues substituteVariables(Var2VarSubstitution variableSubstitutionFragment,
+                                                                      ConstructionAndFilterAndValues constructionAndFilterAndValues,
+                                                                      IntermediateQueryFactory iqFactory) {
+        ValuesNode formerValuesNode = constructionAndFilterAndValues.valuesNode;
+        ImmutableList<Variable> formerOrderedVariables = formerValuesNode.getOrderedVariables();
+        ImmutableList<ImmutableList<Constant>> formerValues = formerValuesNode.getValues();
+        int formerArity = formerOrderedVariables.size();
 
-        ImmutableList<ImmutableTerm> renamedVariables =  constructionAndFilterAndValues.valuesNode.getOrderedVariables().stream()
+        ImmutableList<Variable> substitutedOrderedVariables = formerOrderedVariables.stream()
                 .map(variableSubstitutionFragment::applyToVariable)
                 .collect(ImmutableCollectors.toList());
 
-        if (renamedVariables.equals(constructionAndFilterAndValues.valuesNode.getOrderedVariables()))
+        if (substitutedOrderedVariables.equals(formerOrderedVariables))
             return constructionAndFilterAndValues;
 
-        ImmutableSet<Integer> newVariableIndices = IntStream.range(0, renamedVariables.size())
-                .filter(i -> !renamedVariables.subList(0, i).contains(renamedVariables.get(i)))
-                .boxed()
-                .collect(ImmutableCollectors.toSet());
+        ImmutableList<Integer> firstFoundVariableIndices = substitutedOrderedVariables.stream()
+                .distinct()
+                .map(substitutedOrderedVariables::indexOf)
+                // Ascending order
+                .sorted()
+                .collect(ImmutableCollectors.toList());
 
-        ImmutableList<Variable> newVariables = IntStream.range(0, renamedVariables.size())
-                .filter(newVariableIndices::contains)
-                .boxed()
-                .map(i -> (Variable) renamedVariables.get(i))
+        if (firstFoundVariableIndices.size() == formerArity) {
+            return new ConstructionAndFilterAndValues(constructionAndFilterAndValues.constructionNode,
+                    constructionAndFilterAndValues.filterNode,
+                    iqFactory.createValuesNode(substitutedOrderedVariables, formerValues));
+        }
+
+        ImmutableList<Variable> newOrderedVariables = firstFoundVariableIndices.stream()
+                .map(substitutedOrderedVariables::get)
                 .collect(ImmutableCollectors.toList());
 
         // Stream in Stream in Stream, can be optimized?
-        ImmutableList<ImmutableList<Constant>> newValues = oldValues.stream()
-                .filter(constants -> IntStream.range(0, renamedVariables.size())
-                        .allMatch(i -> IntStream.range(0, oldValues.size())
-                                .allMatch(j -> constants.get(i).equals(constants.get(j)) ||
-                                        !(renamedVariables.get(i).equals(renamedVariables.get(j))))))
-                .map(constants -> IntStream.range(0, constants.size())
-                    .filter(newVariableIndices::contains)
-                    .boxed()
-                    .map(constants::get)
-                    .collect(ImmutableCollectors.toList()))
+        ImmutableList<ImmutableList<Constant>> newValues = formerValues.stream()
+                .filter(tuple -> IntStream.range(0, formerArity)
+                        .allMatch(i -> IntStream.range(0, formerArity)
+                                .filter(j -> j != i)
+                                .allMatch(j -> tuple.get(i).equals(tuple.get(j)) ||
+                                        !(substitutedOrderedVariables.get(i).equals(substitutedOrderedVariables.get(j))))))
+                .map(tuple -> firstFoundVariableIndices.stream()
+                        .map(tuple::get)
+                        .collect(ImmutableCollectors.toList()))
                 .collect(ImmutableCollectors.toList());
 
         return new ConstructionAndFilterAndValues(constructionAndFilterAndValues.constructionNode,
                 constructionAndFilterAndValues.filterNode,
-                iqFactory.createValuesNode(newVariables, newValues));
+                iqFactory.createValuesNode(newOrderedVariables, newValues));
     }
 
     private IQTree buildTreeFromCFV(ConstructionAndFilterAndValues constructionAndFilterAndValues) {
