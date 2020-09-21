@@ -309,6 +309,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
+
+        @Override
+        public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
+            throw new RuntimeException("TODO: implement serialization of VALUES");
+        }
     }
 
 

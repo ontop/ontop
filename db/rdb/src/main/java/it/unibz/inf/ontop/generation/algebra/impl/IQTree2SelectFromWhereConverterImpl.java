@@ -219,6 +219,10 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             return convert(tree, signature);
         }
+        else if (rootNode instanceof ValuesNode) {
+            ValuesNode valuesNode = (ValuesNode) rootNode;
+            return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
+        }
         else
             throw new RuntimeException("TODO: support arbitrary relations");
     }
