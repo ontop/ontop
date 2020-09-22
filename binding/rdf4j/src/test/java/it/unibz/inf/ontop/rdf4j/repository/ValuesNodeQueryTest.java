@@ -25,6 +25,15 @@ public class ValuesNodeQueryTest extends AbstractRDF4JTest {
     public static void after() throws SQLException {
         release();
     }
+
+    @Test
+    public void testOntologyObjectProperty() {
+        int count = runQueryAndCount("SELECT * WHERE {\n" +
+                "\t?s <http://te.st/ValuesNodeTest#teaches> ?o\n" +
+                "}");
+        assertEquals(count, 3);
+    }
+
     @Test
     public void testOntologySpo() {
         int count = runQueryAndCount("SELECT * WHERE {\n" +

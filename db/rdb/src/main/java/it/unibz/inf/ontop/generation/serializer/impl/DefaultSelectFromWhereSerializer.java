@@ -93,7 +93,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return idFactory.createRelationID(null, VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
-        private ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
+        ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
             return variableAliases.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
@@ -107,15 +107,15 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
         }
 
-        private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
-            AttributeAliasFactory aliasFactory = createAtttibuteAliasFactory();
+        ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
+            AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
             return variables.stream()
                     .collect(ImmutableCollectors.toMap(
                             Function.identity(),
                             v -> aliasFactory.createAttributeAlias(v.getName())));
         }
 
-        protected AttributeAliasFactory createAtttibuteAliasFactory() {
+        protected AttributeAliasFactory createAttributeAliasFactory() {
             return new DefaultAttributeAliasFactory(idFactory);
         }
 
@@ -312,7 +312,26 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
-            throw new RuntimeException("TODO: implement serialization of VALUES");
+            ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
+            ImmutableMap<Variable, QuotedID> variableAliases = createVariableAliases(ImmutableSet.copyOf(orderedVariables));
+            // Leaf node
+            ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs = ImmutableMap.of();
+
+            String tuplesSerialized = sqlValuesExpression.getValues().stream()
+                    .map(tuple -> tuple.stream()
+                            .map(constant -> sqlTermSerializer.serialize(constant, childColumnIDs))
+                            .collect(Collectors.joining(",", " (", ")")))
+                    .collect(Collectors.joining(","));
+            RelationID alias = generateFreshViewAlias();
+            String internalColumnNames = orderedVariables.stream()
+                    .map(variableAliases::get)
+                    .map(QuotedID::toString)
+                    .collect(Collectors.joining(",", " (", ")"));
+            String sql = "(VALUES " + tuplesSerialized + ") AS " + alias + internalColumnNames;
+
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = attachRelationAlias(alias, variableAliases);
+
+            return new QuerySerializationImpl(sql, columnIDs);
         }
     }
 
