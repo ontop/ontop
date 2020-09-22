@@ -39,6 +39,6 @@ public class ValuesNodeQueryTest extends AbstractRDF4JTest {
         int count = runQueryAndCount("SELECT * WHERE {\n" +
                 "\t?s ?p ?o\n" +
                 "}");
-        assertEquals(count, 9);
+        assertEquals(count, 12);
     }
 }
