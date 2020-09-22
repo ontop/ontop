@@ -35,7 +35,8 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
     private final DistinctVariableOnlyDataAtom tripleAtom;
     private final DistinctVariableOnlyDataAtom quadAtom;
-    private final RDFAtomPredicate rdfAtomPredicate;
+    private final RDFAtomPredicate tripleAtomPredicate;
+    private final RDFAtomPredicate quadAtomPredicate;
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(CoreSingletons coreSingletons) {
@@ -56,7 +57,8 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable());
 
-        rdfAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
+        tripleAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
+        quadAtomPredicate = (RDFAtomPredicate) quadAtom.getPredicate();
     }
 
     @Override
@@ -65,13 +67,13 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         ImmutableList<MappingAssertion> assertions = facts.stream()
                 .map(fact -> new MappingAssertion(
                                 fact.isClassAssertion()
-                                        ? MappingAssertionIndex.ofClass(rdfAtomPredicate,
+                                        ? MappingAssertionIndex.ofClass(selectAtomPredicate(fact),
                                             Optional.of(fact.getClassOrProperty())
                                                     .filter(c -> c instanceof IRIConstant)
                                                     .map(c -> ((IRIConstant) c).getIRI())
                                                     .orElseThrow(() -> new RuntimeException(
                                                             "TODO: support bnode for classes as mapping assertion index")))
-                                        : MappingAssertionIndex.ofProperty(rdfAtomPredicate, fact.getProperty().getIRI()),
+                                        : MappingAssertionIndex.ofProperty(selectAtomPredicate(fact), fact.getProperty().getIRI()),
                                     createIQ(fact),
                                     new ABoxFactProvenance(fact)))
                 .collect(ImmutableCollectors.toList());
@@ -79,6 +81,12 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         LOGGER.debug("Appended {} assertions as fact rules", facts.size());
 
         return assertions;
+    }
+
+    private RDFAtomPredicate selectAtomPredicate(RDFFact fact) {
+        return fact.getGraph()
+                .map(g -> quadAtomPredicate)
+                .orElse(tripleAtomPredicate);
     }
 
     private IQ createIQ(RDFFact rdfFact) {

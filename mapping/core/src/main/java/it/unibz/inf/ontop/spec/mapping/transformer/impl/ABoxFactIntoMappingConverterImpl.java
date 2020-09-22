@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -46,7 +47,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     private final DBTypeFactory dbTypeFactory;
 
     private final DistinctVariableOnlyDataAtom tripleAtom;
-    private final RDFAtomPredicate rdfAtomPredicate;
+    private final RDFAtomPredicate tripleAtomPredicate;
     // LAZY
     private DistinctVariableOnlyDataAtom quadAtom;
 
@@ -68,34 +69,44 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable(),
                 projectedVariableGenerator.generateNewVariable());
-        rdfAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
+        tripleAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
     }
 
     @Override
     public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts, boolean isOntologyAnnotationQueryingEnabled) {
         // Group facts by class name or property name (for properties != rdf:type)
+        // TODO: make it robust to punning (property vs class)
+        // TODO: separate triples from quads
         ImmutableMap<ObjectConstant, ImmutableList<RDFFact>> dict = facts.stream()
                 .collect(ImmutableCollectors.toMap(RDFFact::getClassOrProperty, ImmutableList::of,
                         (a, b) -> Stream.concat(a.stream(), b.stream()).collect(ImmutableCollectors.toList())));
 
         ImmutableList<MappingAssertion> assertions = dict.entrySet().stream()
                 .map(entry -> new MappingAssertion(
-                                entry.getValue().get(0).isClassAssertion()
-                                    ? MappingAssertionIndex.ofClass(rdfAtomPredicate,
-                                        Optional.of(entry.getKey())
-                                            .filter(c -> c instanceof IRIConstant)
-                                            .map(c -> ((IRIConstant) c).getIRI())
-                                            .orElseThrow(() -> new RuntimeException(
-                                                "TODO: support bnode for classes as mapping assertion index")))
-                                    : MappingAssertionIndex.ofProperty(rdfAtomPredicate, entry.getValue().get(0)
-                                        .getProperty().getIRI()),
-                                createIQ(entry.getValue()),
-                                new ABoxFactProvenance(entry.getValue())))
+                        extractIndex(entry),
+                        createIQ(entry.getValue()),
+                        new ABoxFactProvenance(entry.getValue())))
                 .collect(ImmutableCollectors.toList());
 
         LOGGER.debug("Transformed {} rdfFacts into {} mappingAssertions", facts.size(), assertions.size());
 
         return assertions;
+    }
+
+    /**
+     * TODO: relax the assumption that facts are always triple
+     */
+    protected MappingAssertionIndex extractIndex(Map.Entry<ObjectConstant, ImmutableList<RDFFact>> entry) {
+        return entry.getValue().get(0).isClassAssertion()
+                // TODO: accept quads
+            ? MappingAssertionIndex.ofClass(tripleAtomPredicate,
+                Optional.of(entry.getKey())
+                    .filter(c -> c instanceof IRIConstant)
+                    .map(c -> ((IRIConstant) c).getIRI())
+                    .orElseThrow(() -> new RuntimeException(
+                        "TODO: support bnode for classes as mapping assertion index")))
+            : MappingAssertionIndex.ofProperty(tripleAtomPredicate, entry.getValue().get(0)
+                .getProperty().getIRI());
     }
 
     private IQ createIQ(ImmutableList<RDFFact> rdfFacts) {
