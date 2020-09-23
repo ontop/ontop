@@ -49,9 +49,9 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("INSTR(%s,%s) > 0",
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)));
+        return String.format("(POSITION(%s IN %s) > 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
     }
 
     @Override

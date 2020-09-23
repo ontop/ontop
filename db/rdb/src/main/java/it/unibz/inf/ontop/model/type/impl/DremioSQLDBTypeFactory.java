@@ -26,4 +26,14 @@ public class DremioSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.STRING, VARCHAR_STR);
         return ImmutableMap.copyOf(map);
     }
+
+    @Override
+    public String getDBTrueLexicalValue() {
+        return "true";
+    }
+
+    @Override
+    public String getDBFalseLexicalValue() {
+        return "false";
+    }
 }
