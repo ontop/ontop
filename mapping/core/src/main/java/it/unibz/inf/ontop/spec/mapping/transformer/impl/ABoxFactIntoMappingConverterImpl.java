@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -141,26 +140,42 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
 
     private IQ createClassIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
         if (containsMultipleSubjectTypes(entry)) {
+            LOGGER.debug("This should only be reached if blank nodes are accepted.");
             return createMultiTypedClassIQ(entry);
         }
-        ValuesNode valuesNode = createDBValuesNode(entry);
+
         CustomKey customKey = entry.getKey();
+
+        // We've already excluded multiple types
+        ValuesNode valuesNode = createSingleTypeDBValuesNode(entry);
+        DBTermType subjectDBType = entry.getValue().get(0).getSubject().getType().getClosestDBType(dbTypeFactory);
+        RDFTermTypeConstant subjectRDFTypeConstant = termFactory.getRDFTermTypeConstant(entry.getValue().get(0).getSubject().getType());
 
         ConstructionNode topConstructionNode = customKey.graphOptional.map(
                 graph -> iqFactory.createConstructionNode(
-                        quadAtom.getVariables(), substitutionFactory.getSubstitution(
+                            quadAtom.getVariables(), substitutionFactory.getSubstitution(
                                 quadAtom.getTerm(0),
-                                termFactory.getIRIFunctionalTerm(valuesNode.getOrderedVariables().get(0), false),
+                                    termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                            subjectDBType,
+                                            valuesNode.getOrderedVariables().get(0),
+                                            subjectRDFTypeConstant.getRDFTermType()),
+                                        subjectRDFTypeConstant),
                                 quadAtom.getTerm(1), RDF_TYPE,
                                 quadAtom.getTerm(2), customKey.classOrProperty,
                                 quadAtom.getTerm(3), graph)))
                 .orElseGet(() ->
                         iqFactory.createConstructionNode(
-                                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                                        tripleAtom.getTerm(0),
-                                        termFactory.getIRIFunctionalTerm(valuesNode.getOrderedVariables().get(0), false),
-                                        tripleAtom.getTerm(1), RDF_TYPE,
-                                        tripleAtom.getTerm(2), customKey.classOrProperty)));
+                            tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                                tripleAtom.getTerm(0),
+                                    termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                            subjectDBType,
+                                            valuesNode.getOrderedVariables().get(0),
+                                            subjectRDFTypeConstant.getRDFTermType()),
+                                        subjectRDFTypeConstant),
+                                tripleAtom.getTerm(1), RDF_TYPE,
+                                tripleAtom.getTerm(2), customKey.classOrProperty)));
 
         IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
         return iqFactory.createIQ(tripleAtom, iqTree);
@@ -171,39 +186,52 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
             return createMultiTypedPropertyIQ(entry);
         }
 
-        ValuesNode valuesNode = createDBValuesNode(entry);
         CustomKey customKey = entry.getKey();
 
+        // We've already excluded multiple types
+        ValuesNode valuesNode = createSingleTypeDBValuesNode(entry);
+        DBTermType subjectDBType = entry.getValue().get(0).getSubject().getType().getClosestDBType(dbTypeFactory);
+        RDFTermTypeConstant subjectRDFTypeConstant = termFactory.getRDFTermTypeConstant(entry.getValue().get(0).getSubject().getType());
         DBTermType objectDBType = entry.getValue().get(0).getObject().getType().getClosestDBType(dbTypeFactory);
-        RDFTermTypeConstant objectRDFType = termFactory.getRDFTermTypeConstant(entry.getValue().get(0).getObject().getType());
+        RDFTermTypeConstant objectRDFTypeConstant = termFactory.getRDFTermTypeConstant(entry.getValue().get(0).getObject().getType());
 
         ConstructionNode topConstructionNode = customKey.graphOptional.map(
                 graph -> iqFactory.createConstructionNode(
                         quadAtom.getVariables(), substitutionFactory.getSubstitution(
-                                quadAtom.getTerm(0),
-                                termFactory.getIRIFunctionalTerm(valuesNode.getOrderedVariables().get(0), false),
-                                quadAtom.getTerm(1), customKey.classOrProperty,
-                                quadAtom.getTerm(2),
+                            quadAtom.getTerm(0),
                                 termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversion2RDFLexical(
-                                                objectDBType,
-                                                valuesNode.getOrderedVariables().get(1),
-                                                objectRDFType.getRDFTermType()),
-                                        objectRDFType),
-                                quadAtom.getTerm(3), graph)))
+                                    termFactory.getConversion2RDFLexical(
+                                        subjectDBType,
+                                        valuesNode.getOrderedVariables().get(0),
+                                        subjectRDFTypeConstant.getRDFTermType()),
+                                    subjectRDFTypeConstant),
+                            quadAtom.getTerm(1), customKey.classOrProperty,
+                            quadAtom.getTerm(2),
+                                termFactory.getRDFFunctionalTerm(
+                                    termFactory.getConversion2RDFLexical(
+                                        objectDBType,
+                                        valuesNode.getOrderedVariables().get(1),
+                                        objectRDFTypeConstant.getRDFTermType()),
+                                    objectRDFTypeConstant),
+                            quadAtom.getTerm(3), graph)))
                 .orElseGet(() ->
                         iqFactory.createConstructionNode(
-                                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                                        tripleAtom.getTerm(0),
-                                        termFactory.getIRIFunctionalTerm(valuesNode.getOrderedVariables().get(0), false),
-                                        tripleAtom.getTerm(1), customKey.classOrProperty,
-                                        tripleAtom.getTerm(2),
-                                        termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversion2RDFLexical(
-                                                        objectDBType,
-                                                        valuesNode.getOrderedVariables().get(1),
-                                                        objectRDFType.getRDFTermType()),
-                                                objectRDFType))));
+                        tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                            tripleAtom.getTerm(0),
+                                termFactory.getRDFFunctionalTerm(
+                                    termFactory.getConversion2RDFLexical(
+                                        subjectDBType,
+                                        valuesNode.getOrderedVariables().get(0),
+                                        subjectRDFTypeConstant.getRDFTermType()),
+                                    subjectRDFTypeConstant),
+                            tripleAtom.getTerm(1), customKey.classOrProperty,
+                            tripleAtom.getTerm(2),
+                                termFactory.getRDFFunctionalTerm(
+                                    termFactory.getConversion2RDFLexical(
+                                        objectDBType,
+                                        valuesNode.getOrderedVariables().get(1),
+                                        objectRDFTypeConstant.getRDFTermType()),
+                                    objectRDFTypeConstant))));
 
 
         IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
@@ -218,33 +246,108 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
      */
     private boolean containsMultipleObjectTypes (Entry < CustomKey, ImmutableList < RDFFact >> entry){
         ImmutableList<RDFFact> rdfFacts = entry.getValue();
-        RDFTermType objectRDFTermType = rdfFacts.get(0).getObject().getType();
-        DBTermType objectDBTermType = objectRDFTermType.getClosestDBType(dbTypeFactory);
+        RDFTermType canonicalRDFTermType = rdfFacts.get(0).getObject().getType();
+        DBTermType canonicalDBTermType = canonicalRDFTermType.getClosestDBType(dbTypeFactory);
 
         return rdfFacts.stream()
                 .anyMatch(rdfFact -> !(
-                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory).equals(objectDBTermType) &&
-                                rdfFact.getObject().getType().equals(objectRDFTermType)));
+                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory).equals(canonicalDBTermType) &&
+                        rdfFact.getObject().getType().equals(canonicalRDFTermType)));
     }
 
     /**
-     * Returns true if the given list of RDFFacts contains multiple types of object.
+     * Returns true if the given list of RDFFacts contains multiple types of subject.
      *
      * @param entry, our custom (key, ImList[RDFFact]) entry
      * @return a boolean
      */
     private boolean containsMultipleSubjectTypes (Entry < CustomKey, ImmutableList < RDFFact >> entry){
         ImmutableList<RDFFact> rdfFacts = entry.getValue();
-        RDFTermType subjectRDFTermType = rdfFacts.get(0).getSubject().getType();
-        DBTermType subjectDBTermType = subjectRDFTermType.getClosestDBType(dbTypeFactory);
+        RDFTermType canonicalRDFTermType = rdfFacts.get(0).getSubject().getType();
+        DBTermType canonicalDBTermType = canonicalRDFTermType.getClosestDBType(dbTypeFactory);
 
         return rdfFacts.stream()
                 .anyMatch(rdfFact -> !(
-                        rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory).equals(subjectDBTermType) &&
-                                rdfFact.getSubject().getType().equals(subjectRDFTermType)));
+                        rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory).equals(canonicalDBTermType) &&
+                        rdfFact.getSubject().getType().equals(canonicalRDFTermType)));
     }
 
-    private ValuesNode createDBValuesNode (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+    private IQ createMultiTypedClassIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+        ValuesNode valuesNode = createMultiTypedDBValuesNode(entry);
+        CustomKey customKey = entry.getKey();
+
+        ConstructionNode topConstructionNode = customKey.graphOptional.map(
+                graph -> iqFactory.createConstructionNode(
+                            quadAtom.getVariables(), substitutionFactory.getSubstitution(
+                                quadAtom.getTerm(0),
+                                    termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                            valuesNode.getOrderedVariables().get(0),
+                                            typeFactory.getXsdStringDatatype()),    // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                        valuesNode.getOrderedVariables().get(1)),
+                                quadAtom.getTerm(1), RDF_TYPE,
+                                quadAtom.getTerm(2), customKey.classOrProperty,
+                                quadAtom.getTerm(3), graph)))
+                .orElseGet(() ->
+                        iqFactory.createConstructionNode(
+                            tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                                tripleAtom.getTerm(0),
+                                    termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                            valuesNode.getOrderedVariables().get(0),
+                                            typeFactory.getXsdStringDatatype()),    // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                        valuesNode.getOrderedVariables().get(1)),
+                                tripleAtom.getTerm(1), RDF_TYPE,
+                                tripleAtom.getTerm(2), customKey.classOrProperty)));
+
+        IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
+        return iqFactory.createIQ(tripleAtom, iqTree);
+    }
+
+
+
+    private IQ createMultiTypedPropertyIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+        ValuesNode valuesNode = createMultiTypedDBValuesNode(entry);
+        CustomKey customKey = entry.getKey();
+        ConstructionNode topConstructionNode = customKey.graphOptional.map(
+                graph -> iqFactory.createConstructionNode(
+                        quadAtom.getVariables(), substitutionFactory.getSubstitution(
+                                quadAtom.getTerm(0),
+                                termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                                valuesNode.getOrderedVariables().get(0),
+                                                typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                        valuesNode.getOrderedVariables().get(2)),
+                                quadAtom.getTerm(1), customKey.classOrProperty,
+                                quadAtom.getTerm(2),
+                                termFactory.getRDFFunctionalTerm(
+                                        termFactory.getConversion2RDFLexical(
+                                                valuesNode.getOrderedVariables().get(1),
+                                                typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                        valuesNode.getOrderedVariables().get(3)),
+                                quadAtom.getTerm(3), graph)))
+                .orElseGet(() ->
+                        iqFactory.createConstructionNode(
+                                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                                        tripleAtom.getTerm(0),
+                                        termFactory.getRDFFunctionalTerm(
+                                                termFactory.getConversion2RDFLexical(
+                                                        valuesNode.getOrderedVariables().get(0),
+                                                        typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                                valuesNode.getOrderedVariables().get(2)),
+                                        tripleAtom.getTerm(1), customKey.classOrProperty,
+                                        tripleAtom.getTerm(2),
+                                        termFactory.getRDFFunctionalTerm(
+                                                termFactory.getConversion2RDFLexical(
+                                                        valuesNode.getOrderedVariables().get(1),
+                                                        typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                                valuesNode.getOrderedVariables().get(3)))));
+
+        IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
+        return iqFactory.createIQ(tripleAtom, iqTree);
+    }
+
+    private ValuesNode createSingleTypeDBValuesNode(Entry < CustomKey, ImmutableList < RDFFact >> entry){
         ImmutableList<RDFFact> rdfFacts = entry.getValue();
         // This method is used only in case of a single type existing so this is okay here
         DBTermType subjectDBTermType = rdfFacts.get(0).getSubject().getType().getClosestDBType(dbTypeFactory);
@@ -305,89 +408,6 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                                 termFactory.getRDFTermTypeConstant(rdfFact.getSubject().getType()),
                                 termFactory.getRDFTermTypeConstant(rdfFact.getObject().getType())))
                         .collect(ImmutableCollectors.toList()));
-    }
-
-    private IQ createMultiTypedClassIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
-        throw new RuntimeException("TODO: Implement multi-type class IQ");
-    /*ValuesNode valuesNode = createMultiTypedDBValuesNode(entry);
-    CustomKey customKey = entry.getKey();
-    ConstructionNode topConstructionNode = customKey.graphOptional.map(
-            graph -> iqFactory.createConstructionNode(
-                    quadAtom.getVariables(), substitutionFactory.getSubstitution(
-                            quadAtom.getTerm(0),
-                            termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversion2RDFLexical(
-                                            valuesNode.getOrderedVariables().get(0),
-                                            typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                    valuesNode.getOrderedVariables().get(2)),
-                            quadAtom.getTerm(1), customKey.classOrProperty,
-                            quadAtom.getTerm(2),
-                            termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversion2RDFLexical(
-                                            valuesNode.getOrderedVariables().get(1),
-                                            typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                    valuesNode.getOrderedVariables().get(3)),
-                            quadAtom.getTerm(3), graph)))
-            .orElseGet(() ->
-                    iqFactory.createConstructionNode(
-                            tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                                    tripleAtom.getTerm(0),
-                                    termFactory.getRDFFunctionalTerm(
-                                            termFactory.getConversion2RDFLexical(
-                                                    valuesNode.getOrderedVariables().get(0),
-                                                    typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                            valuesNode.getOrderedVariables().get(2)),
-                                    tripleAtom.getTerm(1), customKey.classOrProperty,
-                                    tripleAtom.getTerm(2),
-                                    termFactory.getRDFFunctionalTerm(
-                                            termFactory.getConversion2RDFLexical(
-                                                    valuesNode.getOrderedVariables().get(1),
-                                                    typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                            valuesNode.getOrderedVariables().get(3)))));
-
-    IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
-    return iqFactory.createIQ(tripleAtom, iqTree);*/
-    }
-
-    private IQ createMultiTypedPropertyIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
-        ValuesNode valuesNode = createMultiTypedDBValuesNode(entry);
-        CustomKey customKey = entry.getKey();
-        ConstructionNode topConstructionNode = customKey.graphOptional.map(
-                graph -> iqFactory.createConstructionNode(
-                        quadAtom.getVariables(), substitutionFactory.getSubstitution(
-                                quadAtom.getTerm(0),
-                                termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversion2RDFLexical(
-                                                valuesNode.getOrderedVariables().get(0),
-                                                typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                        valuesNode.getOrderedVariables().get(2)),
-                                quadAtom.getTerm(1), customKey.classOrProperty,
-                                quadAtom.getTerm(2),
-                                termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversion2RDFLexical(
-                                                valuesNode.getOrderedVariables().get(1),
-                                                typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                        valuesNode.getOrderedVariables().get(3)),
-                                quadAtom.getTerm(3), graph)))
-                .orElseGet(() ->
-                        iqFactory.createConstructionNode(
-                                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
-                                        tripleAtom.getTerm(0),
-                                        termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversion2RDFLexical(
-                                                        valuesNode.getOrderedVariables().get(0),
-                                                        typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                                valuesNode.getOrderedVariables().get(2)),
-                                        tripleAtom.getTerm(1), customKey.classOrProperty,
-                                        tripleAtom.getTerm(2),
-                                        termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversion2RDFLexical(
-                                                        valuesNode.getOrderedVariables().get(1),
-                                                        typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                                valuesNode.getOrderedVariables().get(3)))));
-
-        IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
-        return iqFactory.createIQ(tripleAtom, iqTree);
     }
 
     private static class ABoxFactProvenance implements PPMappingAssertionProvenance {
