@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.ontology.*;
 
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import org.junit.Ignore;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
