@@ -12,7 +12,10 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import java.util.stream.Stream;
 
 /**
- * TODO: explain
+ * This node is analogous to the VALUES statement supported by many relational databases.
+ * See for example the documentation for PostgreSQL: https://www.postgresql.org/docs/current/queries-values.html
+ *
+ * @author Lukas Sundqvist
  */
 public interface ValuesNode extends LeafIQTree {
 

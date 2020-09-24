@@ -67,7 +67,7 @@ public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
                     : tree;
         }
         // Note, we assume here that every IQTree is either a LeafIQTree, NaryOperatorNode, or UnaryOperatorNode
-        return (tree instanceof NaryOperatorNode)
+        return (tree.getRootNode() instanceof NaryOperatorNode)
                 ? iqFactory.createNaryIQTree(
                     (NaryOperatorNode) tree.getRootNode(),
                     tree.getChildren().stream()
