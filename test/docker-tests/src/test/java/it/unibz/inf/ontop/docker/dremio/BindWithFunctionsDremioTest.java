@@ -1,6 +1,5 @@
-package it.unibz.inf.ontop.docker.dreamio;
+package it.unibz.inf.ontop.docker.dremio;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;

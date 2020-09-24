@@ -1,0 +1,4 @@
+university.professors:prof_id
+university.course:course_id
+university.teaching:course_id:university.course:course_id
+university.teaching:prof_id:university.professors:prof_id

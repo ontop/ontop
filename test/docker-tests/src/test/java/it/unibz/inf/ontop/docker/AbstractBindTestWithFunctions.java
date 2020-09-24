@@ -1393,8 +1393,6 @@ public abstract class AbstractBindTestWithFunctions {
                     final OWLBindingSet bindingSet = rs.next();
                     OWLObject ind1 = bindingSet.getOWLObject("w");
 
-                    // log.debug(ind1.toString());
-
                     if (ind1 != null) {
                         String value = ToStringRenderer.getInstance().getRendering(ind1);
                         returnedValues.add(value);

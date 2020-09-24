@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -36,18 +37,42 @@ public abstract class AbstractVirtualModeTest {
     protected abstract OntopOWLStatement createStatement() throws OWLException;
 
     protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+        return createReasoner(owlFile,obdaFile, propertiesFile,Optional.empty());
+    }
+
+    protected static OntopOWLReasoner createReasonerWithConstraints(String owlFile, String obdaFile, String propertiesFile, String implicitConstraintsFile) throws OWLOntologyCreationException {
+        return createReasoner(owlFile,obdaFile,propertiesFile,Optional.of(implicitConstraintsFile));
+    }
+
+    private static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile) throws OWLOntologyCreationException {
         owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
         obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
         propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, optionalImplicitConstraintsFile);
+        return factory.createReasoner(config);
+    }
+
+    private static OntopSQLOWLAPIConfiguration createConfig(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile) {
+
+        if(optionalImplicitConstraintsFile.isPresent()) {
+            return OntopSQLOWLAPIConfiguration.defaultBuilder()
+                    .nativeOntopMappingFile(obdaFile)
+                    .ontologyFile(owlFile)
+                    .propertyFile(propertiesFile)
+                    .basicImplicitConstraintFile(
+                            AbstractBindTestWithFunctions.class.getResource(optionalImplicitConstraintsFile.get()).toString())
+                    .enableTestMode()
+                    .build();
+        }
+
+        return OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)
                 .enableTestMode()
                 .build();
-        return factory.createReasoner(config);
     }
 
     protected static OntopOWLReasoner createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) throws OWLOntologyCreationException {
@@ -205,14 +230,23 @@ public abstract class AbstractVirtualModeTest {
         }
     }
 
-    protected String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
-        return checkReturnedValuesAndMayReturnSql(query, true, expectedValues);
-    }
-    protected void checkReturnedValues(List<String> expectedValues, String query) throws Exception {
-        checkReturnedValuesAndMayReturnSql(query, false, expectedValues);
+    protected String checkReturnedValuesAndOrderReturnSql(String query, List<String> expectedValues) throws Exception {
+        return checkReturnedValues(query, true, true, expectedValues);
     }
 
-    private String checkReturnedValuesAndMayReturnSql(String query, boolean returnSQL, List<String> expectedValues)
+    protected String checkReturnedValuesUnorderedReturnSql(String query, List<String> expectedValues) throws Exception {
+        return checkReturnedValues(query, false, true, expectedValues);
+    }
+
+    protected void checkReturnedValuesAndOrder(List<String> expectedValues, String query) throws Exception {
+        checkReturnedValues(query, true, false, expectedValues);
+    }
+
+    protected void checkReturnedValuesUnordered(List<String> expectedValues, String query) throws Exception {
+        checkReturnedValues(query, false, false, expectedValues);
+    }
+
+    private String checkReturnedValues(String query, boolean sameOrder, boolean returnSQL,  List<String> expectedValues)
             throws Exception {
 
         try (OntopOWLStatement st = createStatement()) {
@@ -240,6 +274,11 @@ public abstract class AbstractVirtualModeTest {
                         i++;
                     }
                 }
+            }
+            if(!sameOrder){
+                expectedValues = Lists.newArrayList(expectedValues);
+                Collections.sort(expectedValues);
+                Collections.sort(returnedValues);
             }
             assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),expectedValues, returnedValues);
 //        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
