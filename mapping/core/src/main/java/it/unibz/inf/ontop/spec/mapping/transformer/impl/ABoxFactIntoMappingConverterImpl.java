@@ -53,6 +53,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     private final RDFAtomPredicate quadAtomPredicate;
 
     private final IRIConstant RDF_TYPE;
+    private final RDFTermType RDFTERMTYPE_TEXT;
 
     @Inject
     protected ABoxFactIntoMappingConverterImpl(TermFactory termFactory, IntermediateQueryFactory iqFactory,
@@ -66,6 +67,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
 
         RDF_TYPE = termFactory.getConstantIRI(RDF.TYPE);
+        RDFTERMTYPE_TEXT = typeFactory.getXsdStringDatatype();
 
         projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
 
@@ -283,7 +285,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                                     termFactory.getRDFFunctionalTerm(
                                         termFactory.getConversion2RDFLexical(
                                             valuesNode.getOrderedVariables().get(0),
-                                            typeFactory.getXsdStringDatatype()),    // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                            RDFTERMTYPE_TEXT),
                                         valuesNode.getOrderedVariables().get(1)),
                                 quadAtom.getTerm(1), RDF_TYPE,
                                 quadAtom.getTerm(2), customKey.classOrProperty,
@@ -295,8 +297,8 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                                     termFactory.getRDFFunctionalTerm(
                                         termFactory.getConversion2RDFLexical(
                                             valuesNode.getOrderedVariables().get(0),
-                                            typeFactory.getXsdStringDatatype()),    // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
-                                        valuesNode.getOrderedVariables().get(1)),
+                                                RDFTERMTYPE_TEXT),
+                                            valuesNode.getOrderedVariables().get(1)),
                                 tripleAtom.getTerm(1), RDF_TYPE,
                                 tripleAtom.getTerm(2), customKey.classOrProperty)));
 
@@ -316,14 +318,14 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                                 termFactory.getRDFFunctionalTerm(
                                         termFactory.getConversion2RDFLexical(
                                                 valuesNode.getOrderedVariables().get(0),
-                                                typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                                RDFTERMTYPE_TEXT),
                                         valuesNode.getOrderedVariables().get(2)),
                                 quadAtom.getTerm(1), customKey.classOrProperty,
                                 quadAtom.getTerm(2),
                                 termFactory.getRDFFunctionalTerm(
                                         termFactory.getConversion2RDFLexical(
                                                 valuesNode.getOrderedVariables().get(1),
-                                                typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                                RDFTERMTYPE_TEXT),
                                         valuesNode.getOrderedVariables().get(3)),
                                 quadAtom.getTerm(3), graph)))
                 .orElseGet(() ->
@@ -333,14 +335,14 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
                                         termFactory.getRDFFunctionalTerm(
                                                 termFactory.getConversion2RDFLexical(
                                                         valuesNode.getOrderedVariables().get(0),
-                                                        typeFactory.getXsdStringDatatype()),// TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                                        RDFTERMTYPE_TEXT),
                                                 valuesNode.getOrderedVariables().get(2)),
                                         tripleAtom.getTerm(1), customKey.classOrProperty,
                                         tripleAtom.getTerm(2),
                                         termFactory.getRDFFunctionalTerm(
                                                 termFactory.getConversion2RDFLexical(
                                                         valuesNode.getOrderedVariables().get(1),
-                                                        typeFactory.getXsdStringDatatype()), // TODO: This is at the moment just text, it works but seems very hacky, unclear how to make this general
+                                                        RDFTERMTYPE_TEXT),
                                                 valuesNode.getOrderedVariables().get(3)))));
 
         IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
