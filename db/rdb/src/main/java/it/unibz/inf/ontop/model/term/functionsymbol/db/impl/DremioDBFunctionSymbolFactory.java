@@ -36,17 +36,6 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
 
     @Override
-    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
-        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
-                (terms, termConverter, termFactory) -> String.format(
-                        "GROUP_CONCAT(%s%s SEPARATOR %s)",
-                        isDistinct ? "DISTINCT " : "",
-                        termConverter.apply(terms.get(0)),
-                        termConverter.apply(terms.get(1))
-                ));
-    }
-
-    @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(POSITION(%s IN %s) > 0)",
@@ -65,7 +54,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         }
 
     /**
-     * Dremio has a SPLIT_PART(string, pattern, index), but this function would fail for several occurrence of "pattern" in "string"
+     * Dremio has a SPLIT_PART(string, pattern, index), but this function would fail for multiple occurrence of "pattern" in "string"
      */
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
@@ -101,14 +90,6 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new NullRejectingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
-    /**
-     * Made Implicit
-     */
-    protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
-                                                                                        DBTermType targetType) {
-        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
-    }
-
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(TO_CHAR(%s, 'YYYY-MM-DD\"T\"HH:MI:SSTZO'), 'UTCO', '+00:00')",
@@ -122,33 +103,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return new DBBooleanFunctionSymbolWithSerializerImpl("REGEXP_MATCHES_3",
-                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootDBType), dbBooleanType, false,
-                this::serializeDBRegexpMatches3);
-    }
-
-    protected String serializeDBRegexpMatches3(ImmutableList<? extends ImmutableTerm> terms,
-                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String string = termConverter.apply(terms.get(0));
-        String pattern = termConverter.apply(terms.get(1));
-        ImmutableTerm flagTerm = terms.get(2);
-        if (flagTerm instanceof DBConstant) {
-            String flags = ((DBConstant) flagTerm).getValue();
-            switch (flags) {
-                // Case sensitive
-                case "":
-                    return String.format("(%s REGEXP BINARY %s)", string, pattern);
-                // Case insensitive
-                case "i":
-                    // TODO: is it robust to collation?
-                    return String.format("(%s REGEXP %s)", string, pattern);
-                default:
-                    break;
-            }
-        }
-
-        return getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3)
-                .getNativeDBString(terms, termConverter, termFactory);
+        throw new UnsupportedOperationException("Regex match parameters: "+NOT_YET_SUPPORTED_MSG);
     }
 
     @Override
