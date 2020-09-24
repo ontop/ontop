@@ -22,25 +22,21 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.IntStream;
 
+/**
+ * Many databases do not support VALUES, they use this normalizer and replace ValuesNodes
+ * with a union of Construction/True pairs.
+ *
+ * @author Lukas Sundqvist
+ */
 public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final QuotedIDFactory quotedIDFactory;
     private final SubstitutionFactory substitutionFactory;
 
-    private final DBTermType stringDBType;
-
-    private int tableNumber = 0;
-
     @Inject
-    protected  ConvertValuesToUnionNormalizer(IntermediateQueryFactory iqFactory, QuotedIDFactory quotedIDFactory,
-                                              TypeFactory typeFactory, SubstitutionFactory substitutionFactory) {
+    protected  ConvertValuesToUnionNormalizer(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
-        this.quotedIDFactory = quotedIDFactory;
         this.substitutionFactory = substitutionFactory;
-
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        stringDBType = dbTypeFactory.getDBStringType();
     }
 
 
@@ -70,7 +66,7 @@ public class ConvertValuesToUnionNormalizer implements DialectExtraNormalizer {
                     ? convertToUnion((ValuesNode) tree)
                     : tree;
         }
-        // Note, I assume here that every IQTree is either a LeafIQTree, NaryOperatorNode, or UnaryOperatorNode
+        // Note, we assume here that every IQTree is either a LeafIQTree, NaryOperatorNode, or UnaryOperatorNode
         return (tree instanceof NaryOperatorNode)
                 ? iqFactory.createNaryIQTree(
                     (NaryOperatorNode) tree.getRootNode(),
