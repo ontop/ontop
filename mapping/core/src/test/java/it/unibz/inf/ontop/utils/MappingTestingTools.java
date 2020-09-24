@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
@@ -56,8 +55,6 @@ public class MappingTestingTools {
     public static final IQConverter IQ_CONVERTER;
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
-
-    public static final OWLAPITranslatorOWL2QL OWLAPI_TRANSLATOR;
 
     public static final DatabaseRelationDefinition TABLE1_AR2;
     public static final DatabaseRelationDefinition TABLE2_AR2;
@@ -98,8 +95,6 @@ public class MappingTestingTools {
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
-
-        OWLAPI_TRANSLATOR = injector.getInstance(OWLAPITranslatorOWL2QL.class);
 
         OfflineMetadataProviderBuilder2 builder = createMetadataProviderBuilder();
         TABLE1_AR2 = builder.createRelationPredicate(1, 2);

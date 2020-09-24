@@ -58,7 +58,7 @@ public class MappingSaturationTest {
         OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY, TERM_FACTORY);
         ObjectPropertyExpression givesLecture = builder.declareObjectProperty(PROP_GIVES_LECTURE);
         ObjectPropertyExpression teaches = builder.declareObjectProperty(PROP_TEACHES);
-        ObjectPropertyExpression givesLab =builder.declareObjectProperty(PROP_GIVES_LAB);
+        ObjectPropertyExpression givesLab = builder.declareObjectProperty(PROP_GIVES_LAB);
         ObjectPropertyExpression isTaughtBy = builder.declareObjectProperty(PROP_IS_TAUGHT_BY);
         builder.addSubPropertyOfAxiom(givesLab, teaches);
         builder.addSubPropertyOfAxiom(givesLecture, teaches);

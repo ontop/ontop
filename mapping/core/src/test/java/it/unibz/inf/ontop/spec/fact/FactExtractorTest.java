@@ -3,20 +3,12 @@ package it.unibz.inf.ontop.spec.fact;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 
-import it.unibz.inf.ontop.spec.ontology.RDFFact;
-
-import it.unibz.inf.ontop.spec.ontology.impl.RDFFactImpl;
-import org.junit.Before;
-import org.junit.Ignore;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
@@ -24,23 +16,60 @@ import static org.junit.Assert.assertTrue;
 
 public class FactExtractorTest {
 
-    private static final String ONTOLOGY_FILE = "src/test/resources/factMarriage/marriage.ttl";
-    private ImmutableSet<RDFFact> facts;
+    private static ImmutableSet<RDFFact> facts;
 
-    private static final IRIConstant BEN = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Ben");
-    private static final IRIConstant JOHN = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#John");
-    private static final IRIConstant JANE = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Jane");
-    private static final IRIConstant A = TERM_FACTORY.getConstantIRI(RDF.TYPE);
-    private static final IRIConstant SPOUSE = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Spouse");
-    private static final IRIConstant PERSON = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Person");
-    private static final IRIConstant MUSICIAN = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Musician");
+    private static final IRIConstant BEN, JOHN, JANE, HAS_SPOUSE, PLAYS_INSTRUMENT, A;
+    private static final IRIConstant SPOUSE, HUSBAND, WIFE, PERSON, MUSICIAN;
+
+    static {
+        BEN = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Ben");
+        JOHN = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#John");
+        JANE = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Jane");
+        HAS_SPOUSE = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#hasSpouse");
+        PLAYS_INSTRUMENT = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#playsInstrument");
+        A = TERM_FACTORY.getConstantIRI(RDF.TYPE);
+        SPOUSE = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Spouse");
+        HUSBAND = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Husband");
+        WIFE = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Wife");
+        PERSON = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Person");
+        MUSICIAN = TERM_FACTORY.getConstantIRI("http://example.org/marriage/voc#Musician");
+    }
+    /**
+     * This setUp method creates the marriage ontology and applies the fact extractor.
+     *
+     */
+    @BeforeClass
+    public static void setUp() throws InconsistentOntologyException {
+        OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY, TERM_FACTORY);
+        OClass spouse = builder.declareClass(SPOUSE.getIRI());
+        OClass husband = builder.declareClass(HUSBAND.getIRI());
+        OClass wife = builder.declareClass(WIFE.getIRI());
+        OClass person = builder.declareClass(PERSON.getIRI());
+        OClass musician = builder.declareClass(MUSICIAN.getIRI());
+
+        ObjectPropertyExpression hasSpouse = builder.declareObjectProperty(HAS_SPOUSE.getIRI());
+        DataPropertyExpression playsInstrument = builder.declareDataProperty(PLAYS_INSTRUMENT.getIRI());
+
+        builder.addSubClassOfAxiom(spouse, person);
+        builder.addSubClassOfAxiom(husband, spouse);
+        builder.addSubClassOfAxiom(wife, spouse);
 
 
-    @Before
-    public void setUp() throws OWLOntologyCreationException {
-        OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-        OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(ONTOLOGY_FILE));
-        Ontology ontology = OWLAPI_TRANSLATOR.translateAndClassify(owl);
+        // Test 1
+        builder.addClassAssertion(husband, BEN);
+        // Test 2
+        // TODO: Add :hasSpouse range/domain :Spouse
+        builder.addObjectPropertyAssertion(hasSpouse, JOHN, JANE);
+
+        // Test 3
+        // TODO: Add :playsInstrument domain :Musician
+        builder.addDataPropertyAssertion(
+                playsInstrument,
+                JOHN,
+                TERM_FACTORY.getRDFLiteralConstant("Violin", TYPE_FACTORY.getXsdStringDatatype()));
+
+
+        Ontology ontology = builder.build();
         facts = FACT_EXTRACTOR.extractAndSelect(Optional.of(ontology));
         System.out.print("Facts: ");
         System.out.println(facts);
@@ -57,7 +86,7 @@ public class FactExtractorTest {
     @Ignore
     @Test
     public void subclassOf() {
-        assertTrue(facts.contains(RDFFactImpl.createTripleFact(BEN, A, SPOUSE)) &&
+        assertTrue(facts.contains(RDFFact.createTripleFact(BEN, A, SPOUSE)) &&
                 facts.contains(RDFFact.createTripleFact(BEN, A, PERSON)));
     }
 
