@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.dbschema.impl.ImplicitDBConstraintsProviderFactoryImpl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -49,36 +51,73 @@ public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
     }
 
     @Override
-    protected ImmutableList<String> getExpectedValuesAvgStudents1() {
-        return ImmutableList.of("11.2");
-    }
-
-    @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents2() {
         return ImmutableList.of("10.333333333333334","12.0", "13.0");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents3() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "10.3333333333333333333", "12.0000000000000000000",
-                "13.0000000000000000000");
+        return ImmutableList.of("0", "0", "0", "0", "0", "10.333333333333334", "12.0",
+                "13.0");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesDuration1() {
-        return ImmutableList.of("0", "0", "0", "0", "0", "18.000", "20.000", "84.500");
+        return ImmutableList.of("0", "0", "0", "0", "0", "18.000000", "20.000000", "84.500000");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("15.5", "16.0", "19.333333333333332");
+        return ImmutableList.of("15.5", "16.0", "19.25");
     }
 
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
-        return ImmutableList.of("31.000", "32.000", "115.500");
+        return ImmutableList.of("31", "32", "115.5");
     }
 
+    /**
+     * GROUP_CONCAT or LIST_AGG not (yet ?) supported by Dremio
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat1() throws Exception {
+        super.testGroupConcat1();
+    }
 
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat2() throws Exception {
+        super.testGroupConcat2();
+    }
 
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat3() throws Exception {
+        super.testGroupConcat3();
+    }
+
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat4() throws Exception {
+        super.testGroupConcat4();
+    }
+
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat5() throws Exception {
+        super.testGroupConcat5();
+    }
+
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat6() throws Exception {
+        super.testGroupConcat6();
+    }
 }

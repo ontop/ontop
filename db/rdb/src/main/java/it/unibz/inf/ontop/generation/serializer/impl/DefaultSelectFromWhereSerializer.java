@@ -108,14 +108,14 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
-            AttributeAliasFactory aliasFactory = createAtttibuteAliasFactory();
+            AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
             return variables.stream()
                     .collect(ImmutableCollectors.toMap(
                             Function.identity(),
                             v -> aliasFactory.createAttributeAlias(v.getName())));
         }
 
-        protected AttributeAliasFactory createAtttibuteAliasFactory() {
+        protected AttributeAliasFactory createAttributeAliasFactory() {
             return new DefaultAttributeAliasFactory(idFactory);
         }
 

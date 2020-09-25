@@ -3,13 +3,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -19,7 +17,7 @@ import java.util.function.Function;
 
 public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
-    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Dremio";
+    private static final String NOT_YET_SUPPORTED_MSG = "Not supported by Dremio yet";
 
     @Inject
     protected DremioDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -28,12 +26,8 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDremioRegularFunctionTable(
             TypeFactory typeFactory) {
-
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         return createDefaultRegularFunctionTable(typeFactory);
     }
-
-    private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
 
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
@@ -126,4 +120,11 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         throw new UnsupportedOperationException("SHA512: " + NOT_YET_SUPPORTED_MSG);
     }
 
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (a,b,c) -> String.format(
+                        "GROUP_CONCAT or LIST_AGG "+ NOT_YET_SUPPORTED_MSG
+                ));
+    }
 }
