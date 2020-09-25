@@ -4,6 +4,7 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.restrictions.RequiredOnlyIf;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.endpoint.OntopEndpointApplication;
@@ -36,6 +37,23 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
             description = "development mode")
     private boolean dev = false;
 
+    @Option(type = OptionType.COMMAND, name = {"--predefined-config"}, title = "predefined query JSON config file",
+            description = "predefined query config file")
+    @RequiredOnlyIf(names={"--predefined-queries"})
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String predefinedConfig;
+
+    @Option(type = OptionType.COMMAND, name = {"--predefined-queries"}, title = "predefined query TOML file",
+            description = "predefined SPARQL queries file")
+    @RequiredOnlyIf(names={"--predefined-config"})
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String predefinedQueries;
+
+    @Option(type = OptionType.COMMAND, name = {"--contexts"}, title = "JSON-LD context file for predefined queries",
+            description = "File containing JSON-LD contexts for predefined queries")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String contexts;
+
     @Override
     public void run() {
 
@@ -60,6 +78,15 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         if (this.portalFile != null)
             argList.add("--portal=" + this.portalFile);
+
+        if (this.predefinedConfig != null)
+            argList.add("--predefined-config=" + this.predefinedConfig);
+
+        if (this.predefinedQueries != null)
+            argList.add("--predefined-queries=" + this.predefinedQueries);
+
+        if (this.contexts != null)
+            argList.add("--contexts=" + this.contexts);
 
         String[] args = new String[argList.size()];
         argList.toArray(args);
