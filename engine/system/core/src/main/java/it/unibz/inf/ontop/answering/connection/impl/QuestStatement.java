@@ -127,16 +127,10 @@ public abstract class QuestStatement implements OntopStatement {
 		}
 	}
 
-	protected abstract TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException;
-
 	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException {
 		return executeSelectQuery(executableQuery, queryLogger);
 	}
-
-	protected abstract BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException;
 
 	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException {
@@ -151,10 +145,8 @@ public abstract class QuestStatement implements OntopStatement {
 		return executeGraphQuery(constructQuery, executableQuery, true, queryLogger);
 	}
 
-	/**
-	 * TODO: describe
-	 */
-	private SimpleGraphResultSet executeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
+	@Override
+	public SimpleGraphResultSet executeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
 		return executeGraphQuery(constructQuery, executableQuery, false, queryLogger);
 	}

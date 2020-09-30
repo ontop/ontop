@@ -161,7 +161,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
+    public BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
@@ -179,7 +179,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
+    public TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
