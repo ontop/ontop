@@ -198,9 +198,9 @@ public class SparqlQueryController {
         selectQuery.evaluate(writer);
 
     }
-    private void evaluateGraphQuery(GraphQuery graphQuery, RDFWriter turtleWriter, HttpServletResponse response) {
+    private void evaluateGraphQuery(GraphQuery graphQuery, RDFWriter writer, HttpServletResponse response) {
         addCacheHeaders(response);
-        graphQuery.evaluate(turtleWriter);
+        graphQuery.evaluate(writer);
     }
 
     /**
