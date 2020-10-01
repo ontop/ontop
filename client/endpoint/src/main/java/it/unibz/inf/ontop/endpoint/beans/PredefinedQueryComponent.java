@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.moandjiezana.toml.Toml;
+import it.unibz.inf.ontop.rdf4j.predefined.OntopRDF4JPredefinedQueryEngine;
+import it.unibz.inf.ontop.rdf4j.predefined.impl.FakeOntopRDF4JPredefinedQueryEngine;
+import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -18,9 +21,15 @@ import java.util.Optional;
 public class PredefinedQueryComponent {
 
     @Bean
-    private PredefinedQueries setupPredefinedQuery(@Value("${predefined-config:#{null}}") String configFile,
-                                          @Value("${predefined-queries:#{null}}") String queryFile,
-                                          @Value("${contexts:#{null}}") String contextFile) throws IOException {
+    private OntopRDF4JPredefinedQueryEngine setupPredefinedQueryEngine(@Value("${predefined-config:#{null}}") String configFile,
+                                                                       @Value("${predefined-queries:#{null}}") String queryFile,
+                                                                       @Value("${contexts:#{null}}") String contextFile,
+                                                                       OntopVirtualRepository repository) throws IOException {
+        PredefinedQueries predefinedQueries = extractPredefinedQueries(configFile, queryFile, contextFile);
+        return new FakeOntopRDF4JPredefinedQueryEngine();
+    }
+
+    private PredefinedQueries extractPredefinedQueries(String configFile, String queryFile, String contextFile) throws IOException {
         if (configFile != null) {
             if (queryFile == null)
                 throw new IllegalArgumentException("predefined-queries is expected when predefined-config is provided");

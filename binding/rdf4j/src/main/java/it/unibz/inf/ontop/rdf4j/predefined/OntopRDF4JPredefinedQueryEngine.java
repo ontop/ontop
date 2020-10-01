@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.predefined;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import org.eclipse.rdf4j.query.GraphQueryResult;
@@ -15,8 +16,13 @@ import java.util.function.Consumer;
  */
 public interface OntopRDF4JPredefinedQueryEngine {
 
-    void evaluate(String queryId, String acceptHeader,
+    /**
+     *
+     * acceptMediaTypes are expected to be sorted by decreasing importance and having no quality parameter
+     */
+    void evaluate(String queryId,
                   ImmutableMap<String, String> bindings,
+                  ImmutableList<String> acceptMediaTypes,
                   ImmutableMultimap<String, String> httpHeaders,
                   Consumer<Integer> httpStatusSetter,
                   BiConsumer<String, String> httpHeaderSetter,
