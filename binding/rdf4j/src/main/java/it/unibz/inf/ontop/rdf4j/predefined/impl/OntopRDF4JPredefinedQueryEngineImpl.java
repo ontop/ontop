@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.rdf4j.predefined.OntopRDF4JPredefinedQueryEngine;
+import it.unibz.inf.ontop.rdf4j.predefined.PredefinedConfig;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.apache.http.protocol.HTTP;
 import org.eclipse.rdf4j.common.lang.FileFormat;
@@ -24,7 +25,9 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
     private final OntopVirtualRepository repository;
 
-    public OntopRDF4JPredefinedQueryEngineImpl(OntopVirtualRepository repository) {
+    public OntopRDF4JPredefinedQueryEngineImpl(OntopVirtualRepository repository,
+                                               ImmutableMap<String, Object> queryMap,
+                                               ImmutableMap<String, PredefinedConfig.QueryEntry> queries) {
         this.repository = repository;
     }
 
