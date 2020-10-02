@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.moandjiezana.toml.Toml;
 import it.unibz.inf.ontop.rdf4j.predefined.OntopRDF4JPredefinedQueryEngine;
-import it.unibz.inf.ontop.rdf4j.predefined.PredefinedConfig;
+import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQueryConfig;
 import it.unibz.inf.ontop.rdf4j.predefined.impl.FakeOntopRDF4JPredefinedQueryEngine;
 import it.unibz.inf.ontop.rdf4j.predefined.impl.OntopRDF4JPredefinedQueryEngineImpl;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
@@ -38,17 +38,17 @@ public class PredefinedQueryComponent {
 
             // TODO: parse the contexts
 
-            return new OntopRDF4JPredefinedQueryEngineImpl(repository, queryMap, config.queries);
+            return new OntopRDF4JPredefinedQueryEngineImpl(repository.getOntopEngine(), queryMap, config.queries);
         }
         else
             return new FakeOntopRDF4JPredefinedQueryEngine();
     }
 
     public static class Config {
-        private final ImmutableMap<String, PredefinedConfig.QueryEntry> queries;
+        private final ImmutableMap<String, PredefinedQueryConfig.QueryEntry> queries;
 
         @JsonCreator
-        public Config(@JsonProperty("queries") Map<String, PredefinedConfig.QueryEntry> queries) {
+        public Config(@JsonProperty("queries") Map<String, PredefinedQueryConfig.QueryEntry> queries) {
             this.queries = ImmutableMap.copyOf(queries);
         }
     }

@@ -3,32 +3,49 @@ package it.unibz.inf.ontop.rdf4j.predefined.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
+import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.rdf4j.predefined.OntopRDF4JPredefinedQueryEngine;
-import it.unibz.inf.ontop.rdf4j.predefined.PredefinedConfig;
-import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
+import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQueryConfig.QueryEntry;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.http.protocol.HTTP;
 import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.Query.QueryType;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.impl.IteratingGraphQueryResult;
+import org.eclipse.rdf4j.repository.sparql.federation.CollectionIteration;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.OutputStream;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
+
 public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefinedQueryEngine {
 
-    private final OntopVirtualRepository repository;
 
-    public OntopRDF4JPredefinedQueryEngineImpl(OntopVirtualRepository repository,
+    private final OntopQueryEngine ontopEngine;
+    private final ImmutableMap<String, Object> queryMap;
+    private final ImmutableMap<String, QueryEntry> queryEntries;
+
+    public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
                                                ImmutableMap<String, Object> queryMap,
-                                               ImmutableMap<String, PredefinedConfig.QueryEntry> queries) {
-        this.repository = repository;
+                                               ImmutableMap<String, QueryEntry> queryEntries) {
+        this.ontopEngine = ontopEngine;
+        this.queryMap = queryMap;
+        this.queryEntries = queryEntries;
     }
 
 
@@ -117,7 +134,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private Optional<QueryType> getQueryType(String queryId) {
-        throw new RuntimeException("TODO: implement it");
+        return Optional.ofNullable(queryEntries.get(queryId))
+                .map(QueryEntry::getQueryType);
     }
 
     /**
@@ -129,12 +147,58 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
     @Override
     public GraphQueryResult evaluateGraph(String queryId, ImmutableMap<String, String> bindings) throws QueryEvaluationException {
+        if (!getQueryType(queryId)
+                .filter(t -> t.equals(QueryType.GRAPH))
+                .isPresent())
+            throw new IllegalArgumentException("The query" + queryId + " is not defined as a graph query");
         return evaluateGraph(queryId, bindings, ImmutableMultimap.of());
     }
 
     protected GraphQueryResult evaluateGraph(String queryId, ImmutableMap<String, String> bindings,
                                              ImmutableMultimap<String, String> httpHeaders) throws QueryEvaluationException {
-        throw new RuntimeException("TODO: implement");
+
+
+        ConstructTemplate constructTemplate = getConstructTemplate(queryId);
+        IQ executableQuery = createExecutableQuery(queryId, bindings);
+        QueryLogger queryLogger = createQueryLogger(queryId, bindings, httpHeaders);
+        return executeConstructQuery(constructTemplate, executableQuery, queryLogger);
+    }
+
+    private ConstructTemplate getConstructTemplate(String queryId) {
+        throw new RuntimeException("TODO: extract in advance construct template");
+    }
+
+    private IQ createExecutableQuery(String queryId, ImmutableMap<String, String> bindings) {
+        throw new RuntimeException("TODO: create executable query");
+    }
+
+    private QueryLogger createQueryLogger(String queryId, ImmutableMap<String, String> bindings,
+                                          ImmutableMultimap<String, String> httpHeaders) {
+        throw new RuntimeException("TODO: create query logger");
+    }
+
+    private GraphQueryResult executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery,
+                                                   QueryLogger queryLogger) {
+        try (
+                OntopConnection conn = ontopEngine.getConnection();
+                OntopStatement stm = conn.createStatement();
+                SimpleGraphResultSet res = stm.executeConstructQuery(constructTemplate, executableQuery, queryLogger)
+        ){
+            // TODO: see how to use stream besides the presence of exception
+            ImmutableList.Builder<Statement> resultBuilder = ImmutableList.builder();
+            if (res != null) {
+                while (res.hasNext()) {
+                    RDFFact as = res.next();
+                    Statement st = createStatement(as);
+                    if (st!=null)
+                        resultBuilder.add(st);
+                }
+            }
+            return new IteratingGraphQueryResult(ImmutableMap.of(), new CollectionIteration<>(resultBuilder.build()));
+
+        } catch (Exception e) {
+            throw new QueryEvaluationException(e);
+        }
     }
 
     private void evaluateTupleWithHandler(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,

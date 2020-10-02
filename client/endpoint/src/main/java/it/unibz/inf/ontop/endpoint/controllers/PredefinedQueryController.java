@@ -65,16 +65,9 @@ public class PredefinedQueryController {
 
     }
 
-    @ExceptionHandler({MalformedQueryException.class})
-    public ResponseEntity<String> handleMalformedQueryException(Exception ex) {
-        ex.printStackTrace();
-        String message = ex.getMessage();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(message, headers, status);
-    }
-
+    /**
+     * TODO: revise exceptions
+     */
     @ExceptionHandler({RepositoryException.class, Exception.class})
     public ResponseEntity<String> handleRepositoryException(Exception ex) {
         ex.printStackTrace();

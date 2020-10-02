@@ -1,18 +1,23 @@
 package it.unibz.inf.ontop.rdf4j.predefined;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.rdf4j.query.Query;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class PredefinedConfig {
+public class PredefinedQueryConfig {
 
     /**
      * TODO: enforce required (shall we use @JsonCreator?)
      */
     public static class QueryEntry {
-        @JsonProperty(value = "sparqlQueryType", required = true)
-        private String sparqlQueryType;
+        @JsonProperty(value = "queryType", required = true)
+        private String queryTypeString;
+
+        // LAZY
+        private Query.QueryType queryType;
+
         @JsonProperty(value = "name", required = false)
         private String name;
         @JsonProperty(value = "description", required = false)
@@ -26,8 +31,10 @@ public class PredefinedConfig {
         @JsonProperty(value = "parameters", required = true)
         private Map<String, QueryParameter> parameters;
 
-        public String getSparqlQueryType() {
-            return sparqlQueryType;
+        public Query.QueryType getQueryType() {
+            if (queryType == null)
+                queryType = Query.QueryType.valueOf(queryTypeString.toUpperCase());
+            return queryType;
         }
 
         public Optional<String> getName() {
