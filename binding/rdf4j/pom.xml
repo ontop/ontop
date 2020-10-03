@@ -118,7 +118,11 @@
 			<artifactId>r2rml-api-rdf4j-binding</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>com.moandjiezana.toml</groupId>
+            <artifactId>toml4j</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 </project>

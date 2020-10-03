@@ -17,8 +17,12 @@ import java.util.function.Consumer;
 public interface OntopRDF4JPredefinedQueryEngine {
 
     /**
-     *
      * acceptMediaTypes are expected to be sorted by decreasing importance and having no quality parameter
+     *
+     * May throw RDF4J runtime exceptions when executing the query.
+     * Problems occurring before query execution are handled by standard HTTP mechanisms (status code + error message).
+     *
+     * NB: this method prototype could easily be made RDF4J-independent, if the need appears one day.
      */
     void evaluate(String queryId,
                   ImmutableMap<String, String> bindings,
