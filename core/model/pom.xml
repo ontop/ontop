@@ -74,23 +74,41 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.sis.core</groupId>
-            <artifactId>sis-referencing</artifactId>
+            <groupId>org.locationtech.proj4j</groupId>
+            <artifactId>proj4j</artifactId>
+            <version>1.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.sis.core</groupId>
-            <artifactId>sis-utility</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sis.core</groupId>
-            <artifactId>sis-metadata</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sis.non-free</groupId>
-            <artifactId>sis-embedded-data</artifactId>
-            <!--<version>1.0</version>
-            <scope>runtime</scope>-->
-        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.opengis</groupId>-->
+<!--            <artifactId>geoapi</artifactId>-->
+<!--            <version>3.0.1</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.kortforsyningen</groupId>-->
+<!--            <artifactId>proj</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.apache.sis.core</groupId>-->
+<!--            <artifactId>sis-referencing</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.sis.core</groupId>-->
+<!--            <artifactId>sis-utility</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.sis.core</groupId>-->
+<!--            <artifactId>sis-metadata</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.sis.non-free</groupId>-->
+<!--            <artifactId>sis-embedded-data</artifactId>-->
+<!--            &lt;!&ndash;<version>1.0</version>-->
+<!--            <scope>runtime</scope>&ndash;&gt;-->
+<!--        </dependency>-->
     </dependencies>
 
 

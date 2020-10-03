@@ -17,8 +17,8 @@ import javax.annotation.Nonnull;
 import static java.lang.Math.PI;
 
 //import org.apache.sis.referencing.*;
-import org.apache.sis.referencing.CRS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+//import org.apache.sis.referencing.CRS;
+//import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,7 +56,7 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         ImmutableTerm geom0 = sridGeomPairs.get(0).getGeometry();
         ImmutableTerm geom1 = sridGeomPairs.get(1).getGeometry();
 
-        String ellipsoidString = getEllipsoidString(srid0);
+        //String ellipsoidString = getEllipsoidString(srid0);
 
         // If SRIDs are not identical throw error
         if (!srid0.equals(srid1)) {
@@ -65,14 +65,14 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
             // Check unit
             switch (unit){
                 case UOM.METRE_STRING:
-                    if (ellipsoidString.equals(defaultEllipsoid)) {
+                    //if (ellipsoidString.equals(defaultEllipsoid)) {
                         //final String measurement_spheroid = "SPHEROID[\"WGS 84\",6378137,298.257223563]";
                         //return termFactory.getDBSTDistanceSpheroid(geom[0], geom[1],termFactory.getDBStringConstant(measurement_spheroid));
                         return termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
                         // If non-WGS84, use Cartesian distance
-                    } else {
-                        return termFactory.getDBSTDistance(geom0, geom1).simplify();
-                    }
+//                    } else {
+//                        return termFactory.getDBSTDistance(geom0, geom1).simplify();
+//                    }
                 case UOM.DEGREE_STRING:
                     // ST_DISTANCE
                     return termFactory.getDBSTDistance(geom0, geom1).simplify();
@@ -92,31 +92,31 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         }
     }
 
-    private String getEllipsoidString(String srid0) {
-        // Given the SRID - retrieve the respective ellipsoid
-        String ellipsoidString;
-        String SRIDcode;
+//    private String getEllipsoidString(String srid0) {
+//        // Given the SRID - retrieve the respective ellipsoid
+//        String ellipsoidString;
+//        String SRIDcode;
+//
+//        // Check whether it is the default CRS
+//        if (srid0.contains("CRS84")) {
+//            //SRIDcode = "CRS:84";
+//            ellipsoidString = defaultEllipsoid;
+//        } else {
+//            //Other EPSG codes
+//            SRIDcode = "EPSG:" + srid0.substring(srid0.length()-4);
+//            try {
+//                ellipsoidString = getEllipsoid(SRIDcode);
+//            } catch (Exception e) {
+//                throw new IllegalArgumentException("Unsupported or invalid SRID provided");
+//            }
+//        }
+//        return ellipsoidString;
+//    }
 
-        // Check whether it is the default CRS
-        if (srid0.contains("CRS84")) {
-            //SRIDcode = "CRS:84";
-            ellipsoidString = defaultEllipsoid;
-        } else {
-            //Other EPSG codes
-            SRIDcode = "EPSG:" + srid0.substring(srid0.length()-4);
-            try {
-                ellipsoidString = getEllipsoid(SRIDcode);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Unsupported or invalid SRID provided");
-            }
-        }
-        return ellipsoidString;
-    }
-
-    private String getEllipsoid(String v) throws Exception{
-        // Retrieve coordinate reference system and respective ellipsoid
-        CoordinateReferenceSystem source = CRS.forCode(v);
-        return source.getName().getCode();
-    }
+//    private String getEllipsoid(String v) throws Exception{
+//        // Retrieve coordinate reference system and respective ellipsoid
+//        CoordinateReferenceSystem source = CRS.forCode(v);
+//        return source.getName().getCode();
+//    }
 
 }

@@ -11,8 +11,8 @@ import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.sis.referencing.CRS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+//import org.apache.sis.referencing.CRS;
+//import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.annotation.Nonnull;
 
@@ -52,18 +52,18 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
         // Given the SRID - retrieve the respective ellipsoid
         String ellipsoidString;
         String SRIDcode;
-        if (getCRS(sridString)) {
+        //if (getCRS(sridString)) {
             //SRIDcode = "CRS:84";
             ellipsoidString = defaultEllipsoid;
-        } else {
-            //Other EPSG codes
-            SRIDcode = "EPSG:" + sridString.substring(sridString.length()-4);
-            try {
-                ellipsoidString = getEllipsoid(SRIDcode);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Unsupported or invalid SRID provided");
-            }
-        }
+//        } else {
+//            //Other EPSG codes
+//            SRIDcode = "EPSG:" + sridString.substring(sridString.length()-4);
+//            try {
+//                ellipsoidString = getEllipsoid(SRIDcode);
+//            } catch (Exception e) {
+//                throw new IllegalArgumentException("Unsupported or invalid SRID provided");
+//            }
+//        }
 
         if (unit.equals(UOM.METRE.getIRIString())) {
             final double EARTH_MEAN_RADIUS_METER = 6370986;
@@ -112,15 +112,15 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
 //        //.orElse(term);
 //    }
 
-    private String getEllipsoid(String v) throws Exception{
-        // Retrieve coordinate reference system and respective ellipsoid
-        CoordinateReferenceSystem source = CRS.forCode(v);
-        return (source.getName().getCode());
-    }
-
-    private boolean getCRS(String sridval) {
-        // Check whether it is the default CRS
-        return sridval
-                .contains("CRS84");
-    }
+//    private String getEllipsoid(String v) throws Exception{
+//        // Retrieve coordinate reference system and respective ellipsoid
+//        CoordinateReferenceSystem source = CRS.forCode(v);
+//        return (source.getName().getCode());
+//    }
+//
+//    private boolean getCRS(String sridval) {
+//        // Check whether it is the default CRS
+//        return sridval
+//                .contains("CRS84");
+//    }
 }

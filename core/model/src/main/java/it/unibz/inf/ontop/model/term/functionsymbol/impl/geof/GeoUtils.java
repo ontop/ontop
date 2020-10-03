@@ -2,11 +2,43 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
+import org.locationtech.proj4j.CRSFactory;
+import org.locationtech.proj4j.CoordinateReferenceSystem;
+import org.locationtech.proj4j.CoordinateTransformFactory;
+import org.locationtech.proj4j.units.Unit;
+import org.locationtech.proj4j.units.Units;
+//import org.osgeo.proj4j.CRSFactory;
+//import org.osgeo.proj4j.CoordinateReferenceSystem;
+//import org.osgeo.proj4j.CoordinateTransform;
+//import org.osgeo.proj4j.CoordinateTransformFactory;
+
 
 import java.util.Optional;
 
 public class GeoUtils {
     public static final String defaultSRID = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
+//
+//    private final CRSAuthorityFactory crsFactory;
+//
+//    /**
+//     * The factory to use for finding operations between pairs of Coordinate Reference Systems.
+//     * This factory must be provided by a GeoAPI implementation.
+//     */
+//    private final CoordinateOperationFactory opFactory;
+//
+//    /**
+//     * Creates an instance using a GeoAPI implementation found on classpath.
+//     * This initialization should be done only once and the factories reused
+//     * as many times as necessary.
+//     */
+//    public MyApp() {
+//        // Note: in GeoAPI 3.1/4.0, those two factories will be merged in a single one.
+//        crsFactory = ServiceLoader.load(CRSAuthorityFactory.class).findFirst()
+//                .orElseThrow(() -> new IllegalStateException("No GeoAPI implementation found"));
+//        opFactory = ServiceLoader.load(CoordinateOperationFactory.class).findFirst()
+//                .orElseThrow(() -> new IllegalStateException("No GeoAPI implementation found"));
+//    }
+
 
     static Optional<ImmutableTerm> tryExtractGeometryFromConstant(ImmutableTerm immutableTerm, TermFactory termFactory) {
         return Optional.of(immutableTerm)
@@ -59,5 +91,32 @@ public class GeoUtils {
                 );
 
         return new SridGeomPair(srid, geometry);
+    }
+
+    public static String toProj4jName(String sridIRIString) {
+
+        String crsPrefix = "http://www.opengis.net/def/crs/OGC/1.3/CRS";
+
+        String epsgPrefix = "http://www.opengis.net/def/crs/EPSG/0/";
+
+        if (sridIRIString.startsWith(crsPrefix)) {
+            return "CRS:" + sridIRIString.substring(crsPrefix.length());
+        } else if (sridIRIString.startsWith(epsgPrefix)) {
+            return "EPSG:" + sridIRIString.substring(epsgPrefix.length());
+        }
+
+        throw new IllegalArgumentException("Unknown SRID IRI");
+    }
+
+    public static Unit getUnit(String sridIRIString) {
+        String csName = toProj4jName(sridIRIString);
+
+        if(csName.startsWith("CRS:")){
+            return Units.DEGREES;
+        }
+
+        CRSFactory csFactory = new CRSFactory();
+        CoordinateReferenceSystem crs = csFactory.createFromName(csName);
+        return crs.getProjection().getUnits();
     }
 }
