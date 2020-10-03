@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +17,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +37,7 @@ public class AbstractRDF4JTest {
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
 
-        Statement st = SQL_CONNECTION.createStatement();
+        java.sql.Statement st = SQL_CONNECTION.createStatement();
 
         FileReader reader = new FileReader(AbstractRDF4JTest.class.getResource(dbScriptRelativePath).getPath());
         BufferedReader in = new BufferedReader(reader);
@@ -72,7 +74,7 @@ public class AbstractRDF4JTest {
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
 
-        Statement st = SQL_CONNECTION.createStatement();
+        java.sql.Statement st = SQL_CONNECTION.createStatement();
 
         FileReader reader = new FileReader(AbstractRDF4JTest.class.getResource(dbScriptRelativePath).getPath());
         BufferedReader in = new BufferedReader(reader);
@@ -96,7 +98,7 @@ public class AbstractRDF4JTest {
                 .build();
 
         OntopRepository repo = OntopRepository.defaultRepository(config);
-        repo.initialize();
+        repo.init();
         /*
          * Prepare the data connection for querying.
          */
@@ -123,7 +125,14 @@ public class AbstractRDF4JTest {
     }
 
     protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues) {
+        runQueryAndCompare(queryString, expectedVValues, new MapBindingSet());
+    }
+
+    protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues,
+                                      BindingSet bindings) {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+        bindings.getBindingNames()
+                .forEach(n -> query.setBinding(n, bindings.getValue(n)));
 
         TupleQueryResult result = query.evaluate();
         ImmutableList.Builder<String> vValueBuilder = ImmutableList.builder();
@@ -138,6 +147,26 @@ public class AbstractRDF4JTest {
         result.close();
 
         assertEquals(expectedVValues, vValueBuilder.build());
+    }
+
+    protected void runGraphQueryAndCompare(String queryString, ImmutableSet<Statement> expectedGraph) {
+        runGraphQueryAndCompare(queryString, expectedGraph, new MapBindingSet());
+    }
+
+    protected void runGraphQueryAndCompare(String queryString, ImmutableSet<Statement> expectedGraph,
+                                           BindingSet bindings) {
+        GraphQuery query = REPO_CONNECTION.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+        bindings.getBindingNames()
+                .forEach(n -> query.setBinding(n, bindings.getValue(n)));
+
+        GraphQueryResult result = query.evaluate();
+        ImmutableSet.Builder<org.eclipse.rdf4j.model.Statement> statementBuilder = ImmutableSet.builder();
+        while (result.hasNext()) {
+            statementBuilder.add(result.next());
+        }
+        result.close();
+
+        assertEquals(expectedGraph, statementBuilder.build());
     }
 
     protected TupleQueryResult evaluate(String queryString) {
