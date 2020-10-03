@@ -27,8 +27,8 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 /**
  * Basis of the representation for information on both<br>
- *   (a) relational tables and views<br>
- *   (b) and views created by the SQL parser for complex sub-queries
+ * (a) relational tables and views<br>
+ * (b) and views created by the SQL parser for complex sub-queries
  *
  * @author Roman Kontchakov
  */
@@ -36,46 +36,46 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 public interface RelationDefinition {
 
 
-	/**
-	 * gets the attribute with the specified position
-	 *
-	 * @param index is position <em>starting at 1</em>
-	 * @return attribute at the position
-	 */
+    /**
+     * gets the attribute with the specified position
+     *
+     * @param index is position <em>starting at 1</em>
+     * @return attribute at the position
+     */
 
-	Attribute getAttribute(int index);
+    Attribute getAttribute(int index);
 
-	/**
-	 * gets the attribute with the specified ID
-	 *
-	 * @param id
-	 * @return
-	 */
+    /**
+     * gets the attribute with the specified ID
+     *
+     * @param id
+     * @return
+     */
 
-	Attribute getAttribute(QuotedID id) throws AttributeNotFoundException;
+    Attribute getAttribute(QuotedID id) throws AttributeNotFoundException;
 
-	/**
-	 * the list of attributes
-	 *
-	 * @return list of attributes
-	 */
-	ImmutableList<Attribute> getAttributes();
+    /**
+     * the list of attributes
+     *
+     * @return list of attributes
+     */
+    ImmutableList<Attribute> getAttributes();
 
-	RelationPredicate getAtomPredicate();
+    RelationPredicate getAtomPredicate();
 
-	ImmutableList<UniqueConstraint> getUniqueConstraints();
+    ImmutableList<UniqueConstraint> getUniqueConstraints();
 
-	ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
+    ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
 
-	ImmutableList<ForeignKeyConstraint> getForeignKeys();
+    ImmutableList<ForeignKeyConstraint> getForeignKeys();
 
 
-	interface AttributeListBuilder {
+    interface AttributeListBuilder {
 
-		AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable);
+        AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable);
 
-		AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable);
+        AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable);
 
-		ImmutableList<Attribute> build(RelationDefinition relation);
-	}
+        ImmutableList<Attribute> build(RelationDefinition relation);
+    }
 }
