@@ -262,7 +262,8 @@ public class GeoSPARQLTest {
                 "BIND(geof:distance(?xWkt, ?yWkt, uom:degree) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
-        assertEquals(3.55, val, 0.01);
+        //assertEquals(3.55, val, 0.01);
+        assertEquals(3.05, val, 0.01);
     }
 
     @Test
@@ -296,7 +297,7 @@ public class GeoSPARQLTest {
                 "BIND(geof:distance(?xWkt, ?yWkt, uom:radian) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
-        assertEquals(0.062, val, 0.001);
+        assertEquals(0.053, val, 0.001);
     }
 
     @Test // Test distance function when an input is not a point

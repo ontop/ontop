@@ -9,12 +9,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolFactoryIm
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-import static java.lang.Math.PI;
+import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoUtils.EARTH_MEAN_RADIUS_METER;
 
 //import org.apache.sis.referencing.*;
 //import org.apache.sis.referencing.CRS;
@@ -39,57 +39,59 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
 
     /**
      * @param subLexicalTerms (geom1, geom2, unit)
-     * NB: we assume that the geoms are WGS 84 (lat lon). Other SRIDs need to be implemented.
+     *                        NB: we assume that the geoms are WGS 84 (lat lon). Other SRIDs need to be implemented.
      */
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
 
-        // Get unit of distance i.e. degree, radian, metric;
-        String unit = ((DBConstant) subLexicalTerms.get(2)).getValue();
 
-        List<SridGeomPair> sridGeomPairs = subLexicalTerms.subList(0, 2).stream().map(
-                term -> GeoUtils.getSridGeomPair(termFactory, term)
+        List<WKTLiteralValue> wktLiteralValues = subLexicalTerms.subList(0, 2).stream().map(
+                term -> GeoUtils.extractWKTLiteralValue(termFactory, term)
         ).collect(Collectors.toList());
 
-        String srid0 = sridGeomPairs.get(0).getSrid();
-        String srid1 = sridGeomPairs.get(1).getSrid();
-        ImmutableTerm geom0 = sridGeomPairs.get(0).getGeometry();
-        ImmutableTerm geom1 = sridGeomPairs.get(1).getGeometry();
+        IRI srid0 = wktLiteralValues.get(0).getSRID();
+        IRI srid1 = wktLiteralValues.get(1).getSRID();
+
+        if (!srid0.equals(srid1)) {
+            throw new IllegalArgumentException("SRIDs do not match: " + srid0 + ", " + srid1);
+        }
+
+        ImmutableTerm geom0 = wktLiteralValues.get(0).getGeometry();
+        ImmutableTerm geom1 = wktLiteralValues.get(1).getGeometry();
 
         //String ellipsoidString = getEllipsoidString(srid0);
+        DistanceUnit inputUnit = GeoUtils.getUnitFromSRID(srid0.getIRIString());// DistanceUnit.fromIRI(srid0);
+        DistanceUnit outputUnit = DistanceUnit.findByIRI(((DBConstant) subLexicalTerms.get(2)).getValue());
 
-        // If SRIDs are not identical throw error
-        if (!srid0.equals(srid1)) {
-            throw new IllegalArgumentException("SRIDs do not match");
+        DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
+        DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+        DBMathBinaryOperator divides = dbFunctionSymbolFactory.getDBMathBinaryOperator("/", dbTypeFactory.getDBDoubleType());
+
+        if (inputUnit == METRE && outputUnit == METRE) {
+            return termFactory.getDBSTDistance(geom0, geom1).simplify();
+        } else if (inputUnit == METRE && outputUnit == RADIAN) {
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistance(geom0, geom1).simplify();
+            DBConstant radiusConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER), dbTypeFactory.getDBDoubleType());
+            return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, radiusConstant);
+        } else if (inputUnit == METRE && outputUnit == DEGREE) {
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistance(geom0, geom1).simplify();
+            DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER / 180 * Math.PI), dbTypeFactory.getDBDoubleType());
+            return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
+        } else if (inputUnit == DEGREE && outputUnit == DEGREE) {
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
+            DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER / 180 * Math.PI), dbTypeFactory.getDBDoubleType());
+            return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
+        } else if (inputUnit == DEGREE && outputUnit == RADIAN) {
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
+            DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER), dbTypeFactory.getDBDoubleType());
+            return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
+        } else if (inputUnit == DEGREE && outputUnit == METRE) {
+            // TODO: consider using getDBSTDistanceSpheroid to get more accurate results
+            return termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
         } else {
-            // Check unit
-            switch (unit){
-                case UOM.METRE_STRING:
-                    //if (ellipsoidString.equals(defaultEllipsoid)) {
-                        //final String measurement_spheroid = "SPHEROID[\"WGS 84\",6378137,298.257223563]";
-                        //return termFactory.getDBSTDistanceSpheroid(geom[0], geom[1],termFactory.getDBStringConstant(measurement_spheroid));
-                        return termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
-                        // If non-WGS84, use Cartesian distance
-//                    } else {
-//                        return termFactory.getDBSTDistance(geom0, geom1).simplify();
-//                    }
-                case UOM.DEGREE_STRING:
-                    // ST_DISTANCE
-                    return termFactory.getDBSTDistance(geom0, geom1).simplify();
-                case UOM.RADIAN_STRING:
-                    // ST_DISTANCE / 180 * PI
-                    double ratio = PI / 180;
-                    DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
-                    DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-                    DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
-                    ImmutableTerm distanceInDegree = termFactory.getDBSTDistance(geom0, geom1);
-                    DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
-                    return termFactory.getImmutableFunctionalTerm(times, distanceInDegree, ratioConstant);
-                default:
-                    throw new IllegalArgumentException("Unexpected unit: " + unit);
-            }
-
+            throw new IllegalArgumentException(String.format("Unsupported combination of units for distance. input: %s, output: %s", inputUnit, outputUnit));
         }
+
     }
 
 //    private String getEllipsoidString(String srid0) {

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -16,9 +15,6 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-import java.util.Optional;
-
-import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoUtils.tryExtractGeometryFromConstant;
 import static java.lang.Math.PI;
 
 public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
@@ -45,9 +41,9 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
         DBMathBinaryOperator times = dbFunctionSymbolFactory.getDBMathBinaryOperator("*", dbTypeFactory.getDBDoubleType());
 
-        SridGeomPair sridGeomPair = GeoUtils.getSridGeomPair(termFactory, term);
-        String sridString = sridGeomPair.getSrid();
-        ImmutableTerm geom = sridGeomPair.getGeometry();
+        WKTLiteralValue WKTLiteralValue = GeoUtils.extractWKTLiteralValue(termFactory, term);
+        IRI sridString = WKTLiteralValue.getSRID();
+        ImmutableTerm geom = WKTLiteralValue.getGeometry();
 
         // Given the SRID - retrieve the respective ellipsoid
         String ellipsoidString;
