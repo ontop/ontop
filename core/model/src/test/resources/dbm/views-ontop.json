@@ -1,0 +1,155 @@
+{
+    "relations": [
+        {
+            "name": "\"views\".\"hr\".\"persons\"",
+            "baseRelation": "\"hr\".\"persons\"",
+            "columns": {
+                "added": [
+                    {
+                        "name": "\"fullName\"",
+                        "datatype": "text",
+                        "expression": "CONCAT(UPPER(\"firstName\"),' ',\"lastName\")",
+                        "isNullable": true
+                    }
+                ],
+                "hidden": [
+                    "\"firstName\"",
+                    "\"lastName\""
+                ]
+            },
+            "uniqueConstraints": {
+                "added": []
+            },
+            "otherFunctionalDependencies": {
+                "added": [] 
+            },
+            "foreignKeys": {
+                "added": []
+            },
+            "type": "BasicDataView"
+        },
+        {
+            "name": "\"views\".\"rooms\"",
+            "query": "SELECT r.\"id\", r.\"hotel_id\", r.\"name\", h.\"id\" AS \"h_id\", h.\"isActive\" AS \"h_isActive\" FROM \"rooms\" r, \"views\".\"hotels\" h WHERE r.\"hotel_id\" = h.\"id\" AND h.\"isActive\" IS TRUE",
+            "uniqueConstraints": {
+                "added": []
+            },
+            "otherFunctionalDependencies": {
+                "added": [] 
+            },
+            "foreignKeys": {
+                "added": []
+            },
+            "type": "SQLDataView"
+        },
+        {
+            "name": "complex-view-1",
+            "query": "SELECT t1.a, SUM(t2.b) AS s FROM myTable t1, myOtherTable t2 WHERE t1.id = t2.id AND t1.score < 50 GROUP BY t1.a HAVING SUM(T2.c) > 2",
+            "uniqueConstraints": {
+                "added": []
+            },
+            "otherFunctionalDependencies": {
+                "added": [] 
+            },
+            "foreignKeys": {
+                "added": []
+            },
+            "type": "SQLDataView"
+        },
+        {
+            "name": "\"hr\".\"persons-tags\"",
+            "baseRelation": "\"hr\".\"persons-xt\"",
+            "flattenedColumn": "\"tags\"",
+            "columns": {
+                "kept": [
+                    {
+                        "id": "\"id\"",
+                        "datatype": "integer",
+                        "isNullable": false
+                    },
+                    {
+                        "id": "\"ssn\"",
+                        "datatype": "text",
+                        "isNullable": false
+                    }
+                ],
+                "position": {
+                    "id": "\"pos\"",
+                    "datatype": "integer",
+                    "isNullable": false
+                },
+                "extracted": [
+                    {
+                        "id": "\"tag_str\"",
+                        "datatype": "text"
+                    },
+                    {
+                        "id": "\"tag_int\"",
+                        "datatype": "integer"
+                    }
+                ]
+            },
+            "uniqueConstraints": {
+                "added": []
+            },
+            "otherFunctionalDependencies": {
+                "added": [] 
+            },
+            "foreignKeys": {
+                "added": []
+            },
+            "type": "FlattenedDataView"
+        },
+        {
+            "name": "\"hr\".\"persons-friends\"",
+            "baseRelation": "\"hr\".\"persons-xt\"",
+            "flattenedColumn": "\"friends\"",
+            "columns": {
+                "kept": [
+                    {
+                        "id": "\"id\"",
+                        "datatype": "integer",
+                        "isNullable": false
+                    }
+                ],
+                "position": {
+                    "id": "\"pos\"",
+                    "datatype": "integer",
+                    "isNullable": false
+                },
+                "extracted": [
+                    {
+                        "id": "\"firstName\"",
+                        "key": "fName",
+                        "datatype": "text"
+                    },
+                    {
+                        "id": "\"nickNames\"",
+                        "key": "nickname",
+                        "datatype": "jsonb"
+                    },
+                    {
+                        "id": "\"nickName_str\"",
+                        "key": "nickname",
+                        "datatype": "text"
+                    },
+                    {
+                        "id": "\"city\"",
+                        "key": "address.city",
+                        "datatype": "text"
+                    }
+                ]
+            },
+            "uniqueConstraints": {
+                "added": []
+            },
+            "otherFunctionalDependencies": {
+                "added": [] 
+            },
+            "foreignKeys": {
+                "added": []
+            },
+            "type": "FlattenedDataView"
+        }
+    ]
+}
