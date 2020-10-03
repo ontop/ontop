@@ -75,7 +75,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     @Override
-    public IQ translate(ParsedQuery pq) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    public IQ translate(ParsedQuery pq, BindingSet bindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
         if (IS_DEBUG_ENABLED)
             log.debug("Parsed query:\n{}", pq.toString());

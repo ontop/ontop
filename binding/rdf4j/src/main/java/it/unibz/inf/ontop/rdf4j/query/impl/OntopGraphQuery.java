@@ -55,8 +55,8 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
 		ParsedQuery parsedQuery = getParsedQuery();
 		GraphSPARQLQuery query = isConstruct
-				? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery)
-				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery);
+				? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery, bindings)
+				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery, bindings);
 		try (
 				OntopStatement stm = conn.createStatement();
 				SimpleGraphResultSet res = stm.execute(query, getHttpHeaders())

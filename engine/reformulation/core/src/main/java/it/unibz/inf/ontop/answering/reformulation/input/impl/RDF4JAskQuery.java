@@ -7,13 +7,14 @@ import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.IQ;
+import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 
 class RDF4JAskQuery extends RDF4JInputQuery<BooleanResultSet> implements AskQuery {
 
-    RDF4JAskQuery(ParsedQuery parsedQuery, String queryString) {
-        super(parsedQuery, queryString);
+    RDF4JAskQuery(ParsedQuery parsedQuery, String queryString, BindingSet bindings) {
+        super(parsedQuery, queryString, bindings);
     }
 
     @Override
