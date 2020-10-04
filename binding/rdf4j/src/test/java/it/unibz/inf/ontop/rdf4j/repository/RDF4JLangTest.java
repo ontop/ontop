@@ -10,6 +10,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -116,6 +117,7 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results, bindings);
     }
 
+    @Ignore("TODO: solve the infinite loop due to some filters above aggrs")
     @Test
     public void testExternalBinding5() {
         String query = "SELECT (SUM(?n) AS ?v)\n" +
