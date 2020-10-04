@@ -86,37 +86,5 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
         }
 
     }
-//
-//    private Optional<ImmutableTerm> getArg0FromTemplate(ImmutableTerm term) {
-//        return Optional.of(term)
-//                // template is a NonGroundFunctionalTerm
-//                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
-//                // template uses DBConcatFunctionSymbol as the functional symbol
-//                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
-//                // the first argument is the string starting with the IRI of the SRID
-//                .map(t -> t.getTerm(0));
-//    }
-//
-//    private Optional<ImmutableTerm> getArg1FromTemplate(ImmutableTerm term) {//ImmutableList<ImmutableTerm> newterms) {
-//        return Optional.of(term)
-//                // template is a NonGroundFunctionalTerm
-//                .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
-//                // template uses DBConcatFunctionSymbol as the functional symbol
-//                .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
-//                // the first argument is the string starting with the IRI of the SRID
-//                .map(t -> t.getTerm(1));
-//        //.orElse(term);
-//    }
 
-//    private String getEllipsoid(String v) throws Exception{
-//        // Retrieve coordinate reference system and respective ellipsoid
-//        CoordinateReferenceSystem source = CRS.forCode(v);
-//        return (source.getName().getCode());
-//    }
-//
-//    private boolean getCRS(String sridval) {
-//        // Check whether it is the default CRS
-//        return sridval
-//                .contains("CRS84");
-//    }
 }

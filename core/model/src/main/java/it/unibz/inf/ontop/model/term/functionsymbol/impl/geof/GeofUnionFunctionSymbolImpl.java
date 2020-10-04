@@ -14,14 +14,15 @@ import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
 
-public class GeofUnionFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
+public class GeofUnionFunctionSymbolImpl extends AbstractBinaryGeofWKTFunctionSymbolDirectImpl {
     public GeofUnionFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType) {
         super("GEOF_UNION", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), wktLiteralType);
     }
 
     @Override
-    protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBUnion(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
+    public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
+        return termFactory::getDBUnion;
     }
 }

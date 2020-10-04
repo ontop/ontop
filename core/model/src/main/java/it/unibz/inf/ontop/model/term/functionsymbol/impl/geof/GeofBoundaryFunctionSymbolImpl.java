@@ -14,14 +14,20 @@ import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.util.function.Function;
 
-public class GeofBoundaryFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
+public class GeofBoundaryFunctionSymbolImpl extends AbstractUnaryGeofWKTFunctionSymbolDirectImpl {
     public GeofBoundaryFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType) {
         super("GEOF_BOUNDARY", functionIRI, ImmutableList.of(wktLiteralType), wktLiteralType);
     }
 
+//    @Override
+//    protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+//        return termFactory.getDBAsText(termFactory.getDBBoundary(subLexicalTerms.get(0))).simplify();
+//    }
+
     @Override
-    protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBAsText(termFactory.getDBBoundary(subLexicalTerms.get(0))).simplify();
+    public Function<ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
+        return termFactory::getDBBoundary;
     }
 }

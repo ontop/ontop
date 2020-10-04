@@ -14,15 +14,15 @@ import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.util.function.Function;
 
-public class GeofEnvelopeFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolImpl {
-    public GeofEnvelopeFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType) {
+public class GeofEnvelopeFunctionSymbolImpl extends AbstractUnaryGeofWKTFunctionSymbolDirectImpl {
+    public GeofEnvelopeFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType) {
         super("GEOF_ENVELOPE", functionIRI, ImmutableList.of(wktLiteralType), wktLiteralType);
     }
 
     @Override
-    protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        //return termFactory.getDBAsText(termFactory.getDBEnvelope(subLexicalTerms.get(0))).simplify();
-        return (termFactory.getDBEnvelope(subLexicalTerms.get(0))).simplify();
+    public Function<ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
+        return termFactory::getDBEnvelope;
     }
 }

@@ -277,7 +277,7 @@ public class GeoSPARQLTest {
                 "BIND(geof:distance(?xWkt, ?yWkt, uom:degree) as ?x) .\n" +
                 "}\n";
         double val = runQueryAndReturnDoubleX(query);
-        assertEquals(3.55, val, 0.01);
+        assertEquals(3.05, val, 0.01);
     }
 
     @Test

@@ -59,4 +59,6 @@ public abstract class AbstractGeofWKTFunctionSymbolImpl extends ReduciblePositiv
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
+
+
 }
