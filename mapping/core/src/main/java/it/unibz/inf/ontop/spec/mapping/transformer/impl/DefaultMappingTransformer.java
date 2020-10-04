@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
@@ -37,6 +38,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final RDF rdfFactory;
 
     private MappingDistinctTransformer mappingDistinctTransformer;
+    private final TermFactory termFactory;
 
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
@@ -46,7 +48,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       MappingSameAsInverseRewriter sameAsInverseRewriter,
                                       SpecificationFactory specificationFactory,
                                       RDF rdfFactory,
-                                      MappingDistinctTransformer mappingDistinctTransformer) {
+                                      MappingDistinctTransformer mappingDistinctTransformer,
+                                      TermFactory termFactory) {
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -55,6 +58,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.specificationFactory = specificationFactory;
         this.rdfFactory = rdfFactory;
         this.mappingDistinctTransformer = mappingDistinctTransformer;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -69,7 +73,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
             return createSpecification(mappingWithFacts, dbParameters, ontology.get().tbox());
         }
         else {
-            ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory).build().tbox();
+            ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory, termFactory).build().tbox();
             return createSpecification(mapping, dbParameters, emptyTBox);
         }
     }

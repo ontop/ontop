@@ -1,27 +1,8 @@
 package it.unibz.inf.ontop.protege.views;
 
-/*
- * #%L
- * ontop-protege4
- * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
@@ -72,6 +53,15 @@ public class OWLAxiomToTurtleVisitor extends OWLAxiomVisitorAdapter {
 		String subject = prefixManager.getShortForm(axiom.getSubject().toString());
 		String predicate = prefixManager.getShortForm(axiom.getProperty().toString());
 		String object = ToStringRenderer.getInstance().getRendering(axiom.getObject());
+		dataPropertyAssertionBuffer.append(String.format("%s %s %s .\n",
+				subject, predicate, object));
+	}
+
+	@Override
+	public void visit(OWLAnnotationAssertionAxiom axiom) {
+		String subject = prefixManager.getShortForm(axiom.getSubject().toString());
+		String predicate = prefixManager.getShortForm(axiom.getProperty().toString());
+		String object = ToStringRenderer.getInstance().getRendering(axiom.getValue());
 		dataPropertyAssertionBuffer.append(String.format("%s %s %s .\n",
 				subject, predicate, object));
 	}

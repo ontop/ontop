@@ -79,6 +79,14 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                     protected String serializeOffset(long offset) {
                         return serializeLimitOffset(Long.MAX_VALUE, offset);
                     }
+
+                    /**
+                     * MySQL: requires parenthesis for complex mix of JOIN/LEFT JOIN (observed for v5.7)
+                     */
+                    @Override
+                    protected String formatBinaryJoin(String operatorString, QuerySerialization left, QuerySerialization right, String onString) {
+                        return String.format("(%s\n %s \n%s %s)", left.getString(), operatorString, right.getString(), onString);
+                    }
                 });
     }
 

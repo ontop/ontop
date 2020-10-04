@@ -327,6 +327,37 @@ public class TurtleSyntaxParserTest {
 		TestCase.assertTrue(result);
 	}
 
+	@Test
+	public void test_GRAPH_1(){
+		final boolean result = parse("GRAPH <http://www.ciao.it/{id}> { :{id} a :C . }");
+		TestCase.assertTrue(result);
+	}
+
+	@Test
+	public void test_GRAPH_2(){
+		final boolean result = parse("GRAPH <http://www.ciao.it/{id}> { :{id} a :C ; :P :{attr1} . }");
+		TestCase.assertTrue(result);
+	}
+
+	@Test
+	public void test_GRAPH_3(){
+		final boolean result = parse("GRAPH <http://www.ciao.it/{id}> { :{id} a :C . :{id} :P :{attr1} . }");
+		TestCase.assertTrue(result);
+	}
+
+	@Test
+	public void test_GRAPH_4(){
+		final boolean result = parse("GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . }");
+		TestCase.assertTrue(result);
+	}
+
+	@Test
+	public void test_GRAPH_5(){
+		final boolean result = parse(
+				"GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . } " +
+						"GRAPH :uni2 { :uni2/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . }");
+		TestCase.assertTrue(result);
+	}
 
 	private boolean compareCQIE(String input, int countBody) {
 		ImmutableList<TargetAtom> mapping;

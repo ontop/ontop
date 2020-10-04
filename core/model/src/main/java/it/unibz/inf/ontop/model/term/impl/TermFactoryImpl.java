@@ -83,6 +83,11 @@ public class TermFactoryImpl implements TermFactory {
         return new IRIConstantImpl(iri, typeFactory);
     }
 
+	@Override
+	public IRIConstant getConstantIRI(String iri) {
+		return getConstantIRI(rdfFactory.createIRI(iri));
+	}
+
     @Override
     public RDFLiteralConstant getRDFLiteralConstant(String value, RDFDatatype type) {
         return new RDFLiteralConstantImpl(value, type);

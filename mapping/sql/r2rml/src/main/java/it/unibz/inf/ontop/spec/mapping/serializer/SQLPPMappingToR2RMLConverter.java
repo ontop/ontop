@@ -5,7 +5,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
+import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -15,13 +15,13 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.jena.JenaGraph;
-import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.graph.Graph;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.riot.RDFWriter;
-import org.apache.jena.shared.PrefixMapping;
+import org.apache.commons.rdf.rdf4j.RDF4JGraph;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.WriterConfig;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,7 +50,7 @@ public class SQLPPMappingToR2RMLConverter {
     }
 
     /**
-     * TODO: remove the splitting logic, not needed anymore.
+     * TODO: remove the splitting logic, not needed anymore.
      */
     public Collection<TriplesMap> getTripleMaps() {
         OBDAMappingTransformer transformer = new OBDAMappingTransformer(rdfFactory, termFactory);
@@ -61,10 +61,10 @@ public class SQLPPMappingToR2RMLConverter {
 
     private ImmutableSet<SQLPPTriplesMap> splitMappingAxioms(List<SQLPPTriplesMap> mappingAxioms) {
         /*
-		 * Delimiter string d used for assigning ids to split mapping axioms.
-		 * If a mapping axiom with id j is split into multiple ones,
-		 * each of then will have "j"+"d"+int as an identifier
-		 */
+         * Delimiter string d used for assigning ids to split mapping axioms.
+         * If a mapping axiom with id j is split into multiple ones,
+         * each of then will have "j"+"d"+int as an identifier
+         */
         String delimiterSubstring = getSplitMappingAxiomIdDelimiterSubstring(mappingAxioms);
         return mappingAxioms.stream()
                 .flatMap(m -> splitMappingAxiom(m, delimiterSubstring).stream())
@@ -140,33 +140,30 @@ public class SQLPPMappingToR2RMLConverter {
      * @param os the output target
      */
     public void write(OutputStream os) throws Exception {
+        Collection<TriplesMap> tripleMaps = getTripleMaps();
         try {
-            JenaR2RMLMappingManager mm = JenaR2RMLMappingManager.getInstance();
-            Collection<TriplesMap> tripleMaps = getTripleMaps();
+            RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
+            RDF4JGraph rdf4JGraph = mm.exportMappings(tripleMaps);
 
-            final JenaGraph jenaGraph = mm.exportMappings(tripleMaps);
-            final Graph graph = new JenaRDF().asJenaGraph(jenaGraph);
+            Model m = rdf4JGraph.asModel().get();
 
-            final PrefixMapping jenaPrefixMapping = graph.getPrefixMapping();
+            m.setNamespace("rr", "http://www.w3.org/ns/r2rml#");
             prefixManager.getPrefixMap()
-                    .forEach((s, s1) ->
-                            jenaPrefixMapping.setNsPrefix(
-                                    s.substring(0, s.length()-1) // remove the last ":" from the prefix
-                                    , s1));
-            jenaPrefixMapping.setNsPrefix("rr", "http://www.w3.org/ns/r2rml#");
+                    .forEach((key, value) ->
+                            m.setNamespace(new SimpleNamespace(
+                                    key.substring(0, key.length() - 1), // remove the last ":" from the prefix,
+                                    value)));
 
-            RDFWriter.create()
-                    .lang(Lang.TTL)
-                    .format(RDFFormat.TURTLE_PRETTY)
-                    .source(graph)
-                    .output(os);
-
-            // use Jena to output pretty turtle syntax
-            //RDFDataMgr.write(os, graph, org.apache.jena.riot.RDFFormat.TURTLE_PRETTY);
+            WriterConfig settings = new WriterConfig();
+            settings.set(BasicWriterSettings.PRETTY_PRINT, true);
+            settings.set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+            Rio.write(m, os, RDFFormat.TURTLE, settings);
             os.close();
+
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
+
 }

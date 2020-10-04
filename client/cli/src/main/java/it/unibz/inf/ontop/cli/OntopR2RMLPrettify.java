@@ -1,19 +1,17 @@
 package it.unibz.inf.ontop.cli;
 
-
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.WriterConfig;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+
+import java.io.*;
 
 @Command(name = "pretty-r2rml",
         description = "prettify R2RML file using Jena")
@@ -33,10 +31,16 @@ public class OntopR2RMLPrettify implements OntopCommand {
     @Override
     public void run() {
         try {
-            Model model = RDFDataMgr.loadModel(new File(inputMappingFile).toURI().toString(), Lang.TURTLE);
-            OutputStream out = new FileOutputStream(outputMappingFile);
-            RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY) ;
-        } catch (FileNotFoundException e) {
+            Model m = Rio.parse(new FileInputStream(inputMappingFile), "", RDFFormat.TURTLE);
+            m.setNamespace("rr", "http://www.w3.org/ns/r2rml#");
+
+            WriterConfig settings = new WriterConfig();
+            settings.set(BasicWriterSettings.PRETTY_PRINT, true);
+            settings.set(BasicWriterSettings.INLINE_BLANK_NODES, true);
+            FileOutputStream os = new FileOutputStream(outputMappingFile);
+            Rio.write(m, os, RDFFormat.TURTLE, settings);
+            os.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

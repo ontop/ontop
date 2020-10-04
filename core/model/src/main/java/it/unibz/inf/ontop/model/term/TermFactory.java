@@ -184,6 +184,8 @@ public interface TermFactory {
 	 */
 	public IRIConstant getConstantIRI(IRI iri);
 
+	public IRIConstant getConstantIRI(String iri);
+
 	public BNode getConstantBNode(String name);
 
 	/**
