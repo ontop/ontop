@@ -95,7 +95,7 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
 
         ImmutableList<String> results = ImmutableList.of("testdatassss");
         MapBindingSet bindings = new MapBindingSet();
-        bindings.addBinding("v", SimpleValueFactory.getInstance().createLiteral("testdata", "en"));
+        bindings.addBinding("v", SimpleValueFactory.getInstance().createLiteral("testdatassss"));
 
         runQueryAndCompare(query, results, bindings);
     }
