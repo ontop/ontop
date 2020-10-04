@@ -11,20 +11,20 @@ public class GeoUtilsTest {
     public void testCRS() {
         String iri = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
         assertEquals("CRS:84", GeoUtils.toProj4jName(iri));
-        assertEquals(Units.DEGREES, GeoUtils.getUnitFromSRID(iri));
+        assertEquals(DistanceUnit.DEGREE, GeoUtils.getUnitFromSRID(iri));
     }
 
     @Test
     public void testEPSG4326() {
         String iri = "http://www.opengis.net/def/crs/EPSG/0/4326";
         assertEquals("EPSG:4326", GeoUtils.toProj4jName(iri));
-        assertEquals(Units.DEGREES, GeoUtils.getUnitFromSRID(iri));
+        assertEquals(DistanceUnit.DEGREE, GeoUtils.getUnitFromSRID(iri));
     }
 
     @Test
     public void testEPSG3044() {
         String iri = "http://www.opengis.net/def/crs/EPSG/0/3044";
         assertEquals("EPSG:3044", GeoUtils.toProj4jName(iri));
-        assertEquals(Units.METRES, GeoUtils.getUnitFromSRID(iri));
+        assertEquals(DistanceUnit.METRE, GeoUtils.getUnitFromSRID(iri));
     }
 }
