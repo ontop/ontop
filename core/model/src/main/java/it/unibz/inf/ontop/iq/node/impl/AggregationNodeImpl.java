@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -23,12 +21,15 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -89,22 +90,36 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     private IQTree applyDescendingSubstitutionOrBlock(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                       Function<ImmutableSubstitution<? extends VariableOrGroundTerm>, IQTree> applyNonBlockedSubstitutionFct) {
-        // TODO: distinguish variable from ground terms
-        ImmutableSubstitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution
-                .reduceDomainToIntersectionWith(groupingVariables);
-        IQTree subTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
 
-        if (nonBlockedSubstitution.equals(descendingSubstitution))
-            return subTree;
+        ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
+
+        ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.getGroundTermFragment()
+                .reduceDomainToIntersectionWith(aggregationVariables);
+
+        ImmutableMap<Variable, Variable> blockedVar2VarSubstitutionMap = extractBlockedVar2VarSubstitutionMap(
+                descendingSubstitution.getVar2VarFragment(),
+                aggregationVariables);
+
+        ImmutableSubstitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution
+                .reduceDomainToIntersectionWith(
+                        Sets.difference(descendingSubstitution.getDomain(),
+                                Sets.union(blockedSubstitutionToGroundTerm.getDomain(), blockedVar2VarSubstitutionMap.keySet()))
+                        .immutableCopy());
+
+        IQTree newSubTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
+
+        if (blockedSubstitutionToGroundTerm.isEmpty() && blockedVar2VarSubstitutionMap.isEmpty())
+            return newSubTree;
 
         TermFactory termFactory = substitution.getTermFactory();
-        ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
-                descendingSubstitution.getImmutableMap().entrySet().stream()
-                        .filter(e -> aggregationVariables.contains(e.getKey()))
-                        .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())))
+                Stream.concat(
+                        blockedSubstitutionToGroundTerm.getImmutableMap().entrySet().stream()
+                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())),
+                        blockedVar2VarSubstitutionMap.entrySet().stream()
+                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))))
                 .orElseThrow(() -> new MinorOntopInternalBugException("Inconsistent with the previous check"));
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
@@ -116,13 +131,52 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                 v -> termFactory.getVariable("v" + UUID.randomUUID().toString())
                         )));
 
-        IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, subTree)
+        IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, newSubTree)
                 .applyFreshRenaming(renamingSubstitution);
+
+
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(
-                        Sets.difference(getVariables(), nonBlockedSubstitution.getDomain()).immutableCopy()),
+                        constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getVariables())),
                 filterTree);
+    }
+
+    /**
+     * Blocks implicit equalities involving aggregation variables but let other entries (like renamings) go.
+     */
+    private ImmutableMap<Variable, Variable> extractBlockedVar2VarSubstitutionMap(Var2VarSubstitution descendingVar2Var,
+                                                                                  ImmutableSet<Variable> aggregationVariables) {
+        // Substitution value -> substitution keys
+        ImmutableMultimap<Variable, Variable> invertedMultimap = descendingVar2Var.getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMultimap(
+                        Map.Entry::getValue,
+                        Map.Entry::getKey));
+
+        // Variables involved in implicit var-to-var equalities that are not "dominant"
+        ImmutableSet<Variable> nonDominantVariables = invertedMultimap.asMap().values().stream()
+                .flatMap(this::extractNonDominantVariables)
+                .collect(ImmutableCollectors.toSet());
+
+         return descendingVar2Var.getImmutableMap().entrySet().stream()
+                .filter(e -> aggregationVariables.contains(e.getValue())
+                        || (aggregationVariables.contains(e.getKey()) && nonDominantVariables.contains(e.getKey())))
+                .collect(ImmutableCollectors.toMap());
+    }
+
+    /**
+     * When len(variables) > 1, there is an implicit equalities between variables.
+     *
+     * Extracts a "dominant" variable among this group. Gives the priority to the first grouping variable found.
+     */
+    private Stream<Variable> extractNonDominantVariables(Collection<Variable> variables) {
+        Variable dominantVariable = variables.stream()
+                .filter(groupingVariables::contains)
+                .findAny()
+                .orElseGet(() -> variables.iterator().next());
+
+        return variables.stream()
+                .filter(v -> !dominantVariable.equals(v));
     }
 
     @Override
