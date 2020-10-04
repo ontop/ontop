@@ -7,15 +7,16 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
 
-public class GeofRcc8EqFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofRcc8EqFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolDirectImpl {
 
     public GeofRcc8EqFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_RCC8_EQ", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
-    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTEquals(subLexicalTerms.get(0), subLexicalTerms.get(1));
+    public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
+        return termFactory::getDBSTEquals;
     }
 }

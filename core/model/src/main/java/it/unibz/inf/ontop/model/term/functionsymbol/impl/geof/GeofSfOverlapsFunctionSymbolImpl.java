@@ -7,15 +7,16 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
 
-public class GeofSfOverlapsFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofSfOverlapsFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolDirectImpl {
 
     public GeofSfOverlapsFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_SF_OVERLAPS", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
-    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTOverlaps(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
+    public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
+        return termFactory::getDBSTOverlaps;
     }
 }

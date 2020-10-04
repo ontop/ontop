@@ -27,7 +27,7 @@ public class GeoUtils {
                 // the SRID is enclosed by "<" and ">
                 .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
                 // extract the geometry out of the string
-                .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1)));
+                .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()));
     }
 
     static Optional<ImmutableTerm> tryExtractArgFromTemplate(ImmutableTerm term, int index) {

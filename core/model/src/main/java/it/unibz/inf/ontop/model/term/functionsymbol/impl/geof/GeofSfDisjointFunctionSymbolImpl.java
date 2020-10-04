@@ -7,15 +7,16 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
 
-public class GeofSfDisjointFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofSfDisjointFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolDirectImpl {
 
     public GeofSfDisjointFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_SF_DISJOINT", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
-    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTDisjoint(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
+    public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
+        return termFactory::getDBSTDisjoint;
     }
 }

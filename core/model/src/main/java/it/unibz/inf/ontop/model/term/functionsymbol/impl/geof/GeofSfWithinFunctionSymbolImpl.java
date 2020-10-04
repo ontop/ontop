@@ -10,16 +10,17 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
-public class GeofSfWithinFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofSfWithinFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolDirectImpl {
 
     public GeofSfWithinFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_SF_WITHIN", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
-    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getDBSTWithin(subLexicalTerms.get(0), subLexicalTerms.get(1)).simplify();
+    public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
+        return termFactory::getDBSTWithin;
     }
 
 

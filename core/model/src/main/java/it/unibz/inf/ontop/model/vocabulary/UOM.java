@@ -9,15 +9,11 @@ public class UOM {
     public static final IRI DEGREE;
     public static final IRI RADIAN;
 
-    public static final String METRE_STRING = UOM.PREFIX + "metre";
-    public static final String DEGREE_STRING = UOM.PREFIX + "degree";
-    public static final String RADIAN_STRING = UOM.PREFIX + "radian";
-
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
-        METRE = factory.createIRI(METRE_STRING);
-        DEGREE = factory.createIRI(DEGREE_STRING);
-        RADIAN = factory.createIRI(RADIAN_STRING);
+        METRE = factory.createIRI(UOM.PREFIX + "metre");
+        DEGREE = factory.createIRI(UOM.PREFIX + "degree");
+        RADIAN = factory.createIRI(UOM.PREFIX + "radian");
     }
 
 }

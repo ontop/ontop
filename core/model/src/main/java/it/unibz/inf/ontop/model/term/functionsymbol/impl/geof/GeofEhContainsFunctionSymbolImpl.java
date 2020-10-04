@@ -8,7 +8,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class GeofEhContainsFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofEhContainsFunctionSymbolImpl extends AbstractGeofBooleanFunctionSymbolImpl {
 
     public GeofEhContainsFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_EH_CONTAINS", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);

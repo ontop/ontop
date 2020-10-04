@@ -3,13 +3,13 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.h2gis.ext.H2GISExtension;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -19,9 +19,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.*;
 
 public class GeoSPARQLTest {
 
@@ -36,9 +34,9 @@ public class GeoSPARQLTest {
     @Before
     public void setUp() throws Exception {
 
-        sqlConnection = DriverManager.getConnection("jdbc:h2:mem:geoms","sa", "");
+        sqlConnection = DriverManager.getConnection("jdbc:h2:mem:geoms", "sa", "");
         H2GISExtension.load(sqlConnection);
-        executeFromFile(sqlConnection,"src/test/resources/geosparql/create-h2.sql");
+        executeFromFile(sqlConnection, "src/test/resources/geosparql/create-h2.sql");
 
 //        org.h2.tools.Server.startWebServer(sqlConnection);
 
@@ -61,8 +59,7 @@ public class GeoSPARQLTest {
         if (!sqlConnection.isClosed()) {
             try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
-            }
-            finally {
+            } finally {
                 sqlConnection.close();
             }
         }
@@ -547,7 +544,10 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
-    @Test // test intersect with user input geometry (template)
+    // it.unibz.inf.ontop.owlapi.exception.OntopOWLException: i
+    // t.unibz.inf.ontop.exception.OntopReformulationException: java.lang.IllegalArgumentException:
+    // SRIDs do not match: <http://www.opengis.net/def/crs/OGC/1.3/CRS84> and <http://www.opengis.net/def/crs/EPSG/0/3044>
+    @Test(expected = OntopOWLException.class) // test intersect with user input geometry (template)
     public void testAskIntersects4() throws Exception {
         String query = "PREFIX : <http://ex.org/> \n" +
                 "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
@@ -559,6 +559,20 @@ public class GeoSPARQLTest {
         boolean val = runQueryAndReturnBooleanX(query);
         assertTrue(val);
     }
+
+    @Test // test intersect with user input geometry (template)
+    public void testAskIntersects5() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "ASK WHERE {\n" +
+                ":1 a :Geom; geo:asWKT ?xWkt.\n" +
+                "FILTER (geof:sfIntersects(?xWkt, '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POLYGON((3 3, 8 3, 8 6, 3 6, 3 3))'^^geo:wktLiteral))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
 
     @Test
     public void testAskTouches() throws Exception {
