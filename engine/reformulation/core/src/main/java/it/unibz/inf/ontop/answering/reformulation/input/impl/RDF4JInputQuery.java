@@ -17,7 +17,7 @@ class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
 
     protected final ParsedQuery parsedQuery;
     private final String inputQueryString;
-    private final BindingSet bindings;
+    protected final BindingSet bindings;
 
     /**
      * TODO: support bindings

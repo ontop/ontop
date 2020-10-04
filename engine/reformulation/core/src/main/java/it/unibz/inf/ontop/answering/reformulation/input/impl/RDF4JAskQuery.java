@@ -22,6 +22,6 @@ class RDF4JAskQuery extends RDF4JInputQuery<BooleanResultSet> implements AskQuer
         if (!(translator instanceof RDF4JInputQueryTranslator)) {
             throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");
         }
-        return ((RDF4JInputQueryTranslator) translator).translateAskQuery(parsedQuery);
+        return ((RDF4JInputQueryTranslator) translator).translateAskQuery(parsedQuery, bindings);
     }
 }

@@ -8,12 +8,9 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 public interface RDF4JInputQueryTranslator extends InputQueryTranslator {
 
-    /*
-     * TODO: support bindings
-     */
     IQ translate(ParsedQuery inputParsedQuery, BindingSet bindings)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
 
-    IQ translateAskQuery(ParsedQuery parsedQuery)
+    IQ translateAskQuery(ParsedQuery parsedQuery, BindingSet bindings)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
 }
