@@ -81,6 +81,11 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(liftedIQ);
 
         IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator());
+        // Late detection of emptiness
+        if (normalizedSubTree.isDeclaredAsEmpty())
+            return iqFactory.createIQ(query.getProjectionAtom(),
+                    iqFactory.createEmptyNode(query.getProjectionAtom().getVariables()));
+
         NativeNode nativeNode = generateNativeNode(normalizedSubTree);
 
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
