@@ -28,7 +28,7 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
     }
 
     /**
-     * @param subLexicalTerms (geom, distance, unit)
+     * @param subLexicalTerms (geom1, geom2, unit)
      *                        NB: we assume that the geom is in WGS 84 (lat lon). Other SRIDs need to be implemented.
      */
     @Override

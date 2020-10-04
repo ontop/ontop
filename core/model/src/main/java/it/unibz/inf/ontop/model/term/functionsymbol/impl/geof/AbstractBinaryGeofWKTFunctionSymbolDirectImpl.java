@@ -23,8 +23,7 @@ public abstract class AbstractBinaryGeofWKTFunctionSymbolDirectImpl extends Abst
             throw new IllegalArgumentException(String.format("SRIDs do not match: %s and %s", v0.getSRID(), v1.getSRID()));
         }
 
-        // TODO: do we need to wrap into a ST_ASTEXT ??
-        return getDBFunction(termFactory).apply(v0.getGeometry(), v1.getGeometry()).simplify();
+        return termFactory.getDBAsText(getDBFunction(termFactory).apply(v0.getGeometry(), v1.getGeometry()).simplify());
     }
 
     abstract public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory);
