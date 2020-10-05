@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.rdf4j.predefined;
 
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 
 import java.util.Optional;
 
-public interface PredefinedQuery {
+public interface PredefinedQuery<Q extends InputQuery> {
+
+    Q getInputQuery();
 
     String getId();
-
-    ParsedQuery getTupleOrBooleanParsedQuery();
 
     Optional<String> getName();
     Optional<String> getDescription();

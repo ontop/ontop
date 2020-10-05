@@ -1,34 +1,32 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.Optional;
 
-public class AbstractPredefinedQuery implements PredefinedQuery {
+public class AbstractPredefinedQuery<Q extends InputQuery> implements PredefinedQuery<Q> {
 
     private final String id;
-    private final String queryString;
     private final PredefinedQueryConfigEntry queryConfig;
-    private final ParsedQuery tupleOrBooleanParsedQuery;
+    private final Q inputQuery;
 
-    public AbstractPredefinedQuery(String id, String queryString, PredefinedQueryConfigEntry queryConfig,
-                                   ParsedQuery tupleOrBooleanParsedQuery) {
+    public AbstractPredefinedQuery(String id, Q inputQuery, PredefinedQueryConfigEntry queryConfig) {
         this.id = id;
-        this.queryString = queryString;
         this.queryConfig = queryConfig;
-        this.tupleOrBooleanParsedQuery = tupleOrBooleanParsedQuery;
+        this.inputQuery = inputQuery;
+    }
+
+    @Override
+    public Q getInputQuery() {
+        return inputQuery;
     }
 
     @Override
     public String getId() {
         return id;
-    }
-
-    @Override
-    public ParsedQuery getTupleOrBooleanParsedQuery() {
-        return tupleOrBooleanParsedQuery;
     }
 
     @Override

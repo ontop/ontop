@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -38,12 +39,14 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final OntopQueryEngine ontopEngine;
     private final ImmutableMap<String, PredefinedGraphQuery> graphQueries;
     private final ImmutableMap<String, PredefinedTupleQuery> tupleQueries;
+    private final QueryReformulator queryReformulator;
 
     public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
                                                PredefinedQueries predefinedQueries) {
         this.ontopEngine = ontopEngine;
         this.graphQueries = predefinedQueries.getGraphQueries();
         this.tupleQueries = predefinedQueries.getTupleQueries();
+        this.queryReformulator = ontopEngine.getQueryReformulator();
     }
 
 
