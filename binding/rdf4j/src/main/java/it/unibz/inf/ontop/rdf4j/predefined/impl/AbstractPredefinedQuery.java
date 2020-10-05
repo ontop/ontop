@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
+import it.unibz.inf.ontop.rdf4j.predefined.InvalidBindingSetException;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
+import org.eclipse.rdf4j.query.BindingSet;
 
 import java.util.Optional;
 
@@ -36,5 +39,10 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
     @Override
     public Optional<String> getDescription() {
         return queryConfig.getDescription();
+    }
+
+    @Override
+    public BindingSet validateAndConvertBindings(ImmutableMap<String, String> bindings) throws InvalidBindingSetException {
+        throw new RuntimeException("TODO: implement binding validation and conversion");
     }
 }

@@ -9,5 +9,8 @@ public interface PredefinedGraphQuery extends PredefinedQuery<RDF4JConstructQuer
 
     Optional<String> getJsonLdFrame();
 
+    /**
+     * NB: remains independent from the bindings
+     */
     ConstructTemplate getConstructTemplate();
 }

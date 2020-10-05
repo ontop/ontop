@@ -9,8 +9,10 @@ import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.rdf4j.predefined.*;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
@@ -18,6 +20,7 @@ import org.apache.http.protocol.HTTP;
 import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.Query.QueryType;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -105,10 +108,9 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                         .orElseThrow(() -> new MinorOntopInternalBugException(
                                 "The selected RDF format should have a writer factory")));
 
-        // TODO: handle invalid bindings
-        IQ executableQuery = createExecutableQuery(predefinedQuery, bindings);
-
         QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, httpHeaders);
+        IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
+
         RDFWriter handler = rdfWriterFactory.getWriter(outputStream);
 
         try(GraphQueryResult result = executeConstructQuery(predefinedQuery.getConstructTemplate(), executableQuery, queryLogger)) {
@@ -154,13 +156,30 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         PredefinedGraphQuery predefinedQuery = Optional.ofNullable(graphQueries.get(queryId))
                 .orElseThrow(() -> new IllegalArgumentException("The query" + queryId + " is not defined as a graph query"));
         ConstructTemplate constructTemplate = predefinedQuery.getConstructTemplate();
-        IQ executableQuery = createExecutableQuery(predefinedQuery, bindings);
         QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, ImmutableMultimap.of());
+        IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
         return executeConstructQuery(constructTemplate, executableQuery, queryLogger);
     }
 
-    private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings) {
-        throw new RuntimeException("TODO: create executable query");
+    /**
+     * TODO: implement it seriously with query caching
+     */
+    private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
+                                     QueryLogger queryLogger) {
+        try {
+            BindingSet bindingSet = predefinedQuery.validateAndConvertBindings(bindings);
+
+            RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
+                    .newBindings(bindingSet);
+
+            return queryReformulator.reformulateIntoNativeQuery(newQuery, queryLogger);
+        } catch (OntopReformulationException e) {
+            throw new QueryEvaluationException(e);
+        }
+    }
+
+    private BindingSet convertBindings(ImmutableMap<String, String> bindings) {
+        throw new RuntimeException("TODO: implement the conversion");
     }
 
     private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
