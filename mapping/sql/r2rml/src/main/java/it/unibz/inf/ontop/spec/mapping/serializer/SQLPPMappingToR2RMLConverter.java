@@ -111,7 +111,7 @@ public class SQLPPMappingToR2RMLConverter {
     private Optional<NonVariableTerm> getFirstTerm(TargetAtom targetAtom) {
         return targetAtom.getSubstitution().getImmutableMap().values().stream()
                 .findFirst()
-                .filter(t -> t instanceof ImmutableFunctionalTerm  || (t instanceof RDFConstant))
+                .filter(t -> t instanceof NonVariableTerm)
                 .map(t -> (NonVariableTerm) t);
     }
 
