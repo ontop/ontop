@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
+import org.apache.commons.rdf.api.RDFTerm;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,18 @@ public class R2rmlConversionTest {
             assertEquals("title", objectMap.getColumn());
             assertNull(objectMap.getDatatype());
             assertEquals("en", objectMap.getLanguageTag());
+            assertNull(objectMap.getTemplate());
+        }
+
+    }
+
+    @Test
+    public void testConstantIri() throws Exception {
+        Collection<TriplesMap> triplesMaps = execute("src/test/resources/npd-constant-iri-mapping.obda");
+        for (TriplesMap triplesMap :triplesMaps){
+            ObjectMap objectMap = triplesMap.getPredicateObjectMap(0).getObjectMap(0);
+            assertEquals("\"Fake point\"", objectMap.getConstant().ntriplesString());
+            assertEquals("<http://sws.ifi.uio.no/data/npd-v2/wellbore/point>", triplesMap.getSubjectMap().getConstant().ntriplesString());
             assertNull(objectMap.getTemplate());
         }
 
