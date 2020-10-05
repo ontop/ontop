@@ -13,7 +13,7 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import java.util.Objects;
 
 
-class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
+class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuery<R> {
 
     protected final ParsedQuery parsedQuery;
     private final String inputQueryString;
@@ -22,7 +22,7 @@ class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
     /**
      * TODO: support bindings
      */
-    RDF4JInputQuery(ParsedQuery parsedQuery, String inputQueryString, BindingSet bindings) {
+    RDF4JInputQueryImpl(ParsedQuery parsedQuery, String inputQueryString, BindingSet bindings) {
         this.parsedQuery = parsedQuery;
         this.inputQueryString = inputQueryString;
         this.bindings = bindings;
@@ -46,7 +46,7 @@ class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RDF4JInputQuery<?> that = (RDF4JInputQuery<?>) o;
+        RDF4JInputQueryImpl<?> that = (RDF4JInputQueryImpl<?>) o;
         return inputQueryString.equals(that.inputQueryString)
                 && bindings.equals(that.bindings);
     }

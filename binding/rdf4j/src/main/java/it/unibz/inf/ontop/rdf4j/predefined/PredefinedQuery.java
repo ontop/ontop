@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.rdf4j.predefined;
 
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 
 import java.util.Optional;
 
-public interface PredefinedQuery<Q extends InputQuery> {
+public interface PredefinedQuery<Q extends RDF4JInputQuery> {
 
     Q getInputQuery();
 

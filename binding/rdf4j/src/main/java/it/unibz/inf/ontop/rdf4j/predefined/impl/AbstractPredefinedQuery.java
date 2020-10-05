@@ -1,13 +1,12 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.Optional;
 
-public class AbstractPredefinedQuery<Q extends InputQuery> implements PredefinedQuery<Q> {
+public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements PredefinedQuery<Q> {
 
     private final String id;
     private final PredefinedQueryConfigEntry queryConfig;
