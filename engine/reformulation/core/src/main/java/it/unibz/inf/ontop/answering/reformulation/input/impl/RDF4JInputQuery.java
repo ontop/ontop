@@ -47,11 +47,12 @@ class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RDF4JInputQuery<?> that = (RDF4JInputQuery<?>) o;
-        return inputQueryString.equals(that.inputQueryString);
+        return inputQueryString.equals(that.inputQueryString)
+                && bindings.equals(that.bindings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(inputQueryString);
+        return Objects.hash(inputQueryString, bindings);
     }
 }
