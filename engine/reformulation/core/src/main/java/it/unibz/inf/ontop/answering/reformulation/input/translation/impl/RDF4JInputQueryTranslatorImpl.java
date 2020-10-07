@@ -378,29 +378,31 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private TranslationResult translateOrder(Order node, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult child = translate(node.getArg(), externalBindings);
         ImmutableSet<Variable> variables = child.iqTree.getVariables();
-        return createTranslationResult(
-                iqFactory.createUnaryIQTree(
-                        iqFactory.createOrderByNode(
-                                node.getElements().stream()
-                                        .map(o -> getOrderComparator(o, variables, externalBindings))
-                                        .collect(ImmutableCollectors.toList())
-                        ),
-                        child.iqTree
-                ),
-                child.nullableVariables
-        );
+
+        ImmutableList<OrderByNode.OrderComparator> comparators = node.getElements().stream()
+                .map(o -> getOrderComparator(o, variables, externalBindings))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
+
+        return comparators.isEmpty()
+                ? child
+                : createTranslationResult(
+                        iqFactory.createUnaryIQTree(
+                                iqFactory.createOrderByNode(comparators),
+                                child.iqTree),
+                        child.nullableVariables);
     }
 
-    private OrderByNode.OrderComparator getOrderComparator(OrderElem oe, ImmutableSet<Variable> variables, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    private Optional<OrderByNode.OrderComparator> getOrderComparator(OrderElem oe, ImmutableSet<Variable> variables, ImmutableMap<Variable, GroundTerm> externalBindings) {
         ImmutableTerm expr = getTerm(oe.getExpr(), variables, externalBindings);
         if (expr.isGround()) {
-            throw new RuntimeException(
-                    new OntopUnsupportedInputQueryException("The ordering criterion " + oe.getExpr() + "does not contain any variables"));
+            return Optional.empty();
         }
-        return iqFactory.createOrderComparator(
+        return Optional.of(iqFactory.createOrderComparator(
                 (NonGroundTerm) expr,
                 oe.isAscending()
-        );
+        ));
     }
 
 
