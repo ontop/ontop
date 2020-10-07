@@ -366,6 +366,22 @@ public class GeoSPARQLTest {
         assertTrue(val.startsWith("POLYGON ((0.9100"));
     }
 
+    @Test // Case when SRIDs defined are both EPSG3044 (Non WGS84) - Cartesian
+    public void testSelectBuffer_Metre_EPSG3044() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "SELECT ?x WHERE {\n" +
+                "<http://ex.org/epsg3044/21> a :Geom; geo:asWKT ?xWkt.\n" +
+                "BIND(geof:buffer(?xWkt, 10000, uom:metre) as ?x) .\n" +
+                "}\n";
+        String val = runQueryAndReturnString(query);
+        assertTrue(val.startsWith("POLYGON ((678682"));
+    }
+
     private String runQueryReturnIndividual(String query) throws OWLException {
         try (OWLStatement st = conn.createStatement()) {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
