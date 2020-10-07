@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.rdf4j.predefined.*;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.http.protocol.HTTP;
 import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
@@ -35,6 +36,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
 
@@ -94,7 +96,12 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                                           Consumer<Integer> httpStatusSetter, OutputStream outputStream) {
 
         RDFWriterRegistry registry = RDFWriterRegistry.getInstance();
-        Optional<RDFFormat> optionalFormat = extractFormat(acceptMediaTypes, registry, RDFFormat.JSONLD,
+
+        Stream<String> mediaTypes = acceptMediaTypes.stream()
+                // So as to give priority to JSON-LD in browser
+                .filter(s -> !s.equals("application/xml"));
+
+        Optional<RDFFormat> optionalFormat = extractFormat(mediaTypes, registry, RDFFormat.JSONLD,
                 m -> Optional.of(m)
                         .filter(a -> a.contains("json"))
                         .map(a -> RDFFormat.JSONLD));
@@ -134,11 +141,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         throw new RuntimeException("TODO: implement special writer with framing");
     }
 
-    private <FF extends FileFormat, S> Optional<FF> extractFormat(ImmutableList<String> acceptMediaTypes,
+    private <FF extends FileFormat, S> Optional<FF> extractFormat(Stream<String> acceptMediaTypes,
                                                                   FileFormatServiceRegistry<FF, S> registry,
                                                                   FF defaultFormat,
                                                                   Function<String, Optional<FF>> otherFormatFct) {
-        return acceptMediaTypes.stream()
+        return acceptMediaTypes
                 .map(m -> m.startsWith("*/*")
                         ? Optional.of(defaultFormat)
                         : registry.getFileFormatForMIMEType(m)
