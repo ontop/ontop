@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.exception.OntopReformulationException;
 
 public class InvalidBindingSetException extends OntopReformulationException {
 
-    protected InvalidBindingSetException(String message) {
+    public InvalidBindingSetException(String message) {
         super(message);
     }
 
@@ -12,7 +12,7 @@ public class InvalidBindingSetException extends OntopReformulationException {
         super(e);
     }
 
-    protected InvalidBindingSetException(String message, Exception e) {
+    public InvalidBindingSetException(String message, Exception e) {
         super(message, e);
     }
 }

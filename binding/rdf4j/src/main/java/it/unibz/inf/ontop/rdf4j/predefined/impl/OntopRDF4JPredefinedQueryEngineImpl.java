@@ -20,6 +20,8 @@ import org.apache.http.protocol.HTTP;
 import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.Query.QueryType;
@@ -176,10 +178,6 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         } catch (OntopReformulationException e) {
             throw new QueryEvaluationException(e);
         }
-    }
-
-    private BindingSet convertBindings(ImmutableMap<String, String> bindings) {
-        throw new RuntimeException("TODO: implement the conversion");
     }
 
     private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,

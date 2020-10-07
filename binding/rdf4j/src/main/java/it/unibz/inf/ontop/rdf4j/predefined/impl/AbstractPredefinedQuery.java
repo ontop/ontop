@@ -2,11 +2,17 @@ package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.rdf4j.predefined.InvalidBindingSetException;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements PredefinedQuery<Q> {
@@ -41,8 +47,48 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
         return queryConfig.getDescription();
     }
 
+    /**
+     * TODO: implement it seriously
+     */
     @Override
     public BindingSet validateAndConvertBindings(ImmutableMap<String, String> bindings) throws InvalidBindingSetException {
-        throw new RuntimeException("TODO: implement binding validation and conversion");
+        ValueFactory valueFactory = SimpleValueFactory.getInstance();
+
+        ImmutableMap<String, PredefinedQueryConfigEntry.QueryParameter> parameterConfigMap = queryConfig.getParameters();
+
+        MapBindingSet bindingSet = new MapBindingSet();
+
+        for (Map.Entry<String, PredefinedQueryConfigEntry.QueryParameter> parameterEntry : parameterConfigMap.entrySet()) {
+            String parameterId = parameterEntry.getKey();
+            PredefinedQueryConfigEntry.QueryParameter queryParameter = parameterEntry.getValue();
+
+            if (!bindings.containsKey(parameterId)) {
+                if (queryParameter.getRequired())
+                    // TODO: should we collect all the missing required parameters?
+                    throw new InvalidBindingSetException("The required parameter " + parameterId + " is missing");
+                break;
+            }
+            String lexicalValue = bindings.get(parameterId);
+            bindingSet.addBinding(parameterId, convertAndValidate(lexicalValue, queryParameter.getType(), valueFactory));
+        }
+
+        return bindingSet;
+    }
+
+    /**
+     * TODO: perform some validation
+     */
+    private Value convertAndValidate(String lexicalValue, PredefinedQueryConfigEntry.QueryParameterType parameterType,
+                                     ValueFactory valueFactory) {
+        switch (parameterType.getCategory()) {
+            case IRI:
+                return valueFactory.createIRI(lexicalValue);
+            case TYPED_LITERAL:
+                return valueFactory.createLiteral(lexicalValue,
+                        parameterType.getDatatypeIRI()
+                                .orElseThrow(() -> new MinorOntopInternalBugException("A typed literal must have a datatype IRI")));
+            default:
+                throw new MinorOntopInternalBugException("Not supported category: " + parameterType.getCategory());
+        }
     }
 }

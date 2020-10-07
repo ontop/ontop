@@ -3,10 +3,14 @@ package it.unibz.inf.ontop.rdf4j.predefined.parsing.impl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.Query;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry.QueryParameterCategory.IRI;
+import static it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry.QueryParameterCategory.TYPED_LITERAL;
 
 /**
  * TODO: enforce required (shall we use @JsonCreator?)
@@ -62,6 +66,7 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         return Optional.ofNullable(frame);
     }
 
+    @Override
     public ImmutableMap<String, QueryParameter> getParameters() {
         if (typedParameters == null)
             typedParameters = ImmutableMap.copyOf(parameters);
@@ -74,8 +79,12 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
     protected static class ParsedQueryParameter implements QueryParameter {
         @JsonProperty(value = "description", required = false)
         private String description;
+
         @JsonProperty(value = "type", required = true)
         private String type;
+        // LAZY
+        private QueryParameterType parameterType;
+
         @JsonProperty(value = "safeForRandomGeneration", required = true)
         private Boolean safeForRandomGeneration;
         @JsonProperty(value = "required", required = true)
@@ -86,10 +95,6 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
             return Optional.ofNullable(description);
         }
 
-        public String getType() {
-            return type;
-        }
-
         @Override
         public Boolean getSafeForRandomGeneration() {
             return safeForRandomGeneration;
@@ -98,6 +103,20 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         @Override
         public Boolean getRequired() {
             return required;
+        }
+
+        /**
+         * TODO: see how to complain about invalid type
+         */
+        @Override
+        public QueryParameterType getType() {
+            if (parameterType == null) {
+                if (type.toUpperCase().equals("IRI"))
+                    return new QueryParameterTypeImpl(IRI);
+                // TODO: throw a proper exception for invalid IRI
+                return new QueryParameterTypeImpl(TYPED_LITERAL, SimpleValueFactory.getInstance().createIRI(type));
+            }
+            return parameterType;
         }
     }
 }

@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * See QueryLogger.Factory for constructing new instances
+ */
 public class QueryLoggerImpl implements QueryLogger {
 
     public static final String OUTPUT_STREAM_JSON_ERROR = "Problem with the output stream for the query logger. Disabled";
