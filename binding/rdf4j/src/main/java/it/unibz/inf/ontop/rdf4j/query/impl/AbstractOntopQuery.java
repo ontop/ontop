@@ -22,16 +22,12 @@ package it.unibz.inf.ontop.rdf4j.query.impl;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
-import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
 /**
  * TODO: get rid of the query string and keeps the bindings separated from the ParsedQuery
@@ -127,68 +123,15 @@ public abstract class AbstractOntopQuery implements Query {
 
     //all code below is copy-pasted from org.eclipse.rdf4j.repository.sparql.query.SPARQLOperation
     protected String getQueryString() {
-        if (bindings.size() == 0)
-            return queryString;
-        String qry = queryString;
-        int b = qry.indexOf('{');
-        String select = qry.substring(0, b);
-        String where = qry.substring(b);
-        for (String name : bindings.getBindingNames()) {
-            String replacement = getReplacement(bindings.getValue(name));
-            if (replacement != null) {
-                String pattern = "[\\?\\$]" + name + "(?=\\W)";
-                select = select.replaceAll(pattern, "");
-                where = where.replaceAll(pattern, replacement);
-            }
-        }
-        return select + where;
+        return queryString;
     }
 
     protected ParsedQuery getParsedQuery() {
-        // NB: no binding at construction time
-        if (bindings.size() == 0)
-            return initialParsedQuery;
-        else {
-            return QueryParserUtil.parseQuery(QueryLanguage.SPARQL, getQueryString(), baseIRI);
-        }
+        return initialParsedQuery;
     }
 
     protected ImmutableMultimap<String, String> getHttpHeaders() {
         return httpHeaders;
     }
 
-
-    private String getReplacement(Value value) {
-        StringBuilder sb = new StringBuilder();
-        if (value instanceof IRI) {
-            return appendValue(sb, (IRI) value).toString();
-        } else if (value instanceof Literal) {
-            return appendValue(sb, (Literal) value).toString();
-        } else {
-            throw new IllegalArgumentException(
-                    "BNode references not supported by SPARQL end-points");
-        }
-    }
-
-    private StringBuilder appendValue(StringBuilder sb, IRI uri) {
-        sb.append("<").append(uri.stringValue()).append(">");
-        return sb;
-    }
-
-    private StringBuilder appendValue(StringBuilder sb, Literal lit) {
-        sb.append('"');
-        sb.append(lit.getLabel().replace("\"", "\\\""));
-        sb.append('"');
-
-        if (lit.getLanguage() != null) {
-            sb.append('@');
-            sb.append(lit.getLanguage());
-        }
-        else if (lit.getDatatype() != null) {
-            sb.append("^^<");
-            sb.append(lit.getDatatype().stringValue());
-            sb.append('>');
-        }
-        return sb;
-    }
 }

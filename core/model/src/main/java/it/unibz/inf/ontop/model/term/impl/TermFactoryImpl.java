@@ -325,11 +325,17 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms) {
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl(this, (BooleanFunctionSymbol) functor, terms);
+		else
         return new NonGroundFunctionalTermImpl(this, functor, terms);
     }
 
     @Override
     public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms) {
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl((BooleanFunctionSymbol) functor, terms, this);
+		else
         return new NonGroundFunctionalTermImpl(functor, terms, this);
     }
 
