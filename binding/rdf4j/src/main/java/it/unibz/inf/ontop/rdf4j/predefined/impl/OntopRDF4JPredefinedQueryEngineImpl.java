@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.rdf4j.predefined.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.rdf4j.predefined.*;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
@@ -20,8 +22,6 @@ import org.apache.http.protocol.HTTP;
 import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.Query.QueryType;
@@ -45,13 +45,18 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final ImmutableMap<String, PredefinedGraphQuery> graphQueries;
     private final ImmutableMap<String, PredefinedTupleQuery> tupleQueries;
     private final QueryReformulator queryReformulator;
+    private final QueryLogger.Factory queryLoggerFactory;
 
     public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
-                                               PredefinedQueries predefinedQueries) {
+                                               PredefinedQueries predefinedQueries,
+                                               OntopSystemConfiguration configuration) {
         this.ontopEngine = ontopEngine;
         this.graphQueries = predefinedQueries.getGraphQueries();
         this.tupleQueries = predefinedQueries.getTupleQueries();
         this.queryReformulator = ontopEngine.getQueryReformulator();
+
+        Injector injector = configuration.getInjector();
+        queryLoggerFactory = injector.getInstance(QueryLogger.Factory.class);
     }
 
 
@@ -75,8 +80,10 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                 throw new RuntimeException("TODO: support ask queries");
             case GRAPH:
                 evaluateGraphWithHandler(graphQueries.get(queryId), bindings, acceptMediaTypes, httpHeaders, httpHeaderSetter, httpStatusSetter, outputStream);
+                break;
             case TUPLE:
                 evaluateTupleWithHandler(queryId, bindings, acceptMediaTypes, httpHeaders, httpHeaderSetter, httpStatusSetter, outputStream);
+                break;
             default:
                 throw new MinorOntopInternalBugException("Unexpected query type");
         }
@@ -174,15 +181,22 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
             RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
                     .newBindings(bindingSet);
 
+            // TODO: remove
+            System.out.println("BINDINGS: " + bindings);
+            System.out.println("BINDING SET: " + bindingSet);
+
             return queryReformulator.reformulateIntoNativeQuery(newQuery, queryLogger);
         } catch (OntopReformulationException e) {
             throw new QueryEvaluationException(e);
         }
     }
 
+    /**
+     * TODO: Provide the predefined query info to the query logger
+     */
     private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
                                           ImmutableMultimap<String, String> httpHeaders) {
-        throw new RuntimeException("TODO: create query logger");
+        return queryLoggerFactory.create(httpHeaders);
     }
 
     private GraphQueryResult executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery,

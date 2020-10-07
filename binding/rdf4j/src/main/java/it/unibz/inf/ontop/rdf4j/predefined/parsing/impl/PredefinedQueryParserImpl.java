@@ -6,9 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Injector;
 import com.moandjiezana.toml.Toml;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JConstructQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedGraphQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQueries;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedTupleQuery;
@@ -18,7 +22,10 @@ import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigExceptio
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryParser;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,6 +36,13 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PredefinedQueryParserImpl implements PredefinedQueryParser {
+
+    private final RDF4JInputQueryFactory inputQueryFactory;
+
+    public PredefinedQueryParserImpl(OntopSystemConfiguration configuration) {
+        Injector injector = configuration.getInjector();
+        inputQueryFactory = injector.getInstance(RDF4JInputQueryFactory.class);
+    }
 
     @Override
     public PredefinedQueries parse(@Nonnull Reader configReader, @Nonnull Reader queryReader) throws PredefinedQueryConfigException {
@@ -44,10 +58,8 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
         try {
             Toml toml = new Toml().read(queryReader);
             ImmutableMap<String, String> queryMap = toml.entrySet().stream()
-                    .filter(e -> e.getValue() instanceof Map)
-                    .flatMap(e -> Optional.ofNullable(((Map) e.getValue()).get("query"))
-                            .filter(v -> v instanceof String)
-                            .map(v -> (String) v)
+                    .filter(e -> e.getValue() instanceof Toml)
+                    .flatMap(e -> Optional.ofNullable(((Toml) e.getValue()).getString("query"))
                             .map(v -> Maps.immutableEntry(e.getKey(), v))
                             .map(Stream::of)
                             .orElseGet(Stream::empty))
@@ -58,8 +70,13 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
                     .getQueries();
 
             Sets.SetView<String> missingQueries = Sets.difference(configEntries.keySet(), queryMap.keySet());
-            if (!missingQueries.isEmpty())
+            if (!missingQueries.isEmpty()) {
+                // TODO: remove this print
+                System.err.println("Entries parsed: " + toml.entrySet().stream()
+                        //.filter(e -> e.getValue() instanceof Map)
+                        .collect(ImmutableCollectors.toMap()));
                 throw new PredefinedQueryConfigException("Missing query entries for " + missingQueries);
+                }
 
             // TODO: consider contexts
 
@@ -87,8 +104,10 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
 
     private PredefinedGraphQuery createPredefinedGraphQuery(String id, PredefinedQueryConfigEntry queryConfigEntry,
                                                             String queryString) {
-        throw new RuntimeException("TODO: continue with graph queries");
-        // return new PredefinedGraphQueryImpl(id, queryString, constructQuery, queryConfigEntry);
+        ParsedQuery parsedTree = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, null);
+        RDF4JConstructQuery graphQuery = inputQueryFactory.createConstructQuery(queryString, parsedTree, new MapBindingSet());
+
+        return new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry);
     }
 
     private PredefinedTupleQuery createPredefinedTupleQuery(String id, PredefinedQueryConfigEntry queryConfigEntry,
@@ -100,7 +119,7 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
         private final ImmutableMap<String, PredefinedQueryConfigEntry> queries;
 
         @JsonCreator
-        public Config(@JsonProperty("queries") Map<String, PredefinedQueryConfigEntry> queries) {
+        public Config(@JsonProperty("queries") Map<String, ParsedPredefinedQueryConfigEntry> queries) {
             this.queries = ImmutableMap.copyOf(queries);
         }
 
