@@ -329,7 +329,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
                 new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType),
                 new GeofIntersectionFunctionSymbolImpl(GEOF.INTERSECTION, wktLiteral),
-                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral, iriType),
+                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral),
                 new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral),
                 new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral),
                 new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral),

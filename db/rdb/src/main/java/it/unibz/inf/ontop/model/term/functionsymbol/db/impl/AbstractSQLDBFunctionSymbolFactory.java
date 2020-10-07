@@ -322,11 +322,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol boundarySymbol = new GeoDBTypedFunctionSymbol(ST_BOUNDARY, 1, dbStringType, false,
                 abstractRootDBType);
-        builder.put(ST_BOUNDARY, 2, boundarySymbol);
+        builder.put(ST_BOUNDARY, 1, boundarySymbol);
 
         DBFunctionSymbol convexhullSymbol = new GeoDBTypedFunctionSymbol(ST_CONVEXHULL, 1, dbStringType, false,
                 abstractRootDBType);
-        builder.put(ST_CONVEXHULL, 2, convexhullSymbol);
+        builder.put(ST_CONVEXHULL, 1, convexhullSymbol);
 
         DBFunctionSymbol differenceSymbol = new GeoDBTypedFunctionSymbol(ST_DIFFERENCE, 2, dbStringType, false,
                 abstractRootDBType);
@@ -338,7 +338,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol envelopeSymbol = new GeoDBTypedFunctionSymbol(ST_ENVELOPE, 1, dbStringType, false,
                 abstractRootDBType);
-        builder.put(ST_ENVELOPE, 2, envelopeSymbol);
+        builder.put(ST_ENVELOPE, 1, envelopeSymbol);
 
         DBFunctionSymbol unionSymbol = new GeoDBTypedFunctionSymbol(ST_UNION, 2, dbStringType, false,
                 abstractRootDBType);
@@ -354,7 +354,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol getsridSymbol = new GeoDBTypedFunctionSymbol(ST_SRID, 1, dbIntType, false,
                 abstractRootDBType);
-        builder.put(ST_SRID, 2, getsridSymbol);
+        builder.put(ST_SRID, 1, getsridSymbol);
 
         /*DBFunctionSymbol flipCoordinatesSymbol = new GeoDBTypedFunctionSymbol(ST_FLIP_COORDINATES, 1, dbStringType, false,
                 abstractRootDBType);

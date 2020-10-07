@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Function;
 
 public class GeofBoundaryFunctionSymbolImpl extends AbstractUnaryGeofWKTFunctionSymbolDirectImpl {
-    public GeofBoundaryFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType) {
+    public GeofBoundaryFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType) {
         super("GEOF_BOUNDARY", functionIRI, ImmutableList.of(wktLiteralType), wktLiteralType);
     }
 
