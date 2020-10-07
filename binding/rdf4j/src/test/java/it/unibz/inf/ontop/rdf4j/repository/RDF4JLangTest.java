@@ -184,6 +184,162 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
     }
 
     @Test
+    public void testExternalBinding9() {
+        String query = "SELECT (CONCAT(?l,?f) AS ?v) \n" +
+                "WHERE {\n" +
+                "   ?s rdfs:label ?l .\n" +
+                "}\n";
+
+        ImmutableList<String> results = ImmutableList.of("testdatassss");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("f", SimpleValueFactory.getInstance().createLiteral("ssss"));
+        bindings.addBinding("v", SimpleValueFactory.getInstance().createLiteral("testdatassss"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding10() {
+        String query = "SELECT *\n" +
+                "WHERE {\n" +
+                "   ?s rdfs:label ?v .\n" +
+                "   BIND(CONCAT(?v,?f) AS ?r)" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        ImmutableList<String> results = ImmutableList.of("testdata");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("f", SimpleValueFactory.getInstance().createLiteral("ssss"));
+        bindings.addBinding("r", SimpleValueFactory.getInstance().createLiteral("testdatassss"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding11() {
+        String query = "SELECT *\n" +
+                "WHERE {\n" +
+                "   ?s rdfs:label ?l ; rdfs:comment ?v .\n" +
+                "   FILTER(str(?l) = ?f)\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        ImmutableList<String> results = ImmutableList.of("Deutsche Beschreibung","English description");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("f", SimpleValueFactory.getInstance().createLiteral("testdata"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding12() {
+        String query = "SELECT *\n" +
+                "WHERE {\n" +
+                "   ?s rdfs:comment ?c .\n" +
+                "   OPTIONAL { \n" +
+                "      ?s rdfs:label ?l ." +
+                "   }\n" +
+                "   BIND(COALESCE(?l,?c) AS ?v) \n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        ImmutableList<String> results = ImmutableList.of("Deutsche Beschreibung","English description");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("l", SimpleValueFactory.getInstance().createLiteral("NO DATA"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding13() {
+        String query = "SELECT *\n" +
+                "WHERE {\n" +
+                "   ?s rdfs:comment ?c .\n" +
+                "   OPTIONAL { \n" +
+                "      ?s rdfs:label ?l ." +
+                "   }\n" +
+                "   BIND(COALESCE(?l,?c) AS ?v) \n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        ImmutableList<String> results = ImmutableList.of("testdata","testdata");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("l", SimpleValueFactory.getInstance().createLiteral("testdata", "en"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding14() {
+        String query = "SELECT *\n" +
+                "WHERE {\n" +
+                "   ?s rdfs:comment ?v .\n" +
+                "   OPTIONAL { \n" +
+                "      ?s rdfs:label ?l ." +
+                "   }\n" +
+                "   FILTER (str(COALESCE(?l,?v)) = \"testdata\") \n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        ImmutableList<String> results = ImmutableList.of("Deutsche Beschreibung","English description");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("l", SimpleValueFactory.getInstance().createLiteral("testdata", "en"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding15() {
+        String query = "SELECT *\n" +
+                "WHERE {\n" +
+                "   ?s rdfs:comment ?v .\n" +
+                "   OPTIONAL { \n" +
+                "      ?s rdfs:label ?l ." +
+                "   }\n" +
+                "   FILTER (str(COALESCE(?l,?v)) = \"NO DATA\") \n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        ImmutableList<String> results = ImmutableList.of();
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("l", SimpleValueFactory.getInstance().createLiteral("NO DATA", "en"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding16() {
+        String query = "SELECT  *\n" +
+                "WHERE {\n" +
+                "   ?s rdfs:label ?l ; rdfs:comment ?v .\n" +
+                "}\n" +
+                "ORDER BY ?o ?v";
+
+        ImmutableList<String> results = ImmutableList.of("Deutsche Beschreibung","English description");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("l", SimpleValueFactory.getInstance().createLiteral("testdata", "en"));
+        bindings.addBinding("o", SimpleValueFactory.getInstance().createLiteral("some"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding17() {
+        String query = "SELECT (CONCAT(?l,?r) AS ?v) \n" +
+                "WHERE {\n" +
+                "   BIND(CONCAT(?f, \"ss\") AS ?r)\n" +
+                "   ?s rdfs:label ?l .\n" +
+                "}\n";
+
+        ImmutableList<String> results = ImmutableList.of("testdatassss");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("f", SimpleValueFactory.getInstance().createLiteral("ss"));
+        bindings.addBinding("v", SimpleValueFactory.getInstance().createLiteral("testdatassss"));
+
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
     public void testExternalBindingGraph1() {
         String query = "CONSTRUCT {\n" +
                 "  <http://ex.org/21> rdfs:label ?l \n" +
