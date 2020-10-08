@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -8,8 +10,10 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
+import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -18,7 +22,6 @@ import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.rdf4j.predefined.*;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.http.protocol.HTTP;
 import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
@@ -33,6 +36,7 @@ import org.eclipse.rdf4j.rio.*;
 
 import java.io.OutputStream;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -40,6 +44,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
 
+@SuppressWarnings("UnstableApiUsage")
 public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefinedQueryEngine {
 
 
@@ -48,6 +53,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final ImmutableMap<String, PredefinedTupleQuery> tupleQueries;
     private final QueryReformulator queryReformulator;
     private final QueryLogger.Factory queryLoggerFactory;
+    private final Cache<ImmutableMap<String, String>, IQ> referenceQueryCache;
+    private final ReferenceValueReplacer valueReplacer;
 
     public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
                                                PredefinedQueries predefinedQueries,
@@ -59,6 +66,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
         Injector injector = configuration.getInjector();
         queryLoggerFactory = injector.getInstance(QueryLogger.Factory.class);
+        valueReplacer = injector.getInstance(ReferenceValueReplacer.class);
+
+        // TODO: think about the dimensions
+        referenceQueryCache = CacheBuilder.newBuilder()
+                .build();
     }
 
 
@@ -182,20 +194,31 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
      */
     private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
                                      QueryLogger queryLogger) {
+
+        // TODO: validate the bindings
+        ImmutableMap<String, String> bindingWithReferences = predefinedQuery.replaceWithReferenceValues(bindings);
+
         try {
-            BindingSet bindingSet = predefinedQuery.validateAndConvertBindings(bindings);
+            IQ referenceIQ = referenceQueryCache.get(
+                    bindingWithReferences,
+                    () -> generateReferenceQuery(predefinedQuery, bindingWithReferences, queryLogger));
 
-            RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
-                    .newBindings(bindingSet);
+            return valueReplacer.replaceReferenceValues(referenceIQ, bindings, bindingWithReferences);
 
-            // TODO: remove
-            System.out.println("BINDINGS: " + bindings);
-            System.out.println("BINDING SET: " + bindingSet);
-
-            return queryReformulator.reformulateIntoNativeQuery(newQuery, queryLogger);
-        } catch (OntopReformulationException e) {
-            throw new QueryEvaluationException(e);
+        } catch (ExecutionException e) {
+            // TODO: return a better exception
+            throw new QueryEvaluationException(e.getCause());
         }
+    }
+
+    private IQ generateReferenceQuery(PredefinedQuery predefinedQuery,
+                                      ImmutableMap<String, String> bindingWithReferences, QueryLogger queryLogger)
+            throws OntopReformulationException {
+        BindingSet bindingSet = predefinedQuery.validateAndConvertBindings(bindingWithReferences);
+        RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
+                .newBindings(bindingSet);
+
+        return queryReformulator.reformulateIntoNativeQuery(newQuery, queryLogger);
     }
 
     /**

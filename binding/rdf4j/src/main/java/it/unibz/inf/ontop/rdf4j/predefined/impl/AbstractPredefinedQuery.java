@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.rdf4j.predefined.InvalidBindingSetException;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -73,6 +74,19 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
         }
 
         return bindingSet;
+    }
+
+    @Override
+    public ImmutableMap<String, String> replaceWithReferenceValues(ImmutableMap<String, String> bindings) {
+        ImmutableMap<String, PredefinedQueryConfigEntry.QueryParameter> parameterMap = queryConfig.getParameters();
+
+        return bindings.entrySet().stream()
+                .filter(e -> parameterMap.containsKey(e.getKey()))
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> parameterMap.get(e.getKey())
+                                .getReferenceValue(e.getValue())
+                                .orElseGet(e::getValue)));
     }
 
     /**

@@ -2,12 +2,17 @@ package it.unibz.inf.ontop.rdf4j.predefined.parsing.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.Query;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry.QueryParameterCategory.IRI;
 import static it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry.QueryParameterCategory.TYPED_LITERAL;
@@ -85,6 +90,9 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         // LAZY
         private QueryParameterType parameterType;
 
+        // LAZY
+        private String referenceValue;
+
         @JsonProperty(value = "safeForRandomGeneration", required = true)
         private Boolean safeForRandomGeneration;
         @JsonProperty(value = "required", required = true)
@@ -96,7 +104,7 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         }
 
         @Override
-        public Boolean getSafeForRandomGeneration() {
+        public Boolean isSafeForRandomGeneration() {
             return safeForRandomGeneration;
         }
 
@@ -113,10 +121,52 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
             if (parameterType == null) {
                 if (type.toUpperCase().equals("IRI"))
                     return new QueryParameterTypeImpl(IRI);
+
+                String typeString = type.startsWith("xsd:")
+                        ? XSD.PREFIX + type.substring(4)
+                        : type;
                 // TODO: throw a proper exception for invalid IRI
-                return new QueryParameterTypeImpl(TYPED_LITERAL, SimpleValueFactory.getInstance().createIRI(type));
+                return new QueryParameterTypeImpl(TYPED_LITERAL, SimpleValueFactory.getInstance().createIRI(typeString));
             }
             return parameterType;
+        }
+
+        @Override
+        public Optional<String> getReferenceValue(String value) {
+            if (!isSafeForRandomGeneration())
+                return Optional.empty();
+
+            if (referenceValue == null) {
+                synchronized (this) {
+                    if (referenceValue == null)
+                        referenceValue = generateReferenceValue(getType());
+                }
+            }
+            return Optional.of(referenceValue);
+        }
+
+        private static String generateReferenceValue(QueryParameterType paramType) {
+
+            switch (paramType.getCategory()) {
+                case IRI:
+                    throw new RuntimeException("TODO: support generating ref values for IRIs");
+                case TYPED_LITERAL:
+                    return generateReferenceLiteralValue(paramType.getDatatypeIRI()
+                            .orElseThrow(() -> new MinorOntopInternalBugException("Invalid typed literal")));
+                default:
+                    throw new MinorOntopInternalBugException("Unexpected parameter type: " + paramType.getCategory());
+            }
+        }
+
+        private static String generateReferenceLiteralValue(IRI datatype) {
+            String iriString = datatype.stringValue();
+
+            // TODO: avoid the series of IF
+            if (iriString.equals(XSD.STRING.getIRIString())) {
+                return UUID.randomUUID().toString();
+            }
+            else
+                throw new RuntimeException("TODO: support random generation of " + datatype);
         }
     }
 }

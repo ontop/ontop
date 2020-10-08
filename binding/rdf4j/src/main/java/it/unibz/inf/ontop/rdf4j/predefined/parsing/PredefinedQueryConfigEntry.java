@@ -19,11 +19,16 @@ public interface PredefinedQueryConfigEntry {
 
         Optional<String> getDescription();
 
-        Boolean getSafeForRandomGeneration();
+        Boolean isSafeForRandomGeneration();
 
         Boolean getRequired();
 
         QueryParameterType getType();
+
+        /**
+         * Returns a reference value only if safe for random generation
+         */
+        Optional<String> getReferenceValue(String value);
     }
 
     interface QueryParameterType {

@@ -8,8 +8,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import com.moandjiezana.toml.Toml;
-import it.unibz.inf.ontop.answering.reformulation.input.ConstructQuery;
-import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JConstructQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
@@ -70,13 +68,8 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
                     .getQueries();
 
             Sets.SetView<String> missingQueries = Sets.difference(configEntries.keySet(), queryMap.keySet());
-            if (!missingQueries.isEmpty()) {
-                // TODO: remove this print
-                System.err.println("Entries parsed: " + toml.entrySet().stream()
-                        //.filter(e -> e.getValue() instanceof Map)
-                        .collect(ImmutableCollectors.toMap()));
+            if (!missingQueries.isEmpty())
                 throw new PredefinedQueryConfigException("Missing query entries for " + missingQueries);
-                }
 
             // TODO: consider contexts
 
