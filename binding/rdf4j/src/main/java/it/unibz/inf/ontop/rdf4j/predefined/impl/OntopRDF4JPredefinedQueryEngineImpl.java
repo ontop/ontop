@@ -203,7 +203,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                     bindingWithReferences,
                     () -> generateReferenceQuery(predefinedQuery, bindingWithReferences, queryLogger));
 
-            return valueReplacer.replaceReferenceValues(referenceIQ, bindings, bindingWithReferences);
+            IQ newIQ = valueReplacer.replaceReferenceValues(referenceIQ, bindings, bindingWithReferences);
+            // TODO: revisit it
+            queryLogger.declareReformulationFinishedAndSerialize(newIQ, false);
+            return newIQ;
+
 
         } catch (ExecutionException e) {
             // TODO: return a better exception
