@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.rdf4j.predefined.parsing.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -29,6 +30,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -71,7 +73,9 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
             if (!missingQueries.isEmpty())
                 throw new PredefinedQueryConfigException("Missing query entries for " + missingQueries);
 
-            // TODO: consider contexts
+            ImmutableMap<String, Object> contextMap = contextReader == null
+                    ? ImmutableMap.of()
+                    : ImmutableMap.copyOf(mapper.readValue(contextReader, new TypeReference<HashMap<String, Object>>() {}));
 
             ImmutableMap<String, PredefinedGraphQuery> graphQueries = configEntries.entrySet().stream()
                     .filter(e -> e.getValue().getQueryType().equals(Query.QueryType.GRAPH))
@@ -79,7 +83,7 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
                             Map.Entry::getKey,
                             // TODO: consider contexts
                             e -> createPredefinedGraphQuery(e.getKey(), e.getValue(),
-                                    queryMap.get(e.getKey()))));
+                                    queryMap.get(e.getKey()), contextMap)));
 
             ImmutableMap<String, PredefinedTupleQuery> tupleQueries = configEntries.entrySet().stream()
                     .filter(e -> e.getValue().getQueryType().equals(Query.QueryType.TUPLE))
@@ -88,7 +92,7 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
                             e -> createPredefinedTupleQuery(e.getKey(), e.getValue(),
                                     queryMap.get(e.getKey()))));
 
-            return PredefinedQueries.defaultPredefinedQueries(tupleQueries, graphQueries);
+            return PredefinedQueries.defaultPredefinedQueries(tupleQueries, graphQueries, contextMap);
 
         } catch (IOException e) {
             throw new PredefinedQueryConfigException(e);
@@ -96,11 +100,17 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
     }
 
     private PredefinedGraphQuery createPredefinedGraphQuery(String id, PredefinedQueryConfigEntry queryConfigEntry,
-                                                            String queryString) {
+                                                            String queryString, ImmutableMap<String, Object> expandContextMap) {
         ParsedQuery parsedTree = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, null);
         RDF4JConstructQuery graphQuery = inputQueryFactory.createConstructQuery(queryString, parsedTree, new MapBindingSet());
 
-        return new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry);
+        Optional<Object> expandedContext = queryConfigEntry.getExpandContextKey()
+                .map(k -> Optional.ofNullable(expandContextMap.get(k))
+                        .orElseThrow(() -> new PredefinedQueryConfigException("The expanded context " + k + " is not defined")));
+
+        return expandedContext
+                .map(c -> new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry, c))
+                .orElseGet(() -> new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry));
     }
 
     private PredefinedTupleQuery createPredefinedTupleQuery(String id, PredefinedQueryConfigEntry queryConfigEntry,

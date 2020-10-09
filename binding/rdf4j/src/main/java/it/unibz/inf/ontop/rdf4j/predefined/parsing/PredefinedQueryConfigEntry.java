@@ -14,6 +14,8 @@ public interface PredefinedQueryConfigEntry {
 
     Query.QueryType getQueryType();
 
+    Optional<String> getExpandContextKey();
+
     Optional<Map<String, Object>> getFrame();
 
     ImmutableMap<String, QueryParameter> getParameters();

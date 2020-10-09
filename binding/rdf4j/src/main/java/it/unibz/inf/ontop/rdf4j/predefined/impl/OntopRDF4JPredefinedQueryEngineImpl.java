@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import com.github.jsonldjava.core.DocumentLoader;
+import com.github.jsonldjava.utils.JsonUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
@@ -35,6 +37,7 @@ import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.JSONLDMode;
 import org.eclipse.rdf4j.rio.helpers.JSONLDSettings;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -56,6 +59,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final QueryLogger.Factory queryLoggerFactory;
     private final Cache<ImmutableMap<String, String>, IQ> referenceQueryCache;
     private final ReferenceValueReplacer valueReplacer;
+    private final DocumentLoader documentLoader;
 
     public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
                                                PredefinedQueries predefinedQueries,
@@ -72,6 +76,16 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         // TODO: think about the dimensions
         referenceQueryCache = CacheBuilder.newBuilder()
                 .build();
+
+        documentLoader = new DocumentLoader();
+        predefinedQueries.getContextMap().forEach(
+                (k,m) -> {
+                    try {
+                        documentLoader.addInjectedDoc(k, JsonUtils.toString(m));
+                    } catch (IOException e) {
+                        throw new MinorOntopInternalBugException("Unexpected issue when serialize a parsed JSON element");
+                    }
+                });
     }
 
 
@@ -156,7 +170,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private RDFWriterFactory createJSONLDFrameWriterFactory(Map<String, Object> jsonLdFrame) {
-        return new FramedJSONLDWriterFactory(jsonLdFrame);
+        return new FramedJSONLDWriterFactory(jsonLdFrame, documentLoader);
     }
 
     private <FF extends FileFormat, S> Optional<FF> extractFormat(Stream<String> acceptMediaTypes,

@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.jsonld;
 
+import com.github.jsonldjava.core.DocumentLoader;
+import com.github.jsonldjava.core.JsonLdConsts;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
@@ -22,15 +24,18 @@ public class FramedJSONLDWriter implements RDFWriter {
 
     @Nullable
     private final String baseIRI;
+    @Nullable
+    private final DocumentLoader documentLoader;
 
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, OutputStream outputStream) {
-        this(jsonLdFrame, outputStream, null);
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, OutputStream outputStream) {
+        this(jsonLdFrame, documentLoader, outputStream, null);
     }
 
     /**
      * TODO: consider base IRI
      */
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, OutputStream outputStream, @Nullable String baseIRI) {
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, OutputStream outputStream, @Nullable String baseIRI) {
+        this.documentLoader = documentLoader;
         writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         this.jsonLdFrame = jsonLdFrame;
         this.baseIRI = baseIRI;
@@ -41,16 +46,17 @@ public class FramedJSONLDWriter implements RDFWriter {
     /**
      * TODO: consider base IRI
      */
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, Writer writer, @Nullable String baseIRI) {
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, Writer writer, @Nullable String baseIRI) {
         this.writer = writer;
         this.jsonLdFrame = jsonLdFrame;
         this.baseIRI = baseIRI;
         nQuadsOutputStream = new ByteArrayOutputStream();
         nQuadsWriter = new NQuadsWriter(nQuadsOutputStream);
+        this.documentLoader = documentLoader;
 
     }
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, Writer writer) {
-        this(jsonLdFrame, writer, null);
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, Writer writer) {
+        this(jsonLdFrame, documentLoader, writer, null);
     }
 
     @Override
@@ -97,10 +103,14 @@ public class FramedJSONLDWriter implements RDFWriter {
             // TODO: make it optional
             options.setUseNativeTypes(true);
             options.setProcessingMode(JsonLdOptions.JSON_LD_1_1);
-            //if (expandContext != null)
-            //    options.setExpandContext(expandContext);
+            if (documentLoader != null)
+                options.setDocumentLoader(documentLoader);
             Object parsedJsonLd = JsonLdProcessor.fromRDF(nQuadsOutputStream.toString(), options);
             Map<String, Object> framedJsonLd = JsonLdProcessor.frame(parsedJsonLd, jsonLdFrame, options);
+
+            // Forces the usage of the @context of the frame (not the resolved one)
+            Optional.ofNullable(jsonLdFrame.get(JsonLdConsts.CONTEXT))
+                    .ifPresent(v -> framedJsonLd.put(JsonLdConsts.CONTEXT, v));
 
             JsonUtils.write(writer, framedJsonLd);
             writer.flush();
