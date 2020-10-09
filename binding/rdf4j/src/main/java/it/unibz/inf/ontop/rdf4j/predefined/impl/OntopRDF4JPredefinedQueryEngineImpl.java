@@ -10,16 +10,15 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.rdf4j.jsonld.FramedJSONLDWriterFactory;
 import it.unibz.inf.ontop.rdf4j.predefined.*;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.http.protocol.HTTP;
@@ -33,6 +32,8 @@ import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.impl.IteratingGraphQueryResult;
 import org.eclipse.rdf4j.repository.sparql.federation.CollectionIteration;
 import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.JSONLDMode;
+import org.eclipse.rdf4j.rio.helpers.JSONLDSettings;
 
 import java.io.OutputStream;
 import java.util.*;
@@ -140,6 +141,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
 
         RDFWriter handler = rdfWriterFactory.getWriter(outputStream);
+        if (rdfFormat.equals(RDFFormat.JSONLD)) {
+            // As of 10/2020, native types are ignored by the default JSON-LD writer of RDF4J
+            handler.set(JSONLDSettings.USE_NATIVE_TYPES, true);
+            handler.set(JSONLDSettings.JSONLD_MODE, JSONLDMode.COMPACT);
+        }
 
         try(GraphQueryResult result = executeConstructQuery(predefinedQuery.getConstructTemplate(), executableQuery, queryLogger)) {
             handler.startRDF();
@@ -149,8 +155,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         }
     }
 
-    private RDFWriterFactory createJSONLDFrameWriterFactory(String jsonLdFrame) {
-        throw new RuntimeException("TODO: implement special writer with framing");
+    private RDFWriterFactory createJSONLDFrameWriterFactory(Map<String, Object> jsonLdFrame) {
+        return new FramedJSONLDWriterFactory(jsonLdFrame);
     }
 
     private <FF extends FileFormat, S> Optional<FF> extractFormat(Stream<String> acceptMediaTypes,
@@ -189,9 +195,6 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return executeConstructQuery(constructTemplate, executableQuery, queryLogger);
     }
 
-    /**
-     * TODO: implement it seriously with query caching
-     */
     private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
                                      QueryLogger queryLogger) {
 

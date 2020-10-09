@@ -19,7 +19,7 @@ import java.util.Optional;
 public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements PredefinedQuery<Q> {
 
     private final String id;
-    private final PredefinedQueryConfigEntry queryConfig;
+    protected final PredefinedQueryConfigEntry queryConfig;
     private final Q inputQuery;
 
     public AbstractPredefinedQuery(String id, Q inputQuery, PredefinedQueryConfigEntry queryConfig) {

@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.rdf4j.predefined.impl;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedGraphQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class PredefinedGraphQueryImpl extends AbstractPredefinedQuery<RDF4JConstructQuery> implements PredefinedGraphQuery {
@@ -13,12 +13,9 @@ public class PredefinedGraphQueryImpl extends AbstractPredefinedQuery<RDF4JConst
         super(id, graphQuery, queryConfig);
     }
 
-    /**
-     * TODO: get it
-     */
     @Override
-    public Optional<String> getJsonLdFrame() {
-        return Optional.empty();
+    public Optional<Map<String, Object>> getJsonLdFrame() {
+        return queryConfig.getFrame();
     }
 
     @Override

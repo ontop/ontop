@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.Query;
 
+import java.util.Map;
 import java.util.Optional;
 
 public interface PredefinedQueryConfigEntry {
@@ -12,6 +13,8 @@ public interface PredefinedQueryConfigEntry {
     Optional<String> getDescription();
 
     Query.QueryType getQueryType();
+
+    Optional<Map<String, Object>> getFrame();
 
     ImmutableMap<String, QueryParameter> getParameters();
 

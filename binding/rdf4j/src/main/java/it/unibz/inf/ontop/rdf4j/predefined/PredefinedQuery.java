@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import org.eclipse.rdf4j.query.BindingSet;
 
+import java.util.Map;
 import java.util.Optional;
 
 public interface PredefinedQuery<Q extends RDF4JInputQuery> {

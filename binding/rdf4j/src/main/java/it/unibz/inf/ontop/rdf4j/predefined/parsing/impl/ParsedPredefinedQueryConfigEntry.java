@@ -66,6 +66,7 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         return Optional.ofNullable(outputContext);
     }
 
+    @Override
     public Optional<Map<String, Object>> getFrame() {
         return Optional.ofNullable(frame);
     }
