@@ -81,9 +81,8 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
                     .filter(e -> e.getValue().getQueryType().equals(Query.QueryType.GRAPH))
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            // TODO: consider contexts
                             e -> createPredefinedGraphQuery(e.getKey(), e.getValue(),
-                                    queryMap.get(e.getKey()), contextMap)));
+                                    queryMap.get(e.getKey()))));
 
             ImmutableMap<String, PredefinedTupleQuery> tupleQueries = configEntries.entrySet().stream()
                     .filter(e -> e.getValue().getQueryType().equals(Query.QueryType.TUPLE))
@@ -100,17 +99,11 @@ public class PredefinedQueryParserImpl implements PredefinedQueryParser {
     }
 
     private PredefinedGraphQuery createPredefinedGraphQuery(String id, PredefinedQueryConfigEntry queryConfigEntry,
-                                                            String queryString, ImmutableMap<String, Object> expandContextMap) {
+                                                            String queryString) {
         ParsedQuery parsedTree = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, null);
         RDF4JConstructQuery graphQuery = inputQueryFactory.createConstructQuery(queryString, parsedTree, new MapBindingSet());
 
-        Optional<Object> expandedContext = queryConfigEntry.getExpandContextKey()
-                .map(k -> Optional.ofNullable(expandContextMap.get(k))
-                        .orElseThrow(() -> new PredefinedQueryConfigException("The expanded context " + k + " is not defined")));
-
-        return expandedContext
-                .map(c -> new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry, c))
-                .orElseGet(() -> new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry));
+        return new PredefinedGraphQueryImpl(id, graphQuery, queryConfigEntry);
     }
 
     private PredefinedTupleQuery createPredefinedTupleQuery(String id, PredefinedQueryConfigEntry queryConfigEntry,

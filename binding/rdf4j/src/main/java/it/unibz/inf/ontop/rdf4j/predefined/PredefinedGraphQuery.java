@@ -10,8 +10,6 @@ public interface PredefinedGraphQuery extends PredefinedQuery<RDF4JConstructQuer
 
     Optional<Map<String, Object>> getJsonLdFrame();
 
-    Optional<Object> getExpandContext();
-
     /**
      * NB: remains independent from the bindings
      */

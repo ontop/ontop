@@ -30,8 +30,6 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
     private String name;
     @JsonProperty(value = "description", required = false)
     private String description;
-    @JsonProperty(value = "expandContextKey", required = false)
-    private String expandContextKey;
     @JsonProperty(value = "frame", required = false)
     private Map<String, Object> frame;
     @JsonProperty(value = "parameters", required = true)
@@ -54,11 +52,6 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
     @Override
     public Optional<String> getDescription() {
         return Optional.ofNullable(description);
-    }
-
-    @Override
-    public Optional<String> getExpandContextKey() {
-        return Optional.ofNullable(expandContextKey);
     }
 
     @Override
