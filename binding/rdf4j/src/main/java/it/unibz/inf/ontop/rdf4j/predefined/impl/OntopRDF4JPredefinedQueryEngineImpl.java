@@ -36,6 +36,8 @@ import org.eclipse.rdf4j.repository.sparql.federation.CollectionIteration;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.JSONLDMode;
 import org.eclipse.rdf4j.rio.helpers.JSONLDSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,6 +62,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final Cache<ImmutableMap<String, String>, IQ> referenceQueryCache;
     private final ReferenceValueReplacer valueReplacer;
     private final DocumentLoader documentLoader;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OntopRDF4JPredefinedQueryEngineImpl.class);
 
     public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
                                                PredefinedQueries predefinedQueries,
@@ -238,6 +242,10 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         BindingSet bindingSet = predefinedQuery.validateAndConvertBindings(bindingWithReferences);
         RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
                 .newBindings(bindingSet);
+
+        LOGGER.debug("Generating the reference query for {} with ref parameters {}",
+                predefinedQuery.getId(),
+                bindingSet);
 
         return queryReformulator.reformulateIntoNativeQuery(newQuery, queryLogger);
     }

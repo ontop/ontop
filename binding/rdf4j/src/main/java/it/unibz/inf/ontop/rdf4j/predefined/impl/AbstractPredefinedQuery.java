@@ -67,7 +67,7 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
                 if (queryParameter.getRequired())
                     // TODO: should we collect all the missing required parameters?
                     throw new InvalidBindingSetException("The required parameter " + parameterId + " is missing");
-                break;
+                continue;
             }
             String lexicalValue = bindings.get(parameterId);
             bindingSet.addBinding(parameterId, convertAndValidate(lexicalValue, queryParameter.getType(), valueFactory));

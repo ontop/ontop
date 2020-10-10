@@ -16,12 +16,15 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 @Singleton
 public class ReferenceValueReplacer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceValueReplacer.class);
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -41,6 +44,7 @@ public class ReferenceValueReplacer {
                                      ImmutableMap<String, String> bindingWithReferences) {
 
         ImmutableMap<String, String> referenceToInputMap = bindings.entrySet().stream()
+                .filter(e -> bindingWithReferences.containsKey(e.getKey()))
                 .filter(e -> !e.getValue().equals(bindingWithReferences.get(e.getKey())))
                 .collect(ImmutableCollectors.toMap(
                         e -> bindingWithReferences.get(e.getKey()),
@@ -48,6 +52,8 @@ public class ReferenceValueReplacer {
 
         if (referenceToInputMap.isEmpty())
             return referenceIq;
+
+        LOGGER.debug("Reference values to be replaced: {}", referenceToInputMap);
 
         IQTree newTree = transform(referenceIq.getTree(), referenceToInputMap);
 
