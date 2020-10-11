@@ -8,6 +8,8 @@ import com.github.jsonldjava.utils.JsonUtils;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.nquads.NQuadsWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import javax.annotation.Nullable;
@@ -21,6 +23,7 @@ public class FramedJSONLDWriter implements RDFWriter {
     private final ByteArrayOutputStream nQuadsOutputStream;
     private final Writer writer;
     private final Map<String, Object> jsonLdFrame;
+    private static final Logger LOGGER = LoggerFactory.getLogger(FramedJSONLDWriter.class);
 
     @Nullable
     private final String baseIRI;
@@ -106,6 +109,15 @@ public class FramedJSONLDWriter implements RDFWriter {
             if (documentLoader != null)
                 options.setDocumentLoader(documentLoader);
             Object parsedJsonLd = JsonLdProcessor.fromRDF(nQuadsOutputStream.toString(), options);
+
+            // Empty result: was causing a NullPointerException while framing
+            if ((parsedJsonLd instanceof List) && ((List) parsedJsonLd).isEmpty()) {
+                // After framing, the convention seems to be providing an empty map
+                JsonUtils.write(writer, new HashMap<>());
+                writer.flush();
+                return;
+            }
+
             Map<String, Object> framedJsonLd = JsonLdProcessor.frame(parsedJsonLd, jsonLdFrame, options);
 
             // Forces the usage of the @context of the frame (not the resolved one)

@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.predefined;
 
-import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-
-public class InvalidBindingSetException extends OntopQueryAnsweringException {
+public class InvalidBindingSetException extends Exception {
 
     public InvalidBindingSetException(String message) {
         super(message);
