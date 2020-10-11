@@ -101,7 +101,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                          ImmutableMultimap<String, String> httpHeaders,
                          Consumer<Integer> httpStatusSetter,
                          BiConsumer<String, String> httpHeaderSetter,
-                         OutputStream outputStream) throws QueryEvaluationException, RDFHandlerException {
+                         OutputStream outputStream) throws LateEvaluationOrConversionException {
 
         Optional<QueryType> optionalQueryType = getQueryType(queryId);
         if (!optionalQueryType.isPresent()) {
@@ -126,7 +126,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
     private void evaluateGraphWithHandler(PredefinedGraphQuery predefinedQuery, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
                                           ImmutableMultimap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
-                                          Consumer<Integer> httpStatusSetter, OutputStream outputStream) {
+                                          Consumer<Integer> httpStatusSetter, OutputStream outputStream) throws LateEvaluationOrConversionException {
 
         RDFWriterRegistry registry = RDFWriterRegistry.getInstance();
 
@@ -196,6 +196,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
             printWriter.println(String.format("No result for %s with the parameters %s",
                     predefinedQuery.getId(), bindings));
             printWriter.flush();
+        } catch (QueryEvaluationException | RDFHandlerException e) {
+            throw new LateEvaluationOrConversionException(e);
         }
     }
 

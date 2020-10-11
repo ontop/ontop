@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
 
 import java.io.OutputStream;
 import java.util.function.BiConsumer;
@@ -19,10 +18,9 @@ public interface OntopRDF4JPredefinedQueryEngine {
     /**
      * acceptMediaTypes are expected to be sorted by decreasing importance and having no quality parameter
      *
-     * May throw RDF4J runtime exceptions when executing the query.
+     * May throw a LateEvaluationOrConversionException when executing the query.
      * Problems occurring before query execution are handled by standard HTTP mechanisms (status code + error message).
      *
-     * NB: this method prototype could easily be made RDF4J-independent, if the need appears one day.
      */
     void evaluate(String queryId,
                   ImmutableMap<String, String> bindings,
@@ -30,7 +28,7 @@ public interface OntopRDF4JPredefinedQueryEngine {
                   ImmutableMultimap<String, String> httpHeaders,
                   Consumer<Integer> httpStatusSetter,
                   BiConsumer<String, String> httpHeaderSetter,
-                  OutputStream outputStream) throws QueryEvaluationException, RDFHandlerException;
+                  OutputStream outputStream) throws LateEvaluationOrConversionException;
 
     GraphQueryResult evaluateGraph(String queryId, ImmutableMap<String, String> bindings) throws QueryEvaluationException;
 

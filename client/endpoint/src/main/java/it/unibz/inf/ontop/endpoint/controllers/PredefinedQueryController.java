@@ -4,10 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.rdf4j.predefined.LateEvaluationOrConversionException;
 import it.unibz.inf.ontop.rdf4j.predefined.OntopRDF4JPredefinedQueryEngine;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.repository.RepositoryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,7 +40,7 @@ public class PredefinedQueryController {
     public void answer(@PathVariable("id") String id,
                        @RequestParam Map<String,String> allRequestParams,
                        @RequestHeader(ACCEPT) String accept,
-                       HttpServletRequest request, HttpServletResponse response) throws IOException {
+                       HttpServletRequest request, HttpServletResponse response) throws IOException, LateEvaluationOrConversionException {
 
         response.setCharacterEncoding("UTF-8");
 
@@ -60,18 +59,22 @@ public class PredefinedQueryController {
 
         engine.evaluate(id, ImmutableMap.copyOf(allRequestParams), acceptMediaTypes, httpHeaders,
                 response::setStatus, response::setHeader, outputStream);
-
         outputStream.flush();
-
     }
 
-    /**
-     * TODO: revise exceptions
-     */
-    @ExceptionHandler({RepositoryException.class, Exception.class})
-    public ResponseEntity<String> handleRepositoryException(Exception ex) {
+    @ExceptionHandler({LateEvaluationOrConversionException.class})
+    public ResponseEntity<String> handleLateException(Exception ex) {
         ex.printStackTrace();
-        String message = ex.getMessage();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        return new ResponseEntity<>(ex.getMessage(), headers, status);
+    }
+
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<String> handleUnexpectedException(Exception ex) {
+        ex.printStackTrace();
+        String message = "Unexpected exception: " + ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
