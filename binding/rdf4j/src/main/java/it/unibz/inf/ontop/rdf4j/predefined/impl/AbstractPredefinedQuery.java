@@ -55,6 +55,11 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
     }
 
     @Override
+    public boolean isResultStreamingEnabled() {
+        return queryConfig.isResultStreamingEnabled();
+    }
+
+    @Override
     public void validate(ImmutableMap<String, String> bindings) throws InvalidBindingSetException {
         ImmutableMap<String, PredefinedQueryConfigEntry.QueryParameter> parameterConfigMap = queryConfig.getParameters();
 

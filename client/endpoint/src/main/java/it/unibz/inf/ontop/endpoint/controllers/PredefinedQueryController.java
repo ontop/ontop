@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +57,22 @@ public class PredefinedQueryController {
                         .map(v -> Maps.immutableEntry(k, v)))
                 .collect(ImmutableCollectors.toMultimap());
 
-        ServletOutputStream outputStream = response.getOutputStream();
+        ImmutableMap<String, String> requestParams = ImmutableMap.copyOf(allRequestParams);
+        ServletOutputStream responseOutputStream = response.getOutputStream();
 
-        engine.evaluate(id, ImmutableMap.copyOf(allRequestParams), acceptMediaTypes, httpHeaders,
-                response::setStatus, response::setHeader, outputStream);
-        outputStream.flush();
+        if (engine.shouldStream(id)) {
+
+            engine.evaluate(id, requestParams, acceptMediaTypes, httpHeaders,
+                    response::setStatus, response::setHeader, responseOutputStream);
+        }
+        else {
+            ByteArrayOutputStream payloadOutputStream = new ByteArrayOutputStream();
+            engine.evaluate(id, requestParams, acceptMediaTypes, httpHeaders,
+                    response::setStatus, response::setHeader, payloadOutputStream);
+            response.setContentLength(payloadOutputStream.size());
+            payloadOutputStream.writeTo(responseOutputStream);
+        }
+        responseOutputStream.flush();
     }
 
     @ExceptionHandler({LateEvaluationOrConversionException.class})

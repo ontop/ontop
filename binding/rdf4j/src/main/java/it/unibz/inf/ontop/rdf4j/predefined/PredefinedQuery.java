@@ -18,6 +18,8 @@ public interface PredefinedQuery<Q extends RDF4JInputQuery> {
 
     boolean shouldReturn404IfEmpty();
 
+    boolean isResultStreamingEnabled();
+
     void validate(ImmutableMap<String, String> bindings) throws InvalidBindingSetException;
 
     /**

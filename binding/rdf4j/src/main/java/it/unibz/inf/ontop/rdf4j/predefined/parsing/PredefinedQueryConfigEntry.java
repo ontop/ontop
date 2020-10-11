@@ -19,9 +19,15 @@ public interface PredefinedQueryConfigEntry {
      */
     boolean shouldReturn404IfEmpty();
 
+    /**
+     * False by default
+     */
+    boolean isResultStreamingEnabled();
+
     Optional<Map<String, Object>> getFrame();
 
     ImmutableMap<String, QueryParameter> getParameters();
+
 
     interface QueryParameter {
 

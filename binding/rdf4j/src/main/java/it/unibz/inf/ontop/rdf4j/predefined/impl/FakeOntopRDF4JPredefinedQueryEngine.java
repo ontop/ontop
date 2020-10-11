@@ -24,6 +24,20 @@ public class FakeOntopRDF4JPredefinedQueryEngine implements OntopRDF4JPredefined
     }
 
     @Override
+    public String evaluate(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
+                           ImmutableMultimap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
+                           BiConsumer<String, String> httpHeaderSetter) {
+        // Not-recognized query id
+        httpStatusSetter.accept(404);
+        return "Not found";
+    }
+
+    @Override
+    public boolean shouldStream(String queryId) {
+        return false;
+    }
+
+    @Override
     public GraphQueryResult evaluateGraph(String queryId, ImmutableMap<String, String> bindings) throws QueryEvaluationException {
         throw new UnsupportedOperationException("Intended to be used by the HTTP endpoint only");
     }

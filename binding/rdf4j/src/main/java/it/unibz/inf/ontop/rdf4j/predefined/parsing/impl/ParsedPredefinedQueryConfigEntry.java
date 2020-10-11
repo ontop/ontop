@@ -40,6 +40,9 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
     @JsonProperty(value = "return404IfEmpty", required = false)
     private Boolean return404IfEmpty;
 
+    @JsonProperty(value = "resultStreaming", required = false)
+    private Boolean resultStreaming;
+
     @Override
     public Query.QueryType getQueryType() {
         if (queryType == null)
@@ -74,6 +77,13 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         if (return404IfEmpty == null)
             return404IfEmpty = false;
         return return404IfEmpty;
+    }
+
+    @Override
+    public boolean isResultStreamingEnabled() {
+        if (resultStreaming == null)
+            resultStreaming = false;
+        return resultStreaming;
     }
 
     /**

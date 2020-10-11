@@ -16,6 +16,8 @@ import java.util.function.Consumer;
 public interface OntopRDF4JPredefinedQueryEngine {
 
     /**
+     * Streaming mode
+     *
      * acceptMediaTypes are expected to be sorted by decreasing importance and having no quality parameter
      *
      * May throw a LateEvaluationOrConversionException when executing the query.
@@ -29,6 +31,18 @@ public interface OntopRDF4JPredefinedQueryEngine {
                   Consumer<Integer> httpStatusSetter,
                   BiConsumer<String, String> httpHeaderSetter,
                   OutputStream outputStream) throws LateEvaluationOrConversionException;
+
+    /**
+     * Same, without streaming
+     */
+    String evaluate(String queryId,
+                  ImmutableMap<String, String> bindings,
+                  ImmutableList<String> acceptMediaTypes,
+                  ImmutableMultimap<String, String> httpHeaders,
+                  Consumer<Integer> httpStatusSetter,
+                  BiConsumer<String, String> httpHeaderSetter);
+
+    boolean shouldStream(String queryId);
 
     GraphQueryResult evaluateGraph(String queryId, ImmutableMap<String, String> bindings) throws QueryEvaluationException;
 

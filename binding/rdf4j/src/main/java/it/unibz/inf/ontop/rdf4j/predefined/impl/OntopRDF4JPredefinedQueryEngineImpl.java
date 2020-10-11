@@ -40,9 +40,7 @@ import org.eclipse.rdf4j.rio.helpers.JSONLDSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
@@ -54,7 +52,6 @@ import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefinedQueryEngine {
-
 
     private final OntopQueryEngine ontopEngine;
     private final ImmutableMap<String, PredefinedGraphQuery> graphQueries;
@@ -122,6 +119,35 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
             default:
                 throw new MinorOntopInternalBugException("Unexpected query type");
         }
+    }
+
+    @Override
+    public String evaluate(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
+                           ImmutableMultimap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
+                           BiConsumer<String, String> httpHeaderSetter) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            evaluate(queryId, bindings, acceptMediaTypes, httpHeaders, httpStatusSetter, httpHeaderSetter, outputStream);
+            return outputStream.toString();
+        } catch (LateEvaluationOrConversionException e) {
+            httpStatusSetter.accept(500);
+            return e.getMessage();
+        }
+    }
+
+    /**
+     * Disabled by default
+     */
+    @Override
+    public boolean shouldStream(String queryId) {
+        if (graphQueries.containsKey(queryId))
+            return graphQueries.get(queryId)
+                    .isResultStreamingEnabled();
+        else if (tupleQueries.containsKey(queryId))
+            return tupleQueries.get(queryId)
+                    .isResultStreamingEnabled();
+        else
+            return false;
     }
 
     private void evaluateGraphWithHandler(PredefinedGraphQuery predefinedQuery, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
