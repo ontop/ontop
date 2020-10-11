@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.rdf4j.jsonld.EmptyResultException;
 import it.unibz.inf.ontop.rdf4j.jsonld.FramedJSONLDWriterFactory;
 import it.unibz.inf.ontop.rdf4j.predefined.*;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
@@ -153,7 +154,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
         RDFWriterFactory rdfWriterFactory = predefinedQuery.getJsonLdFrame()
                 .filter(f -> rdfFormat.equals(RDFFormat.JSONLD))
-                .map(this::createJSONLDFrameWriterFactory)
+                .map(jsonLdFrame -> createJSONLDFrameWriterFactory(jsonLdFrame, predefinedQuery.shouldReturn404IfEmpty()))
                 .orElseGet(() -> registry.get(rdfFormat)
                         .orElseThrow(() -> new MinorOntopInternalBugException(
                                 "The selected RDF format should have a writer factory")));
@@ -188,11 +189,19 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
             PrintWriter printWriter = new PrintWriter(outputStream);
             printWriter.println("Problem reformulating the underlying SPARQL query: \n" + e.getMessage());
             printWriter.flush();
+        } catch (EmptyResultException e) {
+            httpStatusSetter.accept(404);
+            httpHeaderSetter.accept(HTTP.CONTENT_TYPE, "text/plain");
+            PrintWriter printWriter = new PrintWriter(outputStream);
+            printWriter.println(String.format("No result for %s with the parameters %s",
+                    predefinedQuery.getId(), bindings));
+            printWriter.flush();
         }
     }
 
-    private RDFWriterFactory createJSONLDFrameWriterFactory(Map<String, Object> jsonLdFrame) {
-        return new FramedJSONLDWriterFactory(jsonLdFrame, documentLoader);
+    private RDFWriterFactory createJSONLDFrameWriterFactory(Map<String, Object> jsonLdFrame,
+                                                            boolean throwExceptionIfEmpty) {
+        return new FramedJSONLDWriterFactory(jsonLdFrame, documentLoader, throwExceptionIfEmpty);
     }
 
     private <FF extends FileFormat, S> Optional<FF> extractFormat(Stream<String> acceptMediaTypes,

@@ -27,39 +27,40 @@ public class FramedJSONLDWriter implements RDFWriter {
 
     @Nullable
     private final String baseIRI;
+    private final boolean throwExceptionIfEmpty;
     @Nullable
     private final DocumentLoader documentLoader;
 
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, OutputStream outputStream) {
-        this(jsonLdFrame, documentLoader, outputStream, null);
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader,
+                              OutputStream outputStream, boolean throwExceptionIfEmpty) {
+        this(jsonLdFrame, documentLoader, outputStream, null, throwExceptionIfEmpty);
     }
 
-    /**
-     * TODO: consider base IRI
-     */
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, OutputStream outputStream, @Nullable String baseIRI) {
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, OutputStream outputStream,
+                              @Nullable String baseIRI, boolean throwExceptionIfEmpty) {
         this.documentLoader = documentLoader;
         writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         this.jsonLdFrame = jsonLdFrame;
         this.baseIRI = baseIRI;
+        this.throwExceptionIfEmpty = throwExceptionIfEmpty;
         nQuadsOutputStream = new ByteArrayOutputStream();
         nQuadsWriter = new NQuadsWriter(nQuadsOutputStream);
     }
 
-    /**
-     * TODO: consider base IRI
-     */
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, Writer writer, @Nullable String baseIRI) {
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, Writer writer,
+                              @Nullable String baseIRI, boolean throwExceptionIfEmpty) {
         this.writer = writer;
         this.jsonLdFrame = jsonLdFrame;
         this.baseIRI = baseIRI;
+        this.throwExceptionIfEmpty = throwExceptionIfEmpty;
         nQuadsOutputStream = new ByteArrayOutputStream();
         nQuadsWriter = new NQuadsWriter(nQuadsOutputStream);
         this.documentLoader = documentLoader;
 
     }
-    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader, Writer writer) {
-        this(jsonLdFrame, documentLoader, writer, null);
+    public FramedJSONLDWriter(Map<String, Object> jsonLdFrame, @Nullable DocumentLoader documentLoader,
+                              Writer writer, boolean throwExceptionIfEmpty) {
+        this(jsonLdFrame, documentLoader, writer, null, throwExceptionIfEmpty);
     }
 
     @Override
@@ -112,6 +113,9 @@ public class FramedJSONLDWriter implements RDFWriter {
 
             // Empty result: was causing a NullPointerException while framing
             if ((parsedJsonLd instanceof List) && ((List) parsedJsonLd).isEmpty()) {
+                if (throwExceptionIfEmpty)
+                    throw new EmptyResultException();
+
                 // After framing, the convention seems to be providing an empty map
                 JsonUtils.write(writer, new HashMap<>());
                 writer.flush();

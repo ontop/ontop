@@ -16,6 +16,8 @@ public interface PredefinedQuery<Q extends RDF4JInputQuery> {
     Optional<String> getName();
     Optional<String> getDescription();
 
+    boolean shouldReturn404IfEmpty();
+
     void validate(ImmutableMap<String, String> bindings) throws InvalidBindingSetException;
 
     /**

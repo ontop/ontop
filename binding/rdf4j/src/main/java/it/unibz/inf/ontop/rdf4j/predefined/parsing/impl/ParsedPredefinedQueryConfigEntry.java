@@ -37,6 +37,9 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
     // LAZY
     private ImmutableMap<String, QueryParameter> typedParameters;
 
+    @JsonProperty(value = "return404IfEmpty", required = false)
+    private Boolean return404IfEmpty;
+
     @Override
     public Query.QueryType getQueryType() {
         if (queryType == null)
@@ -64,6 +67,13 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         if (typedParameters == null)
             typedParameters = ImmutableMap.copyOf(parameters);
         return typedParameters;
+    }
+
+    @Override
+    public boolean shouldReturn404IfEmpty() {
+        if (return404IfEmpty == null)
+            return404IfEmpty = false;
+        return return404IfEmpty;
     }
 
     /**

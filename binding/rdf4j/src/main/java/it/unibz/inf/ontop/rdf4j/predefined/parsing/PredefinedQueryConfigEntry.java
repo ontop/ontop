@@ -14,6 +14,11 @@ public interface PredefinedQueryConfigEntry {
 
     Query.QueryType getQueryType();
 
+    /**
+     * False by default
+     */
+    boolean shouldReturn404IfEmpty();
+
     Optional<Map<String, Object>> getFrame();
 
     ImmutableMap<String, QueryParameter> getParameters();

@@ -16,7 +16,6 @@ import org.eclipse.rdf4j.query.impl.MapBindingSet;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements PredefinedQuery<Q> {
 
@@ -48,6 +47,11 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
     @Override
     public Optional<String> getDescription() {
         return queryConfig.getDescription();
+    }
+
+    @Override
+    public boolean shouldReturn404IfEmpty() {
+        return queryConfig.shouldReturn404IfEmpty();
     }
 
     @Override

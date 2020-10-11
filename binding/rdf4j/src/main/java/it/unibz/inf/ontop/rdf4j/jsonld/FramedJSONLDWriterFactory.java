@@ -15,15 +15,19 @@ public class FramedJSONLDWriterFactory implements RDFWriterFactory {
     private final Map<String, Object> jsonLDFrame;
     @Nullable
     private final DocumentLoader documentLoader;
+    private final boolean throwExceptionIfEmpty;
 
     public FramedJSONLDWriterFactory(Map<String, Object> jsonLDFrame) {
         this.jsonLDFrame = jsonLDFrame;
         this.documentLoader = null;
+        this.throwExceptionIfEmpty = false;
     }
 
-    public FramedJSONLDWriterFactory(Map<String, Object> jsonLdFrame, DocumentLoader documentLoader) {
+    public FramedJSONLDWriterFactory(Map<String, Object> jsonLdFrame, DocumentLoader documentLoader,
+                                     boolean throwExceptionIfEmpty) {
         this.jsonLDFrame = jsonLdFrame;
         this.documentLoader = documentLoader;
+        this.throwExceptionIfEmpty = throwExceptionIfEmpty;
     }
 
     @Override
@@ -33,20 +37,20 @@ public class FramedJSONLDWriterFactory implements RDFWriterFactory {
 
     @Override
     public RDFWriter getWriter(OutputStream out) {
-        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, out);
+        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, out, throwExceptionIfEmpty);
     }
     @Override
     public RDFWriter getWriter(OutputStream out, String baseURI) throws URISyntaxException {
-        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, out, baseURI);
+        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, out, baseURI, throwExceptionIfEmpty);
     }
 
     @Override
     public RDFWriter getWriter(Writer writer) {
-        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, writer);
+        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, writer, throwExceptionIfEmpty);
     }
 
     @Override
     public RDFWriter getWriter(Writer writer, String baseURI) throws URISyntaxException {
-        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, writer, baseURI);
+        return new FramedJSONLDWriter(jsonLDFrame, documentLoader, writer, baseURI, throwExceptionIfEmpty);
     }
 }
