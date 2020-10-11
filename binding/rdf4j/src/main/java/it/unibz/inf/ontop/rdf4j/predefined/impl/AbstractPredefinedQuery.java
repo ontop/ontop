@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -15,6 +16,7 @@ import org.eclipse.rdf4j.query.impl.MapBindingSet;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements PredefinedQuery<Q> {
 
@@ -48,11 +50,38 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
         return queryConfig.getDescription();
     }
 
-    /**
-     * TODO: implement it seriously
-     */
     @Override
-    public BindingSet validateAndConvertBindings(ImmutableMap<String, String> bindings) throws InvalidBindingSetException {
+    public void validate(ImmutableMap<String, String> bindings) throws InvalidBindingSetException {
+        ImmutableMap<String, PredefinedQueryConfigEntry.QueryParameter> parameterConfigMap = queryConfig.getParameters();
+
+        ImmutableList.Builder<String> problemBuilder = ImmutableList.builder();
+
+        for (Map.Entry<String, PredefinedQueryConfigEntry.QueryParameter> parameterEntry : parameterConfigMap.entrySet()) {
+            String parameterId = parameterEntry.getKey();
+            PredefinedQueryConfigEntry.QueryParameter queryParameter = parameterEntry.getValue();
+
+            if (!bindings.containsKey(parameterId)) {
+                if (queryParameter.getRequired())
+                    problemBuilder.add("The required parameter " + parameterId + " is missing");
+            }
+            else
+                validate(bindings.get(parameterId), parameterEntry.getValue().getType())
+                        .ifPresent(problemBuilder::add);
+        }
+
+        ImmutableList<String> problems = problemBuilder.build();
+        switch (problems.size()) {
+            case 0:
+                return;
+            case 1:
+                throw new InvalidBindingSetException(problems.get(0));
+            default:
+                throw new InvalidBindingSetException("Invalid parameters: \n - " + String.join("\n - ", problems));
+        }
+    }
+
+    @Override
+    public BindingSet convertBindings(ImmutableMap<String, String> bindings) {
         ValueFactory valueFactory = SimpleValueFactory.getInstance();
 
         ImmutableMap<String, PredefinedQueryConfigEntry.QueryParameter> parameterConfigMap = queryConfig.getParameters();
@@ -61,16 +90,13 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
 
         for (Map.Entry<String, PredefinedQueryConfigEntry.QueryParameter> parameterEntry : parameterConfigMap.entrySet()) {
             String parameterId = parameterEntry.getKey();
-            PredefinedQueryConfigEntry.QueryParameter queryParameter = parameterEntry.getValue();
 
-            if (!bindings.containsKey(parameterId)) {
-                if (queryParameter.getRequired())
-                    // TODO: should we collect all the missing required parameters?
-                    throw new InvalidBindingSetException("The required parameter " + parameterId + " is missing");
-                continue;
+            if (bindings.containsKey(parameterId)) {
+                String lexicalValue = bindings.get(parameterId);
+
+                PredefinedQueryConfigEntry.QueryParameter queryParameter = parameterEntry.getValue();
+                bindingSet.addBinding(parameterId, convertAndValidate(lexicalValue, queryParameter.getType(), valueFactory));
             }
-            String lexicalValue = bindings.get(parameterId);
-            bindingSet.addBinding(parameterId, convertAndValidate(lexicalValue, queryParameter.getType(), valueFactory));
         }
 
         return bindingSet;
@@ -89,9 +115,6 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
                                 .orElseGet(e::getValue)));
     }
 
-    /**
-     * TODO: perform some validation
-     */
     private Value convertAndValidate(String lexicalValue, PredefinedQueryConfigEntry.QueryParameterType parameterType,
                                      ValueFactory valueFactory) {
         switch (parameterType.getCategory()) {
@@ -104,5 +127,14 @@ public class AbstractPredefinedQuery<Q extends RDF4JInputQuery> implements Prede
             default:
                 throw new MinorOntopInternalBugException("Not supported category: " + parameterType.getCategory());
         }
+    }
+
+    /**
+     * Returns a string for the error message if any
+     *
+     * TODO: implement it
+     */
+    private Optional<String> validate(String lexicalValue, PredefinedQueryConfigEntry.QueryParameterType parameterType) {
+        return Optional.empty();
     }
 }

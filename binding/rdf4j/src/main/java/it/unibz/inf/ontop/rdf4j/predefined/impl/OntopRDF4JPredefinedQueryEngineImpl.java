@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
@@ -140,11 +141,13 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         if (!optionalFormat.isPresent()) {
             // 406: Not acceptable
             httpStatusSetter.accept(406);
+            PrintWriter printWriter = new PrintWriter(outputStream);
+            printWriter.println("Not acceptable. Suggested format: application/ld+json .");
+            printWriter.flush();
             return;
         }
 
         RDFFormat rdfFormat = optionalFormat.get();
-        httpHeaderSetter.accept(HTTP.CONTENT_TYPE, rdfFormat.getDefaultMIMEType() + ";charset=UTF-8");
 
         // TODO: caching headers (on a per queryId basis)
 
@@ -156,20 +159,35 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                                 "The selected RDF format should have a writer factory")));
 
         QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, httpHeaders);
-        IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
+        try {
+            IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
 
-        RDFWriter handler = rdfWriterFactory.getWriter(outputStream);
-        if (rdfFormat.equals(RDFFormat.JSONLD)) {
-            // As of 10/2020, native types are ignored by the default JSON-LD writer of RDF4J
-            handler.set(JSONLDSettings.USE_NATIVE_TYPES, true);
-            handler.set(JSONLDSettings.JSONLD_MODE, JSONLDMode.COMPACT);
-        }
+            httpHeaderSetter.accept(HTTP.CONTENT_TYPE, rdfFormat.getDefaultMIMEType() + ";charset=UTF-8");
 
-        try(GraphQueryResult result = executeConstructQuery(predefinedQuery.getConstructTemplate(), executableQuery, queryLogger)) {
-            handler.startRDF();
-            while (result.hasNext())
-                handler.handleStatement(result.next());
-            handler.endRDF();
+            RDFWriter handler = rdfWriterFactory.getWriter(outputStream);
+            if (rdfFormat.equals(RDFFormat.JSONLD)) {
+                // As of 10/2020, native types are ignored by the default JSON-LD writer of RDF4J
+                handler.set(JSONLDSettings.USE_NATIVE_TYPES, true);
+                handler.set(JSONLDSettings.JSONLD_MODE, JSONLDMode.COMPACT);
+            }
+
+            try (GraphQueryResult result = executeConstructQuery(predefinedQuery.getConstructTemplate(), executableQuery, queryLogger)) {
+                handler.startRDF();
+                while (result.hasNext())
+                    handler.handleStatement(result.next());
+                handler.endRDF();
+            }
+        } catch (InvalidBindingSetException e) {
+            httpStatusSetter.accept(400);
+            PrintWriter printWriter = new PrintWriter(outputStream);
+            printWriter.println(e.getMessage());
+            printWriter.flush();
+
+        } catch (OntopReformulationException e) {
+            httpStatusSetter.accept(500);
+            PrintWriter printWriter = new PrintWriter(outputStream);
+            printWriter.println("Problem reformulating the underlying SPARQL query: \n" + e.getMessage());
+            printWriter.flush();
         }
     }
 
@@ -209,14 +227,20 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                 .orElseThrow(() -> new IllegalArgumentException("The query" + queryId + " is not defined as a graph query"));
         ConstructTemplate constructTemplate = predefinedQuery.getConstructTemplate();
         QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, ImmutableMultimap.of());
-        IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
-        return executeConstructQuery(constructTemplate, executableQuery, queryLogger);
+        try {
+            IQ executableQuery = createExecutableQuery(predefinedQuery, bindings, queryLogger);
+            return executeConstructQuery(constructTemplate, executableQuery, queryLogger);
+        } catch (OntopReformulationException | InvalidBindingSetException e) {
+            throw new QueryEvaluationException(e);
+        }
     }
 
     private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
-                                     QueryLogger queryLogger) {
+                                     QueryLogger queryLogger) throws OntopReformulationException, InvalidBindingSetException {
 
-        // TODO: validate the bindings
+        // May throw an InvalidBindingSetException
+        predefinedQuery.validate(bindings);
+
         ImmutableMap<String, String> bindingWithReferences = predefinedQuery.replaceWithReferenceValues(bindings);
 
         try {
@@ -231,15 +255,19 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
 
         } catch (ExecutionException e) {
-            // TODO: return a better exception
-            throw new QueryEvaluationException(e.getCause());
+            Throwable cause = e.getCause();
+
+            if (cause instanceof OntopReformulationException)
+                throw (OntopReformulationException) cause;
+
+            throw new MinorOntopInternalBugException("Unexpected exception when creating executable query: ", e);
         }
     }
 
     private IQ generateReferenceQuery(PredefinedQuery predefinedQuery,
                                       ImmutableMap<String, String> bindingWithReferences, QueryLogger queryLogger)
             throws OntopReformulationException {
-        BindingSet bindingSet = predefinedQuery.validateAndConvertBindings(bindingWithReferences);
+        BindingSet bindingSet = predefinedQuery.convertBindings(bindingWithReferences);
         RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
                 .newBindings(bindingSet);
 

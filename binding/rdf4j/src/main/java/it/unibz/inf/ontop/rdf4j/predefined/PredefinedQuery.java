@@ -16,11 +16,17 @@ public interface PredefinedQuery<Q extends RDF4JInputQuery> {
     Optional<String> getName();
     Optional<String> getDescription();
 
-    BindingSet validateAndConvertBindings(ImmutableMap<String, String> bindings) throws InvalidBindingSetException;
+    void validate(ImmutableMap<String, String> bindings) throws InvalidBindingSetException;
 
     /**
-     * Remove irrelevant bindings and replace the values of "safe" parameters by the reference ones
+     * NB: the bindings should have been validated before
+     */
+    BindingSet convertBindings(ImmutableMap<String, String> bindings);
+
+    /**
+     * Removes irrelevant bindings and replace the values of "safe" parameters by the reference ones
      *
+     * NB: the bindings should have been validated before
      */
     ImmutableMap<String, String> replaceWithReferenceValues(ImmutableMap<String, String> bindings);
 }
