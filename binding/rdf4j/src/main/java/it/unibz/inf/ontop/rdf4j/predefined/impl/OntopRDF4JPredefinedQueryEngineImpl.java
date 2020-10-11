@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
@@ -128,10 +129,12 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             evaluate(queryId, bindings, acceptMediaTypes, httpHeaders, httpStatusSetter, httpHeaderSetter, outputStream);
-            return outputStream.toString();
+            return outputStream.toString(StandardCharsets.UTF_8.name());
         } catch (LateEvaluationOrConversionException e) {
             httpStatusSetter.accept(500);
             return e.getMessage();
+        } catch (UnsupportedEncodingException e) {
+            throw new MinorOntopInternalBugException("UTF-8 was expected to be supported");
         }
     }
 
