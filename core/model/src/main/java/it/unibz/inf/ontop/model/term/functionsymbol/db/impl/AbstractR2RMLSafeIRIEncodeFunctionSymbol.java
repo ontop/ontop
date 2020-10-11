@@ -8,8 +8,10 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractTypedDBFunctionSymbol {
 
@@ -18,7 +20,7 @@ public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractT
 
     protected AbstractR2RMLSafeIRIEncodeFunctionSymbol(DBTermType dbStringType) {
         super("R2RMLIRISafeEncode", ImmutableList.of(dbStringType), dbStringType);
-        Charset charset = Charset.forName("utf-8");
+        Charset charset = StandardCharsets.UTF_8;
         this.iriEncoder = new Encoder(charset);
         this.iriDecoder = new Decoder(charset);
     }
@@ -49,7 +51,13 @@ public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractT
     private DBConstant encodeConstant(DBConstant constant, TermFactory termFactory) {
         // Query element: percent-encoding except if in iunreserved
         // TODO: this implementation seems to ignore the ucschar range. Check if it is a problem
+        // YES, it is a problem for RDB2RDFTest, see test dg0017
+        // However, this is precisely what is required for ENCODE_FOR_URI in SPARQL
         // TODO: redundant with R2RMLIRISafeEncoder. Which one shall we choose?
+        // both, but we need to differentiate between URIs (incorrectly called iriEncoder) and IRIs
+        //   this one for IRIs
+        // return termFactory.getDBStringConstant(R2RMLIRISafeEncoder.encode(constant.getValue()));
+        //   this one of URIs
         return termFactory.getDBStringConstant(iriEncoder.encodeQueryElement(constant.getValue()));
     }
 
