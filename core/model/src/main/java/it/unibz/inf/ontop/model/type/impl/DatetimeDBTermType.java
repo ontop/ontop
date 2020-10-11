@@ -10,13 +10,8 @@ public class DatetimeDBTermType extends DBTermTypeImpl {
     private final RDFDatatype rdfDatatype;
 
     protected DatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, Category.DATETIME);
         this.rdfDatatype = rdfDatatype;
-    }
-
-    @Override
-    public Category getCategory() {
-        return Category.DATETIME;
     }
 
     @Override
