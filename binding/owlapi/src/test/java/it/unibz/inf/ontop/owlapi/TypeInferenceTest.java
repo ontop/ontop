@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -60,7 +61,6 @@ public class TypeInferenceTest {
         ImmutableSet<String> expectedValues = ImmutableSet.of(
                 "<http://example.org/types/voc#Philippines>",
                 "<http://example.org/types/voc#China>"
-
         );
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -93,17 +93,14 @@ public class TypeInferenceTest {
                 returnedValueBuilder.add(ind1.toString());
                 i++;
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }
         ImmutableSet<String> returnedValues = returnedValueBuilder.build();
 
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
-
+        assertEquals(expectedValues, returnedValues);
+        assertEquals(expectedValues.size(), i);
     }
 }

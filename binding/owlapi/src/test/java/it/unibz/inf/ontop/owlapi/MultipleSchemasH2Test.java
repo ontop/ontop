@@ -17,6 +17,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
+
 
 public class MultipleSchemasH2Test {
 
@@ -30,17 +32,6 @@ public class MultipleSchemasH2Test {
 
     private static Connection sqlConnection;
 
-    @Before
-    public void init() {
-
-    }
-
-    @After
-    public void after() {
-
-    }
-
-
     @BeforeClass
     public static void setUp() throws Exception {
 
@@ -48,37 +39,23 @@ public class MultipleSchemasH2Test {
         String username = "sa";
         String password = "";
 
-        System.out.println("Test");
+        sqlConnection = DriverManager.getConnection(url, username, password);
+        executeFromFile(sqlConnection, "src/test/resources/multischema/multiple-schema-test.sql");
 
-        try {
+        // Creating a new instance of the reasoner
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdafile)
+                .ontologyFile(owlfile)
+                .jdbcUrl(url)
+                .jdbcUser(username)
+                .jdbcPassword(password)
+                .enableTestMode()
+                .build();
+        reasoner = factory.createReasoner(config);
 
-            sqlConnection = DriverManager.getConnection(url, username, password);
-
-            FileReader reader = new FileReader("src/test/resources/multischema/multiple-schema-test.sql");
-            BufferedReader in = new BufferedReader(reader);
-            SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
-            runner.runScript(in);
-
-            // Creating a new instance of the reasoner
-            OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-            OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .nativeOntopMappingFile(obdafile)
-                    .ontologyFile(owlfile)
-                    .jdbcUrl(url)
-                    .jdbcUser(username)
-                    .jdbcPassword(password)
-                    .enableTestMode()
-                    .build();
-            reasoner = factory.createReasoner(config);
-
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
+        // Now we are ready for querying
+        conn = reasoner.getConnection();
     }
 
     @AfterClass
@@ -95,9 +72,8 @@ public class MultipleSchemasH2Test {
             java.sql.Statement s = sqlConnection.createStatement();
             try {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
-            } catch (SQLException sqle) {
-                System.out.println("Table not found, not dropping");
-            } finally {
+            }
+            finally {
                 s.close();
                 sqlConnection.close();
             }
@@ -116,16 +92,10 @@ public class MultipleSchemasH2Test {
                 System.out.println("Result " + ind1.toString());
                 count += 1;
             }
-            Assert.assertTrue(count == numberOfResults);
+            Assert.assertEquals(count, numberOfResults);
 
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
-            } catch (Exception e) {
-                st.close();
-                Assert.assertTrue(false);
-            }
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }

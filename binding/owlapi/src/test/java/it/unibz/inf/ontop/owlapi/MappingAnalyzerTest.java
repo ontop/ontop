@@ -46,7 +46,6 @@ public class MappingAnalyzerTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		// Initializing and H2 database with the stock exchange data
 		conn = DriverManager.getConnection(url, username, password);
 		executeFromFile(conn, "src/test/resources/test/mappinganalyzer/create-tables.sql");
 	}

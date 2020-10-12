@@ -25,17 +25,13 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -46,7 +42,6 @@ import java.sql.SQLException;
  * there and then query on top.
  */
 public class SPARQLRegExTest {
-	
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -66,14 +61,7 @@ public class SPARQLRegExTest {
 		String password = "fish";
 
 		sqlConnection = DriverManager.getConnection(url, username, password);
-
-		FileReader reader = new FileReader(
-				"src/test/resources/regex/sparql-regex-test.sql");
-		BufferedReader in = new BufferedReader(reader);
-		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true,
-				false);
-		runner.runScript(in);
-
+		executeFromFile(sqlConnection, "src/test/resources/regex/sparql-regex-test.sql");
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -93,11 +81,7 @@ public class SPARQLRegExTest {
 	@AfterClass
 	public static void tearDown() throws Exception {
 
-		FileReader reader = new FileReader(
-				"src/test/resources/regex/sparql-regex-test.sql.drop");
-		BufferedReader in = new BufferedReader(reader);
-		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
-		runner.runScript(in);
+		executeFromFile(sqlConnection, "src/test/resources/regex/sparql-regex-test.sql.drop");
 
 		conn.close();
 		reasoner.dispose();
@@ -109,7 +93,6 @@ public class SPARQLRegExTest {
 				sqlConnection.close();
 			}
 		}
-
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {

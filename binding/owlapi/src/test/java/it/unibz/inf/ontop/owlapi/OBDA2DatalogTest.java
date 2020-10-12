@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 import java.sql.Connection;

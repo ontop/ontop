@@ -25,7 +25,8 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -33,27 +34,29 @@ import java.sql.DriverManager;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /***
  */
 
-public class TMappingConstantPositionsTest extends TestCase {
+public class TMappingConstantPositionsTest{
 	private Connection conn;
 
-	final String owlfile = "src/test/resources/test/tmapping-positions.owl";
-	final String obdafile = "src/test/resources/test/tmapping-positions.obda";
+	private static final  String owlfile = "src/test/resources/test/tmapping-positions.owl";
+	private static final  String obdafile = "src/test/resources/test/tmapping-positions.obda";
 
-	String url = "jdbc:h2:mem:questjunitdb";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		conn = DriverManager.getConnection(url, username, password);
 		executeFromFile(conn, "src/test/resources/test/tmapping-positions-create-h2.sql");
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		executeFromFile(conn, "src/test/resources/test/tmapping-positions-drop-h2.sql");
 		conn.close();
@@ -78,22 +81,14 @@ public class TMappingConstantPositionsTest extends TestCase {
 		
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
-
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			for (int i = 0; i < 3; i++){
 				assertTrue(rs.hasNext());
 				rs.next();
 			}
 			assertFalse(rs.hasNext());
-		}
-		catch (Exception e) {
-			throw e;
-		} 
-		finally {
-			st.close();
 		}
 	}
 
@@ -105,6 +100,4 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		runTests(p);
 	}
-
-
 }

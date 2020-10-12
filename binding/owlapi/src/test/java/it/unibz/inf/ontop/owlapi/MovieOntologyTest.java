@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertTrue;
 
 public class MovieOntologyTest {
@@ -29,13 +30,13 @@ public class MovieOntologyTest {
 
 		// String driver = "org.h2.Driver";
 		conn = DriverManager.getConnection("jdbc:h2:mem:questjunitdb", "sa",  "");
-		executeUpdate("src/test/resources/test/treewitness/imdb-schema-create-h2.sql");
+		executeFromFile(conn, "src/test/resources/test/treewitness/imdb-schema-create-h2.sql");
 	}
 
 	
 	@After
 	public void tearDown() throws Exception {
-		executeUpdate("src/test/resources/test/treewitness/imdb-schema-drop-h2.sql");		
+		executeFromFile(conn, "src/test/resources/test/treewitness/imdb-schema-drop-h2.sql");
 	}
 
 	@Test
@@ -66,29 +67,6 @@ public class MovieOntologyTest {
 		assertTrue(true);
 	}
 
-	private void executeUpdate(String filename) throws Exception {
-
-		try (Statement st = conn.createStatement()){
-			FileReader reader = new FileReader(filename);
-			BufferedReader in = new BufferedReader(reader);
-			StringBuilder bf = new StringBuilder();
-			String line = in.readLine();
-			while (line != null) {
-				bf.append(line);
-				bf.append("\n");
-				line = in.readLine();
-				if (line !=null && line.isEmpty()) {
-					st.execute(bf.toString());
-					conn.commit();
-					bf = new StringBuilder();
-				}
-			}
-			in.close();
-			st.execute(bf.toString());
-			conn.commit();
-
-		}
-	}
 
 	
 }

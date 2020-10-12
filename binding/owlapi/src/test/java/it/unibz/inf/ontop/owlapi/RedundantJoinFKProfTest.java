@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RedundantJoinFKProfTest {
 
@@ -114,15 +113,13 @@ public class RedundantJoinFKProfTest {
                 java.lang.System.out.println(ind1);
                 i++;
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
+        assertEquals(expectedValues, returnedValues);
+        assertEquals(expectedValues.size(), i);
 
         return sql;
     }

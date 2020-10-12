@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,37 +33,29 @@ import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.*;
 
 public class URITemplateMatcherTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	final String owlFile = "src/test/resources/template/oboe-core.owl";
-	final String obdaFile = "src/test/resources/template/oboe-coreURIconstants.obda";
+	private static final  String owlFile = "src/test/resources/template/oboe-core.owl";
+	private static final  String obdaFile = "src/test/resources/template/oboe-coreURIconstants.obda";
 
 	private static Connection sqlConnection;
 
-	private String url = "jdbc:h2:mem:questjunitdb";
-	private String username = "sa";
-	private String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final  String username = "sa";
+	private static final  String password = "";
 
 	@Before
 	public void setUp() throws Exception {
-
 		sqlConnection = DriverManager.getConnection(url, username, password);
-
-		try (FileReader reader = new FileReader("src/test/resources/template/smallDatasetURIconstants.sql")) {
-			BufferedReader in = new BufferedReader(reader);
-			SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
-			runner.runScript(in);
-		}
+		executeFromFile(sqlConnection,"src/test/resources/template/smallDatasetURIconstants.sql");
 	}
 
 	@After

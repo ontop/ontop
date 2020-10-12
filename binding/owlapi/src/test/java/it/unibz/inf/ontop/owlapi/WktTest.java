@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class WktTest {
@@ -97,8 +98,7 @@ public class WktTest {
             conn.close();
             reasoner.dispose();
         }
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
+        assertEquals(expectedValues, returnedValues);
+        assertEquals(expectedValues.size(), i);
     }
 }
