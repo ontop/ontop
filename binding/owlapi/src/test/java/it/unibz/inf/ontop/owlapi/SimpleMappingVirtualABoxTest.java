@@ -47,8 +47,8 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 	private Connection conn;
 
-	final String owlfile = "src/test/resources/test/simplemapping.owl";
-	final String obdafile = "src/test/resources/test/simplemapping.obda";
+	private static final String owlfile = "src/test/resources/test/simplemapping.owl";
+	private static final String obdafile = "src/test/resources/test/simplemapping.obda";
 
 	private static final String url = "jdbc:h2:mem:questjunitdb";
 	private static final String username = "sa";

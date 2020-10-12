@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 public class RepeatedColumnNameTest {
@@ -109,7 +110,7 @@ public class RepeatedColumnNameTest {
                 final OWLBindingSet bindingSet = rs.next();
                 OWLObject ind1 = bindingSet.getOWLObject("p");
                 returnedValues.add(ind1.toString());
-                java.lang.System.out.println(ind1);
+                System.out.println(ind1);
                 i++;
             }
         }
@@ -117,9 +118,8 @@ public class RepeatedColumnNameTest {
             conn.close();
             reasoner.dispose();
         }
-        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
-                returnedValues.equals(expectedValues));
-        assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
+        assertEquals(expectedValues, returnedValues);
+        assertEquals(expectedValues.size(), i);
 
         return sql;
     }

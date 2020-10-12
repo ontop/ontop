@@ -51,25 +51,12 @@ public class SPARQLRegExTest {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
+	private static Connection sqlConnection;
 	private static OWLConnection conn;
-
-	static Logger log = LoggerFactory.getLogger(SPARQLRegExTest.class);
-
-	final static String owlfile = "src/test/resources/regex/sparql-regex-test.owl";
-	final static String obdafile = "src/test/resources/regex/sparql-regex-test.obda";
 	private static OntopOWLReasoner reasoner;
 
-	private static Connection sqlConnection;
-
-	@Before
-	public void init() {
-
-	}
-
-	@After
-	public void after() {
-
-	}
+	private final static String owlfile = "src/test/resources/regex/sparql-regex-test.owl";
+	private final static String obdafile = "src/test/resources/regex/sparql-regex-test.obda";
 
 	@BeforeClass
 	public static void setUp() throws Exception {
@@ -78,11 +65,7 @@ public class SPARQLRegExTest {
 		String username = "fish";
 		String password = "fish";
 
-		System.out.println("Test");
-
-		sqlConnection = DriverManager
-				.getConnection(url, username, password);
-
+		sqlConnection = DriverManager.getConnection(url, username, password);
 
 		FileReader reader = new FileReader(
 				"src/test/resources/regex/sparql-regex-test.sql");
@@ -149,10 +132,6 @@ public class SPARQLRegExTest {
 			 * ind2.toString()); assertEquals("\"value1\"", val.toString());
 			 */
 
-		}
-		finally {
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 
