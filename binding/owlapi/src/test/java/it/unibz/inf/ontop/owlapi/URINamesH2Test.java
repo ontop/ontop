@@ -20,22 +20,11 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import com.google.common.collect.ImmutableList;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -45,98 +34,34 @@ import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class URINamesH2Test {
+public class URINamesH2Test extends AbstractOWLAPITest {
 
-	private static OWLConnection conn;
-	private static OntopOWLReasoner reasoner;
-	private static Connection sqlConnection;
-
-	private final static String owlfile = "src/test/resources/urinames/uri-names.owl";
-	private final static String obdafile = "src/test/resources/urinames/uri-names.obda";
-
+	private final static String owlfile = "/urinames/uri-names.owl";
+	private final static String obdafile = "/urinames/uri-names.obda";
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-
-		 String url = "jdbc:h2:mem:questrepository;";
-		 String username = "fish";
-		 String password = "fish";
-
-		sqlConnection = DriverManager
-				.getConnection(url, username, password);
-
-		executeFromFile(sqlConnection,"src/test/resources/urinames/uri-names.sql");
-
-		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.ontologyFile(owlfile)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.build();
-		reasoner = factory.createReasoner(config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
+		initOBDA("/urinames/uri-names.sql", obdafile, owlfile);
 	}
 
 	@AfterClass
 	public static void tearDown() throws Exception {
-		
-		executeFromFile(sqlConnection,"src/test/resources/urinames/uri-names.sql.drop");
-
-		conn.close();
-		reasoner.dispose();
-		if (!sqlConnection.isClosed()) {
-			try (Statement s = sqlConnection.createStatement()) {
-				s.execute("DROP ALL OBJECTS DELETE FILES");
-			}
-			finally {
-				sqlConnection.close();
-			}
-		}
+		release();
 	}
 
-	private void runTests(String query, int numberOfResults) throws Exception {
-		try (OWLStatement st = conn.createStatement()) {
-
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			int count = 0;
-			while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                OWLObject ind1 = bindingSet.getOWLObject("x");
-				System.out.println("Result " + ind1.toString());
-				count += 1;
-			}
-			Assert.assertTrue(count == numberOfResults);
-
-		}
-	}
-
-	/**
-	 * Test use of two URIs with different arities
-	 * 
-	 * @throws Exception
-	 */
 	@Test
 	public void testURIDifferentArities1() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {?x a :Zoo}";
-		runTests(query, 2);
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {?v a :Zoo}";
+		checkReturnedValues(query, ImmutableList.of(
+				"<http://www.ontop.org/zoo-Berlin>",
+				"<http://www.ontop.org/zoo-zoo-Berlin>"));
 	}
 
-
-	/**
-	 * Test use of two URIs with different arities
-	 *
-	 * @throws Exception
-	 */
 	@Test
 	public void testURIDifferentArities2() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {?x a :Entertainment }";
-		runTests(query, 2);
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {?v a :Entertainment }";
+		checkReturnedValues(query, ImmutableList.of(
+				"<http://www.ontop.org/zoo-zoo-Berlin>",
+				"<http://www.ontop.org/other-activity-Berlin>"));
 	}
-
-
 }

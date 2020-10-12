@@ -57,6 +57,28 @@ public class AbstractOWLAPITest {
         CONNECTION = reasoner.getConnection();
     }
 
+    protected static void initR2RML(String createDbFile, String r2rmlFile, String ontologyFile)
+            throws SQLException, IOException, OWLOntologyCreationException {
+        String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
+
+        SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
+        executeFromFile(SQL_CONNECTION, AbstractOWLAPITest.class.getResource(createDbFile).getPath());
+
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .r2rmlMappingFile(AbstractOWLAPITest.class.getResource(r2rmlFile).getPath())
+                .ontologyFile(AbstractOWLAPITest.class.getResource(ontologyFile).getPath())
+                .jdbcUrl(jdbcUrl)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
+                .enableTestMode()
+                .build();
+
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+        OntopOWLReasoner reasoner = factory.createReasoner(config);
+
+        CONNECTION = reasoner.getConnection();
+    }
+
     protected static void release() throws OWLException, SQLException {
         CONNECTION.close();
         SQL_CONNECTION.close();
@@ -81,11 +103,10 @@ public class AbstractOWLAPITest {
         }
 
         ImmutableList<String> returnedValues = returnedValueBuilder.build();
-        assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedVValues.toString()),
-                returnedValues, expectedVValues);
+        assertEquals(expectedVValues, returnedValues);
     }
 
-    protected String checkReturnedValuesAndReturnSql(String query, List<String> expectedVValues) throws Exception {
+    protected String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
         OntopOWLStatement st = CONNECTION.createStatement();
         String sql;
 
@@ -111,11 +132,23 @@ public class AbstractOWLAPITest {
             }
             i++;
         }
-        assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedVValues.toString()), returnedValues, expectedVValues);
-        assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedVValues.size()), expectedVValues.size(), i);
+        assertEquals(expectedValues, returnedValues);
+        assertEquals(expectedValues.size(), i);
 
         LOGGER.debug("SQL: \n" + sql);
 
         return sql;
+    }
+
+    protected void checkNumberOfReturnedValues(String query, int expectedNumber) throws Exception {
+        OntopOWLStatement st = CONNECTION.createStatement();
+
+        int i = 0;
+        TupleOWLResultSet rs = st.executeSelectQuery(query);
+        while (rs.hasNext()) {
+            final OWLBindingSet bindingSet = rs.next();
+            i++;
+        }
+        assertEquals(expectedNumber, i);
     }
 }

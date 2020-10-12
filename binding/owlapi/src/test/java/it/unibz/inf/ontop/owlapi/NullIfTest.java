@@ -21,12 +21,12 @@ public class NullIfTest extends AbstractOWLAPITest {
 
     @BeforeClass
     public static void before() throws IOException, SQLException, OWLOntologyCreationException {
-        AbstractOWLAPITest.initOBDA(CREATE_DB_FILE, OBDA_FILE, ONTOLOGY_FILE);
+        initOBDA(CREATE_DB_FILE, OBDA_FILE, ONTOLOGY_FILE);
     }
 
     @AfterClass
     public static void after() throws SQLException, OWLException {
-        AbstractOWLAPITest.release();
+        release();
     }
 
     @Test
