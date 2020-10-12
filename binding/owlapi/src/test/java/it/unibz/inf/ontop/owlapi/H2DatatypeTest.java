@@ -20,122 +20,48 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import com.google.common.collect.ImmutableList;
+import org.junit.*;
 
 /***
  * Tests that h2 datatypes
  */
-public class H2DatatypeTest {
-    private static final String owlFile = "src/test/resources/datatype/datatypes.owl";
-	private static final String obdaFile = "src/test/resources/datatype/datetime-h2.obda";
+public class H2DatatypeTest extends AbstractOWLAPITest {
+    private static final String owlFile = "/datatype/datatypes.owl";
+	private static final String obdaFile = "/datatype/datetime-h2.obda";
 
-	private static final String JDBC_URL =  "jdbc:h2:mem:datatype";
-	private static final String JDBC_USER =  "sa";
-	private static final String JDBC_PASSWORD =  "";
-
-	private OntopOWLReasoner reasoner;
-	private OWLConnection conn;
-	private Connection sqlConnection;
-
-	@Before
-	public void setUp() throws Exception {
-
-		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-		executeFromFile(sqlConnection,"src/test/resources/datatype/h2-datatypes.sql");
-
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFile)
-				.nativeOntopMappingFile(obdaFile)
-				.jdbcUrl(JDBC_URL)
-				.jdbcUser(JDBC_USER)
-				.jdbcPassword(JDBC_PASSWORD)
-				.enableTestMode()
-				.build();
-
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-		reasoner = factory.createReasoner(config);
-		conn = reasoner.getConnection();
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/datatype/h2-datatypes.sql", obdaFile, owlFile);
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		conn.close();
-		reasoner.dispose();
-		if (!sqlConnection.isClosed()) {
-			try (java.sql.Statement s = sqlConnection.createStatement()) {
-				s.execute("DROP ALL OBJECTS DELETE FILES");
-			}
-			finally {
-				sqlConnection.close();
-			}
-		}
+	@AfterClass
+	public static void tearDown() throws Exception {
+		release();
 	}
-
 
 	/**
 	 * Test use of date
-	 * @throws Exception
 	 */
 	@Test
 	public void testDate() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> " +
+				"SELECT ?s ?v\n" +
                 "WHERE {\n" +
-                "   ?s a :Row; :hasDate ?x\n" +
-                "   FILTER ( ?x = \"2013-03-18\"^^xsd:date ) .\n" +
+                "   ?s a :Row; :hasDate ?v\n" +
+                "   FILTER ( ?v = \"2013-03-18\"^^xsd:date ) .\n" +
                 "}";
-		String val = runQueryReturnLiteral(query);
-		assertEquals("\"2013-03-18\"^^xsd:date", val);
+		checkReturnedValues(query, ImmutableList.of("2013-03-18"));
 	}
-
 
 	@Test
 	public void testDate2() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x\n" +
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> " +
+				"SELECT ?v\n" +
                 "WHERE {\n" +
-                "   ?x a :Row; :hasDate \"2013-03-18\"^^xsd:date\n" +
+                "   ?v a :Row; :hasDate \"2013-03-18\"^^xsd:date\n" +
                 "}";
-        String val = runQueryReturnIndividual(query);
-        assertEquals("<http://ontop.inf.unibz.it/test/datatypes#datetime-1>", val);
+		checkReturnedValues(query, ImmutableList.of("<http://ontop.inf.unibz.it/test/datatypes#datetime-1>"));
     }
-
-
-	private String runQueryReturnIndividual(String query) throws OWLException {
-		try (OWLStatement st = conn.createStatement()) {
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-			OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-			String retval = ind1.toString();
-			return retval;
-		}
-	}
-
-	private String runQueryReturnLiteral(String query) throws OWLException {
-		try (OWLStatement st = conn.createStatement()) {
-			TupleOWLResultSet  rs = st.executeSelectQuery(query);
-			assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-			String retval = ind1.toString();
-			return retval;
-		}
-	}
 }
 
