@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.logging.impl;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.Hashing;
@@ -69,10 +70,13 @@ public class QueryLoggerImpl implements QueryLogger {
     protected static final String QUERY_TEMPLATE_KEY = "extractedQueryTemplate";
     protected static final String HASH_KEY = "hash";
     protected static final String PARAMETERS_KEY = "parameters";
+    protected static final String PREDEFINED_KEY = "predefined";
+    protected static final String PREDEFINED_QUERY_KEY = "queryId";
+    protected static final String BINDINGS_KEY = "bindings";
 
     private static final DateFormat  DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     private static final Logger REGULAR_LOGGER = LoggerFactory.getLogger(QueryLoggerImpl.class);
-;
+    ;
 
 
     private final UUID queryId;
@@ -106,6 +110,12 @@ public class QueryLoggerImpl implements QueryLogger {
     private IQ reformulatedQuery;
     @Nullable
     private Boolean wasReformulationCached;
+
+    @Nullable
+    private String predefinedQueryId;
+
+    @Nullable
+    private ImmutableMap<String, String> bindings;
 
     @AssistedInject
     protected QueryLoggerImpl(@Assisted ImmutableMultimap<String, String> httpHeaders,
@@ -233,6 +243,21 @@ public class QueryLoggerImpl implements QueryLogger {
         js.writeObjectFieldStart(PARAMETERS_KEY);
         for (Map.Entry<GroundTerm, Variable> e : queryTemplate.getParameterMap().entrySet()) {
             js.writeStringField(e.getValue().toString(), e.getKey().toString());
+        }
+        js.writeEndObject();
+        js.writeEndObject();
+    }
+
+    private void writePredefinedQueryInfo(JsonGenerator js) throws IOException {
+        if (predefinedQueryId == null || bindings == null)
+            return;
+        js.writeObjectFieldStart(PREDEFINED_KEY);
+
+        js.writeStringField(PREDEFINED_QUERY_KEY, predefinedQueryId);
+
+        js.writeObjectFieldStart(BINDINGS_KEY);
+        for (Map.Entry<String, String> e : bindings.entrySet()) {
+            js.writeStringField(e.getKey(), e.getValue());
         }
         js.writeEndObject();
         js.writeEndObject();
@@ -366,6 +391,16 @@ public class QueryLoggerImpl implements QueryLogger {
             return;
 
         relationNames = relationNameExtractor.extractRelationNames(plannedQuery);
+    }
+
+    @Override
+    public void setPredefinedQuery(String queryId, ImmutableMap<String, String> bindings) {
+        if (disabled)
+            return;
+
+        predefinedQueryId = queryId;
+        this.bindings = bindings;
+
     }
 
     protected void declareException(Exception e, String exceptionType) {

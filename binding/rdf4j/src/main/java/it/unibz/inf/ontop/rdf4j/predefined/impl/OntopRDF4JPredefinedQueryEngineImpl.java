@@ -318,12 +318,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         return queryReformulator.reformulateIntoNativeQuery(newQuery, queryLogger);
     }
 
-    /**
-     * TODO: Provide the predefined query info to the query logger
-     */
     private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
                                           ImmutableMultimap<String, String> httpHeaders) {
-        return queryLoggerFactory.create(httpHeaders);
+        QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
+        queryLogger.setPredefinedQuery(predefinedQuery.getId(), bindings);
+        return queryLogger;
     }
 
     private GraphQueryResult executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery,
