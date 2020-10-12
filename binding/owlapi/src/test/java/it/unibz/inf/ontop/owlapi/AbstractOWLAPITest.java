@@ -144,7 +144,7 @@ public class AbstractOWLAPITest {
         if (value instanceof OWLLiteral) {
             OWLLiteral literal = (OWLLiteral) value;
             if (literal.getDatatype().isString())
-                return literal.getLiteral();
+                return "\"" + literal.getLiteral() + "\"^^xsd:string";
             // literal.getLiteral();
             return literal.toString();
         }
