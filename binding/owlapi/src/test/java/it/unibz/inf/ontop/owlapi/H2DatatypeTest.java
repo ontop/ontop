@@ -51,7 +51,7 @@ public class H2DatatypeTest extends AbstractOWLAPITest {
                 "   ?s a :Row; :hasDate ?v\n" +
                 "   FILTER ( ?v = \"2013-03-18\"^^xsd:date ) .\n" +
                 "}";
-		checkReturnedValues(query, ImmutableList.of("2013-03-18"));
+		checkReturnedValues(query, ImmutableList.of("\"2013-03-18\"^^xsd:date"));
 	}
 
 	@Test

@@ -37,7 +37,7 @@ public class NullIfTest extends AbstractOWLAPITest {
                 "  ?s ex:hasNumber ?v\n" +
                 "}";
 
-        String sql = checkReturnedValuesAndReturnSql(query, ImmutableList.of("2"));
+        String sql = checkReturnedValuesAndReturnSql(query, ImmutableList.of("\"2\"^^xsd:integer"));
         assertFalse(sql.toUpperCase().contains("NULLIF"));
     }
 }

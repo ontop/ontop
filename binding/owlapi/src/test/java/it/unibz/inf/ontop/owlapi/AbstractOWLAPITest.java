@@ -84,26 +84,25 @@ public class AbstractOWLAPITest {
         SQL_CONNECTION.close();
     }
 
-    protected void checkReturnedValues(String query, ImmutableList<String> expectedVValues) throws Exception {
+    protected void checkReturnedValues(String query, ImmutableList<String> expectedValues) throws Exception {
         OWLStatement st = CONNECTION.createStatement();
 
         ImmutableList.Builder<String> returnedValueBuilder = ImmutableList.builder();
         TupleOWLResultSet rs = st.executeSelectQuery(query);
 
+        int i = 0;
         while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
-
             OWLObject value = bindingSet.getOWLObject("v");
-            String stringValue = (value instanceof OWLLiteral)
-                    ? ((OWLLiteral) value).getLiteral()
-                    : (value == null) ? null : value.toString();
-
+            String stringValue = getStringValue(value);
             if (stringValue != null)
                 returnedValueBuilder.add(stringValue);
+            i++;
         }
 
         ImmutableList<String> returnedValues = returnedValueBuilder.build();
-        assertEquals(expectedVValues, returnedValues);
+        assertEquals(expectedValues, returnedValues);
+        assertEquals(expectedValues.size(), i); // required due to possible nulls
     }
 
     protected String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
@@ -123,9 +122,7 @@ public class AbstractOWLAPITest {
         while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
             OWLObject value = bindingSet.getOWLObject("v");
-            String stringValue = (value instanceof OWLLiteral)
-                    ? ((OWLLiteral) value).getLiteral()
-                    : (value == null) ? null : value.toString();
+            String stringValue = getStringValue(value);
             if (stringValue != null) {
                 returnedValues.add(stringValue);
                 LOGGER.debug(stringValue);
@@ -133,11 +130,26 @@ public class AbstractOWLAPITest {
             i++;
         }
         assertEquals(expectedValues, returnedValues);
-        assertEquals(expectedValues.size(), i);
+        assertEquals(expectedValues.size(), i); // required due to possible nulls
 
         LOGGER.debug("SQL: \n" + sql);
 
         return sql;
+    }
+
+    private String getStringValue(OWLObject value) {
+        if (value == null)
+            return null;
+
+        if (value instanceof OWLLiteral) {
+            OWLLiteral literal = (OWLLiteral) value;
+            if (literal.getDatatype().isString())
+                return literal.getLiteral();
+            // literal.getLiteral();
+            return literal.toString();
+        }
+
+        return value.toString();
     }
 
     protected void checkNumberOfReturnedValues(String query, int expectedNumber) throws Exception {
