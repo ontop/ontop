@@ -38,11 +38,6 @@ public interface PredefinedQueryConfigEntry {
         Boolean getRequired();
 
         QueryParameterType getType();
-
-        /**
-         * Returns a reference value only if safe for random generation
-         */
-        Optional<String> getReferenceValue(String value);
     }
 
     interface QueryParameterType {

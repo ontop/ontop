@@ -98,9 +98,6 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
         // LAZY
         private QueryParameterType parameterType;
 
-        // LAZY
-        private String referenceValue;
-
         @JsonProperty(value = "safeForRandomGeneration", required = true)
         private Boolean safeForRandomGeneration;
         @JsonProperty(value = "required", required = true)
@@ -137,44 +134,6 @@ public class ParsedPredefinedQueryConfigEntry implements PredefinedQueryConfigEn
                 return new QueryParameterTypeImpl(TYPED_LITERAL, SimpleValueFactory.getInstance().createIRI(typeString));
             }
             return parameterType;
-        }
-
-        @Override
-        public Optional<String> getReferenceValue(String value) {
-            if (!isSafeForRandomGeneration())
-                return Optional.empty();
-
-            if (referenceValue == null) {
-                synchronized (this) {
-                    if (referenceValue == null)
-                        referenceValue = generateReferenceValue(getType());
-                }
-            }
-            return Optional.of(referenceValue);
-        }
-
-        private static String generateReferenceValue(QueryParameterType paramType) {
-
-            switch (paramType.getCategory()) {
-                case IRI:
-                    throw new RuntimeException("TODO: support generating ref values for IRIs");
-                case TYPED_LITERAL:
-                    return generateReferenceLiteralValue(paramType.getDatatypeIRI()
-                            .orElseThrow(() -> new MinorOntopInternalBugException("Invalid typed literal")));
-                default:
-                    throw new MinorOntopInternalBugException("Unexpected parameter type: " + paramType.getCategory());
-            }
-        }
-
-        private static String generateReferenceLiteralValue(IRI datatype) {
-            String iriString = datatype.stringValue();
-
-            // TODO: avoid the series of IF
-            if (iriString.equals(XSD.STRING.getIRIString())) {
-                return UUID.randomUUID().toString();
-            }
-            else
-                throw new RuntimeException("TODO: support random generation of " + datatype);
         }
     }
 }
