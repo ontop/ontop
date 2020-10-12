@@ -207,6 +207,7 @@ public class QueryLoggerImpl implements QueryLogger {
 
         writeHttpHeaders(js);
         writeQueryTemplateExtraction(js);
+        writePredefinedQueryInfo(js);
 
         if (sparqlQueryString != null)
             js.writeStringField(SPARQL_QUERY_KEY, sparqlQueryString);

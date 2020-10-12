@@ -283,39 +283,36 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
         ImmutableMap<String, String> bindingWithReferences = predefinedQuery.replaceWithReferenceValues(bindings);
 
-        try {
-            IQ referenceIQ = referenceQueryCache.get(
-                    bindingWithReferences,
-                    () -> generateReferenceQuery(predefinedQuery, bindingWithReferences, queryLogger));
+        IQ existingReferenceIQ = referenceQueryCache.getIfPresent(bindingWithReferences);
+        // NB: no problem if concurrent reference queries are generated (deterministic results)
+        IQ referenceIQ = existingReferenceIQ == null
+                ? generateReferenceQuery(predefinedQuery, bindingWithReferences)
+                : existingReferenceIQ;
+        if (existingReferenceIQ == null)
+            referenceQueryCache.put(bindingWithReferences, referenceIQ);
 
-            IQ newIQ = valueReplacer.replaceReferenceValues(referenceIQ, bindings, bindingWithReferences);
-            // TODO: revisit it
-            queryLogger.declareReformulationFinishedAndSerialize(newIQ, false);
-            return newIQ;
+        IQ newIQ = valueReplacer.replaceReferenceValues(referenceIQ, bindings, bindingWithReferences);
 
+        queryLogger.declareReformulationFinishedAndSerialize(newIQ, referenceIQ == existingReferenceIQ);
 
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-
-            if (cause instanceof OntopReformulationException)
-                throw (OntopReformulationException) cause;
-
-            throw new MinorOntopInternalBugException("Unexpected exception when creating executable query: ", e);
-        }
+        return newIQ;
     }
 
     private IQ generateReferenceQuery(PredefinedQuery predefinedQuery,
-                                      ImmutableMap<String, String> bindingWithReferences, QueryLogger queryLogger)
+                                      ImmutableMap<String, String> bindingWithReferences)
             throws OntopReformulationException {
         BindingSet bindingSet = predefinedQuery.convertBindings(bindingWithReferences);
         RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
                 .newBindings(bindingSet);
 
+        // TODO: shall we consider some HTTP headers?
+        QueryLogger tmpQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
+
         LOGGER.debug("Generating the reference query for {} with ref parameters {}",
                 predefinedQuery.getId(),
                 bindingSet);
 
-        return queryReformulator.reformulateIntoNativeQuery(newQuery, queryLogger);
+        return queryReformulator.reformulateIntoNativeQuery(newQuery, tmpQueryLogger);
     }
 
     private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
