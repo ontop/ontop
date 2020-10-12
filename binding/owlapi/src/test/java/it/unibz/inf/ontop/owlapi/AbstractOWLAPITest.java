@@ -84,7 +84,7 @@ public class AbstractOWLAPITest {
         SQL_CONNECTION.close();
     }
 
-    protected void checkReturnedValues(String query, ImmutableList<String> expectedValues) throws Exception {
+    protected void checkReturnedValues(String query, String var, ImmutableList<String> expectedValues) throws Exception {
         OWLStatement st = CONNECTION.createStatement();
 
         ImmutableList.Builder<String> returnedValueBuilder = ImmutableList.builder();
@@ -93,7 +93,7 @@ public class AbstractOWLAPITest {
         int i = 0;
         while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
-            OWLObject value = bindingSet.getOWLObject("v");
+            OWLObject value = bindingSet.getOWLObject(var);
             String stringValue = getStringValue(value);
             if (stringValue != null)
                 returnedValueBuilder.add(stringValue);
@@ -105,7 +105,7 @@ public class AbstractOWLAPITest {
         assertEquals(expectedValues.size(), i); // required due to possible nulls
     }
 
-    protected String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
+    protected String checkReturnedValuesAndReturnSql(String query, String var, List<String> expectedValues) throws Exception {
         OntopOWLStatement st = CONNECTION.createStatement();
         String sql;
 
@@ -121,7 +121,7 @@ public class AbstractOWLAPITest {
         TupleOWLResultSet rs = st.executeSelectQuery(query);
         while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
-            OWLObject value = bindingSet.getOWLObject("v");
+            OWLObject value = bindingSet.getOWLObject(var);
             String stringValue = getStringValue(value);
             if (stringValue != null) {
                 returnedValues.add(stringValue);

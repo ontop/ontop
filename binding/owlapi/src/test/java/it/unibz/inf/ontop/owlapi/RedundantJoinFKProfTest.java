@@ -35,7 +35,7 @@ public class RedundantJoinFKProfTest extends AbstractOWLAPITest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        String sql = checkReturnedValuesAndReturnSql(query, ImmutableList.of(
+        String sql = checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
                 "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1>",
                 "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1>",
                 "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/3>",

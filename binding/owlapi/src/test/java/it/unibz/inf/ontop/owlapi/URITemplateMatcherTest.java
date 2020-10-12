@@ -50,7 +50,7 @@ public class URITemplateMatcherTest extends AbstractOWLAPITest {
 				"             <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#Unit> . \n" +
 				"  }";
 
-		checkReturnedValues(queryBind, ImmutableList.of(
+		checkReturnedValues(queryBind, "v", ImmutableList.of(
 				"<http://www.ola.fr#measurement/unit/name/1>",
 				"<http://www.ola.fr#measurement/unit/name/2>"));
 	}
@@ -64,6 +64,6 @@ public class URITemplateMatcherTest extends AbstractOWLAPITest {
 				"     <http://www.ola.fr#measurement/unit/name/1> a oboe-core:Measurement ; oboe-core:hasValue ?v \n" +
 				"  }";
 
-		checkReturnedValues(queryBind, ImmutableList.of("<http://urlconstants.org/32>"));
+		checkReturnedValues(queryBind, "v", ImmutableList.of("<http://urlconstants.org/32>"));
 	}
 }

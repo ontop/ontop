@@ -23,7 +23,7 @@ public class RepeatedColumnNameTest extends AbstractOWLAPITest {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "SELECT * { ?v a :Professor. }";
 
-        String sql = checkReturnedValuesAndReturnSql(query, ImmutableList.of(
+        String sql = checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
                 "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1/1>",
                 "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/2/2>"));
 

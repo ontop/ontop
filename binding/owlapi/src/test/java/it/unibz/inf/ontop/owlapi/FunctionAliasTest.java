@@ -26,7 +26,7 @@ public class FunctionAliasTest extends AbstractOWLAPITest {
                 "SELECT  ?v " +
                 "WHERE {?y :title ?v . }";
 
-        String sql = checkReturnedValuesAndReturnSql(query, ImmutableList.of(
-                "the sun", "winter is coming"));
+        String sql = checkReturnedValuesAndReturnSql(query, "v",
+                ImmutableList.of("the sun", "winter is coming"));
     }
 }

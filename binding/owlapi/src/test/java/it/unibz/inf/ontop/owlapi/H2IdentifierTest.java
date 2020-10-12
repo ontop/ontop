@@ -51,7 +51,7 @@ public class H2IdentifierTest extends AbstractOWLAPITest {
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 				"SELECT ?v WHERE {?v a :Country} ORDER BY ?v";
-		checkReturnedValues(query, ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina>"));
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class H2IdentifierTest extends AbstractOWLAPITest {
 	public void testUpperCaseTableUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 				"SELECT ?v WHERE {?v a :Country2} ORDER BY ?v";
-		checkReturnedValues(query, ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>"));
 	}
 	
 	/**
@@ -71,7 +71,7 @@ public class H2IdentifierTest extends AbstractOWLAPITest {
 	public void testLowerCaseColumnViewDefQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 				"SELECT ?v WHERE {?v a :Country4} ORDER BY ?v";
-		checkReturnedValues(query, ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-1010>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-1010>"));
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class H2IdentifierTest extends AbstractOWLAPITest {
 	public void testLowerCaseColumnViewDefUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 				"SELECT ?v WHERE {?v a :Country5} ORDER BY ?v";
-		checkReturnedValues(query, ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-1010>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-1010>"));
 	}
 	
 	/**
@@ -91,14 +91,14 @@ public class H2IdentifierTest extends AbstractOWLAPITest {
 	public void testLowerCaseTable() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 				"SELECT ?v WHERE {?v a :Country3} ORDER BY ?v";
-		checkReturnedValues(query, ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-BladeRunner-2020-Constant>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-BladeRunner-2020-Constant>"));
 	}
 
 	@Test
 	public void testLowerCaseTableWithSymbol() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 				"SELECT ?v WHERE {?v a :NoCountry} ORDER BY ?v";
-		checkReturnedValues(query, ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#CountryNo-Atlantis>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#CountryNo-Atlantis>"));
 	}
 }
 

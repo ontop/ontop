@@ -33,11 +33,9 @@ public class NullIfTest extends AbstractOWLAPITest {
     public void testSelectNumbers() throws Exception {
         String query = "PREFIX ex: <http://example.org/>" +
                 "SELECT ?v\n" +
-                "WHERE {\n" +
-                "  ?s ex:hasNumber ?v\n" +
-                "}";
+                "WHERE { ?s ex:hasNumber ?v }";
 
-        String sql = checkReturnedValuesAndReturnSql(query, ImmutableList.of("\"2\"^^xsd:integer"));
+        String sql = checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of("\"2\"^^xsd:integer"));
         assertFalse(sql.toUpperCase().contains("NULLIF"));
     }
 }

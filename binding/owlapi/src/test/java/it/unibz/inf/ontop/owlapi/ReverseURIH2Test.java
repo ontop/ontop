@@ -50,61 +50,61 @@ public class ReverseURIH2Test extends AbstractOWLAPITest {
 	@Test
 	public void testSingleColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-Cote%20D%27ivore> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testSingleColum() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-John%20Smith> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testTwoColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testTwoColum2Value() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith%202> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testTwoColum22Vaule() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore%202> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testTwoColum() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testThreeColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore-Cote%20D%27ivore> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testThreeColum() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith-John%20Smith> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testThreeColum23Value() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore%202-Cote%20D%27ivore%203> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 	@Test
 	public void testThreeColum3Value() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-John%20Smith-John%20Smith%202-John%20Smith%203> a ?v}";
-		checkReturnedValues(query, ImmutableList.of("<http://www.ontop.org/Test>"));
+		checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
 	}
 
 }

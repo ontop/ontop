@@ -27,14 +27,11 @@ public class WktTest extends AbstractOWLAPITest {
     public void testWkt1() throws Exception {
 
         String query =  "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
-                "\n" +
-                "SELECT ?v\n" +
-                "WHERE {\n" +
-                "   ?s geo:asWKT ?v" +
-                "}";
+                "SELECT ?s ?v\n" +
+                "WHERE { ?s geo:asWKT ?v }";
 
         List<String> expectedValues = ImmutableList.of(
                 "\"POLYGON((-77.089005 38.913574, -77.029953 38.913574, -77.029953 38.886321, -77.089005 38.886321, -77.089005 38.913574))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>");
-        checkReturnedValuesAndReturnSql(query, expectedValues);
+        checkReturnedValuesAndReturnSql(query, "v", expectedValues);
     }
 }

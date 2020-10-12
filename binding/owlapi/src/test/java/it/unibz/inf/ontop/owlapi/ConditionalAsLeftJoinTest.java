@@ -29,7 +29,7 @@ public class ConditionalAsLeftJoinTest extends AbstractOWLAPITest {
                 "OPTIONAL { :Tartaruga :hasAddress ?v }\n" +
                 "}";
 
-        String sql = checkReturnedValuesAndReturnSql(query, ImmutableList.of(
+        String sql = checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
                 "<http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#aa>"));
     }
 

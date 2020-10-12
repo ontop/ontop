@@ -52,7 +52,7 @@ public class URINamesH2Test extends AbstractOWLAPITest {
 	@Test
 	public void testURIDifferentArities1() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {?v a :Zoo}";
-		checkReturnedValues(query, ImmutableList.of(
+		checkReturnedValues(query, "v", ImmutableList.of(
 				"<http://www.ontop.org/zoo-Berlin>",
 				"<http://www.ontop.org/zoo-zoo-Berlin>"));
 	}
@@ -60,7 +60,7 @@ public class URINamesH2Test extends AbstractOWLAPITest {
 	@Test
 	public void testURIDifferentArities2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {?v a :Entertainment }";
-		checkReturnedValues(query, ImmutableList.of(
+		checkReturnedValues(query, "v", ImmutableList.of(
 				"<http://www.ontop.org/zoo-zoo-Berlin>",
 				"<http://www.ontop.org/other-activity-Berlin>"));
 	}

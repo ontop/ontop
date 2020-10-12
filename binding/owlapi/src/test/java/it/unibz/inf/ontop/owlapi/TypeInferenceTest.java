@@ -32,6 +32,6 @@ public class TypeInferenceTest extends AbstractOWLAPITest {
                 "<http://example.org/types/voc#Philippines>",
                 "<http://example.org/types/voc#China>"
         );
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValues(queryBind, "v", expectedValues);
     }
 }
