@@ -51,6 +51,18 @@ if [ "${ONTOP_PORTAL_FILE+x}" ]; then
   args_array+=("--portal=${ONTOP_PORTAL_FILE}")
 fi
 
+if [ "${ONTOP_PREDEFINED_CONFIG+x}" ]; then
+  args_array+=("--predefined-config=${ONTOP_PREDEFINED_CONFIG}")
+fi
+
+if [ "${ONTOP_PREDEFINED_QUERIES+x}" ]; then
+  args_array+=("--predefined-queries=${ONTOP_PREDEFINED_QUERIES}")
+fi
+
+if [ "${ONTOP_CONTEXTS+x}" ]; then
+  args_array+=("--contexts=${ONTOP_CONTEXTS}")
+fi
+
 if [ "${ONTOP_DEV_MODE+x}" ]; then
   args_array+=("--dev")
 fi
@@ -63,7 +75,7 @@ if [ -z "${ONTOP_JAVA_ARGS+x}" ]; then
   ONTOP_JAVA_ARGS="-Xmx512m"
 fi
 
-if [ -z "${ONTOP_DEBUG+x}" ]; then
+if [ "${ONTOP_DEBUG+x}" ]; then
   LOGBACK_CONFIG_FILE=${ONTOP_HOME}/log/logback-debug.xml
 else
   LOGBACK_CONFIG_FILE=${ONTOP_HOME}/log/logback.xml

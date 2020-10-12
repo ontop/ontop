@@ -127,16 +127,10 @@ public abstract class QuestStatement implements OntopStatement {
 		}
 	}
 
-	protected abstract TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException;
-
 	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException {
 		return executeSelectQuery(executableQuery, queryLogger);
 	}
-
-	protected abstract BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException;
 
 	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException {
@@ -148,21 +142,24 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	private SimpleGraphResultSet executeDescribeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(constructQuery, executableQuery, true, queryLogger);
+		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, true, queryLogger);
 	}
 
-	/**
-	 * TODO: describe
-	 */
 	private SimpleGraphResultSet executeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(constructQuery, executableQuery, false, queryLogger);
+		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, false, queryLogger);
+	}
+
+	@Override
+	public SimpleGraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
+		return executeGraphQuery(constructTemplate, executableQuery, false, queryLogger);
 	}
 
 	/**
 	 * TODO: refactor
 	 */
-	protected abstract SimpleGraphResultSet executeGraphQuery(ConstructQuery query, IQ executableQuery,
+	protected abstract SimpleGraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery,
 															  boolean collectResults, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 

@@ -10,4 +10,8 @@ public abstract class OntopInternalBugException extends RuntimeException {
     protected OntopInternalBugException(String message) {
         super(message);
     }
+
+    protected OntopInternalBugException(String message, Throwable e) {
+        super(message, e);
+    }
 }

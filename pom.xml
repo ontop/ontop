@@ -143,6 +143,7 @@
         <guice.version>4.1.0</guice.version>
         <sesame.version>2.7.16</sesame.version>
         <h2.version>1.4.196</h2.version>
+        <toml4j.version>0.7.2</toml4j.version>
 
         <docker.url>localhost</docker.url>
         <docker.db2.password>obda-pwd</docker.db2.password>
@@ -651,6 +652,12 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.moandjiezana.toml</groupId>
+                <artifactId>toml4j</artifactId>
+                <version>${toml4j.version}</version>
             </dependency>
 
             <!-- JDBC Drivers -->
