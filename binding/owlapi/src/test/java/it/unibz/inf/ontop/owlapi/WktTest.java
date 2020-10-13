@@ -4,18 +4,15 @@ import com.google.common.collect.ImmutableList;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import java.util.List;
 
 
 public class WktTest extends AbstractOWLAPITest {
 
-    private static final String CREATE_SCRIPT = "/test/wkt/wkt_test_create.sql";
-    private static final String ODBA_FILE = "/test/wkt/wkt_test.obda";
-    private static final String OWL_FILE = "/test/wkt/wkt_test.owl";
-
     @BeforeClass
     public static void setUp() throws Exception {
-        AbstractOWLAPITest.initOBDA(CREATE_SCRIPT, ODBA_FILE, OWL_FILE);
+        AbstractOWLAPITest.initOBDA("/test/wkt/wkt_test_create.sql",
+                "/test/wkt/wkt_test.obda",
+                "/test/wkt/wkt_test.owl");
     }
 
     @AfterClass
@@ -25,13 +22,11 @@ public class WktTest extends AbstractOWLAPITest {
 
     @Test
     public void testWkt1() throws Exception {
-
         String query =  "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
                 "SELECT ?s ?v\n" +
                 "WHERE { ?s geo:asWKT ?v }";
 
-        List<String> expectedValues = ImmutableList.of(
-                "\"POLYGON((-77.089005 38.913574, -77.029953 38.913574, -77.029953 38.886321, -77.089005 38.886321, -77.089005 38.913574))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>");
-        checkReturnedValuesAndReturnSql(query, "v", expectedValues);
+        checkReturnedValuesAndReturnSql(query, "v", ImmutableList.of(
+                "\"POLYGON((-77.089005 38.913574, -77.029953 38.913574, -77.029953 38.886321, -77.089005 38.886321, -77.089005 38.913574))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>"));
     }
 }

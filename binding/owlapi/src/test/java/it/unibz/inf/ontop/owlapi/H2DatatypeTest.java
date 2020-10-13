@@ -27,12 +27,12 @@ import org.junit.*;
  * Tests that h2 datatypes
  */
 public class H2DatatypeTest extends AbstractOWLAPITest {
-    private static final String owlFile = "/datatype/datatypes.owl";
-	private static final String obdaFile = "/datatype/datetime-h2.obda";
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		initOBDA("/datatype/h2-datatypes.sql", obdaFile, owlFile);
+		initOBDA("/datatype/h2-datatypes.sql",
+				"/datatype/datetime-h2.obda",
+				"/datatype/datatypes.owl");
 	}
 
 	@AfterClass
@@ -51,7 +51,8 @@ public class H2DatatypeTest extends AbstractOWLAPITest {
                 "   ?s a :Row; :hasDate ?v\n" +
                 "   FILTER ( ?v = \"2013-03-18\"^^xsd:date ) .\n" +
                 "}";
-		checkReturnedValues(query, "v", ImmutableList.of("\"2013-03-18\"^^xsd:date"));
+		checkReturnedValues(query, "v", ImmutableList.of(
+				"\"2013-03-18\"^^xsd:date"));
 	}
 
 	@Test
@@ -61,7 +62,8 @@ public class H2DatatypeTest extends AbstractOWLAPITest {
                 "WHERE {\n" +
                 "   ?v a :Row; :hasDate \"2013-03-18\"^^xsd:date\n" +
                 "}";
-		checkReturnedValues(query, "v", ImmutableList.of("<http://ontop.inf.unibz.it/test/datatypes#datetime-1>"));
+		checkReturnedValues(query, "v", ImmutableList.of(
+				"<http://ontop.inf.unibz.it/test/datatypes#datetime-1>"));
     }
 }
 

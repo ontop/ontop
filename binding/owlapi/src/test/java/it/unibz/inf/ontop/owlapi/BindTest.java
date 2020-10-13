@@ -22,24 +22,8 @@ package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.*;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLObject;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.List;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -56,12 +40,11 @@ import static org.junit.Assert.assertTrue;
 
 public class BindTest extends AbstractOWLAPITest {
 
-    private static final String OWL_FILE = "/test/bind/sparqlBind.owl";
-    private static final String OBDA_FILE = "/test/bind/sparqlBind.obda";
-
     @BeforeClass
     public static void setUp() throws Exception {
-        initOBDA("/test/bind/sparqlBind-create-h2.sql", OBDA_FILE, OWL_FILE);
+        initOBDA("/test/bind/sparqlBind-create-h2.sql",
+                "/test/bind/sparqlBind.obda",
+                "/test/bind/sparqlBind.owl");
 	}
 
     @AfterClass
@@ -404,5 +387,4 @@ public class BindTest extends AbstractOWLAPITest {
                 "\"\"^^xsd:string",
                 "\"\"^^xsd:string"));
     }
-
 }

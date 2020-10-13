@@ -36,12 +36,11 @@ import org.junit.Test;
  */
 public class URINamesH2Test extends AbstractOWLAPITest {
 
-	private final static String owlfile = "/urinames/uri-names.owl";
-	private final static String obdafile = "/urinames/uri-names.obda";
-
 	@BeforeClass
 	public static void setUp() throws Exception {
-		initOBDA("/urinames/uri-names.sql", obdafile, owlfile);
+		initOBDA("/urinames/uri-names.sql",
+				"/urinames/uri-names.obda",
+				"/urinames/uri-names.owl");
 	}
 
 	@AfterClass

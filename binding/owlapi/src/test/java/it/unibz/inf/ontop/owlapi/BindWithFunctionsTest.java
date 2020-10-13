@@ -22,12 +22,11 @@ import java.util.Locale;
  */
 public class BindWithFunctionsTest extends AbstractOWLAPITest {
 
-	private static final String owlfile = "/test/bind/sparqlBind.owl";
-	private static final String obdafile = "/test/bind/sparqlBindWithFunctions.obda";
-
     @BeforeClass
 	public static void setUp() throws Exception {
-    	initOBDA("/test/bind/sparqlBindWithFns-create-h2.sql", obdafile, owlfile);
+    	initOBDA("/test/bind/sparqlBindWithFns-create-h2.sql",
+                "/test/bind/sparqlBindWithFunctions.obda",
+                "/test/bind/sparqlBind.owl");
 	}
 
 	@AfterClass

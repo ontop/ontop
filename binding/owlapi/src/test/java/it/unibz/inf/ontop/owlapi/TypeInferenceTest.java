@@ -8,13 +8,11 @@ import org.junit.*;
  */
 public class TypeInferenceTest extends AbstractOWLAPITest {
 
-    private static final String ONTOLOGY_FILE = "/test/typeinference/types.owl";
-    private static final String OBDA_FILE = "/test/typeinference/types.obda";
-    private static final String CREATE_DB_FILE = "/test/typeinference/types-create-db.sql";
-
     @BeforeClass
     public static void setUp() throws Exception {
-        initOBDA(CREATE_DB_FILE, OBDA_FILE, ONTOLOGY_FILE);
+        initOBDA("/test/typeinference/types-create-db.sql",
+                "/test/typeinference/types.obda",
+                "/test/typeinference/types.owl");
     }
 
     @AfterClass
@@ -28,10 +26,8 @@ public class TypeInferenceTest extends AbstractOWLAPITest {
                 "SELECT ?v \n" +
                 "WHERE { ?x a :Asian_Company ; :hasCompanyLocation ?v . }";
 
-        ImmutableList<String> expectedValues = ImmutableList.of(
+        checkReturnedValues(queryBind, "v", ImmutableList.of(
                 "<http://example.org/types/voc#Philippines>",
-                "<http://example.org/types/voc#China>"
-        );
-        checkReturnedValues(queryBind, "v", expectedValues);
+                "<http://example.org/types/voc#China>"));
     }
 }

@@ -26,13 +26,11 @@ import org.junit.*;
 
 public class URITemplateMatcherTest extends AbstractOWLAPITest {
 
-	private static final String dbScriptFile = "/template/smallDatasetURIconstants.sql";
-	private static final String owlFile = "/template/oboe-core.owl";
-	private static final String obdaFile = "/template/oboe-coreURIconstants.obda";
-
 	@BeforeClass
 	public static void setUp() throws Exception {
-		initOBDA(dbScriptFile, obdaFile, owlFile);
+		initOBDA("/template/smallDatasetURIconstants.sql",
+				"/template/oboe-coreURIconstants.obda",
+				"/template/oboe-core.owl");
 	}
 
 	@AfterClass
@@ -42,7 +40,6 @@ public class URITemplateMatcherTest extends AbstractOWLAPITest {
 
 	@Test
 	public void testURIConstant() throws Exception {
-
 		String queryBind = "PREFIX : <http://www.ola.fr#>\n" +
 				"  PREFIX oboe-core: <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#>\n" +
 				"  SELECT ?v {\n" +
@@ -57,13 +54,13 @@ public class URITemplateMatcherTest extends AbstractOWLAPITest {
 
 	@Test
 	public void testURIConstant2() throws Exception {
-
 		String queryBind = "PREFIX : <http://www.ola.fr#>\n" +
 				"  PREFIX oboe-core: <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#>\n" +
 				"  SELECT ?v {\n" +
 				"     <http://www.ola.fr#measurement/unit/name/1> a oboe-core:Measurement ; oboe-core:hasValue ?v \n" +
 				"  }";
 
-		checkReturnedValues(queryBind, "v", ImmutableList.of("<http://urlconstants.org/32>"));
+		checkReturnedValues(queryBind, "v", ImmutableList.of(
+				"<http://urlconstants.org/32>"));
 	}
 }
