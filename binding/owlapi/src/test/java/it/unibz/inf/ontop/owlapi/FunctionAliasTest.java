@@ -19,12 +19,11 @@ public class FunctionAliasTest extends AbstractOWLAPITest {
 
     @Test
     public void testAlias() throws Exception {
-
         String query = "PREFIX :	<http://www.movieontology.org/2009/11/09/movieontology.owl#>" +
                 "SELECT  ?v " +
                 "WHERE {?y :title ?v . }";
 
-        String sql = checkReturnedValuesAndReturnSql(query, "v",
+        checkReturnedValues(query, "v",
                 ImmutableList.of("\"the sun\"^^xsd:string",
                         "\"winter is coming\"^^xsd:string"));
     }
