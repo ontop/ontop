@@ -20,131 +20,81 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.google.common.collect.ImmutableList;
+import org.junit.*;
 
 /***
  * Tests constants
  */
-public class H2ConstantTest {
+public class H2ConstantTest extends AbstractOWLAPITest {
 
-	private static final String owlfile = "src/test/resources/constant/mappingConstants.owl";
-	private static final String obdafile = "src/test/resources/constant/mappingConstants.obda";
-
-	private OntopOWLReasoner reasoner;
-	private Connection sqlConnection;
-	private OWLConnection conn;
-
-	private static final String url = "jdbc:h2:mem:questjunitdb";
-	private static final String username = "sa";
-	private static final String password = "";
-
-	@Before
-	public void setUp() throws Exception {
-
-		sqlConnection= DriverManager.getConnection(url,username, password);
-		executeFromFile(sqlConnection, "src/test/resources/constant/constantsDatabase-h2.sql");
-
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.ontologyFile(owlfile)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.enableTestMode()
-				.build();
-        reasoner = factory.createReasoner(config);
-		conn = reasoner.getConnection();
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/constant/constantsDatabase-h2.sql",
+				"/constant/mappingConstants.obda",
+				"/constant/mappingConstants.owl");
 	}
 
-
-	@After
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-		if (!sqlConnection.isClosed()) {
-			try (java.sql.Statement s = sqlConnection.createStatement()) {
-				s.execute("DROP ALL OBJECTS DELETE FILES");
-			}
-			finally {
-				sqlConnection.close();
-			}
-		}
+	@AfterClass
+	public static void tearDown() throws Exception {
+		release();
 	}
 	
 
-	
-	private String runTests(String query) throws Exception {
-		try (OWLStatement st = conn.createStatement()) {
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-
-            OWLObject ind1 = bindingSet.getOWLObject("y")	 ;
-			String retval = ind1.toString();
-			return retval;
-		}
-	}
-
-
-
-    /**
-	 * Test use of constants
-	 * @throws Exception
-	 */
 	@Test
 	public void testConstantDouble() throws Exception {
-		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> SELECT ?x ?y\n" +
+		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> " +
+				"SELECT ?x ?y\n" +
                 "WHERE {\n" +
                 "   ?x a :Company; :hasNetworth ?y\n" +
                 "}";
-		String val = runTests(query);
-		assertEquals("\"1234.5678\"^^xsd:double", val);
+
+		checkReturnedValues(query, "y", ImmutableList.of(
+				"\"1234.5678\"^^xsd:double",
+				"\"1234.5678\"^^xsd:double"));
 	}
 
 	@Test
 	public void testConstantInteger() throws Exception {
-		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> SELECT ?x ?y\n" +
+		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> " +
+				"SELECT ?x ?y\n" +
 				"WHERE {\n" +
 				"   ?x a :Address; :hasNumber ?y\n" +
 				"}";
-		String val = runTests(query);
-		assertEquals("\"35\"^^xsd:integer", val);
+
+		checkReturnedValues(query, "y", ImmutableList.of(
+				"\"35\"^^xsd:integer",
+				"\"35\"^^xsd:integer",
+				"\"35\"^^xsd:integer",
+				"\"35\"^^xsd:integer",
+				"\"35\"^^xsd:integer",
+				"\"35\"^^xsd:integer",
+				"\"35\"^^xsd:integer"));
 	}
 
 	@Test
 	public void testConstantBoolean() throws Exception {
-		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> SELECT ?x ?y\n" +
+		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> " +
+				"SELECT ?x ?y\n" +
 				"WHERE {\n" +
 				"   ?x a :Company; :hasSupplier ?y\n" +
 				"}";
-		String val = runTests(query);
-		assertEquals("\"true\"^^xsd:boolean", val);
+
+		checkReturnedValues(query, "y", ImmutableList.of(
+				"\"true\"^^xsd:boolean",
+				"\"true\"^^xsd:boolean"));
 	}
 
 	@Test
 	public void testConstantDecimal() throws Exception {
-		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> SELECT ?x ?y\n" +
+		String query =  "PREFIX : <http://www.semanticweb.org/smallDatabase#> " +
+				"SELECT ?x ?y\n" +
 				"WHERE {\n" +
 				"   ?x a :Company; :hasMarketShares ?y\n" +
 				"}";
-		String val = runTests(query);
-		assertEquals("\"1.000433564392849540\"^^xsd:decimal", val);
+
+		checkReturnedValues(query, "y", ImmutableList.of(
+				"\"1.000433564392849540\"^^xsd:decimal"));
 	}
 }
 

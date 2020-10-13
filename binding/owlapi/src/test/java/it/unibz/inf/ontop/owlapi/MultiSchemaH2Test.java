@@ -21,13 +21,12 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -43,100 +42,72 @@ import static junit.framework.TestCase.assertTrue;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class MultiSchemaH2Test  {
+public class MultiSchemaH2Test extends AbstractOWLAPITest {
 
-    private static final String owlFile = "src/test/resources/multischema/multischemah2.owl";
-    private static final String obdaFile = "src/test/resources/multischema/multischemah2.obda";
-
-	private OntopOWLReasoner reasoner;
-	private OWLConnection conn;
-	private Connection sqlConnection;
-
-	private static final String url = "jdbc:h2:mem:questrepository";
-	private static final String username =  "fish";
-	private static final String password = "fish";
-
-
-	@Before
-	public void setUp() throws Exception {
-
-		sqlConnection = DriverManager.getConnection(url,username, password);
-
-		executeFromFile(sqlConnection, "src/test/resources/multischema/stockexchange-h2Schema.sql");
-
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlFile)
-				.nativeOntopMappingFile(obdaFile)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.enableTestMode()
-				.build();
-
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-		reasoner = factory.createReasoner(config);
-		conn = reasoner.getConnection();
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/multischema/stockexchange-h2Schema.sql",
+				"/multischema/multischemah2.obda",
+				"/multischema/multischemah2.owl");
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		conn.close();
-		reasoner.dispose();
-		if (!sqlConnection.isClosed()) {
-			try (java.sql.Statement s = sqlConnection.createStatement()) {
-				s.execute("DROP ALL OBJECTS DELETE FILES");
-			}
-			finally {
-				sqlConnection.close();
-			}
-		}
+	@AfterClass
+	public static void tearDown() throws Exception {
+		release();
 	}
 
-	/**
-	 * Test use of two aliases to same table
-	 * @throws Exception
-	 */
 	@Test
 	public void testOneSchema() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Address}";
-		checkThereIsAtLeastOneResult(query);
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
+				"SELECT ?x WHERE {?x a :Address}";
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Address-991>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Address-992>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Address-993>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Address-995>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Address-996>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Address-997>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Address-998>"));
 	}
 	@Test
 	public void testTableOneSchema() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Broker}";
-		checkThereIsAtLeastOneResult(query);
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
+				"SELECT ?x WHERE {?x a :Broker}";
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker-112>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker-113>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker-114>"));
 	}
 
 	@Test
 	public void testAliasOneSchema() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Worker}";
-		checkThereIsAtLeastOneResult(query);
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
+				"SELECT ?x WHERE {?x a :Worker}";
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Worker-112>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Worker-113>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Worker-114>"));
 	}
 
 	@Test
 	public void testSchemaWhere() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?r WHERE { ?x :isBroker ?r }";
-		checkThereIsAtLeastOneResult(query);
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
+				"SELECT ?x ?r WHERE { ?x :isBroker ?r }";
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Client-112>"));
 	}
 
 	@Test
 	public void testMultischema() throws Exception {
-		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE { ?x :hasFile ?r }";
-		checkThereIsAtLeastOneResult(query);
-	}
-
-	private void checkThereIsAtLeastOneResult(String query) throws Exception {
-		try (OWLStatement st = conn.createStatement()) {
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.hasNext());
-		}
-		finally {
-			conn.close();
-			reasoner.dispose();
-		}
+		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> " +
+				"SELECT ?x WHERE { ?x :hasFile ?r }";
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-997>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-996>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-995>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-993>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-992>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-991>",
+				"<http://www.owl-ontologies.com/Ontology1207768242.owl#Broker2-998>"));
 	}
 }
