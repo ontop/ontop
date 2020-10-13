@@ -1,23 +1,21 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 
 public class WktTest extends AbstractOWLAPITest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        AbstractOWLAPITest.initOBDA("/test/wkt/wkt_test_create.sql",
+        initOBDA("/test/wkt/wkt_test_create.sql",
                 "/test/wkt/wkt_test.obda",
                 "/test/wkt/wkt_test.owl");
     }
 
     @AfterClass
     public static void tearDown() throws Exception {
-        AbstractOWLAPITest.release();
+        release();
     }
 
     @Test

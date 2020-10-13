@@ -21,9 +21,7 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import com.google.common.collect.ImmutableList;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 
 /***

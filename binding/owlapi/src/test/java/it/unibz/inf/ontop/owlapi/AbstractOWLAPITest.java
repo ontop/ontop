@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLException;
@@ -157,14 +158,23 @@ public class AbstractOWLAPITest {
     }
 
     protected void checkNumberOfReturnedValues(String query, int expectedNumber) throws Exception {
-        OntopOWLStatement st = CONNECTION.createStatement();
-
-        int i = 0;
-        TupleOWLResultSet rs = st.executeSelectQuery(query);
-        while (rs.hasNext()) {
-            final OWLBindingSet bindingSet = rs.next();
-            i++;
+        try(OntopOWLStatement st = CONNECTION.createStatement()) {
+            int i = 0;
+            TupleOWLResultSet rs = st.executeSelectQuery(query);
+            while (rs.hasNext()) {
+                final OWLBindingSet bindingSet = rs.next();
+                i++;
+            }
+            assertEquals(expectedNumber, i);
         }
-        assertEquals(expectedNumber, i);
     }
+
+    protected boolean executeAskQuery(String query) throws Exception {
+        try (OWLStatement st = CONNECTION.createStatement()) {
+            BooleanOWLResultSet rs = st.executeAskQuery(query);
+            boolean retval = rs.getValue();
+            return retval;
+        }
+    }
+
 }
