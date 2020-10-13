@@ -108,12 +108,11 @@ public class AbstractOWLAPITest {
 
     protected String checkReturnedValuesAndReturnSql(String query, String var, List<String> expectedValues) throws Exception {
         OntopOWLStatement st = CONNECTION.createStatement();
-        String sql;
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         IQ executableQuery = st.getExecutableQuery(query);
-        sql = Optional.of(executableQuery.getTree())
+        String sql = Optional.of(executableQuery.getTree())
                 .filter(t -> t instanceof UnaryIQTree)
                 .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
                 .filter(n -> n instanceof NativeNode)
@@ -175,6 +174,17 @@ public class AbstractOWLAPITest {
             boolean retval = rs.getValue();
             return retval;
         }
+    }
+
+    protected String getSqlTranslation(String query) throws Exception {
+        OntopOWLStatement st = CONNECTION.createStatement();
+        IQ executableQuery = st.getExecutableQuery(query);
+        return Optional.of(executableQuery.getTree())
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> ((NativeNode) n).getNativeQueryString())
+                .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
     }
 
 }
