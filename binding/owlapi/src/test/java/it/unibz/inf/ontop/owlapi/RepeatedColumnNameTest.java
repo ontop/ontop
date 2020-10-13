@@ -4,13 +4,12 @@ import com.google.common.collect.ImmutableList;
 import org.junit.*;
 
 public class RepeatedColumnNameTest extends AbstractOWLAPITest {
-    private static final String CREATE_SCRIPT = "/test/repeatedCN/repeatedCN_create.sql";
-    private static final String OWL_FILE = "/test/repeatedCN/repeatedCN_test.owl";
-    private static final String R2RML_FILE = "/test/repeatedCN/repeatedCN_test.ttl";
 
     @BeforeClass
     public static void setUp() throws Exception {
-        initR2RML(CREATE_SCRIPT, R2RML_FILE, OWL_FILE);
+        initR2RML("/test/repeatedCN/repeatedCN_create.sql",
+                "/test/repeatedCN/repeatedCN_test.ttl",
+                "/test/repeatedCN/repeatedCN_test.owl");
     }
 
     @AfterClass

@@ -127,6 +127,10 @@ public class AbstractOWLAPITest {
                 returnedValues.add(stringValue);
                 LOGGER.debug(stringValue);
             }
+            else {
+                returnedValues.add("UNBOUND");
+                LOGGER.debug("UNBOUND");
+            }
             i++;
         }
         assertEquals(expectedValues, returnedValues);

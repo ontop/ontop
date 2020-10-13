@@ -1,31 +1,22 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import org.junit.*;
 
 import static org.junit.Assert.assertFalse;
 
 
 public class NullIfTest extends AbstractOWLAPITest {
 
-    private static final String CREATE_DB_FILE = "/nullif/nullif-create.sql";
-    private static final String OBDA_FILE = "/nullif/nullif.obda";
-    private static final String ONTOLOGY_FILE = "/nullif/nullif.ttl";
-
     @BeforeClass
-    public static void before() throws IOException, SQLException, OWLOntologyCreationException {
-        initOBDA(CREATE_DB_FILE, OBDA_FILE, ONTOLOGY_FILE);
+    public static void before() throws Exception {
+        initOBDA("/nullif/nullif-create.sql",
+                "/nullif/nullif.obda",
+                "/nullif/nullif.ttl");
     }
 
     @AfterClass
-    public static void after() throws SQLException, OWLException {
+    public static void after() throws Exception {
         release();
     }
 

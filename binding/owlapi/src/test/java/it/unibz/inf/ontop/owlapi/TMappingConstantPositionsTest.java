@@ -20,84 +20,31 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import com.google.common.collect.ImmutableList;
+import org.junit.*;
 
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+public class TMappingConstantPositionsTest extends AbstractOWLAPITest {
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Properties;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-/***
- */
-
-public class TMappingConstantPositionsTest{
-	private Connection conn;
-
-	private static final  String owlfile = "src/test/resources/test/tmapping-positions.owl";
-	private static final  String obdafile = "src/test/resources/test/tmapping-positions.obda";
-
-	private static final String url = "jdbc:h2:mem:questjunitdb";
-	private static final String username = "sa";
-	private static final String password = "";
-
-	@Before
-	public void setUp() throws Exception {
-		conn = DriverManager.getConnection(url, username, password);
-		executeFromFile(conn, "src/test/resources/test/tmapping-positions-create-h2.sql");
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/test/tmapping-positions-create-h2.sql",
+				"/test/tmapping-positions.obda",
+				"/test/tmapping-positions.owl");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		executeFromFile(conn, "src/test/resources/test/tmapping-positions-drop-h2.sql");
-		conn.close();
-	}
-
-	private void runTests(Properties p) throws Exception {
-
-		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.ontologyFile(owlfile)
-				.properties(p)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.enableTestMode()
-				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
-
-		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
-		
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
-		try (OWLStatement st = conn.createStatement()) {
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			for (int i = 0; i < 3; i++){
-				assertTrue(rs.hasNext());
-				rs.next();
-			}
-			assertFalse(rs.hasNext());
-		}
+		release();
 	}
 
 	@Test
 	public void testViEqSig() throws Exception {
+		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> " +
+				"SELECT * WHERE { ?x a :A. }";
 
-		Properties p = new Properties();
-		// p.put(OPTIMIZE_EQUIVALENCES, "true");
-
-		runTests(p);
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://example.org/2>",
+				"<http://example.org/3>",
+				"<http://example.org/1>"));
 	}
 }

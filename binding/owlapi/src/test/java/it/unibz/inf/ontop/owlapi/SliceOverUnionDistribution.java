@@ -2,21 +2,16 @@ package it.unibz.inf.ontop.owlapi;
 
 import org.junit.*;
 
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.readFromFile;
-
 /**
  * Checks that that SLICE does not distribute over UNION (reproduces a bug).
  */
 public class SliceOverUnionDistribution extends AbstractOWLAPITest {
 
-    private static final String CREATE_SCRIPT = "/slice/create.sql";
-    private static final String OWL_FILE = "/slice/university.ttl";
-    private static final String MAPPING_FILE = "/slice/university.obda";
-    private static final String QUERY_FILE = "src/test/resources/slice/slice.rq";
-
     @BeforeClass
     public static void setUp() throws Exception {
-        initOBDA(CREATE_SCRIPT, MAPPING_FILE, OWL_FILE);
+        initOBDA("/slice/create.sql",
+                "/slice/university.obda",
+                "/slice/university.ttl");
     }
 
     @AfterClass
@@ -26,7 +21,15 @@ public class SliceOverUnionDistribution extends AbstractOWLAPITest {
 
     @Test
     public void testQuery() throws Exception {
-        String query = readFromFile(QUERY_FILE);
+        String query = "PREFIX : <http://example.org/voc#>\n" +
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
+                "\n" +
+                "SELECT ?person ?name WHERE {\n" +
+                "    ?person foaf:lastName ?name .\n" +
+                "    {\n" +
+                "        SELECT ?person WHERE { ?person rdf:type :Teacher . } LIMIT 1\n" +
+                "    }\n" +
+                "}";
         checkNumberOfReturnedValues(query, 1);
     }
 }
