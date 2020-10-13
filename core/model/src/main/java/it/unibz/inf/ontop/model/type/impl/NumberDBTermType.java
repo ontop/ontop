@@ -44,6 +44,10 @@ public class NumberDBTermType extends DBTermTypeImpl {
         return false;
     }
 
+    /**
+     * NB: here we ignore the presence of + and 0s on the left (for the sake of simplicity)
+     * TODO: stop ignoring this presence
+     */
     @Override
     public boolean areEqualitiesStrict() {
         return category == Category.INTEGER;
