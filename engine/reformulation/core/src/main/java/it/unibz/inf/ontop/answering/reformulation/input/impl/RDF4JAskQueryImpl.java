@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JAskQuery;
+import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
@@ -11,9 +13,9 @@ import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 
-class RDF4JAskQuery extends RDF4JInputQuery<BooleanResultSet> implements AskQuery {
+class RDF4JAskQueryImpl extends RDF4JInputQueryImpl<BooleanResultSet> implements RDF4JAskQuery {
 
-    RDF4JAskQuery(ParsedQuery parsedQuery, String queryString, BindingSet bindings) {
+    RDF4JAskQueryImpl(ParsedQuery parsedQuery, String queryString, BindingSet bindings) {
         super(parsedQuery, queryString, bindings);
     }
 
@@ -23,5 +25,10 @@ class RDF4JAskQuery extends RDF4JInputQuery<BooleanResultSet> implements AskQuer
             throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");
         }
         return ((RDF4JInputQueryTranslator) translator).translateAskQuery(parsedQuery, bindings);
+    }
+
+    @Override
+    public RDF4JInputQuery<BooleanResultSet> newBindings(BindingSet newBindings) {
+        return new RDF4JAskQueryImpl(parsedQuery, getInputString(), newBindings);
     }
 }

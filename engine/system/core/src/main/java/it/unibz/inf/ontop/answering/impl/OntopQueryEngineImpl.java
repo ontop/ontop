@@ -16,13 +16,14 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 public class OntopQueryEngineImpl implements OntopQueryEngine {
 
     private final DBConnector dbConnector;
+    private final QueryReformulator queryReformulator;
 
     @AssistedInject
     private OntopQueryEngineImpl(@Assisted OBDASpecification obdaSpecification,
                                  @Assisted ExecutorRegistry executorRegistry,
                                  ReformulationFactory translationFactory,
                                  OntopSystemFactory systemFactory) {
-        QueryReformulator queryReformulator = translationFactory.create(obdaSpecification, executorRegistry);
+        queryReformulator = translationFactory.create(obdaSpecification, executorRegistry);
         dbConnector = systemFactory.create(queryReformulator);
     }
 
@@ -39,5 +40,10 @@ public class OntopQueryEngineImpl implements OntopQueryEngine {
     @Override
     public OntopConnection getConnection() throws OntopConnectionException {
         return dbConnector.getConnection();
+    }
+
+    @Override
+    public QueryReformulator getQueryReformulator() {
+        return queryReformulator;
     }
 }

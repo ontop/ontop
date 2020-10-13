@@ -161,7 +161,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
+    public BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
@@ -179,7 +179,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
+    public TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
@@ -203,7 +203,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected SimpleGraphResultSet executeGraphQuery(ConstructQuery inputQuery, IQ executableQuery, boolean collectResults,
+    protected SimpleGraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, boolean collectResults,
                                                      QueryLogger queryLogger)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         TupleResultSet tuples;
@@ -225,7 +225,7 @@ public class SQLQuestStatement extends QuestStatement {
             queryLogger.declareResultSetUnblockedAndSerialize();
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
-        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, queryLogger, termFactory, rdfFactory);
+        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, collectResults, queryLogger, termFactory, rdfFactory);
     }
 
     private NativeNode extractNativeNode(IQ executableQuery) throws EmptyQueryException {

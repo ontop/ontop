@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -336,6 +337,37 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
         bindings.addBinding("f", SimpleValueFactory.getInstance().createLiteral("ss"));
         bindings.addBinding("v", SimpleValueFactory.getInstance().createLiteral("testdatassss"));
 
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding18() {
+        String query = "SELECT * \n" +
+                "WHERE {\n" +
+                "   BIND ((COALESCE(?show, \"true\") != \"false\") AS ?dec)\n" +
+                "   BIND (IF(?dec, \"not-ok\", \"ok\") AS ?v)\n" +
+                "   ?s rdfs:label ?l .\n" +
+                "}\n";
+
+        ImmutableList<String> results = ImmutableList.of("ok", "ok");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("show", SimpleValueFactory.getInstance().createLiteral("false", XSD.STRING));
+        runQueryAndCompare(query, results, bindings);
+    }
+
+    @Test
+    public void testExternalBinding19() {
+        String query = "SELECT * \n" +
+                "WHERE {\n" +
+                "   BIND ((COALESCE(?show, \"true\") != \"false\") AS ?dec)\n" +
+                "   BIND (IF(?dec, \"not-ok\", \"ok\") AS ?v)\n" +
+                "   ?s rdfs:label ?l .\n" +
+                "   OPTIONAL { ?s rdfs:notExisting ?a } \n" +
+                "}\n";
+
+        ImmutableList<String> results = ImmutableList.of("ok", "ok");
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("show", SimpleValueFactory.getInstance().createLiteral("false", XSD.STRING));
         runQueryAndCompare(query, results, bindings);
     }
 
