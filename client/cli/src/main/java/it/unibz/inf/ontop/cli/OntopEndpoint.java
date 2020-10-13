@@ -39,13 +39,13 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"--predefined-config"}, title = "predefined query JSON config file",
             description = "predefined query config file")
-    @RequiredOnlyIf(names={"--predefined-queries"})
+    @RequiredOnlyIf(names = {"--predefined-queries"})
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String predefinedConfig;
 
     @Option(type = OptionType.COMMAND, name = {"--predefined-queries"}, title = "predefined query TOML file",
             description = "predefined SPARQL queries file")
-    @RequiredOnlyIf(names={"--predefined-config"})
+    @RequiredOnlyIf(names = {"--predefined-config"})
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String predefinedQueries;
 
@@ -90,6 +90,9 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         String[] args = new String[argList.size()];
         argList.toArray(args);
+
+        // Spring boot gives warns when the logback.configurationFile property is set
+        System.setProperty("logback.configurationFile", "");
 
         OntopEndpointApplication.main(args);
     }
