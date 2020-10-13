@@ -140,8 +140,4 @@ public class JoinEliminationMappingTest extends TestCase {
 		runTests(p);
 	}
 
-	public void testViEqNoSig() throws Exception {
-		Properties p  = new Properties();
-		runTests(p);
-	}
 }
