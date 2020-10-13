@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
@@ -109,47 +108,47 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
-        String otherLexicalValue = otherTerm.getValue();
 
+        // NB: incompatibility between the target DB types is assumed to be detected earlier. Not tested here.
         if ((inputType != null)
                 && (otherTerm.getType() instanceof DBTermType)
                 // TODO: remove this test once strict equalities will be enforced in SQL queries
-                && areCompatibleForStrictEq(inputType, (DBTermType) otherTerm.getType())) {
+                && inputType.areEqualitiesStrict()) {
 
-            Optional<Boolean> isValid = inputType.isValidLexicalValue(otherLexicalValue);
-            if (!isValid.isPresent())
-                return IncrementalEvaluation.declareSameExpression();
-
-            if (isValid.get()) {
-                ImmutableExpression newEquality = termFactory.getStrictEquality(
-                        terms.get(0),
-                        termFactory.getDBConstant(otherTerm.getValue(), inputType));
-
-                return newEquality.evaluate(variableNullability, true);
-            }
-            else {
-                ImmutableExpression newExpression = termFactory.getBooleanIfElseNull(
-                        termFactory.getDBIsNotNull(terms.get(0)),
-                        termFactory.getIsTrue(termFactory.getDBBooleanConstant(false)));
-                
-                return newExpression.evaluate(variableNullability, true);
-            }
+            return perform2ndStepEvaluationStrictEqWithConstant(terms, otherTerm.getValue(), termFactory, variableNullability);
         }
         else
             return IncrementalEvaluation.declareSameExpression();
     }
 
     /**
-     * TEMPORARY: only returns true when we are sure that SQL equalities are strict for these types.
+     * After making the compatibility checks (2nd step)
      *
-     * TODO: remove it once strict equalities will be enforced in SQL queries
+     * Low-level.
      */
-    private boolean areCompatibleForStrictEq(DBTermType type1, DBTermType type2) {
-        return Stream.of(type1.areEqualitiesStrict(type2), type2.areEqualitiesStrict(type1))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce((b1, b2) -> b1 && b2)
-                .orElse(false);
+    protected IncrementalEvaluation perform2ndStepEvaluationStrictEqWithConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                                 String otherLexicalValue,
+                                                                                 TermFactory termFactory,
+                                                                                 VariableNullability variableNullability) {
+        assert inputType != null;
+        Optional<Boolean> isValid = inputType.isValidLexicalValue(otherLexicalValue);
+        if (!isValid.isPresent())
+            return IncrementalEvaluation.declareSameExpression();
+
+        if (isValid.get()) {
+            ImmutableExpression newEquality = termFactory.getStrictEquality(
+                    terms.get(0),
+                    termFactory.getDBConstant(otherLexicalValue, inputType));
+
+            return newEquality.evaluate(variableNullability, true);
+        }
+        else {
+            ImmutableExpression newExpression = termFactory.getBooleanIfElseNull(
+                    termFactory.getDBIsNotNull(terms.get(0)),
+                    termFactory.getIsTrue(termFactory.getDBBooleanConstant(false)));
+
+            return newExpression.evaluate(variableNullability, true);
+        }
     }
 
 
