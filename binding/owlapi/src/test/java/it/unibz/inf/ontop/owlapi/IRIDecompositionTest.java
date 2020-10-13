@@ -23,7 +23,7 @@ public class IRIDecompositionTest extends AbstractOWLAPITest {
     }
 
     @Test
-    public void testSelectNumbers() throws Exception {
+    public void testIriDecomposition() throws Exception {
         String query = "PREFIX rev: <http://purl.org/stuff/rev#>\n" +
                         "SELECT ?p " +
                         "WHERE { <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Reviewer10> ?p ?o}";
