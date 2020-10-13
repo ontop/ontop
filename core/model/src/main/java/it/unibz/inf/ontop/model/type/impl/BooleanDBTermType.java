@@ -11,13 +11,8 @@ public class BooleanDBTermType extends DBTermTypeImpl implements DBTermType {
     private final RDFDatatype xsdBooleanDatatype;
 
     public BooleanDBTermType(String booleanStr, TermTypeAncestry ancestry, RDFDatatype xsdBooleanDatatype) {
-        super(booleanStr, ancestry, false);
+        super(booleanStr, ancestry, false, Category.BOOLEAN);
         this.xsdBooleanDatatype = xsdBooleanDatatype;
-    }
-
-    @Override
-    public Category getCategory() {
-        return Category.BOOLEAN;
     }
 
     @Override

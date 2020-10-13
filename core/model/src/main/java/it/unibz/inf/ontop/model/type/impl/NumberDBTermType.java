@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
+import it.unibz.inf.ontop.model.type.lexical.DefaultLexicalSpaces;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -16,22 +17,17 @@ public class NumberDBTermType extends DBTermTypeImpl {
 
     protected NumberDBTermType(String name, String castName, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
                                Category category) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, category);
         this.castName = castName;
         this.rdfDatatype = rdfDatatype;
         this.category = category;
     }
 
     protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype, Category category) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, category);
         this.rdfDatatype = rdfDatatype;
         castName = name;
         this.category = category;
-    }
-
-    @Override
-    public Category getCategory() {
-        return category;
     }
 
     @Override

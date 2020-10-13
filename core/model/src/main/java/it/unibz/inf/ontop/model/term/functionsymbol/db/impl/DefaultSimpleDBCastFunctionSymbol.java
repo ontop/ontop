@@ -109,15 +109,31 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
+        String otherLexicalValue = otherTerm.getValue();
+
         if ((inputType != null)
                 && (otherTerm.getType() instanceof DBTermType)
                 // TODO: remove this test once strict equalities will be enforced in SQL queries
                 && areCompatibleForStrictEq(inputType, (DBTermType) otherTerm.getType())) {
-            ImmutableExpression newEquality = termFactory.getStrictEquality(
-                    terms.get(0),
-                    termFactory.getDBConstant(otherTerm.getValue(), inputType));
 
-            return newEquality.evaluate(variableNullability, true);
+            Optional<Boolean> isValid = inputType.isValidLexicalValue(otherLexicalValue);
+            if (!isValid.isPresent())
+                return IncrementalEvaluation.declareSameExpression();
+
+            if (isValid.get()) {
+                ImmutableExpression newEquality = termFactory.getStrictEquality(
+                        terms.get(0),
+                        termFactory.getDBConstant(otherTerm.getValue(), inputType));
+
+                return newEquality.evaluate(variableNullability, true);
+            }
+            else {
+                ImmutableExpression newExpression = termFactory.getBooleanIfElseNull(
+                        termFactory.getDBIsNotNull(terms.get(0)),
+                        termFactory.getIsTrue(termFactory.getDBBooleanConstant(false)));
+                
+                return newExpression.evaluate(variableNullability, true);
+            }
         }
         else
             return IncrementalEvaluation.declareSameExpression();
