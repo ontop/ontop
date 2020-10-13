@@ -5,13 +5,11 @@ import org.junit.*;
 
 public class MultipleSchemasH2Test extends AbstractOWLAPITest {
 
-    private final static String dbfile = "/multischema/multiple-schema-test.sql";
-    private final static String owlfile = "/multischema/multiple-schema-test.owl";
-    private final static String obdafile = "/multischema/multiple-schema-test.obda";
-
     @BeforeClass
     public static void setUp() throws Exception {
-        initOBDA(dbfile, obdafile, owlfile);
+        initOBDA("/multischema/multiple-schema-test.sql",
+                "/multischema/multiple-schema-test.obda",
+                "/multischema/multiple-schema-test.owl");
     }
 
     @AfterClass
@@ -21,7 +19,9 @@ public class MultipleSchemasH2Test extends AbstractOWLAPITest {
 
     @Test
     public void testSingleColum() throws Exception {
-        String query = "PREFIX : <http://www.ontop.org/> SELECT ?v WHERE {<http://www.ontop.org/test-Cote%20D%27ivore> a ?v}";
-        checkReturnedValues(query, "v", ImmutableList.of("<http://www.ontop.org/Test>"));
+        String query = "PREFIX : <http://www.ontop.org/> " +
+                "SELECT ?v WHERE {<http://www.ontop.org/test-Cote%20D%27ivore> a ?v}";
+        checkReturnedValues(query, "v", ImmutableList.of(
+                "<http://www.ontop.org/Test>"));
     }
 }
