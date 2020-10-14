@@ -8,11 +8,11 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
  */
 public interface RDF4JInputQueryFactory {
 
-    SelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
+    RDF4JSelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 
-    AskQuery createAskQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
+    RDF4JAskQuery createAskQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 
-    ConstructQuery createConstructQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
+    RDF4JConstructQuery createConstructQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 
-    DescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
+    RDF4JDescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 }

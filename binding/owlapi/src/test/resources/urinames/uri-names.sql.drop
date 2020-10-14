@@ -1,3 +1,0 @@
-DROP TABLE zoos;
-DROP TABLE entertainments;
-DROP TABLE everything;

@@ -120,9 +120,8 @@ public class SubLiftTest {
                 i++;
             }
             assertEquals(expectedCardinality, i);
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }
