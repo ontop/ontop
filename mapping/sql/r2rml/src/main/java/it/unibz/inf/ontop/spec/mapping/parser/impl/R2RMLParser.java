@@ -209,7 +209,8 @@ public class R2RMLParser {
 		}
 
 		if (type == RDFCategory.IRI) {
-			string = R2RMLVocabulary.prefixUri(templateString);
+			// TODO: give the base IRI
+			string = R2RMLVocabulary.resolveIri(templateString, "http://example.com/base/");
 		}
 
 		String suffix = string; // literal case
