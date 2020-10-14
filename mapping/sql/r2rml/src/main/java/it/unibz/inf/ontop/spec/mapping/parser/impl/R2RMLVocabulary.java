@@ -25,9 +25,8 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  */
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.eclipse.rdf4j.common.net.ParsedIRI;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class R2RMLVocabulary {
 
@@ -39,8 +38,8 @@ public class R2RMLVocabulary {
 		int index = resource.indexOf('{');
     	String prefix = index >= 0 ? resource.substring(0, index) : resource;
 		try {
-			return (new URI(prefix)).isAbsolute();
-		} catch (URISyntaxException e) {
+			return ParsedIRI.create(prefix).isAbsolute();
+		} catch (IllegalArgumentException e) {
 			return false;
 		}
 	}
