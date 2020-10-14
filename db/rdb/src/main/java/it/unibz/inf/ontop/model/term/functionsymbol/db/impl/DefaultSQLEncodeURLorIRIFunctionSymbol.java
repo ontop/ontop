@@ -1,22 +1,20 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSafeIRIEncodeFunctionSymbol {
+public class DefaultSQLEncodeURLorIRIFunctionSymbol extends AbstractEncodeURIorIRIFunctionSymbol {
 
     private final String encodeForIriStart, encodeForIriEnd;
 
-    protected DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(DBTermType dbStringType) {
-        super(dbStringType);
+    protected DefaultSQLEncodeURLorIRIFunctionSymbol(DBTermType dbStringType, boolean preserveInternationalChars) {
+        super(dbStringType, preserveInternationalChars);
         /*
          * Imported from SQL99DialectAdapter
          */

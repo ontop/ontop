@@ -8,19 +8,20 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractTypedDBFunctionSymbol {
+public abstract class AbstractEncodeURIorIRIFunctionSymbol extends AbstractTypedDBFunctionSymbol {
 
-    private final Encoder iriEncoder;
-    private final Decoder iriDecoder;
+    private final EnDecoder enDecoder;
 
-    protected AbstractR2RMLSafeIRIEncodeFunctionSymbol(DBTermType dbStringType) {
-        super("R2RMLIRISafeEncode", ImmutableList.of(dbStringType), dbStringType);
-        Charset charset = Charset.forName("utf-8");
-        this.iriEncoder = new Encoder(charset);
-        this.iriDecoder = new Decoder(charset);
+    protected AbstractEncodeURIorIRIFunctionSymbol(DBTermType dbStringType, boolean preserveInternationalChars) {
+        super(preserveInternationalChars ? "R2RMLIRISafeEncode" : "DB_ENCODE_FOR_URI", ImmutableList.of(dbStringType), dbStringType);
+        this.enDecoder = preserveInternationalChars
+                ? new IRISafeEnDecoder()
+                : new EnDecoderForURI();
     }
 
     @Override
@@ -47,10 +48,7 @@ public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractT
     }
 
     private DBConstant encodeConstant(DBConstant constant, TermFactory termFactory) {
-        // Query element: percent-encoding except if in iunreserved
-        // TODO: this implementation seems to ignore the ucschar range. Check if it is a problem
-        // TODO: redundant with R2RMLIRISafeEncoder. Which one shall we choose?
-        return termFactory.getDBStringConstant(iriEncoder.encodeQueryElement(constant.getValue()));
+        return termFactory.getDBStringConstant(enDecoder.encode(constant.getValue()));
     }
 
     @Override
@@ -58,10 +56,64 @@ public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractT
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
         DBConstant decodedConstant = termFactory.getDBStringConstant(
-                iriDecoder.urlDecode(otherTerm.getValue(), true));
+                enDecoder.decode(otherTerm.getValue()));
 
         ImmutableExpression newExpression = termFactory.getStrictEquality(terms.get(0), decodedConstant);
 
         return newExpression.evaluate(variableNullability, true);
     }
+
+    interface EnDecoder {
+        String encode(String value);
+        String decode(String value);
+    }
+
+    /**
+     * Not preserving international characters
+     */
+    protected static class EnDecoderForURI implements EnDecoder {
+
+        private final Encoder uriEncoder;
+        private final Decoder uriDecoder;
+
+        protected EnDecoderForURI() {
+            Charset charset = StandardCharsets.UTF_8;
+            this.uriEncoder = new Encoder(charset);
+            this.uriDecoder = new Decoder(charset);
+        }
+
+        /**
+         * Query element: percent-encoding except if in iunreserved
+         */
+        @Override
+        public String encode(String value) {
+            return uriEncoder.encodeQueryElement(value);
+        }
+
+        @Override
+        public String decode(String value) {
+            return uriDecoder.urlDecode(value, true);
+        }
+    }
+
+    /**
+     * reserving international characters
+     */
+    protected static class IRISafeEnDecoder implements EnDecoder {
+
+        protected IRISafeEnDecoder() {
+        }
+
+        @Override
+        public String encode(String value) {
+            return R2RMLIRISafeEncoder.encode(value);
+        }
+
+        @Override
+        public String decode(String value) {
+            return R2RMLIRISafeEncoder.decode(value);
+        }
+    }
+
+
 }

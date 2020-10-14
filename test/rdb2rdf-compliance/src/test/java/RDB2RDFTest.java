@@ -91,7 +91,7 @@ public class RDB2RDFTest {
 			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
 			"tc0009d",
 			// TODO: fix: too much escaping for the curly brackets in the string
-			"tc0010c",
+			//"tc0010c",
 			// Modified (different XSD.DOUBLE lexical form)
 			"dg0012",
 			// Direct mapping and bnodes: row unique ids are not considered, leadinq to incomplete results
@@ -111,8 +111,6 @@ public class RDB2RDFTest {
 			"tc0016c",
 			// Wrong data IRI created. TODO: fix it
 			"tc0016e",
-			// Excessive IRI encoding done for extreme-east asia characters. TODO: fix it
-			"dg0017",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"dg0018",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.

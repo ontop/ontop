@@ -2,10 +2,10 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import it.unibz.inf.ontop.model.type.DBTermType;
 
-public class MySQLR2RMLSafeIRIEncodeFunctionSymbolImpl extends DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol {
+public class MySQLEncodeURLorIRIFunctionSymbolImpl extends DefaultSQLEncodeURLorIRIFunctionSymbol {
 
-    protected MySQLR2RMLSafeIRIEncodeFunctionSymbolImpl(DBTermType dbStringType) {
-        super(dbStringType);
+    protected MySQLEncodeURLorIRIFunctionSymbolImpl(DBTermType dbStringType, boolean preserveInternationalChars) {
+        super(dbStringType, preserveInternationalChars);
     }
 
     @Override
