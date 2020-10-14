@@ -111,9 +111,6 @@ public class RDB2RDFTest {
 			"tc0016c",
 			// Wrong data IRI created. TODO: fix it
 			"tc0016e",
-			// Excessive IRI encoding done for far-east asia characters (would do the same with accented characters). TODO: fix it
-			// see AbstractR2RMLSafeIRIEncodeFunctionSymbol
-			"dg0017",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"dg0018",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.

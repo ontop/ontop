@@ -7,10 +7,10 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.function.Function;
 
-public class MockupR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSafeIRIEncodeFunctionSymbol {
+public class MockupEncodeURIorIRIFunctionSymbol extends AbstractEncodeURIorIRIFunctionSymbol {
 
-    protected MockupR2RMLSafeIRIEncodeFunctionSymbol(DBTermType dbStringType) {
-        super(dbStringType);
+    protected MockupEncodeURIorIRIFunctionSymbol(DBTermType dbStringType, boolean preserveInternationalChars) {
+        super(dbStringType, preserveInternationalChars);
     }
 
     @Override

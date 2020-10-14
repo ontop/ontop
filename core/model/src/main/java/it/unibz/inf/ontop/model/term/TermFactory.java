@@ -400,6 +400,11 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);
 
 	/**
+	 * NB: encodes international characters (i.e. not safe for IRIs in general)
+	 */
+	ImmutableFunctionalTerm getDBEncodeForURI(ImmutableTerm term);
+
+	/**
 	 * At least two terms are expected
 	 */
 	ImmutableFunctionalTerm getNullRejectingDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms);

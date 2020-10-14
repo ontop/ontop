@@ -50,6 +50,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
     // Created in init()
+    private DBFunctionSymbol encodeForURIFunctionSymbol;
+    // Created in init()
     private DBFunctionSymbol strBeforeFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol strAfterFunctionSymbol;
@@ -326,7 +328,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         nonStrictDatetimeEqOperator = createNonStrictDatetimeEquality();
         nonStrictDateEqOperator = createNonStrictDateEquality();
         nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
-        r2rmlIRISafeEncodeFunctionSymbol = createR2RMLIRISafeEncode();
+        r2rmlIRISafeEncodeFunctionSymbol = createEncodeURLorIRI(true);
+        encodeForURIFunctionSymbol = createEncodeURLorIRI(false);
         strAfterFunctionSymbol = createStrAfterFunctionSymbol();
         containsFunctionSymbol = createContainsFunctionSymbol();
         strBeforeFunctionSymbol = createStrBeforeFunctionSymbol();
@@ -656,6 +659,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBFunctionSymbol getR2RMLIRISafeEncode() {
         return r2rmlIRISafeEncodeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBEncodeForURI() {
+        return encodeForURIFunctionSymbol;
     }
 
     @Override
@@ -1163,7 +1171,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBNotFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType);
 
-    protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
+    protected abstract DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars);
 
     protected abstract DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType);
     protected abstract DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType);
