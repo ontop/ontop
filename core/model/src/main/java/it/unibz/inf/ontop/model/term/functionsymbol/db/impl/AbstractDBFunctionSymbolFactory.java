@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
-    private static final String BNODE_PREFIX = "_:ontop-bnode-";
+    private static final String BNODE_PREFIX = "ontop-bnode-";
     private static final String PLACEHOLDER = "{}";
 
     /**
