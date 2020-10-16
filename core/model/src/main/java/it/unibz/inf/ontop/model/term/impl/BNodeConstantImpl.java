@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
