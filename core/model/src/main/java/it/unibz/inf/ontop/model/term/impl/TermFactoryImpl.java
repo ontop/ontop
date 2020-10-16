@@ -725,18 +725,16 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
-														  ImmutableList<? extends ImmutableTerm> arguments) {
-		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
-				arguments);
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString) {
+		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> arguments) {
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(arguments.size()),
+				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
 				arguments);
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
