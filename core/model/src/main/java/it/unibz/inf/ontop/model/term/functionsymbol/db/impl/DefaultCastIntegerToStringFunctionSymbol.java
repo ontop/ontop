@@ -27,27 +27,18 @@ public class DefaultCastIntegerToStringFunctionSymbol extends DefaultSimpleDBCas
         this.pattern = Pattern.compile("^([0+]|-0)\\d+");
     }
 
-    /**
-     * Gets rid of the cast and simplifies the strict equality.
-     *
-     * Is a trick.
-     *
-     * TODO: remove this method once strict equalities will be enforced to the DB engine
-     *
-     */
     @Override
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
         String otherValue = otherTerm.getValue();
         // Positive non-null numbers normally does not start with + or by 0
-        if (pattern.matcher(otherValue).matches())
+        if (pattern.matcher(otherValue).matches()
+                && inputType.isValidLexicalValue(otherValue)
+                    .filter(b -> b)
+                    .isPresent())
             return IncrementalEvaluation.declareSameExpression();
 
-        ImmutableExpression newEquality = termFactory.getStrictEquality(
-                terms.get(0),
-                termFactory.getDBConstant(otherValue, inputType));
-
-        return newEquality.evaluate(variableNullability, true);
+        return perform2ndStepEvaluationStrictEqWithConstant(terms, otherValue, termFactory, variableNullability);
     }
 }
