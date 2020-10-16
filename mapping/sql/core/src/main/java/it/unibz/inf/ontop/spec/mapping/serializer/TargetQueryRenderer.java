@@ -262,8 +262,7 @@ public class TargetQueryRenderer {
                     prefixManager
             );
         if (function.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
-            String templateWithVars = instantiateTemplate(function, prefixManager);
-            return templateWithVars;
+            return "_:" + instantiateTemplate(function, prefixManager);
         }
         throw new UnexpectedTermException(function);
     }
