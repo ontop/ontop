@@ -88,14 +88,16 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     protected ImmutableTerm constructIRI(String text) {
         return constructBnodeOrIRI(text,
                 col -> termFactory.getIRIFunctionalTerm(col, true),
-                termFactory::getIRIFunctionalTerm);
+                termFactory::getIRIFunctionalTerm,
+                false);
     }
 
     protected ImmutableTerm constructBnodeOrIRI(String text,
                                                 Function<Variable, ImmutableFunctionalTerm> columnFct,
-                                                BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct) {
+                                                BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct,
+                                                boolean isBnode) {
         final String PLACEHOLDER = "{}";
-        List<FormatString> tokens = parseIRIOrBnode(text);
+        List<FormatString> tokens = parseIRIOrBnode(text, isBnode);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
@@ -125,14 +127,17 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
 
-    private List<FormatString> parseIRIOrBnode(String text) {
+    private List<FormatString> parseIRIOrBnode(String text, boolean isBnode) {
         List<FormatString> toReturn = new ArrayList<>();
         Matcher m = varPattern.matcher(text);
         int i = 0;
         while (i < text.length()) {
             if (m.find(i)) {
                 if (m.start() != i) {
-                    toReturn.add(new FixedString(text.substring(i, m.start())));
+                    String subString = text.substring(i, m.start());
+                    toReturn.add(new FixedString(
+                            // Remove the prefix _:
+                            (isBnode && (i == 0)) ? subString.substring(2) : subString));
                 }
                 String value = m.group(1);
                 if (validateAttributeName(value)) {
@@ -155,7 +160,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     private ImmutableTerm constructBnodeFunction(String text) {
         return constructBnodeOrIRI(text,
                 col -> termFactory.getBnodeFunctionalTerm(col, true),
-                termFactory::getBnodeFunctionalTerm);
+                termFactory::getBnodeFunctionalTerm,
+                true);
     }
 
     private interface FormatString {
