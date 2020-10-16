@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -630,7 +629,7 @@ public class RDBMSSIRepositoryManager {
 	private int getObjectConstantUriId(ObjectConstant c, PreparedStatement uriidStm) throws SQLException {
 		
 		// TODO (ROMAN): I am not sure this is entirely correct for blank nodes
-		String uri = (c instanceof BNode) ? ((BNode) c).getName() : ((IRIConstant) c).getIRI().getIRIString();
+		String uri = (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
 
 		int uri_id = uriMap.getId(uri);
 		if (uri_id < 0) {

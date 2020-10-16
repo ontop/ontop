@@ -16,6 +16,7 @@ import org.eclipse.rdf4j.query.TupleQueryResultHandler;
 import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
+import java.security.SecureRandom;
 import java.util.List;
 
 
@@ -34,6 +35,11 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 		TupleResultSet res;
 		OntopStatement stm;
 		long start = System.currentTimeMillis();
+
+		SecureRandom random = new SecureRandom();
+		byte[] salt = new byte[20];
+		random.nextBytes(salt);
+
 		try {
 			stm = conn.createStatement();
 			if(this.queryTimeout > 0)
@@ -50,7 +56,7 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 			}
 			
 			List<String> signature = res.getSignature();
-			return new OntopTupleQueryResult(res, signature);
+			return new OntopTupleQueryResult(res, signature, salt);
 
 		} catch (QueryEvaluationException e) {
 			throw e;

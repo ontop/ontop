@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,9 +43,9 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 		this.inputQueryFactory = inputQueryFactory;
 	}
 
-	private Statement createStatement(RDFFact assertion) {
+	private Statement createStatement(RDFFact assertion, byte[] salt) {
 
-		Statement stm = RDF4JHelper.createStatement(assertion);
+		Statement stm = RDF4JHelper.createStatement(assertion, salt);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
 			return stm;
 		else 
@@ -61,13 +62,16 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 				OntopStatement stm = conn.createStatement();
 				SimpleGraphResultSet res = stm.execute(query, getHttpHeaders())
 		){
+			SecureRandom random = new SecureRandom();
+			byte[] salt = new byte[20];
+			random.nextBytes(salt);
 			
 			Map<String, String> namespaces = new HashMap<>();
 			List<Statement> results = new LinkedList<>();
 			if (res != null) {
 				while (res.hasNext()) {
 					RDFFact as = res.next();
-					Statement st = createStatement(as);
+					Statement st = createStatement(as, salt);
 					if (st!=null)
 						results.add(st);
 				}

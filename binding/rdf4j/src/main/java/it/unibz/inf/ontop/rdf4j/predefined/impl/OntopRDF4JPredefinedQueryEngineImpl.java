@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
@@ -64,6 +65,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final DocumentLoader documentLoader;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OntopRDF4JPredefinedQueryEngineImpl.class);
+    private final SecureRandom random;
 
     public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
                                                PredefinedQueries predefinedQueries,
@@ -90,6 +92,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                         throw new MinorOntopInternalBugException("Unexpected issue when serialize a parsed JSON element");
                     }
                 });
+
+        random = new SecureRandom();
     }
 
 
@@ -329,12 +333,16 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                 OntopStatement stm = conn.createStatement();
                 SimpleGraphResultSet res = stm.executeConstructQuery(constructTemplate, executableQuery, queryLogger)
         ){
+            byte[] salt = new byte[20];
+            random.nextBytes(salt);
+
+
             // TODO: see how to use stream besides the presence of exceptions
             ImmutableList.Builder<Statement> resultBuilder = ImmutableList.builder();
             if (res != null) {
                 while (res.hasNext()) {
                     RDFFact as = res.next();
-                    Statement st = createStatement(as);
+                    Statement st = createStatement(as, salt);
                     if (st!=null)
                         resultBuilder.add(st);
                 }
