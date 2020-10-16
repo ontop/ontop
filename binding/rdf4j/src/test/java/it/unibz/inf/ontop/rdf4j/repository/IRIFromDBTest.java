@@ -1,4 +1,5 @@
-import it.unibz.inf.ontop.rdf4j.repository.AbstractRDF4JTest;
+package it.unibz.inf.ontop.rdf4j.repository;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

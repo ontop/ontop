@@ -130,6 +130,18 @@ public class AbstractRDF4JTest {
 
     protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues,
                                       BindingSet bindings) {
+        ImmutableList<String> vValues = runQuery(queryString, bindings);
+        assertEquals(expectedVValues, vValues);
+    }
+
+    protected ImmutableList<String> runQuery(String queryString) {
+        return runQuery(queryString, new MapBindingSet());
+    }
+
+    /**
+     * Extracts the values of the variable ?v
+     */
+    protected ImmutableList<String> runQuery(String queryString, BindingSet bindings) {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
         bindings.getBindingNames()
                 .forEach(n -> query.setBinding(n, bindings.getValue(n)));
@@ -146,7 +158,7 @@ public class AbstractRDF4JTest {
         }
         result.close();
 
-        assertEquals(expectedVValues, vValueBuilder.build());
+        return vValueBuilder.build();
     }
 
     protected void runGraphQueryAndCompare(String queryString, ImmutableSet<Statement> expectedGraph) {

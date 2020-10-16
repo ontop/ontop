@@ -306,13 +306,13 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
 												 ImmutableList<DBConstant> arguments);
 
+	/**
+	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 */
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString);
+
 	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
 												   ImmutableList<? extends ImmutableTerm> arguments);
-
-	/**
-	 * NB: a fresh Bnode template is created
-	 */
-	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
