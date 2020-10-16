@@ -48,6 +48,7 @@ import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 
 import javax.annotation.Nonnull;
+import java.security.SecureRandom;
 
 public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
@@ -122,7 +123,11 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
                 throw new QueryEvaluationException("A materialization GraphQuery can only be evaluated once");
             hasStarted = true;
 
-            return new IteratingGraphQueryResult(ImmutableMap.of(), new GraphMaterializationIteration(graphResultSet));
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[20];
+            random.nextBytes(salt);
+
+            return new IteratingGraphQueryResult(ImmutableMap.of(), new GraphMaterializationIteration(graphResultSet, salt));
         }
 
         @Override
@@ -219,9 +224,11 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
     private static class GraphMaterializationIteration implements CloseableIteration<Statement, QueryEvaluationException> {
 
         private final MaterializedGraphResultSet graphResultSet;
+        private final byte[] salt;
 
-        GraphMaterializationIteration(MaterializedGraphResultSet graphResultSet) {
+        GraphMaterializationIteration(MaterializedGraphResultSet graphResultSet, byte[] salt) {
             this.graphResultSet = graphResultSet;
+            this.salt = salt;
         }
 
         @Override
@@ -245,7 +252,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
         @Override
         public Statement next() throws QueryEvaluationException {
             try {
-                return RDF4JHelper.createStatement(graphResultSet.next());
+                return RDF4JHelper.createStatement(graphResultSet.next(), salt);
             } catch (OntopQueryAnsweringException e) {
                 throw new QueryEvaluationException(e);
             }
