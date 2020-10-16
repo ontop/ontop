@@ -1,27 +1,13 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
-public class RDF4JBnodeProfTest extends AbstractRDF4JTest {
-
-    @BeforeClass
-    public static void before() throws IOException, SQLException {
-        initOBDA("/prof/prof.sql", "/prof/prof-bnode.obda");
-    }
-
-    @AfterClass
-    public static void after() throws SQLException {
-        release();
-    }
+public abstract class AbstractRDF4JBnodeProfTest extends AbstractRDF4JTest {
 
     @Test
     public void testProfessor1() {
@@ -42,9 +28,11 @@ public class RDF4JBnodeProfTest extends AbstractRDF4JTest {
                 "  ?p a :Professor \n" +
                 "}" +
                 "LIMIT 2";
+        // returning the internal label of a bnode could result into a privacy breach
         runQueryAndCompare(query, ImmutableList.of("not-available", "not-available"));
     }
 
+    @Ignore("TODO: enable it for privacy")
     @Test
     public void testProfessor3() {
         String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -52,8 +40,10 @@ public class RDF4JBnodeProfTest extends AbstractRDF4JTest {
                 "WHERE {\n" +
                 "  ?v a :Professor ; :firstName \"Michael\" . \n" +
                 "}";
-        int count = runQueryAndCount(query);
-        assertEquals(1, count);
+        ImmutableList<String> results = runQuery(query);
+        assertEquals(results.size(), 1);
+        // Makes sure the internal bnode label is not leaked
+        assertFalse(results.get(0).contains("professor/40"));
     }
 
 }
