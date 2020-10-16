@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop-rdf4j-webapps</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.0.3</version>
+        <version>4.0.4-SNAPSHOT</version>
     </parent>
     <artifactId>ontop-rdf4j-config-sql</artifactId>
     <name>ontop-rdf4j-sql</name>
