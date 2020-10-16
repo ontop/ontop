@@ -12,8 +12,8 @@ public class OntopMaterializedGraphOWLResultSet extends OntopGraphOWLResultSet
 
     private final MaterializedGraphResultSet graphResultSet;
 
-    public OntopMaterializedGraphOWLResultSet(MaterializedGraphResultSet graphResultSet) {
-        super(graphResultSet);
+    public OntopMaterializedGraphOWLResultSet(MaterializedGraphResultSet graphResultSet, byte[] salt) {
+        super(graphResultSet, salt);
         this.graphResultSet = graphResultSet;
     }
 

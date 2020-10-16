@@ -98,7 +98,7 @@ public class TargetQueryRenderer {
         throw new UnexpectedTermException(term);
     }
 
-    private static String displayConstantBnode(BNode term) { return term.getName(); }
+    private static String displayConstantBnode(BNode term) { return term.getInternalLabel(); }
 
     private static String displayLiteralConstant(RDFLiteralConstant term) {
         return term.toString();

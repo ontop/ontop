@@ -30,10 +30,10 @@ public class OWLAPIIndividualTranslator {
 	 * does some approximation: if the property is used like an object property, then declare it as such.
 	 * Otherwise, declares it as a data property.
 	 */
-	public OWLAxiom translate(RDFFact assertion) {
+	public OWLAxiom translate(RDFFact assertion, byte[] salt) {
 		IRIConstant factProperty = assertion.getProperty();
 		ObjectConstant classOrProperty = assertion.getClassOrProperty();
-		OWLIndividual subject = translate(assertion.getSubject());
+		OWLIndividual subject = translate(assertion.getSubject(), salt);
 
 		if (assertion.getGraph().isPresent())
 			throw new MinorOntopInternalBugException("Quads are not supported by OWLAPI so that method " +
@@ -49,7 +49,7 @@ public class OWLAPIIndividualTranslator {
 
 				OWLObjectProperty property = dataFactory.getOWLObjectProperty(
 						IRI.create(factProperty.getIRI().getIRIString()));
-				OWLIndividual object = translate((ObjectConstant) assertionObject);
+				OWLIndividual object = translate((ObjectConstant) assertionObject, salt);
 				return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);
 			}
 			else {
@@ -73,12 +73,12 @@ public class OWLAPIIndividualTranslator {
 	 * @param constant
 	 * @return
 	 */
-	public OWLIndividual translate(ObjectConstant constant) {
+	public OWLIndividual translate(ObjectConstant constant, byte[] salt) {
 		if (constant instanceof IRIConstant)
 			return dataFactory.getOWLNamedIndividual(IRI.create(((IRIConstant)constant).getIRI().getIRIString()));
 
 		else /*if (constant instanceof BNode)*/ 
-			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
+			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getAnonymizedLabel(salt));
 	}
 	
 	public OWLLiteral translate(RDFLiteralConstant v) {
@@ -108,23 +108,23 @@ public class OWLAPIIndividualTranslator {
 		}
 	}
 
-	public OWLAnnotationSubject translateAnnotationSubject(ObjectConstant subject) {
+	public OWLAnnotationSubject translateAnnotationSubject(ObjectConstant subject, byte[] salt) {
 		if (subject instanceof IRIConstant)
 			return IRI.create(((IRIConstant) subject).getIRI().getIRIString());
 		else if (subject instanceof BNode)
-			return dataFactory.getOWLAnonymousIndividual(((BNode) subject).getName());
+			return dataFactory.getOWLAnonymousIndividual(((BNode) subject).getAnonymizedLabel(salt));
 		else
 			throw new UnexceptedAssertionTermException(subject);
 
 	}
 
-	public OWLAnnotationValue translateAnnotationValue(Constant constant) {
+	public OWLAnnotationValue translateAnnotationValue(Constant constant, byte[] salt) {
 		if (constant instanceof RDFLiteralConstant)
 			return translate((RDFLiteralConstant) constant);
 		else if (constant instanceof IRIConstant)
 			return IRI.create(((IRIConstant) constant).getIRI().getIRIString());
 		else if (constant instanceof BNode)
-			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
+			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getAnonymizedLabel(salt));
 		else
 			throw new UnexceptedAssertionTermException(constant);
 	}

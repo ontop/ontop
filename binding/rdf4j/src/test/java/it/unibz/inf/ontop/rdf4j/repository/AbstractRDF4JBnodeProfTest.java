@@ -32,7 +32,6 @@ public abstract class AbstractRDF4JBnodeProfTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, ImmutableList.of("not-available", "not-available"));
     }
 
-    @Ignore("TODO: enable it for privacy")
     @Test
     public void testProfessor3() {
         String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
