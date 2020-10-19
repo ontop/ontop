@@ -259,12 +259,6 @@ public class TargetQueryRenderer {
         if (function.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
             return "_:" + instantiateTemplate(function, prefixManager);
         }
-        // TODO: shall we keep that? What does it do?
-        else if (function.getArity() == 1)
-            return "_:" + displayTerm(
-                    function.getTerms().get(0),
-                    prefixManager
-            );
         throw new UnexpectedTermException(function);
     }
 
