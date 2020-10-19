@@ -10,35 +10,35 @@ quest:		http://obda.org/quest#
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-professor
-target		_:professor/{prof_id} a :Professor .
+target		_:professor_{prof_id} a :Professor .
 source		SELECT prof_id, last_name FROM professors;
 
 mappingId	MAPID-fname
-target		_:professor/{prof_id} :firstName {first_name} .
+target		_:professor_{prof_id} :firstName {first_name} .
 source		SELECT prof_id, first_name FROM professors;
 
 mappingId	MAPID-lname
-target		_:professor/{prof_id} :lastName {last_name} .
+target		_:professor_{prof_id} :lastName {last_name} .
 source		SELECT prof_id, last_name FROM professors;
 
 mappingId	MAPID-nickname
-target		_:professor/{prof_id} :nickname {nickname} .
+target		_:professor_{prof_id} :nickname {nickname} .
 source		SELECT prof_id, nickname FROM professors;
 
 mappingId	MAPID-teaches
-target		_:professor/{prof_id} :teaches _:course/{course_id} .
+target		_:professor_{prof_id} :teaches _:course_{course_id} .
 source		SELECT prof_id, course_id FROM teaching;
 
 mappingId	MAPID-teachesAt
-target		_:professor/{prof_id} :teachesAt :university/Bolzano .
+target		_:professor_{prof_id} :teachesAt :university/Bolzano .
 source		SELECT prof_id FROM teaching;
 
 mappingId	MAPID-teacherID
-target		_:professor/{prof_id} :teacherID {prof_id} .
+target		_:professor_{prof_id} :teacherID {prof_id} .
 source		SELECT prof_id FROM teaching;
 
 mappingId	MAPID-course
-target		_:course/{course_id} a :Course ; :duration {duration} ; :nbStudents {nb_students} .
+target		_:course_{course_id} a :Course ; :duration {duration} ; :nbStudents {nb_students} .
 source		SELECT * FROM course;
 
 ]]
