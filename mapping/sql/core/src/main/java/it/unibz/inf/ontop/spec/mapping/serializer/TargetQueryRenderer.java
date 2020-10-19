@@ -256,11 +256,6 @@ public class TargetQueryRenderer {
     }
 
     private static String displayBnodeTemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
-        if (function.getArity() == 1)
-            return "_:" + displayTerm(
-                    function.getTerms().get(0),
-                    prefixManager
-            );
         if (function.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
             return "_:" + instantiateTemplate(function, prefixManager);
         }

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -42,7 +41,21 @@ public abstract class AbstractRDF4JBnodeProfTest extends AbstractRDF4JTest {
         ImmutableList<String> results = runQuery(query);
         assertEquals(results.size(), 1);
         // Makes sure the internal bnode label is not leaked
-        assertFalse(results.get(0).contains("professor/40"));
+        assertFalse(results.get(0).contains("professor_40"));
+    }
+
+    /**
+     * The constant bnode in the SPARQL query should be treated as a variable
+     */
+    @Test
+    public void testProfessor4() {
+        String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "SELECT  *\n" +
+                "WHERE {\n" +
+                "  _:professor_40 a :Professor ; :firstName ?v \n" +
+                "}";
+        int count = runQueryAndCount(query);
+        assertEquals(8, count);
     }
 
 }
