@@ -26,7 +26,7 @@ target		_:professor/{prof_id} :nickname {nickname} .
 source		SELECT prof_id, nickname FROM professors;
 
 mappingId	MAPID-teaches
-target		_:professor/{prof_id} :teaches :course/{course_id} .
+target		_:professor/{prof_id} :teaches _:course/{course_id} .
 source		SELECT prof_id, course_id FROM teaching;
 
 mappingId	MAPID-teachesAt
