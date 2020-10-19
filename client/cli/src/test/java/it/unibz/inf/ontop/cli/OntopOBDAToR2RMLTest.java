@@ -73,6 +73,15 @@ public class OntopOBDAToR2RMLTest {
         runCommand(argv);
     }
 
+    @Test
+    public void testOntopOBDA2R2RML_prof_bnode(){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/prof/prof-bnode.obda",
+                "-o", "target/prof-bnode-mapping.ttl"
+        };
+        runCommand(argv);
+    }
+
 
     private void runCommand(String[] args) {
         Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();

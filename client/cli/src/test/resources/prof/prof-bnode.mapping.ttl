@@ -1,0 +1,209 @@
+<urn:MAPID-teaches>  a  <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT prof_id, course_id FROM teaching;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#template>
+                                    "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/{course_id}" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#IRI>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teaches>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "professor/{prof_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
+
+<urn:MAPID-teacherID>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT prof_id FROM teaching;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "prof_id" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teacherID>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "professor/{prof_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
+
+<urn:MAPID-lname>  a  <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT prof_id, last_name FROM professors;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "last_name" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#lastName>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "professor/{prof_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
+
+<urn:MAPID-fname>  a  <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT prof_id, first_name FROM professors;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "first_name" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#firstName>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "professor/{prof_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
+
+<urn:MAPID-course_1>  a  <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT * FROM course;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "nb_students" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents>
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "duration" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#duration>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Course> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "_:_:ontop-bnode-8/{course_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
+
+<urn:MAPID-teachesAt>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT prof_id FROM teaching;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#object>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#university/Bolzano> ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teachesAt>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "professor/{prof_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
+
+<urn:MAPID-professor>
+        a       <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT prof_id, last_name FROM professors;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#SubjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                  <http://www.w3.org/ns/r2rml#class>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Professor> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "professor/{prof_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
+
+<urn:MAPID-nickname>  a  <http://www.w3.org/ns/r2rml#TriplesMap> ;
+        <http://www.w3.org/ns/r2rml#logicalTable>
+                [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
+                  <http://www.w3.org/ns/r2rml#sqlQuery>
+                          "SELECT prof_id, nickname FROM professors;"
+                ] ;
+        <http://www.w3.org/ns/r2rml#predicateObjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
+                  <http://www.w3.org/ns/r2rml#objectMap>
+                          [ a       <http://www.w3.org/ns/r2rml#ObjectMap> , <http://www.w3.org/ns/r2rml#TermMap> ;
+                            <http://www.w3.org/ns/r2rml#column>
+                                    "nickname" ;
+                            <http://www.w3.org/ns/r2rml#termType>
+                                    <http://www.w3.org/ns/r2rml#Literal>
+                          ] ;
+                  <http://www.w3.org/ns/r2rml#predicate>
+                          <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname>
+                ] ;
+        <http://www.w3.org/ns/r2rml#subjectMap>
+                [ a       <http://www.w3.org/ns/r2rml#TermMap> , <http://www.w3.org/ns/r2rml#SubjectMap> ;
+                  <http://www.w3.org/ns/r2rml#template>
+                          "professor/{prof_id}" ;
+                  <http://www.w3.org/ns/r2rml#termType>
+                          <http://www.w3.org/ns/r2rml#BlankNode>
+                ] .
