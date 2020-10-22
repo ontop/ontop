@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 
@@ -38,6 +39,41 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isQueryTemplateExtractionEnabled() {
+        return systemSettings.isQueryTemplateExtractionEnabled();
+    }
+
+    @Override
+    public boolean isSparqlQueryIncludedIntoQueryLog() {
+        return getRequiredBoolean(SPARQL_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean isReformulatedQueryIncludedIntoQueryLog() {
+        return getRequiredBoolean(REFORMULATED_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean areClassesAndPropertiesIncludedIntoQueryLog() {
+        return getRequiredBoolean(CLASSES_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean areTablesIncludedIntoQueryLog() {
+        return getRequiredBoolean(TABLES_INCLUDED_QUERY_LOGGING);
+    }
+
+    @Override
+    public boolean isQueryLoggingDecompositionEnabled() {
+        return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION);
+    }
+
+    @Override
+    public boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive() {
+        return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE);
+    }
+
+    @Override
     public long getQueryCacheMaxSize() {
         return getRequiredLong(QUERY_CACHE_MAX_SIZE);
     }
@@ -45,6 +81,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     @Override
     public String getApplicationName() {
         return getRequiredProperty(APPLICATION_NAME);
+    }
+
+    @Override
+    public ImmutableSet<String> getHttpHeaderNamesToLog() {
+        return systemSettings.getHttpHeaderNamesToLog();
     }
 
     @Override

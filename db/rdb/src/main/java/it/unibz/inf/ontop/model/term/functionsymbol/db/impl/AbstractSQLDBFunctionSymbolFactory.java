@@ -437,8 +437,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
-        return new DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new DefaultSQLEncodeURLorIRIFunctionSymbol(dbStringType, preserveInternationalChars);
     }
 
     @Override
@@ -784,5 +784,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     protected abstract String getUUIDNameInDialect();
+
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROW_NUMBER() OVER ()";
+    }
 
 }

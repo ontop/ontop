@@ -1,26 +1,8 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
@@ -29,8 +11,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
@@ -44,7 +25,7 @@ import java.util.Optional;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
-	private final List<Assertion> results = new ArrayList<>();
+	private final List<RDFFact> results = new ArrayList<>();
 
 	private final TupleResultSet tupleResultSet;
 
@@ -54,19 +35,18 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
 	// store results in case of describe queries
 	private final boolean storeResults;
+    private final QueryLogger queryLogger;
     private final TermFactory termFactory;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
 
-    ABoxAssertionSupplier builder;
-
     public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
-                                       boolean storeResults, TermFactory termFactory,
+                                       boolean storeResults, QueryLogger queryLogger, TermFactory termFactory,
                                        org.apache.commons.rdf.api.RDF rdfFactory) throws OntopResultConversionException, OntopConnectionException {
 		this.tupleResultSet = tupleResultSet;
 		this.constructTemplate = constructTemplate;
+        this.queryLogger = queryLogger;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
-        builder = OntologyBuilderImpl.assertionSupplier(this.rdfFactory);
 
         Extension ex = constructTemplate.getExtension();
         if (ex != null) {
@@ -93,7 +73,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
     }
 
     @Override
-	public void addNewResult(Assertion assertion)
+	public void addNewResult(RDFFact assertion)
 	{
 		results.add(assertion);
 	}
@@ -106,10 +86,10 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-    private List<Assertion> processResults(OntopBindingSet bindingSet)
+    private List<RDFFact> processResults(OntopBindingSet bindingSet)
             throws OntopResultConversionException, OntopConnectionException {
 
-        List<Assertion> tripleAssertions = new ArrayList<>();
+        List<RDFFact> tripleAssertions = new ArrayList<>();
 
 
         for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
@@ -117,11 +97,10 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             for (int i = 0; i < size / 3; i++) {
 
                 ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
-                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
-                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
-                Assertion assertion = SimpleGraphResultSet.getAssertion(builder, subjectConstant, predicateConstant, objectConstant);
-                if (assertion != null)
-                    tripleAssertions.add(assertion);
+                IRIConstant propertyConstant = (IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
+                RDFConstant objectConstant = (RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
+                if (subjectConstant != null && propertyConstant != null && objectConstant != null)
+                    tripleAssertions.add(RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
             }
         }
         return tripleAssertions;
@@ -136,7 +115,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             return false;
         // construct
         while(tupleResultSet.hasNext()) {
-            List<Assertion> newTriples = processResults(tupleResultSet.next());
+            List<RDFFact> newTriples = processResults(tupleResultSet.next());
             if (!newTriples.isEmpty()) {
                 results.addAll(newTriples);
                 return true;
@@ -146,7 +125,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
     }
 
     @Override
-    public Assertion next() {
+    public RDFFact next() {
         if (results.size() > 0)
             return results.remove(0);
         else

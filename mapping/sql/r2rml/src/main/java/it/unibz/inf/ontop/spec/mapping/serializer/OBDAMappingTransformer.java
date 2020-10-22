@@ -301,7 +301,7 @@ public class OBDAMappingTransformer {
 	private String getTemplate(ImmutableFunctionalTerm lexicalTerm, PrefixManager prefixManager) {
 		FunctionSymbol functionSymbol = lexicalTerm.getFunctionSymbol();
 		if (functionSymbol instanceof BnodeStringTemplateFunctionSymbol) {
-			return "_:" + Templates.getTemplateString(lexicalTerm);
+			return Templates.getTemplateString(lexicalTerm);
 		}
 		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
 			return expandPrefix(Templates.getTemplateString(lexicalTerm), prefixManager);

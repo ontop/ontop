@@ -125,14 +125,26 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
         protected Stream<ComparatorSimplification> simplifyRDFTerm(ImmutableTerm lexicalTerm, ImmutableTerm rdfTypeTerm,
                                                                    IQTree childTree, boolean isAscending) {
+
+
+            Optional<ImmutableSet<RDFTermType>> possibleTypes = extractPossibleTypes(rdfTypeTerm, childTree);
+
             /*
              * Mono-typed case
+             *
+             * Either the type term is a constant or it is a functional term that either return NULL or always the same constant.
+             *
+             * If it is functional term, we can rely on the lexical term to handle the case where the type term is null,
+             * as the type and lexical terms are expected to be "on-sync" (both nulls, or non is null)
+             *
              */
-            if (rdfTypeTerm instanceof RDFTermTypeConstant) {
+            if (possibleTypes.isPresent() && possibleTypes.get().size() == 1) {
+                RDFTermType possibleType = possibleTypes.get().iterator().next();
+
                 return lexicalTerm.isGround()
                         ? Stream.empty()
                         : Stream.of(computeDBTerm((NonGroundTerm) lexicalTerm,
-                                ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType(), childTree))
+                                possibleType, childTree))
                             .map(t -> iqFactory.createOrderComparator(t, isAscending))
                             .map(ComparatorSimplification::new);
             }
@@ -140,7 +152,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
             /*
              * Possibly multi-typed case
              */
-            return extractPossibleTypes(rdfTypeTerm, childTree)
+            return possibleTypes
                     // All types extracted
                     .map(types -> computeSimplifications(lexicalTerm, rdfTypeTerm, types, childTree, isAscending))
                     // Cannot extract all the types --> postpone

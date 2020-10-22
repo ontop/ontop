@@ -4,8 +4,8 @@ The [Ontop](http://ontop-vkg.org) framework is an open source project available 
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 4.0.0
-* Release date: 31/07/2020
+* Current version: 4.0.3
+* Release date: 16/10/2020
 * [Changelog](https://ontop-vkg.org/guide/releases.html)
 
 

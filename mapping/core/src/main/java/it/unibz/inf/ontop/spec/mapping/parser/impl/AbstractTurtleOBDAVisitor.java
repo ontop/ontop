@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -17,6 +19,8 @@ import org.apache.commons.rdf.api.RDF;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -27,25 +31,30 @@ import java.util.stream.Stream;
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
     // Column placeholder pattern
-    private static final Pattern varPattern = Pattern.compile("\\{([^\\}]+)\\}");
+    private static final Pattern varPattern = Pattern.compile("\\{([^}]+)}");
     private static final Pattern constantBnodePattern = Pattern.compile("^_:(.*)");
+
+    @Override
+    public Object visitLiteral(LiteralContext ctx) {
+        return super.visitLiteral(ctx);
+    }
 
     protected abstract boolean validateAttributeName(String value);
 
     /**
      * Map of directives
      */
-    private HashMap<String, String> directives = new HashMap<>();
+    private final HashMap<String, String> directives = new HashMap<>();
 
+    /**
+     * The current graph
+     */
+    private ImmutableTerm currentGraph;
     /**
      * The current subject term
      */
     private ImmutableTerm currentSubject;
 
-    /**
-     * Davide> The current graph
-     */
-    private ImmutableTerm currentGraphLabel;
 
     protected String error = "";
     private final TermFactory termFactory;
@@ -55,8 +64,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     private final OntopMappingSettings settings;
 
     protected AbstractTurtleOBDAVisitor(TermFactory termFactory, TypeFactory typeFactory,
-                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory,
-                                     OntopMappingSettings settings) {
+                                        TargetAtomFactory targetAtomFactory, RDF rdfFactory,
+                                        OntopMappingSettings settings) {
         this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.rdfFactory = rdfFactory;
@@ -77,20 +86,29 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     protected ImmutableTerm constructIRI(String text) {
-        ImmutableTerm toReturn = null;
+        return constructBnodeOrIRI(text,
+                col -> termFactory.getIRIFunctionalTerm(col, true),
+                termFactory::getIRIFunctionalTerm,
+                false);
+    }
+
+    protected ImmutableTerm constructBnodeOrIRI(String text,
+                                                Function<Variable, ImmutableFunctionalTerm> columnFct,
+                                                BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct,
+                                                boolean isBnode) {
         final String PLACEHOLDER = "{}";
-        List<FormatString> tokens = parseIRI(text);
+        List<FormatString> tokens = parseIRIOrBnode(text, isBnode);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
-                IRI iri = rdfFactory.createIRI(token.toString());
-                toReturn = termFactory.getConstantIRI(iri);
+                return termFactory.getConstantIRI(rdfFactory.createIRI(token.toString()));
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
                 Variable column = termFactory.getVariable(token.toString());
-                toReturn = termFactory.getIRIFunctionalTerm(column, true);
+                return columnFct.apply(column);
             }
+            throw new MinorOntopInternalBugException("Unexpected token: " + token);
         } else {
             StringBuilder sb = new StringBuilder();
             List<ImmutableTerm> terms = new ArrayList<>();
@@ -104,20 +122,22 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
                 }
             }
             String iriTemplate = sb.toString(); // complete IRI template
-            toReturn = termFactory.getIRIFunctionalTerm(iriTemplate, ImmutableList.copyOf(terms));
+            return templateFct.apply(iriTemplate, ImmutableList.copyOf(terms));
         }
-        return toReturn;
     }
 
 
-    private List<FormatString> parseIRI(String text) {
+    private List<FormatString> parseIRIOrBnode(String text, boolean isBnode) {
         List<FormatString> toReturn = new ArrayList<>();
         Matcher m = varPattern.matcher(text);
         int i = 0;
         while (i < text.length()) {
             if (m.find(i)) {
                 if (m.start() != i) {
-                    toReturn.add(new FixedString(text.substring(i, m.start())));
+                    String subString = text.substring(i, m.start());
+                    toReturn.add(new FixedString(
+                            // Remove the prefix _:
+                            (isBnode && (i == 0)) ? subString.substring(2) : subString));
                 }
                 String value = m.group(1);
                 if (validateAttributeName(value)) {
@@ -138,12 +158,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     private ImmutableTerm constructBnodeFunction(String text) {
-        ImmutableList.Builder<ImmutableTerm> args = ImmutableList.builder();
-        Matcher m = varPattern.matcher(text);
-        while (m.find()) {
-            args.add(termFactory.getVariable(m.group(1)));
-        }
-        return termFactory.getFreshBnodeFunctionalTerm(args.build());
+        return constructBnodeOrIRI(text,
+                col -> termFactory.getBnodeFunctionalTerm(col, true),
+                termFactory::getBnodeFunctionalTerm,
+                true);
     }
 
     private interface FormatString {
@@ -252,9 +270,15 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     @Override
     public ImmutableList<TargetAtom> visitParse(ParseContext ctx) {
         ctx.directiveStatement().forEach(this::visit);
-        return ctx.triplesStatement().stream()
+        ImmutableList<TargetAtom> tripleAtoms = ctx.triplesStatement().stream()
                 .flatMap(this::visitTriplesStatement)
                 .collect(ImmutableCollectors.toList());
+
+        ImmutableList<TargetAtom> quadAtoms = ctx.quadsStatement().stream()
+                .flatMap(this::visitQuadsStatement)
+                .collect(ImmutableCollectors.toList());
+
+        return ImmutableList.copyOf(Iterables.concat(tripleAtoms, quadAtoms));
     }
 
     @Override
@@ -271,17 +295,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Stream<TargetAtom> visitTriplesStatement(TriplesStatementContext ctx) {
-
         TriplesContext triples = ctx.triples();
-        if( triples != null ){
+        if (triples != null) {
             return visitTriples(triples);
+        } else {
+            return Stream.empty();
         }
-        else{
-            QuadsContext quads = ctx.quads();
-            if( quads != null )
-                return visitQuads(quads);
-            else throw new IllegalArgumentException("Not triple nor quads");
-        }
+    }
+
+    @Override
+    public Stream<TargetAtom> visitQuadsStatement(QuadsStatementContext ctx) {
+        this.currentGraph = visitGraph(ctx.graph());
+        return ctx.triplesStatement().stream().flatMap(this::visitTriplesStatement);
     }
 
     @Override
@@ -306,12 +331,6 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Stream<TargetAtom> visitQuads(QuadsContext ctx) {
-        currentGraphLabel = visitGraph(ctx.graph());
-        return ctx.triples().stream().flatMap(this::visitTriples);
-    }
-
-    @Override
     public Stream<TargetAtom> visitPredicateObjectList(PredicateObjectListContext ctx) {
         return ctx.predicateObject().stream()
                 .flatMap(this::visitPredicateObject);
@@ -320,16 +339,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     @Override
     public Stream<TargetAtom> visitPredicateObject(PredicateObjectContext ctx) {
         Stream<TargetAtom> result = visitObjectList(ctx.objectList()).map(object ->
-                currentGraphLabel == null ? targetAtomFactory.getTripleTargetAtom(currentSubject,
-                        visitVerb(ctx.verb()), object) : targetAtomFactory.getQuadTargetAtom(currentSubject,
-                        visitVerb(ctx.verb()), object, currentGraphLabel));
+                currentGraph == null
+                        ? targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), object)
+                        : targetAtomFactory.getQuadTargetAtom(currentSubject, visitVerb(ctx.verb()), object, currentGraph));
         return result;
 
-        //   return visitObjectList(ctx.objectList())
-        //         .map(t -> targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), t));
     }
-
-
 
 
     @Override
@@ -364,9 +379,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return null;
     }
 
-    // Davide> Quads support
     @Override
-    public ImmutableTerm visitGraph(GraphContext ctx){
+    public ImmutableTerm visitGraph(GraphContext ctx) {
         if (ctx == null) return null;
         ResourceContext rc = ctx.resource();
         if (rc != null) {
@@ -388,10 +402,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         ImmutableTerm term = (ImmutableTerm) visit(ctx.children.iterator().next());
         return (term instanceof Variable)
                 ? termFactory.getRDFLiteralFunctionalTerm(
-                        termFactory.getPartiallyDefinedToStringCast((Variable) term),
-                    // We give the abstract datatype RDFS.LITERAL when it is not determined yet
-                    // --> The concrete datatype be inferred afterwards
-                            RDFS.LITERAL)
+                termFactory.getPartiallyDefinedToStringCast((Variable) term),
+                // We give the abstract datatype RDFS.LITERAL when it is not determined yet
+                // --> The concrete datatype be inferred afterwards
+                RDFS.LITERAL)
                 : term;
     }
 
@@ -424,7 +438,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         IRI iri = visitIri(ctx.iri());
 
         if ((!settings.areAbstractDatatypesToleratedInMapping())
-            && typeFactory.getDatatype(iri).isAbstract())
+                && typeFactory.getDatatype(iri).isAbstract())
             // TODO: throw a better exception (invalid input)
             throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
                     + iri + "\nSet the property "
@@ -450,7 +464,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableTerm visitBlank(BlankContext ctx) {
-        if (ctx.BLANK_NODE_FUNCTION() != null){
+        if (ctx.BLANK_NODE_FUNCTION() != null) {
             return constructBnodeFunction(ctx.BLANK_NODE_FUNCTION().getText());
         }
         if (ctx.BLANK_NODE_LABEL() != null) {

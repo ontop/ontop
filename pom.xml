@@ -3,7 +3,7 @@
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.1.0-beta-1-SNAPSHOT</version>
 
     <name>ontop</name>
     <url>http://ontop-vkg.org/</url>
@@ -143,6 +143,7 @@
         <guice.version>4.1.0</guice.version>
         <sesame.version>2.7.16</sesame.version>
         <h2.version>1.4.196</h2.version>
+        <toml4j.version>0.7.2</toml4j.version>
 
         <docker.url>localhost</docker.url>
         <docker.db2.password>obda-pwd</docker.db2.password>
@@ -343,7 +344,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.13</version>
+                <version>4.13.1</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -654,6 +655,12 @@
                 <version>2.5</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.moandjiezana.toml</groupId>
+                <artifactId>toml4j</artifactId>
+                <version>${toml4j.version}</version>
+            </dependency>
+
             <!-- JDBC Drivers -->
 
             <dependency>
@@ -861,6 +868,13 @@
                 <artifactId>junit-jupiter-api</artifactId>
                 <version>5.6.2</version>
             </dependency>
+
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.11</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +37,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, SPARQLFunctionSymbol> coalesceMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> distinctSparqlGroupConcatMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> nonDistinctSparqlGroupConcatMap;
+    // TODO: use a cache with a limited budget
+    private final Map<IRI, SPARQLFunctionSymbol> sparqlIRIMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
@@ -48,6 +51,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
     private final DBTermType dbStringType;
+    private final SPARQLFunctionSymbol iriNoBaseFunctionSymbol;
 
     /**
      * Created in init()
@@ -78,6 +82,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.coalesceMap = new ConcurrentHashMap<>();
         this.distinctSparqlGroupConcatMap = new ConcurrentHashMap<>();
         this.nonDistinctSparqlGroupConcatMap = new ConcurrentHashMap<>();
+        this.sparqlIRIMap = new ConcurrentHashMap<>();
         this.isAMap = new ConcurrentHashMap<>();
         this.lexicalInequalityFunctionSymbolMap = new ConcurrentHashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
@@ -94,6 +99,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.lexicalEBVFunctionSymbol = new LexicalEBVFunctionSymbolImpl(dbStringType, metaRDFType, dbBooleanType);
         this.notYetTypedEqualityFunctionSymbol = new NotYetTypedEqualityFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbBooleanType);
+
+        this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(),
+                typeFactory.getXsdStringDatatype(), typeFactory.getIRITermType());
     }
 
     @Inject
@@ -127,7 +135,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new LcaseSPARQLFunctionSymbolImpl(xsdString),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_ENCODE_FOR_URI", XPathFunction.ENCODE_FOR_URI,
                         xsdString, xsdString, true,
-                        TermFactory::getR2RMLIRISafeEncodeFunctionalTerm),
+                        TermFactory::getDBEncodeForURI),
                 new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
@@ -210,7 +218,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_TZ", SPARQL.TZ,
                 xsdDatetime, xsdString, false, TermFactory::getDBTz),
+                new UnaryBnodeSPARQLFunctionSymbolImpl(xsdString, bnodeType),
                 new NowSPARQLFunctionSymbolImpl(xsdDatetime),
+                new IfSPARQLFunctionSymbolImpl(xsdBoolean, abstractRDFType),
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
                 new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),
@@ -330,6 +340,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 return Optional.of(createSPARQLStrUUIDFunctionSymbol());
             case SPARQL.COALESCE:
                 return getSPARQLCoalesceFunctionSymbol(arity);
+            case SPARQL.BNODE:
+                if (arity == 0)
+                    return Optional.of(createZeroArySPARQLBnodeFunctionSymbol());
+                // Otherwise, default case
             default:
                 return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
         }
@@ -345,6 +359,18 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         return isDistinct
                 ? distinctSparqlGroupConcatMap.computeIfAbsent(separator, s -> createSPARQLGroupConcat(s, true))
                 : nonDistinctSparqlGroupConcatMap.computeIfAbsent(separator, s -> createSPARQLGroupConcat(s, false));
+    }
+
+    @Override
+    public synchronized SPARQLFunctionSymbol getIRIFunctionSymbol(IRI baseIRI) {
+        return sparqlIRIMap.computeIfAbsent(baseIRI, b -> new IriSPARQLFunctionSymbolImpl(b,
+                typeFactory.getAbstractRDFTermType(), typeFactory.getXsdStringDatatype(),
+                typeFactory.getIRITermType()));
+    }
+
+    @Override
+    public SPARQLFunctionSymbol getIRIFunctionSymbol() {
+        return iriNoBaseFunctionSymbol;
     }
 
     protected SPARQLAggregationFunctionSymbol createSPARQLGroupConcat(String separator, boolean isDistinct) {
@@ -371,6 +397,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 ? Optional.empty()
                 : Optional.of(coalesceMap
                 .computeIfAbsent(arity, a -> new CoalesceSPARQLFunctionSymbolImpl(a, typeFactory.getAbstractRDFTermType())));
+    }
+
+    private SPARQLFunctionSymbol createZeroArySPARQLBnodeFunctionSymbol() {
+        return new ZeroAryBnodeSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getBlankNodeType());
     }
 
     /**

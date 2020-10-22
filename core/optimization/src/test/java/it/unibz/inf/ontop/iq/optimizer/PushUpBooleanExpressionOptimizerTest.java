@@ -187,10 +187,10 @@ public class PushUpBooleanExpressionOptimizerTest {
         ExtensionalDataNode dataNode2 = createExtensionalDataNode (TABLE1_AR2, ImmutableList.of(X, Y));
         ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(Z));
 
-        queryBuilder1.init(projectionAtom, joinNode1);
+        queryBuilder1.init(projectionAtom, leftJoinNode);
+        queryBuilder1.addChild(leftJoinNode, joinNode1, LEFT);
+        queryBuilder1.addChild(joinNode1, dataNode2);
         queryBuilder1.addChild(joinNode1, dataNode1);
-        queryBuilder1.addChild(joinNode1, leftJoinNode);
-        queryBuilder1.addChild(leftJoinNode, dataNode2, LEFT);
         queryBuilder1.addChild(leftJoinNode, dataNode3, RIGHT);
         IntermediateQuery query1 = queryBuilder1.build();
 

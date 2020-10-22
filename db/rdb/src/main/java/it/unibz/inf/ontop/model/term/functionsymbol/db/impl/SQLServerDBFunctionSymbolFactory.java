@@ -144,6 +144,14 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     /**
+     * ORDER BY is required in the OVER clause
+     */
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROW_NUMBER() OVER (ORDER BY (SELECT NULL))";
+    }
+
+    /**
      * TODO: update
      */
     @Override

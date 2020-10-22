@@ -1,0 +1,26 @@
+@base <http://example.com/base/> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rev: <http://purl.org/stuff/rev#> .
+@prefix bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> .
+@prefix bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/> .
+
+<#Person> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "person" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Reviewer{nr}";
+  rr:class bsbm:Person;
+];
+.
+
+<#Review> a rr:TriplesMap;
+rr:logicalTable [ rr:tableName "review" ];
+rr:subjectMap [
+  rr:template "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/Review{nr}";
+  rr:class bsbm:Review;
+];
+.

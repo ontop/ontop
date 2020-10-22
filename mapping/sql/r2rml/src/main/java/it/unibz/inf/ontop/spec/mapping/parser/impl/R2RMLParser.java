@@ -209,7 +209,8 @@ public class R2RMLParser {
 		}
 
 		if (type == RDFCategory.IRI) {
-			string = R2RMLVocabulary.prefixUri(templateString);
+			// TODO: give the base IRI
+			string = R2RMLVocabulary.resolveIri(templateString, "http://example.com/base/");
 		}
 
 		String suffix = string; // literal case
@@ -233,7 +234,7 @@ public class R2RMLParser {
 
 				if (i > 0) {
 					String cons = suffix.substring(0, i);
-					termListBuilder.add(termFactory.getDBStringConstant(cons));
+					termListBuilder.add(termFactory.getDBStringConstant(deEscape(cons)));
 					suffix = suffix.substring(suffix.indexOf("}", i) + 1);
 				}
 				else {
@@ -249,7 +250,7 @@ public class R2RMLParser {
 			string = string.substring(0, begin) + "[]" + string.substring(end + 1);
 		}
 		if (type == RDFCategory.LITERAL && !suffix.isEmpty()) {
-			termListBuilder.add(termFactory.getDBStringConstant(suffix));
+			termListBuilder.add(termFactory.getDBStringConstant(deEscape(suffix)));
 		}
 
 		string = string.replace("[", "{");
@@ -280,6 +281,12 @@ public class R2RMLParser {
 		}
 	}
 
+	private static String deEscape(String s) {
+		s = s.replace("\\{", "{");
+		s = s.replace("\\}", "}");
+		s = s.replace("\\\\", "\\");
+		return s;
+	}
 
 	private ImmutableFunctionalTerm getVariable(String variableName) {
 		return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));

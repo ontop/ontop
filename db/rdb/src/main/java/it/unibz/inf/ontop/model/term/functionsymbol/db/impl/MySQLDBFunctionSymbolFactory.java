@@ -159,6 +159,17 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         throw new RuntimeException("TODO: support it");
     }
 
+    /**
+     * Only for >= 8.0.2
+     *
+     * TODO: provide an alternative implementation for the row unique str for previous versions
+     *
+     */
+    @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return super.serializeDBRowNumber(converter, termFactory);
+    }
+
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
         return new DefaultSQLTimestampISONormFunctionSymbol(
@@ -218,8 +229,8 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
-    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
-        return new MySQLR2RMLSafeIRIEncodeFunctionSymbolImpl(dbStringType);
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new MySQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
     }
 
     @Override

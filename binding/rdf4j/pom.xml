@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop-binding</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>4.0.1-SNAPSHOT</version>
+		<version>4.1.0-beta-1-SNAPSHOT</version>
 	</parent>
 	<artifactId>ontop-rdf4j</artifactId>
 	<name>ontop-rdf4j</name>
@@ -118,7 +118,11 @@
 			<artifactId>r2rml-api-rdf4j-binding</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>com.moandjiezana.toml</groupId>
+            <artifactId>toml4j</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 </project>

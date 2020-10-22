@@ -258,7 +258,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
                     .reduce(aggregationSubstitution,
                             (s, a) -> (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
-                                    a.getSubstitution().composeWith(s),
+                                    a.getSubstitution().composeWith(s).reduceDomainToIntersectionWith(aggregateVariables),
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");
                             });

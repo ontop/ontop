@@ -15,6 +15,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -267,7 +268,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
 
             for (byte b : hash) {
@@ -1378,9 +1379,213 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(query, expectedValues, false);
     }
 
+    @Test
+    public void testBNODE0() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT DISTINCT ?b ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   BIND (BNODE() AS ?b)\n"
+                + "   BIND (\"cst\" AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testBNODE1() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT DISTINCT ?b ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   BIND (BNODE(\"b1\") AS ?b)\n"
+                + "   BIND (\"cst\" AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        expectedValues.add("\"cst\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI1() throws Exception {
+        String queryBind = "SELECT ?w  {" +
+                "BIND(IRI(\"http://example.org/john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI1_2() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"http://example.org/john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI2() throws Exception {
+        String queryBind = "SELECT ?w  {" +
+                "BIND(IRI(<http://example.org/john>) AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI3() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI4() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(URI(\"john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI5() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"urn:john\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<urn:john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI6() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "BIND(IRI(\"mailto:john@somewhere.org\") AS ?w)\n" +
+                "FILTER (isIRI(?w))\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<mailto:john@somewhere.org>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI7() throws Exception {
+        String queryBind = "BASE <http://example.org/>\n" +
+                "SELECT ?w  {" +
+                "{ VALUES ?v { \"john\" \"ernest\" \"http://example.org/alice\" } } UNION { BIND (str(rand()) AS ?v) } \n" +
+                "BIND(IRI(?v) AS ?w)\n" +
+                "VALUES ?y { <http://example.org/john> <http://otherdomain.org/ernest> } \n" +
+                "FILTER (?w = ?y)\n" +
+                "} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIRI8() throws Exception {
+        String queryBind = "BASE <http://example.org/project1#data/>\n" +
+                "SELECT ?w {" +
+                "BIND(IRI(\"john\") AS ?w)\n" +
+                "} ";
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("<http://example.org/project1#data/john>");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF1() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(\"rrr\" * \"2\"^^xsd:integer, \"1\", \"2\"), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF2() throws Exception {
+        String queryBind = "SELECT (IF(1 < 2, \"first\", \"second\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"first\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF3() throws Exception {
+        String queryBind = "SELECT (IF(1 > 2, \"first\", \"second\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"second\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF4() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(1 < 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF5() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(1 > 2, \"rrr\" * \"2\"^^xsd:integer, \"second\"), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"second\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testIF6() throws Exception {
+        String queryBind = "SELECT (COALESCE(IF(1 > 2, \"first\", \"rrr\" * \"2\"^^xsd:integer), \"other\") AS ?w)  {} ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"other\"^^xsd:string");
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
     private void checkReturnedValuesAndOrder(String query, List<String> expectedValues) throws Exception {
         checkReturnedValues(query, expectedValues, true);
-
     }
 
     private void checkReturnedValues(String query, List<String> expectedValues, boolean sameOrder) throws Exception {

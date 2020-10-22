@@ -1,24 +1,5 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -346,12 +327,18 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms) {
-		return new NonGroundFunctionalTermImpl(this, functor, terms);
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl(this, (BooleanFunctionSymbol) functor, terms);
+		else
+			return new NonGroundFunctionalTermImpl(this, functor, terms);
 	}
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms) {
-		return new NonGroundFunctionalTermImpl(functor, terms, this);
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl((BooleanFunctionSymbol) functor, terms, this);
+		else
+			return new NonGroundFunctionalTermImpl(functor, terms, this);
 	}
 
 	@Override
@@ -531,6 +518,16 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableFunctionalTerm getDBNow() {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBNow());
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBRowUniqueStr() {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowUniqueStr());
+	}
+
+    @Override
+    public ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIriStringResolver(baseIRI), argLexical);
     }
 
     @Override
@@ -728,18 +725,16 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
-														  ImmutableList<? extends ImmutableTerm> arguments) {
-		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
-				arguments);
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString) {
+		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> arguments) {
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(arguments.size()),
+				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
 				arguments);
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
@@ -943,6 +938,11 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
     }
+
+	@Override
+	public ImmutableFunctionalTerm getDBEncodeForURI(ImmutableTerm term) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBEncodeForURI(), term);
+	}
 
     @Override
 	public ImmutableFunctionalTerm getNullRejectingDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {

@@ -1,13 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonNullConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.UUID;
 
@@ -114,6 +110,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBCharLength();
 
     DBFunctionSymbol getR2RMLIRISafeEncode();
+
+    DBFunctionSymbol getDBEncodeForURI();
 
     /**
      * arity must be {@code >= 2 }
@@ -238,6 +236,18 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType);
+
+    /**
+     * Returns a DB string that unique to the row
+     */
+    DBFunctionSymbol getDBRowUniqueStr();
+
+    /**
+     * Returns a different number for each row (e.g. ROWNUM of Oracle)
+     */
+    DBFunctionSymbol getDBRowNumber();
+
+    DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
 
     //-------------
     // Aggregation

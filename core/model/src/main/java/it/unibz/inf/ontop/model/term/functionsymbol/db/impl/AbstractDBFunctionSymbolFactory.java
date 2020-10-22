@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +21,7 @@ import java.util.stream.Stream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
-    private static final String BNODE_PREFIX = "_:ontop-bnode-";
+    private static final String BNODE_PREFIX = "ontop-bnode-";
     private static final String PLACEHOLDER = "{}";
 
     /**
@@ -47,6 +49,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBBooleanFunctionSymbol containsFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol encodeForURIFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol strBeforeFunctionSymbol;
     // Created in init()
@@ -99,6 +103,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBFunctionSymbol nonDistinctGroupConcat;
     // Created in init()
     private DBFunctionSymbol distinctGroupConcat;
+
+    // Created in init()
+    private DBFunctionSymbol rowUniqueStrFct;
+    // Created in init()
+    private DBFunctionSymbol rowNumberFct;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -219,6 +228,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
+    private final Map<IRI, DBFunctionSymbol> iriStringResolverMap;
+
     private final Map<DBTermType, DBFunctionSymbol> distinctSumMap;
     private final Map<DBTermType, DBFunctionSymbol> regularSumMap;
 
@@ -266,6 +277,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.castMap = new ConcurrentHashMap<>();
         this.iriTemplateMap = new ConcurrentHashMap<>();
         this.bnodeTemplateMap = new ConcurrentHashMap<>();
+        this.iriStringResolverMap = new ConcurrentHashMap<>();
         this.numericInequalityMap = new ConcurrentHashMap<>();
         this.booleanInequalityMap = new ConcurrentHashMap<>();
         this.stringInequalityMap = new ConcurrentHashMap<>();
@@ -316,7 +328,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         nonStrictDatetimeEqOperator = createNonStrictDatetimeEquality();
         nonStrictDateEqOperator = createNonStrictDateEquality();
         nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
-        r2rmlIRISafeEncodeFunctionSymbol = createR2RMLIRISafeEncode();
+        r2rmlIRISafeEncodeFunctionSymbol = createEncodeURLorIRI(true);
+        encodeForURIFunctionSymbol = createEncodeURLorIRI(false);
         strAfterFunctionSymbol = createStrAfterFunctionSymbol();
         containsFunctionSymbol = createContainsFunctionSymbol();
         strBeforeFunctionSymbol = createStrBeforeFunctionSymbol();
@@ -339,6 +352,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         nonDistinctGroupConcat = createDBGroupConcat(dbStringType, false);
         distinctGroupConcat = createDBGroupConcat(dbStringType, true);
+
+        rowUniqueStrFct = createDBRowUniqueStr();
+        rowNumberFct = createDBRowNumber();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -646,6 +662,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBEncodeForURI() {
+        return encodeForURIFunctionSymbol;
+    }
+
+    @Override
     public DBNotFunctionSymbol getDBNot() {
         return dbNotFunctionSymbol;
     }
@@ -842,6 +863,21 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     public DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType) {
         return typeNullMap
                 .computeIfAbsent(termType, this::createTypeNullFunctionSymbol);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRowUniqueStr() {
+        return rowUniqueStrFct;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRowNumber() {
+        return rowNumberFct;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIriStringResolver(IRI baseIRI) {
+        return iriStringResolverMap.computeIfAbsent(baseIRI, this::createDBIriStringResolver);
     }
 
     @Override
@@ -1070,6 +1106,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 (t, c, f) -> serializeCurrentDateTime(type, t, c, f));
     }
 
+    protected DBFunctionSymbol createDBRowUniqueStr() {
+        return new DBFunctionSymbolWithSerializerImpl("ROW_UNIQUE_STR", ImmutableList.of(), dbStringType, true,
+                (t, c, f) -> serializeDBRowUniqueStr(c, f));
+    }
+
+    protected DBFunctionSymbol createDBRowNumber() {
+        return new DBFunctionSymbolWithSerializerImpl("ROW_NUMBER", ImmutableList.of(), dbIntegerType, true,
+                (t, c, f) -> serializeDBRowNumber(c, f));
+    }
+
+
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) ;
@@ -1124,7 +1171,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBNotFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType);
 
-    protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
+    protected abstract DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars);
 
     protected abstract DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType);
     protected abstract DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType);
@@ -1135,6 +1182,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new SimplifiableTypedNullFunctionSymbol(termType);
     }
 
+    protected DBFunctionSymbol createDBIriStringResolver(IRI baseIRI) {
+        return new DBIriStringResolverFunctionSymbolImpl(baseIRI, "^[a-zA-Z]+:", rootDBType, dbStringType);
+    }
 
     protected abstract String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter,
@@ -1217,6 +1267,19 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                       TermFactory termFactory) {
         return "CURRENT_" + type;
     }
+
+    /**
+     * By default, uses the row number
+     */
+    protected String serializeDBRowUniqueStr(Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        ImmutableFunctionalTerm newTerm = termFactory.getDBCastFunctionalTerm(dbStringType,
+                termFactory.getImmutableFunctionalTerm(getDBRowNumber()));
+
+        return termConverter.apply(newTerm);
+    }
+
+    protected abstract String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory);
+
 
 
     @Override

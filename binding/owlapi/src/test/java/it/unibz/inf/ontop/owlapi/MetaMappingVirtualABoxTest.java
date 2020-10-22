@@ -20,23 +20,8 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLObject;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Properties;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.google.common.collect.ImmutableList;
+import org.junit.*;
 
 
 /**
@@ -49,94 +34,38 @@ import static org.junit.Assert.assertTrue;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class MetaMappingVirtualABoxTest {
+public class MetaMappingVirtualABoxTest extends AbstractOWLAPITest {
 
-	private Connection conn;
-
-	private static final  String owlfile = "src/test/resources/test/metamapping.owl";
-	private static final  String obdaFileName = "src/test/resources/test/metamapping.obda";
-
-	private static final String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
-	private static final String username = "sa";
-	private static final String password = "";
-
-	@Before
-	public void setUp() throws Exception {
-		
-		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
-		// String driver = "org.h2.Driver";
-		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
-
-		conn = DriverManager.getConnection(url, username, password);
-		executeFromFile(conn, "src/test/resources/test/metamapping-create-h2.sql");
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/test/metamapping-create-h2.sql",
+				"/test/metamapping.obda",
+				"/test/metamapping.owl");
 	}
 
-	@After
-    public void tearDown() throws Exception {
-		executeFromFile(conn, "src/test/resources/test/metamapping-drop-h2.sql");
-		conn.close();
-	}
-
-	private void runTests(Properties p) throws Exception {
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdaFileName)
-				.ontologyFile(owlfile)
-				.properties(p)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.enableTestMode()
-				.build();
-
-
-		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
-        try (OntopOWLReasoner reasoner = factory.createReasoner(config);
-			 // Now we are ready for querying
-			 OWLConnection conn = reasoner.getConnection();
-			 OWLStatement st = conn.createStatement();
-			 TupleOWLResultSet rs1 = st.executeSelectQuery(query1)) {
-
-            assertTrue(rs1.hasNext());
-            final OWLBindingSet bindingSet = rs1.next();
-            OWLObject ind = bindingSet.getOWLObject("x");
-			//OWLIndividual ind2 = rs.getOWLIndividual("y");
-			//OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<http://example.org/uri1>", ind.toString());
-			//assertEquals("<uri1>", ind2.toString());
-			//assertEquals("\"value1\"", val.toString());
-
-
-		}
-
-        try (OntopOWLReasoner reasoner = factory.createReasoner(config);
-			 // Now we are ready for querying
-			 OWLConnection conn = reasoner.getConnection();
-			 OWLStatement st = conn.createStatement();
-			 TupleOWLResultSet  rs2 = st.executeSelectQuery(query2)) {
-
-            assertTrue(rs2.hasNext());
-            final OWLBindingSet bindingSet = rs2.next();
-            OWLObject ind1 = bindingSet.getOWLObject("x");
-            OWLObject ind2 = bindingSet.getOWLObject("y");
-			//OWLLiteral val = rs2.getOWLLiteral("y");
-            assertEquals("<http://example.org/uri1>", ind1.toString());
-            assertEquals("<http://example.org/A>", ind2.toString());
-            //assertEquals("\"A\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
-        }
+	@AfterClass
+    public static void tearDown() throws Exception {
+		release();
 	}
 
     @Test
-	public void testViEqSig() throws Exception {
+	public void test1() throws Exception {
+		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> " +
+				"SELECT * WHERE { ?x a :A_1 }";
 
-		Properties p = new Properties();
-		// p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
+		checkReturnedValues(query1, "x", ImmutableList.of(
+				"<http://example.org/uri1>"));
+	}
 
-		runTests(p);
+	@Test
+	public void test2() throws Exception {
+		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> " +
+				"SELECT * WHERE { ?x :P_1 ?y }";
+
+		checkReturnedValues(query2, "x", ImmutableList.of(
+				"<http://example.org/uri1>"));
+
+		checkReturnedValues(query2, "y", ImmutableList.of(
+				"<http://example.org/A>"));
 	}
 }

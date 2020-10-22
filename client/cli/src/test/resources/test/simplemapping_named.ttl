@@ -1,0 +1,63 @@
+@prefix : <http://it.unibz.inf/obda/test/simple#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:mapping-A-8720de41-9e48-4be6-a369-b2634a92bd27> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT id FROM TABLE1 WHERE id < 5"
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:class :A;
+      rr:graph <http://www.ciao.it>;
+      rr:template "http://it.unibz.inf/obda/test/simple#{id}";
+      rr:termType rr:IRI
+    ] .
+
+<urn:mapping-B-af5eecab-9bba-4303-b138-86d05ebbd60c> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT id FROM TABLE1 WHERE id = 7"
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:class :B;
+      rr:graph <http://www.ciao.it>;
+      rr:template "http://it.unibz.inf/obda/test/simple#{id}";
+      rr:termType rr:IRI
+    ] .
+
+<urn:mapping-C-P_1-55333990-71af-482e-b0c7-a356a72b8895> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT id, attr1 FROM TABLE1"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:template "http://it.unibz.inf/obda/test/simple#{attr1}";
+          rr:termType rr:IRI
+        ];
+      rr:predicate :P
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:class :C;
+      rr:graphMap [ a rr:GraphMap, rr:TermMap;
+          rr:template "http://www.ciao.it/{id}";
+          rr:termType rr:IRI
+        ];
+      rr:template "http://it.unibz.inf/obda/test/simple#{id}";
+      rr:termType rr:IRI
+    ] .
+
+<urn:mapping-P-default-graph> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT id, attr1 FROM TABLE1"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:template "http://it.unibz.inf/obda/test/simple#{attr1}";
+          rr:termType rr:IRI
+        ];
+      rr:predicate :P
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "http://it.unibz.inf/obda/test/simple#{id}";
+      rr:termType rr:IRI
+    ] .

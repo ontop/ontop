@@ -4,7 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -15,18 +14,18 @@ import java.util.Optional;
  * the leaves.
  * <p>
  * An example:
- * 
+ *
  * <pre>
  *   $s1 :p1 $o1
  *   $s1 :p2 $o2
  *   $s1 :p2 $o3
  * </pre>
- * 
+ *
  * The example is stored to the TurtleContainer as shown below.
- * 
+ *
  * <pre>
- *         :p1 - $o1    
- *        / 
+ *         :p1 - $o1
+ *        /
  *   $s1 <      $o2
  *        :p2 <
  *              $o3
@@ -34,7 +33,7 @@ import java.util.Optional;
  * <p>
  * This data structure helps in printing the short Turtle syntax by traversing
  * the tree.
- * 
+ *
  * <pre>
  * $s1 :p1 $o1; :p2 $o2, $o3 .
  * </pre>
@@ -47,7 +46,7 @@ class TurtleWriter {
 
 	/**
 	 * Adding the subject, predicate and object components to this container.
-	 * 
+	 *
 	 * @param subject
 	 *            The subject term of the Function.
 	 * @param predicate
@@ -103,7 +102,7 @@ class TurtleWriter {
 
 	/**
 	 * Prints the container.
-	 * 
+	 *
 	 * @return The Turtle short representation.
 	 */
 	String print() {
@@ -112,10 +111,7 @@ class TurtleWriter {
 		for (Optional<String> graph : graphToSubjects.keySet()) {
 			graph.ifPresent(g -> sb.append(String.format("GRAPH %s { ", g)));
 
-			Collection<String> subjects = graphToSubjects.get(graph);
-			int i = 0;
-
-			for (String subject : subjects) {
+			for (String subject : graphToSubjects.get(graph)) {
 				String subjectKey = graph
 						.map(g -> computeSubjectKey(g, subject))
 						.orElse(subject);
@@ -139,15 +135,11 @@ class TurtleWriter {
 						commaSeparator = true;
 					}
 				}
-
-				// For the last subject, postpone the last dot
-				if (++i < subjects.size()) {
-					sb.append(" . ");
-				}
+				sb.append(" ");
+				sb.append(".");
+				sb.append(" ");
 			}
-			sb.append(
-					graph.map(g -> " } . ")
-							.orElse(" . "));
+			graph.ifPresent(g -> sb.append("} "));
 		}
 		return sb.toString();
 	}

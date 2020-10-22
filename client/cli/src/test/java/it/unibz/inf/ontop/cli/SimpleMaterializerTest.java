@@ -164,6 +164,22 @@ public class SimpleMaterializerTest {
          assertEquals(4, numOfAnnotationAssertions(outFile));
     }
 
+
+    @Test
+    public void runMaterializationWithReasoningTrig_R2RML() throws Exception {
+        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning_named_r2rml.trig";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping_named.ttl";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "trig",
+                "-o", outFile, "-p", propertiesFile);
+        assertEquals(9, numOfClassAssertions(outFile));
+        assertEquals(0, numOfObjectPropertyAssertions(outFile));
+        // :P is treated as Annotaton property because the materialized RDF file is not a valid ontology
+        // and rdfs:label and rdfs:comments
+        assertEquals(6, numOfAnnotationAssertions(outFile));
+    }
+
     @Test
     public void runMaterializationWithReasoningTrig() throws Exception {
         String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning_named.trig";
@@ -193,4 +209,15 @@ public class SimpleMaterializerTest {
         // NO rdfs:label and rdfs:comments from the ontology
         assertEquals(4, numOfAnnotationAssertions(outFile));
     }
+
+    @Test
+    public void runMaterializationWithReasoningTrig_multi_files() throws Exception {
+        String outFile = "src/test/resources/output/";
+        String ontoFile = "src/test/resources/test/simplemapping.owl";
+        String mappingFile = "src/test/resources/test/simplemapping_named.obda";
+        String propertiesFile = "src/test/resources/test/simplemapping.properties";
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile, "-f", "trig",
+                "-o", outFile, "-p", propertiesFile, "--separate-files");
+    }
+
 }

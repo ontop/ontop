@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.answering.connection.impl;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.logging.impl.QueryLoggerImpl;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.*;
@@ -127,16 +127,10 @@ public abstract class QuestStatement implements OntopStatement {
 		}
 	}
 
-	protected abstract TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException;
-
 	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException {
 		return executeSelectQuery(executableQuery, queryLogger);
 	}
-
-	protected abstract BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException;
 
 	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException {
@@ -148,21 +142,24 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	private SimpleGraphResultSet executeDescribeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(constructQuery, executableQuery, true, queryLogger);
+		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, true, queryLogger);
 	}
 
-	/**
-	 * TODO: describe
-	 */
 	private SimpleGraphResultSet executeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(constructQuery, executableQuery, false, queryLogger);
+		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, false, queryLogger);
+	}
+
+	@Override
+	public SimpleGraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
+		return executeGraphQuery(constructTemplate, executableQuery, false, queryLogger);
 	}
 
 	/**
 	 * TODO: refactor
 	 */
-	protected abstract SimpleGraphResultSet executeGraphQuery(ConstructQuery query, IQ executableQuery,
+	protected abstract SimpleGraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery,
 															  boolean collectResults, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
@@ -178,17 +175,24 @@ public abstract class QuestStatement implements OntopStatement {
 	@Override
 	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopConnectionException,
             OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+		return execute(inputQuery, ImmutableMultimap.of());
+	}
+
+	@Override
+	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)
+			throws OntopConnectionException, OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+
 		if (inputQuery instanceof SelectQuery) {
-			return (R) executeInThread((SelectQuery) inputQuery, this::executeSelectQuery);
+			return (R) executeInThread((SelectQuery) inputQuery, httpHeaders, this::executeSelectQuery);
 		}
 		else if (inputQuery instanceof AskQuery) {
-			return (R) executeInThread((AskQuery) inputQuery, this::executeBooleanQuery);
+			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, this::executeBooleanQuery);
 		}
 		else if (inputQuery instanceof ConstructQuery) {
-			return (R) executeInThread((ConstructQuery) inputQuery, this::executeConstructQuery);
+			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders, this::executeConstructQuery);
 		}
 		else if (inputQuery instanceof DescribeQuery) {
-			return (R) executeDescribeQuery((DescribeQuery) inputQuery);
+			return (R) executeDescribeQuery((DescribeQuery) inputQuery, httpHeaders);
 		}
 		else {
 			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);
@@ -199,7 +203,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * TODO: completely refactor this old-way of processing DESCRIBE.
 	 *  ---> should be converted into 1 CONSTRUCT query
 	 */
-	private SimpleGraphResultSet executeDescribeQuery(DescribeQuery inputQuery)
+	private SimpleGraphResultSet executeDescribeQuery(DescribeQuery inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopReformulationException, OntopResultConversionException, OntopConnectionException,
 			OntopQueryEvaluationException {
 
@@ -215,7 +219,7 @@ public abstract class QuestStatement implements OntopStatement {
 				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
 				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
 
-				SimpleGraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
+				SimpleGraphResultSet set = executeInThread(constructQuery, httpHeaders, this::executeDescribeConstructQuery);
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;
 				} else if (set != null) {
@@ -229,7 +233,7 @@ public abstract class QuestStatement implements OntopStatement {
 				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
 
 				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
-				SimpleGraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
+				SimpleGraphResultSet set = executeInThread(constructQuery, httpHeaders, this::executeDescribeConstructQuery);
 
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;
@@ -291,9 +295,12 @@ public abstract class QuestStatement implements OntopStatement {
 	 * Internal method to start a new query execution thread type defines the
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
-	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, Evaluator<R, Q> evaluator)
+	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, ImmutableMultimap<String, String> httpHeaders,
+																				 Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
-		QueryLogger queryLogger = queryLoggerFactory.create();
+		QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
+
+		queryLogger.setSparqlQuery(inputQuery.getInputString());
 
 		CountDownLatch monitor = new CountDownLatch(1);
 		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
@@ -314,9 +321,11 @@ public abstract class QuestStatement implements OntopStatement {
 				throw (OntopReformulationException) ex;
 			}
 			else if (ex instanceof OntopQueryEvaluationException) {
+				queryLogger.declareEvaluationException(ex);
 				throw (OntopQueryEvaluationException) ex;
 			}
 			else {
+				queryLogger.declareEvaluationException(ex);
 				throw new OntopQueryEvaluationException(ex);
 			}
 		}
@@ -355,7 +364,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
-			return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create());
+			return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 
 }

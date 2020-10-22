@@ -1,33 +1,11 @@
 package it.unibz.inf.ontop.owlapi.resultset.impl;
 
-/*
- * #%L
- * ontop-obdalib-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.spec.ontology.AnnotationAssertion;
-import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
+import it.unibz.inf.ontop.spec.ontology.*;
 import org.semanticweb.owlapi.model.*;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLDatatypeImpl;
@@ -36,47 +14,57 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDatatypeImpl;
 /***
  * Translates a ontop ABox assertion into an OWLIndividualAxiom. Used in the
  * result sets.
- * 
- * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ *
+ * Treats assertions opportunistically as data or object properties, given the type of the object.
+ * Has no information whether the property is actually an annotation property or not (not provided by SPARQL).
  * 
  */
 public class OWLAPIIndividualTranslator {
 
 	private final OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 
-	public OWLIndividualAxiom translate(ClassAssertion ca) {
-		IRI conceptIRI = IRI.create(ca.getConcept().getIRI().getIRIString());
+	/**
+	 * Distinguishes class assertions from property assertions.
+	 *
+	 * As we are not having access to the distinction between object/data/annotation OWL properties,
+	 * does some approximation: if the property is used like an object property, then declare it as such.
+	 * Otherwise, declares it as a data property.
+	 */
+	public OWLAxiom translate(RDFFact assertion, byte[] salt) {
+		IRIConstant factProperty = assertion.getProperty();
+		ObjectConstant classOrProperty = assertion.getClassOrProperty();
+		OWLIndividual subject = translate(assertion.getSubject(), salt);
 
-		OWLClass description = dataFactory.getOWLClass(conceptIRI);
-		OWLIndividual object = translate(ca.getIndividual());
-		return dataFactory.getOWLClassAssertionAxiom(description, object);
-	} 
-	
-	public OWLIndividualAxiom translate(ObjectPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getIRI().getIRIString());
+		if (assertion.getGraph().isPresent())
+			throw new MinorOntopInternalBugException("Quads are not supported by OWLAPI so that method " +
+					"should not used with them");
 
-		OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
-		OWLIndividual subject = translate(opa.getSubject());
-		OWLIndividual object = translate(opa.getObject());
-		return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);				
-	}
-	
-	public OWLIndividualAxiom translate(DataPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getIRI().getIRIString());
+		/*
+		 * For regular property assertions and when the object is a b-node (not working fine with OWLAPI)
+		 */
+		if (factProperty.equals(classOrProperty) || (!(classOrProperty instanceof IRIConstant))) {
 
-		OWLDataProperty property = dataFactory.getOWLDataProperty(roleIRI);
-		OWLIndividual subject = translate(opa.getSubject());
-		OWLLiteral object = translate(opa.getValue());
-		return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object);			
-	}
+			RDFConstant assertionObject = assertion.getObject();
+			if (assertionObject instanceof ObjectConstant) {
 
-	public OWLAnnotationAssertionAxiom translate(AnnotationAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getIRI().getIRIString());
+				OWLObjectProperty property = dataFactory.getOWLObjectProperty(
+						IRI.create(factProperty.getIRI().getIRIString()));
+				OWLIndividual object = translate((ObjectConstant) assertionObject, salt);
+				return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);
+			}
+			else {
+				OWLDataProperty property = dataFactory.getOWLDataProperty(
+						IRI.create(factProperty.getIRI().getIRIString()));
+				OWLLiteral literal = translate((RDFLiteralConstant) assertionObject);
+				return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, literal);
+			}
+		}
+		else {
+			IRI classIRI = IRI.create(((IRIConstant)classOrProperty).getIRI().getIRIString());
 
-		OWLAnnotationProperty property = dataFactory.getOWLAnnotationProperty(roleIRI);
-		OWLAnnotationSubject subject = translateAnnotationSubject(opa.getSubject());
-		OWLAnnotationValue object = translateAnnotationValue(opa.getValue());
-		return dataFactory.getOWLAnnotationAssertionAxiom(property, subject, object);
+			OWLClass description = dataFactory.getOWLClass(classIRI);
+			return dataFactory.getOWLClassAssertionAxiom(description, subject);
+		}
 	}
 
 	/***
@@ -85,12 +73,12 @@ public class OWLAPIIndividualTranslator {
 	 * @param constant
 	 * @return
 	 */
-	public OWLIndividual translate(ObjectConstant constant) {
+	public OWLIndividual translate(ObjectConstant constant, byte[] salt) {
 		if (constant instanceof IRIConstant)
 			return dataFactory.getOWLNamedIndividual(IRI.create(((IRIConstant)constant).getIRI().getIRIString()));
 
 		else /*if (constant instanceof BNode)*/ 
-			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
+			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getAnonymizedLabel(salt));
 	}
 	
 	public OWLLiteral translate(RDFLiteralConstant v) {
@@ -120,23 +108,23 @@ public class OWLAPIIndividualTranslator {
 		}
 	}
 
-	public OWLAnnotationSubject translateAnnotationSubject(ObjectConstant subject) {
+	public OWLAnnotationSubject translateAnnotationSubject(ObjectConstant subject, byte[] salt) {
 		if (subject instanceof IRIConstant)
 			return IRI.create(((IRIConstant) subject).getIRI().getIRIString());
 		else if (subject instanceof BNode)
-			return dataFactory.getOWLAnonymousIndividual(((BNode) subject).getName());
+			return dataFactory.getOWLAnonymousIndividual(((BNode) subject).getAnonymizedLabel(salt));
 		else
 			throw new UnexceptedAssertionTermException(subject);
 
 	}
 
-	public OWLAnnotationValue translateAnnotationValue(Constant constant) {
+	public OWLAnnotationValue translateAnnotationValue(Constant constant, byte[] salt) {
 		if (constant instanceof RDFLiteralConstant)
 			return translate((RDFLiteralConstant) constant);
 		else if (constant instanceof IRIConstant)
 			return IRI.create(((IRIConstant) constant).getIRI().getIRIString());
 		else if (constant instanceof BNode)
-			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
+			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getAnonymizedLabel(salt));
 		else
 			throw new UnexceptedAssertionTermException(constant);
 	}

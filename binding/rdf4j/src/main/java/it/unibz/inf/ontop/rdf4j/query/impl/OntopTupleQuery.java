@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
@@ -15,6 +16,7 @@ import org.eclipse.rdf4j.query.TupleQueryResultHandler;
 import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
+import java.security.SecureRandom;
 import java.util.List;
 
 
@@ -23,8 +25,8 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 	private final RDF4JInputQueryFactory factory;
 
 	public OntopTupleQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection conn,
-						   RDF4JInputQueryFactory factory, OntopSystemSettings settings) {
-		super(queryString, baseIRI, parsedQuery, conn, settings);
+						   ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory factory, OntopSystemSettings settings) {
+		super(queryString, baseIRI, parsedQuery, conn, httpHeaders, settings);
 		this.factory = factory;
 	}
 
@@ -33,13 +35,18 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 		TupleResultSet res;
 		OntopStatement stm;
 		long start = System.currentTimeMillis();
+
+		SecureRandom random = new SecureRandom();
+		byte[] salt = new byte[20];
+		random.nextBytes(salt);
+
 		try {
 			stm = conn.createStatement();
 			if(this.queryTimeout > 0)
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
-				SelectQuery inputQuery = factory.createSelectQuery(getQueryString(), getParsedQuery());
-				res = stm.execute(inputQuery);
+				SelectQuery inputQuery = factory.createSelectQuery(getQueryString(), getParsedQuery(), bindings);
+				res = stm.execute(inputQuery, getHttpHeaders());
 			} catch (OntopQueryAnsweringException e) {
 				long end = System.currentTimeMillis();
 				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){
@@ -49,7 +56,7 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 			}
 			
 			List<String> signature = res.getSignature();
-			return new OntopTupleQueryResult(res, signature);
+			return new OntopTupleQueryResult(res, signature, salt);
 
 		} catch (QueryEvaluationException e) {
 			throw e;

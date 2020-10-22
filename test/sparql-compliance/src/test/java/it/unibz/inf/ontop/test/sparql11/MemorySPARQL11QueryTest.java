@@ -36,19 +36,15 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			/* AGGREGATES */
+			// TODO: support xsd:double cast
+			aggregatesManifest + "agg-err-02",
+
 			// TODO: Find a right version of H2. Fail on 1.4.196
 			aggregatesManifest + "agg-groupconcat-01",
 			aggregatesManifest + "agg-groupconcat-02",
 			aggregatesManifest + "agg-groupconcat-03",
 
-			// TODO: support IF
-			aggregatesManifest + "agg-err-02",
-
 			/* FUNCTIONS*/
-
-			//bnode not supported in SPARQL transformation
-			functionsManifest + "bnode01",
-			functionsManifest + "bnode02",
 
 			// the SI does not preserve the original timezone
 			functionsManifest + "hours",
@@ -56,11 +52,8 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "day",
 
 			//not supported in SPARQL transformation
-			functionsManifest + "if01",
-			functionsManifest + "if02",
 			functionsManifest + "in01",
 			functionsManifest + "in02",
-			functionsManifest + "iri01",
 
 			//not supported in H2 transformation
 			functionsManifest + "md5-01",
@@ -93,11 +86,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//TZ is not supported in H2
 			functionsManifest + "tz",
 
-			/* CONSTRUCT not supported yet*/
-			//Projection cannot be cast to Reduced in rdf4j
-//			constructManifest + "constructwhere01",
-//			constructManifest + "constructwhere02",
-//			constructManifest + "constructwhere03",
 			//problem importing dataset
 			constructManifest + "constructwhere04",
 
@@ -108,10 +96,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			csvTscResManifest + "tsv02",
 			//different format for number and not supported custom datatype
 			csvTscResManifest + "tsv03",
-
-			/* GROUPING */
-			// Multi-typed COALESCE as grouping condition TODO: support it
-			groupingManifest + "group04",
 
 			/* NEGATION
 			not supported yet */

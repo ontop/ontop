@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class AbstractDBConcatFunctionSymbol extends AbstractTypedDBFunctionSymbol implements DBConcatFunctionSymbol {
@@ -51,4 +52,20 @@ public abstract class AbstractDBConcatFunctionSymbol extends AbstractTypedDBFunc
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializer.getNativeDBString(terms, termConverter, termFactory);
     }
+
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        if (newTerms.stream().allMatch(t -> t instanceof Constant)) {
+            // NB: for null rejecting, all the terms are expected be non-null
+            return termFactory.getDBStringConstant(
+                    newTerms.stream()
+                            .map(t -> extractString((Constant) t))
+                            .collect(Collectors.joining()));
+        }
+        else
+            return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+    }
+
+    protected abstract String extractString(Constant constant);
 }

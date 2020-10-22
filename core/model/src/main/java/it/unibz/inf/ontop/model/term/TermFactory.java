@@ -1,26 +1,5 @@
 package it.unibz.inf.ontop.model.term;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -327,13 +306,13 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
 												 ImmutableList<DBConstant> arguments);
 
+	/**
+	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 */
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString);
+
 	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
 												   ImmutableList<? extends ImmutableTerm> arguments);
-
-	/**
-	 * NB: a fresh Bnode template is created
-	 */
-	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
@@ -419,6 +398,11 @@ public interface TermFactory {
 
 
 	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);
+
+	/**
+	 * NB: encodes international characters (i.e. not safe for IRIs in general)
+	 */
+	ImmutableFunctionalTerm getDBEncodeForURI(ImmutableTerm term);
 
 	/**
 	 * At least two terms are expected
@@ -558,6 +542,10 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBNow();
+
+	ImmutableFunctionalTerm getDBRowUniqueStr();
+
+	ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical);
 
 	//-------------
 	// Aggregation

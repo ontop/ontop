@@ -72,6 +72,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         if (state.isEmpty())
             return state.createNormalizedTree(currentIQProperties);
 
+        // Particularly needed when the LJ condition has never been propagated down
+        // and no substitution on both side will give an opportunity.
+        // TODO: see if it deserves to be in the loop.
+        state = state.propagateDownLJCondition();
+
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             LJNormalizationState newState = state
                     .optimizeLeftJoinCondition()
@@ -778,6 +783,17 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .filter(e -> (e.getValue().equals(specialProvenanceConstant)))
                     .map(e -> Maps.immutableEntry(e.getKey(), specialProvenanceConstant))
                     .findFirst();
+        }
+
+        public LJNormalizationState propagateDownLJCondition() {
+            if (ljCondition.isPresent()) {
+                IQTree newRightChild = rightChild.propagateDownConstraint(ljCondition.get());
+                return rightChild.equals(newRightChild)
+                        ? this
+                        : updateConditionAndRightChild(ljCondition, newRightChild);
+            }
+            else
+                return this;
         }
     }
 }

@@ -37,7 +37,7 @@ import it.unibz.inf.ontop.model.term.ObjectConstant;
  *
  */
 
-public interface ObjectPropertyAssertion extends Assertion {
+public interface ObjectPropertyAssertion {
 
 	ObjectPropertyExpression getProperty();
 	

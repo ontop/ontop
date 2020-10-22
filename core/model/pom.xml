@@ -2,7 +2,7 @@
     <parent>
         <artifactId>ontop-core</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.1.0-beta-1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -71,6 +71,12 @@
             <groupId>io.mikael</groupId>
             <artifactId>urlbuilder</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
     </dependencies>
 
 
