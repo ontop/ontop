@@ -280,7 +280,7 @@ public abstract class AbstractVirtualModeTest {
                 Collections.sort(expectedValues);
                 Collections.sort(returnedValues);
             }
-            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),returnedValues, expectedValues);
+            assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), expectedValues, returnedValues);
 //        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
 //                returnedValues.equals(expectedValues));
             assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);

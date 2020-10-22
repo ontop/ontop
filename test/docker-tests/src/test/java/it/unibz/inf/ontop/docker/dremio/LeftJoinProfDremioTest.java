@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -67,13 +68,13 @@ public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
     }
 
     @Override
-    protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
-        return ImmutableList.of("15.5", "16.0", "19.25");
+    protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
+        return ImmutableList.of("31.000000000000000000000000000000", "32.000000000000000000000000000000", "115.500000000000000000000000000000");
     }
 
     @Override
-    protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
-        return ImmutableList.of("31", "32", "115.5");
+    protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
+        return ImmutableList.of("15.5", "16.0", "19.25");
     }
 
     /**
@@ -119,5 +120,21 @@ public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
     @Override
     public void testGroupConcat6() throws Exception {
         super.testGroupConcat6();
+    }
+
+    /**
+     * Deactivated due to the following.
+     * A condition like:
+     * `CAST(CAST(<columnName> AS VARCHAR) AS BIGINT) = 3`
+     * will generate a query over the source (i.e. Postgres) that contains:
+     * `CAST(<columnName> AS VARCHAR(65536)) = 3`
+     * And Postgres (rightfully) throws the exception:
+     * ERROR: operator does not exist: character varying = integer
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testProperties() throws Exception {
+        super.testProperties();
     }
 }

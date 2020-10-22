@@ -14,6 +14,9 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.INTEGER_STR;
+import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.SERIAL_STR;
+
 
 public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -127,4 +130,13 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                         "GROUP_CONCAT or LIST_AGG "+ NOT_YET_SUPPORTED_MSG
                 ));
     }
+
+    /**
+     * Requires sometimes to type NULLs
+     */
+    @Override
+    protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
+            return new NonSimplifiableTypedNullFunctionSymbol(termType);
+    }
+
 }
