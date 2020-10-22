@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker.dreamio;
+package it.unibz.inf.ontop.docker.dremio;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
