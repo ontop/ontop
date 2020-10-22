@@ -7,6 +7,6 @@ ns:  http://example.org/ns#
 [MappingDeclaration] @collection [[
 mappingId	mapping1
 target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} ; ns:pubYear {publication_date} ; dc:description {description}@en .
-source	SELECT id, title, price, discount, publication_date, description, lang FROM test.books WHERE lang = 'en'
+source	SELECT id, title, price, discount, publication_date, description, lang FROM smallBook.books WHERE lang = 'en'
 ]]
 

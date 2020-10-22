@@ -13,12 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Executed with Dremio over Postgresql.
- * The Docker image and data for the Postgresql DB can be found at:
- * https://github.com/ontop/ontop-dockertests/tree/master/pgsql
- * The parameters to connect to Postgresql from Dremio are in "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.properties"
+ * Executed with Dremio over Postgresql
  */
-//@Ignore
 public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/dremio/bind/sparqlBind.owl";
