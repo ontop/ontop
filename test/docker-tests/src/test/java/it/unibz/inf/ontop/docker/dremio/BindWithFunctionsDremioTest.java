@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Executed with Dremio over Postgresql
  */
-@Ignore
+//@Ignore
 public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/dremio/bind/sparqlBind.owl";
