@@ -22,7 +22,7 @@ import java.util.Optional;
 /**
  * Executed with Dremio over Postgresql
  */
-@Ignore
+//@Ignore
 public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
     private static final String owlFileName = "/redundant_join/redundant_join_fk_test.owl";
     private static final String obdaFileName = "/dremio/redundant_join/redundant_join_fk_test.obda";
