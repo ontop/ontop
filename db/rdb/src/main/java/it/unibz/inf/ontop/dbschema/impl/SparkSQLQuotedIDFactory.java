@@ -5,15 +5,14 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
 /**
- * Creates QuotedIdentifiers following the rules of MySQL:<br>
- *    - unquoted table identifiers are preserved<br>
- *    - unquoted column identifiers are not case-sensitive<br>
- *    - quoted identifiers are preserved
+ * Creates QuotedIdentifiers following the rules of SparkSQL:
+ *    - double and single quotes are not tolerated only for schema and attributes definition
  */
 
 public class SparkSQLQuotedIDFactory implements QuotedIDFactory {
 
-    private static final String MY_SQL_QUOTATION_STRING = "`";
+    private static final String SINGLE_QUOTATION_STRING = "'";
+    private static final String SQL_QUOTATION_STRING = "`";
     private final boolean caseSensitiveTableNames;
 
     SparkSQLQuotedIDFactory(boolean caseSensitiveTableNames) {
@@ -22,16 +21,7 @@ public class SparkSQLQuotedIDFactory implements QuotedIDFactory {
 
     @Override
     public QuotedID createAttributeID(String s) {
-        if (s == null)
-            return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION);
-
-        if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
-            return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, false);
-
-        if (s.startsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING) && s.endsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING))
-            return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, false);
-
-        return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION, false);
+        return createFromString(s);
     }
 
     @Override
@@ -39,22 +29,33 @@ public class SparkSQLQuotedIDFactory implements QuotedIDFactory {
         return new RelationIDImpl(createFromString(schema), createFromString(table));
     }
 
+    /**
+     *
+     * @param s schema/table/attribute string name possibly quoted (SQL rendering)
+     * @return
+     */
     private QuotedID createFromString(String s) {
         if (s == null)
             return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION);
 
-        if (s.startsWith("`") && s.endsWith(MY_SQL_QUOTATION_STRING))
-            return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitiveTableNames);
+        // Backticks are tolerated for SparkSQL schema and table names, but not necessary
+        if (s.startsWith(SQL_QUOTATION_STRING) && s.endsWith(SQL_QUOTATION_STRING))
+            return new QuotedIDImpl(s.substring(1, s.length() - 1), SQL_QUOTATION_STRING, caseSensitiveTableNames);
 
-        if (s.startsWith("\"") && s.endsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING))
-            return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitiveTableNames);
+        // Double quotes are not supported by SparkSQL for schema definition
+        /*if (s.startsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING) && s.endsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING))
+            return new QuotedIDImpl(s.substring(1, s.length() - 1), SQLStandardQuotedIDFactory.NO_QUOTATION, caseSensitiveTableNames);*/
+
+        // Single quotes are not supported by SparkSQL for schema definition
+        /*if (s.startsWith(SINGLE_QUOTATION_STRING) && s.endsWith(SINGLE_QUOTATION_STRING))
+            return new QuotedIDImpl(s.substring(1, s.length() - 1), SQLStandardQuotedIDFactory.NO_QUOTATION, caseSensitiveTableNames);*/
 
         return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION, caseSensitiveTableNames);
     }
 
     @Override
     public String getIDQuotationString() {
-        return MY_SQL_QUOTATION_STRING;
+        return SQL_QUOTATION_STRING;
     }
 }
 
