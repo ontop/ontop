@@ -39,6 +39,12 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         if (dbPassword != null)
             builder.jdbcPassword(dbPassword);
 
+        if (dbUrl != null)
+            builder.jdbcUrl(dbUrl);
+
+        if (dbUser != null)
+            builder.jdbcUser(dbUser);
+
         if (isR2rmlFile(mappingFile))
             builder.r2rmlMappingFile(mappingFile);
         else

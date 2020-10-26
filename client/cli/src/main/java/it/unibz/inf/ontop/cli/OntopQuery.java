@@ -100,6 +100,12 @@ public class OntopQuery extends OntopReasoningCommandBase {
         if (dbPassword != null)
             configurationBuilder.jdbcPassword(dbPassword);
 
+        if (dbUrl != null)
+            configurationBuilder.jdbcUrl(dbUrl);
+
+        if (dbUser != null)
+            configurationBuilder.jdbcUser(dbUser);
+
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
         try (OntopOWLReasoner reasoner = factory.createReasoner(configurationBuilder.build());

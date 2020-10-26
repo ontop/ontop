@@ -12,7 +12,11 @@ Here is a list of environment variables that directly correspond to arguments of
 - `ONTOP_PROPERTIES_FILE` (required). Corresponds to the argument `--properties`.
 - `ONTOP_ONTOLOGY_FILE` (optional). Corresponds to the argument `--ontology`.
 - `ONTOP_DB_PASSWORD` (optional). Corresponds to the argument `--db-password`. Introduced in 4.1.0.
-- `ONTOP_DB_PASSWORD_FILE` (optional). Loads the password from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-password`. Introduced in 4.1.0.
+- `ONTOP_DB_PASSWORD_FILE` (optional). Loads the DB password from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-password`. Introduced in 4.1.0.
+- `ONTOP_DB_USER` (optional). Corresponds to the argument `--db-user`. Introduced in 4.1.0.
+- `ONTOP_DB_USER_FILE` (optional). Loads the DB user from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-user`. Introduced in 4.1.0.
+- `ONTOP_DB_URL` (optional). Corresponds to the argument `--db-url`. Introduced in 4.1.0.
+- `ONTOP_DB_URL_FILE` (optional). Loads the DB url from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-url`. Introduced in 4.1.0.
 - `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
 - `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
 - `ONTOP_CORS_ALLOWED_ORIGINS` (optional). Corresponds to the argument `--cors-allowed-origins`.

@@ -38,6 +38,12 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
             if (dbPassword != null)
                 builder.jdbcPassword(dbPassword);
 
+            if (dbUrl != null)
+                builder.jdbcUrl(dbUrl);
+
+            if (dbUser != null)
+                builder.jdbcUser(dbUser);
+
             OntopSQLOWLAPIConfiguration configuration = builder.build();
 
             DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();

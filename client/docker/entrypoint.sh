@@ -35,15 +35,37 @@ else
   echo "ERROR: environment variable ONTOP_PROPERTIES_FILE is not set" && exit 1
 fi
 
+if [ "${ONTOP_DB_USER+x}" ]; then
+  args_array+=("--db-user=${ONTOP_DB_USER}")
+fi
+
+if [ "${ONTOP_DB_USER_FILE+x}" ]; then
+  if [ "${ONTOP_DB_USER+x}" ]; then
+    echo "ERROR: environment variables ONTOP_DB_USER and ONTOP_DB_USER_FILE are conflicting. Please choose one of the two." && exit 1
+  fi
+  args_array+=("--db-user=$(< "${ONTOP_DB_USER_FILE}")")
+fi
+
 if [ "${ONTOP_DB_PASSWORD+x}" ]; then
   args_array+=("--db-password=${ONTOP_DB_PASSWORD}")
 fi
 
 if [ "${ONTOP_DB_PASSWORD_FILE+x}" ]; then
   if [ "${ONTOP_DB_PASSWORD+x}" ]; then
-    echo "ERROR: environment variables ONTOP_DB_PASSWORD and ONTOP_DB_PASSWORD_FILE are conflicting. Choose one of the two." && exit 1
+    echo "ERROR: environment variables ONTOP_DB_PASSWORD and ONTOP_DB_PASSWORD_FILE are conflicting. Please choose one of the two." && exit 1
   fi
   args_array+=("--db-password=$(< "${ONTOP_DB_PASSWORD_FILE}")")
+fi
+
+if [ "${ONTOP_DB_URL+x}" ]; then
+  args_array+=("--db-url=${ONTOP_DB_URL}")
+fi
+
+if [ "${ONTOP_DB_URL_FILE+x}" ]; then
+  if [ "${ONTOP_DB_URL+x}" ]; then
+    echo "ERROR: environment variables ONTOP_DB_URL and ONTOP_DB_URL_FILE are conflicting. Please choose one of the two." && exit 1
+  fi
+  args_array+=("--db-url=$(< "${ONTOP_DB_URL_FILE}")")
 fi
 
 if [ "${ONTOP_XML_CATALOG_FILE+x}" ]; then
