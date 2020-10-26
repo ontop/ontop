@@ -9,19 +9,28 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
+
 public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
+
+    private static final String UNSUPPORTED_MSG = "Not supported by Spark or not still implemented";
 
     @Inject
     protected SparkSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createHiveSQLRegularFunctionTable(typeFactory), typeFactory);
+        super(createSparkSQLRegularFunctionTable(typeFactory), typeFactory);
     }
 
-    protected static ImmutableTable<String, Integer, DBFunctionSymbol> createHiveSQLRegularFunctionTable(
+    protected static ImmutableTable<String, Integer, DBFunctionSymbol> createSparkSQLRegularFunctionTable(
             TypeFactory typeFactory) {
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
@@ -32,67 +41,80 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("REPLACE(date_format(%s,'yyyy-MM-dd HH:mm:ss'),' ','T')", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String getUUIDNameInDialect() {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 }
 

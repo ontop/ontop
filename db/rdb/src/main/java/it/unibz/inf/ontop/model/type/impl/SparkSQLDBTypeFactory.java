@@ -33,8 +33,6 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     }
 
     private static Map<String, DBTermType> createHiveSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
-        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
-        RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BYTE_STR, map.get(TINYINT_STR));
@@ -42,6 +40,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(LONG_STR, map.get(BIGINT_STR));
         map.put(STRING_STR, map.get(TEXT_STR));
         map.put(DEC_STR, map.get(DECIMAL_STR));
+
         return map;
     }
 
