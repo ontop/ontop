@@ -31,6 +31,11 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String constraintFile;
 
+    @Option(type = OptionType.COMMAND, name = {"-d", "--db-password"}, title = "DB password",
+            description = "DB password (if not passed in the properties)")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbPassword;
+
     protected boolean isR2rmlFile(String mappingFile) {
         return !mappingFile.endsWith(".obda");
     }

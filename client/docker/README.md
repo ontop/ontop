@@ -11,6 +11,8 @@ Here is a list of environment variables that directly correspond to arguments of
 - `ONTOP_MAPPING_FILE` (required). Corresponds to the argument `--mapping`.
 - `ONTOP_PROPERTIES_FILE` (required). Corresponds to the argument `--properties`.
 - `ONTOP_ONTOLOGY_FILE` (optional). Corresponds to the argument `--ontology`.
+- `ONTOP_DB_PASSWORD` (optional). Corresponds to the argument `--db-password`. Introduced in 4.1.0.
+- `ONTOP_DB_PASSWORD_FILE` (optional). Loads the password from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-password`. Introduced in 4.1.0.
 - `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
 - `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
 - `ONTOP_CORS_ALLOWED_ORIGINS` (optional). Corresponds to the argument `--cors-allowed-origins`.

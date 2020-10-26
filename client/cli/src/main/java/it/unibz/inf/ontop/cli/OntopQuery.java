@@ -97,6 +97,9 @@ public class OntopQuery extends OntopReasoningCommandBase {
             configurationBuilder.nativeOntopMappingFile(mappingFile);
         }
 
+        if (dbPassword != null)
+            configurationBuilder.jdbcPassword(dbPassword);
+
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 
         try (OntopOWLReasoner reasoner = factory.createReasoner(configurationBuilder.build());

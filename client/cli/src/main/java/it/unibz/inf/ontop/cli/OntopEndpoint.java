@@ -88,6 +88,9 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
         if (this.contexts != null)
             argList.add("--contexts=" + this.contexts);
 
+        if (this.dbPassword != null)
+            argList.add("--db-password=" + this.dbPassword);
+
         String[] args = new String[argList.size()];
         argList.toArray(args);
 

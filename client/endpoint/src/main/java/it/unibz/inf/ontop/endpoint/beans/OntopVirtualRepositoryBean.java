@@ -17,7 +17,8 @@ public class OntopVirtualRepositoryBean {
                                                              @Value("${ontology:#{null}}") String ontology,
                                                              @Value("${xml-catalog:#{null}}") String xmlCatalog,
                                                              @Value("${properties}") String properties,
-                                                             @Value("${constraint:#{null}}") String constraint) throws RepositoryException {
+                                                             @Value("${constraint:#{null}}") String constraint,
+                                                             @Value("${db-password:#{null}}") String dbPassword) throws RepositoryException {
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .propertyFile(properties);
 
@@ -32,8 +33,12 @@ public class OntopVirtualRepositoryBean {
         if ((xmlCatalog != null) && (!xmlCatalog.isEmpty()))
             builder.xmlCatalogFile(xmlCatalog);
 
-        if (constraint !=null && !constraint.isEmpty())
+        if (constraint != null && !constraint.isEmpty())
             builder.basicImplicitConstraintFile(constraint);
+
+        // NB: might be empty
+        if (dbPassword != null)
+            builder.jdbcPassword(dbPassword);
 
         return builder.build();
     }

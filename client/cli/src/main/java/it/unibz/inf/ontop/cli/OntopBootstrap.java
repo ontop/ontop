@@ -32,9 +32,13 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
             Objects.requireNonNull(owlFile, "ontology file must not be null");
 
-            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .propertyFile(propertiesFile)
-                    .build();
+            OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                    .propertyFile(propertiesFile);
+
+            if (dbPassword != null)
+                builder.jdbcPassword(dbPassword);
+
+            OntopSQLOWLAPIConfiguration configuration = builder.build();
 
             DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();
             BootstrappingResults results = bootstrapper.bootstrap(configuration, baseIRI);

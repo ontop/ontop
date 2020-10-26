@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.JDBC_PASSWORD;
 import static it.unibz.inf.ontop.injection.OntopSystemSQLSettings.FETCH_SIZE;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
@@ -287,9 +288,14 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         else
             properties.setProperty(FETCH_SIZE, "-1");
 
-        return configBuilder
+        if (dbPassword != null)
+            properties.setProperty(JDBC_PASSWORD, dbPassword);
+
+        configBuilder
                 .properties(properties)
                 .enableOntologyAnnotationQuerying(true);
+
+        return configBuilder;
     }
 
     private class OutputSpec {
