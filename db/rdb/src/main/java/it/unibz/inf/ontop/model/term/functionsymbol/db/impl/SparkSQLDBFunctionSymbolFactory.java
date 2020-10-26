@@ -41,20 +41,18 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
-        // TODO: throw a better exception
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }
 
     @Override
     protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-        // TODO: throw a better exception
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        // todo:fix pizzadb prefix!!!!!
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }
 
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        // TODO: throw a better exception
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
     @Override
@@ -115,6 +113,11 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         // TODO: throw a better exception
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    @Override
+    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
+        return new SparkSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
     }
 }
 
