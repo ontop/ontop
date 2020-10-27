@@ -42,14 +42,6 @@ public class SparkSQLQuotedIDFactory implements QuotedIDFactory {
         if (s.startsWith(SQL_QUOTATION_STRING) && s.endsWith(SQL_QUOTATION_STRING))
             return new QuotedIDImpl(s.substring(1, s.length() - 1), SQL_QUOTATION_STRING, caseSensitiveTableNames);
 
-        // Double quotes are not supported by SparkSQL for schema definition
-        /*if (s.startsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING) && s.endsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING))
-            return new QuotedIDImpl(s.substring(1, s.length() - 1), SQLStandardQuotedIDFactory.NO_QUOTATION, caseSensitiveTableNames);*/
-
-        // Single quotes are not supported by SparkSQL for schema definition
-        /*if (s.startsWith(SINGLE_QUOTATION_STRING) && s.endsWith(SINGLE_QUOTATION_STRING))
-            return new QuotedIDImpl(s.substring(1, s.length() - 1), SQLStandardQuotedIDFactory.NO_QUOTATION, caseSensitiveTableNames);*/
-
         return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION, caseSensitiveTableNames);
     }
 
