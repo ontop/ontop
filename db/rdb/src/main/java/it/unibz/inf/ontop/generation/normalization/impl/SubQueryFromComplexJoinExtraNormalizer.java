@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -19,9 +21,11 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  * Useful for Dremio.
  *
  */
+@Singleton
 public class SubQueryFromComplexJoinExtraNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
+    @Inject
     protected SubQueryFromComplexJoinExtraNormalizer(CoreSingletons coreSingletons) {
         super(coreSingletons);
     }
