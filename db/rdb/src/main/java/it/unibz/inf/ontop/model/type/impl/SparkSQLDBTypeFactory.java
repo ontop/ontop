@@ -50,9 +50,6 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     private static ImmutableMap<DefaultTypeCode, String> createHiveSQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
-        //map.remove(DefaultTypeCode.STRING, TEXT_STR);
-        //map.replace(DefaultTypeCode.STRING, STRING_STR);
-
         map.put(DefaultTypeCode.STRING, STRING_STR);
 
         return ImmutableMap.copyOf(map);

@@ -16,7 +16,9 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
 
-
+/**
+ *  SPARK-SQL 3.0.1 function description available at : https://spark.apache.org/docs/3.0.1/api/sql/
+ */
 public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String UNSUPPORTED_MSG = "Not supported by Spark or not still implemented";
