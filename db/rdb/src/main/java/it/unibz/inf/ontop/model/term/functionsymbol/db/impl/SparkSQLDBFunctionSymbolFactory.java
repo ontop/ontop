@@ -11,15 +11,11 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
+
 
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
 
 public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -46,8 +42,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     @Override
     protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-        // todo:fix pizzadb prefix!!!!!
-        return new NullToleratingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
+        return getNullRejectingDBConcat(arity);
     }
 
     @Override
@@ -59,6 +54,11 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(date_format(%s,'yyyy-MM-dd HH:mm:ss'),' ','T')", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
+        return new SparkSQLTimestampDenormFunctionSymbol(timestampType, dbStringType);
     }
 
     @Override

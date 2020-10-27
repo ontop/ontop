@@ -29,16 +29,20 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createHiveSQLTypeMap(rootTermType, typeFactory), createHiveSQLCodeMap());
+        super(createSparkSQLTypeMap(rootTermType, typeFactory), createHiveSQLCodeMap());
     }
 
-    private static Map<String, DBTermType> createHiveSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+    private static Map<String, DBTermType> createSparkSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        DBTermType stringType = new StringDBTermType(STRING_STR, rootAncestry, typeFactory.getXsdStringDatatype());
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
+        map.put(STRING_STR, stringType);
         map.put(BYTE_STR, map.get(TINYINT_STR));
         map.put(SHORT_STR, map.get(SMALLINT_STR));
         map.put(LONG_STR, map.get(BIGINT_STR));
-        map.put(STRING_STR, map.get(TEXT_STR));
         map.put(DEC_STR, map.get(DECIMAL_STR));
 
         return map;
@@ -46,7 +50,28 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     private static ImmutableMap<DefaultTypeCode, String> createHiveSQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
+        //map.remove(DefaultTypeCode.STRING, TEXT_STR);
+        //map.replace(DefaultTypeCode.STRING, STRING_STR);
+
+        map.put(DefaultTypeCode.STRING, STRING_STR);
+
         return ImmutableMap.copyOf(map);
+    }
+
+    /**
+     * NB: TRUE is an alias of 1
+     */
+    @Override
+    public String getDBTrueLexicalValue() {
+        return "1";
+    }
+
+    /**
+     * NB: FALSE is an alias of 0
+     */
+    @Override
+    public String getDBFalseLexicalValue() {
+        return "0";
     }
 
 }
