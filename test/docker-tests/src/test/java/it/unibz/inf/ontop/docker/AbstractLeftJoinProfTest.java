@@ -1166,7 +1166,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "ORDER BY ?v";
 
         String [] expectedValues = {
-                "Depp", "Poppins", "Smith", "Smith"};
+                "Depp", "Poppins", "Smith", "Smith", "Smith"};
         String sql = checkReturnedValuesAndOrderReturnSql(query, Arrays.asList(expectedValues));
 
         assertTrue(sql.toUpperCase().contains("LEFT"));
