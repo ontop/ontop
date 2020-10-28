@@ -121,13 +121,13 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
+    protected boolean isInDefaultSchema(RelationID id) {
+        // getSchemaID() always non-null
+        return id.getSchemaID().equals(getDefaultSchema());
+    }
 
-    protected ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
-        QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
-        if (schemaId.equals(getDefaultSchema()))
-            return id.getWithSchemalessID();
-
-        return ImmutableList.of(id);
+    private ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
+        return isInDefaultSchema(id) ? id.getWithSchemalessID() : ImmutableList.of(id);
     }
 
 

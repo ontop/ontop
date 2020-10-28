@@ -48,13 +48,9 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         super.checkSameRelationID(extractedId, givenId);
     }
 
-
     @Override
-    public ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
-        if (isDual(id) || defaultSchema.equals(id.getSchemaID()))
-            return id.getWithSchemalessID();
-
-        return ImmutableList.of(id);
+    protected boolean isInDefaultSchema(RelationID id) {
+        return isDual(id) || super.isInDefaultSchema(id);
     }
 
 
