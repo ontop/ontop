@@ -8,14 +8,19 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class DremioExtraNormalizer implements DialectExtraNormalizer {
 
     private final TypingNullsDialectExtraNormalizer typingNullNormalizer;
+    private final SubQueryFromComplexJoinExtraNormalizer complexJoinNormalizer;
 
     @Inject
-    protected DremioExtraNormalizer(TypingNullsDialectExtraNormalizer typingNullNormalizer) {
+    protected DremioExtraNormalizer(TypingNullsDialectExtraNormalizer typingNullNormalizer,
+                                    SubQueryFromComplexJoinExtraNormalizer complexJoinNormalizer) {
         this.typingNullNormalizer = typingNullNormalizer;
+        this.complexJoinNormalizer = complexJoinNormalizer;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-              return   typingNullNormalizer.transform(tree, variableGenerator);
+              return complexJoinNormalizer.transform(
+                      typingNullNormalizer.transform(tree, variableGenerator),
+                      variableGenerator);
     }
 }
