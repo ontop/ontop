@@ -245,6 +245,25 @@ v1.4. Added Food class (used in domain/range of hasIngredient), Added several ha
     
 
 
+    <!-- http://www.co-ode.org/ontologies/pizza/pizza.owl#isEnabled -->
+
+    <owl:DatatypeProperty rdf:about="http://www.co-ode.org/ontologies/pizza/pizza.owl#isEnabled">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://www.co-ode.org/ontologies/pizza/pizza.owl#Sensor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/pizza/pizza.owl#menuNumber -->
+
+    <owl:DatatypeProperty rdf:about="http://www.co-ode.org/ontologies/pizza/pizza.owl#menuNumber">
+        <rdfs:domain rdf:resource="http://www.co-ode.org/ontologies/pizza/pizza.owl#Food"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- http://www.co-ode.org/ontologies/pizza/pizza.owl#value -->
 
     <owl:DatatypeProperty rdf:about="http://www.co-ode.org/ontologies/pizza/pizza.owl#value">
