@@ -131,7 +131,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
 
-    protected QuotedID getDefaultSchema() { return QuotedIDImpl.EMPTY_ID; }
+    protected QuotedID getDefaultSchema() { return SQLStandardQuotedIDFactory.EMPTY_ID; }
 
     protected QuotedID getEffectiveRelationSchema(RelationID id) {
         QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null

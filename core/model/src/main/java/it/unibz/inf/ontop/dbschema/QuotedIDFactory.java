@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import javax.annotation.Nullable;
+
 /**
  * Factory for creating attribute and relation identifier from strings.
  * It defines the rules of transforming unquoted and quoted identifiers.
@@ -47,7 +49,7 @@ public interface QuotedIDFactory {
 	 * @return
 	 */
 	
-	RelationID createRelationID(String schema, String table);	
+	RelationID createRelationID(@Nullable String schema, String table);
 	
 	
 	String getIDQuotationString();

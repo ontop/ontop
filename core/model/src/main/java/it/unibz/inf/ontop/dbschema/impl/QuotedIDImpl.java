@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 
 import java.io.IOException;
 
-import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.NO_QUOTATION;
 
 /**
  * Database identifier used for schema names, table names and aliases
@@ -47,8 +46,6 @@ public class QuotedIDImpl implements QuotedID {
     private final String quoteString;
     private final boolean caseSensitive;
     private final int hashCode;
-
-    public static final QuotedID EMPTY_ID = new QuotedIDImpl(null, NO_QUOTATION);
 
     /**
      * (used only in QuotedIDFactory implementations)

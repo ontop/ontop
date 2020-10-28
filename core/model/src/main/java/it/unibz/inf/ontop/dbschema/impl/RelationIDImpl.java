@@ -35,7 +35,7 @@ public class RelationIDImpl implements RelationID {
     public ImmutableList<RelationID> getWithSchemalessID() {
         return (schema.getName() == null)
                 ? ImmutableList.of(this)
-                : ImmutableList.of(new RelationIDImpl(QuotedIDImpl.EMPTY_ID, table), this);
+                : ImmutableList.of(new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, table), this);
     }
 
 

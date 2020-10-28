@@ -24,7 +24,7 @@ public class QuotedIdentifierTest {
 
 		assertEquals("\"abc\"", rawIdFactory.createAttributeID("abc").getSQLRendering());
 
-		assertEquals(null, rawIdFactory.createAttributeID(null).getSQLRendering());
+//		assertEquals(null, rawIdFactory.createAttributeID(null).getSQLRendering());
 
 		assertEquals("A", fac.createAttributeID("A").getSQLRendering());
 
@@ -34,7 +34,7 @@ public class QuotedIdentifierTest {
 
 		assertEquals("\"A\"", fac.createAttributeID("\"A\"").getSQLRendering());
 
-		assertEquals(null, fac.createAttributeID(null).getSQLRendering());
+//		assertEquals(null, fac.createAttributeID(null).getSQLRendering());
 
 		assertEquals("\"A\"", rawIdFactory.createRelationID(null, "A").getSQLRendering());
 		

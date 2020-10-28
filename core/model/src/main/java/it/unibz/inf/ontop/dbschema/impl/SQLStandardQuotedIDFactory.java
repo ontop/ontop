@@ -26,6 +26,8 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
+import java.util.Objects;
+
 /**
  * Creates QuotedIdentifiers following the rules of SQL standard:<br>
  *    - unquoted identifiers are converted into upper case<br>
@@ -64,22 +66,22 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	public static final String QUOTATION_STRING = "\"";
 	public static final String NO_QUOTATION = "";
 
-	public SQLStandardQuotedIDFactory() { }
+	public static final QuotedID EMPTY_ID = new QuotedIDImpl(null, NO_QUOTATION);
 
 	@Override
 	public QuotedID createAttributeID(String s) {
+		Objects.requireNonNull(s);
 		return createFromString(s);
 	}
 	
 	@Override
 	public RelationID createRelationID(String schema, String table) {
-		return new RelationIDImpl(createFromString(schema), createFromString(table));
+		Objects.requireNonNull(table);
+		return new RelationIDImpl(schema == null ? EMPTY_ID : createFromString(schema),
+				createFromString(table));
 	}
 	
-	private QuotedID createFromString(String s) {
-		if (s == null)
-			return new QuotedIDImpl(s, NO_QUOTATION);
-		
+	protected QuotedID createFromString(String s) {
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
 			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
