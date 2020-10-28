@@ -48,6 +48,7 @@ public interface RelationID {
 	QuotedID getTableID();
 
 	/**
+	 * USED ONLY IN METADATA PROVIDERS
 	 *
 	 * @return the schema component of the name
 	 */

@@ -91,7 +91,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
         }
     }
 
-    private String getTableName(DatabaseRelationDefinition relation) {
+    private static String getTableName(DatabaseRelationDefinition relation) {
         return relation.getID().getTableID().getName();
     }
 
