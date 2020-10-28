@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
 
@@ -1147,6 +1148,28 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
 
         List<String> expectedValues = ImmutableList.of("http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nbStudents", "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#nickname");
         checkReturnedValuesAndOrderReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testNonOptimizableLJAndJoinMix() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p1 ?v\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :lastName ?v .\n" +
+                "     ?p1 :lastName ?v .\n" +
+                "  }\n" +
+                "}" +
+                "ORDER BY ?v";
+
+        String [] expectedValues = {
+                "Depp", "Poppins", "Smith", "Smith"};
+        String sql = checkReturnedValuesAndOrderReturnSql(query, Arrays.asList(expectedValues));
+
+        assertTrue(sql.toUpperCase().contains("LEFT"));
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
