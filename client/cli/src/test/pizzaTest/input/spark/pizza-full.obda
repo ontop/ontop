@@ -34,15 +34,15 @@ target		:{pizzaID} :hasSensorMeasure :{measureID} . :{measureID} a :SensorMeasur
 source		SELECT * FROM pizzaDB.measures;
 
 mappingId	sensor-TemperatureSensor
-target		:{sensorID} a :TemperatureSensor ; :isEnabled {enabled}^^xsd:boolean .
+target		:{sensorID} a :TemperatureSensor ; :isEnabled {enabled}^^xsd:boolean ; :installationDate {installationDate}^^xsd:date .
 source		SELECT * FROM pizzaDB.sensor WHERE  measureType = 'TEMPERATURE';
 
 mappingId	sensor-HumiditySensor
-target		:{sensorID} a :HumiditySensor ; :isEnabled {enabled}^^xsd:boolean .
+target		:{sensorID} a :HumiditySensor ; :isEnabled {enabled}^^xsd:boolean ; :installationDate {installationDate}^^xsd:date .
 source		SELECT * FROM pizzaDB.sensor WHERE  measureType = 'HUMIDITY';
 
 mappingId	sensor-CO2Sensor
-target		:{sensorID} a :CO2Sensor ; :isEnabled {enabled}^^xsd:boolean .
+target		:{sensorID} a :CO2Sensor ; :isEnabled {enabled}^^xsd:boolean ; :installationDate {installationDate}^^xsd:date .
 source		SELECT * FROM pizzaDB.sensor WHERE  measureType = 'CO2';
 ]]
 

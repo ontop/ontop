@@ -29,7 +29,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        super(createSparkSQLTypeMap(rootTermType, typeFactory), createHiveSQLCodeMap());
+        super(createSparkSQLTypeMap(rootTermType, typeFactory), createSparkSQLCodeMap());
     }
 
     private static Map<String, DBTermType> createSparkSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
@@ -48,7 +48,7 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         return map;
     }
 
-    private static ImmutableMap<DefaultTypeCode, String> createHiveSQLCodeMap() {
+    private static ImmutableMap<DefaultTypeCode, String> createSparkSQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.STRING, STRING_STR);
 
