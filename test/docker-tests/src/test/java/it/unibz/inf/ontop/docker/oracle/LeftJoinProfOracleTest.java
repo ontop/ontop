@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
@@ -59,6 +60,14 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     @Override
     public void testGroupConcat5() throws Exception {
         super.testGroupConcat5();
+    }
+
+    /**
+     * Oracle test DB has not been updated yet
+     */
+    @Override
+    protected List<String> getExpectedValuesNonOptimizableLJAndJoinMix() {
+        return ImmutableList.of("Depp", "Poppins", "Smith", "Smith");
     }
 
     @Override
