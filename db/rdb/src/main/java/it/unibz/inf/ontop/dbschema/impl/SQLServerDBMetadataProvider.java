@@ -13,7 +13,7 @@ public class SQLServerDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @AssistedInject
     SQLServerDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, "SELECT SCHEMA_NAME()", typeFactory);
+        super(connection, new QueryBasedDefaultSchemaProvider("SELECT SCHEMA_NAME()"), typeFactory);
         // https://msdn.microsoft.com/en-us/library/ms175068.aspx
     }
 

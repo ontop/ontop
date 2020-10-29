@@ -20,7 +20,6 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDBMetadataProvider.class);
 
     protected final Connection connection;
-    protected final QuotedIDFactory idFactory;
     protected final DBTypeFactory dbTypeFactory;
     protected final DBParameters dbParameters;
     protected final DatabaseMetaData metadata;
@@ -29,48 +28,41 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     protected final RelationID defaultSchema;
 
-    interface QuotedIDFactoryExtractor {
-        QuotedIDFactory apply(DatabaseMetaData m) throws SQLException;
+    protected interface QuotedIDFactoryFactory {
+        QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
     }
 
-    DefaultDBMetadataProvider(Connection connection, QuotedIDFactoryExtractor idFactoryProvider, String defaultSchemaSupplier, TypeFactory typeFactory) throws MetadataExtractionException {
+    protected interface DefaultSchemaProvider {
+        String get(Connection conn) throws SQLException;
+    }
+
+    DefaultDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, DefaultSchemaProvider defaultSchemaExtractor, TypeFactory typeFactory) throws MetadataExtractionException {
         this.connection = connection;
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         try {
             this.metadata = connection.getMetaData();
-            this.idFactory = idFactoryProvider.apply(metadata);
+            QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
-            this.defaultSchema = retrieveDefaultSchema(defaultSchemaSupplier);
-            this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
+            this.defaultSchema = rawIdFactory.createRelationID(defaultSchemaExtractor.get(connection), "DUMMY");
+            this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
+                    metadata.getDriverVersion(),
+                    metadata.getDatabaseProductName(),
+                    metadata.getDatabaseProductVersion(),
+                    idFactory,
+                    dbTypeFactory);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
     }
 
-    DefaultDBMetadataProvider(Connection connection, String defaultSchemaSupplier, TypeFactory typeFactory) throws MetadataExtractionException {
-        this(connection, DefaultDBMetadataProvider::getQuotedIDFactory, defaultSchemaSupplier, typeFactory);
+    DefaultDBMetadataProvider(Connection connection, DefaultSchemaProvider defaultSchemaExtractor, TypeFactory typeFactory) throws MetadataExtractionException {
+        this(connection, DefaultDBMetadataProvider::getQuotedIDFactory, defaultSchemaExtractor, typeFactory);
     }
 
     @AssistedInject
     DefaultDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        this.connection = connection;
-        this.dbTypeFactory = typeFactory.getDBTypeFactory();
-        try {
-            this.metadata = connection.getMetaData();
-            this.idFactory = getQuotedIDFactory(metadata);
-            this.rawIdFactory = new RawQuotedIDFactory(idFactory);
-            this.defaultSchema = new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, SQLStandardQuotedIDFactory.EMPTY_ID);
-            this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
-    }
-
-    protected static DBParameters getDBParameters(DatabaseMetaData metadata, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
-        return new BasicDBParametersImpl(metadata.getDriverName(), metadata.getDriverVersion(),
-                metadata.getDatabaseProductName(), metadata.getDatabaseProductVersion(), idFactory, dbTypeFactory);
+        this(connection, DefaultDBMetadataProvider::getQuotedIDFactory, c -> null, typeFactory);
     }
 
     protected static QuotedIDFactory getQuotedIDFactory(DatabaseMetaData md) throws SQLException {
@@ -101,6 +93,20 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         LOGGER.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
 
         return new SQLStandardQuotedIDFactory();
+    }
+
+    protected static class QueryBasedDefaultSchemaProvider implements DefaultSchemaProvider {
+        private final String sql;
+        QueryBasedDefaultSchemaProvider(String sql) { this.sql = sql; }
+
+        @Override
+        public String get(Connection conn) throws SQLException {
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                rs.next();
+                return rs.getString(1);
+            }
+        }
     }
 
     @Override
@@ -148,15 +154,6 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             return id;
 
         return new RelationIDImpl(defaultSchema.getSchemaID(), id.getTableID());
-    }
-
-
-    protected final RelationID retrieveDefaultSchema(String sql) throws SQLException {
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            rs.next();
-            return rawIdFactory.createRelationID(rs.getString(1), "DUMMY");
-        }
     }
 
     protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
