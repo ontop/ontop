@@ -34,6 +34,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         return super.getCanonicalRelationId(relationID);
     }
 
+/*
     @Override
     protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
         if (isDual(extractedId) && isDual(givenId))
@@ -41,6 +42,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
         super.checkSameRelationID(extractedId, givenId);
     }
+*/
 
     @Override
     protected boolean isInDefaultSchema(RelationID id) {
