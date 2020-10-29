@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
@@ -11,25 +12,17 @@ import java.sql.Connection;
 
 public class DB2DBMetadataProvider extends DefaultDBMetadataProvider {
 
-    private final ImmutableSet<String> ignoredSchemas = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
-    private final QuotedID defaultSchema;
-
     @AssistedInject
     DB2DBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, typeFactory);
+        super(connection, "select CURRENT SCHEMA from SYSIBM.SYSDUMMY1", typeFactory);
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0005881.html
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000720.html
-        defaultSchema = retrieveDefaultSchema("select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1");
     }
 
-    @Override
-    public QuotedID getDefaultSchema() {
-        return defaultSchema;
-    }
+    private static final ImmutableSet<String> IGNORED_SCHEMAS = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
 
     @Override
-    protected boolean isSchemaIgnored(String schema) { return ignoredSchemas.contains(schema); }
-
+    protected boolean isSchemaIgnored(String schema) { return IGNORED_SCHEMAS.contains(schema); }
 
     /*
     // Alternative solution for DB2 to print column names

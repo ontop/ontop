@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
@@ -27,18 +29,29 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     protected final QuotedIDFactory rawIdFactory;
 
-    DefaultDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, TypeFactory typeFactory) throws MetadataExtractionException {
+    protected final RelationID defaultSchema;
+
+    interface QuotedIDFactoryExtractor {
+        QuotedIDFactory apply(DatabaseMetaData m) throws SQLException;
+    }
+
+    DefaultDBMetadataProvider(Connection connection, QuotedIDFactoryExtractor idFactoryProvider, String defaultSchemaSupplier, TypeFactory typeFactory) throws MetadataExtractionException {
         this.connection = connection;
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         try {
             this.metadata = connection.getMetaData();
-            this.idFactory = idFactory;
+            this.idFactory = idFactoryProvider.apply(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
+            this.defaultSchema = retrieveDefaultSchema(defaultSchemaSupplier);
             this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
+    }
+
+    DefaultDBMetadataProvider(Connection connection, String defaultSchemaSupplier, TypeFactory typeFactory) throws MetadataExtractionException {
+        this(connection, DefaultDBMetadataProvider::getQuotedIDFactory, defaultSchemaSupplier, typeFactory);
     }
 
     @AssistedInject
@@ -49,6 +62,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             this.metadata = connection.getMetaData();
             this.idFactory = getQuotedIDFactory(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
+            this.defaultSchema = new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, SQLStandardQuotedIDFactory.EMPTY_ID);
             this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
         }
         catch (SQLException e) {
@@ -123,30 +137,27 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     protected boolean isInDefaultSchema(RelationID id) {
         // getSchemaID() always non-null
-        return id.getSchemaID().equals(getDefaultSchema());
+        return id.getSchemaID().equals(defaultSchema.getSchemaID());
     }
 
     private ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
         return isInDefaultSchema(id) ? id.getWithSchemalessID() : ImmutableList.of(id);
     }
 
-
-    protected QuotedID getDefaultSchema() { return SQLStandardQuotedIDFactory.EMPTY_ID; }
-
     protected QuotedID getEffectiveRelationSchema(RelationID id) {
         QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
         if (schemaId.getName() != null)
             return schemaId;
 
-        return getDefaultSchema();
+        return defaultSchema.getSchemaID();
     }
 
 
-    protected final QuotedID retrieveDefaultSchema(String sql) throws MetadataExtractionException {
+    protected final RelationID retrieveDefaultSchema(String sql) throws MetadataExtractionException {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             rs.next();
-            return rawIdFactory.createRelationID(rs.getString(1), "DUMMY").getSchemaID();
+            return rawIdFactory.createRelationID(rs.getString(1), "DUMMY");
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -203,12 +214,17 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-        insertPrimaryKey(relation);
-        insertUniqueAttributes(relation);
-        insertForeignKeys(relation, metadataLookup);
+        try {
+            insertPrimaryKey(relation);
+            insertUniqueAttributes(relation);
+            insertForeignKeys(relation, metadataLookup);
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
-    private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException {
+    private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException, SQLException {
         RelationID id = relation.getID();
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = metadata.getPrimaryKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
@@ -236,12 +252,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                 }
             }
         }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
     }
 
-    private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws MetadataExtractionException {
+    private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws MetadataExtractionException, SQLException {
         RelationID id = relation.getID();
         // extracting unique
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
@@ -300,12 +313,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             if (builder != null)
                 builder.build();
         }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
     }
 
-    private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException {
+    private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException, SQLException {
         RelationID id = relation.getID();
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
@@ -342,9 +352,6 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             }
             if (builder != null)
                 builder.build();
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
         }
     }
 

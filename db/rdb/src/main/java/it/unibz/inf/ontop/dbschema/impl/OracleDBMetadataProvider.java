@@ -15,20 +15,15 @@ import java.sql.Statement;
 
 public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
-    private final QuotedID defaultSchema;
     private final RelationID sysDualId;
 
     @AssistedInject
     protected OracleDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, typeFactory);
+        super(connection, "SELECT user FROM dual", typeFactory);
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
-        this.defaultSchema = retrieveDefaultSchema("SELECT user FROM dual");
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID(null, "DUAL");
     }
-
-    @Override
-    protected QuotedID getDefaultSchema() { return defaultSchema; }
 
     private boolean isDual(RelationID id) { return id.getTableID().equals(sysDualId.getTableID()); }
 
@@ -61,7 +56,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
             ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
             while (rs.next()) {
                 RelationID id = rawIdFactory.createRelationID(
-                        defaultSchema.getName(), rs.getString("object_name"));
+                        rs.getString("schema_name"), rs.getString("object_name"));
                 relationIds.add(id);
             }
             return relationIds.build();
@@ -74,7 +69,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     // Obtain the relational objects (i.e., tables and views)
     // filter out all irrelevant table and view names
     private static final String TABLE_LIST_QUERY =
-        "SELECT table_name as object_name FROM user_tables WHERE " +
+        "SELECT user as schema_name, table_name as object_name FROM user_tables WHERE " +
                 "   NOT table_name LIKE 'MVIEW$_%' AND " +
                 "   NOT table_name LIKE 'LOGMNR_%' AND " +
                 "   NOT table_name LIKE 'AQ$_%' AND " +
@@ -83,7 +78,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
                 "   NOT table_name LIKE 'LOGSTDBY$%' AND " +
                 "   NOT table_name LIKE 'OL$%' " +
                 "UNION ALL " +
-                "SELECT view_name as object_name FROM user_views WHERE " +
+                "SELECT user as schema_name, view_name as object_name FROM user_views WHERE " +
                 "   NOT view_name LIKE 'MVIEW_%' AND " +
                 "   NOT view_name LIKE 'LOGMNR_%' AND " +
                 "   NOT view_name LIKE 'AQ$_%'";
