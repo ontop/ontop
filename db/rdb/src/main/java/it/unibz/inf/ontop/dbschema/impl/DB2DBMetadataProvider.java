@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -22,7 +21,9 @@ public class DB2DBMetadataProvider extends DefaultDBMetadataProvider {
     private static final ImmutableSet<String> IGNORED_SCHEMAS = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
 
     @Override
-    protected boolean isSchemaIgnored(String schema) { return IGNORED_SCHEMAS.contains(schema); }
+    protected boolean isRelationExcluded(RelationID id) {
+        return IGNORED_SCHEMAS.contains(getRelationSchema(id));
+    }
 
     /*
     // Alternative solution for DB2 to print column names

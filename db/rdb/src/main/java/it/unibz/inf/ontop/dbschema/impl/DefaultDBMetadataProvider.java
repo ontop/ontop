@@ -111,18 +111,20 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
 
 
-    protected boolean isSchemaIgnored(String schema) { return false; }
+    protected boolean isRelationExcluded(RelationID id) { return false; }
+
+    protected ResultSet getRelationIDsResultSet() throws SQLException {
+        return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" });
+    }
 
     @Override
     public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
-        try (ResultSet rs = metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
+        try (ResultSet rs = getRelationIDsResultSet()) {
             ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
             while (rs.next()) {
-                String schema = rs.getString("TABLE_SCHEM");
-                if (!isSchemaIgnored(schema)) {
-                    RelationID id = getRelationID(rs);
+                RelationID id = getRelationID(rs);
+                if (!isRelationExcluded(id))
                     builder.add(id);
-                }
             }
             return builder.build();
         }
@@ -166,7 +168,6 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
-
         RelationID id = getCanonicalRelationId(id0);
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
