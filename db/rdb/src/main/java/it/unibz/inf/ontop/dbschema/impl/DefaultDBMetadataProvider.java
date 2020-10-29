@@ -118,11 +118,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         try (ResultSet rs = metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
             ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
             while (rs.next()) {
-                // String catalog = rs.getString("TABLE_CAT"); // not used
                 String schema = rs.getString("TABLE_SCHEM");
-                String table = rs.getString("TABLE_NAME");
                 if (!isSchemaIgnored(schema)) {
-                    RelationID id = rawIdFactory.createRelationID(schema, table);
+                    RelationID id = getRelationID(rs);
                     builder.add(id);
                 }
             }

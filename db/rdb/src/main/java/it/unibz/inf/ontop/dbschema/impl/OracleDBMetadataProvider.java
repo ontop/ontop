@@ -34,15 +34,16 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         return super.getCanonicalRelationId(relationID);
     }
 
-/*
+
     @Override
     protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
+        // DUAL is retrieved as SYS.DUAL, but its canonical name is DUAL
         if (isDual(extractedId) && isDual(givenId))
             return;
 
         super.checkSameRelationID(extractedId, givenId);
     }
-*/
+
 
     @Override
     protected boolean isInDefaultSchema(RelationID id) {
