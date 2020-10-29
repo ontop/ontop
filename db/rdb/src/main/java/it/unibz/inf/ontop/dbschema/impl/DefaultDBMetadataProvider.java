@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
@@ -144,39 +142,34 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         return isInDefaultSchema(id) ? id.getWithSchemalessID() : ImmutableList.of(id);
     }
 
-    protected QuotedID getEffectiveRelationSchema(RelationID id) {
+    protected RelationID getCanonicalRelationId(RelationID id) {
         QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
         if (schemaId.getName() != null)
-            return schemaId;
+            return id;
 
-        return defaultSchema.getSchemaID();
+        return new RelationIDImpl(defaultSchema.getSchemaID(), id.getTableID());
     }
 
 
-    protected final RelationID retrieveDefaultSchema(String sql) throws MetadataExtractionException {
+    protected final RelationID retrieveDefaultSchema(String sql) throws SQLException {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             rs.next();
             return rawIdFactory.createRelationID(rs.getString(1), "DUMMY");
         }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
     }
 
     protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
-        // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-        QuotedID givenSchemaId = getEffectiveRelationSchema(givenId);
-        QuotedID extractedSchemaId = extractedId.getSchemaID();
-        if (!extractedSchemaId.equals(givenSchemaId))
-            throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId + "(" + givenSchemaId + " v " + extractedSchemaId + ")");
+        if (!extractedId.equals(givenId))
+            throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
     }
 
 
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+    public DatabaseRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
 
+        RelationID id = getCanonicalRelationId(id0);
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
@@ -225,7 +218,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
     private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException, SQLException {
-        RelationID id = relation.getID();
+        RelationID id = getCanonicalRelationId(relation.getID());
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = metadata.getPrimaryKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
@@ -255,7 +248,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
     private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws MetadataExtractionException, SQLException {
-        RelationID id = relation.getID();
+        RelationID id = getCanonicalRelationId(relation.getID());
         // extracting unique
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
             UniqueConstraint.Builder builder = null;
@@ -316,7 +309,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
     private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException, SQLException {
-        RelationID id = relation.getID();
+        RelationID id = getCanonicalRelationId(relation.getID());
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
             while (rs.next()) {
@@ -362,7 +355,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     // catalog is ignored for now (rs.getString("TABLE_CAT"))
     protected String getRelationCatalog(RelationID relationID) { return null; }
 
-    protected String getRelationSchema(RelationID relationID) { return getEffectiveRelationSchema(relationID).getName(); }
+    protected String getRelationSchema(RelationID relationID) { return relationID.getSchemaID().getName(); }
 
     protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 
