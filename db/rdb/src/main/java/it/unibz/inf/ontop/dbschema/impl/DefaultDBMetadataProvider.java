@@ -27,6 +27,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     protected final QuotedIDFactory rawIdFactory;
 
     protected final RelationID defaultSchema;
+    protected final String defaultCatalog;
 
     protected interface QuotedIDFactoryFactory {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
@@ -44,9 +45,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             this.metadata = connection.getMetaData();
             QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
-            String catalog = defaultSchemaExtractor.getCatalog(connection);
+            defaultCatalog = defaultSchemaExtractor.getCatalog(connection);
             String schema = defaultSchemaExtractor.getSchema(connection);
-            System.out.println("DB-DEFAULTS: " + catalog + "." + schema);
+            System.out.println("DB-DEFAULTS (" + metadata.getDatabaseProductName() + "): " + defaultCatalog + "." + schema);
             this.defaultSchema = rawIdFactory.createRelationID(schema, "DUMMY");
             this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
                     metadata.getDriverVersion(),
@@ -374,7 +375,13 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        System.out.println("DB-CATALOG: " + rs.getString("TABLE_CAT"));
+        String catalog = rs.getString("TABLE_CAT");
+        if (defaultCatalog == null) {
+            if (catalog != null)
+                System.out.println("DB-CATALOG: " + catalog + " v " + defaultCatalog);
+        }
+        else if (!defaultCatalog.equals(catalog))
+            System.out.println("DB-CATALOG: " + catalog + " v " + defaultCatalog);
         return getRelationID(rs, "TABLE_SCHEM","TABLE_NAME");
     }
 

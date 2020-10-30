@@ -17,7 +17,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @AssistedInject
     protected OracleDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider("SELECT NULL FROM dual", "SELECT user FROM dual"), typeFactory);
+        super(connection, new QueryBasedDefaultSchemaProvider("SELECT NULL AS TABLE_CAT FROM dual", "SELECT user as TABLE_SCHEM FROM dual"), typeFactory);
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID(null, "DUAL");
@@ -53,7 +53,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         stmt.closeOnCompletion();
         // Obtain the relational objects (i.e., tables and views)
         // filter out all irrelevant table and view names
-        return stmt.executeQuery("SELECT user as TABLE_SCHEM, table_name as TABLE_NAME " +
+        return stmt.executeQuery("SELECT NULL AS TABLE_CAT, user as TABLE_SCHEM, table_name as TABLE_NAME " +
                 "FROM user_tables " +
                 "WHERE " +
                 "   NOT table_name LIKE 'MVIEW$_%' AND " +
@@ -64,7 +64,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
                 "   NOT table_name LIKE 'LOGSTDBY$%' AND " +
                 "   NOT table_name LIKE 'OL$%' " +
                 "UNION ALL " +
-                "SELECT user as TABLE_SCHEM, view_name as TABLE_NAME " +
+                "SELECT NULL AS TABLE_CAT, user as TABLE_SCHEM, view_name as TABLE_NAME " +
                 "FROM user_views " +
                 "WHERE " +
                 "   NOT view_name LIKE 'MVIEW_%' AND " +
