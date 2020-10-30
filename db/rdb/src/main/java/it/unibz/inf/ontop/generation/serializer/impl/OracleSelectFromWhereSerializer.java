@@ -35,7 +35,7 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
         return selectFromWhere.acceptVisitor(new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
 
             @Override
-            protected AttributeAliasFactory createAtttibuteAliasFactory() {
+            protected AttributeAliasFactory createAttributeAliasFactory() {
                 return new LimitLengthAttributeAliasFactory(idFactory, NAME_MAX_LENGTH, NAME_NUMBER_LENGTH);
             }
 

@@ -15,8 +15,10 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -95,7 +97,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
     @Test
@@ -116,7 +118,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
     @Test
@@ -137,7 +139,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
 
@@ -158,7 +160,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (CEIL(?discount) AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getCeilExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getCeilExpectedValues());
     }
 
     protected List<String> getCeilExpectedValues() {
@@ -184,7 +186,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (FLOOR(?discount) AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getFloorExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getFloorExpectedValues());
     }
 
     protected List<String> getFloorExpectedValues() {
@@ -210,7 +212,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "}";
 
 
-        checkReturnedValues(queryBind, getRoundExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getRoundExpectedValues());
     }
 
     protected List<String> getRoundExpectedValues() {
@@ -234,7 +236,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (ABS((?p - ?discount*?p) - ?p)  AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getAbsExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getAbsExpectedValues());
     }
 
     protected List<String> getAbsExpectedValues() {
@@ -266,7 +268,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            byte[] hash = digest.digest("The Semantic Web".getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
 
             for (byte b : hash) {
@@ -279,31 +281,31 @@ public abstract class AbstractBindTestWithFunctions {
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
 
     }
 
     @Ignore
     @Test
-    public void testHashMd5() throws Exception {
+    public void testHashMd5() {
 
     }
 
     @Ignore
     @Test
-    public void testHashSHA1() throws Exception {
+    public void testHashSHA1() {
 
     }
 
     @Ignore
     @Test
-    public void testHashSHA384() throws Exception {
+    public void testHashSHA384() {
 
     }
 
     @Ignore
     @Test
-    public void testHashSHA512() throws Exception {
+    public void testHashSHA512() {
 
     }
 
@@ -329,7 +331,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"16\"^^xsd:integer");
         expectedValues.add("\"20\"^^xsd:integer");
         expectedValues.add("\"44\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     //test substring with 2 parameters
@@ -351,7 +353,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"e Semantic Web\"@en");
         expectedValues.add("\"ime and Punishment\"@en");
         expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     //test substring with 3 parameters
@@ -373,7 +375,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"e Sema\"@en");
         expectedValues.add("\"ime an\"@en");
         expectedValues.add("\"e Logi\"@en");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
     @Test
     public void testURIEncoding() throws Exception {
@@ -393,7 +395,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The%20Semantic%20Web\"^^xsd:string");
         expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
 
@@ -413,7 +415,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -433,7 +435,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"The Semantic Web\"@en");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
 
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -453,7 +455,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"The Semantic Web\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
 
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -473,7 +475,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -491,7 +493,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
 
@@ -515,7 +517,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
                 "The Logic Book: Introduction, Second Edition\"".toUpperCase()+"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
 
     }
 
@@ -539,7 +541,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"Crime and Punishment crime and punishment\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
                 "The Logic Book: Introduction, Second Edition\"".toLowerCase()+"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
 
     }
 
@@ -557,7 +559,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getBindWithBefore1ExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getBindWithBefore1ExpectedValues());
 
     }
 
@@ -582,7 +584,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (STRBEFORE(?title,\"\") AS ?w)\n"
                 + "}";
-        checkReturnedValues(queryBind, getBindWithBefore2ExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getBindWithBefore2ExpectedValues());
     }
 
     protected List<String> getBindWithBefore2ExpectedValues() {
@@ -607,7 +609,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getBindWithAfter1ExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getBindWithAfter1ExpectedValues());
     }
 
     protected List<String> getBindWithAfter1ExpectedValues() {
@@ -631,7 +633,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRAFTER(?title,\"\") AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getBindWithAfter2ExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getBindWithAfter2ExpectedValues());
 
     }
 
@@ -665,7 +667,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (MONTH(?year) AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getMonthExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getMonthExpectedValues());
     }
 
     protected List<String> getMonthExpectedValues() {
@@ -692,7 +694,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (YEAR(?year) AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getYearExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getYearExpectedValues());
     }
 
     protected List<String> getYearExpectedValues() {
@@ -718,7 +720,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (DAY(?year) AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getDayExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getDayExpectedValues());
     }
 
     protected List<String> getDayExpectedValues() {
@@ -752,7 +754,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"30\"^^xsd:integer");
         expectedValues.add("\"23\"^^xsd:integer");
         expectedValues.add("\"50\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -769,7 +771,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (HOURS(?year) AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getHoursExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getHoursExpectedValues());
     }
 
     protected List<String> getHoursExpectedValues() {
@@ -796,7 +798,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (SECONDS(?year) AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getSecondsExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getSecondsExpectedValues());
     }
 
     protected List<String> getSecondsExpectedValues() {
@@ -880,7 +882,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "}";
 
 
-        checkReturnedValues(queryBind, getDivideExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getDivideExpectedValues());
     }
 
     protected List<String> getDivideExpectedValues() {
@@ -904,7 +906,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:pubYear ?year .\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getTZExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getTZExpectedValues());
     }
 
     protected List<String> getTZExpectedValues() {
@@ -938,7 +940,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
 
     }
 
@@ -965,7 +967,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   } ORDER BY ?title";
 
         List<String> expectedValues = new ArrayList<>();
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
     @Test
@@ -984,7 +986,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
         expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
 
@@ -1005,7 +1007,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
         expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
 
@@ -1026,12 +1028,12 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
 
     @Test
-    public void testIsBlank() throws Exception {
+    public void testIsBlank() {
             //no example data
     }
 
@@ -1052,7 +1054,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
 
@@ -1073,7 +1075,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
 
@@ -1089,7 +1091,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:discount ?discount .\n"
                 + "   } ORDER BY ?year ";
 
-        checkReturnedValues(queryBind, getStrExpectedValues());
+        checkReturnedValuesAndOrder(queryBind, getStrExpectedValues());
 
     }
 
@@ -1121,7 +1123,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"en\"^^xsd:string");
         expectedValues.add("\"en\"^^xsd:string");
         expectedValues.add("\"en\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     //In SPARQL 1.0, the DATATYPE function was not defined for literals with a language tag
@@ -1138,7 +1140,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   FILTER ( datatype(?discount) = xsd:decimal)\n"
                 + "   }  ";
 
-        checkReturnedValues(queryBind, getDatatypeExpectedValues());
+        checkReturnedValuesUnordered(queryBind, getDatatypeExpectedValues());
     }
 
     protected List<String> getDatatypeExpectedValues() {
@@ -1172,7 +1174,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"SPARQL Tutorial | good\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition | good\"^^xsd:string");
         expectedValues.add("\"The Semantic Web | bad\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
 
@@ -1195,7 +1197,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
 
@@ -1217,7 +1219,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
     @Test
@@ -1238,7 +1240,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"SPARQL Tutorial\"@en");
         expectedValues.add("\"The Logic Book: Introduction, First Edition\"@en");
         expectedValues.add("\"The Semantic Web\"@en");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesAndOrder(queryBind, expectedValues);
     }
 
     @Test
@@ -1247,7 +1249,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.5\"^^xsd:float");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1256,7 +1258,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.5\"^^xsd:float");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1265,7 +1267,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.5\"^^xsd:float");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1274,7 +1276,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.5\"^^xsd:double");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1283,7 +1285,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.5\"^^xsd:double");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1291,7 +1293,7 @@ public abstract class AbstractBindTestWithFunctions {
         String queryBind = "SELECT (\"1\"^^xsd:integer / \"2\"^^xsd:integer AS ?w)  {} ";
 
 
-        checkReturnedValues(queryBind, getConstantIntegerDivideExpectedResults());
+        checkReturnedValuesUnordered(queryBind, getConstantIntegerDivideExpectedResults());
     }
 
     protected List<String> getConstantIntegerDivideExpectedResults() {
@@ -1306,7 +1308,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1315,7 +1317,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1324,7 +1326,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1333,7 +1335,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1342,7 +1344,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1351,7 +1353,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1360,7 +1362,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Ignore("TODO: support it, by using a case")
@@ -1370,7 +1372,11 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"INF\"^^xsd:float");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
+    }
+
+    private void checkReturnedValuesUnordered(String query, List<String> expectedValues) throws Exception {
+        checkReturnedValues(query, expectedValues, false);
     }
 
     @Test
@@ -1388,7 +1394,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"cst\"^^xsd:string");
         expectedValues.add("\"cst\"^^xsd:string");
         expectedValues.add("\"cst\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1406,7 +1412,7 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"cst\"^^xsd:string");
         expectedValues.add("\"cst\"^^xsd:string");
         expectedValues.add("\"cst\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1418,7 +1424,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://example.org/john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1431,7 +1437,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://example.org/john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1443,7 +1449,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://example.org/john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1456,7 +1462,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://example.org/john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1469,7 +1475,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://example.org/john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1482,7 +1488,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<urn:john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1495,7 +1501,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<mailto:john@somewhere.org>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1510,7 +1516,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://example.org/john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1521,7 +1527,7 @@ public abstract class AbstractBindTestWithFunctions {
                 "} ";
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://example.org/project1#data/john>");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1530,7 +1536,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1539,7 +1545,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"first\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1548,7 +1554,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"second\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1557,7 +1563,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1566,7 +1572,7 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"second\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
     @Test
@@ -1575,10 +1581,14 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"other\"^^xsd:string");
-        checkReturnedValues(queryBind, expectedValues);
+        checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
-    private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
+    private void checkReturnedValuesAndOrder(String query, List<String> expectedValues) throws Exception {
+        checkReturnedValues(query, expectedValues, true);
+    }
+
+    private void checkReturnedValues(String query, List<String> expectedValues, boolean sameOrder) throws Exception {
 
         try (OWLConnection conn = reasoner.getConnection(); OWLStatement st = conn.createStatement()) {
             int i = 0;
@@ -1587,8 +1597,6 @@ public abstract class AbstractBindTestWithFunctions {
                 while (rs.hasNext()) {
                     final OWLBindingSet bindingSet = rs.next();
                     OWLObject ind1 = bindingSet.getOWLObject("w");
-
-                    // log.debug(ind1.toString());
 
                     if (ind1 != null) {
                         String value = ToStringRenderer.getInstance().getRendering(ind1);
@@ -1600,6 +1608,10 @@ public abstract class AbstractBindTestWithFunctions {
                     }
                     i++;
                 }
+            }
+            if(!sameOrder){
+                Collections.sort(expectedValues);
+                Collections.sort(returnedValues);
             }
             assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()), expectedValues, returnedValues);
             assertEquals(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size(), i);

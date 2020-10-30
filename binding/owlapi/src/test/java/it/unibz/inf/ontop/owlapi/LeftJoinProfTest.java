@@ -2,9 +2,12 @@ package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.*;
+
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class LeftJoinProfTest extends AbstractOWLAPITest {
 
@@ -1215,6 +1218,28 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
                 "\"http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/DiscreteMathematics\"^^xsd:string",
                 "\"http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/LinearAlgebra\"^^xsd:string",
                 "\"http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/ScientificWriting\"^^xsd:string"));
+    }
+
+    @Test
+    public void testNonOptimizableLJAndJoinMix() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p1 ?v\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :lastName ?v .\n" +
+                "     ?p1 :lastName ?v .\n" +
+                "  }\n" +
+                "}" +
+                "ORDER BY ?v";
+
+        String [] expectedValues = {
+                "\"Depp\"^^xsd:string", "\"Poppins\"^^xsd:string", "\"Smith\"^^xsd:string", "\"Smith\"^^xsd:string"};
+        String sql = checkReturnedValuesAndReturnSql(query, "v", Arrays.asList(expectedValues));
+
+        assertTrue(sql.toUpperCase().contains("LEFT"));
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
