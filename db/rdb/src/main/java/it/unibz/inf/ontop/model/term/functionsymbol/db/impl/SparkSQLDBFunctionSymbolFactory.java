@@ -55,7 +55,7 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("REPLACE(date_format(%s,'yyyy-MM-dd HH:mm:ss.SSSZ'),' ','T')", termConverter.apply(terms.get(0)));
+        return String.format("REPLACE(date_format(%s,'yyyy-MM-dd HH:mm:ss.SSSxxx'),' ','T')", termConverter.apply(terms.get(0)));
     }
 
     @Override
