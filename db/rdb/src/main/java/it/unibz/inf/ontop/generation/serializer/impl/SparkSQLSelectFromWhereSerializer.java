@@ -28,4 +28,27 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             }
         });
     }
+
+    @Override
+    public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
+        return selectFromWhere.acceptVisitor(new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
+
+            /**
+             * Not supported
+             */
+            @Override
+            protected String serializeLimitOffset(long limit, long offset) {
+                throw new UnsupportedOperationException("OFFSET clause not compliant to SparkSQL syntax");
+            }
+
+            /**
+             * Not supported
+             */
+            @Override
+            protected String serializeOffset(long offset) {
+                throw new UnsupportedOperationException("OFFSET clause not compliant to SparkSQL syntax");
+            }
+
+        });
+    }
 }
