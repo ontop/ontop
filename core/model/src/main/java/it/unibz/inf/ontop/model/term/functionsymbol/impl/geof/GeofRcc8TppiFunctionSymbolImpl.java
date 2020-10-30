@@ -14,11 +14,14 @@ public class GeofRcc8TppiFunctionSymbolImpl  extends AbstractGeofBooleanFunction
         super("GEOF_RCC8_TPPI", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
-    //    @Override
-//    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-//        final String matrix_pattern = "TTTFTTFFT";
-//        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1),termFactory.getDBStringConstant(matrix_pattern));
-//    }
+    // Set the matrix pattern for relate here
+    final String matrix_pattern = "TTTFTTFFT";
+
+    @Override
+    protected ImmutableTerm setMatrixPattern(TermFactory termFactory) {
+        return termFactory.getDBStringConstant(matrix_pattern);
+    }
+
     @Override
     public TriFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
         return termFactory::getDBRelate;

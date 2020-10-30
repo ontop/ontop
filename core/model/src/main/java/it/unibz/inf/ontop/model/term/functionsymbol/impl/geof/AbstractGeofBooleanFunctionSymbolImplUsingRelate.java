@@ -14,19 +14,21 @@ public abstract class AbstractGeofBooleanFunctionSymbolImplUsingRelate extends A
         super(functionSymbolName, functionIRI, inputTypes, xsdBooleanType);
     }
 
+    protected abstract ImmutableTerm setMatrixPattern(TermFactory termFactory);
+
     @Override
     protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         WKTLiteralValue v0 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(0));
         WKTLiteralValue v1 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(1));
-        ImmutableTerm v2 = termFactory.getDBStringConstant("TTTFTTFFT");
+        //String matrix_pattern = "";
+        //ImmutableTerm v2 = setMatrixPattern(termFactory, matrix_pattern);
+        ImmutableTerm v2 = setMatrixPattern(termFactory);
 
         if (!v0.getSRID().equals(v1.getSRID())) {
             throw new IllegalArgumentException(String.format("SRIDs do not match: %s and %s", v0.getSRID(), v1.getSRID()));
         }
-
         return getDBFunction(termFactory).apply(v0.getGeometry(), v1.getGeometry(), v2).simplify();
     }
 
-    //abstract public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) ;
     abstract public TriFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory);
 }
