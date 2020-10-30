@@ -55,20 +55,4 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         return ImmutableMap.copyOf(map);
     }
 
-    /**
-     * NB: TRUE is an alias of 1
-     */
-    @Override
-    public String getDBTrueLexicalValue() {
-        return "1";
-    }
-
-    /**
-     * NB: FALSE is an alias of 0
-     */
-    @Override
-    public String getDBFalseLexicalValue() {
-        return "0";
-    }
-
 }
