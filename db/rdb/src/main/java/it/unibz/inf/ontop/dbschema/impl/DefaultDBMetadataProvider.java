@@ -376,11 +376,8 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
         String catalog = rs.getString("TABLE_CAT");
-        if (defaultCatalog == null) {
-            if (catalog != null)
-                System.out.println("DB-CATALOG: " + catalog + " v " + defaultCatalog);
-        }
-        else if (!defaultCatalog.equals(catalog))
+        // if catalog is null, then it's the default catalog
+        if (catalog != null && !catalog.equals(defaultCatalog))
             System.out.println("DB-CATALOG: " + catalog + " v " + defaultCatalog);
         return getRelationID(rs, "TABLE_SCHEM","TABLE_NAME");
     }
