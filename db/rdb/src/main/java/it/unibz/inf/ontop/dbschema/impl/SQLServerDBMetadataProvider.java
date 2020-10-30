@@ -13,8 +13,10 @@ public class SQLServerDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @AssistedInject
     SQLServerDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider("SELECT SCHEMA_NAME()"), typeFactory);
+        super(connection, new QueryBasedDefaultSchemaProvider("SELECT DB_NAME()", "SELECT SCHEMA_NAME()"), typeFactory);
         // https://msdn.microsoft.com/en-us/library/ms175068.aspx
+        // https://docs.microsoft.com/en-us/sql/t-sql/functions/schema-name-transact-sql
+        // https://docs.microsoft.com/en-us/sql/t-sql/functions/db-name-transact-sql
     }
 
     private static final ImmutableSet<String> IGNORED_SCHEMAS = ImmutableSet.of("sys", "INFORMATION_SCHEMA");

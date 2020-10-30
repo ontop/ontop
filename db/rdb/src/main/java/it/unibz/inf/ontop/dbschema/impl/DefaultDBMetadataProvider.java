@@ -33,7 +33,8 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
     protected interface DefaultSchemaProvider {
-        String get(Connection conn) throws SQLException;
+        String getSchema(Connection conn) throws SQLException;
+        String getCatalog(Connection conn) throws SQLException;
     }
 
     DefaultDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, DefaultSchemaProvider defaultSchemaExtractor, TypeFactory typeFactory) throws MetadataExtractionException {
@@ -43,7 +44,10 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             this.metadata = connection.getMetaData();
             QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
-            this.defaultSchema = rawIdFactory.createRelationID(defaultSchemaExtractor.get(connection), "DUMMY");
+            String catalog = defaultSchemaExtractor.getCatalog(connection);
+            String schema = defaultSchemaExtractor.getSchema(connection);
+            System.out.println("DB-DEFAULTS: " + catalog + "." + schema);
+            this.defaultSchema = rawIdFactory.createRelationID(schema, "DUMMY");
             this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
                     metadata.getDriverVersion(),
                     metadata.getDatabaseProductName(),
@@ -62,7 +66,12 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     @AssistedInject
     DefaultDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        this(connection, DefaultDBMetadataProvider::getQuotedIDFactory, c -> null, typeFactory);
+        this(connection, DefaultDBMetadataProvider::getQuotedIDFactory, new DefaultSchemaProvider() {
+            @Override
+            public String getSchema(Connection conn) throws SQLException { return null; }
+            @Override
+            public String getCatalog(Connection conn) throws SQLException { return null; }
+        }, typeFactory);
     }
 
     protected static QuotedIDFactory getQuotedIDFactory(DatabaseMetaData md) throws SQLException {
@@ -96,17 +105,25 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
     protected static class QueryBasedDefaultSchemaProvider implements DefaultSchemaProvider {
-        private final String sql;
-        QueryBasedDefaultSchemaProvider(String sql) { this.sql = sql; }
+        private final String sqlCatalog, sqlSchema;
+        QueryBasedDefaultSchemaProvider(String sqlCatalog, String sqlSchema) {
+            this.sqlCatalog = sqlCatalog;
+            this.sqlSchema = sqlSchema;
+        }
 
-        @Override
-        public String get(Connection conn) throws SQLException {
+        private String get(Connection conn, String sql) throws SQLException {
             try (Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery(sql)) {
                 rs.next();
                 return rs.getString(1);
             }
         }
+
+        @Override
+        public String getSchema(Connection conn) throws SQLException { return get(conn, sqlSchema); }
+
+        @Override
+        public String getCatalog(Connection conn) throws SQLException { return get(conn, sqlCatalog); }
     }
 
     @Override
@@ -139,15 +156,12 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
+    // can be overridden, single usage
     protected boolean isInDefaultSchema(RelationID id) {
-        // getSchemaID() always non-null
-        return id.getSchemaID().equals(defaultSchema.getSchemaID());
+        return id.getSchemaID().equals(defaultSchema.getSchemaID()); // getSchemaID() always non-null
     }
 
-    private ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
-        return isInDefaultSchema(id) ? id.getWithSchemalessID() : ImmutableList.of(id);
-    }
-
+    // can be overridden, 4 usages
     protected RelationID getCanonicalRelationId(RelationID id) {
         QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
         if (schemaId.getName() != null)
@@ -156,6 +170,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         return new RelationIDImpl(defaultSchema.getSchemaID(), id.getTableID());
     }
 
+    // can be overridden, 4 usages
     protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
         if (!extractedId.equals(givenId))
             throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
@@ -186,14 +201,17 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                 builder.addAttribute(attributeId, termType, typeName, isNullable);
             }
 
-            if (relations.isEmpty()) {
-                throw new MetadataExtractionException("Cannot find relation id: " + id);
-            }
-            else if (relations.entrySet().size() == 1) {
+            if (relations.entrySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
+                RelationID extractedId = r.getKey();
+                ImmutableList<RelationID> allIDs = isInDefaultSchema(extractedId)
+                        ? ImmutableList.of(new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, extractedId.getTableID()), extractedId)
+                        : ImmutableList.of(extractedId);
+                return new DatabaseTableDefinition(allIDs, r.getValue());
             }
-            throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
+            throw new MetadataExtractionException(relations.isEmpty()
+                    ? "Cannot find relation id: " + id
+                    : "Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);

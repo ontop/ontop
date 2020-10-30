@@ -16,8 +16,9 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     MySQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
         super(connection,
                 metadata -> new MySQLQuotedIDFactory(metadata.storesMixedCaseIdentifiers()),
-                new QueryBasedDefaultSchemaProvider("SELECT DATABASE()"),
+                new QueryBasedDefaultSchemaProvider("SELECT NULL", "SELECT DATABASE()"),
                 typeFactory);
+        // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
     }
 
 
