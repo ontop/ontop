@@ -374,6 +374,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
+        System.out.println("DB-CATALOG: " + rs.getString("TABLE_CAT"));
         return getRelationID(rs, "TABLE_SCHEM","TABLE_NAME");
     }
 
