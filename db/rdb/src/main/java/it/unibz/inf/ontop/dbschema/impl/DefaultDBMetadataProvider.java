@@ -5,37 +5,18 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
-public class DefaultDBMetadataProvider implements DBMetadataProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDBMetadataProvider.class);
-
-    protected final Connection connection;
-    protected final DBTypeFactory dbTypeFactory;
-    protected final DBParameters dbParameters;
-    protected final DatabaseMetaData metadata;
-
-    protected final QuotedIDFactory rawIdFactory;
+public class DefaultDBMetadataProvider extends AbstractDBMetadataProvider {
 
     protected final RelationID defaultSchema;
 
     private static final int SCHEMA_INDEX = 1;
     private static final int CAT_INDEX = 2;
-
-    protected interface QuotedIDFactoryFactory {
-        QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
-    }
 
     protected interface DefaultSchemaProvider {
         String getSchema();
@@ -43,23 +24,13 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
     DefaultDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, DefaultSchemaProvider defaultSchemaExtractor, TypeFactory typeFactory) throws MetadataExtractionException {
-        this.connection = connection;
-        this.dbTypeFactory = typeFactory.getDBTypeFactory();
+        super(connection, idFactoryProvider, typeFactory);
         try {
-            this.metadata = connection.getMetaData();
-            QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
-            this.rawIdFactory = new RawQuotedIDFactory(idFactory);
             this.defaultSchema = rawIdFactory.createRelationID(
                     defaultSchemaExtractor.getCatalog(),
                     defaultSchemaExtractor.getSchema(),
                     "DUMMY");
             System.out.println("DB-DEFAULTS (" + metadata.getDatabaseProductName() + "): " + defaultSchema);
-            this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
-                    metadata.getDriverVersion(),
-                    metadata.getDatabaseProductName(),
-                    metadata.getDatabaseProductVersion(),
-                    idFactory,
-                    dbTypeFactory);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -130,35 +101,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         public String getCatalog() { return catalog; }
     }
 
-    @Override
-    public QuotedIDFactory getQuotedIDFactory() { return dbParameters.getQuotedIDFactory(); }
 
-    @Override
-    public DBParameters getDBParameters() { return dbParameters; }
-
-
-
-    protected boolean isRelationExcluded(RelationID id) { return false; }
-
-    protected ResultSet getRelationIDsResultSet() throws SQLException {
-        return metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" });
-    }
-
-    @Override
-    public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
-        try (ResultSet rs = getRelationIDsResultSet()) {
-            ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
-            while (rs.next()) {
-                RelationID id = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                if (!isRelationExcluded(id))
-                    builder.add(id);
-            }
-            return builder.build();
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
-    }
 
     // can be overridden, single usage
     protected boolean isInDefaultSchema(RelationID id) {
@@ -173,7 +116,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                     .equals(id.getComponents().subList(CAT_INDEX, id.getComponents().size()));
     }
 
-    // can be overridden, 4 usages
+    @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
         if (id.getComponents().size() >= defaultSchema.getComponents().size())
             return id;
@@ -191,215 +134,32 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                 .build());
     }
 
-    // can be overridden, 4 usages
-    protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
-        if (!extractedId.equals(givenId))
-            throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
-    }
-
-
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
-        RelationID id = getCanonicalRelationId(id0);
-        try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
-            Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
-
-            while (rs.next()) {
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id);
-
-                RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
-                        i -> DatabaseTableDefinition.attributeListBuilder());
-
-                QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
-                // columnNoNulls, columnNullable, columnNullableUnknown
-                boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
-                String typeName = rs.getString("TYPE_NAME");
-                int columnSize = rs.getInt("COLUMN_SIZE");
-                DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
-
-                builder.addAttribute(attributeId, termType, typeName, isNullable);
-            }
-
-            if (relations.entrySet().size() == 1) {
-                Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                RelationID extractedId = r.getKey();
-                ImmutableList<RelationID> allIDs = isInDefaultSchema(extractedId)
-                        ? ImmutableList.of(extractedId.getTableOnlyID(), getSchemaTableID(extractedId), extractedId)
-                        :  isInDefaultCatalog(extractedId)
-                            ? ImmutableList.of(getSchemaTableID(extractedId), extractedId)
-                            : ImmutableList.of(extractedId);
-                return new DatabaseTableDefinition(allIDs, r.getValue());
-            }
-            throw new MetadataExtractionException(relations.isEmpty()
-                    ? "Cannot find relation id: " + id
-                    : "Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
+    protected ImmutableList<RelationID> getAllIDs(RelationID id) {
+        return isInDefaultSchema(id)
+                ? ImmutableList.of(id.getTableOnlyID(), getSchemaTableID(id), id)
+                :  isInDefaultCatalog(id)
+                ? ImmutableList.of(getSchemaTableID(id), id)
+                : ImmutableList.of(id);
     }
+
 
     private RelationID getSchemaTableID(RelationID id) {
         return new RelationIDImpl(id.getComponents().subList(TABLE_INDEX, CAT_INDEX));
     }
 
+
     @Override
-    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-        try {
-            insertPrimaryKey(relation);
-            insertUniqueAttributes(relation);
-            insertForeignKeys(relation, metadataLookup);
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
-    }
-
-    private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException, SQLException {
-        RelationID id = getCanonicalRelationId(relation.getID());
-        // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
-        try (ResultSet rs = metadata.getPrimaryKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
-            String currentName = null;
-            while (rs.next()) {
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id);
-
-                currentName = rs.getString("PK_NAME"); // may be null
-                QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
-                int seq = rs.getShort("KEY_SEQ");
-                primaryKeyAttributes.put(seq, attrId);
-            }
-            if (!primaryKeyAttributes.isEmpty()) {
-                try {
-                    // use the KEY_SEQ values to restore the correct order of attributes in the PK
-                    UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
-                    for (int i = 1; i <= primaryKeyAttributes.size(); i++)
-                        builder.addDeterminant(primaryKeyAttributes.get(i));
-                    builder.build();
-                }
-                catch (AttributeNotFoundException e) {
-                    throw new MetadataExtractionException(e);
-                }
-            }
-        }
-    }
-
-    private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws MetadataExtractionException, SQLException {
-        RelationID id = getCanonicalRelationId(relation.getID());
-        // extracting unique
-        try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
-            UniqueConstraint.Builder builder = null;
-            while (rs.next()) {
-                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-                checkSameRelationID(extractedId, id);
-
-                // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
-                //       tableIndexClustered - this is a clustered index
-                //       tableIndexHashed - this is a hashed index
-                //       tableIndexOther (all are static final int in DatabaseMetaData)
-                if (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic) {
-                    if (builder != null)
-                        builder.build();
-
-                    builder = null;
-                    continue;
-                }
-                if (rs.getShort("ORDINAL_POSITION") == 1) {
-                    if (builder != null)
-                        builder.build();
-
-                    if (!rs.getBoolean("NON_UNIQUE")) {
-                        String name = rs.getString("INDEX_NAME");
-                        builder = UniqueConstraint.builder(relation, name);
-                    }
-                    else
-                        builder = null;
-                }
-
-                if (builder != null) {
-                    QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
-                    // ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
-                    //        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
-                    // CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table;
-                    //                      otherwise, it is the number of unique values in the index.
-                    // PAGES int => When TYPE is tableIndexStatisic then this is the number of pages used for the table,
-                    //                    otherwise it is the number of pages used for the current index.
-                    // FILTER_CONDITION String => Filter condition, if any. (may be null)
-                    try {
-                        builder.addDeterminant(attrId);
-                    }
-                    catch (AttributeNotFoundException e) {
-                        try {
-                            // bug in PostgreSQL JBDC driver: it strips off the quotation marks
-                            attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
-                            builder.addDeterminant(attrId);
-                        }
-                        catch (AttributeNotFoundException ex) {
-                           throw new MetadataExtractionException(e);
-                        }
-                    }
-                }
-            }
-            if (builder != null)
-                builder.build();
-        }
-    }
-
-    private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException, SQLException {
-        RelationID id = getCanonicalRelationId(relation.getID());
-        try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            ForeignKeyConstraint.Builder builder = null;
-            while (rs.next()) {
-                RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
-                checkSameRelationID(extractedId, id);
-                RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
-
-                try {
-                    int seq = rs.getShort("KEY_SEQ");
-                    if (seq == 1) {
-                        if (builder != null)
-                            builder.build();
-
-                        String name = rs.getString("FK_NAME"); // String => foreign key name (may be null)
-
-                        DatabaseRelationDefinition ref = dbMetadata.getRelation(pkId);
-
-                        builder = ForeignKeyConstraint.builder(name, relation, ref);
-                    }
-                    if (builder != null) {
-                        try {
-                            QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
-                            QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
-                            builder.add(attrId, refAttrId);
-                        }
-                        catch (AttributeNotFoundException e) {
-                            throw new MetadataExtractionException(e);
-                        }
-                    }
-                }
-                catch (MetadataExtractionException e) {
-                    LOGGER.warn("Cannot find table {} for FK {}", pkId, rs.getString("FK_NAME"));
-                    builder = null; // do not add this foreign key because there is no table it refers to
-                }
-            }
-            if (builder != null)
-                builder.build();
-        }
-    }
-
-
-
-
-
     protected String getRelationCatalog(RelationID relationID) { return relationID.getComponents().size() > CAT_INDEX  ? relationID.getComponents().get(CAT_INDEX).getName() : null; }
 
+    @Override
     protected String getRelationSchema(RelationID relationID) { return relationID.getComponents().size() > SCHEMA_INDEX  ? relationID.getComponents().get(SCHEMA_INDEX).getName() : null; }
 
+    @Override
     protected String getRelationName(RelationID relationID) { return relationID.getComponents().get(TABLE_INDEX).getName(); }
 
+    @Override
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
     }
