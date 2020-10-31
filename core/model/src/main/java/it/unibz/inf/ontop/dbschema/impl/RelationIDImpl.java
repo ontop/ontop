@@ -31,7 +31,7 @@ public class RelationIDImpl implements RelationID {
     }
 
     /**
-     *
+     * Used in SQLParser for creating implicit aliases
      * @return the relation ID that has the same name but no schema name
      */
     @JsonIgnore
@@ -46,7 +46,7 @@ public class RelationIDImpl implements RelationID {
     }
 
     /**
-     *
+     * NOT USED!!!
      * @return null if the schema name is empty or the schema name (as is, without quotation marks)
      */
     @JsonProperty("schema")

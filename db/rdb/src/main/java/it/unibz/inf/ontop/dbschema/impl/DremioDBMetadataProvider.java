@@ -20,8 +20,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @AssistedInject
     DremioDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, DefaultDBMetadataProvider::getQuotedIDFactory, typeFactory);
-        System.out.println("DREMIOOOO: " + getQuotedIDFactory().getClass().getName());
+        super(connection, metadata -> new DremioQuotedIDFactory(), typeFactory);
     }
 
     @Override
@@ -45,7 +44,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected String getRelationSchema(RelationID id) {
-        return id.getComponents().subList(TABLE_INDEX, id.getComponents().size()).stream()
+        return id.getComponents().subList(TABLE_INDEX, id.getComponents().size()).reverse().stream()
                 .map(QuotedID::getName)
                 .collect(Collectors.joining("."));
     }

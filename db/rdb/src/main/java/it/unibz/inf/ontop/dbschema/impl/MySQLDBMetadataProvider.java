@@ -17,7 +17,7 @@ public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
         super(connection,
                 metadata -> new MySQLQuotedIDFactory(metadata.storesMixedCaseIdentifiers()),
                 typeFactory,
-                "SELECT DATABASE() AS TABLE_CAT, NULL AS TABLE_SCHEM");
+                "SELECT NULL AS TABLE_CAT, DATABASE() AS TABLE_SCHEM");
         // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
     }
 
