@@ -175,7 +175,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     // can be overridden, 4 usages
     protected RelationID getCanonicalRelationId(RelationID id) {
-        if (id.getComponents().size() > CAT_INDEX)
+        if (id.getComponents().size() >= defaultSchema.getComponents().size())
             return id;
 
         if (id.getComponents().size() == CAT_INDEX)
