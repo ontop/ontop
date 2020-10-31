@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**

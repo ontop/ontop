@@ -62,7 +62,6 @@ public class RelationIDImpl implements RelationID {
     @Override
     public String getSQLRendering() {
         return components.reverse().stream()
-                .filter(c -> c.getName() != null)
                 .map(QuotedID::getSQLRendering)
                 .collect(Collectors.joining("."));
     }

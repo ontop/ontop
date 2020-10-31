@@ -32,7 +32,7 @@ import java.io.IOException;
 
 /**
  * Database identifier used for schema names, table names and aliases
- * <p>
+ *
  * An identifier can be in quotation marks (to preserve the case etc.).
  * Quotation, however, is ignored when identifiers are compared
  *

@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -68,7 +69,7 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	public static final String NO_QUOTATION = "";
 
 	@Override
-	public QuotedID createAttributeID(String s) {
+	public QuotedID createAttributeID(@Nonnull String s) {
 		Objects.requireNonNull(s);
 		return createFromString(s);
 	}
@@ -84,7 +85,9 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 		return new RelationIDImpl(builder.build());
 	}
 	
-	protected QuotedID createFromString(String s) {
+	protected QuotedID createFromString(@Nonnull String s) {
+		Objects.requireNonNull(s);
+
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
 			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
 

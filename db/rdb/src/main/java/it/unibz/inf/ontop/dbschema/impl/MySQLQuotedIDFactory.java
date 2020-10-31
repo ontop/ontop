@@ -24,6 +24,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedID;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -62,7 +63,7 @@ public class MySQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
 	}
 
 	@Override
-	public QuotedID createAttributeID(String s) {
+	public QuotedID createAttributeID(@Nonnull String s) {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
@@ -75,7 +76,9 @@ public class MySQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
 	}
 
 	@Override
-	protected QuotedID createFromString(String s) {
+	protected QuotedID createFromString(@Nonnull String s) {
+		Objects.requireNonNull(s);
+
 		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
 			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitiveTableNames);
 

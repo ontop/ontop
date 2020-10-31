@@ -24,6 +24,9 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedID;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
 import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTATION_STRING;
 
 /**
@@ -52,7 +55,9 @@ import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTAT
 public class PostgreSQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	@Override
-	protected QuotedID createFromString(String s) {
+	protected QuotedID createFromString(@Nonnull String s) {
+		Objects.requireNonNull(s);
+
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
 			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
