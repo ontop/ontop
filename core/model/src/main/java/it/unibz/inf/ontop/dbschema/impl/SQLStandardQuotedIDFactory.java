@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.dbschema.impl;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
@@ -66,8 +67,6 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	public static final String QUOTATION_STRING = "\"";
 	public static final String NO_QUOTATION = "";
 
-	public static final QuotedID EMPTY_ID = new QuotedIDImpl(null, NO_QUOTATION);
-
 	@Override
 	public QuotedID createAttributeID(String s) {
 		Objects.requireNonNull(s);
@@ -77,8 +76,9 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	@Override
 	public RelationID createRelationID(String schema, String table) {
 		Objects.requireNonNull(table);
-		return new RelationIDImpl(schema == null ? EMPTY_ID : createFromString(schema),
-				createFromString(table));
+		return (schema != null)
+			? new RelationIDImpl(ImmutableList.of(createFromString(table), createFromString(schema)))
+			: new RelationIDImpl(ImmutableList.of(createFromString(table)));
 	}
 	
 	protected QuotedID createFromString(String s) {

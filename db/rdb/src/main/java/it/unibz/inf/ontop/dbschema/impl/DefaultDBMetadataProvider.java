@@ -163,17 +163,19 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     // can be overridden, single usage
     protected boolean isInDefaultSchema(RelationID id) {
-        return id.getComponents().get(SCHEMA_INDEX)
-                .equals(defaultSchema.getComponents().get(SCHEMA_INDEX)); // getSchemaID() always non-null
+        return defaultSchema.getComponents().subList(SCHEMA_INDEX, defaultSchema.getComponents().size())
+                .equals(id.getComponents().subList(SCHEMA_INDEX, id.getComponents().size()));
     }
 
     // can be overridden, 4 usages
     protected RelationID getCanonicalRelationId(RelationID id) {
-        QuotedID schemaId = id.getComponents().get(SCHEMA_INDEX); // getSchemaID() always non-null
-        if (schemaId.getName() != null)
+        if (id.getComponents().size() > 1)
             return id;
 
-        return new RelationIDImpl(defaultSchema.getComponents().get(SCHEMA_INDEX), id.getComponents().get(TABLE_INDEX));
+        return new RelationIDImpl(ImmutableList.<QuotedID>builder()
+                .add(id.getComponents().get(TABLE_INDEX))
+                .addAll(defaultSchema.getComponents().subList(SCHEMA_INDEX, defaultSchema.getComponents().size()))
+                .build());
     }
 
     // can be overridden, 4 usages

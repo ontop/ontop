@@ -18,12 +18,10 @@ public class RelationIDImpl implements RelationID {
     /**
      * (used only in QuotedIDFactory implementations)
      *
-     * @param schema
-     * @param table
      */
 
-    RelationIDImpl(QuotedID schema, QuotedID table) {
-        this.components = ImmutableList.of(table, schema);
+    RelationIDImpl(ImmutableList<QuotedID> components) {
+        this.components = components;
     }
 
     @Override
@@ -39,7 +37,7 @@ public class RelationIDImpl implements RelationID {
     @JsonIgnore
     @Override
     public RelationID getTableOnlyID() {
-        return new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, components.get(TABLE_INDEX));
+        return new RelationIDImpl(ImmutableList.of(components.get(TABLE_INDEX)));
     }
 
     @JsonProperty("name")
