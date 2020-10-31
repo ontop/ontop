@@ -45,7 +45,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected String getRelationSchema(RelationID id) {
-        return id.getComponents().subList(TABLE_INDEX, id.getComponents().size()).reverse().stream()
+        return id.getComponents().subList(1, id.getComponents().size()).reverse().stream()
                 .map(QuotedID::getSQLRendering)
                 .collect(Collectors.joining("."));
     }
