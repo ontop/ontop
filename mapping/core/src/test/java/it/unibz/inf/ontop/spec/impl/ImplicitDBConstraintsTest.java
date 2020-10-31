@@ -75,7 +75,7 @@ public class ImplicitDBConstraintsTest {
 				Optional.of(new File(DIR + "fkeys.lst")), md);
 		List<RelationID> refs = uc.getRelationIDs();
 		assertEquals(2, refs.size());
-		assertTrue(refs.contains(md.getQuotedIDFactory().createRelationID(null, "TABLE2")));
+		assertTrue(refs.contains(md.getQuotedIDFactory().createRelationID( "TABLE2")));
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
-		assertEquals(md.getQuotedIDFactory().createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
 		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
 	}
 
@@ -98,7 +98,7 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
-		assertEquals(md.getQuotedIDFactory().createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
 		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
 		assertEquals(ImmutableList.of(TABLENAME.getAttribute(1)),
 				TABLENAME.getUniqueConstraints().get(0).getAttributes());

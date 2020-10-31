@@ -106,9 +106,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
         private RelationID getRelationIDFromString(QuotedIDFactory idFactory, String tableName) {
             String[] names = tableName.split("\\.");
-            return (names.length == 1)
-                    ? idFactory.createRelationID(null, tableName)
-                    : idFactory.createRelationID(names[0], names[1]);
+            return idFactory.createRelationID(names);
         }
 
         @Override

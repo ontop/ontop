@@ -90,7 +90,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected RelationID generateFreshViewAlias() {
-            return idFactory.createRelationID(null, VIEW_PREFIX + viewCounter.incrementAndGet());
+            return idFactory.createRelationID(VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
         private ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {

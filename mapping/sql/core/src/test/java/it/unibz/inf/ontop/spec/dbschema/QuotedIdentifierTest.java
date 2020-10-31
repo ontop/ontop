@@ -36,7 +36,7 @@ public class QuotedIdentifierTest {
 
 //		assertEquals(null, fac.createAttributeID(null).getSQLRendering());
 
-		assertEquals("\"A\"", rawIdFactory.createRelationID(null, "A").getSQLRendering());
+		assertEquals("\"A\"", rawIdFactory.createRelationID( "A").getSQLRendering());
 		
 		assertEquals("\"S\".\"A\"", rawIdFactory.createRelationID( "S", "A").getSQLRendering());
 		

@@ -199,7 +199,7 @@ public abstract class FromItemParser<T> {
 
             validateFromItem(table);
 
-            RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
+            RelationID id = JSqlParserTools.getRelationId(idfac, table);
             try {
                 DatabaseRelationDefinition relation = metadata.getRelation(id);
                 T rae = create(relation);
@@ -269,7 +269,7 @@ public abstract class FromItemParser<T> {
             if (alias.getAliasColumns() != null)
                 throw new UnsupportedSelectQueryRuntimeException("Alias columns are not supported", alias);
 
-            RelationID aliasId = idfac.createRelationID(null, alias.getName());
+            RelationID aliasId = idfac.createRelationID(alias.getName());
             return operations.withAlias(rae, aliasId);
         }
     }

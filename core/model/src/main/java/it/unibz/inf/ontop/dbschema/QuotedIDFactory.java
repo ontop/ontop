@@ -39,8 +39,10 @@ public interface QuotedIDFactory {
 	 * @return attribute ID
 	 */
 	QuotedID createAttributeID(@Nonnull String attributeId);
-	
-	
+
+
+	RelationID createRelationID(@Nonnull String tableId);
+
 	/**
 	 * Creates a new relation ID from the component strings.
 	 * @param components list of the possibly quoted components of relation ID,

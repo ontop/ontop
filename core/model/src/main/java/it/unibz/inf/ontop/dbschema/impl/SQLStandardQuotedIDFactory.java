@@ -73,7 +73,13 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 		Objects.requireNonNull(s);
 		return createFromString(s);
 	}
-	
+
+	@Override
+	public RelationID createRelationID(@Nonnull String tableId) {
+		return new RelationIDImpl(ImmutableList.of(createFromString(tableId)));
+	}
+
+
 	@Override
 	public RelationID createRelationID(String... components) {
 		Objects.requireNonNull(components[components.length - 1]);
