@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
+
 public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final RelationID sysDualId;
@@ -23,7 +25,10 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         this.sysDualId = rawIdFactory.createRelationID(null, "DUAL");
     }
 
-    private boolean isDual(RelationID id) { return id.getTableID().equals(sysDualId.getTableID()); }
+    private boolean isDual(RelationID id) {
+        return id.getComponents().get(TABLE_INDEX)
+                .equals(sysDualId.getComponents().get(TABLE_INDEX));
+    }
 
     @Override
     protected RelationID getCanonicalRelationId(RelationID relationID) {

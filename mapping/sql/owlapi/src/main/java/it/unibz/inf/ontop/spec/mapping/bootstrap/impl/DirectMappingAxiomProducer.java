@@ -105,7 +105,7 @@ public class DirectMappingAxiomProducer {
 	// TODO: use quotation marks here and for variables names too
 
 	private static String getTableName(DatabaseRelationDefinition relation) {
-		return relation.getID().getTableID().getName();
+		return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
 	}
 	private static String getColumnAlias(Attribute attr) {
 		 return getTableName((DatabaseRelationDefinition)attr.getRelation()) + "_" + attr.getID().getName();

@@ -10,9 +10,10 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 public class RelationIDImpl implements RelationID {
-    private final QuotedID schema, table;
+    private final ImmutableList<QuotedID> components;
 
     /**
      * (used only in QuotedIDFactory implementations)
@@ -22,8 +23,13 @@ public class RelationIDImpl implements RelationID {
      */
 
     RelationIDImpl(QuotedID schema, QuotedID table) {
-        this.schema = schema;
-        this.table = table;
+        this.components = ImmutableList.of(table, schema);
+    }
+
+    @Override
+    @JsonIgnore
+    public ImmutableList<QuotedID> getComponents() {
+        return components;
     }
 
     /**
@@ -32,17 +38,13 @@ public class RelationIDImpl implements RelationID {
      */
     @JsonIgnore
     @Override
-    public ImmutableList<RelationID> getWithSchemalessID() {
-        return (schema.getName() == null)
-                ? ImmutableList.of(this)
-                : ImmutableList.of(new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, table), this);
+    public RelationID getTableOnlyID() {
+        return new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, components.get(TABLE_INDEX));
     }
 
-
     @JsonProperty("name")
-    @Override
     public QuotedID getTableID() {
-        return table;
+        return components.get(TABLE_INDEX);
     }
 
     /**
@@ -50,9 +52,8 @@ public class RelationIDImpl implements RelationID {
      * @return null if the schema name is empty or the schema name (as is, without quotation marks)
      */
     @JsonProperty("schema")
-    @Override
     public QuotedID getSchemaID() {
-        return schema;
+        return components.get(1);
     }
 
     /**
@@ -62,11 +63,10 @@ public class RelationIDImpl implements RelationID {
     @JsonIgnore
     @Override
     public String getSQLRendering() {
-        String s = schema.getSQLRendering();
-        if (s == null)
-            return table.getSQLRendering();
-
-        return s + "." + table.getSQLRendering();
+        return components.reverse().stream()
+                .filter(c -> c.getName() != null)
+                .map(QuotedID::getSQLRendering)
+                .collect(Collectors.joining("."));
     }
 
     @Override
@@ -76,7 +76,7 @@ public class RelationIDImpl implements RelationID {
 
     @Override
     public int hashCode() {
-        return table.hashCode();
+        return components.get(TABLE_INDEX).hashCode();
     }
 
     @Override
@@ -86,14 +86,13 @@ public class RelationIDImpl implements RelationID {
 
         if (obj instanceof RelationIDImpl) {
             RelationIDImpl other = (RelationIDImpl)obj;
-            return (this.schema.equals(other.schema) && this.table.equals(other.table));
+            return this.components.equals(other.components);
         }
 
         return false;
     }
 
     public static class RelationIDSerializer extends JsonSerializer<RelationID> {
-
         @Override
         public void serialize(RelationID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeString(value.getSQLRendering());

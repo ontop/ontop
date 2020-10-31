@@ -26,7 +26,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     public RAExpressionAttributes create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<QuotedID, ImmutableTerm> map = getAttributesMap(relation, variables);
         return new RAExpressionAttributes(attachAliases(map, relation.getAllIDs().stream()
-                .flatMap(l -> l.getWithSchemalessID().stream())
+                .flatMap(id -> Stream.of(id, id.getTableOnlyID()))
                 .distinct()
                 .collect(ImmutableCollectors.toSet())),
                 aoops.create(relation, variables));

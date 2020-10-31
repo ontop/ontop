@@ -15,6 +15,8 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
+
 public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDBMetadataProvider.class);
@@ -28,6 +30,8 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     protected final RelationID defaultSchema;
     protected final String defaultCatalog;
+
+    private static final int SCHEMA_INDEX = 1;
 
     protected interface QuotedIDFactoryFactory {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
@@ -159,16 +163,17 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     // can be overridden, single usage
     protected boolean isInDefaultSchema(RelationID id) {
-        return id.getSchemaID().equals(defaultSchema.getSchemaID()); // getSchemaID() always non-null
+        return id.getComponents().get(SCHEMA_INDEX)
+                .equals(defaultSchema.getComponents().get(SCHEMA_INDEX)); // getSchemaID() always non-null
     }
 
     // can be overridden, 4 usages
     protected RelationID getCanonicalRelationId(RelationID id) {
-        QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
+        QuotedID schemaId = id.getComponents().get(SCHEMA_INDEX); // getSchemaID() always non-null
         if (schemaId.getName() != null)
             return id;
 
-        return new RelationIDImpl(defaultSchema.getSchemaID(), id.getTableID());
+        return new RelationIDImpl(defaultSchema.getComponents().get(SCHEMA_INDEX), id.getComponents().get(TABLE_INDEX));
     }
 
     // can be overridden, 4 usages
@@ -206,7 +211,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
                 RelationID extractedId = r.getKey();
                 ImmutableList<RelationID> allIDs = isInDefaultSchema(extractedId)
-                        ? ImmutableList.of(new RelationIDImpl(SQLStandardQuotedIDFactory.EMPTY_ID, extractedId.getTableID()), extractedId)
+                        ? ImmutableList.of(extractedId.getTableOnlyID(), extractedId)
                         : ImmutableList.of(extractedId);
                 return new DatabaseTableDefinition(allIDs, r.getValue());
             }
@@ -370,9 +375,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     // catalog is ignored for now (rs.getString("TABLE_CAT"))
     protected String getRelationCatalog(RelationID relationID) { return null; }
 
-    protected String getRelationSchema(RelationID relationID) { return relationID.getSchemaID().getName(); }
+    protected String getRelationSchema(RelationID relationID) { return relationID.getComponents().get(SCHEMA_INDEX).getName(); }
 
-    protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
+    protected String getRelationName(RelationID relationID) { return relationID.getComponents().get(TABLE_INDEX).getName(); }
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
         String catalog = rs.getString("TABLE_CAT");
