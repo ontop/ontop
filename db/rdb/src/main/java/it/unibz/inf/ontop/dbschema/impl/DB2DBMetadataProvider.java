@@ -8,14 +8,15 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class DB2DBMetadataProvider extends DefaultDBMetadataProvider {
+public class DB2DBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @AssistedInject
     DB2DBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider(
-                connection,
-                "select NULL AS TABLE_CAT, CURRENT SCHEMA AS TABLE_SCHEM from SYSIBM.SYSDUMMY1"), typeFactory);
+        super(connection, metadata -> new SQLStandardQuotedIDFactory(), typeFactory,
+                "select NULL AS TABLE_CAT, CURRENT SCHEMA AS TABLE_SCHEM from SYSIBM.SYSDUMMY1");
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0005881.html
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000720.html
     }

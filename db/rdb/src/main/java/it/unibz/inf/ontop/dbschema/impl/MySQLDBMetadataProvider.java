@@ -10,15 +10,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
+public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @AssistedInject
     MySQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
         super(connection,
                 metadata -> new MySQLQuotedIDFactory(metadata.storesMixedCaseIdentifiers()),
-                new QueryBasedDefaultSchemaProvider(connection,
-                        "SELECT DATABASE() AS TABLE_CAT, NULL AS TABLE_SCHEM"),
-                typeFactory);
+                typeFactory,
+                "SELECT DATABASE() AS TABLE_CAT, NULL AS TABLE_SCHEM");
         // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
     }
 
@@ -36,5 +35,4 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(tableNameColumn));
     }
-
 }

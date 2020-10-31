@@ -20,7 +20,8 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @AssistedInject
     DremioDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, (m) -> new SQLStandardQuotedIDFactory(), typeFactory);
+        super(connection, DefaultDBMetadataProvider::getQuotedIDFactory, typeFactory);
+        System.out.println("DREMIOOOO: " + getQuotedIDFactory().getClass().getName());
     }
 
     @Override

@@ -7,13 +7,12 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 
-public class H2DBMetadataProvider extends  DefaultDBMetadataProvider {
+public class H2DBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvider {
 
     @AssistedInject
     H2DBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider(
-                connection,
-                "SELECT DATABASE() AS TABLE_CAT, SCHEMA() AS TABLE_SCHEM"), typeFactory);
+        super(connection, metadata -> new SQLStandardQuotedIDFactory(), typeFactory,
+                "SELECT DATABASE() AS TABLE_CAT, SCHEMA() AS TABLE_SCHEM");
         // http://www.h2database.com/html/functions.html#current_schema
     }
 }

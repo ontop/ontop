@@ -270,6 +270,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
+    protected abstract RelationID getCanonicalRelationId(RelationID id);
 
     protected abstract ImmutableList<RelationID> getAllIDs(RelationID id);
 
@@ -280,6 +281,5 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
     protected abstract String getRelationName(RelationID id);
 
-    protected abstract RelationID getCanonicalRelationId(RelationID id);
 
 }

@@ -9,12 +9,12 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 
-public class SQLServerDBMetadataProvider extends DefaultDBMetadataProvider {
+public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvider {
 
     @AssistedInject
     SQLServerDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider(connection,
-                "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM"), typeFactory);
+        super(connection, metadata -> new SQLServerQuotedIDFactory(), typeFactory,
+                "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM");
         // https://msdn.microsoft.com/en-us/library/ms175068.aspx
         // https://docs.microsoft.com/en-us/sql/t-sql/functions/schema-name-transact-sql
         // https://docs.microsoft.com/en-us/sql/t-sql/functions/db-name-transact-sql
