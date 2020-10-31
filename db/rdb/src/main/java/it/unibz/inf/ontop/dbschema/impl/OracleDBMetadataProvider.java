@@ -57,6 +57,9 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
+    protected String getRelationSchema(RelationID id) { return id.getComponents().size() > SCHEMA_INDEX ? id.getComponents().get(SCHEMA_INDEX).getName() : null; }
+
+    @Override
     protected ResultSet getRelationIDsResultSet() throws SQLException {
         Statement stmt = connection.createStatement();
         stmt.closeOnCompletion();

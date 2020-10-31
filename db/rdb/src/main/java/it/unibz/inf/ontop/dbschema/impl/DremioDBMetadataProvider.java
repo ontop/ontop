@@ -36,6 +36,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         String[] components = rs.getString(schemaNameColumn).split("\\.");
         String[] allComponents = Arrays.copyOf(components, components.length + 1);
         allComponents[components.length] = rs.getString(tableNameColumn);
+        System.out.println("DREMIOOO: " + Arrays.toString(allComponents));
         return rawIdFactory.createRelationID(allComponents);
     }
 
@@ -45,7 +46,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     @Override
     protected String getRelationSchema(RelationID id) {
         return id.getComponents().subList(TABLE_INDEX, id.getComponents().size()).reverse().stream()
-                .map(QuotedID::getName)
+                .map(QuotedID::getSQLRendering)
                 .collect(Collectors.joining("."));
     }
 

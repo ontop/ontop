@@ -14,8 +14,8 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBMetadataProvider {
 
-    private static final int SCHEMA_INDEX = 1;
-    private static final int CATALOG_INDEX = 2;
+    protected static final int SCHEMA_INDEX = 1;
+    protected static final int CATALOG_INDEX = 2;
 
     private final RelationID defaultSchema;
 
