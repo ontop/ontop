@@ -13,7 +13,9 @@ public class DB2DBMetadataProvider extends DefaultDBMetadataProvider {
 
     @AssistedInject
     DB2DBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider("select NULL from SYSIBM.SYSDUMMY1", "select CURRENT SCHEMA from SYSIBM.SYSDUMMY1"), typeFactory);
+        super(connection, new QueryBasedDefaultSchemaProvider(
+                connection,
+                "select NULL AS TABLE_CAT, CURRENT SCHEMA AS TABLE_SCHEM from SYSIBM.SYSDUMMY1"), typeFactory);
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0005881.html
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000720.html
     }

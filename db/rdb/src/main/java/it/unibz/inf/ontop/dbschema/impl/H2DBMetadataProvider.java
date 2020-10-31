@@ -11,7 +11,9 @@ public class H2DBMetadataProvider extends  DefaultDBMetadataProvider {
 
     @AssistedInject
     H2DBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider("SELECT DATABASE()", "SELECT SCHEMA()"), typeFactory);
+        super(connection, new QueryBasedDefaultSchemaProvider(
+                connection,
+                "SELECT DATABASE() AS TABLE_CAT, SCHEMA() AS TABLE_SCHEM"), typeFactory);
         // http://www.h2database.com/html/functions.html#current_schema
     }
 }

@@ -13,7 +13,8 @@ public class SQLServerDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @AssistedInject
     SQLServerDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider("SELECT DB_NAME()", "SELECT SCHEMA_NAME()"), typeFactory);
+        super(connection, new QueryBasedDefaultSchemaProvider(connection,
+                "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM"), typeFactory);
         // https://msdn.microsoft.com/en-us/library/ms175068.aspx
         // https://docs.microsoft.com/en-us/sql/t-sql/functions/schema-name-transact-sql
         // https://docs.microsoft.com/en-us/sql/t-sql/functions/db-name-transact-sql

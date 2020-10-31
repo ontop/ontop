@@ -19,7 +19,8 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @AssistedInject
     protected OracleDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, new QueryBasedDefaultSchemaProvider("SELECT NULL AS TABLE_CAT FROM dual", "SELECT user as TABLE_SCHEM FROM dual"), typeFactory);
+        super(connection, new QueryBasedDefaultSchemaProvider(connection,
+                "SELECT NULL AS TABLE_CAT, user as TABLE_SCHEM FROM dual"), typeFactory);
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
         this.sysDualId = rawIdFactory.createRelationID("DUAL");

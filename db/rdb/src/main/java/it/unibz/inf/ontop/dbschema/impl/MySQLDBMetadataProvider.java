@@ -16,7 +16,8 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     MySQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
         super(connection,
                 metadata -> new MySQLQuotedIDFactory(metadata.storesMixedCaseIdentifiers()),
-                new QueryBasedDefaultSchemaProvider("SELECT NULL", "SELECT DATABASE()"),
+                new QueryBasedDefaultSchemaProvider(connection,
+                        "SELECT SELECT DATABASE() AS TABLE_CAT, NULLit.unibz.inf.ontop.owlapi.CanonicalIRIUniversityTest AS TABLE_SCHEM"),
                 typeFactory);
         // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
     }
@@ -33,16 +34,16 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @Override
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "TABLE_CAT","TABLE_NAME");
+        return getRelationID(rs, "TABLE_SCHEM",  "TABLE_CAT", "TABLE_NAME");
     }
 
     @Override
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "PKTABLE_CAT", "PKTABLE_NAME");
+        return getRelationID(rs, "PKTABLE_SCHEM", "PKTABLE_CAT", "PKTABLE_NAME");
     }
 
     @Override
     protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "FKTABLE_CAT", "FKTABLE_NAME");
+        return getRelationID(rs, "FKTABLE_SCHEM", "FKTABLE_CAT", "FKTABLE_NAME");
     }
 }

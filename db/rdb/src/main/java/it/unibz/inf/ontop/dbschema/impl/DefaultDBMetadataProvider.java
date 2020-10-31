@@ -29,17 +29,17 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     protected final QuotedIDFactory rawIdFactory;
 
     protected final RelationID defaultSchema;
-    protected final String defaultCatalog;
 
     private static final int SCHEMA_INDEX = 1;
+    private static final int CAT_INDEX = 2;
 
     protected interface QuotedIDFactoryFactory {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
     }
 
     protected interface DefaultSchemaProvider {
-        String getSchema(Connection conn) throws SQLException;
-        String getCatalog(Connection conn) throws SQLException;
+        String getSchema();
+        String getCatalog();
     }
 
     DefaultDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, DefaultSchemaProvider defaultSchemaExtractor, TypeFactory typeFactory) throws MetadataExtractionException {
@@ -49,10 +49,11 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             this.metadata = connection.getMetaData();
             QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
-            defaultCatalog = defaultSchemaExtractor.getCatalog(connection);
-            String schema = defaultSchemaExtractor.getSchema(connection);
-            System.out.println("DB-DEFAULTS (" + metadata.getDatabaseProductName() + "): " + defaultCatalog + "." + schema);
-            this.defaultSchema = rawIdFactory.createRelationID(schema, "DUMMY");
+            this.defaultSchema = rawIdFactory.createRelationID(
+                    defaultSchemaExtractor.getCatalog(),
+                    defaultSchemaExtractor.getSchema(),
+                    "DUMMY");
+            System.out.println("DB-DEFAULTS (" + metadata.getDatabaseProductName() + "): " + defaultSchema);
             this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
                     metadata.getDriverVersion(),
                     metadata.getDatabaseProductName(),
@@ -73,9 +74,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     DefaultDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
         this(connection, DefaultDBMetadataProvider::getQuotedIDFactory, new DefaultSchemaProvider() {
             @Override
-            public String getSchema(Connection conn) throws SQLException { return null; }
+            public String getSchema() { return null; }
             @Override
-            public String getCatalog(Connection conn) throws SQLException { return null; }
+            public String getCatalog() { return null; }
         }, typeFactory);
     }
 
@@ -110,25 +111,23 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     }
 
     protected static class QueryBasedDefaultSchemaProvider implements DefaultSchemaProvider {
-        private final String sqlCatalog, sqlSchema;
-        QueryBasedDefaultSchemaProvider(String sqlCatalog, String sqlSchema) {
-            this.sqlCatalog = sqlCatalog;
-            this.sqlSchema = sqlSchema;
-        }
-
-        private String get(Connection conn, String sql) throws SQLException {
-            try (Statement stmt = conn.createStatement();
+        private final String catalog, schema;
+        QueryBasedDefaultSchemaProvider(Connection connection, String sql) throws MetadataExtractionException {
+            try (Statement stmt = connection.createStatement();
                  ResultSet rs = stmt.executeQuery(sql)) {
                 rs.next();
-                return rs.getString(1);
+                schema = rs.getString("TABLE_SCHEM");
+                catalog = rs.getString("TABLE_CAT");
+            }
+            catch (SQLException e) {
+                throw new MetadataExtractionException(e);
             }
         }
 
         @Override
-        public String getSchema(Connection conn) throws SQLException { return get(conn, sqlSchema); }
-
+        public String getSchema() { return schema; }
         @Override
-        public String getCatalog(Connection conn) throws SQLException { return get(conn, sqlCatalog); }
+        public String getCatalog() { return catalog; }
     }
 
     @Override
@@ -166,11 +165,25 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         return defaultSchema.getComponents().subList(SCHEMA_INDEX, defaultSchema.getComponents().size())
                 .equals(id.getComponents().subList(SCHEMA_INDEX, id.getComponents().size()));
     }
+    // can be overridden, single usage
+    protected boolean isInDefaultCatalog(RelationID id) {
+        return defaultSchema.getComponents().size() > SCHEMA_INDEX
+                && id.getComponents().size() > SCHEMA_INDEX
+                && defaultSchema.getComponents().subList(CAT_INDEX, defaultSchema.getComponents().size())
+                    .equals(id.getComponents().subList(CAT_INDEX, id.getComponents().size()));
+    }
 
     // can be overridden, 4 usages
     protected RelationID getCanonicalRelationId(RelationID id) {
-        if (id.getComponents().size() > 1)
+        if (id.getComponents().size() > CAT_INDEX)
             return id;
+
+        if (id.getComponents().size() == CAT_INDEX)
+            return new RelationIDImpl(ImmutableList.<QuotedID>builder()
+                    .add(id.getComponents().get(TABLE_INDEX))
+                    .add(id.getComponents().get(SCHEMA_INDEX))
+                    .addAll(defaultSchema.getComponents().subList(CAT_INDEX, defaultSchema.getComponents().size()))
+                    .build());
 
         return new RelationIDImpl(ImmutableList.<QuotedID>builder()
                 .add(id.getComponents().get(TABLE_INDEX))
@@ -213,8 +226,10 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
                 RelationID extractedId = r.getKey();
                 ImmutableList<RelationID> allIDs = isInDefaultSchema(extractedId)
-                        ? ImmutableList.of(extractedId.getTableOnlyID(), extractedId)
-                        : ImmutableList.of(extractedId);
+                        ? ImmutableList.of(extractedId.getTableOnlyID(), getSchemaTableID(extractedId), extractedId)
+                        :  isInDefaultCatalog(extractedId)
+                            ? ImmutableList.of(getSchemaTableID(extractedId), extractedId)
+                            : ImmutableList.of(extractedId);
                 return new DatabaseTableDefinition(allIDs, r.getValue());
             }
             throw new MetadataExtractionException(relations.isEmpty()
@@ -226,6 +241,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
+    private RelationID getSchemaTableID(RelationID id) {
+        return new RelationIDImpl(id.getComponents().subList(TABLE_INDEX, CAT_INDEX));
+    }
 
     @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
@@ -374,30 +392,25 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
 
 
-    // catalog is ignored for now (rs.getString("TABLE_CAT"))
-    protected String getRelationCatalog(RelationID relationID) { return null; }
+    protected String getRelationCatalog(RelationID relationID) { return relationID.getComponents().size() > CAT_INDEX  ? relationID.getComponents().get(CAT_INDEX).getName() : null; }
 
     protected String getRelationSchema(RelationID relationID) { return relationID.getComponents().size() > SCHEMA_INDEX  ? relationID.getComponents().get(SCHEMA_INDEX).getName() : null; }
 
     protected String getRelationName(RelationID relationID) { return relationID.getComponents().get(TABLE_INDEX).getName(); }
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        String catalog = rs.getString("TABLE_CAT");
-        // if catalog is null, then it's the default catalog
-        if (catalog != null && !catalog.equals(defaultCatalog))
-            System.out.println("DB-CATALOG: " + catalog + " v " + defaultCatalog);
-        return getRelationID(rs, "TABLE_SCHEM","TABLE_NAME");
+        return getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
     }
 
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "PKTABLE_SCHEM","PKTABLE_NAME");
+        return getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
     }
 
     protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "FKTABLE_SCHEM","FKTABLE_NAME");
+        return getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
     }
 
-    protected final RelationID getRelationID(ResultSet rs, String schemaNameColumn, String tableNameColumn) throws SQLException {
-        return rawIdFactory.createRelationID(rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
+    protected final RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
+        return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
     }
 }
