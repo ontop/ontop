@@ -28,19 +28,8 @@ public class DremioDBMetadataProvider extends DefaultDBMetadataProvider {
         return id;
     }
 
-    protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "TABLE_SCHEM","TABLE_NAME");
-    }
-
-    protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "PKTABLE_SCHEM","PKTABLE_NAME");
-    }
-
-    protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "FKTABLE_SCHEM","FKTABLE_NAME");
-    }
-
-    private RelationID getRelationID(ResultSet rs, String schemaNameColumn, String tableNameColumn) throws SQLException {
+    @Override
+    protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         String[] components = rs.getString(schemaNameColumn).split("\\.");
         String[] allComponents = Arrays.copyOf(components, components.length + 1);
         allComponents[components.length] = rs.getString(tableNameColumn);

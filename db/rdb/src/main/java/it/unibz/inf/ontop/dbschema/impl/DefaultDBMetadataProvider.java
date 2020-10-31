@@ -149,7 +149,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         try (ResultSet rs = getRelationIDsResultSet()) {
             ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
             while (rs.next()) {
-                RelationID id = getRelationID(rs);
+                RelationID id = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 if (!isRelationExcluded(id))
                     builder.add(id);
             }
@@ -206,7 +206,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
-                RelationID extractedId = getRelationID(rs);
+                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id);
 
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
@@ -264,7 +264,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
             String currentName = null;
             while (rs.next()) {
-                RelationID extractedId = getRelationID(rs);
+                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id);
 
                 currentName = rs.getString("PK_NAME"); // may be null
@@ -293,7 +293,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
             UniqueConstraint.Builder builder = null;
             while (rs.next()) {
-                RelationID extractedId = getRelationID(rs);
+                RelationID extractedId = getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
                 checkSameRelationID(extractedId, id);
 
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
@@ -353,8 +353,9 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
             while (rs.next()) {
-                RelationID extractedId = getFKRelationID(rs);
+                RelationID extractedId = getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
                 checkSameRelationID(extractedId, id);
+                RelationID pkId = getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
 
                 try {
                     int seq = rs.getShort("KEY_SEQ");
@@ -363,7 +364,8 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                             builder.build();
 
                         String name = rs.getString("FK_NAME"); // String => foreign key name (may be null)
-                        DatabaseRelationDefinition ref = dbMetadata.getRelation(getPKRelationID(rs));
+
+                        DatabaseRelationDefinition ref = dbMetadata.getRelation(pkId);
 
                         builder = ForeignKeyConstraint.builder(name, relation, ref);
                     }
@@ -379,7 +381,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
                     }
                 }
                 catch (MetadataExtractionException e) {
-                    LOGGER.warn("Cannot find table {} for FK {}", getPKRelationID(rs), rs.getString("FK_NAME"));
+                    LOGGER.warn("Cannot find table {} for FK {}", pkId, rs.getString("FK_NAME"));
                     builder = null; // do not add this foreign key because there is no table it refers to
                 }
             }
@@ -398,19 +400,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
 
     protected String getRelationName(RelationID relationID) { return relationID.getComponents().get(TABLE_INDEX).getName(); }
 
-    protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "TABLE_CAT", "TABLE_SCHEM","TABLE_NAME");
-    }
-
-    protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "PKTABLE_CAT", "PKTABLE_SCHEM","PKTABLE_NAME");
-    }
-
-    protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "FKTABLE_CAT", "FKTABLE_SCHEM","FKTABLE_NAME");
-    }
-
-    protected final RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
+    protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
     }
 }
