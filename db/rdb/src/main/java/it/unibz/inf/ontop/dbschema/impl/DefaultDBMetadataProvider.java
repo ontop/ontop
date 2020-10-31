@@ -377,7 +377,7 @@ public class DefaultDBMetadataProvider implements DBMetadataProvider {
     // catalog is ignored for now (rs.getString("TABLE_CAT"))
     protected String getRelationCatalog(RelationID relationID) { return null; }
 
-    protected String getRelationSchema(RelationID relationID) { return relationID.getComponents().get(SCHEMA_INDEX).getName(); }
+    protected String getRelationSchema(RelationID relationID) { return relationID.getComponents().size() > SCHEMA_INDEX  ? relationID.getComponents().get(SCHEMA_INDEX).getName() : null; }
 
     protected String getRelationName(RelationID relationID) { return relationID.getComponents().get(TABLE_INDEX).getName(); }
 
