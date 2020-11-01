@@ -1,4 +1,4 @@
-university.professor:prof_id
-university.course:course_id
-university.teaching:course_id:university.course:course_id
-university.teaching:prof_id:university.professor:prof_id
+postgres_university.public.professors:prof_id
+postgres_university.public.course:course_id
+postgres_university.public.teaching:course_id:postgres_university.public.course:course_id
+postgres_university.public.teaching:prof_id:postgres_university.public.professors:prof_id

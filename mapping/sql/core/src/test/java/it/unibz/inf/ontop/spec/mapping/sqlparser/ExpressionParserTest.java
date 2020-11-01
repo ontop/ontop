@@ -1090,8 +1090,8 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         Variable u = TERM_FACTORY.getVariable("y0");
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P, Q WHERE P.A = Q.A(+)", ImmutableMap.of(
-                new QualifiedAttributeID(IDFAC.createRelationID(null,"P"), IDFAC.createAttributeID("A")), v,
-                new QualifiedAttributeID(IDFAC.createRelationID(null, "Q"), IDFAC.createAttributeID("A")), u));
+                new QualifiedAttributeID(IDFAC.createRelationID("P"), IDFAC.createAttributeID("A")), v,
+                new QualifiedAttributeID(IDFAC.createRelationID( "Q"), IDFAC.createAttributeID("A")), u));
     }
 
     @Test

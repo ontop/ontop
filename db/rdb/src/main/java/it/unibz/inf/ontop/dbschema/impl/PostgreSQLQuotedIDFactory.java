@@ -23,8 +23,9 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 
 import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RelationID;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTATION_STRING;
 
@@ -51,33 +52,15 @@ import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTAT
  *
  */
 
-public class PostgreSQLQuotedIDFactory implements QuotedIDFactory {
-
-	PostgreSQLQuotedIDFactory() { }
+public class PostgreSQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	@Override
-	public QuotedID createAttributeID(String s) {
-		return createFromString(s);
-	}
+	protected QuotedID createFromString(@Nonnull String s) {
+		Objects.requireNonNull(s);
 
-	@Override
-	public RelationID createRelationID(String schema, String table) {
-		return new RelationIDImpl(createFromString(schema), createFromString(table));
-	}
-	
-	public QuotedID createFromString(String s) {
-		if (s == null)
-			return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION);
-		
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
 			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
-		return new QuotedIDImpl(s.toLowerCase(), SQLStandardQuotedIDFactory.NO_QUOTATION);
+		return new QuotedIDImpl(s.toLowerCase(), NO_QUOTATION);
 	}
-
-	@Override
-	public String getIDQuotationString() {
-		return QUOTATION_STRING;
-	}
-	
 }

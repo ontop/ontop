@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -91,8 +89,8 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
         }
     }
 
-    private String getTableName(DatabaseRelationDefinition relation) {
-        return relation.getID().getTableID().getName();
+    private static String getTableName(DatabaseRelationDefinition relation) {
+        return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
     }
 
     static final class DatabaseRelationDescriptor {
@@ -108,9 +106,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
         private RelationID getRelationIDFromString(QuotedIDFactory idFactory, String tableName) {
             String[] names = tableName.split("\\.");
-            return (names.length == 1)
-                    ? idFactory.createRelationID(null, tableName)
-                    : idFactory.createRelationID(names[0], names[1]);
+            return idFactory.createRelationID(names);
         }
 
         @Override
