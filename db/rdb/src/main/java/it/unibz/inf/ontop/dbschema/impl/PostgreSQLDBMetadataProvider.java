@@ -12,8 +12,8 @@ public class PostgreSQLDBMetadataProvider extends DefaultSchemaDBMetadataProvide
     @AssistedInject
     PostgreSQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
         super(connection, metadata -> new PostgreSQLQuotedIDFactory(), typeFactory,
-                // current_catalog
-                "SELECT NULL AS TABLE_CAT, current_schema AS TABLE_SCHEM");
+                // current_catalog AS TABLE_CAT
+                "SELECT current_schema AS TABLE_SCHEM");
         // https://www.postgresql.org/docs/current/functions-info.html
         // CAREFUL: PostgreSQL uses a chain of schemas and goes through the list until it finds the relevant object
         // https://www.postgresql.org/docs/current/ddl-schemas.html

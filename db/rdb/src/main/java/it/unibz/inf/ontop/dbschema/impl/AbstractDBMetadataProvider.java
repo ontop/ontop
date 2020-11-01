@@ -80,7 +80,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
-    protected abstract RelationID getRelationID(ResultSet rs, String table_cat, String table_schem, String table_name) throws SQLException;
+    protected abstract RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColum) throws SQLException;
 
     // can be overridden, 4 usages
     protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
@@ -280,6 +280,4 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract String getRelationSchema(RelationID id);
 
     protected abstract String getRelationName(RelationID id);
-
-
 }

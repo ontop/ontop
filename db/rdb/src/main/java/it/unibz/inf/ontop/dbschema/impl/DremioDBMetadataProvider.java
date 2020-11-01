@@ -33,11 +33,10 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
-        String[] components = rs.getString(schemaNameColumn).split("\\.");
-        String[] allComponents = Arrays.copyOf(components, components.length + 1);
-        allComponents[components.length] = rs.getString(tableNameColumn);
-        System.out.println("DREMIOOO: " + Arrays.toString(allComponents));
-        return rawIdFactory.createRelationID(allComponents);
+        String[] schemaComponents = rs.getString(schemaNameColumn).split("\\.");
+        String[] components = Arrays.copyOf(schemaComponents, schemaComponents.length + 1);
+        components[schemaComponents.length] = rs.getString(tableNameColumn);
+        return rawIdFactory.createRelationID(components);
     }
 
     @Override

@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
+
     @Override
     protected QuotedID createFromString(@Nonnull String s) {
         Objects.requireNonNull(s);

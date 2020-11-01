@@ -21,6 +21,28 @@ public class DefaultDBMetadataProvider extends AbstractDBMetadataProvider {
         super(connection, DefaultDBMetadataProvider::getQuotedIDFactory, typeFactory);
     }
 
+    @Override
+    protected RelationID getCanonicalRelationId(RelationID id) { return id; }
+
+    @Override
+    protected ImmutableList<RelationID> getAllIDs(RelationID id) { return ImmutableList.of(id); }
+
+    @Override
+    protected String getRelationCatalog(RelationID relationID) { return relationID.getComponents().size() > CATALOG_INDEX ? relationID.getComponents().get(CATALOG_INDEX).getName() : null; }
+
+    @Override
+    protected String getRelationSchema(RelationID relationID) { return relationID.getComponents().size() > SCHEMA_INDEX  ? relationID.getComponents().get(SCHEMA_INDEX).getName() : null; }
+
+    @Override
+    protected String getRelationName(RelationID relationID) { return relationID.getComponents().get(TABLE_INDEX).getName(); }
+
+    @Override
+    protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
+        return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
+    }
+
+
+
     public static QuotedIDFactory getQuotedIDFactory(DatabaseMetaData md) throws SQLException {
 
         if (md.storesMixedCaseIdentifiers())
@@ -51,26 +73,4 @@ public class DefaultDBMetadataProvider extends AbstractDBMetadataProvider {
         return new SQLStandardQuotedIDFactory();
     }
 
-
-
-
-    @Override
-    protected RelationID getCanonicalRelationId(RelationID id) { return id; }
-
-    @Override
-    protected ImmutableList<RelationID> getAllIDs(RelationID id) { return ImmutableList.of(id); }
-
-    @Override
-    protected String getRelationCatalog(RelationID relationID) { return relationID.getComponents().size() > CATALOG_INDEX ? relationID.getComponents().get(CATALOG_INDEX).getName() : null; }
-
-    @Override
-    protected String getRelationSchema(RelationID relationID) { return relationID.getComponents().size() > SCHEMA_INDEX  ? relationID.getComponents().get(SCHEMA_INDEX).getName() : null; }
-
-    @Override
-    protected String getRelationName(RelationID relationID) { return relationID.getComponents().get(TABLE_INDEX).getName(); }
-
-    @Override
-    protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
-        return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
-    }
 }

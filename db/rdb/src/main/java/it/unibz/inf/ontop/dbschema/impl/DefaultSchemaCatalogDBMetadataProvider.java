@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -17,15 +18,16 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
     protected static final int SCHEMA_INDEX = 1;
     protected static final int CATALOG_INDEX = 2;
 
-    private final RelationID defaultSchema;
+    private final QuotedID defaultCatalog, defaultSchema;
 
     DefaultSchemaCatalogDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, TypeFactory typeFactory, String sql) throws MetadataExtractionException {
         super(connection, idFactoryProvider, typeFactory);
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             rs.next();
-            defaultSchema = rawIdFactory.createRelationID(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), "DUMMY");
-            System.out.println("DB-DEFAULTS (" + connection.getMetaData().getDatabaseProductName() + "): " + defaultSchema);
+            RelationID id = rawIdFactory.createRelationID(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), "DUMMY");
+            defaultCatalog = id.getComponents().get(CATALOG_INDEX);
+            defaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -39,12 +41,12 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
                 return new RelationIDImpl(ImmutableList.of(
                         id.getComponents().get(TABLE_INDEX),
                         id.getComponents().get(SCHEMA_INDEX),
-                        defaultSchema.getComponents().get(CATALOG_INDEX)));
+                        defaultCatalog));
             case SCHEMA_INDEX:
                 return new RelationIDImpl(ImmutableList.of(
                         id.getComponents().get(TABLE_INDEX),
-                        defaultSchema.getComponents().get(SCHEMA_INDEX),
-                        defaultSchema.getComponents().get(CATALOG_INDEX)));
+                        defaultSchema,
+                        defaultCatalog));
             default:
                 return id;
         }
@@ -52,9 +54,9 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
 
     @Override
     protected ImmutableList<RelationID> getAllIDs(RelationID id) {
-        if (defaultSchema.getComponents().get(CATALOG_INDEX).equals(id.getComponents().get(CATALOG_INDEX))) {
+        if (defaultCatalog.equals(id.getComponents().get(CATALOG_INDEX))) {
             RelationID schemaTableId = new RelationIDImpl(id.getComponents().subList(TABLE_INDEX, CATALOG_INDEX));
-            if (defaultSchema.getComponents().get(SCHEMA_INDEX).equals(id.getComponents().get(SCHEMA_INDEX)))
+            if (defaultSchema.equals(id.getComponents().get(SCHEMA_INDEX)))
                 return ImmutableList.of(id.getTableOnlyID(), schemaTableId, id);
             return ImmutableList.of(schemaTableId, id);
         }
