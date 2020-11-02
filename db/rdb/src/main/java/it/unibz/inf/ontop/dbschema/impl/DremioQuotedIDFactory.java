@@ -10,11 +10,15 @@ public class DremioQuotedIDFactory extends SQLStandardQuotedIDFactory {
     @Override
     protected QuotedID createFromString(@Nonnull String s) {
         Objects.requireNonNull(s);
-        return new QuotedIDImpl(s, NO_QUOTATION, false);
+        
+        if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
+            return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
+
+        return new QuotedIDImpl(s, QUOTATION_STRING, false);
     }
 
     @Override
     public String getIDQuotationString() {
-        return NO_QUOTATION;
+        return QUOTATION_STRING;
     }
 }
