@@ -10,7 +10,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 mappingId	MAPID-professor
 target		:professor/{prof_id} a :Professor . 
-source		SELECT prof_id, last_name FROM "postgres_university".unitTests."public".professors;
+source		SELECT prof_id, last_name FROM "postgres".unitTests."public".professors;
 
 mappingId	MAPID-fname
 target		:professor/{prof_id} :firstName {first_name} .
