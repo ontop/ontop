@@ -14,16 +14,9 @@ public class GeofRcc8TppiFunctionSymbolImpl  extends AbstractGeofBooleanFunction
         super("GEOF_RCC8_TPPI", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
-    // Set the matrix pattern for relate here
-    final String matrix_pattern = "TTTFTTFFT";
-
     @Override
-    protected ImmutableTerm setMatrixPattern(TermFactory termFactory) {
-        return termFactory.getDBStringConstant(matrix_pattern);
+    protected String getMatrixPatternString() {
+        return "TTTFTTFFT";
     }
 
-    @Override
-    public TriFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
-        return termFactory::getDBRelate;
-    }
 }
