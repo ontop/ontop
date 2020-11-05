@@ -35,9 +35,13 @@ public class AbstractRDF4JTest {
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath) throws SQLException, IOException {
         initOBDA(dbScriptRelativePath, obdaRelativePath, null);
     }
-
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath) throws SQLException, IOException {
+        initOBDA(dbScriptRelativePath, obdaRelativePath, null, null);
+    }
+
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile) throws SQLException, IOException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
@@ -67,6 +71,9 @@ public class AbstractRDF4JTest {
         if (ontologyRelativePath != null)
             builder.ontologyFile(AbstractRDF4JTest.class.getResource(ontologyRelativePath).getPath());
 
+        if (propertyFile != null)
+            builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
+
         OntopSQLOWLAPIConfiguration config = builder.build();
 
         OntopRepository repo = OntopRepository.defaultRepository(config);
@@ -78,6 +85,16 @@ public class AbstractRDF4JTest {
     }
 
     protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
+        initR2RML(dbScriptRelativePath, r2rmlRelativePath, null, null);
+    }
+
+    protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath,
+                                    @Nullable String ontologyRelativePath) throws SQLException, IOException {
+        initR2RML(dbScriptRelativePath, r2rmlRelativePath, ontologyRelativePath, null);
+    }
+
+    protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath,
+                                    @Nullable String ontologyRelativePath, @Nullable String propertyFile) throws SQLException, IOException {
 
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
@@ -98,13 +115,20 @@ public class AbstractRDF4JTest {
         st.executeUpdate(bf.toString());
         SQL_CONNECTION.commit();
 
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .r2rmlMappingFile(AbstractRDF4JTest.class.getResource(r2rmlRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
-                .enableTestMode()
-                .build();
+                .enableTestMode();
+
+        if (ontologyRelativePath != null)
+            builder.ontologyFile(AbstractRDF4JTest.class.getResource(ontologyRelativePath).getPath());
+
+        if (propertyFile != null)
+            builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
+
+        OntopSQLOWLAPIConfiguration config = builder.build();
 
         OntopRepository repo = OntopRepository.defaultRepository(config);
         repo.init();
