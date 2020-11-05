@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/spark-datatypes-test#"
+     xml:base="http://www.semanticweb.org/spark-datatypes-test"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:obda="https://w3id.org/obda/vocabulary#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:terms="http://purl.org/dc/terms/">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/spark-datatypes-test"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.w3.org/2001/XMLSchema#date -->
+
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasBigInt -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasBigInt">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasBinary -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasBinary">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#hexBinary"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasBoolean -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasBoolean">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasByte -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasByte">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#byte"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasDate -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasDate">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasDec -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasDec">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasDecimal -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasDecimal">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasDouble -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasDouble">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasFloat -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasFloat">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasInt -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasInt">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasInteger -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasInteger">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasLong -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasLong">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasNumeric -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasNumeric">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasReal -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasReal">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasShort -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasShort">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#short"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasSmallInt -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasSmallInt">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#short"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasString -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasString">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasTimestamp -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasTimestamp">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#hasTinyInt -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/spark-datatypes-test#hasTinyInt">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#byte"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/spark-datatypes-test#TestObject -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/spark-datatypes-test#TestObject"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+
