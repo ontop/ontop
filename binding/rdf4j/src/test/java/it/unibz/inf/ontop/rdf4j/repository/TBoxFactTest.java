@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,10 +16,12 @@ public class TBoxFactTest extends AbstractRDF4JTest {
     private static final String OBDA_FILE = "/label_comment.obda";
     // TODO: use an ontology file
     private static final String OWL_FILE = null;
+    // TODO: use a properties file
+    private static final String PROPERTIES_FILE = null;
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        initOBDA(CREATE_DB_FILE, OBDA_FILE, OWL_FILE);
+        initOBDA(CREATE_DB_FILE, OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterClass
