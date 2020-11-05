@@ -60,14 +60,14 @@ public class SelectQueryParserTest {
 
         idfac = builder.getQuotedIDFactory();
         TABLE_SP = builder.createDatabaseRelation(
-                ImmutableList.of(idfac.createRelationID(null, "PP"),
+                ImmutableList.of(idfac.createRelationID("PP"),
                         idfac.createRelationID("S", "PP")),
                 DatabaseTableDefinition.attributeListBuilder()
         .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
         .addAttribute(idfac.createAttributeID("B"), integerDBType, false));
 
         TABLE_SQ = builder.createDatabaseRelation(
-                ImmutableList.of(idfac.createRelationID(null, "QQ"),
+                ImmutableList.of(idfac.createRelationID("QQ"),
                         idfac.createRelationID("S", "QQ")),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idfac.createAttributeID("A"), integerDBType, false)

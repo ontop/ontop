@@ -25,7 +25,10 @@ import java.sql.DriverManager;
 import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
@@ -34,7 +37,7 @@ import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
  * A simple test that check if the system is able to handle mapping variants
  * to construct the proper datalog program.
  */
-public class MappingAnalyzerTest extends TestCase {
+public class MappingAnalyzerTest {
 
 	private Connection conn;
 
@@ -44,178 +47,120 @@ public class MappingAnalyzerTest extends TestCase {
 	private static final String username = "sa";
 	private static final String password = "";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
-		// Initializing and H2 database with the stock exchange data
 		conn = DriverManager.getConnection(url, username, password);
 		executeFromFile(conn, "src/test/resources/test/mappinganalyzer/create-tables.sql");
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		executeFromFile(conn, "src/test/resources/test/mappinganalyzer/drop-tables.sql");
 		conn.close();
 	}
 
 	private void runTests(String obdaFileName) throws Exception {
-		Properties p = new Properties();
-		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
-				.properties(p)
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
 				.enableTestMode()
 				.build();
 
-		factory.createReasoner(configuration);
+		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
+		reasoner.close();
 	}
 
-	public void testMapping_1() {
-		try {
-			runTests("src/test/resources/test/mappinganalyzer/case_1.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+	@Test
+	public void testMapping_1() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_1.obda");
 	}
-	
-	public void testMapping_2() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_2.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_2() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_2.obda");
 	}
-	
-	public void testMapping_3() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_3.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_3() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_3.obda");
 	}
-	
-	public void testMapping_4() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_4.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_4() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_4.obda");
 	}
-	
-	public void testMapping_5() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_5.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL
-		}
+
+	@Test(expected = IllegalConfigurationException.class)
+	public void test_5_ambiguous_column_name() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_5.obda");
 	}
-	
-	public void testMapping_6() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_6.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_6() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_6.obda");
 	}
-	
-	public void testMapping_7() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_7.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_7() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_7.obda");
 	}
-	
-	public void testMapping_8() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_8.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
-		}
+
+	@Test(expected = IllegalConfigurationException.class)
+	public void test_8_duplicate_column_name() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_8.obda");
 	}
-	
-	public void testMapping_9()  {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_9.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
-		}
+
+	@Test(expected = IllegalConfigurationException.class)
+	public void test_9_placeholder_does_not_match() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_9.obda");
 	}
-	
-	public void testMapping_10() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_10.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were alias map to two different values
-		}
+
+	@Test(expected = IllegalConfigurationException.class)
+	public void test_10_duplicate_column_name() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_10.obda");
 	}
-	
-	public void testMapping_11() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_11.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_11() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_11.obda");
 	}
-	
-	public void testMapping_12() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_12.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were name map to two different values
-		}
+
+	@Test
+	public void testMapping_12() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_12.obda");
 	}
-	
-	public void testMapping_13() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_13.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_13() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_13.obda");
 	}
-	
-	public void testMapping_14() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_14.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL
-		}
+
+	@Test(expected = IllegalConfigurationException.class)
+	public void test_14_fqdn_in_target() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_14.obda");
 	}
-	
-	public void testMapping_15() {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_15.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_15() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_15.obda");
 	}
-	
-	public void testMapping_16()  {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_16.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_16() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_16.obda");
 	}
-	
-	public void testMapping_17()  {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_17.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), true); // FAIL
-		}
+
+	@Test(expected = IllegalConfigurationException.class)
+	public void test_17_ambigous_column_name() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_17.obda");
 	}
-	
-	public void testMapping_18()  {
-		try {
-            runTests("src/test/resources/test/mappinganalyzer/case_18.obda");
-		} catch (Exception e) {
-			assertTrue(e.toString(), false);
-		}
+
+	@Test
+	public void testMapping_18() throws Exception {
+		runTests("src/test/resources/test/mappinganalyzer/case_18.obda");
 	}
 }

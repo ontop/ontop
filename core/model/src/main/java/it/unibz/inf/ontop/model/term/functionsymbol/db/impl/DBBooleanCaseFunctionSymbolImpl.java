@@ -111,7 +111,7 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
                         .map(twoVLExpressions::get)
                         .allMatch(e -> e.equals(oppositeExpression))) {
 
-                    ImmutableSet<ImmutableExpression> conditions = IntStream.range(0, twoVLExpressions.size())
+                    ImmutableSet<ImmutableExpression> conditions = IntStream.range(0, twoVLExpressions.size() -1)
                             .filter(i -> i % 2 == 0)
                             .boxed()
                             .map(twoVLExpressions::get)

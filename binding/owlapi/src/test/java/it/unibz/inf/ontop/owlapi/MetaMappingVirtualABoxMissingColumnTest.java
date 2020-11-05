@@ -78,36 +78,6 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		conn.close();
 	}
 
-	private void runTests() throws Exception {
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.ontologyFile(owlfile)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.enableTestMode()
-				.build();
-       
-		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-        try (OntopOWLReasoner reasoner = factory.createReasoner(config);
-			 // Now we are ready for querying
-			 OWLConnection conn = reasoner.getConnection();
-			 OWLStatement st = conn.createStatement();
-			 TupleOWLResultSet rs1 = st.executeSelectQuery(query1);
-        ) {
-            assertTrue(rs1.hasNext());
-            final OWLBindingSet bindingSet = rs1.next();
-            OWLIndividual ind = bindingSet.getOWLIndividual("x");
-			//OWLIndividual ind2 = rs.getOWLIndividual("y");
-			//OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<uri1>", ind.toString());
-			//assertEquals("<uri1>", ind2.toString());
-			//assertEquals("\"value1\"", val.toString());
-		}
-
-	}
 
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
@@ -119,7 +89,17 @@ public class MetaMappingVirtualABoxMissingColumnTest {
         expectedEx.expect(IllegalConfigurationException.class);
         expectedEx.expectMessage("The placeholder(s) code1 in the target do(es) not occur in source query of the mapping assertion");
 
-		runTests();
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.enableTestMode()
+				.build();
+
+		OntopOWLReasoner reasoner = factory.createReasoner(config);
 	}
 
 

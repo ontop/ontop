@@ -19,24 +19,8 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLLiteral;
-
-import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Scanner;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static junit.framework.TestCase.*;
+import com.google.common.collect.ImmutableList;
+import org.junit.*;
 
 
 /***
@@ -45,66 +29,29 @@ import static junit.framework.TestCase.*;
  * Checks that language tags are handled correctly if they appear in assertions in the .owl file.
  *
  */
-public class LangTagTest {
+public class LangTagTest extends AbstractOWLAPITest {
 
-    private static final String owlFile = "src/test/resources/test/langTag/langTag.owl";
-    private static final String obdaFile = "src/test/resources/test/langTag/langTag.obda";
-    private static final String propertyfile = "src/test/resources/test/langTag/langTag.properties";
-    private static final String createTablesFile = "src/test/resources/test/langTag/create-h2.sql";
-    private static final String dropTablesFile = "src/test/resources/test/langTag/drop-h2.sql";
-    private static final String queryFile = "src/test/resources/test/langTag/query.rq";
-
-    private OntopOWLReasoner reasoner;
-    private OWLConnection conn;
-    private Connection sqlConnection;
-
-
-    @Before
-    public void setUp() throws Exception {
-
-        sqlConnection = DriverManager.getConnection("jdbc:h2:mem:langTag","sa", "sa");
-        executeFromFile(sqlConnection, createTablesFile);
-
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile(owlFile)
-                .nativeOntopMappingFile(obdaFile)
-                .propertyFile(propertyfile)
-                .enableOntologyAnnotationQuerying(true)
-                .build();
-
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        reasoner = factory.createReasoner(config);
-        conn = reasoner.getConnection();
+    @BeforeClass
+    public static void setUp() throws Exception {
+        initOBDA("/test/langTag/create-h2.sql",
+                "/test/langTag/langTag.obda",
+                "/test/langTag/langTag.owl",
+                "/test/langTag/langTag.properties");
     }
 
     @After
     public void tearDown() throws Exception {
-        executeFromFile(sqlConnection, dropTablesFile);
-        sqlConnection.close();
-        conn.close();
+        release();
     }
 
     @Test
-    public void runTest() throws Exception {
+    public void testLangTag() throws Exception {
+        String query = "SELECT ?instancia ?comment  WHERE {\n" +
+                "VALUES ?instancia { <http://www.basecia.es/ontologia#CuentaContableActivos> } .\n" +
+                "?instancia <http://www.w3.org/2000/01/rdf-schema#comment> ?comment .\n" +
+                "}";
 
-        String query = new Scanner( new File(queryFile)).useDelimiter("\\A").next();
-
-        try (OWLStatement st = conn.createStatement()) {
-            TupleOWLResultSet rs2 = st.executeSelectQuery(query);
-            assertTrue(rs2.hasNext());
-            final OWLBindingSet bindingSet = rs2.next();
-            IRI iri = bindingSet.getOWLIndividual("instancia").asOWLNamedIndividual().getIRI();
-            OWLLiteral lit = bindingSet.getOWLLiteral("comment");
-            assertEquals("http://www.basecia.es/ontologia#", iri.getNamespace());
-            assertEquals("CuentaContableActivos", iri.getRemainder().get());
-            assertEquals("Cuenta bancaria interna de activos.", lit.getLiteral());
-            assertEquals("es", lit.getLang());
-
-            assertFalse(rs2.hasNext());
-        }
+        checkReturnedValues(query, "comment", ImmutableList.of(
+                "\"Cuenta bancaria interna de activos.\"@es"));
     }
 }

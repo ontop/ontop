@@ -90,8 +90,6 @@ public class RDB2RDFTest {
 			"tc0007h",
 			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
 			"tc0009d",
-			// TODO: fix: too much escaping for the curly brackets in the string
-			"tc0010c",
 			// Modified (different XSD.DOUBLE lexical form)
 			"dg0012",
 			// Direct mapping and bnodes: row unique ids are not considered, leadinq to incomplete results
@@ -109,10 +107,8 @@ public class RDB2RDFTest {
 			"tc0016b",
 			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
 			"tc0016c",
-			// Wrong data IRI created. TODO: fix it
+			// H2 returns varbinary in lower case while upper case was expected. Modified test added.
 			"tc0016e",
-			// Excessive IRI encoding done for extreme-east asia characters. TODO: fix it
-			"dg0017",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"dg0018",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.

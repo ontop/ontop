@@ -77,7 +77,7 @@ public class SelectItemParser {
         @Override
         public void visit(AllTableColumns allTableColumns) {
             Table table = allTableColumns.getTable();
-            RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
+            RelationID id = JSqlParserTools.getRelationId(idfac, table);
 
             stream = attributes.asMap().entrySet().stream()
                     .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))

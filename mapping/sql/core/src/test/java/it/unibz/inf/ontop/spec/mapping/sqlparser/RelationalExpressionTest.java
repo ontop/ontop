@@ -110,7 +110,7 @@ public class RelationalExpressionTest {
         onExpression.setLeftExpression(new Column(new Table("P"), "A"));
         onExpression.setRightExpression(new Column(new Table("Q"), "A"));
 
-        re1_1 = ops.withAlias(re2, builder.getQuotedIDFactory().createRelationID(null, "P"));
+        re1_1 = ops.withAlias(re2, builder.getQuotedIDFactory().createRelationID("P"));
 
 
         System.out.println("****************************************************");
@@ -263,7 +263,7 @@ public class RelationalExpressionTest {
 
     @Test
     public void alias_test() {
-        RelationID tableAlias = MDFAC.createRelationID(null, "S");
+        RelationID tableAlias = MDFAC.createRelationID("S");
         QualifiedAttributeID qaAx = new QualifiedAttributeID(tableAlias, attX);
         QualifiedAttributeID qaAy = new QualifiedAttributeID(tableAlias, attY);
 

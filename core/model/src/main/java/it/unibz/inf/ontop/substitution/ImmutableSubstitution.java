@@ -98,4 +98,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
 
     ImmutableSubstitution<ImmutableTerm> simplifyValues();
 
+    TermFactory getTermFactory();
+
 }

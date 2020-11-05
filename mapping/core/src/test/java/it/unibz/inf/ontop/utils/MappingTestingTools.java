@@ -122,7 +122,7 @@ public class MappingTestingTools {
             for (int i = 1 ; i <= arity; i++) {
                 builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
             }
-            RelationID id = idFactory.createRelationID(null, "TABLE" + tableNumber + "AR" + arity);
+            RelationID id = idFactory.createRelationID("TABLE" + tableNumber + "AR" + arity);
             return createDatabaseRelation(ImmutableList.of(id), builder);
         }
     }

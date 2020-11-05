@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.owlapi.AbstractOWLAPITest;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,7 +26,7 @@ public class OWLAPITestingTools {
         OWLAPI_TRANSLATOR = injector.getInstance(OWLAPITranslatorOWL2QL.class);
     }
 
-    public static String readFromFile(String filename) throws IOException {
+    private static String readFromFile(String filename) throws IOException {
         FileReader reader = new FileReader(filename);
         BufferedReader in = new BufferedReader(reader);
         StringBuilder bf = new StringBuilder();

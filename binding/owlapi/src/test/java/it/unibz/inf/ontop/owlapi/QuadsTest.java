@@ -98,7 +98,7 @@ public class QuadsTest {
     String sql;
 
     int i = 0;
-    String expectedResult = Files.lines(Paths.get(RESULT_FILE)).collect(joining("\n"));
+    String expectedResult = Files.lines(Paths.get(RESULT_FILE)).collect(joining("\n")) + "\n";
 
     try {
       IQ executableQuery = st.getExecutableQuery(query);
@@ -119,10 +119,9 @@ public class QuadsTest {
         i++;
       }
       assertEquals(expectedCardinality, i);
-      assertEquals(expectedResult + "\n", builder.toString());
-    } catch (Exception e) {
-      throw e;
-    } finally {
+      assertEquals(expectedResult, builder.toString());
+    }
+    finally {
       conn.close();
       reasoner.dispose();
     }

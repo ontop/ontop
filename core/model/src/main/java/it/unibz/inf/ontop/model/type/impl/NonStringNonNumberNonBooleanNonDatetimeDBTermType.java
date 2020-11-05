@@ -16,14 +16,14 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
                                                                 boolean isAbstract) {
-        super(name, parentAncestry, isAbstract);
+        super(name, parentAncestry, isAbstract, Category.OTHER);
         rdfDatatype = null;
         this.support = StrictEqSupport.SAME_TYPE_NO_CONSTANT;
     }
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
                                                                 RDFDatatype rdfDatatype) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, Category.OTHER);
         this.rdfDatatype = rdfDatatype;
         this.support = StrictEqSupport.SAME_TYPE_NO_CONSTANT;
     }
@@ -31,7 +31,7 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
             String name, TermTypeAncestry parentAncestry,
             StrictEqSupport support) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, Category.OTHER);
         this.support = support;
         this.rdfDatatype = null;
     }
@@ -39,14 +39,9 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
             String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
             StrictEqSupport support) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, Category.OTHER);
         this.support = support;
         this.rdfDatatype = rdfDatatype;
-    }
-
-    @Override
-    public Category getCategory() {
-        return Category.OTHER;
     }
 
     @Override

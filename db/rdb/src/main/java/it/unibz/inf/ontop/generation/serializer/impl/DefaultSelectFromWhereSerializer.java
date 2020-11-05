@@ -90,7 +90,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected RelationID generateFreshViewAlias() {
-            return idFactory.createRelationID(null, VIEW_PREFIX + viewCounter.incrementAndGet());
+            return idFactory.createRelationID(VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
         ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
@@ -107,7 +107,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
         }
 
-        ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
+        private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
             AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
             return variables.stream()
                     .collect(ImmutableCollectors.toMap(

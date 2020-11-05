@@ -327,12 +327,18 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms) {
-		return new NonGroundFunctionalTermImpl(this, functor, terms);
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl(this, (BooleanFunctionSymbol) functor, terms);
+		else
+			return new NonGroundFunctionalTermImpl(this, functor, terms);
 	}
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms) {
-		return new NonGroundFunctionalTermImpl(functor, terms, this);
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl((BooleanFunctionSymbol) functor, terms, this);
+		else
+			return new NonGroundFunctionalTermImpl(functor, terms, this);
 	}
 
 	@Override
@@ -719,18 +725,16 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
-														  ImmutableList<? extends ImmutableTerm> arguments) {
-		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
-				arguments);
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString) {
+		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> arguments) {
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(arguments.size()),
+				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
 				arguments);
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
@@ -934,6 +938,11 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
     }
+
+	@Override
+	public ImmutableFunctionalTerm getDBEncodeForURI(ImmutableTerm term) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBEncodeForURI(), term);
+	}
 
     @Override
 	public ImmutableFunctionalTerm getNullRejectingDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {

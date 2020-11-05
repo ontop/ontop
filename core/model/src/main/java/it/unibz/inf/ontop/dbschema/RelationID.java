@@ -35,23 +35,18 @@ import com.google.common.collect.ImmutableList;
 
 public interface RelationID {
 
-	/**
-	 *
-	 * @return the relation ID with the schema name, followed by the relation ID (if it has schema)
-	 */
-	ImmutableList<RelationID> getWithSchemalessID();
+	RelationID getTableOnlyID();
+
+	int TABLE_INDEX = 0;
 
 	/**
 	 *
-	 * @return the table component of the name
+	 * @return the components of the relation id
+	 *         table name is the component with index 0
+	 *         schema name is the component with index 1
+	 *         catalog name is the component with index 2
 	 */
-	QuotedID getTableID();
-
-	/**
-	 *
-	 * @return the schema component of the name
-	 */
-	QuotedID getSchemaID();
+	ImmutableList<QuotedID> getComponents();
 
 	/**
 	 *

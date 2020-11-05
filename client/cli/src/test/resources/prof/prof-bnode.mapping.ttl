@@ -1,0 +1,130 @@
+@prefix : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:MAPID-professor> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id, last_name FROM professors;"
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:class :Professor;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-fname> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id, first_name FROM professors;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:column "first_name";
+          rr:termType rr:Literal
+        ];
+      rr:predicate :firstName
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-lname> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id, last_name FROM professors;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:column "last_name";
+          rr:termType rr:Literal
+        ];
+      rr:predicate :lastName
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-nickname> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id, nickname FROM professors;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:column "nickname";
+          rr:termType rr:Literal
+        ];
+      rr:predicate :nickname
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-teaches> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id, course_id FROM teaching;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:template "course_{course_id}";
+          rr:termType rr:BlankNode
+        ];
+      rr:predicate :teaches
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-teachesAt> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id FROM teaching;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:object <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#university/Bolzano>;
+      rr:predicate :teachesAt
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-teacherID> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id FROM teaching;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:column "prof_id";
+          rr:termType rr:Literal
+        ];
+      rr:predicate :teacherID
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:template "professor_{prof_id}";
+      rr:termType rr:BlankNode
+    ] .
+
+<urn:MAPID-course_1> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT * FROM course;"
+    ];
+  rr:predicateObjectMap [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:column "duration";
+          rr:termType rr:Literal
+        ];
+      rr:predicate :duration
+    ], [ a rr:PredicateObjectMap;
+      rr:objectMap [ a rr:ObjectMap, rr:TermMap;
+          rr:column "nb_students";
+          rr:termType rr:Literal
+        ];
+      rr:predicate :nbStudents
+    ];
+  rr:subjectMap [ a rr:SubjectMap, rr:TermMap;
+      rr:class :Course;
+      rr:template "course_{course_id}";
+      rr:termType rr:BlankNode
+    ] .

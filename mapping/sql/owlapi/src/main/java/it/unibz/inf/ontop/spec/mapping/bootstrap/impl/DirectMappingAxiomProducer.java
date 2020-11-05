@@ -104,8 +104,11 @@ public class DirectMappingAxiomProducer {
 
 	// TODO: use quotation marks here and for variables names too
 
+	private static String getTableName(DatabaseRelationDefinition relation) {
+		return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
+	}
 	private static String getColumnAlias(Attribute attr) {
-		 return ((DatabaseRelationDefinition)attr.getRelation()).getID().getTableID().getName() + "_" + attr.getID().getName();
+		 return getTableName((DatabaseRelationDefinition)attr.getRelation()) + "_" + attr.getID().getName();
 	}
 	
 	private static String getQualifiedColumnName(Attribute attr) {
@@ -154,9 +157,9 @@ public class DirectMappingAxiomProducer {
 											  Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableTerm sub = generateTerm(fk.getRelation(),
-				fk.getRelation().getID().getTableID().getName() + "_", bnodeTemplateMap);
+				getTableName(fk.getRelation()) + "_", bnodeTemplateMap);
 		ImmutableTerm obj = generateTerm(fk.getReferencedRelation(),
-				fk.getReferencedRelation().getID().getTableID().getName() + "_", bnodeTemplateMap);
+				getTableName(fk.getReferencedRelation()) + "_", bnodeTemplateMap);
 
 		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
 		return ImmutableList.of(atom);
@@ -171,7 +174,7 @@ public class DirectMappingAxiomProducer {
      * @return table IRI
      */
 	private String getTableIRIString(DatabaseRelationDefinition table) {
-		return baseIRI + R2RMLIRISafeEncoder.encode(table.getID().getTableID().getName());
+		return baseIRI + R2RMLIRISafeEncoder.encode(getTableName(table));
 	}
 
     /**

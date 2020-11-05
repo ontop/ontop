@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.input;
 
+import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 /**
@@ -7,23 +8,11 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
  */
 public interface RDF4JInputQueryFactory {
 
-    /**
-     * TODO: support bindings
-     */
-    SelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery);
+    RDF4JSelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 
-    /**
-     * TODO: support bindings
-     */
-    AskQuery createAskQuery(String queryString, ParsedQuery parsedQuery);
+    RDF4JAskQuery createAskQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 
-    /**
-     * TODO: support bindings
-     */
-    ConstructQuery createConstructQuery(String queryString, ParsedQuery parsedQuery);
+    RDF4JConstructQuery createConstructQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 
-    /**
-     * TODO: support bindings
-     */
-    DescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery);
+    RDF4JDescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings);
 }

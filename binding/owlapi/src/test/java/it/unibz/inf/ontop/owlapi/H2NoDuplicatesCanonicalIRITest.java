@@ -20,181 +20,97 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.ArrayList;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.*;
 
 /***
  * Test use of canonical iri in h2 simple database on wellbores
  */
-public class H2NoDuplicatesCanonicalIRITest {
+public class H2NoDuplicatesCanonicalIRITest extends AbstractOWLAPITest {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-	private static final String owlfile = "src/test/resources/sameAs/wellbores-same-as-can.owl";
-	private static final String obdafile = "src/test/resources/sameAs/wellbores-same-as-can.obda";
-
-	private OntopOWLReasoner reasoner;
-	private Connection sqlConnection;
-	private OWLConnection conn;
-
-	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
-	private static final String JDBC_USER =  "sa";
-	private static final String JDBC_PASSWORD =  "";
-
-	@Before
-	public void setUp() throws Exception {
-
-		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-		executeFromFile(sqlConnection,"src/test/resources/sameAs/wellbores-same-as-can.sql");
-
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile(owlfile)
-				.nativeOntopMappingFile(obdafile)
-				.jdbcUrl(JDBC_URL)
-				.jdbcUser(JDBC_USER)
-				.jdbcPassword(JDBC_PASSWORD)
-				.enableTestMode()
-				.build();
-
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-		reasoner = factory.createReasoner(config);
-		conn = reasoner.getConnection();
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/sameAs/wellbores-same-as-can.sql",
+				"/sameAs/wellbores-same-as-can.obda",
+				"/sameAs/wellbores-same-as-can.owl");
 	}
 
-
-	@After
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-		if (!sqlConnection.isClosed()) {
-			try (java.sql.Statement s = sqlConnection.createStatement()) {
-				s.execute("DROP ALL OBJECTS DELETE FILES");
-			}
-			finally {
-				sqlConnection.close();
-			}
-		}
+	@AfterClass
+	public static void tearDown() throws Exception {
+		release();
 	}
-
-	private ArrayList<String> runTests(String query) throws Exception {
-		try (OWLStatement st = conn.createStatement()) {
-			ArrayList<String> retVal = new ArrayList<>();
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			while(rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                for (String s : rs.getSignature()) {
-					OWLObject binding = bindingSet.getOWLObject(s);
-					String rendering = ToStringRenderer.getInstance().getRendering(binding);
-					retVal.add(rendering);
-					log.debug((s + ":  " + rendering));
-				}
-			}
-			return retVal;
-		}
-	}
-
-
 
 	@Test
     public void testCanIRI1() throws Exception {
-
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x ?y  WHERE{\n" +
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT DISTINCT ?x ?y WHERE {\n" +
 				"?x a :Wellbore .\n" +
 				"?x :inWell ?y .\n" +
-				"}\n";
+				"}";
 
-		ArrayList<String> results = runTests(query);
-		ArrayList<String> expectedResults = new ArrayList<>();
-
-		assertEquals(20, results.size());
+		checkNumberOfReturnedValues(query, 10);
     }
 
 	@Test
 	public void testCanIRI2() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x WHERE{\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT DISTINCT ?x WHERE{\n" +
 				"?x a :Wellbore .\n" +
-				"}\n";
+				"}";
 
-		ArrayList<String> results = runTests(query);
-
-		assertEquals(5, results.size());
+		checkNumberOfReturnedValues(query, 5);
 	}
 
 	@Test
 	public void testCanIRI3() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x ?y ?z WHERE{\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT DISTINCT ?x ?y ?z WHERE{\n" +
 				"?x a :Wellbore .\n" +
 				"?x :inWell ?y .\n" +
 				"?x :name ?z .\n" +
-				"}\n";
+				"}";
 
-		ArrayList<String> results = runTests(query);
-
-		assertEquals(72, results.size() );
+		checkNumberOfReturnedValues(query, 24);
 	}
 
 	@Test
 	public void testCanIRI4() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x ?y WHERE{\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT DISTINCT ?x ?y WHERE{\n" +
 				"?x a :Well .\n" +
 				"?x :hasWellbore ?y .\n" +
-				"}\n";
+				"}";
 
-		ArrayList<String> results = runTests(query);
-
-		assertEquals(8, results.size() );
+		checkNumberOfReturnedValues(query, 4);
 	}
 
 	@Test
 	public void testCanIRI5() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select * WHERE{\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT * WHERE{\n" +
 				"?x :inWell ?y .\n" +
-				"}\n";
+				"}";
 
-		ArrayList<String> results = runTests(query);
-
-		assertEquals(20, results.size() );
+		checkNumberOfReturnedValues(query, 10);
 	}
 
 	@Test
 	public void testCanIRI6() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x WHERE{\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT DISTINCT ?x WHERE{\n" +
 				"?x a :Well .\n" +
-				"}\n";
+				"}";
 
-		ArrayList<String> results = runTests(query);
-
-		assertEquals(4, results.size() );
+		checkNumberOfReturnedValues(query, 4);
 	}
 
 	@Test
 	public void testCanIRI7() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select * WHERE{\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+				"SELECT * WHERE{\n" +
 				"?x :hasWellbore ?y .\n" +
-				"}\n";
+				"}";
 
-		ArrayList<String> results = runTests(query);
-
-		assertEquals(8, results.size() );
+		checkNumberOfReturnedValues(query, 4);
 	}
-
 }
 

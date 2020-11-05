@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.input.AskQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
@@ -29,7 +28,7 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 
     @Override
 	public boolean evaluate() throws QueryEvaluationException {
-		AskQuery query = factory.createAskQuery(getQueryString(), getParsedQuery());
+		AskQuery query = factory.createAskQuery(getQueryString(), getParsedQuery(), bindings);
 
 		try (OntopStatement stm = conn.createStatement();
 			 BooleanResultSet rs = stm.execute(query, getHttpHeaders())) {

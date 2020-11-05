@@ -25,7 +25,10 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     @Override
     public RAExpressionAttributes create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<QuotedID, ImmutableTerm> map = getAttributesMap(relation, variables);
-        return new RAExpressionAttributes(attachAliases(map, relation.getAllIDs()),
+        return new RAExpressionAttributes(attachAliases(map, relation.getAllIDs().stream()
+                .flatMap(id -> Stream.of(id, id.getTableOnlyID()))
+                .distinct()
+                .collect(ImmutableCollectors.toSet())),
                 aoops.create(relation, variables));
     }
 
@@ -165,17 +168,11 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
 
     private ImmutableMap<QualifiedAttributeID, ImmutableTerm> attachAliases(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes, ImmutableSet<RelationID> allRelationIds) {
         return unqualifiedAttributes.entrySet().stream()
-                        .flatMap(e -> createQualifiedID(allRelationIds, e.getKey())
+                        .flatMap(e -> Stream.concat(
+                                Stream.of(new QualifiedAttributeID(null, e.getKey())),
+                                allRelationIds.stream()
+                                        .map(a -> new QualifiedAttributeID(a, e.getKey())))
                                 .map(i -> Maps.immutableEntry(i, e.getValue())))
                         .collect(ImmutableCollectors.toMap());
     }
-
-    private Stream<QualifiedAttributeID> createQualifiedID(ImmutableSet<RelationID> aliases, QuotedID attributeId) {
-        return Stream.concat(Stream.of(new QualifiedAttributeID(null, attributeId)),
-                aliases.stream()
-                        .flatMap(l -> l.getWithSchemalessID().stream())
-                        .distinct()
-                        .map(a -> new QualifiedAttributeID(a, attributeId)));
-    }
-
 }

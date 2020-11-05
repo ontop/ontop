@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
     private final ImmutableUnificationTools unificationTools;
-    private final ConstructionNodeTools constructionNodeTools;
+    protected final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;

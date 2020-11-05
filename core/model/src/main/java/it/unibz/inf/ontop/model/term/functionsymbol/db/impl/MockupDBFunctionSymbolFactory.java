@@ -168,8 +168,8 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
-        return new MockupR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new MockupEncodeURIorIRIFunctionSymbol(dbStringType, preserveInternationalChars);
     }
 
     /**

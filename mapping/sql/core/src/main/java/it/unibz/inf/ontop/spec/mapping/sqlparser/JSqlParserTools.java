@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -43,5 +46,18 @@ public class JSqlParserTools {
             throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
 
         return plainSelect;
+    }
+
+    public static RelationID getRelationId(QuotedIDFactory idfac, Table table) {
+        // a massive workaround for JSQLParser, which supports long names
+        // but does NOT give direct access to the components
+        if (table.getSchemaName() == null)
+            return idfac.createRelationID(table.getName());
+        
+        if (table.getDatabase().getDatabaseName() == null)
+            return idfac.createRelationID(table.getSchemaName(), table.getName());
+        
+        String s = table.getFullyQualifiedName();
+        return idfac.createRelationID(s.split("\\."));
     }
 }

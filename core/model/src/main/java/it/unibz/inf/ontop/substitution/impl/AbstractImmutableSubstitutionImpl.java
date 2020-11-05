@@ -423,4 +423,9 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         return substitutionFactory.getSubstitution(newMap);
     }
+
+    @Override
+    public TermFactory getTermFactory() {
+        return termFactory;
+    }
 }

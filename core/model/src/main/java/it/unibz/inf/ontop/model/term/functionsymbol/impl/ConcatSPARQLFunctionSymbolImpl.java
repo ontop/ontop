@@ -68,9 +68,12 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
             return Optional.empty();
     }
 
+    /**
+     * Non-trivial logic. But could be implemented.
+     */
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        throw new RuntimeException("TODO: implement ConcatSPARQLFunctionSymbolImpl.inferType(...)");
+        return Optional.empty();
     }
 
     /**
