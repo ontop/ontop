@@ -62,17 +62,16 @@ public class DefaultMappingTransformer implements MappingTransformer {
     @Override
     public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters,
                                        Optional<Ontology> ontology, ImmutableSet<RDFFact> facts) {
+        ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
+        ImmutableList<MappingAssertion> mappingWithFacts =
+                Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
+
         if (ontology.isPresent()) {
-            ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(facts);
-
-            ImmutableList<MappingAssertion> mappingWithFacts =
-                    Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
-
             return createSpecification(mappingWithFacts, dbParameters, ontology.get().tbox());
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory, termFactory).build().tbox();
-            return createSpecification(mapping, dbParameters, emptyTBox);
+            return createSpecification(mappingWithFacts, dbParameters, emptyTBox);
         }
     }
 
