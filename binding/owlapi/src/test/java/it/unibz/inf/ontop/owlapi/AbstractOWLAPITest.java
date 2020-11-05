@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,19 +39,29 @@ public class AbstractOWLAPITest {
 
     protected static void initOBDA(String createDbFile, String obdaFile, String ontologyFile)
             throws SQLException, IOException, OWLOntologyCreationException {
+        initOBDA(createDbFile, obdaFile, ontologyFile, null);
+    }
+
+    protected static void initOBDA(String createDbFile, String obdaFile, String ontologyFile,
+                                   @Nullable String propertiesFile)
+            throws SQLException, IOException, OWLOntologyCreationException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
         executeFromFile(SQL_CONNECTION, AbstractOWLAPITest.class.getResource(createDbFile).getPath());
 
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractOWLAPITest.class.getResource(obdaFile).getPath())
                 .ontologyFile(AbstractOWLAPITest.class.getResource(ontologyFile).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
-                .enableTestMode()
-                .build();
+                .enableTestMode();
+
+        if (propertiesFile != null)
+            builder.propertyFile(AbstractOWLAPITest.class.getResource(propertiesFile).getPath());
+
+        OntopSQLOWLAPIConfiguration config = builder.build();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopOWLReasoner reasoner = factory.createReasoner(config);

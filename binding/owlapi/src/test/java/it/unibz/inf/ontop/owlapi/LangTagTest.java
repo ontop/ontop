@@ -35,7 +35,8 @@ public class LangTagTest extends AbstractOWLAPITest {
     public static void setUp() throws Exception {
         initOBDA("/test/langTag/create-h2.sql",
                 "/test/langTag/langTag.obda",
-                "/test/langTag/langTag.owl");
+                "/test/langTag/langTag.owl",
+                "/test/langTag/langTag.properties");
     }
 
     @After
