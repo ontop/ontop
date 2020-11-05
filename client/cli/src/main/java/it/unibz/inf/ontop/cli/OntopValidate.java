@@ -31,21 +31,26 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
             System.exit(1);
         }
 
-        OntopSQLOWLAPIConfiguration config;
-        if (isR2rmlFile(mappingFile)) {
-            config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .ontologyFile(owlFile)
-                    .r2rmlMappingFile(mappingFile)
-                    .propertyFile(propertiesFile)
-                    .build();
-        }
-        else {
-            config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .ontologyFile(owlFile)
-                    .nativeOntopMappingFile(mappingFile)
-                    .propertyFile(propertiesFile)
-                    .build();
-        }
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder =
+                OntopSQLOWLAPIConfiguration.defaultBuilder()
+                        .ontologyFile(owlFile)
+                        .propertyFile(propertiesFile);
+
+        if (dbPassword != null)
+            builder.jdbcPassword(dbPassword);
+
+        if (dbUrl != null)
+            builder.jdbcUrl(dbUrl);
+
+        if (dbUser != null)
+            builder.jdbcUser(dbUser);
+
+        if (isR2rmlFile(mappingFile))
+            builder.r2rmlMappingFile(mappingFile);
+        else
+            builder.nativeOntopMappingFile(mappingFile);
+
+        OntopSQLOWLAPIConfiguration config = builder.build();
 
         OWLOntology ontology = null;
         try {

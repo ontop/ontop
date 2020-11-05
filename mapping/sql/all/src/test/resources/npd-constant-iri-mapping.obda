@@ -1,0 +1,29 @@
+[PrefixDeclaration]
+:		http://sws.ifi.uio.no/vocab/npd-v2#
+dc:		http://purl.org/dc/elements/1.1/
+ex:		http://example.org/ex#
+isc:		http://resource.geosciml.org/classifier/ics/ischart/
+nlx:		http://sws.ifi.uio.no/data/norlex/
+npd:		http://sws.ifi.uio.no/data/npd-v2/
+owl:		http://www.w3.org/2002/07/owl#
+ptl:		http://sws.ifi.uio.no/vocab/npd-v2-ptl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+sql:		http://sws.ifi.uio.no/vocab/sql#
+xsd:		http://www.w3.org/2001/XMLSchema#
+geos:		http://www.opengis.net/ont/geosparql#
+nlxv:		http://sws.ifi.uio.no/vocab/norlex#
+npdv:		http://sws.ifi.uio.no/vocab/npd-v2#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+void:		http://rdfs.org/ns/void#
+diskos:		http://sws.ifi.uio.no/data/diskos/
+diskosv:		http://sws.ifi.uio.no/vocab/diskos#
+
+
+[MappingDeclaration] @collection [[
+
+mappingId	Mapping:00015:Literal:wellbore_coordinates:dateSyncNPD
+target		npd:wellbore/point rdfs:label "Fake point" .
+source		SELECT wlbNpdidWellbore,dateSyncNPD FROM wellbore_coordinates
+
+]]
+

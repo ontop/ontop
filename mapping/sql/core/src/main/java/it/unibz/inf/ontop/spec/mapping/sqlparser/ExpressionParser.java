@@ -418,7 +418,7 @@ public class ExpressionParser {
             QuotedID column = idfac.createAttributeID(expression.getColumnName());
             Table table = expression.getTable();
             RelationID relation = (table != null) && (table.getName() != null)
-                    ? idfac.createRelationID(table.getSchemaName(), table.getName())
+                    ? JSqlParserTools.getRelationId(idfac, table)
                     : null;
             QualifiedAttributeID qa = new QualifiedAttributeID(relation, column);
             ImmutableTerm var = attributes.get(qa);

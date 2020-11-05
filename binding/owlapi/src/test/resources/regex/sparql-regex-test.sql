@@ -1,4 +1,4 @@
-DROP TABLE test;
+DROP TABLE IF EXISTS test;
 
 CREATE TABLE test (
     name1 character varying(100)

@@ -12,14 +12,14 @@ public class StringDBTermType extends DBTermTypeImpl {
     private final RDFDatatype xsdStringDatatype;
 
     protected StringDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, Category.STRING);
         this.xsdStringDatatype = xsdStringDatatype;
         this.castName = name;
     }
 
     protected StringDBTermType(String name, String castName,
                                TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, Category.STRING);
         this.castName = castName;
         this.xsdStringDatatype = xsdStringDatatype;
     }
@@ -27,11 +27,6 @@ public class StringDBTermType extends DBTermTypeImpl {
     @Override
     public String getCastName() {
         return castName;
-    }
-
-    @Override
-    public Category getCategory() {
-        return Category.STRING;
     }
 
     @Override

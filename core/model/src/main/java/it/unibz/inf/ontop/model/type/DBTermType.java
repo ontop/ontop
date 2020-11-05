@@ -44,6 +44,8 @@ public interface DBTermType extends TermType {
      */
     boolean areEqualitiesBetweenTwoDBAttributesStrict();
 
+    Optional<Boolean> isValidLexicalValue(String lexicalValue);
+
 
     enum Category {
         STRING,

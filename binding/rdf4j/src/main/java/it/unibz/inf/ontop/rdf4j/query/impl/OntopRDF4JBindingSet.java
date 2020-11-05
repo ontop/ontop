@@ -23,9 +23,12 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     private static final long serialVersionUID = -8455466574395305166L;
 
     private OntopBindingSet ontopBindingSet;
+    private final byte[] salt;
 
-    public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet) {
+    public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet,
+                                byte[] salt) {
         this.ontopBindingSet = ontopBindingSet;
+        this.salt = salt;
     }
 
     @Override
@@ -49,7 +52,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
             final RDFConstant constant = ontopBindingSet.getConstant(variableName);
             return constant == null?
                     null:
-                    RDF4JHelper.getValue(constant);
+                    RDF4JHelper.getValue(constant, salt);
         } catch (OntopResultConversionException e) {
             throw new RuntimeException(e);
         }
@@ -73,7 +76,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
 //        try {
             return new SimpleBinding(
                     ontopBinding.getName(),
-                    RDF4JHelper.getValue(ontopBinding.getValue())
+                    RDF4JHelper.getValue(ontopBinding.getValue(), salt)
             );
 //        } catch (OntopResultConversionException e) {
 //            throw new RuntimeException(e);

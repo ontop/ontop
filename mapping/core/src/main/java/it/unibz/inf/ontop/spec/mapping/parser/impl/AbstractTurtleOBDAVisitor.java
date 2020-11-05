@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -18,6 +19,8 @@ import org.apache.commons.rdf.api.RDF;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -83,20 +86,29 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     protected ImmutableTerm constructIRI(String text) {
-        ImmutableTerm toReturn = null;
+        return constructBnodeOrIRI(text,
+                col -> termFactory.getIRIFunctionalTerm(col, true),
+                termFactory::getIRIFunctionalTerm,
+                false);
+    }
+
+    protected ImmutableTerm constructBnodeOrIRI(String text,
+                                                Function<Variable, ImmutableFunctionalTerm> columnFct,
+                                                BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct,
+                                                boolean isBnode) {
         final String PLACEHOLDER = "{}";
-        List<FormatString> tokens = parseIRI(text);
+        List<FormatString> tokens = parseIRIOrBnode(text, isBnode);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
-                IRI iri = rdfFactory.createIRI(token.toString());
-                toReturn = termFactory.getConstantIRI(iri);
+                return termFactory.getConstantIRI(rdfFactory.createIRI(token.toString()));
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
                 Variable column = termFactory.getVariable(token.toString());
-                toReturn = termFactory.getIRIFunctionalTerm(column, true);
+                return columnFct.apply(column);
             }
+            throw new MinorOntopInternalBugException("Unexpected token: " + token);
         } else {
             StringBuilder sb = new StringBuilder();
             List<ImmutableTerm> terms = new ArrayList<>();
@@ -110,20 +122,22 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
                 }
             }
             String iriTemplate = sb.toString(); // complete IRI template
-            toReturn = termFactory.getIRIFunctionalTerm(iriTemplate, ImmutableList.copyOf(terms));
+            return templateFct.apply(iriTemplate, ImmutableList.copyOf(terms));
         }
-        return toReturn;
     }
 
 
-    private List<FormatString> parseIRI(String text) {
+    private List<FormatString> parseIRIOrBnode(String text, boolean isBnode) {
         List<FormatString> toReturn = new ArrayList<>();
         Matcher m = varPattern.matcher(text);
         int i = 0;
         while (i < text.length()) {
             if (m.find(i)) {
                 if (m.start() != i) {
-                    toReturn.add(new FixedString(text.substring(i, m.start())));
+                    String subString = text.substring(i, m.start());
+                    toReturn.add(new FixedString(
+                            // Remove the prefix _:
+                            (isBnode && (i == 0)) ? subString.substring(2) : subString));
                 }
                 String value = m.group(1);
                 if (validateAttributeName(value)) {
@@ -144,12 +158,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     private ImmutableTerm constructBnodeFunction(String text) {
-        ImmutableList.Builder<ImmutableTerm> args = ImmutableList.builder();
-        Matcher m = varPattern.matcher(text);
-        while (m.find()) {
-            args.add(termFactory.getVariable(m.group(1)));
-        }
-        return termFactory.getFreshBnodeFunctionalTerm(args.build());
+        return constructBnodeOrIRI(text,
+                col -> termFactory.getBnodeFunctionalTerm(col, true),
+                termFactory::getBnodeFunctionalTerm,
+                true);
     }
 
     private interface FormatString {

@@ -8,9 +8,8 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.apache.commons.rdf.api.IRI;
+import org.eclipse.rdf4j.common.net.ParsedIRI;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.function.Function;
 
 public class DBIriStringResolverFunctionSymbolImpl extends AbstractTypedDBFunctionSymbol {
@@ -33,8 +32,8 @@ public class DBIriStringResolverFunctionSymbolImpl extends AbstractTypedDBFuncti
             String arg = ((DBConstant) newTerm).getValue();
             boolean isAbsoluteIRI;
             try {
-                isAbsoluteIRI = (new URI(arg)).isAbsolute();
-            } catch (URISyntaxException e) {
+                isAbsoluteIRI = ParsedIRI.create(arg).isAbsolute();
+            } catch (IllegalArgumentException e) {
                 isAbsoluteIRI = false;
             }
             return termFactory.getDBStringConstant(isAbsoluteIRI ? arg : baseIRI.getIRIString() + arg);

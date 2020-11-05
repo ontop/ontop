@@ -111,6 +111,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getR2RMLIRISafeEncode();
 
+    DBFunctionSymbol getDBEncodeForURI();
+
     /**
      * arity must be {@code >= 2 }
      *

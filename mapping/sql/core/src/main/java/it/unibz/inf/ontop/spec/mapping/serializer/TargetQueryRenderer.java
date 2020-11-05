@@ -98,7 +98,7 @@ public class TargetQueryRenderer {
         throw new UnexpectedTermException(term);
     }
 
-    private static String displayConstantBnode(BNode term) { return term.getName(); }
+    private static String displayConstantBnode(BNode term) { return term.getInternalLabel(); }
 
     private static String displayLiteralConstant(RDFLiteralConstant term) {
         return term.toString();
@@ -256,14 +256,8 @@ public class TargetQueryRenderer {
     }
 
     private static String displayBnodeTemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
-        if (function.getArity() == 1)
-            return "_:" + displayTerm(
-                    function.getTerms().get(0),
-                    prefixManager
-            );
         if (function.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
-            String templateWithVars = instantiateTemplate(function, prefixManager);
-            return templateWithVars;
+            return "_:" + instantiateTemplate(function, prefixManager);
         }
         throw new UnexpectedTermException(function);
     }

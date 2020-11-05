@@ -191,7 +191,7 @@ public class OptimizationTestingTools {
             for (int i = 1; i <= arity; i++) {
                 builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
             }
-            RelationID id = idFactory.createRelationID(null, tableName);
+            RelationID id = idFactory.createRelationID(tableName);
             return createDatabaseRelation(ImmutableList.of(id), builder);
         }
 

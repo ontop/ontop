@@ -52,7 +52,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private static final String TB_EDITION = "EDITION";
 	private static final String TB_BOOKWRITER = "BOOKWRITER";
 
-	private String propertyFile;
+	private final String propertyFile;
 	private Properties properties;
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractConstraintTest.class);
@@ -82,7 +82,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 			@Override
 			public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
 				return provider.getRelationIDs().stream()
-						.filter(r -> ImmutableSet.of(TB_BOOK, TB_BOOKWRITER, TB_EDITION, TB_WRITER).contains(r.getTableID().getName().toUpperCase()))
+						.filter(id -> ImmutableSet.of(TB_BOOK, TB_BOOKWRITER, TB_EDITION, TB_WRITER)
+								.contains(id.getComponents().get(RelationID.TABLE_INDEX).getName().toUpperCase()))
 						.collect(ImmutableCollectors.toList());
 			}
 		};
@@ -90,7 +91,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(filteredMetadataLoader);
 
 		ImmutableMap<String, RelationDefinition> map = metadata.getAllRelations().stream()
-				.collect(ImmutableCollectors.toMap(r -> r.getID().getTableID().getName().toUpperCase(), Function.identity()));
+				.collect(ImmutableCollectors.toMap(r -> r.getID().getComponents().get(RelationID.TABLE_INDEX).getName().toUpperCase(), Function.identity()));
 
 		tBook = Optional.ofNullable(map.get(TB_BOOK));
 		tBookWriter = Optional.ofNullable(map.get(TB_BOOKWRITER));

@@ -32,20 +32,20 @@ public class OfflineMetadataProviderBuilder {
     }
 
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1) {
-        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(null, relation)),
+        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                 .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1));
     }
 
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2) {
-        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(null, relation)),
+        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2));
     }
 
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3) {
-        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(null, relation)),
+        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
@@ -53,7 +53,7 @@ public class OfflineMetadataProviderBuilder {
     }
 
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4) {
-        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(null, relation)),
+        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
@@ -62,7 +62,7 @@ public class OfflineMetadataProviderBuilder {
     }
 
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4, String attribute5, DBTermType type5, boolean isNullable5) {
-        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(null, relation)),
+        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
@@ -72,7 +72,7 @@ public class OfflineMetadataProviderBuilder {
     }
 
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4, String attribute5, DBTermType type5, boolean isNullable5, String attribute6, DBTermType type6, boolean isNullable6) {
-        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(null, relation)),
+        return createDatabaseRelation(ImmutableList.of(idFactory.createRelationID(relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)

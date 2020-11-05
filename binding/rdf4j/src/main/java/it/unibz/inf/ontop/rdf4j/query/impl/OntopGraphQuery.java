@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,9 +21,9 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.query.algebra.evaluation.iterator.CollectionIteration;
-import org.eclipse.rdf4j.query.impl.GraphQueryResultImpl;
+import org.eclipse.rdf4j.query.impl.IteratingGraphQueryResult;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.repository.sparql.federation.CollectionIteration;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 
@@ -42,9 +43,9 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 		this.inputQueryFactory = inputQueryFactory;
 	}
 
-	private Statement createStatement(RDFFact assertion) {
+	private Statement createStatement(RDFFact assertion, byte[] salt) {
 
-		Statement stm = RDF4JHelper.createStatement(assertion);
+		Statement stm = RDF4JHelper.createStatement(assertion, salt);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
 			return stm;
 		else 
@@ -55,26 +56,28 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
 		ParsedQuery parsedQuery = getParsedQuery();
 		GraphSPARQLQuery query = isConstruct
-				? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery)
-				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery);
+				? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery, bindings)
+				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery, bindings);
 		try (
 				OntopStatement stm = conn.createStatement();
 				SimpleGraphResultSet res = stm.execute(query, getHttpHeaders())
 		){
+			SecureRandom random = new SecureRandom();
+			byte[] salt = new byte[20];
+			random.nextBytes(salt);
 			
 			Map<String, String> namespaces = new HashMap<>();
 			List<Statement> results = new LinkedList<>();
 			if (res != null) {
 				while (res.hasNext()) {
 					RDFFact as = res.next();
-					Statement st = createStatement(as);
+					Statement st = createStatement(as, salt);
 					if (st!=null)
 						results.add(st);
 				}
 			}
-			
-			//return new GraphQueryResultImpl(namespaces, results.iterator());
-            return new GraphQueryResultImpl(namespaces, new CollectionIteration<>(results));
+
+            return new IteratingGraphQueryResult(namespaces, new CollectionIteration<>(results));
 			
 		} catch (Exception e) {
 			throw new QueryEvaluationException(e);

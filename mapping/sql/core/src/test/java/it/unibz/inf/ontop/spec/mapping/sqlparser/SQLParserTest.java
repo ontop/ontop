@@ -89,7 +89,7 @@ public class SQLParserTest {
 		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"HR", "REGIONS"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("REGION_ID"), dbTypeFactory.getDBLargeIntegerType(), false));
 
-		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID(null, "tableName")), DatabaseTableDefinition.attributeListBuilder()
+		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("tableName")), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("cast"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("do"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("extract"), integerDBType, false)
@@ -106,7 +106,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("value"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("xml"), integerDBType, false));
 
-		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID(null, "grade")), DatabaseTableDefinition.attributeListBuilder()
+		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("grade")), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("st_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("class_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("grade"), integerDBType, false)
@@ -151,7 +151,7 @@ public class SQLParserTest {
 		builder.createDatabaseRelation("PC",
 			"model", varchar20DBType, false);
 
-		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"\"dbo\"", "TEMPERATURE_DEVIATION"), DatabaseTableDefinition.attributeListBuilder()
+		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"\"CIM\"", "\"dbo\"", "TEMPERATURE_DEVIATION"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("ID"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("DATETIME"), dbTypeFactory.getDBDateTimestampType(), false)
 			.addAttribute(idfac.createAttributeID("SCALE"), integerDBType, false)
@@ -190,8 +190,11 @@ public class SQLParserTest {
 	}
 
 	private ImmutableList<RelationID> createRelationIdWithDefaultSchema(QuotedIDFactory idfac, String schema, String table) {
-		return ImmutableList.of(idfac.createRelationID(null, table),
-				idfac.createRelationID(schema, table));
+		return ImmutableList.of(idfac.createRelationID(table), idfac.createRelationID(schema, table));
+	}
+
+	private ImmutableList<RelationID> createRelationIdWithDefaultSchema(QuotedIDFactory idfac, String catalog, String schema, String table) {
+		return ImmutableList.of(idfac.createRelationID(table), idfac.createRelationID(catalog, schema, table));
 	}
 
 	private RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {

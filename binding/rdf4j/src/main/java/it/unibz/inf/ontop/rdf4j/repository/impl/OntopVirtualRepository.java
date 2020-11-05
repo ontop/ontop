@@ -127,4 +127,14 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
     public HTTPCacheHeaders getHttpCacheHeaders() {
         return cacheHeaders;
     }
+
+    /**
+     * Useful for the endpoints: allows to share the same query engine for the SPARQL and the predefined query endpoints
+     */
+    public OntopQueryEngine getOntopEngine() {
+        if (!isInitialized()) {
+            init();
+        }
+        return queryEngine;
+    }
 }
