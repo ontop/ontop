@@ -48,12 +48,12 @@ public class SparkSQLTimestampDenormFunctionSymbol extends AbstractDBTypeConvers
 
     @Override
     protected ImmutableTerm convertDBConstant(DBConstant constant, TermFactory termFactory) throws DBTypeConversionException {
-        return null;
+        return termFactory.getImmutableFunctionalTerm(this, constant);
     }
 
     @Override
     protected boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
-        return false;
+        return true;
     }
 
     @Override
