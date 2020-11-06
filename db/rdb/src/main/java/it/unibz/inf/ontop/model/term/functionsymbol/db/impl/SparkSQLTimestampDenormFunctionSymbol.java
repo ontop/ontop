@@ -43,7 +43,11 @@ public class SparkSQLTimestampDenormFunctionSymbol extends AbstractDBTypeConvers
                 termFactory.getDBStringConstant("T"),
                 termFactory.getDBStringConstant(" "));
 
-        return String.format(TEMPLATE, termConverter.apply(replaceTTerm));
+        ImmutableFunctionalTerm replaceZTerm = termFactory.getDBReplace(replaceTTerm,
+                termFactory.getDBStringConstant("Z"),
+                termFactory.getDBStringConstant("+00:00"));
+
+        return String.format(TEMPLATE, termConverter.apply(replaceZTerm));
     }
 
     @Override
