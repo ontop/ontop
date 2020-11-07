@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>ontop-client</artifactId>
@@ -42,11 +43,11 @@
             <scope>provided</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.google.guava</groupId>-->
-<!--            <artifactId>guava</artifactId>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.google.guava</groupId>-->
+        <!--            <artifactId>guava</artifactId>-->
+        <!--            <scope>provided</scope>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -58,11 +59,11 @@
         <!-- dependencies available from Protege: end -->
 
         <!-- not sure if this is really needed -->
-<!--        <dependency>-->
-<!--            <groupId>com.google.errorprone</groupId>-->
-<!--            <artifactId>error_prone_annotations</artifactId>-->
-<!--&lt;!&ndash;            <version>2.0.15</version>&ndash;&gt;-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.google.errorprone</groupId>-->
+        <!--            <artifactId>error_prone_annotations</artifactId>-->
+        <!--&lt;!&ndash;            <version>2.0.15</version>&ndash;&gt;-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>com.opencsv</groupId>
@@ -73,7 +74,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-<!--            <version>3.4</version>-->
+            <!--            <version>3.4</version>-->
         </dependency>
 
         <dependency>
@@ -295,52 +296,6 @@
             <groupId>eu.optique-project</groupId>
             <artifactId>r2rml-api-rdf4j-binding</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>eu.optique-project</groupId>-->
-<!--            <artifactId>r2rml-api-jena-binding</artifactId>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.apache.commons</groupId>-->
-<!--            <artifactId>commons-rdf-jena</artifactId>-->
-<!--            <version>${commons-rdf.version}</version>-->
-<!--        </dependency>-->
-
-        <!-- transtiive closure of commons-rdf-jena starts -->
-
-<!--        <dependency>-->
-<!--            <groupId>org.apache.jena</groupId>-->
-<!--            <artifactId>jena-core</artifactId>-->
-<!--            <version>${jena.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.jena</groupId>-->
-<!--            <artifactId>jena-iri</artifactId>-->
-<!--            <version>${jena.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.jena</groupId>-->
-<!--            <artifactId>jena-base</artifactId>-->
-<!--            <version>${jena.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.jena</groupId>-->
-<!--            <artifactId>jena-shaded-guava</artifactId>-->
-<!--            <version>${jena.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.jena</groupId>-->
-<!--            <artifactId>jena-arq</artifactId>-->
-<!--            <version>${jena.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.commons</groupId>-->
-<!--            <artifactId>commons-compress</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.commons</groupId>-->
-<!--            <artifactId>commons-csv</artifactId>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>xerces</groupId>
@@ -397,11 +352,11 @@
         </dependency>
 
         <!-- antlr4 transitive dependencies start -->
-<!--        <dependency>-->
-<!--            <groupId>org.antlr</groupId>-->
-<!--            <artifactId>antlr-runtime</artifactId>-->
-<!--&lt;!&ndash;            <version>3.5.2</version>&ndash;&gt;-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.antlr</groupId>-->
+        <!--            <artifactId>antlr-runtime</artifactId>-->
+        <!--&lt;!&ndash;            <version>3.5.2</version>&ndash;&gt;-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.abego.treelayout</groupId>
@@ -423,15 +378,15 @@
         <!-- antlr4 transitive dependencies end-->
 
         <!--<dependency>-->
-            <!--<groupId>net.sf.opencsv</groupId>-->
-            <!--<artifactId>opencsv</artifactId>-->
-            <!--<version>2.0</version>-->
+        <!--<groupId>net.sf.opencsv</groupId>-->
+        <!--<artifactId>opencsv</artifactId>-->
+        <!--<version>2.0</version>-->
         <!--</dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.antlr</groupId>-->
-<!--            <artifactId>stringtemplate</artifactId>-->
-<!--&lt;!&ndash;            <version>4.0.2</version>&ndash;&gt;-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.antlr</groupId>-->
+        <!--            <artifactId>stringtemplate</artifactId>-->
+        <!--&lt;!&ndash;            <version>4.0.2</version>&ndash;&gt;-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.apache.tomcat</groupId>
@@ -525,26 +480,26 @@
             <groupId>org.functionaljava</groupId>
             <artifactId>functionaljava</artifactId>
         </dependency>
-		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.inject.extensions</groupId>
-			<artifactId>guice-assistedinject</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>aopalliance</groupId>-->
-<!--			<artifactId>aopalliance</artifactId>-->
-<!--		</dependency>-->
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-assistedinject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+        <!--		<dependency>-->
+        <!--			<groupId>aopalliance</groupId>-->
+        <!--			<artifactId>aopalliance</artifactId>-->
+        <!--		</dependency>-->
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -563,6 +518,20 @@
             <version>${commons-rdf.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.moandjiezana.toml</groupId>
+            <artifactId>toml4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-nquads</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>failureaccess</artifactId>
@@ -630,11 +599,14 @@
                         <Bundle-Description>${project.description}</Bundle-Description>
                         <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
                         <Implementation-Version>${project.version}</Implementation-Version>
-                        <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties</Update-Url>
+                        <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties
+                        </Update-Url>
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
-                        <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*;-split-package:=merge-last</Import-Package>
+                        <Import-Package>
+                            !javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*;-split-package:=merge-last
+                        </Import-Package>
 
                         <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                             or protege wont load it -->
