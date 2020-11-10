@@ -70,7 +70,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	 * Remove all the nodes from the Tree
 	 */
 	public void reset() {
-		Enumeration<TreeNode> children = root.children();
+		Enumeration<? extends TreeNode> children = root.children();
 		while (children.hasMoreElements()) {
 			removeNodeFromParent((MutableTreeNode) children.nextElement());
 			children = root.children();
@@ -101,7 +101,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 		if (element instanceof QueryControllerGroup) {
 			QueryControllerGroup group = (QueryControllerGroup) element;
 			QueryGroupTreeElement ele = new QueryGroupTreeElement(group.getID());
-			Enumeration<TreeNode> groups = root.children();
+			Enumeration<? extends TreeNode> groups = root.children();
 			while (groups.hasMoreElements()) {
 				Object temporal = groups.nextElement();
 				if (!(temporal instanceof QueryGroupTreeElement)) {
@@ -117,7 +117,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 		} else if (element instanceof QueryControllerQuery) {
 			QueryControllerQuery query = (QueryControllerQuery) element;
 			QueryTreeElement elementQuery = new QueryTreeElement(query.getID(), query.getQuery());
-			Enumeration<TreeNode> elements = root.children();
+			Enumeration<? extends TreeNode> elements = root.children();
 			while (elements.hasMoreElements()) {
 				TreeNode currentElement = elements.nextElement();
 				if (currentElement instanceof QueryGroupTreeElement) {
@@ -143,7 +143,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	public void elementAdded(QueryControllerQuery query, QueryControllerGroup group) {
 		QueryGroupTreeElement groupTElement = null;
 		QueryTreeElement elemQ = new QueryTreeElement(query.getID(), query.getQuery());
-		Enumeration<TreeNode> groups = root.children();
+		Enumeration<? extends TreeNode> groups = root.children();
 		while (groups.hasMoreElements()) {
 			Object temporal = groups.nextElement();
 			if (!(temporal instanceof QueryGroupTreeElement)) {
@@ -166,7 +166,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 		QueryGroupTreeElement ele = new QueryGroupTreeElement(group.getID());
 		QueryTreeElement elemQ = new QueryTreeElement(query.getID(), query.getQuery());
 
-		Enumeration<TreeNode> groups = root.children();
+		Enumeration<? extends TreeNode> groups = root.children();
 		while (groups.hasMoreElements()) {
 			TreeNode node = groups.nextElement();
 			if (node instanceof QueryGroupTreeElement) {
@@ -202,7 +202,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	}
 
 	private QueryTreeElement getTreeNode(TreeNode root, QueryControllerQuery query) {
-		Enumeration<TreeNode> parent = root.children();
+		Enumeration<? extends TreeNode> parent = root.children();
 		while (parent.hasMoreElements()) {
 			TreeNode node = parent.nextElement();
 			if (node instanceof QueryTreeElement) {
@@ -216,7 +216,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	}
 
 	private QueryTreeElement getTreeNode(TreeNode root, QueryControllerGroup group, QueryControllerQuery query) {
-		Enumeration<TreeNode> parent = root.children();
+		Enumeration<? extends TreeNode> parent = root.children();
 		while (parent.hasMoreElements()) {
 			TreeNode node = parent.nextElement();
 			if (node instanceof QueryGroupTreeElement) {
@@ -235,7 +235,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	 */
 	public TreeElement getNode(String element) {
 		TreeElement node = null;
-		Enumeration<TreeNode> elements = root.children();
+		Enumeration<? extends TreeNode> elements = root.children();
 		while (elements.hasMoreElements()) {
 			TreeElement currentNode = (TreeElement) elements.nextElement();
 			if (currentNode instanceof QueryGroupTreeElement) {
@@ -261,7 +261,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	 */
 	public QueryTreeElement getElementQuery(String element, String group) {
 		QueryTreeElement node = null;
-		Enumeration<TreeNode> elements = root.children();
+		Enumeration<? extends TreeNode> elements = root.children();
 		while (elements.hasMoreElements()) {
 			TreeElement currentNode = (TreeElement) elements.nextElement();
 			if (currentNode instanceof QueryGroupTreeElement && currentNode.getID().equals(group)) {
