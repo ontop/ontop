@@ -36,15 +36,23 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.Count;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
 
 public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator {
 
@@ -198,11 +206,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         if (node instanceof Order)
             return translateOrder((Order) node, externalBindings);
-
+        if (node instanceof Service)
+            return translateService((Service) node, externalBindings);
         throw new Sparql2IqConversionException("Unexpected SPARQL operator : " + node.toString());
     }
 
-    private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+ 
+
+	private TranslationResult translateDifference(Difference diff, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
         TranslationResult leftTranslation = translate(diff.getLeftArg(), externalBindings);
         TranslationResult rightTranslation = translate(diff.getRightArg(), externalBindings);
@@ -405,6 +416,43 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         ));
     }
 
+    private TranslationResult translateService(Service service, ImmutableMap<Variable, GroundTerm> externalBindings) throws OntopInvalidInputQueryException {
+        
+        final Set<String> serviceVars = service.getServiceVars();
+        ImmutableSet<Variable> allVars = serviceVars.stream()
+                .map(termFactory::getVariable)
+                .collect(ImmutableCollectors.toSet());
+        String collect = allVars.stream().map(Variable::getName).collect(Collectors.joining(","));
+        SPARQLRepository srq = new SPARQLRepository(service.getServiceRef().getValue().stringValue());
+        final BindingSetAssignment bsa = new BindingSetAssignment();
+        bsa.setBindingNames(serviceVars);
+        Map<String, MapBindingSet> sbs = new HashMap<>();
+        Set<BindingSet> bs = new HashSet<>();
+        for (String sv:serviceVars) {
+            final MapBindingSet bindingSet = new MapBindingSet();
+            sbs.put(sv, bindingSet);
+            bs.add(bindingSet);
+        }
+            
+        srq.init();
+        try (RepositoryConnection conn = srq.getConnection()) {
+            String remoteQuery = service.getSelectQueryString(serviceVars);
+            TupleQuery prepareQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, remoteQuery);
+            try (TupleQueryResult evaluate = prepareQuery.evaluate()) {
+                while (evaluate.hasNext()) {
+                    BindingSet next = evaluate.next();
+                    for (String bindingName : service.getServiceVars()) {
+                        sbs.get(bindingName).addBinding(next.getBinding(bindingName));
+                    }
+                }
+            }
+        }
+      
+        bsa.setBindingSets(bs);
+        srq.shutDown();
+        return translateBindingSetAssignment(bsa, externalBindings);
+//        throw new Sparql2IqConversionException("SPARQL service not yet implemented : " + collect);
+    }
 
     private TranslationResult translateBindingSetAssignment(BindingSetAssignment node, ImmutableMap<Variable, GroundTerm> externalBindings) {
 
