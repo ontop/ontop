@@ -424,14 +424,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 .collect(ImmutableCollectors.toSet());
         String collect = allVars.stream().map(Variable::getName).collect(Collectors.joining(","));
         SPARQLRepository srq = new SPARQLRepository(service.getServiceRef().getValue().stringValue());
-        final BindingSetAssignment bsa = new BindingSetAssignment();
-        bsa.setBindingNames(serviceVars);
-        Map<String, MapBindingSet> sbs = new HashMap<>();
-        Set<BindingSet> bs = new HashSet<>();
+        
+        Map<String, MapBindingSet> sbs = new LinkedHashMap<>();
+        
         for (String sv:serviceVars) {
             final MapBindingSet bindingSet = new MapBindingSet();
             sbs.put(sv, bindingSet);
-            bs.add(bindingSet);
         }
             
         srq.init();
@@ -441,13 +439,18 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             try (TupleQueryResult evaluate = prepareQuery.evaluate()) {
                 while (evaluate.hasNext()) {
                     BindingSet next = evaluate.next();
-                    for (String bindingName : service.getServiceVars()) {
+                    service.getServiceVars().forEach(bindingName -> {
                         sbs.get(bindingName).addBinding(next.getBinding(bindingName));
-                    }
+                    });
                 }
             }
         }
-      
+        Set<BindingSet> bs = new LinkedHashSet<>();
+        final BindingSetAssignment bsa = new BindingSetAssignment();
+        bsa.setBindingNames(sbs.keySet());
+        serviceVars.forEach(sv -> {
+            bs.add(sbs.get(sv));
+        });
         bsa.setBindingSets(bs);
         srq.shutDown();
         return translateBindingSetAssignment(bsa, externalBindings);

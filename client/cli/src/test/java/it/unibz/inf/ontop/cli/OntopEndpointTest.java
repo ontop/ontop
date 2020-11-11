@@ -78,22 +78,19 @@ public class OntopEndpointTest {
         repo.init();
 
         try (RepositoryConnection conn = repo.getConnection()) {
-            String queryString = "PREFIX up: <http://purl.uniprot.org/core/>\n"
-                    + "SELECT ?protein\n"
-                    + "WHERE\n"
-                    + "{\n"
-                    + "SERVICE <https://sparql.uniprot.org/sparql> {"
-                    + "        ?protein a up:Protein .\n"
-                    + "        ?protein up:mnemonic 'A4_HUMAN'\n"
+            String queryString = "PREFIX : <http://meraka/moss/exampleBooks.owl#>\n"
+                    + "SELECT DISTINCT ?x\n"
+                    + "WHERE {"
+                     + "SERVICE <"+sparqlEndpoint+"> {"
+                     + "?x :title \"How to get fired\"."
                     + "}}";
             TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-            //TupleQueryResult result = tupleQuery.evaluate();
             try (TupleQueryResult result = tupleQuery.evaluate()) {
                 assertTrue(result.hasNext());
                 BindingSet bindingSet = result.next();
-                final Binding binding = bindingSet.getBinding("protein");
+                final Binding binding = bindingSet.getBinding("x");
                 assertNotNull(binding);
-                assertEquals("http://purl.uniprot.org/uniprot/P05067", binding.getValue().stringValue());
+                assertEquals("Expect book:11","http://meraka/moss/exampleBooks.owl#book/11/", binding.getValue().stringValue());
                 assertFalse(result.hasNext());
             }
         }
