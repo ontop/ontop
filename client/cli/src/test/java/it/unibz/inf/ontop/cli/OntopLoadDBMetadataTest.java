@@ -1,0 +1,44 @@
+package it.unibz.inf.ontop.cli;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import it.unibz.inf.ontop.spec.dbschema.tools.impl.Metadata;
+import it.unibz.inf.ontop.spec.dbschema.tools.impl.Relations;
+import it.unibz.inf.ontop.spec.dbschema.tools.impl.UniqueConstraints;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import static junit.framework.TestCase.*;
+
+public class OntopLoadDBMetadataTest {
+
+    // Test file
+    File viewsFile = new File("src/test/resources/output/exampleBooks-metadata.json");
+    Metadata metadata = new ObjectMapper()
+        .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
+        .readerFor(Metadata.class)
+        .readValue(viewsFile);
+
+    public OntopLoadDBMetadataTest() throws IOException {
+    }
+
+    @Test
+    public void TestLoadMetadataFromJSON() throws IOException {
+
+        List<Relations> rel2 = metadata.getRelations();
+        assertEquals("\"tb_emerge_authors\"", rel2.get(0).getName());
+    }
+
+    @Test
+    public void TestLoadMetadataFromJSON2() throws IOException {
+
+        List<Relations> rel2 = metadata.getRelations();
+        List<UniqueConstraints> uq2 = rel2.get(0).getUniqueConstraints();
+        assertEquals(uq2.get(0).getIsPrimaryKey(), true);
+    }
+
+
+}

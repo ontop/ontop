@@ -1,0 +1,105 @@
+package it.unibz.inf.ontop.spec.dbschema.tools.impl;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Map;
+
+public class Metadata {//implements ImmutableMetadata {
+
+    private final ImmutableMetadata relations;
+    private final ImmutableMetadata uniqueConstraints;
+    private final ImmutableMetadata foreignKeys;
+    private final ImmutableMetadata columns;
+    private final ImmutableMetadata name;
+    private final ImmutableMetadata uniqueConstraintsname;
+    private final ImmutableMetadata uniqueConstraintsdeterminants;
+    private final ImmutableMetadata uniqueConstraintsisPrimaryKey;
+    private final ImmutableMetadata foreignKeysname;
+    private final ImmutableMetadata foreignKeysfrom;
+    private final ImmutableMetadata foreignKeysto;
+    private final ImmutableMetadata foreignKeysfromrelation;
+    private final ImmutableMetadata foreignKeysfromcolumn;
+    private final ImmutableMetadata foreignKeystorelation;
+    private final ImmutableMetadata foreignKeystocolumn;
+    private final ImmutableMetadata columnsname;
+    private final ImmutableMetadata columnsisnullable;
+    private final ImmutableMetadata columnsdatatype;
+
+
+    @Getter
+    @Setter
+    @ToString
+    class Question {
+        private Integer questionNumber;
+        private String question;
+    }
+
+    @SuppressWarnings("unchecked")
+    @JsonProperty("relations")
+    private void unpackNested(Map<String,Object> relations) {
+        this.uniqueConstraints = (String)relations.get("uniqueConstraints");
+        Map<String,String> uniqueConstraints = (Map<String,String>)relations.get("name");
+        this.uniqueConstraintsname = uniqueConstraints.get("name");
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public Metadata(@JsonProperty ("uniqueConstraints") final ImmutableMetadata uniqueConstraints,
+               @JsonProperty ("foreignKeys")   final ImmutableMetadata foreignKeys,
+                    @JsonProperty ("columnsdatatype")   final ImmutableMetadata columnsdatatype
+              ) {
+        this.uniqueConstraints = uniqueConstraints;
+        this.foreignKeys = foreignKeys;
+        this.columnsdatatype = columnsdatatype;
+    }
+
+    public ImmutableMetadata getuniqueConstraints() {
+        return uniqueConstraints;
+    }
+
+    public ImmutableMetadata getforeignKeys() {
+        return foreignKeys;
+    }
+
+
+    /*@JsonProperty("uniqueConstraints")
+    private String name;
+
+    @JsonProperty("foreignKeys")
+    private String dept;
+
+    @JsonIgnore
+    @Override
+    public DBParameters getDBParameters() {
+        return dbParameters;
+    }*/
+
+    /*@SuppressWarnings("unused")
+    @JsonProperty("metadata")
+    Map<String, String> setMetadataForJsonImport() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        String extractionTime = dateFormat.format(Calendar.getInstance().getTime());
+
+        return ImmutableMap.<String, String>builder()
+            .put("dbmsProductName", getDBParameters().getDbmsProductName())
+            .put("dbmsVersion", getDBParameters().getDbmsVersion())
+            .put("driverName", getDBParameters().getDriverName())
+            .put("driverVersion", getDBParameters().getDriverVersion())
+            .put("quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString())
+            .put("extractionTime", extractionTime)
+            .build();
+    }*/
+
+
+}

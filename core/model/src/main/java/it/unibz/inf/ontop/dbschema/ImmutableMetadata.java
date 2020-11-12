@@ -17,4 +17,11 @@ public interface ImmutableMetadata {
             lookup.getRelation(id);
         return lookup.extractImmutableMetadata();
     }
+
+    /*static ImmutableMetadata loadImmutableMetadata(MetadataProvider metadataProvider) throws MetadataLoadingException {
+        CachingMetadataLookup lookup = new CachingMetadataLookup(metadataProvider);
+        for (RelationID id : metadataProvider.getRelationIDs())
+            lookup.getRelation(id);
+        return lookup.extractImmutableMetadata();
+    }*/
 }

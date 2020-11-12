@@ -70,6 +70,10 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dremio.jdbc</groupId>
+            <artifactId>dremio-jdbc</artifactId>
+        </dependency>
     </dependencies>
 
 
