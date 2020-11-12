@@ -38,13 +38,28 @@ public class Relations {
     }
 
     @JsonProperty("otherFunctionalDependencies")
+    public List<String> getOtherFunctionalDependencies() {
+        return otherFunctionalDependencies;
+    }
+
+    @JsonProperty("otherFunctionalDependencies")
     public void setOtherFunctionalDependencies(List<String> otherFunctionalDependencies) {
         this.otherFunctionalDependencies = otherFunctionalDependencies;
     }
 
     @JsonProperty("foreignKeys")
+    public List<ForeignKeys> getForeignKeys() {
+        return foreignKeys;
+    }
+
+    @JsonProperty("foreignKeys")
     public void setForeignKeys(List<ForeignKeys> foreignKeys) {
         this.foreignKeys = foreignKeys;
+    }
+
+    @JsonProperty("columns")
+    public List<Columns> getColumns() {
+        return columns;
     }
 
     @JsonProperty("columns")

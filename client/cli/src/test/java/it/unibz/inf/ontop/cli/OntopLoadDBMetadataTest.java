@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.cli;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.unibz.inf.ontop.spec.dbschema.tools.impl.ForeignKeys;
 import it.unibz.inf.ontop.spec.dbschema.tools.impl.Metadata;
 import it.unibz.inf.ontop.spec.dbschema.tools.impl.Relations;
 import it.unibz.inf.ontop.spec.dbschema.tools.impl.UniqueConstraints;
@@ -25,14 +26,14 @@ public class OntopLoadDBMetadataTest {
     public OntopLoadDBMetadataTest() throws IOException {
     }
 
-    @Test
+    @Test // Check relation name
     public void TestLoadMetadataFromJSON() throws IOException {
 
         List<Relations> rel2 = metadata.getRelations();
         assertEquals("\"tb_emerge_authors\"", rel2.get(0).getName());
     }
 
-    @Test
+    @Test // Check primary key
     public void TestLoadMetadataFromJSON2() throws IOException {
 
         List<Relations> rel2 = metadata.getRelations();
@@ -40,5 +41,11 @@ public class OntopLoadDBMetadataTest {
         assertEquals(uq2.get(0).getIsPrimaryKey(), true);
     }
 
+    @Test // Check foreign key name
+    public void TestLoadMetadataFromJSON3() throws IOException {
 
+        List<Relations> rel = metadata.getRelations();
+        List<ForeignKeys> fk = rel.get(0).getForeignKeys();
+        assertEquals(fk.get(1).getName(), "fk_emerge_writes_book");
+    }
 }
