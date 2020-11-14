@@ -39,6 +39,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()));
     }
 
+    @Override
+    public SQLTermSerializer getTermSerializer() {
+        return sqlTermSerializer;
+    }
+
     /**
      * Mutable: one instance per SQL query to generate
      */
