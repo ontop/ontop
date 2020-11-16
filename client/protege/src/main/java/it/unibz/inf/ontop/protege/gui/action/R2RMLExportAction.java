@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 
 public class R2RMLExportAction extends ProtegeAction {
 
@@ -131,13 +132,11 @@ public class R2RMLExportAction extends ProtegeAction {
     private class R2RMLExportThread implements OBDAProgressListener {
 
         @Override
-        public void actionCanceled() throws Exception {
+        public void actionCanceled() {
 
         }
 
-        public void run(File file)
-                throws Exception {
-
+        public void run(File file) throws IOException {
             SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
                     obdaModel.getRdfFactory(), obdaModel.getTermFactory());
             writer.write(file);

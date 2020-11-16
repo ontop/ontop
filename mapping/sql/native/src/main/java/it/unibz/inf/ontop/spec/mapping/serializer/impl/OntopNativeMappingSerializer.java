@@ -35,22 +35,15 @@ public class OntopNativeMappingSerializer {
     /**
      * The save/write operation.
      *
-     * @param writer
-     *          The target writer to which the model is saved.
+     * @param file The file where the model is saved.
      * @throws IOException
      */
-    public void save(Writer writer) throws IOException {
-        BufferedWriter bufferWriter = new BufferedWriter(writer);
-        writePrefixDeclaration(bufferWriter);
-        writeMappingDeclaration(bufferWriter);
-        bufferWriter.flush();
-        bufferWriter.close();
-    }
-
     public void save(File file) throws IOException {
-        try {
-            save(new FileWriter(file));
-        } catch (IOException e) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writePrefixDeclaration(writer);
+            writeMappingDeclaration(writer);
+        }
+        catch (IOException e) {
             throw new IOException(String.format("Error while saving the OBDA model to the file located at %s.\n" +
                     "Make sure you have the write permission at the location specified.", file.getAbsolutePath()));
         }

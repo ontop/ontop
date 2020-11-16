@@ -22,9 +22,7 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -115,35 +113,17 @@ public class SQLPPMappingToR2RMLConverter {
                 .map(t -> (NonVariableTerm) t);
     }
 
-
     /**
      * the method to write the R2RML mappings
      * from an rdf Model to a file
      *
      * @param file the ttl file to write to
      */
-    public void write(File file) throws Exception {
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            write(fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    /**
-     * the method to write the R2RML mappings
-     * from an rdf Model to a file
-     *
-     * @param os the output target
-     */
-    public void write(OutputStream os) throws Exception {
-        Collection<TriplesMap> tripleMaps = getTripleMaps();
-        try {
+    public void write(File file) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            Collection<TriplesMap> tripleMaps = getTripleMaps();
             RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
             RDF4JGraph rdf4JGraph = mm.exportMappings(tripleMaps);
-
             Model m = rdf4JGraph.asModel().get();
 
             m.setNamespace("rr", "http://www.w3.org/ns/r2rml#");
@@ -156,13 +136,7 @@ public class SQLPPMappingToR2RMLConverter {
             WriterConfig settings = new WriterConfig();
             settings.set(BasicWriterSettings.PRETTY_PRINT, true);
             settings.set(BasicWriterSettings.INLINE_BLANK_NODES, true);
-            Rio.write(m, os, RDFFormat.TURTLE, settings);
-            os.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            Rio.write(m, fos, RDFFormat.TURTLE, settings);
         }
     }
-
 }

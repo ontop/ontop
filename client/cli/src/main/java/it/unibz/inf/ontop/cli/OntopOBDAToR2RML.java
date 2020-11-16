@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 
 @Command(name = "to-r2rml",
         description = "Convert ontop native mapping format (.obda) to R2RML format")
@@ -44,8 +45,6 @@ public class OntopOBDAToR2RML implements OntopCommand {
                     .concat(".ttl");
         }
 
-        File out = new File(outputMappingFile);
-
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(inputMappingFile)
                 .jdbcDriver("dummy")
@@ -59,27 +58,17 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         OntopSQLOWLAPIConfiguration config = configBuilder.build();
 
-        SQLPPMapping ppMapping;
-        /*
-         * load the mapping in native Ontop syntax
-         */
         try {
-            ppMapping = config.loadProvidedPPMapping();
-        } catch (MappingException e) {
+            SQLPPMapping ppMapping = config.loadProvidedPPMapping();
+            SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, config.getRdfFactory(),
+                    config.getTermFactory());
+
+            converter.write(new File(outputMappingFile));
+            System.out.println("R2RML mapping file " + outputMappingFile + " written!");
+        }
+        catch (MappingException | IOException e) {
             e.printStackTrace();
             System.exit(1);
-            return;
         }
-
-        SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, config.getRdfFactory(),
-                config.getTermFactory());
-
-        try {
-            converter.write(out);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("R2RML mapping file " + outputMappingFile + " written!");
     }
 }

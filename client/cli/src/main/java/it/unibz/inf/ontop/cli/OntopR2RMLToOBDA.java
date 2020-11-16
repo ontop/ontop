@@ -30,32 +30,26 @@ public class OntopR2RMLToOBDA implements OntopCommand {
     @Override
     public void run() {
 
-        if(Strings.isNullOrEmpty(outputMappingFile)){
+        if (Strings.isNullOrEmpty(outputMappingFile)) {
             outputMappingFile = inputMappingFile.substring(inputMappingFile.lastIndexOf(".")).concat(".obda");
         }
 
-        File out = new File(outputMappingFile);
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .r2rmlMappingFile(inputMappingFile)
+                .jdbcName("h2")
+                .jdbcUrl("jdbc:h2:tcp://localhost/DBName")
+                .jdbcUser("username")
+                .jdbcPassword("password")
+                .build();
+
         try {
-            Properties p = new Properties();
-            p.put(OntopSQLCoreSettings.JDBC_NAME, "h2");
-            p.put(OntopSQLCoreSettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-            p.put(OntopSQLCredentialSettings.JDBC_USER, "username");
-            p.put(OntopSQLCredentialSettings.JDBC_PASSWORD, "password");
-            p.put(OntopSQLCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
-
-            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .r2rmlMappingFile(inputMappingFile)
-                    .properties(p)
-                    .build();
-
             SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
 
             OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
-            writer.save(out);
-
-        } catch (Exception e) {
+            writer.save(new File(outputMappingFile));
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }
