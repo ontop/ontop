@@ -34,6 +34,7 @@ import org.apache.commons.rdf.api.*;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 
@@ -48,7 +49,7 @@ public class OBDAMappingTransformer {
 
 	private final RDF rdfFactory;
 	private final TermFactory termFactory;
-	private String baseIRIString;
+	private final String baseIRIString;
 	private final eu.optique.r2rml.api.MappingFactory mappingFactory;
 
 	OBDAMappingTransformer(RDF rdfFactory, TermFactory termFactory) {
@@ -130,9 +131,8 @@ public class OBDAMappingTransformer {
 		Optional.ofNullable(targetAtomClassification.get(true))
 				.map(Collection::stream)
 				.orElse(Stream.empty())
-				.map(this::extractClassIRIFromConstantClassTargetAtom)
+				.map(OBDAMappingTransformer::extractClassIRIFromConstantClassTargetAtom)
 				.forEach(sm::addClass);
-
 
 		// Other target atoms -> predicate object map
 		Optional.ofNullable(targetAtomClassification.get(false))
@@ -151,7 +151,7 @@ public class OBDAMappingTransformer {
 				.isPresent();
 	}
 
-	private IRI extractClassIRIFromConstantClassTargetAtom(TargetAtom targetAtom) {
+	private static IRI extractClassIRIFromConstantClassTargetAtom(TargetAtom targetAtom) {
 		return Optional.of(targetAtom.getProjectionAtom())
 				.filter(a -> a.getPredicate() instanceof RDFAtomPredicate)
 				.flatMap(a -> ((RDFAtomPredicate) a.getPredicate()).getClassIRI(targetAtom.getSubstitutedTerms()))
@@ -164,51 +164,46 @@ public class OBDAMappingTransformer {
 				extractObjectMap(targetAtom, prefixManager));
 	}
 
+	private static <T> T unsupportedBlankNode(BlankNode t) {
+		throw new MinorOntopInternalBugException("Unexpected transformation: " + t.toString());
+	}
+	private static <T> T unsupportedLiteral(Literal t) {
+		throw new MinorOntopInternalBugException("Unexpected transformation: " + t.toString());
+	}
+
 	private SubjectMap extractSubjectMap(ImmutableTerm substitutedTerm, PrefixManager prefixManager) {
-		return extractTermMap(substitutedTerm, true, false,
+		return extractTermMap(substitutedTerm,
 				mappingFactory::createSubjectMap,
 				mappingFactory::createSubjectMap,
 				mappingFactory::createSubjectMap,
 				// TODO: allow blank nodes to appear in a subject map
-				l -> {
-					throw new UnsupportedOperationException();
-				},
-				l -> {
-					throw new UnsupportedOperationException();
-				},
+				OBDAMappingTransformer::unsupportedBlankNode,
+				OBDAMappingTransformer::unsupportedLiteral,
 				prefixManager);
 	}
 
 	private GraphMap extractGraphMap(ImmutableTerm substitutedTerm, PrefixManager prefixManager) {
-		return extractTermMap(substitutedTerm, true, false,
+		return extractTermMap(substitutedTerm,
 				mappingFactory::createGraphMap,
 				mappingFactory::createGraphMap,
 				mappingFactory::createGraphMap,
-				l -> {
-					throw new UnsupportedOperationException();
-				},
-				l -> {
-					throw new UnsupportedOperationException();
-				},
+				OBDAMappingTransformer::unsupportedBlankNode,
+				OBDAMappingTransformer::unsupportedLiteral,
 				prefixManager);
 	}
 
 	private PredicateMap extractPredicateMap(TargetAtom targetAtom, PrefixManager prefixManager) {
-		return extractTermMap(targetAtom.getSubstitutedTerm(1), false, false,
+		return extractTermMap(targetAtom.getSubstitutedTerm(1),
 				mappingFactory::createPredicateMap,
 				mappingFactory::createPredicateMap,
 				mappingFactory::createPredicateMap,
-				l -> {
-					throw new UnsupportedOperationException();
-				},
-				l -> {
-					throw new UnsupportedOperationException();
-				},
+				OBDAMappingTransformer::unsupportedBlankNode,
+				OBDAMappingTransformer::unsupportedLiteral,
 		        prefixManager);
 	}
 
 	private ObjectMap extractObjectMap(TargetAtom targetAtom, PrefixManager prefixManager) {
-		return extractTermMap(targetAtom.getSubstitutedTerm(2), true, true,
+		return extractTermMap(targetAtom.getSubstitutedTerm(2),
 				mappingFactory::createObjectMap,
 				mappingFactory::createObjectMap,
 				mappingFactory::createObjectMap,
@@ -217,12 +212,12 @@ public class OBDAMappingTransformer {
 				prefixManager);
 	}
 
-	private <T extends TermMap> T extractTermMap(ImmutableTerm substitutedTerm, boolean acceptBNode, boolean acceptLiterals,
-												 java.util.function.Function<Template, T> templateFct,
-												 java.util.function.Function<String, T> columnFct,
-												 java.util.function.Function<IRI, T> iriFct,
-												 java.util.function.Function<BlankNode, T> bNodeFct,
-												 java.util.function.Function<Literal, T> literalFct,
+	private <T extends TermMap> T extractTermMap(ImmutableTerm substitutedTerm,
+												 Function<Template, T> templateFct,
+												 Function<String, T> columnFct,
+												 Function<IRI, T> iriFct,
+												 Function<BlankNode, T> bNodeFct,
+												 Function<Literal, T> literalFct,
 												 PrefixManager prefixManager) {
 
 		ImmutableFunctionalTerm rdfFunctionalTerm = Optional.of(substitutedTerm)
@@ -244,16 +239,12 @@ public class OBDAMappingTransformer {
 								+ rdfFunctionalTerm.getTerm(1)));
 
 		if (termType instanceof ObjectRDFType)
-			return extractIriOrBnodeTermMap(lexicalTerm, (ObjectRDFType) termType, acceptBNode,
+			return extractIriOrBnodeTermMap(lexicalTerm, (ObjectRDFType) termType,
 					templateFct, columnFct, iriFct, bNodeFct, prefixManager);
-		else if (termType instanceof RDFDatatype)
-			if (acceptLiterals)
-				return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
-			else
-				throw new MinorOntopInternalBugException("A literal term map has been found in an unexpected area: "
-						+ substitutedTerm);
-		else
-			throw new MinorOntopInternalBugException("An RDF termType must be either an object type or a datatype");
+		if (termType instanceof RDFDatatype)
+			return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
+
+		throw new MinorOntopInternalBugException("An RDF termType must be either an object type or a datatype");
 	}
 
 	private ImmutableFunctionalTerm convertIntoRDFFunctionalTerm(NonVariableTerm term) {
@@ -263,19 +254,15 @@ public class OBDAMappingTransformer {
 					termFactory.getDBStringConstant(constant.getValue()),
 					termFactory.getRDFTermTypeConstant(constant.getType()));
 		}
-		else
-			return (ImmutableFunctionalTerm) term;
+		return (ImmutableFunctionalTerm) term;
 	}
 
-	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm, ObjectRDFType termType, boolean acceptBNode,
-                                                           java.util.function.Function<Template, T> templateFct,
-                                                           java.util.function.Function<String, T> columnFct,
-                                                           java.util.function.Function<IRI, T> iriFct,
-                                                           java.util.function.Function<BlankNode, T> bNodeFct,
+	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm, ObjectRDFType termType,
+                                                           Function<Template, T> templateFct,
+                                                           Function<String, T> columnFct,
+                                                           Function<IRI, T> iriFct,
+                                                           Function<BlankNode, T> bNodeFct,
                                                            PrefixManager prefixManager) {
-		if ((!acceptBNode) && termType.isBlankNode())
-			throw new MinorOntopInternalBugException("Bnode term map found in an unexpected area: " + lexicalTerm);
-
 		T termMap;
 		if (lexicalTerm instanceof DBConstant) { //fixed string
 			String lexicalString = ((DBConstant) lexicalTerm).getValue();
@@ -306,7 +293,7 @@ public class OBDAMappingTransformer {
 		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
 			return expandPrefix(Templates.getTemplateString(lexicalTerm), prefixManager);
 		}
-		if (functionSymbol instanceof DBConcatFunctionSymbol){
+		if (functionSymbol instanceof DBConcatFunctionSymbol) {
 			return Templates.getDBConcatTemplateString(lexicalTerm);
 		}
 		throw new R2RMLSerializationException ("Unexpected function symbol "+functionSymbol + " in term "+lexicalTerm);
@@ -316,8 +303,8 @@ public class OBDAMappingTransformer {
 		String expandedTemplate = prefixedTemplate;
 		try {
 			expandedTemplate = prefixManager.getExpandForm(prefixedTemplate);
-		} catch (InvalidPrefixWritingException e){
-
+		}
+		catch (InvalidPrefixWritingException ignored) {
 		}
 		return expandedTemplate;
 	}
@@ -326,9 +313,9 @@ public class OBDAMappingTransformer {
 	 * NB: T is assumed to be an ObjectMap
 	 */
 	private <T extends TermMap> T extractLiteralTermMap(ImmutableTerm lexicalTerm, RDFDatatype datatype,
-														java.util.function.Function<Template, T> templateFct,
-														java.util.function.Function<String, T> columnFct,
-														java.util.function.Function<Literal, T> literalFct) {
+														Function<Template, T> templateFct,
+														Function<String, T> columnFct,
+														Function<Literal, T> literalFct) {
 		T termMap;
 		if (lexicalTerm instanceof Variable) {
 			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
@@ -376,14 +363,13 @@ public class OBDAMappingTransformer {
 	 *  so the R2RML mapping should not use rr:datatype for this term map
 	 */
 	private boolean isOntopInternalRDFLiteral(RDFDatatype datatype, ImmutableTerm lexicalTerm) {
-		if(!datatype.equals(RDFS.LITERAL))
+		if (!datatype.getIRI().equals(RDFS.LITERAL))
 			return false;
-		if(lexicalTerm instanceof Variable)
+		if (lexicalTerm instanceof Variable)
 			return true;
-		if(lexicalTerm instanceof ImmutableFunctionalTerm){
+		if (lexicalTerm instanceof ImmutableFunctionalTerm) {
 			FunctionSymbol fs = ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol();
-			if(fs instanceof BnodeStringTemplateFunctionSymbol || fs instanceof IRIStringTemplateFunctionSymbol)
-				return true;
+			return fs instanceof BnodeStringTemplateFunctionSymbol || fs instanceof IRIStringTemplateFunctionSymbol;
 		}
 		return false;
 	}
@@ -392,13 +378,13 @@ public class OBDAMappingTransformer {
 		return Optional.of(lexicalTerm)
 				.filter(t -> t instanceof ImmutableFunctionalTerm)
 				.map(t -> (ImmutableFunctionalTerm) t)
-				.map(t -> uncastFunction(t))
+				.map(this::uncastFunction)
 				.orElse(lexicalTerm);
 	}
 
 	private ImmutableTerm uncastFunction(ImmutableFunctionalTerm fun) {
 			ImmutableList<ImmutableTerm> unCastArgs = fun.getTerms().stream()
-					.map(t -> uncast(t))
+					.map(this::uncast)
 					.collect(ImmutableCollectors.toList());
 			FunctionSymbol fs = fun.getFunctionSymbol();
 
@@ -413,11 +399,8 @@ public class OBDAMappingTransformer {
 	 * TODO: shall we consider as an internal bug or differently?
 	 */
 	static class R2RMLSerializationException extends OntopInternalBugException {
-
 		private R2RMLSerializationException(String message) {
 			super(message);
 		}
 	}
-
-
 }

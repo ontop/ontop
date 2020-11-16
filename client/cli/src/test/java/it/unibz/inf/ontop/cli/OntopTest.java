@@ -56,19 +56,19 @@ public class OntopTest {
 
     @Test
     public void testOntopMissingArgValues (){
-        String[] argv = { "materialize", "-m",
+        Ontop.main("materialize", "-m",
                 "-t", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",
-                "-f", "turtle", "-o", "/tmp/npd", "--separate-files"};
-        Ontop.main(argv);
+                "-f", "turtle",
+                "-o", "/tmp/npd",
+                "--separate-files");
     }
 
     @Test
     public void testOntopMissingRequiredArg (){
-        String[] argv = { "materialize",
+        Ontop.main("materialize",
                 "-t", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",
-                "-f", "turtle", "-o", "/tmp/npd", "--separate-files"};
-        Ontop.main(argv);
+                "-f", "turtle",
+                "-o", "/tmp/npd",
+                "--separate-files");
     }
-
-
 }

@@ -17,13 +17,11 @@ public class OntopBootstrapTest {
 
     @Test
     public void testOntopBootstrap (){
-        String[] argv = {"bootstrap",
+        Ontop.main("bootstrap",
                 "-b", "http://www.example.org/",
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-m", "src/test/resources/output/exampleBooks-bootstrapped.obda",
-                "-t", "src/test/resources/output/exampleBooks-bootstrapped.owl"
-        };
-        Ontop.main(argv);
+                "-t", "src/test/resources/output/exampleBooks-bootstrapped.owl");
     }
 
 
