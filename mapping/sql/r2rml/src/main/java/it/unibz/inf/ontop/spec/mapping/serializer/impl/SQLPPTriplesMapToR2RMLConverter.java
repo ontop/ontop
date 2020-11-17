@@ -259,7 +259,13 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			return Templates.getTemplateString(lexicalTerm);
 		}
 		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-			return expandPrefix(Templates.getTemplateString(lexicalTerm));
+			String prefixedTemplate = Templates.getTemplateString(lexicalTerm);
+			try {
+				return prefixManager.getExpandForm(prefixedTemplate);
+			}
+			catch (InvalidPrefixWritingException e) {
+				return prefixedTemplate;
+			}
 		}
 		if (functionSymbol instanceof DBConcatFunctionSymbol) {
 			return Templates.getDBConcatTemplateString(lexicalTerm);
@@ -267,14 +273,6 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		throw new R2RMLSerializationException("Unexpected function symbol " + functionSymbol + " in term " + lexicalTerm);
 	}
 
-	private String expandPrefix(String prefixedTemplate) {
-		try {
-			return prefixManager.getExpandForm(prefixedTemplate);
-		}
-		catch (InvalidPrefixWritingException ignored) {
-			return prefixedTemplate;
-		}
-	}
 
 	/**
 	 * NB: T is assumed to be an ObjectMap
@@ -297,13 +295,12 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		}
 		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
-			Predicate functionSymbol = functionalLexicalTerm.getFunctionSymbol();
-
-			if (functionSymbol instanceof DBConcatFunctionSymbol) { //concat
+			if (functionalLexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol) { //concat
 				termMap = templateFct.apply(mappingFactory.createTemplate(
-						TargetQueryRenderer.displayConcat(functionalLexicalTerm)));
-			} else
-				throw new R2RMLSerializationException("Unexpected function symbol: " + functionSymbol);
+						Templates.getDBConcatTemplateString(functionalLexicalTerm)));
+			}
+			else
+				throw new R2RMLSerializationException("Unexpected function symbol in: " + lexicalTerm);
 		}
 		else {
 			throw new MinorOntopInternalBugException("Unexpected lexical term for a literal: " + lexicalTerm);
@@ -351,16 +348,14 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	}
 
 	private ImmutableTerm uncastFunction(ImmutableFunctionalTerm fun) {
-			ImmutableList<ImmutableTerm> unCastArgs = fun.getTerms().stream()
+			ImmutableList<ImmutableTerm> uncastArgs = fun.getTerms().stream()
 					.map(this::uncast)
 					.collect(ImmutableCollectors.toList());
-			FunctionSymbol fs = fun.getFunctionSymbol();
 
-			if (fs instanceof DBTypeConversionFunctionSymbol
-					&& (((DBTypeConversionFunctionSymbol) fs).isTemporary())
-					&& fs.getArity() == 1)
-				return unCastArgs.iterator().next();
-			return termFactory.getImmutableFunctionalTerm(fs, unCastArgs);
+			if (DBTypeConversionFunctionSymbol.isTemporary(fun.getFunctionSymbol()))
+				return uncastArgs.get(0);
+
+			return termFactory.getImmutableFunctionalTerm(fun.getFunctionSymbol(), uncastArgs);
 	}
 
 	/**

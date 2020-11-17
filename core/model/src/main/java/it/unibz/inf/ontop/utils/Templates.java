@@ -148,11 +148,11 @@ public class Templates {
     }
 
     public static String getDBConcatTemplateString(ImmutableFunctionalTerm lexicalTerm) {
-        if(!(lexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol)){
+        if (!(lexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol)) {
             throw new IllegalArgumentException("The lexical term was expected to have a DBConcatFunctionSymbol");
         }
         return lexicalTerm.getTerms().stream()
-                .map(t -> "{"+t+"}")
+                .map(t -> "{"+t+"}") // TODO: escape { } in constants (see TargetQueryRenderer)
                 .collect(Collectors.joining());
     }
 }

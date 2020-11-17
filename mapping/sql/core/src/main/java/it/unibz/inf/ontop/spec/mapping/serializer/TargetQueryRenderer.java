@@ -61,14 +61,14 @@ public class TargetQueryRenderer {
      * Prints the short form of the predicate (by omitting the complete URI and
      * replacing it by a prefix name).
      */
-    private static String getAbbreviatedName(String uri, PrefixManager pm, boolean insideQuotes) {
-        return pm.getShortForm(uri, insideQuotes);
+    private static String getAbbreviatedName(String uri, PrefixManager pm) {
+        return pm.getShortForm(uri, false);
     }
 
     private static String concatArg2String(ImmutableTerm term) {
         if (term instanceof Constant) {
             String st = ((Constant) term).getValue();
-            if (st.contains("{")) {
+            if (st.contains("{")) {   // TODO: check this condition - not clear why it does not escape the sole } (and does not escape \ at all)
                 st = st.replace("{", "\\{");
                 st = st.replace("}", "\\}");
             }
@@ -81,12 +81,13 @@ public class TargetQueryRenderer {
      * Prints the text representation of different terms.
      */
     private static String displayTerm(ImmutableTerm term, PrefixManager prefixManager) {
-        if (isTemporaryConversionFunction(term)) // TmpToTEXT(...)
-            return displayVariable(
-                    extractUniqueVariableArgument((ImmutableFunctionalTerm) term)
-            );
-        if (term instanceof ImmutableFunctionalTerm) // RDF(..)
-            return displayNonTemporaryFunction((ImmutableFunctionalTerm) term, prefixManager);
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) term;
+            if (DBTypeConversionFunctionSymbol.isTemporary(ift.getFunctionSymbol())) // TmpToTEXT(...)
+                return displayVariable(extractUniqueVariableArgument(ift));
+
+            return displayNonTemporaryFunction(ift, prefixManager);  // RDF(..)
+        }
         if (term instanceof Variable)
             return displayVariable((Variable) term);
         if (term instanceof IRIConstant)
@@ -111,7 +112,7 @@ public class TargetQueryRenderer {
     private static String displayIRIConstant(IRIConstant iri, PrefixManager prefixManager) {
         if (iri.getIRI().getIRIString().equals(RDF.TYPE.getIRIString()))
             return "a";
-        return getAbbreviatedName(iri.toString(), prefixManager, false); // shorten the URI if possible
+        return getAbbreviatedName(iri.toString(), prefixManager); // shorten the URI if possible
     }
 
     private static String displayVariable(Variable term) {
@@ -183,14 +184,6 @@ public class TargetQueryRenderer {
         return "_:" + displayTerm(term, prefixManager);
     }
 
-    private static boolean isTemporaryConversionFunction(ImmutableTerm term) {
-        if (term instanceof ImmutableFunctionalTerm) {
-            FunctionSymbol fs = ((ImmutableFunctionalTerm) term).getFunctionSymbol();
-            return (fs instanceof DBTypeConversionFunctionSymbol && ((DBTypeConversionFunctionSymbol) fs).isTemporary());
-        }
-        return false;
-    }
-
     private static Variable extractUniqueVariableArgument(ImmutableFunctionalTerm fun) {
         if (fun.getArity() == 1) {
             ImmutableTerm arg = fun.getTerm(0);
@@ -205,8 +198,11 @@ public class TargetQueryRenderer {
      * Otherwise return the term
      **/
     private static ImmutableTerm asArg(ImmutableTerm term) {
-        if (isTemporaryConversionFunction(term))
-            return extractUniqueVariableArgument((ImmutableFunctionalTerm) term);
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm)term;
+            if (DBTypeConversionFunctionSymbol.isTemporary(ift.getFunctionSymbol()))
+                return extractUniqueVariableArgument(ift);
+        }
         return term;
     }
 
@@ -236,7 +232,7 @@ public class TargetQueryRenderer {
                 .map(tag -> lexicalString + "@" + tag.getFullString())
                 .orElseGet(() -> {
                     final String typePostfix = datatype.getIRI().equals(RDFS.LITERAL) ? "" : "^^"
-                            + getAbbreviatedName(datatype.getIRI().getIRIString(), prefixManager, false);
+                            + getAbbreviatedName(datatype.getIRI().getIRIString(), prefixManager);
                     return lexicalString + typePostfix;
                 });
     }
@@ -249,7 +245,7 @@ public class TargetQueryRenderer {
     }
 
     private static String displayIRI(String s, PrefixManager prefixManager) {
-        String shortenedUri = getAbbreviatedName(s, prefixManager, false); // shorten the URI if possible
+        String shortenedUri = getAbbreviatedName(s, prefixManager); // shorten the URI if possible
         if (!shortenedUri.equals(s))
             return shortenedUri;
         return "<" + s + ">";
