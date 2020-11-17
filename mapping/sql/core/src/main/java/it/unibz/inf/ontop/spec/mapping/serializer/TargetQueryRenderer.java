@@ -32,53 +32,51 @@ public class TargetQueryRenderer {
 
     private final PrefixManager prefixManager;
 
+    /**
+     * @param prefixManager that is used to shorten full IRI name.
+     */
     public TargetQueryRenderer(PrefixManager prefixManager) {
         this.prefixManager = prefixManager;
     }
 
     /**
-     * Transforms the given <code>OBDAQuery</code> into a string. The method requires
-     * a prefix manager to shorten full IRI name.
+     * Transforms a given list of TargetAtoms into a string.
      */
     public String encode(ImmutableList<TargetAtom> body) {
 
         TurtleWriter turtleWriter = new TurtleWriter();
         for (TargetAtom atom : body) {
             RDFAtomPredicate pred = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
-            String subject = displayTerm(pred.getSubject(atom.getSubstitutedTerms()));
-            String predicate = displayTerm(pred.getProperty(atom.getSubstitutedTerms()));
-            String object = displayTerm(pred.getObject(atom.getSubstitutedTerms()));
+            String subject = renderTerm(pred.getSubject(atom.getSubstitutedTerms()));
+            String predicate = renderTerm(pred.getProperty(atom.getSubstitutedTerms()));
+            String object = renderTerm(pred.getObject(atom.getSubstitutedTerms()));
             if (pred instanceof TriplePredicate) {
                 turtleWriter.put(subject, predicate, object);
             }
             else if (pred instanceof QuadPredicate) {
-                String graph = displayTerm(pred.getGraph(atom.getSubstitutedTerms()).get());
+                String graph = renderTerm(pred.getGraph(atom.getSubstitutedTerms()).get());
                 turtleWriter.put(subject, predicate, object, graph);
             }
-            else {
+            else
                 throw new UnsupportedOperationException("unsupported predicate! " + pred);
-            }
         }
         return turtleWriter.print();
     }
 
-    /**
-     * Prints the text representation of different terms.
-     */
-    private String displayTerm(ImmutableTerm term) {
+    private String renderTerm(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) term;
             FunctionSymbol fs = ift.getFunctionSymbol();
             if (DBTypeConversionFunctionSymbol.isTemporary(fs)) { // TmpToTEXT(...)
                 ImmutableTerm uncast = DBTypeConversionFunctionSymbol.uncast(ift);
                 if (uncast instanceof Variable)
-                    return displayVariable((Variable)uncast);
+                    return renderVariable((Variable)uncast);
                 throw new UnexpectedTermException(term);
             }
 
             // RDF(..)
             if (fs instanceof RDFTermFunctionSymbol)
-                return displayRDFFunction(ift);
+                return renderRDFFunction(ift);
 
             if (fs instanceof DBConcatFunctionSymbol) {
                 return "\"" + ift.getTerms().stream()
@@ -87,13 +85,13 @@ public class TargetQueryRenderer {
             }
 
             return ift.getFunctionSymbol().getName() + "(" + ift.getTerms().stream()
-                    .map(this::displayTerm)
+                    .map(this::renderTerm)
                     .collect(Collectors.joining(", ")) + ")";
         }
         if (term instanceof Variable)
-            return displayVariable((Variable) term);
+            return renderVariable((Variable) term);
         if (term instanceof IRIConstant)
-            return displayIRI(((IRIConstant) term).getIRI().getIRIString());
+            return renderIRI(((IRIConstant) term).getIRI().getIRIString());
         if (term instanceof RDFLiteralConstant)
             return ((RDFLiteralConstant) term).toString();
         if (term instanceof BNode)
@@ -101,7 +99,7 @@ public class TargetQueryRenderer {
         throw new UnexpectedTermException(term);
     }
 
-    private static String displayVariable(Variable term) {
+    private static String renderVariable(Variable term) {
         return "{" + term.getName() + "}";
     }
 
@@ -115,12 +113,12 @@ public class TargetQueryRenderer {
             return st;
         }
         if (term instanceof Variable)
-            return displayVariable((Variable)term);
+            return renderVariable((Variable)term);
 
         throw new UnexpectedTermException(term);
     }
 
-    private String displayRDFFunction(ImmutableFunctionalTerm function) {
+    private String renderRDFFunction(ImmutableFunctionalTerm function) {
         ImmutableTerm lexicalTerm = function.getTerm(0);
 
         Optional<RDFDatatype> optionalDatatype = function.inferType()
@@ -129,7 +127,7 @@ public class TargetQueryRenderer {
                 .map(t -> (RDFDatatype) t);
 
         if (optionalDatatype.isPresent())
-            return displayDatatypeFunction(lexicalTerm, optionalDatatype.get());
+            return renderRDFLiteral(lexicalTerm, optionalDatatype.get());
 
         ImmutableTerm termType = function.getTerm(1);
         if (termType instanceof RDFTermTypeConstant) {
@@ -137,23 +135,23 @@ public class TargetQueryRenderer {
                             && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol)
                     ? instantiateTemplate((ImmutableFunctionalTerm) lexicalTerm)
                     // case of RDF(TermToTxt(variable), X) or RDF(variable, X), where X = BNODE / IRI
-                    : displayTerm(lexicalTerm);
+                    : renderTerm(lexicalTerm);
 
             RDFTermType rdfTermType = ((RDFTermTypeConstant) termType).getRDFTermType();
             if (rdfTermType instanceof BlankNodeTermType)
                 return "_:" + identifier;
             if (rdfTermType instanceof IRITermType)
-                return displayIRI(identifier);
+                return renderIRI(identifier);
         }
 
         throw new IllegalArgumentException("unsupported function " + function);
     }
 
-    private String displayDatatypeFunction(ImmutableTerm lexicalTerm, RDFDatatype datatype) {
+    private String renderRDFLiteral(ImmutableTerm lexicalTerm, RDFDatatype datatype) {
         String lexicalString = (lexicalTerm instanceof DBConstant)
                 // Happens when abstract datatypes are used
                 ? "\"" + ((DBConstant) lexicalTerm).getValue() + "\""
-                : displayTerm(lexicalTerm);
+                : renderTerm(lexicalTerm);
 
         String suffix = datatype.getLanguageTag()
                 .map(tag -> "@" + tag.getFullString())
@@ -164,9 +162,9 @@ public class TargetQueryRenderer {
         return lexicalString + suffix;
     }
 
-    private String displayIRI(String iri) {
+    private String renderIRI(String iri) {
         if (iri.equals(RDF.TYPE.getIRIString()))
-            return "a";
+            return "a"; // should be used only in predicate position, but...
 
         String shortenedIri = prefixManager.getShortForm(iri, false);
         if (!shortenedIri.equals(iri))
@@ -177,21 +175,19 @@ public class TargetQueryRenderer {
 
     private static String instantiateTemplate(ImmutableFunctionalTerm ift) {
 
-        ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) ift.getFunctionSymbol();
-
         ImmutableList<Variable> vars = ift.getTerms().stream()
                 .map(DBTypeConversionFunctionSymbol::uncast)
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable)t)
                 .collect(ImmutableCollectors.toList());
 
+        ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) ift.getFunctionSymbol();
         if (vars.size() != fs.getArity())
             throw new UnexpectedTermException(ift);
 
-        Object[] varNames = vars.stream().map(TargetQueryRenderer::displayVariable).toArray();
+        Object[] varNames = vars.stream().map(TargetQueryRenderer::renderVariable).toArray();
         return Templates.format(fs.getTemplate(), varNames);
     }
-
 
     private static class UnexpectedTermException extends OntopInternalBugException {
         private UnexpectedTermException(ImmutableTerm term) {
