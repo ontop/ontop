@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.type.impl.IRITermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -78,10 +79,18 @@ public class TargetQueryRenderer {
     private String displayTerm(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) term;
-            if (DBTypeConversionFunctionSymbol.isTemporary(ift.getFunctionSymbol())) // TmpToTEXT(...)
+            FunctionSymbol fs = ift.getFunctionSymbol();
+            if (DBTypeConversionFunctionSymbol.isTemporary(fs)) // TmpToTEXT(...)
                 return displayVariable(extractUniqueVariableArgument(ift));
 
-            return displayNonTemporaryFunction(ift);  // RDF(..)
+            // RDF(..)
+            if (fs instanceof DBConcatFunctionSymbol)
+                return displayConcat(ift);
+
+            if (fs instanceof RDFTermFunctionSymbol)
+                return displayRDFFunction(ift);
+
+            return displayOrdinaryFunction(ift);
         }
         if (term instanceof Variable)
             return displayVariable((Variable) term);
@@ -96,19 +105,6 @@ public class TargetQueryRenderer {
 
     private static String displayVariable(Variable term) {
         return "{" + term.getName() + "}";
-    }
-
-    private String displayNonTemporaryFunction(ImmutableFunctionalTerm function) {
-
-        FunctionSymbol functionSymbol = function.getFunctionSymbol();
-
-        if (functionSymbol instanceof DBConcatFunctionSymbol)
-            return displayConcat(function);
-
-        if (functionSymbol instanceof RDFTermFunctionSymbol)
-            return displayRDFFunction(function);
-
-        return displayOrdinaryFunction(function, functionSymbol.getName());
     }
 
     private String displayRDFFunction(ImmutableFunctionalTerm function) {
@@ -169,8 +165,9 @@ public class TargetQueryRenderer {
         return term;
     }
 
-    private String displayOrdinaryFunction(ImmutableFunctionalTerm function, String fname) {
-        return fname + "(" + function.getTerms().stream()
+    private String displayOrdinaryFunction(ImmutableFunctionalTerm ift) {
+        return ift.getFunctionSymbol().getName() +
+                "(" + ift.getTerms().stream()
                 .map(this::displayTerm)
                 .collect(Collectors.joining(", "))
                 + ")";
@@ -191,30 +188,35 @@ public class TargetQueryRenderer {
         return lexicalString + suffix;
     }
 
-    private String displayIRI(String s) {
-        if (s.equals(RDF.TYPE.getIRIString()))
+    private String displayIRI(String iri) {
+        if (iri.equals(RDF.TYPE.getIRIString()))
             return "a";
 
-        String shortenedUri = prefixManager.getShortForm(s, false);
-        if (!shortenedUri.equals(s))
-            return shortenedUri;
+        String shortenedIri = prefixManager.getShortForm(iri, false);
+        if (!shortenedIri.equals(iri))
+            return shortenedIri;
 
-        return "<" + s + ">";
+        return "<" + iri + ">";
     }
 
-    private String instantiateTemplate(ImmutableFunctionalTerm function) {
+    private static String instantiateTemplate(ImmutableFunctionalTerm ift) {
 
-        String template = ((ObjectStringTemplateFunctionSymbol) function.getFunctionSymbol()).getTemplate();
+        ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) ift.getFunctionSymbol();
+        String template = fs.getTemplate();
 
         // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
         String templateFormat = template.replace("{}", "%s");
 
-        final Object[] varNames = function.getTerms().stream()
-                .map(TargetQueryRenderer::asArg)
-                .filter(Variable.class::isInstance)
-                .map(this::displayTerm)
-                .toArray();
+        ImmutableList<Variable> vars = ift.getTerms().stream()
+                .map(DBTypeConversionFunctionSymbol::uncast)
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toList());
 
+        if (vars.size() != fs.getArity())
+            throw new UnexpectedTermException(ift);
+
+        Object[] varNames = vars.stream().map(TargetQueryRenderer::displayVariable).toArray();
         return String.format(templateFormat, varNames);
     }
 
