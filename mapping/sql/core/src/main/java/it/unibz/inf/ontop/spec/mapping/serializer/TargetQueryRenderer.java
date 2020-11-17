@@ -78,11 +78,8 @@ public class TargetQueryRenderer {
             if (fs instanceof RDFTermFunctionSymbol)
                 return renderRDFFunction(ift);
 
-            if (fs instanceof DBConcatFunctionSymbol) {
-                return "\"" + ift.getTerms().stream()
-                                .map(TargetQueryRenderer::concatArg2String)
-                                .collect(Collectors.joining()) + "\"";
-            }
+            if (fs instanceof DBConcatFunctionSymbol)
+                return "\"" + Templates.getDBConcatTemplateString(ift) + "\"";
 
             return ift.getFunctionSymbol().getName() + "(" + ift.getTerms().stream()
                     .map(this::renderTerm)
@@ -103,20 +100,6 @@ public class TargetQueryRenderer {
         return "{" + term.getName() + "}";
     }
 
-    private static String concatArg2String(ImmutableTerm term) {
-        if (term instanceof Constant) {
-            String st = ((Constant) term).getValue();
-            if (st.contains("{")) {   // TODO: check this condition - not clear why it does not escape the sole } (and does not escape \ at all)
-                st = st.replace("{", "\\{");
-                st = st.replace("}", "\\}");
-            }
-            return st;
-        }
-        if (term instanceof Variable)
-            return renderVariable((Variable)term);
-
-        throw new UnexpectedTermException(term);
-    }
 
     private String renderRDFFunction(ImmutableFunctionalTerm function) {
         ImmutableTerm lexicalTerm = function.getTerm(0);
@@ -133,7 +116,7 @@ public class TargetQueryRenderer {
         if (termType instanceof RDFTermTypeConstant) {
             String identifier = (lexicalTerm instanceof ImmutableFunctionalTerm
                             && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol)
-                    ? instantiateTemplate((ImmutableFunctionalTerm) lexicalTerm)
+                    ? Templates.getTemplateString2((ImmutableFunctionalTerm) lexicalTerm)
                     // case of RDF(TermToTxt(variable), X) or RDF(variable, X), where X = BNODE / IRI
                     : renderTerm(lexicalTerm);
 
@@ -171,22 +154,6 @@ public class TargetQueryRenderer {
             return shortenedIri;
 
         return "<" + iri + ">";
-    }
-
-    private static String instantiateTemplate(ImmutableFunctionalTerm ift) {
-
-        ImmutableList<Variable> vars = ift.getTerms().stream()
-                .map(DBTypeConversionFunctionSymbol::uncast)
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable)t)
-                .collect(ImmutableCollectors.toList());
-
-        ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) ift.getFunctionSymbol();
-        if (vars.size() != fs.getArity())
-            throw new UnexpectedTermException(ift);
-
-        Object[] varNames = vars.stream().map(TargetQueryRenderer::renderVariable).toArray();
-        return Templates.format(fs.getTemplate(), varNames);
     }
 
     private static class UnexpectedTermException extends OntopInternalBugException {

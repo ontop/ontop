@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
@@ -24,10 +23,8 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.Templates;
 import org.apache.commons.rdf.api.*;
@@ -37,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -196,7 +194,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 				.orElseThrow(() -> new R2RMLSerializationException(
 						"Was expecting a RDFTerm functional or constant term, not " + term));
 
-		ImmutableTerm lexicalTerm = uncast(rdfFunctionalTerm.getTerm(0));
+		ImmutableTerm lexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfFunctionalTerm.getTerm(0));
 
 		// Might be abstract (e.g. partially defined literal map)
 		RDFTermType termType = Optional.of(rdfFunctionalTerm.getTerm(1))
@@ -256,10 +254,10 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private String getTemplate(ImmutableFunctionalTerm lexicalTerm) {
 		FunctionSymbol functionSymbol = lexicalTerm.getFunctionSymbol();
 		if (functionSymbol instanceof BnodeStringTemplateFunctionSymbol) {
-			return Templates.getTemplateString(lexicalTerm);
+			return Templates.getTemplateString2(lexicalTerm);
 		}
 		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-			String prefixedTemplate = Templates.getTemplateString(lexicalTerm);
+			String prefixedTemplate = Templates.getTemplateString2(lexicalTerm);
 			try {
 				return prefixManager.getExpandForm(prefixedTemplate);
 			}
@@ -339,24 +337,6 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		return false;
 	}
 
-	private ImmutableTerm uncast(ImmutableTerm lexicalTerm) {
-		return Optional.of(lexicalTerm)
-				.filter(t -> t instanceof ImmutableFunctionalTerm)
-				.map(t -> (ImmutableFunctionalTerm) t)
-				.map(this::uncastFunction)
-				.orElse(lexicalTerm);
-	}
-
-	private ImmutableTerm uncastFunction(ImmutableFunctionalTerm fun) {
-			ImmutableList<ImmutableTerm> uncastArgs = fun.getTerms().stream()
-					.map(this::uncast)
-					.collect(ImmutableCollectors.toList());
-
-			if (DBTypeConversionFunctionSymbol.isTemporary(fun.getFunctionSymbol()))
-				return uncastArgs.get(0);
-
-			return termFactory.getImmutableFunctionalTerm(fun.getFunctionSymbol(), uncastArgs);
-	}
 
 	/**
 	 * TODO: shall we consider as an internal bug or differently?

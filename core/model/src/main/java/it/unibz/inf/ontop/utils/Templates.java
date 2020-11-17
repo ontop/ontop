@@ -24,6 +24,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 
@@ -55,24 +56,15 @@ public class Templates {
      * @see #format(String, Object...)
      */
     public static String format(String uriTemplate, Collection<?> args) {
-
         StringBuilder sb = new StringBuilder();
-
         int beginIndex = 0;
-
         for (Object arg : args) {
-
             int endIndex = uriTemplate.indexOf(PLACE_HOLDER, beginIndex);
-
             sb.append(uriTemplate.subSequence(beginIndex, endIndex)).append(arg);
-
             beginIndex = endIndex + PLACE_HOLDER_LENGTH;
         }
-
         sb.append(uriTemplate.substring(beginIndex));
-
         return sb.toString();
-
     }
 
     public static int getArity(String template) {
@@ -147,12 +139,43 @@ public class Templates {
         return templateWithVars.toString();
     }
 
-    public static String getDBConcatTemplateString(ImmutableFunctionalTerm lexicalTerm) {
-        if (!(lexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol)) {
-            throw new IllegalArgumentException("The lexical term was expected to have a DBConcatFunctionSymbol");
-        }
-        return lexicalTerm.getTerms().stream()
-                .map(t -> "{"+t+"}") // TODO: escape { } in constants (see TargetQueryRenderer)
-                .collect(Collectors.joining());
+
+    public static String getTemplateString2(ImmutableFunctionalTerm ift) {
+
+        ImmutableList<Variable> vars = ift.getTerms().stream()
+                .map(DBTypeConversionFunctionSymbol::uncast)
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toList());
+
+        ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) ift.getFunctionSymbol();
+        if (vars.size() != fs.getArity())
+            throw new IllegalArgumentException("The number of placeholders does not match the arity: " + ift);
+
+        Object[] varNames = vars.stream().map(v -> "{" + v + "}").toArray();
+        return Templates.format(fs.getTemplate(), varNames);
     }
+
+    public static String getDBConcatTemplateString(ImmutableFunctionalTerm ift) {
+        if (!(ift.getFunctionSymbol() instanceof DBConcatFunctionSymbol))
+            throw new IllegalArgumentException("Invalid term type (DBConcat is expected): " + ift);
+
+        return ift.getTerms().stream()
+                    .map(Templates::concatArg2String)
+                    .collect(Collectors.joining());
+    }
+
+    private static String concatArg2String(ImmutableTerm term) {
+        if (term instanceof Constant) {
+            return ((Constant) term).getValue()
+                .replace("\\", "\\\\")
+                .replace("{", "\\{")
+                .replace("}", "\\}");
+        }
+        if (term instanceof Variable)
+            return "{" + ((Variable)term).getName() + "}";
+
+        throw new IllegalArgumentException("Unexpected term type (only Constant and Variable are allowed):" + term);
+    }
+
 }
