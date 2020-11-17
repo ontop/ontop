@@ -88,20 +88,10 @@ public class TargetQueryRenderer {
         if (term instanceof IRIConstant)
             return displayPredicateIRI(((IRIConstant) term).getIRI().getIRIString());
         if (term instanceof RDFLiteralConstant)
-            return displayLiteralConstant((RDFLiteralConstant) term);
+            return ((RDFLiteralConstant) term).toString();
         if (term instanceof BNode)
-            return displayConstantBnode((BNode) term);
+            return ((BNode) term).getInternalLabel();
         throw new UnexpectedTermException(term);
-    }
-
-    private static String displayConstantBnode(BNode term) { return term.getInternalLabel(); }
-
-    private static String displayLiteralConstant(RDFLiteralConstant term) {
-        return term.toString();
-    }
-
-    private static String displayConstantLexicalValue(DBConstant term) {
-        return "\"" + term.getValue() + "\"";
     }
 
     private String displayPredicateIRI(String iri) {
@@ -145,14 +135,17 @@ public class TargetQueryRenderer {
             if (rdfTermType instanceof BlankNodeTermType) {
                 if (lexicalTerm instanceof ImmutableFunctionalTerm) {
                     ImmutableFunctionalTerm nestedFunction = (ImmutableFunctionalTerm) lexicalTerm;
-                    FunctionSymbol nestedFs = nestedFunction.getFunctionSymbol();
-                    if (nestedFs instanceof BnodeStringTemplateFunctionSymbol)
-                        return displayBnodeTemplate(nestedFunction);
+                    if (nestedFunction.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
+                        if (nestedFunction.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
+                            return "_:" + instantiateTemplate(nestedFunction);
+                        }
+                        throw new UnexpectedTermException(nestedFunction);
+                    }
                     // case of RDF(TermToTxt(variable), BNODE)
-                    return displayNonFunctionalBNode(nestedFunction);
+                    return "_:" + displayTerm(nestedFunction);
                 }
                 // case of RDF(variable, BNODE)
-                return displayNonFunctionalBNode(lexicalTerm);
+                return "_:" + displayTerm(lexicalTerm);
             }
             if (rdfTermType instanceof IRITermType) {
                 if (lexicalTerm instanceof ImmutableFunctionalTerm) {
@@ -165,10 +158,6 @@ public class TargetQueryRenderer {
         }
 
         throw new IllegalArgumentException("unsupported function " + function);
-    }
-
-    private String displayNonFunctionalBNode(ImmutableTerm term) {
-        return "_:" + displayTerm(term);
     }
 
     private static Variable extractUniqueVariableArgument(ImmutableFunctionalTerm fun) {
@@ -203,14 +192,15 @@ public class TargetQueryRenderer {
     private String displayDatatypeFunction(ImmutableTerm lexicalTerm, RDFDatatype datatype) {
         final String lexicalString = (lexicalTerm instanceof DBConstant)
                 // Happens when abstract datatypes are used
-                ? displayConstantLexicalValue((DBConstant) lexicalTerm)
+                ? "\"" + ((DBConstant) lexicalTerm).getValue() + "\""
                 : displayTerm(lexicalTerm);
 
         return datatype.getLanguageTag()
                 .map(tag -> lexicalString + "@" + tag.getFullString())
                 .orElseGet(() -> {
-                    final String typePostfix = datatype.getIRI().equals(RDFS.LITERAL) ? "" : "^^"
-                            + prefixManager.getShortForm(datatype.getIRI().getIRIString(), false);
+                    String typePostfix = datatype.getIRI().equals(RDFS.LITERAL)
+                            ? ""
+                            : "^^" + prefixManager.getShortForm(datatype.getIRI().getIRIString(), false);
                     return lexicalString + typePostfix;
                 });
     }
@@ -221,13 +211,6 @@ public class TargetQueryRenderer {
             return shortenedUri;
 
         return "<" + s + ">";
-    }
-
-    private String displayBnodeTemplate(ImmutableFunctionalTerm function) {
-        if (function.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
-            return "_:" + instantiateTemplate(function);
-        }
-        throw new UnexpectedTermException(function);
     }
 
     private String instantiateTemplate(ImmutableFunctionalTerm function) {
