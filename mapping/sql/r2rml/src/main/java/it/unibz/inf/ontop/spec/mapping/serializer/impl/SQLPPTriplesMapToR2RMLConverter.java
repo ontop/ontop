@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import eu.optique.r2rml.api.MappingFactory;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
@@ -32,6 +33,7 @@ import it.unibz.inf.ontop.utils.Templates;
 import org.apache.commons.rdf.api.*;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -62,7 +64,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public Stream<TriplesMap> getTriplesMaps(SQLPPTriplesMap triplesMap) {
+	public Stream<TriplesMap> convert(SQLPPTriplesMap triplesMap) {
 
 		// check if mapping id is an iri
 		String mapping_id = triplesMap.getId();
@@ -70,70 +72,66 @@ public class SQLPPTriplesMapToR2RMLConverter {
 				? baseIRIString + mapping_id
 				: mapping_id;
 
-		//Table
-		SQLPPSourceQueryImpl squery = (SQLPPSourceQueryImpl) triplesMap.getSourceQuery();
-		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQL());
+		LogicalTable logicalTable = mappingFactory.createR2RMLView(triplesMap.getSourceQuery().getSQL());
 
-		// group by subject
-		ImmutableMap<ImmutableTerm, Collection<TargetAtom>> subjectMap = triplesMap.getTargetAtoms().stream()
+		ImmutableList<Map.Entry<RDFAtomPredicate, TargetAtom>> targetAtoms = triplesMap.getTargetAtoms().stream()
 				.filter(t -> t.getProjectionAtom().getPredicate() instanceof RDFAtomPredicate)
+				.map(t -> Maps.immutableEntry((RDFAtomPredicate)t.getProjectionAtom().getPredicate(), t))
+				.collect(ImmutableCollectors.toList());
+
+		ImmutableMap<ImmutableTerm, Collection<Map.Entry<RDFAtomPredicate, TargetAtom>>> subjectMap = targetAtoms.stream()
 				.collect(ImmutableCollectors.toMultimap(
-						t -> ((RDFAtomPredicate)t.getProjectionAtom().getPredicate()).getSubject(t.getSubstitutedTerms()),
-						t -> t))
+						e -> e.getKey().getSubject(e.getValue().getSubstitutedTerms()),
+						e -> e))
 				.asMap();
 
 		return subjectMap.entrySet().stream()
-				.flatMap(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix));
+				.flatMap(e -> processSameSubjectGroup(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix));
 	}
 
-	private Stream<TriplesMap> extractTriplesMap(LogicalTable logicalTable,
-												 ImmutableTerm subject,
-												 Collection<TargetAtom> targetAtoms,
-												 String mainNodeURLPrefix) {
+	private Stream<TriplesMap> processSameSubjectGroup(LogicalTable logicalTable,
+													   ImmutableTerm subject,
+													   Collection<Map.Entry<RDFAtomPredicate, TargetAtom>> targetAtoms,
+													   String mainNodeIriPrefix) {
 
-		SubjectMap sm = extractSubjectMap(subject);
-		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, sm);
-
-		// group by graph
-		ImmutableMap<Optional<ImmutableTerm>, Collection<TargetAtom>> graphMap = targetAtoms.stream()
-				.filter(t -> t.getProjectionAtom().getPredicate() instanceof RDFAtomPredicate)
+		ImmutableMap<Optional<ImmutableTerm>, Collection<Map.Entry<RDFAtomPredicate, TargetAtom>>> graphMap = targetAtoms.stream()
 				.collect(ImmutableCollectors.toMultimap(
-						t -> ((RDFAtomPredicate)t.getProjectionAtom().getPredicate()).getGraph(t.getSubstitutedTerms()),
-						t -> t))
+						e -> e.getKey().getGraph(e.getValue().getSubstitutedTerms()),
+						e -> e))
 				.asMap();
 
 		return graphMap.entrySet().stream()
-				.map(e -> extractTriplesMap(tm, e.getKey(), e.getValue(), mainNodeURLPrefix));
+				.map(e -> processSameSubjectGraphGroup(logicalTable, subject, e.getKey(), e.getValue(), mainNodeIriPrefix));
 	}
 
-	private TriplesMap extractTriplesMap(TriplesMap tm,
-										 Optional<ImmutableTerm> graph,
-										 Collection<TargetAtom> targetAtoms,
-										 String mainNodeURLPrefix) {
+	private TriplesMap processSameSubjectGraphGroup(LogicalTable logicalTable,
+													ImmutableTerm subject,
+													Optional<ImmutableTerm> graph,
+													Collection<Map.Entry<RDFAtomPredicate, TargetAtom>> targetAtoms,
+													String mainNodeIriPrefix) {
 
 		// Make sure we don't create triples map with the same name in case of multiple named graphs
-		tm.setNode(rdfFactory.createIRI(
-				graph.map(t -> mainNodeURLPrefix + "-" + UUID.randomUUID().toString())
-						.orElse(mainNodeURLPrefix)));
+		IRI iri = rdfFactory.createIRI(
+				graph.map(t -> mainNodeIriPrefix + "-" + UUID.randomUUID().toString())
+						.orElse(mainNodeIriPrefix));
+
+		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, extractSubjectMap(subject), iri);
 
 		graph.ifPresent(t -> tm.getSubjectMap().addGraphMap(extractGraphMap(t)));
 
-		for (TargetAtom targetAtom : targetAtoms)  {
-			Optional<RDFAtomPredicate> predicate = Optional.of(targetAtom.getProjectionAtom().getPredicate())
-					.filter(p -> p instanceof RDFAtomPredicate)
-					.map(p -> (RDFAtomPredicate) p);
+		for (Map.Entry<RDFAtomPredicate, TargetAtom> e : targetAtoms)  {
+			RDFAtomPredicate predicate = e.getKey();
+			ImmutableList<ImmutableTerm> terms = e.getValue().getSubstitutedTerms();
 
-			Optional<IRI> classIri = predicate.flatMap(p -> p.getClassIRI(targetAtom.getSubstitutedTerms()));
+			Optional<IRI> classIri = predicate.getClassIRI(terms);
 			if (classIri.isPresent()) {
 				tm.getSubjectMap().addClass(classIri.get());
 			}
-			else if (predicate.isPresent()) {
+			else {
 				tm.addPredicateObjectMap(mappingFactory.createPredicateObjectMap(
-						extractPredicateMap(predicate.get().getProperty(targetAtom.getSubstitutedTerms())),
-						extractObjectMap(predicate.get().getObject(targetAtom.getSubstitutedTerms()))));
+						extractPredicateMap(predicate.getProperty(terms)),
+						extractObjectMap(predicate.getObject(terms))));
 			}
-			else
-				throw new MinorOntopInternalBugException("Unexpected predicate in " + targetAtom);
 		}
 
 		return tm;
@@ -192,7 +190,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 												 Function<Literal, T> literalFct) {
 
 		ImmutableFunctionalTerm rdfFunctionalTerm = Optional.of(term)
-				.filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
+				.filter(t -> t instanceof NonVariableTerm)
 				.map(t -> convertIntoRDFFunctionalTerm((NonVariableTerm) t))
 				.filter(t -> t.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
 				.orElseThrow(() -> new R2RMLSerializationException(
@@ -210,8 +208,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 								+ rdfFunctionalTerm.getTerm(1)));
 
 		if (termType instanceof ObjectRDFType)
-			return extractIriOrBnodeTermMap(lexicalTerm, (ObjectRDFType) termType,
-					templateFct, columnFct, iriFct, bNodeFct);
+			return extractIriOrBnodeTermMap(lexicalTerm, (ObjectRDFType) termType, templateFct, columnFct, iriFct, bNodeFct);
 		if (termType instanceof RDFDatatype)
 			return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
 
@@ -271,13 +268,12 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	}
 
 	private String expandPrefix(String prefixedTemplate) {
-		String expandedTemplate = prefixedTemplate;
 		try {
-			expandedTemplate = prefixManager.getExpandForm(prefixedTemplate);
+			return prefixManager.getExpandForm(prefixedTemplate);
 		}
 		catch (InvalidPrefixWritingException ignored) {
+			return prefixedTemplate;
 		}
-		return expandedTemplate;
 	}
 
 	/**

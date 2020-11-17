@@ -31,7 +31,7 @@ public class R2rmlConversionTest {
                RDF4JR2RMLMappingManager.getInstance().getMappingFactory(),
                ppMapping.getPrefixManager());
        ImmutableList<TriplesMap> triplesMaps = ppMapping.getTripleMaps().stream()
-               .flatMap(transformer::getTriplesMaps)
+               .flatMap(transformer::convert)
                .collect(ImmutableCollectors.toList());
        assertEquals(1, triplesMaps.size());
        return triplesMaps.iterator().next();

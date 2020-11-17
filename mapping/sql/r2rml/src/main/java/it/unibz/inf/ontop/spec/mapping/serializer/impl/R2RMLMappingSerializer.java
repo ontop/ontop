@@ -43,7 +43,7 @@ public class R2RMLMappingSerializer implements MappingSerializer {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             SQLPPTriplesMapToR2RMLConverter transformer = new SQLPPTriplesMapToR2RMLConverter(rdfFactory, termFactory, manager.getMappingFactory(), ppMapping.getPrefixManager());
             ImmutableList<TriplesMap> tripleMaps = ppMapping.getTripleMaps().stream()
-                    .flatMap(transformer::getTriplesMaps)
+                    .flatMap(transformer::convert)
                     .collect(ImmutableCollectors.toList());
             RDF4JGraph rdf4JGraph = manager.exportMappings(tripleMaps);
             Model model = rdf4JGraph.asModel().get();
