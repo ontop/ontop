@@ -10,7 +10,7 @@ import com.google.common.base.Strings;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -57,13 +57,13 @@ public class OntopOBDAToR2RML implements OntopCommand {
         }
 
         OntopSQLOWLAPIConfiguration config = configBuilder.build();
+        R2RMLMappingSerializer converter = new R2RMLMappingSerializer(
+                config.getRdfFactory(),
+                config.getTermFactory());
 
         try {
             SQLPPMapping ppMapping = config.loadProvidedPPMapping();
-            SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, config.getRdfFactory(),
-                    config.getTermFactory());
-
-            converter.write(new File(outputMappingFile));
+            converter.write(new File(outputMappingFile), ppMapping);
             System.out.println("R2RML mapping file " + outputMappingFile + " written!");
         }
         catch (MappingException | IOException e) {

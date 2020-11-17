@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
-import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -51,14 +51,14 @@ public class R2RMLExportAction extends ProtegeAction {
 	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 	
 	@Override
-	public void initialise() throws Exception {
+	public void initialise()  {
 		editorKit = (OWLEditorKit)getEditorKit();		
 		obdaModel = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel();
 		modelManager = editorKit.getOWLModelManager();
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void dispose()  {
 		// Does nothing!
 	}
 
@@ -111,7 +111,7 @@ public class R2RMLExportAction extends ProtegeAction {
                                         JOptionPane.INFORMATION_MESSAGE);
                             } catch (Exception e) {
                                 JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
-                                log.error("Error during R2RML export. \n", e.getMessage());
+                                log.error("Error during R2RML export: {}\n", e.getMessage());
                                 e.printStackTrace();
                             }
                         }
@@ -137,9 +137,8 @@ public class R2RMLExportAction extends ProtegeAction {
         }
 
         public void run(File file) throws IOException {
-            SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
-                    obdaModel.getRdfFactory(), obdaModel.getTermFactory());
-            writer.write(file);
+            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModel.getRdfFactory(), obdaModel.getTermFactory());
+            writer.write(file, obdaModel.generatePPMapping());
         }
 
         @Override

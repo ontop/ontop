@@ -101,8 +101,8 @@ public class SQLMappingParserUsingOwlTest {
     private void saveRegularFile() throws Exception {
         SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
                 specificationFactory.createPrefixManager(ImmutableMap.of()));
-        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
-        writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
+        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
+        writer.write(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"), ppMapping);
     }
 
     /*

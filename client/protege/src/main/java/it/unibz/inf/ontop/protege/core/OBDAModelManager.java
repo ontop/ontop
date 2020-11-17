@@ -610,8 +610,8 @@ public class OBDAModelManager implements Disposable {
 				File obdaFile = new File(URI.create(obdaDocumentIri));
 				if(obdaModel.hasTripleMaps()) {
 					SQLPPMapping ppMapping = obdaModel.generatePPMapping();
-					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
-					writer.save(obdaFile);
+					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
+					writer.write(obdaFile, ppMapping);
 					log.info("mapping file saved to {}", obdaFile);
 				} else {
 					Files.deleteIfExists(obdaFile.toPath());

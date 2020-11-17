@@ -1,47 +1,38 @@
 package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.OntopNativeMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.serializer.MappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 
 import java.io.*;
+import java.util.Map;
 
 /**
- *
  * Serializer for the Ontop Native Mapping Language (SQL-specific).
- *
- * TODO: add a MappingSerializer interface.
- * TODO: consider build from a factory, but make it optional.
- *
  */
-public class OntopNativeMappingSerializer {
 
-    private final SQLPPMapping ppMapping;
-
-    /**
-     * TODO: may consider building it through Assisted Injection.
-     */
-    public OntopNativeMappingSerializer(SQLPPMapping ppMapping) {
-        this.ppMapping = ppMapping;
-    }
+public class OntopNativeMappingSerializer implements MappingSerializer {
 
     /**
      * The save/write operation.
      *
-     * @param file The file where the model is saved.
+     * @param file The file where the mapping is saved.
+     * @param ppMapping The mapping
      * @throws IOException
      */
-    public void save(File file) throws IOException {
+    @Override
+    public void write(File file, SQLPPMapping ppMapping) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writePrefixDeclaration(writer);
-            writeMappingDeclaration(writer);
+            writePrefixDeclaration(writer, ppMapping.getPrefixManager());
+            writeMappingDeclaration(writer, ppMapping);
         }
         catch (IOException e) {
             throw new IOException(String.format("Error while saving the OBDA model to the file located at %s.\n" +
@@ -49,12 +40,9 @@ public class OntopNativeMappingSerializer {
         }
     }
 
-        /*
-     * Helper methods related to save file.
-     */
 
-    private void writePrefixDeclaration(BufferedWriter writer) throws IOException {
-        final ImmutableMap<String, String> prefixMap = ppMapping.getPrefixManager().getPrefixMap();
+    private void writePrefixDeclaration(BufferedWriter writer, PrefixManager prefixManager) throws IOException {
+        final ImmutableMap<String, String> prefixMap = prefixManager.getPrefixMap();
 
         if (prefixMap.size() == 0) {
             return; // do nothing if there is no prefixes to write
@@ -62,14 +50,15 @@ public class OntopNativeMappingSerializer {
 
         writer.write(OntopNativeMappingParser.PREFIX_DECLARATION_TAG);
         writer.write("\n");
-        for (String prefix : prefixMap.keySet()) {
-            String uri = prefixMap.get(prefix);
+        for (Map.Entry<String, String> e : prefixMap.entrySet()) {
+            String prefix = e.getKey();
+            String uri = e.getValue();
             writer.write(prefix + (prefix.length() >= 9 ? "\t" : "\t\t") + uri + "\n");
         }
         writer.write("\n");
     }
 
-    private void writeMappingDeclaration(BufferedWriter writer) throws IOException {
+    private void writeMappingDeclaration(BufferedWriter writer, SQLPPMapping ppMapping) throws IOException {
 
         writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " " + OntopNativeMappingParser.START_COLLECTION_SYMBOL);
         writer.write("\n");
@@ -83,7 +72,7 @@ public class OntopNativeMappingSerializer {
             writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + axiom.getId() + "\n");
 
             ImmutableList<TargetAtom> targetQuery = axiom.getTargetAtoms();
-            writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
+            writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery, ppMapping.getPrefixManager()) + "\n");
 
             SQLPPSourceQuery sourceQuery = axiom.getSourceQuery();
             writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
@@ -93,16 +82,17 @@ public class OntopNativeMappingSerializer {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(ImmutableList<TargetAtom> query) {
-        return TargetQueryRenderer.encode(query, ppMapping.getPrefixManager());
+    private String printTargetQuery(ImmutableList<TargetAtom> query, PrefixManager prefixManager) {
+        return TargetQueryRenderer.encode(query, prefixManager);
     }
 
-    private String printSourceQuery(SQLPPSourceQuery query) {
+    private static String printSourceQuery(SQLPPSourceQuery query) {
         String sourceString = SourceQueryRenderer.encode(query);
         String toReturn = convertTabToSpaces(sourceString);
         return toReturn.replaceAll("\n", "\n\t\t\t");
     }
-    private String convertTabToSpaces(String input) {
+
+    private static String convertTabToSpaces(String input) {
         return input.replaceAll("\t", "   ");
     }
 }

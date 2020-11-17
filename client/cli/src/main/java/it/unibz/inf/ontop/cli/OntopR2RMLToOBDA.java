@@ -5,14 +5,11 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Strings;
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
-import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 import java.io.File;
-import java.util.Properties;
 
 @Command(name = "to-obda",
         description = "Convert R2RML format to ontop native mapping format (.obda)")
@@ -42,11 +39,11 @@ public class OntopR2RMLToOBDA implements OntopCommand {
                 .jdbcPassword("password")
                 .build();
 
+        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
+
         try {
             SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
-
-            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
-            writer.save(new File(outputMappingFile));
+            writer.write(new File(outputMappingFile), ppMapping);
         }
         catch (Exception e) {
             e.printStackTrace();

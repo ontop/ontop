@@ -1,9 +1,8 @@
-package it.unibz.inf.ontop.spec.mapping.serializer;
+package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
+import eu.optique.r2rml.api.MappingFactory;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -27,6 +26,7 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.Templates;
 import org.apache.commons.rdf.api.*;
@@ -42,127 +42,103 @@ import java.util.stream.Stream;
  * Transform OBDA mappings in R2rml mappings
  * Initial @author s Sarah, Mindas, Timi, Guohui, Martin
  *
- * TODO: rename it R2RML serializer
- *
  */
-public class OBDAMappingTransformer {
+public class SQLPPTriplesMapToR2RMLConverter {
 
 	private final RDF rdfFactory;
 	private final TermFactory termFactory;
-	private final String baseIRIString;
-	private final eu.optique.r2rml.api.MappingFactory mappingFactory;
+	private final MappingFactory mappingFactory;
+	private final PrefixManager prefixManager;
 
-	OBDAMappingTransformer(RDF rdfFactory, TermFactory termFactory) {
-        this("urn:", rdfFactory, termFactory);
-	}
+	private static final String baseIRIString = "urn:";
 
-    OBDAMappingTransformer(String baseIRIString, RDF rdfFactory, TermFactory termFactory) {
-        this.baseIRIString = baseIRIString;
+	public SQLPPTriplesMapToR2RMLConverter(RDF rdfFactory, TermFactory termFactory, MappingFactory mappingFactory, PrefixManager prefixManager) {
 		this.rdfFactory = rdfFactory;
 		this.termFactory = termFactory;
-		this.mappingFactory = RDF4JR2RMLMappingManager.getInstance().getMappingFactory();
+		this.mappingFactory = mappingFactory;
+		this.prefixManager = prefixManager;
 	}
 
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public Stream<TriplesMap> getTriplesMaps(SQLPPTriplesMap triplesMap, PrefixManager prefixManager) {
-
-		SQLPPSourceQueryImpl squery = (SQLPPSourceQueryImpl) triplesMap.getSourceQuery();
-		ImmutableList<TargetAtom> targetAtoms = triplesMap.getTargetAtoms();
-
-		//triplesMap node
-		String mapping_id = triplesMap.getId();
+	public Stream<TriplesMap> getTriplesMaps(SQLPPTriplesMap triplesMap) {
 
 		// check if mapping id is an iri
-		String mainNodeURLPrefix = (!mapping_id.contains(":"))
+		String mapping_id = triplesMap.getId();
+		String mainNodeURLPrefix = !mapping_id.contains(":")
 				? baseIRIString + mapping_id
 				: mapping_id;
 
 		//Table
+		SQLPPSourceQueryImpl squery = (SQLPPSourceQueryImpl) triplesMap.getSourceQuery();
 		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQL());
 
-		ImmutableMultimap<ImmutableTerm, TargetAtom> targetAtomMultimap = targetAtoms.stream()
+		// group by subject
+		ImmutableMap<ImmutableTerm, Collection<TargetAtom>> subjectMap = triplesMap.getTargetAtoms().stream()
+				.filter(t -> t.getProjectionAtom().getPredicate() instanceof RDFAtomPredicate)
 				.collect(ImmutableCollectors.toMultimap(
-						a -> a.getSubstitutedTerm(0),
-						a -> a));
+						t -> ((RDFAtomPredicate)t.getProjectionAtom().getPredicate()).getSubject(t.getSubstitutedTerms()),
+						t -> t))
+				.asMap();
 
-		// Creates a triples map per subject map
-		return targetAtomMultimap.asMap().entrySet().stream()
-				.flatMap(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
+		return subjectMap.entrySet().stream()
+				.flatMap(e -> extractTriplesMap(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix));
 	}
 
-	private Stream<TriplesMap> extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
-										 Collection<TargetAtom> targetAtoms, String mainNodeURLPrefix,
-										 PrefixManager prefixManager) {
+	private Stream<TriplesMap> extractTriplesMap(LogicalTable logicalTable,
+												 ImmutableTerm subject,
+												 Collection<TargetAtom> targetAtoms,
+												 String mainNodeURLPrefix) {
 
+		SubjectMap sm = extractSubjectMap(subject);
+		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, sm);
+
+		// group by graph
 		ImmutableMap<Optional<ImmutableTerm>, Collection<TargetAtom>> graphMap = targetAtoms.stream()
+				.filter(t -> t.getProjectionAtom().getPredicate() instanceof RDFAtomPredicate)
 				.collect(ImmutableCollectors.toMultimap(
-						t -> Optional.of(t.getProjectionAtom())
-								.filter(a -> a.getArity() > 3)
-								.map(a -> t.getSubstitutedTerm(3)),
+						t -> ((RDFAtomPredicate)t.getProjectionAtom().getPredicate()).getGraph(t.getSubstitutedTerms()),
 						t -> t))
 				.asMap();
 
 		return graphMap.entrySet().stream()
-				.map(e -> extractTriplesMap(logicalTable, substitutedTerm, e.getKey(), e.getValue(), mainNodeURLPrefix, prefixManager));
+				.map(e -> extractTriplesMap(tm, e.getKey(), e.getValue(), mainNodeURLPrefix));
 	}
 
-	private TriplesMap extractTriplesMap(LogicalTable logicalTable, ImmutableTerm substitutedTerm,
-										 Optional<ImmutableTerm> graphTerm, Collection<TargetAtom> targetAtoms,
-										 String mainNodeURLPrefix, PrefixManager prefixManager) {
-		SubjectMap sm = extractSubjectMap(substitutedTerm, prefixManager);
+	private TriplesMap extractTriplesMap(TriplesMap tm,
+										 Optional<ImmutableTerm> graph,
+										 Collection<TargetAtom> targetAtoms,
+										 String mainNodeURLPrefix) {
 
 		// Make sure we don't create triples map with the same name in case of multiple named graphs
-		BlankNodeOrIRI mainNode = rdfFactory.createIRI(
-				graphTerm
-						.map(t -> mainNodeURLPrefix + "-" + UUID.randomUUID().toString())
-						.orElse(mainNodeURLPrefix));
+		tm.setNode(rdfFactory.createIRI(
+				graph.map(t -> mainNodeURLPrefix + "-" + UUID.randomUUID().toString())
+						.orElse(mainNodeURLPrefix)));
 
-		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, sm, mainNode);
+		graph.ifPresent(t -> tm.getSubjectMap().addGraphMap(extractGraphMap(t)));
 
-		graphTerm.map(g -> extractGraphMap(g, prefixManager))
-				.ifPresent(sm::addGraphMap);
+		for (TargetAtom targetAtom : targetAtoms)  {
+			Optional<RDFAtomPredicate> predicate = Optional.of(targetAtom.getProjectionAtom().getPredicate())
+					.filter(p -> p instanceof RDFAtomPredicate)
+					.map(p -> (RDFAtomPredicate) p);
 
-		ImmutableMap<Boolean, ImmutableList<TargetAtom>> targetAtomClassification = targetAtoms.stream()
-				.collect(ImmutableCollectors.partitioningBy(OBDAMappingTransformer::isConstantClassTargetAtom));
-
-		// Constant classes
-		Optional.ofNullable(targetAtomClassification.get(true))
-				.map(Collection::stream)
-				.orElse(Stream.empty())
-				.map(OBDAMappingTransformer::extractClassIRIFromConstantClassTargetAtom)
-				.forEach(sm::addClass);
-
-		// Other target atoms -> predicate object map
-		Optional.ofNullable(targetAtomClassification.get(false))
-				.map(Collection::stream)
-				.orElse(Stream.empty())
-				.map(a -> convertIntoPredicateObjectMap(a, prefixManager))
-				.forEach(tm::addPredicateObjectMap);
+			Optional<IRI> classIri = predicate.flatMap(p -> p.getClassIRI(targetAtom.getSubstitutedTerms()));
+			if (classIri.isPresent()) {
+				tm.getSubjectMap().addClass(classIri.get());
+			}
+			else if (predicate.isPresent()) {
+				tm.addPredicateObjectMap(mappingFactory.createPredicateObjectMap(
+						extractPredicateMap(predicate.get().getProperty(targetAtom.getSubstitutedTerms())),
+						extractObjectMap(predicate.get().getObject(targetAtom.getSubstitutedTerms()))));
+			}
+			else
+				throw new MinorOntopInternalBugException("Unexpected predicate in " + targetAtom);
+		}
 
 		return tm;
 	}
 
-	private static boolean isConstantClassTargetAtom(TargetAtom targetAtom) {
-		return Optional.of(targetAtom.getProjectionAtom())
-				.filter(a -> a.getPredicate() instanceof RDFAtomPredicate)
-				.flatMap(a -> ((RDFAtomPredicate) a.getPredicate()).getClassIRI(targetAtom.getSubstitutedTerms()))
-				.isPresent();
-	}
-
-	private static IRI extractClassIRIFromConstantClassTargetAtom(TargetAtom targetAtom) {
-		return Optional.of(targetAtom.getProjectionAtom())
-				.filter(a -> a.getPredicate() instanceof RDFAtomPredicate)
-				.flatMap(a -> ((RDFAtomPredicate) a.getPredicate()).getClassIRI(targetAtom.getSubstitutedTerms()))
-				.orElseThrow(() -> new IllegalArgumentException("The target atom is expected to have a constant class"));
-	}
-
-	private PredicateObjectMap convertIntoPredicateObjectMap(TargetAtom targetAtom, PrefixManager prefixManager) {
-		return mappingFactory.createPredicateObjectMap(
-				extractPredicateMap(targetAtom, prefixManager),
-				extractObjectMap(targetAtom, prefixManager));
-	}
 
 	private static <T> T unsupportedBlankNode(BlankNode t) {
 		throw new MinorOntopInternalBugException("Unexpected transformation: " + t.toString());
@@ -171,61 +147,56 @@ public class OBDAMappingTransformer {
 		throw new MinorOntopInternalBugException("Unexpected transformation: " + t.toString());
 	}
 
-	private SubjectMap extractSubjectMap(ImmutableTerm substitutedTerm, PrefixManager prefixManager) {
-		return extractTermMap(substitutedTerm,
+	private SubjectMap extractSubjectMap(ImmutableTerm term) {
+		return extractTermMap(term,
 				mappingFactory::createSubjectMap,
 				mappingFactory::createSubjectMap,
 				mappingFactory::createSubjectMap,
 				// TODO: allow blank nodes to appear in a subject map
-				OBDAMappingTransformer::unsupportedBlankNode,
-				OBDAMappingTransformer::unsupportedLiteral,
-				prefixManager);
+				SQLPPTriplesMapToR2RMLConverter::unsupportedBlankNode,
+				SQLPPTriplesMapToR2RMLConverter::unsupportedLiteral);
 	}
 
-	private GraphMap extractGraphMap(ImmutableTerm substitutedTerm, PrefixManager prefixManager) {
-		return extractTermMap(substitutedTerm,
+	private GraphMap extractGraphMap(ImmutableTerm term) {
+		return extractTermMap(term,
 				mappingFactory::createGraphMap,
 				mappingFactory::createGraphMap,
 				mappingFactory::createGraphMap,
-				OBDAMappingTransformer::unsupportedBlankNode,
-				OBDAMappingTransformer::unsupportedLiteral,
-				prefixManager);
+				SQLPPTriplesMapToR2RMLConverter::unsupportedBlankNode,
+				SQLPPTriplesMapToR2RMLConverter::unsupportedLiteral);
 	}
 
-	private PredicateMap extractPredicateMap(TargetAtom targetAtom, PrefixManager prefixManager) {
-		return extractTermMap(targetAtom.getSubstitutedTerm(1),
+	private PredicateMap extractPredicateMap(ImmutableTerm term) {
+		return extractTermMap(term,
 				mappingFactory::createPredicateMap,
 				mappingFactory::createPredicateMap,
 				mappingFactory::createPredicateMap,
-				OBDAMappingTransformer::unsupportedBlankNode,
-				OBDAMappingTransformer::unsupportedLiteral,
-		        prefixManager);
+				SQLPPTriplesMapToR2RMLConverter::unsupportedBlankNode,
+				SQLPPTriplesMapToR2RMLConverter::unsupportedLiteral);
 	}
 
-	private ObjectMap extractObjectMap(TargetAtom targetAtom, PrefixManager prefixManager) {
-		return extractTermMap(targetAtom.getSubstitutedTerm(2),
+	private ObjectMap extractObjectMap(ImmutableTerm term) {
+		return extractTermMap(term,
 				mappingFactory::createObjectMap,
 				mappingFactory::createObjectMap,
 				mappingFactory::createObjectMap,
 				mappingFactory::createObjectMap,
-				mappingFactory::createObjectMap,
-				prefixManager);
+				mappingFactory::createObjectMap);
 	}
 
-	private <T extends TermMap> T extractTermMap(ImmutableTerm substitutedTerm,
+	private <T extends TermMap> T extractTermMap(ImmutableTerm term,
 												 Function<Template, T> templateFct,
 												 Function<String, T> columnFct,
 												 Function<IRI, T> iriFct,
 												 Function<BlankNode, T> bNodeFct,
-												 Function<Literal, T> literalFct,
-												 PrefixManager prefixManager) {
+												 Function<Literal, T> literalFct) {
 
-		ImmutableFunctionalTerm rdfFunctionalTerm = Optional.of(substitutedTerm)
+		ImmutableFunctionalTerm rdfFunctionalTerm = Optional.of(term)
 				.filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
 				.map(t -> convertIntoRDFFunctionalTerm((NonVariableTerm) t))
 				.filter(t -> t.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
 				.orElseThrow(() -> new R2RMLSerializationException(
-						"Was expecting a RDFTerm functional or constant term, not " + substitutedTerm));
+						"Was expecting a RDFTerm functional or constant term, not " + term));
 
 		ImmutableTerm lexicalTerm = uncast(rdfFunctionalTerm.getTerm(0));
 
@@ -240,7 +211,7 @@ public class OBDAMappingTransformer {
 
 		if (termType instanceof ObjectRDFType)
 			return extractIriOrBnodeTermMap(lexicalTerm, (ObjectRDFType) termType,
-					templateFct, columnFct, iriFct, bNodeFct, prefixManager);
+					templateFct, columnFct, iriFct, bNodeFct);
 		if (termType instanceof RDFDatatype)
 			return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
 
@@ -257,12 +228,12 @@ public class OBDAMappingTransformer {
 		return (ImmutableFunctionalTerm) term;
 	}
 
-	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm, ObjectRDFType termType,
+	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm,
+														   ObjectRDFType termType,
                                                            Function<Template, T> templateFct,
                                                            Function<String, T> columnFct,
                                                            Function<IRI, T> iriFct,
-                                                           Function<BlankNode, T> bNodeFct,
-                                                           PrefixManager prefixManager) {
+                                                           Function<BlankNode, T> bNodeFct) {
 		T termMap;
 		if (lexicalTerm instanceof DBConstant) { //fixed string
 			String lexicalString = ((DBConstant) lexicalTerm).getValue();
@@ -274,7 +245,7 @@ public class OBDAMappingTransformer {
 			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
 		}
 		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-			String templateString = getTemplate((ImmutableFunctionalTerm) lexicalTerm, prefixManager);
+			String templateString = getTemplate((ImmutableFunctionalTerm) lexicalTerm);
 			termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
 		}
 		else {
@@ -285,21 +256,21 @@ public class OBDAMappingTransformer {
 		return termMap;
 	}
 
-	private String getTemplate(ImmutableFunctionalTerm lexicalTerm, PrefixManager prefixManager) {
+	private String getTemplate(ImmutableFunctionalTerm lexicalTerm) {
 		FunctionSymbol functionSymbol = lexicalTerm.getFunctionSymbol();
 		if (functionSymbol instanceof BnodeStringTemplateFunctionSymbol) {
 			return Templates.getTemplateString(lexicalTerm);
 		}
 		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-			return expandPrefix(Templates.getTemplateString(lexicalTerm), prefixManager);
+			return expandPrefix(Templates.getTemplateString(lexicalTerm));
 		}
 		if (functionSymbol instanceof DBConcatFunctionSymbol) {
 			return Templates.getDBConcatTemplateString(lexicalTerm);
 		}
-		throw new R2RMLSerializationException ("Unexpected function symbol "+functionSymbol + " in term "+lexicalTerm);
+		throw new R2RMLSerializationException("Unexpected function symbol " + functionSymbol + " in term " + lexicalTerm);
 	}
 
-	private String expandPrefix(String prefixedTemplate, PrefixManager prefixManager) {
+	private String expandPrefix(String prefixedTemplate) {
 		String expandedTemplate = prefixedTemplate;
 		try {
 			expandedTemplate = prefixManager.getExpandForm(prefixedTemplate);
@@ -312,7 +283,8 @@ public class OBDAMappingTransformer {
 	/**
 	 * NB: T is assumed to be an ObjectMap
 	 */
-	private <T extends TermMap> T extractLiteralTermMap(ImmutableTerm lexicalTerm, RDFDatatype datatype,
+	private <T extends TermMap> T extractLiteralTermMap(ImmutableTerm lexicalTerm,
+														RDFDatatype datatype,
 														Function<Template, T> templateFct,
 														Function<String, T> columnFct,
 														Function<Literal, T> literalFct) {

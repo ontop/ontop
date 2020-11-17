@@ -1,13 +1,14 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
+import com.google.common.collect.ImmutableList;
+import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.ObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.SQLPPTriplesMapToR2RMLConverter;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
-
-import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -25,9 +26,13 @@ public class R2rmlConversionTest {
                .build();
 
        SQLPPMapping ppMapping = config.loadProvidedPPMapping();
-       SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping,
-               config.getRdfFactory(), config.getTermFactory());
-       Collection<TriplesMap> triplesMaps = converter.getTripleMaps();
+       SQLPPTriplesMapToR2RMLConverter transformer = new SQLPPTriplesMapToR2RMLConverter(config.getRdfFactory(),
+               config.getTermFactory(),
+               RDF4JR2RMLMappingManager.getInstance().getMappingFactory(),
+               ppMapping.getPrefixManager());
+       ImmutableList<TriplesMap> triplesMaps = ppMapping.getTripleMaps().stream()
+               .flatMap(transformer::getTriplesMaps)
+               .collect(ImmutableCollectors.toList());
        assertEquals(1, triplesMaps.size());
        return triplesMaps.iterator().next();
    }
