@@ -626,8 +626,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
+		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
 		ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
-		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
+		String trgQuery = targetQueryRenderer.encode(targetQuery);
 		txtTargetQuery.setText(trgQuery);
 	}
 }

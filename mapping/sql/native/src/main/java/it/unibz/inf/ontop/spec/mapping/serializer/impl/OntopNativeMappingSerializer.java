@@ -60,6 +60,8 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
 
     private void writeMappingDeclaration(BufferedWriter writer, SQLPPMapping ppMapping) throws IOException {
 
+        TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(ppMapping.getPrefixManager());
+
         writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " " + OntopNativeMappingParser.START_COLLECTION_SYMBOL);
         writer.write("\n");
 
@@ -72,7 +74,7 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
             writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + axiom.getId() + "\n");
 
             ImmutableList<TargetAtom> targetQuery = axiom.getTargetAtoms();
-            writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery, ppMapping.getPrefixManager()) + "\n");
+            writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + targetQueryRenderer.encode(targetQuery) + "\n");
 
             SQLPPSourceQuery sourceQuery = axiom.getSourceQuery();
             writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
@@ -80,10 +82,6 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
         }
         writer.write(OntopNativeMappingParser.END_COLLECTION_SYMBOL);
         writer.write("\n\n");
-    }
-
-    private String printTargetQuery(ImmutableList<TargetAtom> query, PrefixManager prefixManager) {
-        return TargetQueryRenderer.encode(query, prefixManager);
     }
 
     private static String printSourceQuery(SQLPPSourceQuery query) {

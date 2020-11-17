@@ -370,7 +370,8 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 //		String trgQuery = map.getOptionalTargetString()
 //				.orElseGet(() -> TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager));
 
-		String trgQuery = TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager);
+		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
+		String trgQuery = targetQueryRenderer.encode(map.getTargetAtoms());
 
 		//String trgQuery = map.getOptionalTargetString();
  		trgQueryTextPane.setText(trgQuery);
