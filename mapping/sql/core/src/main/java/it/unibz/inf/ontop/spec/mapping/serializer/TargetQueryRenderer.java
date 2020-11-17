@@ -86,19 +86,12 @@ public class TargetQueryRenderer {
         if (term instanceof Variable)
             return displayVariable((Variable) term);
         if (term instanceof IRIConstant)
-            return displayPredicateIRI(((IRIConstant) term).getIRI().getIRIString());
+            return displayIRI(((IRIConstant) term).getIRI().getIRIString());
         if (term instanceof RDFLiteralConstant)
             return ((RDFLiteralConstant) term).toString();
         if (term instanceof BNode)
             return ((BNode) term).getInternalLabel();
         throw new UnexpectedTermException(term);
-    }
-
-    private String displayPredicateIRI(String iri) {
-        if (iri.equals(RDF.TYPE.getIRIString()))
-            return "a";
-
-        return prefixManager.getShortForm(iri, false);
     }
 
     private static String displayVariable(Variable term) {
@@ -134,24 +127,18 @@ public class TargetQueryRenderer {
             RDFTermType rdfTermType = ((RDFTermTypeConstant) termType).getRDFTermType();
             if (rdfTermType instanceof BlankNodeTermType) {
                 if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-                    ImmutableFunctionalTerm nestedFunction = (ImmutableFunctionalTerm) lexicalTerm;
-                    if (nestedFunction.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
-                        if (nestedFunction.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol) {
-                            return "_:" + instantiateTemplate(nestedFunction);
-                        }
-                        throw new UnexpectedTermException(nestedFunction);
-                    }
-                    // case of RDF(TermToTxt(variable), BNODE)
-                    return "_:" + displayTerm(nestedFunction);
+                    ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) lexicalTerm;
+                    if (ift.getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol)
+                        return "_:" + instantiateTemplate(ift);
                 }
-                // case of RDF(variable, BNODE)
+                // case of RDF(TermToTxt(variable), BNODE) or RDF(variable, BNODE)
                 return "_:" + displayTerm(lexicalTerm);
             }
             if (rdfTermType instanceof IRITermType) {
                 if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-                    ImmutableFunctionalTerm nestedFunction = (ImmutableFunctionalTerm) lexicalTerm;
-                    if (nestedFunction.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol)
-                        return displayPredicateIRI(instantiateTemplate(nestedFunction));
+                    ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) lexicalTerm;
+                    if (ift.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol)
+                        return displayIRI(instantiateTemplate(ift));
                 }
                 return displayIRI(displayTerm(lexicalTerm));
             }
@@ -190,22 +177,24 @@ public class TargetQueryRenderer {
     }
 
     private String displayDatatypeFunction(ImmutableTerm lexicalTerm, RDFDatatype datatype) {
-        final String lexicalString = (lexicalTerm instanceof DBConstant)
+        String lexicalString = (lexicalTerm instanceof DBConstant)
                 // Happens when abstract datatypes are used
                 ? "\"" + ((DBConstant) lexicalTerm).getValue() + "\""
                 : displayTerm(lexicalTerm);
 
-        return datatype.getLanguageTag()
-                .map(tag -> lexicalString + "@" + tag.getFullString())
-                .orElseGet(() -> {
-                    String typePostfix = datatype.getIRI().equals(RDFS.LITERAL)
+        String suffix = datatype.getLanguageTag()
+                .map(tag -> "@" + tag.getFullString())
+                .orElseGet(() -> datatype.getIRI().equals(RDFS.LITERAL)
                             ? ""
-                            : "^^" + prefixManager.getShortForm(datatype.getIRI().getIRIString(), false);
-                    return lexicalString + typePostfix;
-                });
+                            : "^^" + prefixManager.getShortForm(datatype.getIRI().getIRIString(), false));
+
+        return lexicalString + suffix;
     }
 
     private String displayIRI(String s) {
+        if (s.equals(RDF.TYPE.getIRIString()))
+            return "a";
+
         String shortenedUri = prefixManager.getShortForm(s, false);
         if (!shortenedUri.equals(s))
             return shortenedUri;
