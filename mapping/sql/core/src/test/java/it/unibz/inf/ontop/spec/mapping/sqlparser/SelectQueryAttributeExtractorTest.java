@@ -51,8 +51,7 @@ public class SelectQueryAttributeExtractorTest {
                 "     ALESFO001.PRECIOFINAL\n"+
                 "\t             \n"+
                 "FROM ALMAES001 "+
-                "LEFT JOIN ALESFO001 ON ALMAES001.IDART = ALESFO001.IDART" +
-                ""
+                "LEFT JOIN ALESFO001 ON ALMAES001.IDART = ALESFO001.IDART"
         );
         assertEquals(ImmutableList.of(
                 idfac.createAttributeID("IDART"),
@@ -66,4 +65,24 @@ public class SelectQueryAttributeExtractorTest {
                 idfac.createAttributeID("STCMIN"),
                 idfac.createAttributeID("PRECIOFINAL")), res);
     }
+
+    // issue 366
+    @Test
+    public void test_approximation_distinct() throws InvalidSelectQueryException {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        QuotedIDFactory idfac = builder.getQuotedIDFactory();
+
+        ApproximateSelectQueryAttributeExtractor aex = new ApproximateSelectQueryAttributeExtractor(idfac);
+
+        ImmutableList<QuotedID> res = aex.getAttributes("select \n distinct \n rotorID from\n" +
+                "(select zpolrotorid as rotorID from LinkData\n" +
+                "union\n" +
+                "select abomSerialNumberMale as rotorID from AssemblyData\n" +
+                "union\n" +
+                "select abomSerialNumberFemale as rotorID from AssemblyData) as R"
+        );
+        assertEquals(ImmutableList.of(
+                idfac.createAttributeID("rotorID")), res);
+    }
+
 }
