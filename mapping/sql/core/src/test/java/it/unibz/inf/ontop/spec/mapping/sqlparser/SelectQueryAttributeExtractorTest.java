@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
@@ -84,5 +85,24 @@ public class SelectQueryAttributeExtractorTest {
         assertEquals(ImmutableList.of(
                 idfac.createAttributeID("rotorID")), res);
     }
+
+    @Test(expected = it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException.class) // issue 366
+    public void test_distinct_union() throws Exception {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        builder.createDatabaseRelation("LinkData", "zpolrotorid", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
+        builder.createDatabaseRelation("AssemblyData",
+                "abomSerialNumberMale", builder.getDBTypeFactory().getDBLargeIntegerType(), false,
+                "abomSerialNumberFemale", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
+        MetadataLookup metadataLookup = builder.build();
+        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
+        DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
+        RAExpressionAttributes r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select \n distinct \n rotorID from\n" +
+                "(select zpolrotorid as rotorID from LinkData\n" +
+                "union\n" +
+                "select abomSerialNumberMale as rotorID from AssemblyData\n" +
+                "union\n" +
+                "select abomSerialNumberFemale as rotorID from AssemblyData) as R"));
+    }
+
 
 }
