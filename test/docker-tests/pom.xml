@@ -8,6 +8,14 @@
     <modelVersion>4.0.0</modelVersion>
     <properties>
         <skipTests>true</skipTests>
+        <docker.url>localhost</docker.url>
+        <docker.db2.password>obda-pwd</docker.db2.password>
+        <docker.mssql.password>Mssql1.0</docker.mssql.password>
+        <docker.mysql.password>mysql</docker.mysql.password>
+        <docker.oracle.password>oracle</docker.oracle.password>
+        <docker.pgsql.password>postgres2</docker.pgsql.password>
+        <docker.denodo.password>admin</docker.denodo.password>
+        <docker.dremio.password>dremio123</docker.dremio.password>
     </properties>
 
     <artifactId>ontop-docker-tests</artifactId>
@@ -47,42 +55,13 @@
             <artifactId>owlapi-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>db2jcc4.jar</artifactId>
         </dependency>
         <dependency>
             <groupId>madgik.adp</groupId>
             <artifactId>adp-jdbc</artifactId>
             <version>0.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sap.db.jdbc.Driver</groupId>
-            <artifactId>hana</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.dremio.jdbc</groupId>
-            <artifactId>dremio-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.jtds</groupId>
@@ -122,6 +101,47 @@
         <dependency>
             <groupId>monetdb</groupId>
             <artifactId>monetdb-jdbc</artifactId>
+            <version>11.19.15</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sap.db.jdbc.Driver</groupId>
+            <artifactId>hana</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dremio.jdbc</groupId>
+            <artifactId>dremio-jdbc</artifactId>
+            <version>1.4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>sqljdbc4</artifactId>
+            <version>4.0.2206.100</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>12.2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.14.jre7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm</groupId>
+            <artifactId>db2jcc4.jar</artifactId>
+            <version>10.1.4</version>
         </dependency>
 
         <dependency>
