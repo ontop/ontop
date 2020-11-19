@@ -56,7 +56,6 @@ import static org.junit.Assert.assertEquals;
 
 public class R2rmlCheckerTest {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	private ClassifiedTBox onto;
 
 	private static final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
 	private static final String obdaFile = "/mysql/npd/npd-v2-ql_a.obda";
@@ -68,6 +67,7 @@ public class R2rmlCheckerTest {
 	private final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
 	private final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
+	private ClassifiedTBox onto;
 	private OntopOWLReasoner reasonerOBDA;
 	private OntopOWLReasoner reasonerR2rml;
 
@@ -122,36 +122,30 @@ public class R2rmlCheckerTest {
 		try (OWLConnection obdaConnection = reasonerOBDA.getConnection();
 			 OWLConnection r2rmlConnection = reasonerR2rml.getConnection()) {
 
-			// Now we are ready for querying
 			log.debug("Comparing concepts");
 			for (OClass cl : onto.classes()) {
 				String concept = cl.getIRI().getIRIString();
-
+				log.debug("class " + concept);
 				int conceptOBDA = runSPARQLConceptsQuery("<" + concept + ">", obdaConnection);
 				int conceptR2rml = runSPARQLConceptsQuery("<" + concept + ">", r2rmlConnection);
-
 				assertEquals(conceptOBDA, conceptR2rml);
 			}
 
 			log.debug("Comparing object properties");
 			for (ObjectPropertyExpression prop : onto.objectProperties()) {
 				String role = prop.getIRI().getIRIString();
-
-				log.debug("description " + role);
+				log.debug("object property " + role);
 				int roleOBDA = runSPARQLRolesQuery("<" + role + ">", obdaConnection);
 				int roleR2rml = runSPARQLRolesQuery("<" + role + ">", r2rmlConnection);
-
 				assertEquals(roleOBDA, roleR2rml);
 			}
 
 			log.debug("Comparing data properties");
 			for (DataPropertyExpression prop : onto.dataProperties()) {
 				String role = prop.getIRI().getIRIString();
-
-				log.debug("description " + role);
+				log.debug("data property " + role);
 				int roleOBDA = runSPARQLRolesQuery("<" + role + ">", obdaConnection);
 				int roleR2rml = runSPARQLRolesQuery("<" + role + ">", r2rmlConnection);
-
 				assertEquals(roleOBDA, roleR2rml);
 			}
 		}
@@ -163,19 +157,20 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 //	@Test
-	public void testOBDAEmpties() throws Exception {
-		List<IRI> emptyConceptsObda = new ArrayList<>();
-		List<IRI> emptyRolesObda = new ArrayList<>();
+	public void testOBDAEmpties()  {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
+		log.info(empties.toString());
+
+		List<IRI> emptyConceptsObda = new ArrayList<>();
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()) {
 			emptyConceptsObda.add(iteratorC.next());
 		}
-		log.info(empties.toString());
 		log.info("Empty concepts: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
+		List<IRI> emptyRolesObda = new ArrayList<>();
 		Iterator<IRI> iteratorR = empties.iEmptyRoles();
 		while (iteratorR.hasNext()) {
 			emptyRolesObda.add(iteratorR.next());
@@ -190,19 +185,20 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 //	@Test
-	public void testR2rmlEmpties() throws Exception {
-		List<IRI> emptyConceptsR2rml = new ArrayList<>();
-		List<IRI> emptyRolesR2rml = new ArrayList<>();
+	public void testR2rmlEmpties() {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
+		log.info(empties.toString());
+
+		List<IRI> emptyConceptsR2rml = new ArrayList<>();
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()) {
 			emptyConceptsR2rml.add(iteratorC.next());
 		}
-		log.info(empties.toString());
 		log.info("Empty concepts: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
+		List<IRI> emptyRolesR2rml = new ArrayList<>();
 		Iterator<IRI> iteratorR = empties.iEmptyRoles();
 		while (iteratorR.hasNext()) {
 			emptyRolesR2rml.add(iteratorR.next());

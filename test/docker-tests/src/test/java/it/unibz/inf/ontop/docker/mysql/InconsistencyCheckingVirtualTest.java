@@ -17,14 +17,14 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public class InconsistencyCheckingVirtualTest {
 
-	private String owlFile = "/mysql/example/BooksNoAxioms.owl";
-	private String obdaFile = "/mysql/example/exampleBooks.obda";
-	private String propertyFile = "/mysql/example/exampleBooks.properties";
+	private static final String owlFile = "/mysql/example/BooksNoAxioms.owl";
+	private static final String obdaFile = "/mysql/example/exampleBooks.obda";
+	private static final  String propertyFile = "/mysql/example/exampleBooks.properties";
 	private OntopOWLReasoner reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-	
-	String prefix = "http://meraka/moss/exampleBooks.owl#";
+
+	private static final String prefix = "http://meraka/moss/exampleBooks.owl#";
 	OWLClass c1 = Class(IRI.create(prefix + "AudioBook"));
 	OWLClass c2 = Class(IRI.create(prefix + "Book"));
 	
@@ -41,14 +41,9 @@ public class InconsistencyCheckingVirtualTest {
 	
 	@Before
 	public void setUp() throws Exception {
-
 		manager = OWLManager.createOWLOntologyManager();
-		try {
-			InputStream ontologyFile =  this.getClass().getResourceAsStream(owlFile);
+		try (InputStream ontologyFile =  this.getClass().getResourceAsStream(owlFile)) {
 			ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
-		} catch (OWLOntologyCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	
@@ -59,9 +54,7 @@ public class InconsistencyCheckingVirtualTest {
 		assertTrue(reasoner.isConsistent());
 	}
 	
-	private void startReasoner(){
-
-
+	private void startReasoner() throws OWLOntologyCreationException {
 		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
 		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
@@ -73,13 +66,8 @@ public class InconsistencyCheckingVirtualTest {
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
-		try {
-	        reasoner = factory.createReasoner(config);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+	    reasoner = factory.createReasoner(config);
 	}
 	
 	@Test
