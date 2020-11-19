@@ -91,12 +91,6 @@
             <artifactId>rdf4j-rio-ntriples</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <!-- Optique R2RML API -->
         <dependency>
             <groupId>eu.optique-project</groupId>
