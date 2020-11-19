@@ -117,12 +117,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>db2jcc4.jar</artifactId>
-            <version>10.1.4</version>
+            <groupId>com.ibm.db2</groupId>
+            <artifactId>jcc</artifactId>
+            <version>11.5.4.0</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryparser-serql</artifactId>
