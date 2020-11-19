@@ -68,7 +68,13 @@ public class OntopOBDAToR2RML implements OntopCommand {
             description = "Properties file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Nullable // optional
-    String propertiesFile;
+    private String propertiesFile;
+
+    @Option(type = OptionType.COMMAND, name = {"--force"}, title = "Force the conversion",
+            description = "Force the conversion in the absence of DB metadata", arity = 0)
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    @Nullable // optional
+    private Boolean force;
 
     @Override
     public void run() {
@@ -119,6 +125,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
                                     .collect(ImmutableCollectors.toList()),
                             ppMapping.getPrefixManager());
                 }
+            }
+            else if (force == null) {
+                System.err.println("DB metadata is required by default to respect column quoting rules in R2RML. " +
+                        "Specify the option --force to bypass this requirement.");
+                System.exit(2);
             }
 
             converter.write(new File(outputMappingFile), ppMapping);
