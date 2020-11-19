@@ -81,9 +81,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.sap.db.jdbc.Driver</groupId>
-            <artifactId>hana</artifactId>
-            <version>1.0</version>
+            <groupId>com.sap.cloud.db.jdbc</groupId>
+            <artifactId>ngdbc</artifactId>
+            <version>2.6.30</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -99,9 +99,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.oracle.jdbc</groupId>
+            <groupId>com.oracle.ojdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>12.2.0.1</version>
+            <version>19.3.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
