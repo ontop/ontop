@@ -127,7 +127,8 @@ public class OntopOBDAToR2RML implements OntopCommand {
                 }
             }
             else if (force == null) {
-                System.err.println("DB metadata is required by default to respect column quoting rules in R2RML. " +
+                System.err.println("Access to DB metadata is required by default to respect column quoting rules of R2RML.\n" +
+                        "Please provide a properties file containing the info to connect to the database\n." +
                         "Specify the option --force to bypass this requirement.");
                 System.exit(2);
             }
