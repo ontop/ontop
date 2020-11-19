@@ -150,7 +150,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
     }
 
-    private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
         String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
         SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
         try {
