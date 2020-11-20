@@ -8,6 +8,7 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
+import it.unibz.inf.ontop.spec.dbschema.tools.impl.Metadata;
 import it.unibz.inf.ontop.spec.dbschema.tools.impl.RDBMetadataLoader;
 
 import java.io.*;
@@ -38,7 +39,7 @@ public class OntopLoadDBMetadata implements OntopCommand{
             RDBMetadataLoader.class);
 
         /*try {
-            String payload = loaderAndDeserializer.loadAndDeserialize();
+            Metadata payload = loaderAndDeserializer.loadAndDeserialize();
 
             OutputStream out = outputFile == null
                 ? System.out

@@ -44,7 +44,7 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
         return loadOBDASpecification();
     }
 
-    protected abstract OBDASpecification loadOBDASpecification() throws OBDASpecificationException;
+    protected abstract OBDASpecification loadOBDASpecification() throws OBDASpecificationException ;
 
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(

@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.spec;
 
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.spec.impl.OBDASpecInputImpl;
 import org.apache.commons.rdf.api.Graph;
+
 import java.io.File;
 import java.io.Reader;
 import java.util.Optional;
@@ -45,6 +47,9 @@ public interface OBDASpecInput {
         return getFile(CONSTRAINT_KEY);
     }
 
+    default Optional<File> getViewFile() {
+        return getFile(VIEW_KEY);
+    }
 
     interface Builder {
 
@@ -78,6 +83,7 @@ public interface OBDASpecInput {
 
     String MAPPING_KEY = "mapping";
     String CONSTRAINT_KEY = "constraint";
+    String VIEW_KEY = "view";
 
 
 

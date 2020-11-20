@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.materialization.impl.DefaultOntopRDFMaterializer;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public interface OntopRDFMaterializer {
 
@@ -26,14 +27,14 @@ public interface OntopRDFMaterializer {
     /**
      * Default implementation
      */
-    static OntopRDFMaterializer defaultMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+    static OntopRDFMaterializer defaultMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException, IOException {
         return new DefaultOntopRDFMaterializer(configuration, materializationParams);
     }
 
     /**
      * Default implementation
      */
-    static OntopRDFMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
+    static OntopRDFMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException, IOException {
         return new DefaultOntopRDFMaterializer(configuration, MaterializationParams.defaultBuilder().build());
     }
 

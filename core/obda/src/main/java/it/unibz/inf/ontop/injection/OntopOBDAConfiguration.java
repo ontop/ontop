@@ -4,6 +4,8 @@ package it.unibz.inf.ontop.injection;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
+import java.io.IOException;
+
 public interface OntopOBDAConfiguration extends OntopModelConfiguration {
 
     @Override
@@ -14,7 +16,7 @@ public interface OntopOBDAConfiguration extends OntopModelConfiguration {
      *
      * Otherwise, loads it.
      */
-    OBDASpecification loadSpecification() throws OBDASpecificationException;
+    OBDASpecification loadSpecification() throws OBDASpecificationException ;
 
     SpecificationFactory getSpecificationFactory();
 

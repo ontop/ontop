@@ -22,6 +22,7 @@ import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
 import java.util.Properties;

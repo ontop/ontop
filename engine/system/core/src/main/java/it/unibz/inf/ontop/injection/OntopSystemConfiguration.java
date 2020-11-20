@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
+import java.io.IOException;
+
 public interface OntopSystemConfiguration extends OntopReformulationConfiguration {
 
     @Override

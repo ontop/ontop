@@ -64,7 +64,7 @@ public class TMappingDisablingTest extends TestCase {
 	}
 	
 	public void testDisableTMappings() throws Exception {
-		
+
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
@@ -74,7 +74,7 @@ public class TMappingDisablingTest extends TestCase {
 				.build();
 		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
 		OWLConnection conn = reasoner.getConnection();
-		
+
 		String sparqlQuery = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Boy }";

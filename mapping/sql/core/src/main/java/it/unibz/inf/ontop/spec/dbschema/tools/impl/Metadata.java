@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.dbschema.tools.impl;
 
 import com.fasterxml.jackson.annotation.*;
+import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 
 import java.util.HashMap;
 import java.util.List;
