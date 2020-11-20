@@ -67,17 +67,17 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
 
         boolean needLineBreak = false;
         for (SQLPPTriplesMap axiom : ppMapping.getTripleMaps()) {
-
             if (needLineBreak) {
                 writer.write("\n");
             }
-            writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + axiom.getId() + "\n");
+            writer.write(OntopNativeMappingParser.MAPPING_ID_LABEL + "\t" +
+                    axiom.getId() + "\n");
 
-            ImmutableList<TargetAtom> targetQuery = axiom.getTargetAtoms();
-            writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + targetQueryRenderer.encode(targetQuery) + "\n");
+            writer.write(OntopNativeMappingParser.TARGET_LABEL + "\t\t" +
+                    targetQueryRenderer.encode(axiom.getTargetAtoms()) + "\n");
 
-            SQLPPSourceQuery sourceQuery = axiom.getSourceQuery();
-            writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
+            writer.write(OntopNativeMappingParser.SOURCE_LABEL + "\t\t" +
+                    printSourceQuery(axiom.getSourceQuery()) + "\n");
             needLineBreak = true;
         }
         writer.write(OntopNativeMappingParser.END_COLLECTION_SYMBOL);
