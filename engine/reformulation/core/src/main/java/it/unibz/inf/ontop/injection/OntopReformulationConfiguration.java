@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 
+import java.io.IOException;
+
 
 public interface OntopReformulationConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
 

@@ -22,6 +22,8 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
 import javax.annotation.Nonnull;
+import javax.imageio.stream.ImageOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 

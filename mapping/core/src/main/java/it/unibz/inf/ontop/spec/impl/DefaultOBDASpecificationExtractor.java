@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 
+import java.io.IOException;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

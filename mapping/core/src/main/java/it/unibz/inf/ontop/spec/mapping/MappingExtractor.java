@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Optional;
 
 public interface MappingExtractor {

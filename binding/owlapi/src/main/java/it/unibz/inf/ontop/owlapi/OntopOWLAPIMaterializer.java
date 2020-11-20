@@ -10,6 +10,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public interface OntopOWLAPIMaterializer {
 
@@ -28,14 +29,14 @@ public interface OntopOWLAPIMaterializer {
     /**
      * Default implementation
      */
-    static OntopOWLAPIMaterializer defaultMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+    static OntopOWLAPIMaterializer defaultMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException, IOException {
         return new DefaultOntopOWLAPIMaterializer(configuration, materializationParams);
     }
 
     /**
      * Default implementation with default parameters
      */
-    static OntopOWLAPIMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
+    static OntopOWLAPIMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException, IOException {
         return new DefaultOntopOWLAPIMaterializer(configuration);
     }
 

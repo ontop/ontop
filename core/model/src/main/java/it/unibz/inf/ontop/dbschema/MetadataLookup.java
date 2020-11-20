@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.dbschema;
 
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import java.io.File;
+
 public interface MetadataLookup {
 
     /**
@@ -13,4 +15,6 @@ public interface MetadataLookup {
     DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
 
     QuotedIDFactory getQuotedIDFactory();
+
+    //File getFile();
 }

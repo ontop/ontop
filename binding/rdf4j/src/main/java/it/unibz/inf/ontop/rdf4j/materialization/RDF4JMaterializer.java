@@ -12,6 +12,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 
 public interface RDF4JMaterializer {
 
