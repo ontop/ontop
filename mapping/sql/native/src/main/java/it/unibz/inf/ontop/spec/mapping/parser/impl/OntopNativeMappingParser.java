@@ -25,24 +25,19 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import org.apache.commons.rdf.api.Graph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -61,7 +56,6 @@ import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.
 public class OntopNativeMappingParser implements SQLMappingParser {
 
     public enum Label {
-        /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
         /* Mapping decl.: */mappingId, target, source
     }
 
@@ -75,8 +69,6 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     public static final String START_COLLECTION_SYMBOL = "@collection [[";
     public static final String END_COLLECTION_SYMBOL = "]]";
     protected static final String COMMENT_SYMBOL = ";";
-
-    private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
     private final TargetQueryParserFactory targetQueryParserFactory;
     private final SQLPPMappingFactory ppMappingFactory;
@@ -144,16 +136,13 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                                      SQLPPMappingFactory ppMappingFactory, String fileName)
             throws MappingIOException, InvalidMappingExceptionWithIndicator {
 
-        final Map<String, String> prefixes = new HashMap<>();
-        final List<SQLPPTriplesMap> mappings = new ArrayList<>();
+        final ImmutableMap.Builder<String, String> prefixes = ImmutableMap.builder();
+        final ImmutableList.Builder<SQLPPTriplesMap> mappings = ImmutableList.builder();
         final List<Indicator> invalidMappingIndicators = new ArrayList<>();
 
-        List<TargetQueryParser> parsers = null;
-
-		String line;
-
         try (LineNumberReader lineNumberReader = new LineNumberReader(reader)) {
-
+            TargetQueryParser parser = null; // lazy initialization
+            String line;
             while ((line = lineNumberReader.readLine()) != null) {
                 try {
                     if (isCommentLine(line) || line.isEmpty()) {
@@ -161,42 +150,38 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                     }
                     if (line.contains(PREFIX_DECLARATION_TAG)) {
                         prefixes.putAll(readPrefixDeclaration(lineNumberReader));
-
-                    /*
-                     * In case of late prefix declaration
-                     */
-                        if (parsers != null) {
-                            parsers = createParsers(ImmutableMap.copyOf(prefixes));
-                        }
-
-                    } else if (line.contains(CLASS_DECLARATION_TAG)) {
-                        // deprecated tag
+                    }
+                    else if (line.contains(CLASS_DECLARATION_TAG)) { // deprecated tag
                         throw new UnsupportedTagException(CLASS_DECLARATION_TAG);
-                    } else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) {
-                        // deprecated tag
+                    }
+                    else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) { // deprecated tag
                         throw new UnsupportedTagException(OBJECT_PROPERTY_DECLARATION_TAG);
-                    } else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) {
-                        // deprecated tag
+                    }
+                    else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) { // deprecated tag
                         throw new UnsupportedTagException(DATA_PROPERTY_DECLARATION_TAG);
-                    } else if (line.contains(SOURCE_DECLARATION_TAG)) {
+                    }
+                    else if (line.contains(SOURCE_DECLARATION_TAG)) {
                         // This exception wil be rethrown
                         throw new RuntimeException("Source declaration is not supported anymore (since 3.0). " +
                                 "Please give this information with the Ontop configuration.");
-                    } else if (line.contains(MAPPING_DECLARATION_TAG)) {
-                        if (parsers == null) {
-                            parsers = createParsers(ImmutableMap.copyOf(prefixes));
+                    }
+                    else if (line.contains(MAPPING_DECLARATION_TAG)) {
+                        if (parser == null) {
+                            parser = targetQueryParserFactory.createParser(prefixes.build());
                         }
-                        mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators));
-                    } else {
+                        mappings.addAll(readMappingDeclaration(lineNumberReader, parser, invalidMappingIndicators));
+                    }
+                    else {
                         throw new IOException("Unknown syntax: " + line);
                     }
-                } catch (Exception e) {
-                    throw new IOException(String.format("ERROR reading %s at line: %s", fileName,
-                            lineNumberReader.getLineNumber()
-                                    + " \nMESSAGE: " + e.getMessage()), e);
+                }
+                catch (Exception e) {
+                    throw new IOException(String.format("ERROR reading %s at line: %d\nMESSAGE: %s", fileName,
+                            lineNumberReader.getLineNumber(), e.getMessage()), e);
                 }
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new MappingIOException(e);
         }
 
@@ -205,10 +190,8 @@ public class OntopNativeMappingParser implements SQLMappingParser {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
         }
 
-        PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
-        ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(mappings);
-
-        return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, prefixManager);
+        PrefixManager prefixManager = specificationFactory.createPrefixManager(prefixes.build());
+        return ppMappingFactory.createSQLPreProcessedMapping(mappings.build(), prefixManager);
 	}
 
     /*
@@ -225,6 +208,20 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         return prefixes;
     }
 
+
+    private static final class MappingDeclarationStatus {
+        private final List<Indicator> invalidMappingIndicators;
+
+        MappingDeclarationStatus(List<Indicator> invalidMappingIndicators) {
+            this.invalidMappingIndicators = invalidMappingIndicators;
+        }
+
+        boolean fail(int lineNumber, Object hint, int reason) {
+            invalidMappingIndicators.add(new Indicator(lineNumber, hint, reason));
+            return false;
+        }
+    }
+
     /**
      * TODO: describe
      * TODO: follow the advice of IntelliJ: split this method to make its workflow tractable.
@@ -233,37 +230,36 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      * @return The updated mapping set of the current source
      * @throws IOException
      */
-    private List<SQLPPTriplesMap> readMappingDeclaration(LineNumberReader reader,
-                                                                List<TargetQueryParser> parsers,
+    private ImmutableList<SQLPPTriplesMap> readMappingDeclaration(LineNumberReader reader,
+                                                                TargetQueryParser parser,
                                                                 List<Indicator> invalidMappingIndicators)
             throws IOException {
-        List<SQLPPTriplesMap> currentSourceMappings = new ArrayList<>();
+
+        ImmutableList.Builder<SQLPPTriplesMap> currentSourceMappings = ImmutableList.builder();
+        MappingDeclarationStatus status = new MappingDeclarationStatus(invalidMappingIndicators);
 
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
-        StringBuffer sourceQuery = null;
+        ImmutableList.Builder<String> sourceQuery = ImmutableList.builder();
         String targetString = null;
         ImmutableList<TargetAtom> targetQuery = null;
-        int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
 
         String line;
         for(line = reader.readLine();
         		line != null && !line.trim().equals(END_COLLECTION_SYMBOL);
         		line = reader.readLine()) {
-            int lineNumber = reader.getLineNumber();
+
             if (line.isEmpty()) {
             	if (!mappingId.isEmpty()) {
 	            	// Save the mapping to the model (if valid) at this point
 	                if (isMappingValid) {
-	                    currentSourceMappings =
-                                addNewMapping(mappingId, sourceQuery.toString(), targetString, targetQuery, currentSourceMappings);
+                        currentSourceMappings.add(new OntopNativeSQLPPTriplesMap(
+                                mappingId, createSourceQuery(sourceQuery), targetString, targetQuery));
 	                    mappingId = "";
-	                    sourceQuery = null;
+	                    sourceQuery = ImmutableList.builder();
 	                    targetQuery = null;
 	                }
-
-
             	}
             	else {
                     isMappingValid = true;
@@ -282,11 +278,11 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
             String label;
             String value;
-            if(tokens.length > 1 ) {
+            if (tokens.length > 1) {
                 label = tokens[0].trim();
                 value = tokens[1].trim();
             }
-            else{
+            else {
                 value = tokens[0];
                 label = "";
             }
@@ -297,42 +293,34 @@ public class OntopNativeMappingParser implements SQLMappingParser {
             if (currentLabel.equals(Label.mappingId.name())) {
                 mappingId = value;
                 if (mappingId.isEmpty()) { // empty or not
-                    invalidMappingIndicators.add(new Indicator(lineNumber, Label.mappingId, MAPPING_ID_IS_BLANK));
-                    isMappingValid = false;
+                    isMappingValid = status.fail(reader.getLineNumber(), Label.mappingId, MAPPING_ID_IS_BLANK);
                 }
-            } else if (currentLabel.equals(Label.target.name())) {
+            }
+            else if (currentLabel.equals(Label.target.name())) {
                 targetString = value;
                 if (targetString.isEmpty()) { // empty or not
-                    invalidMappingIndicators.add(new Indicator(lineNumber, mappingId, TARGET_QUERY_IS_BLANK));
-                    isMappingValid = false;
-                } else {
-	                // Load the target query
+                    isMappingValid = status.fail(reader.getLineNumber(), mappingId, TARGET_QUERY_IS_BLANK);
+                }
+                else {
                     try {
-                        targetQuery = loadTargetQuery(targetString, parsers);
-                    } catch (UnparsableTargetQueryException e) {
-                        invalidMappingIndicators.add(new Indicator(lineNumber, new String[] {mappingId, targetString, e.getMessage()},
-                                ERROR_PARSING_TARGET_QUERY));
-                        isMappingValid = false;
+                        targetQuery = parser.parse(targetString);
+                    }
+                    catch (TargetQueryParserException e) {
+                        isMappingValid = status.fail(reader.getLineNumber(), new String[] {mappingId, targetString, e.getMessage()},
+                                ERROR_PARSING_TARGET_QUERY);
                     }
                 }
-            } else if (currentLabel.equals(Label.source.name())) {
-                String sourceString = value;
-                if (sourceString.isEmpty()) { // empty or not
-                    invalidMappingIndicators.add(new Indicator(lineNumber, mappingId, SOURCE_QUERY_IS_BLANK));
-                    isMappingValid = false;
-                } else {
-	                // Build the source query string.
-	                if (sourceQuery == null) {
-	                	sourceQuery = new StringBuffer();
-	                	sourceQuery.append(sourceString);
-	                } else {
-	                	sourceQuery.append("\n");
-	                	sourceQuery.append(sourceString);
-	                }
+            }
+            else if (currentLabel.equals(Label.source.name())) {
+                if (value.isEmpty()) { // empty or not
+                    isMappingValid = status.fail(reader.getLineNumber(), mappingId, SOURCE_QUERY_IS_BLANK);
                 }
-            } else {
-                String msg = String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], lineNumber);
-                throw new IOException(msg);
+                else {
+                    sourceQuery.add(value);
+                }
+            }
+            else {
+                throw new IOException(String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], reader.getLineNumber()));
             }
         }
 
@@ -342,49 +330,20 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
-            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetString, targetQuery, currentSourceMappings);
+            currentSourceMappings.add(new OntopNativeSQLPPTriplesMap(
+                    mappingId, createSourceQuery(sourceQuery), targetString, targetQuery));
         }
 
-        return currentSourceMappings;
+        return currentSourceMappings.build();
     }
 
-	private static ImmutableList<TargetAtom> loadTargetQuery(String targetString,
-                                        List<TargetQueryParser> parsers) throws UnparsableTargetQueryException {
-        Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
-		for (TargetQueryParser parser : parsers) {
-            try {
-                ImmutableList<TargetAtom> parse = parser.parse(targetString);
-				return parse;
-            } catch (TargetQueryParserException e) {
-            	exceptions.put(parser, e);
-            }
-    	}
-		throw new UnparsableTargetQueryException(exceptions);
-    }
 
-    private List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
-                                                       String targetString,
-                                                       ImmutableList<TargetAtom> targetQuery,
-                                                       List<SQLPPTriplesMap> currentSourceMappings) {
-        SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(
-                mappingId, sourceQueryFactory.createSourceQuery(sourceQuery), targetString, targetQuery);
-
-        // TODO (ROMAN, 12/04/20): the contains test is useless because OntopNativeSQLPPTriplesMap does not override equals
-        if (!currentSourceMappings.contains(mapping)) {
-            currentSourceMappings.add(mapping);
-        }
-        else {
-            LOG.warn("Duplicate mapping {}", mappingId);
-        }
-        return currentSourceMappings;
+    private SQLPPSourceQuery createSourceQuery(ImmutableList.Builder<String> builder) {
+        return sourceQueryFactory.createSourceQuery(String.join("\n", builder.build()));
     }
 
     private static boolean isCommentLine(String line) {
         // A comment line is always started by semi-colon
         return line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0;
-    }
-
-    private List<TargetQueryParser> createParsers(ImmutableMap<String, String> prefixes) {
-        return ImmutableList.of(targetQueryParserFactory.createParser(prefixes));
     }
 }
