@@ -170,8 +170,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         String toString();
     }
 
-    private class FixedString implements FormatString {
-        private String s;
+    private static class FixedString implements FormatString {
+        private final String s;
 
         FixedString(String s) {
             this.s = s;
@@ -188,8 +188,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
     }
 
-    private class ColumnString implements FormatString {
-        private String s;
+    private static class ColumnString implements FormatString {
+        private final String s;
 
         ColumnString(String s) {
             this.s = s;
@@ -332,12 +332,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Stream<TargetAtom> visitPredicateObject(PredicateObjectContext ctx) {
-        Stream<TargetAtom> result = visitObjectList(ctx.objectList()).map(object ->
+        return visitObjectList(ctx.objectList()).map(object ->
                 currentGraph == null
                         ? targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), object)
                         : targetAtomFactory.getQuadTargetAtom(currentSubject, visitVerb(ctx.verb()), object, currentGraph));
-        return result;
-
     }
 
 
@@ -419,16 +417,13 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public ImmutableFunctionalTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
+    public ImmutableFunctionalTerm visitVariableLiteral(VariableLiteralContext ctx) {
         ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
                 visitVariable(ctx.variable()));
-        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, visitLanguageTag(ctx.languageTag()));
-    }
+        TerminalNode langTag = ctx.LANGTAG();
+        if (langTag != null)
+            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, langTag.getText().substring(1).toLowerCase());
 
-    @Override
-    public ImmutableFunctionalTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
-        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
-                visitVariable(ctx.variable()));
         IRI iri = visitIri(ctx.iri());
 
         if ((!settings.areAbstractDatatypesToleratedInMapping())
@@ -468,20 +463,20 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public String visitLanguageTag(LanguageTagContext ctx) {
-        return ctx.LANGTAG().getText().substring(1).toLowerCase();
-    }
-
-    @Override
-    public ImmutableTerm visitUntypedStringLiteral(UntypedStringLiteralContext ctx) {
-        LitStringContext lsc = ctx.litString();
-        ImmutableTerm literal = visitLitString(lsc);
-        LanguageTagContext lc = ctx.languageTag();
-        if (lc != null) {
-            return termFactory.getRDFLiteralFunctionalTerm(literal, visitLanguageTag(lc));
+    public ImmutableTerm visitRdfLiteral(RdfLiteralContext ctx) {
+        ImmutableTerm stringValue = visitLitString(ctx.litString());
+        TerminalNode langtag = ctx.LANGTAG();
+        if (langtag != null) {
+            return termFactory.getRDFLiteralFunctionalTerm(stringValue, langtag.getText().substring(1).toLowerCase());
         }
-        return termFactory.getRDFLiteralFunctionalTerm(literal, XSD.STRING)
-                .simplify();
+        IriContext iriCtx = ctx.iri();
+        if (iriCtx != null) {
+            IRI iri = visitIri(iriCtx);
+            return termFactory.getRDFLiteralFunctionalTerm(stringValue, iri)
+                    .simplify(); // why?
+        }
+        return termFactory.getRDFLiteralFunctionalTerm(stringValue, XSD.STRING)
+                .simplify(); // why?
     }
 
     @Override
@@ -493,13 +488,6 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return termFactory.getDBStringConstant(str.substring(1, str.length() - 1)); // without the double quotes
     }
 
-    @Override
-    public ImmutableTerm visitTypedLiteral(TypedLiteralContext ctx) {
-        ImmutableTerm stringValue = visitLitString(ctx.litString());
-        IRI iriRef = visitIri(ctx.iri());
-        return termFactory.getRDFLiteralFunctionalTerm(stringValue, iriRef)
-                .simplify();
-    }
 
     @Override
     public ImmutableTerm visitUntypedBooleanLiteral(UntypedBooleanLiteralContext ctx) {
@@ -508,14 +496,15 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableTerm visitNumericLiteral(NumericLiteralContext ctx) {
-        TerminalNode token = ctx.INTEGER();
-        if (token != null) {
-            return typeTerm(token.getText(), XSD.INTEGER);
+        TerminalNode node = ctx.INTEGER();
+        if (node != null) {
+            return typeTerm(node.getText(), XSD.INTEGER);
         }
-        token = ctx.DOUBLE();
-        if (token != null) {
-            return typeTerm(token.getText(), XSD.DOUBLE);
+        node = ctx.DOUBLE();
+        if (node != null) {
+            return typeTerm(node.getText(), XSD.DOUBLE);
         }
-        return typeTerm(ctx.DECIMAL().getText(), XSD.DECIMAL);
+        node = ctx.DECIMAL();
+        return typeTerm(node.getText(), XSD.DECIMAL);
     }
 }
