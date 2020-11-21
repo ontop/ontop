@@ -59,22 +59,7 @@ grammar TurtleOBDA;
  *------------------------------------------------------------------*/
 
 parse
-  : directive* (triplesStatement|quadsStatement)+ EOF
-  ;
-
-directive
-  : base
-  | prefixID
-  ;
-
-base
-  : '@base' IRIREF '.'
-  | 'BASE' IRIREF       /* the BASE keyword should be case-insensitive, see https://www.w3.org/TR/turtle/#sec-grammar-grammar */
-  ;
-
-prefixID
-  : '@prefix' PNAME_NS IRIREF '.'
-  | 'PREFIX' PNAME_NS IRIREF   /* the PREFIX keyword should be case-insensitive */
+  : (triplesStatement|quadsStatement)+ EOF
   ;
 
 triplesStatement

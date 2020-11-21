@@ -21,24 +21,20 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.model.vocabulary.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.listener.ThrowingErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 
-    private final String prefixesString;
+	private static final Logger log = LoggerFactory.getLogger(AbstractTurtleOBDAParser.class);
 	private final Supplier<TurtleOBDAVisitor> visitorSupplier;
 
 	/**
@@ -47,9 +43,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * (i.e., the directives @base and @prefix).
 	 *
 	 */
-	public AbstractTurtleOBDAParser(ImmutableMap<String, String> prefixes,
-									Supplier<TurtleOBDAVisitor> visitorSupplier) {
-		this.prefixesString = !prefixes.isEmpty() ? getPrefixDirectives(prefixes) : "";
+	public AbstractTurtleOBDAParser(Supplier<TurtleOBDAVisitor> visitorSupplier) {
 		this.visitorSupplier = visitorSupplier;
 	}
 
@@ -62,25 +56,18 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 */
 	@Override
 	public ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException {
-		StringBuilder bf = new StringBuilder(input.trim());
-		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
-			bf.insert(bf.length() - 1, ' ');
-		}
-		// Update the input by appending the directives
-		bf.insert(0, prefixesString);
 		try {
-			CharStream inputStream = CharStreams.fromString(bf.toString());
+			CharStream inputStream = CharStreams.fromString(input);
 			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
-
 			//substitute the standard ConsoleErrorListener (simply print out the error) with ThrowingErrorListener
             lexer.removeErrorListeners();
-			lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+			lexer.addErrorListener(new ThrowingErrorListener());
 
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
             //substitute the standard ConsoleErrorListener (simply print out the error) with ThrowingErrorListener
 			parser.removeErrorListeners();
-			parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+			parser.addErrorListener(new ThrowingErrorListener());
 
 			return (ImmutableList<TargetAtom>)visitorSupplier.get().visitParse(parser.parse());
 		}
@@ -89,19 +76,12 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 		}
 	}
 
-	/**
-	 * The turtle syntax predefines the quest, rdf, rdfs and owl prefixes.
-	 */
-	private static final ImmutableMap<String, String> standardPrefixes = ImmutableMap.of(
-			OntopInternal.PREFIX_XSD, XSD.PREFIX,
-			OntopInternal.PREFIX_OBDA, Ontop.PREFIX,
-			OntopInternal.PREFIX_RDF, RDF.PREFIX,
-			OntopInternal.PREFIX_RDFS, RDFS.PREFIX,
-			OntopInternal.PREFIX_OWL, OWL.PREFIX);
-
-	private static String getPrefixDirectives(ImmutableMap<String, String> prefixes) {
-		return Stream.concat(prefixes.entrySet().stream(), standardPrefixes.entrySet().stream())
-				.map(e -> "@prefix " + e.getKey() + " <" + e.getValue() + "> .\n")
-				.collect(Collectors.joining());
+	private static class ThrowingErrorListener extends BaseErrorListener {
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
+				throws ParseCancellationException {
+			log.debug("Syntax error location: column " + charPositionInLine + "\n" + msg);
+			throw new ParseCancellationException("Syntax error location: column " + charPositionInLine + "\n" + msg);
+		}
 	}
 }
