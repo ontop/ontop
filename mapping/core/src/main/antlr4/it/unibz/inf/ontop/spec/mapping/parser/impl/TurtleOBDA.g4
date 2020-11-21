@@ -164,7 +164,7 @@ iri
 literal
   : typedLiteral
   | untypedStringLiteral
-  | untypedNumericLiteral
+  | numericLiteral
   | untypedBooleanLiteral
   ;
 
@@ -181,26 +181,12 @@ litString
 //  : STRING_WITH_QUOTE_DOUBLE
   ;
 
-untypedNumericLiteral
-  : numericUnsigned
-  | numericPositive
-  | numericNegative
-  ;
-
 untypedBooleanLiteral
   : BOOLEAN_LITERAL
   ;
 
-numericUnsigned
+numericLiteral
   : INTEGER | DOUBLE | DECIMAL
-  ;
-
-numericPositive
-  : INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE
-  ;
-
-numericNegative
-  : INTEGER_NEGATIVE | DOUBLE_NEGATIVE  | DECIMAL_NEGATIVE
   ;
 
 WS
@@ -262,43 +248,19 @@ LANGTAG
   ;
 
 INTEGER
-  : [0-9] +
+  : [+-]? [0-9] +
   ;
 
 DECIMAL
-  : [0-9]* '.' [0-9] +
+  : [+-]? [0-9]* '.' [0-9] +
   ;
 
 DOUBLE
-  : ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9] + EXPONENT | [0-9] + EXPONENT)
+  : [+-]? ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9] + EXPONENT | [0-9] + EXPONENT)
   ;
 
 EXPONENT
   : [eE] [+-]? [0-9] +
-  ;
-
-INTEGER_POSITIVE
-  : '+' INTEGER
-  ;
-
-INTEGER_NEGATIVE
-  : '-' INTEGER
-  ;
-
-DOUBLE_POSITIVE
-  : '+' DOUBLE
-  ;
-
-DOUBLE_NEGATIVE
-  : '-' DOUBLE
-  ;
-
-DECIMAL_POSITIVE
-  : '+' DECIMAL
-  ;
-
-DECIMAL_NEGATIVE
-  : '-' DECIMAL
   ;
 
 // not used

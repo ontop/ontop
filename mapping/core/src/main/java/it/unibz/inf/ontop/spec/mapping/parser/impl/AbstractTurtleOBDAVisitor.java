@@ -502,18 +502,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public ImmutableTerm visitUntypedNumericLiteral(UntypedNumericLiteralContext ctx) {
-        return (ImmutableTerm) visitChildren(ctx);
-    }
-
-    @Override
     public ImmutableTerm visitUntypedBooleanLiteral(UntypedBooleanLiteralContext ctx) {
         return typeTerm(ctx.BOOLEAN_LITERAL().getText(), XSD.BOOLEAN);
     }
 
     @Override
-    public ImmutableTerm visitNumericUnsigned(NumericUnsignedContext ctx) {
-
+    public ImmutableTerm visitNumericLiteral(NumericLiteralContext ctx) {
         TerminalNode token = ctx.INTEGER();
         if (token != null) {
             return typeTerm(token.getText(), XSD.INTEGER);
@@ -523,31 +517,5 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             return typeTerm(token.getText(), XSD.DOUBLE);
         }
         return typeTerm(ctx.DECIMAL().getText(), XSD.DECIMAL);
-    }
-
-    @Override
-    public ImmutableTerm visitNumericPositive(NumericPositiveContext ctx) {
-        TerminalNode token = ctx.INTEGER_POSITIVE();
-        if (token != null) {
-            return typeTerm(token.getText(), XSD.INTEGER);
-        }
-        token = ctx.DOUBLE_POSITIVE();
-        if (token != null) {
-            return typeTerm(token.getText(), XSD.DOUBLE);
-        }
-        return typeTerm(ctx.DECIMAL_POSITIVE().getText(), XSD.DECIMAL);
-    }
-
-    @Override
-    public ImmutableTerm visitNumericNegative(NumericNegativeContext ctx) {
-        TerminalNode token = ctx.INTEGER_NEGATIVE();
-        if (token != null) {
-            return typeTerm(token.getText(), XSD.INTEGER);
-        }
-        token = ctx.DOUBLE_NEGATIVE();
-        if (token != null) {
-            return typeTerm(token.getText(), XSD.DOUBLE);
-        }
-        return typeTerm(ctx.DECIMAL_NEGATIVE().getText(), XSD.DECIMAL);
     }
 }
