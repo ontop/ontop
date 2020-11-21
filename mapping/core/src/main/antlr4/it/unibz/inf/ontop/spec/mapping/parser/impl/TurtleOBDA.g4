@@ -69,7 +69,7 @@ directive
 
 base
   : '@base' IRIREF '.'
-  | 'BASE' IRIREF       /* the BASE keyword should be case-insensitive */
+  | 'BASE' IRIREF       /* the BASE keyword should be case-insensitive, see https://www.w3.org/TR/turtle/#sec-grammar-grammar */
   ;
 
 prefixID

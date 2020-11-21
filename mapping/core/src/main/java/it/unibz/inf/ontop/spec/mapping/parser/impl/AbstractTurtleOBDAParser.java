@@ -31,7 +31,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +44,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	/**
 	 * Constructs the parser object with prefixes. These prefixes will
 	 * help to generate the query header that contains the prefix definitions
-	 * (i.e., the directives @BASE and @PREFIX).
+	 * (i.e., the directives @base and @prefix).
 	 *
 	 */
 	public AbstractTurtleOBDAParser(ImmutableMap<String, String> prefixes,
@@ -55,12 +54,11 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	}
 
 	/**
-	 * Returns the CQIE object from the input string. If the input prefix
-	 * manager is null then no directive header will be appended.
+	 * Returns the list of TargetAtom objects from the input string.
+	 * If the input prefix manager is empty then no directive header will be appended.
 	 * 
-	 * @param input
-	 *            A target query string written in Turtle syntax.
-	 * @return A CQIE object.
+	 * @param input A target query string written in Turtle syntax.
+	 * @return a list of TargetAtom objects.
 	 */
 	@Override
 	public ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException {
@@ -94,20 +92,16 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	/**
 	 * The turtle syntax predefines the quest, rdf, rdfs and owl prefixes.
 	 */
-	private static String getPrefixDirectives(ImmutableMap<String, String> prefixes) {
-		return Stream.concat(
-				prefixes.entrySet().stream()
-					.map(e -> addPrefixDeclaration(e.getKey(), e.getValue())),
-				Stream.of(
-					addPrefixDeclaration(OntopInternal.PREFIX_XSD, XSD.PREFIX),
-					addPrefixDeclaration(OntopInternal.PREFIX_OBDA, Ontop.PREFIX),
-					addPrefixDeclaration(OntopInternal.PREFIX_RDF, RDF.PREFIX),
-					addPrefixDeclaration(OntopInternal.PREFIX_RDFS, RDFS.PREFIX),
-					addPrefixDeclaration(OntopInternal.PREFIX_OWL, OWL.PREFIX)))
-				.collect(Collectors.joining());
-	}
+	private static final ImmutableMap<String, String> standardPrefixes = ImmutableMap.of(
+			OntopInternal.PREFIX_XSD, XSD.PREFIX,
+			OntopInternal.PREFIX_OBDA, Ontop.PREFIX,
+			OntopInternal.PREFIX_RDF, RDF.PREFIX,
+			OntopInternal.PREFIX_RDFS, RDFS.PREFIX,
+			OntopInternal.PREFIX_OWL, OWL.PREFIX);
 
-	private static String addPrefixDeclaration(String prefix, String iri) {
-		return "@prefix " + prefix + " <" + iri + "> .\n";
+	private static String getPrefixDirectives(ImmutableMap<String, String> prefixes) {
+		return Stream.concat(prefixes.entrySet().stream(), standardPrefixes.entrySet().stream())
+				.map(e -> "@prefix " + e.getKey() + " <" + e.getValue() + "> .\n")
+				.collect(Collectors.joining());
 	}
 }
