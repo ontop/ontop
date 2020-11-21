@@ -31,6 +31,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 
@@ -84,7 +85,8 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 			parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
 			return (ImmutableList<TargetAtom>)visitorSupplier.get().visitParse(parser.parse());
-		} catch (RuntimeException e) {
+		}
+		catch (RuntimeException e) {
 			throw new TargetQueryParserException(e.getMessage(), e);
 		}
 	}
@@ -95,22 +97,22 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * Adds directives to the query header from the PrefixManager.
 	 */
 	private void appendDirectives(StringBuffer query) {
-		StringBuffer sb = new StringBuffer();
-		for (String prefix : prefixes.keySet()) {
-			sb.append("@PREFIX");
-			sb.append(" ");
-			sb.append(prefix);
-			sb.append(" ");
-			sb.append("<");
-			sb.append(prefixes.get(prefix));
-			sb.append(">");
-			sb.append(" .\n");
-		}
-		sb.append("@PREFIX " + OntopInternal.PREFIX_XSD + " <" + XSD.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_OBDA + " <" + Ontop.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_RDF + " <" + RDF.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_RDFS + " <" + RDFS.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_OWL + " <" + OWL.PREFIX + "> .\n");
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, String> e : prefixes.entrySet())
+			addPrefixDeclaration(sb, e.getKey(), e.getValue());
+		addPrefixDeclaration(sb, OntopInternal.PREFIX_XSD, XSD.PREFIX);
+		addPrefixDeclaration(sb, OntopInternal.PREFIX_OBDA, Ontop.PREFIX);
+		addPrefixDeclaration(sb, OntopInternal.PREFIX_RDF, RDF.PREFIX);
+		addPrefixDeclaration(sb, OntopInternal.PREFIX_RDFS, RDFS.PREFIX);
+		addPrefixDeclaration(sb, OntopInternal.PREFIX_OWL, OWL.PREFIX);
 		query.insert(0, sb);
+	}
+
+	private static void addPrefixDeclaration(StringBuilder sb, String prefix, String iri) {
+		sb.append("@PREFIX ")
+				.append(prefix)
+				.append(" <")
+				.append(iri)
+				.append("> .\n");
 	}
 }
