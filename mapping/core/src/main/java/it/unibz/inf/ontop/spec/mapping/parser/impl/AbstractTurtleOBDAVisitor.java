@@ -269,7 +269,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableList<TargetAtom> visitParse(ParseContext ctx) {
-        ctx.directiveStatement().forEach(this::visit);
+        ctx.directive().forEach(this::visit);
         ImmutableList<TargetAtom> tripleAtoms = ctx.triplesStatement().stream()
                 .flatMap(this::visitTriplesStatement)
                 .collect(ImmutableCollectors.toList());
@@ -279,12 +279,6 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
                 .collect(ImmutableCollectors.toList());
 
         return ImmutableList.copyOf(Iterables.concat(tripleAtoms, quadAtoms));
-    }
-
-    @Override
-    public Void visitDirectiveStatement(DirectiveStatementContext ctx) {
-        visit(ctx.directive());
-        return null;
     }
 
     @Override

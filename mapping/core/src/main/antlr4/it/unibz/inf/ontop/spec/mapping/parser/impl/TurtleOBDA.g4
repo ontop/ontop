@@ -59,11 +59,22 @@ grammar TurtleOBDA;
  *------------------------------------------------------------------*/
 
 parse
-  : directiveStatement* (triplesStatement|quadsStatement)+ EOF
+  : directive* (triplesStatement|quadsStatement)+ EOF
   ;
 
-directiveStatement
-  : directive '.'
+directive
+  : base
+  | prefixID
+  ;
+
+base
+  : '@base' IRIREF '.'
+  | 'BASE' IRIREF       /* the BASE keyword should be case-insensitive */
+  ;
+
+prefixID
+  : '@prefix' PNAME_NS IRIREF '.'
+  | 'PREFIX' PNAME_NS IRIREF   /* the PREFIX keyword should be case-insensitive */
   ;
 
 triplesStatement
@@ -73,19 +84,6 @@ triplesStatement
 quadsStatement
     : 'GRAPH' graph '{' triplesStatement+ '}'
     ;
-
-directive
-  : base
-  | prefixID
-  ;
-
-prefixID
-  : ('@prefix' | '@PREFIX') PNAME_NS IRIREF
-  ;
-
-base
-  : ('@base' | '@BASE') IRIREF
-  ;
 
 triples
   : subject  predicateObjectList
