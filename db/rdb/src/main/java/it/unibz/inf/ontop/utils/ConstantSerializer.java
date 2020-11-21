@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.generation.serializer.impl.SQLTermSerializer;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
@@ -13,12 +14,16 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
  * Util for THIRD-PARTY applications
  *
  * Useful for instance for converting from high-level mapping languages to R2RML
+ *
+ * Designed to be extensible
+ *
  */
 public class ConstantSerializer {
 
-    private final SQLTermSerializer sqlTermSerializer;
-    private final TermFactory termFactory;
-    private final DBTypeFactory dbTypeFactory;
+    protected final SQLTermSerializer sqlTermSerializer;
+    protected final TermFactory termFactory;
+    protected final DBTypeFactory dbTypeFactory;
+    protected final Injector injector;
 
     public ConstantSerializer(String jdbcDriver) {
         OntopSQLCoreConfiguration configuration = OntopSQLCoreConfiguration.defaultBuilder()
@@ -26,7 +31,8 @@ public class ConstantSerializer {
                 .jdbcUrl("jdbc:fake://do.not.use/")
                 .build();
 
-        SelectFromWhereSerializer selectFromWhereSerializer = configuration.getInjector().getInstance(SelectFromWhereSerializer.class);
+        this.injector = configuration.getInjector();
+        SelectFromWhereSerializer selectFromWhereSerializer = injector.getInstance(SelectFromWhereSerializer.class);
         this.sqlTermSerializer = selectFromWhereSerializer.getTermSerializer();
 
         this.termFactory = configuration.getTermFactory();
