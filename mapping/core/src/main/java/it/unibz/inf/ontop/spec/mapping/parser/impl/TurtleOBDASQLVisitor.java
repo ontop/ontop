@@ -33,10 +33,8 @@ import java.util.stream.Stream;
  */
 public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
-
     // Column placeholder pattern
     private static final Pattern varPattern = Pattern.compile("\\{([^}]+)}");
-    private static final Pattern constantBnodePattern = Pattern.compile("^_:(.*)");
 
     @Override
     public Object visitLiteral(TurtleOBDAParser.LiteralContext ctx) {
@@ -77,11 +75,10 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         this.prefixes = prefixes;
     }
 
-    private boolean validateAttributeName(String value) {
+    private static void validateAttributeName(String value) {
         if (value.contains(".")) {
             throw new IllegalArgumentException("Fully qualified columns as "+value+" are not accepted.\nPlease, use an alias instead.");
         }
-        return true;
     }
 
     public String getError() {
@@ -99,24 +96,23 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     private ImmutableTerm constructIRI(String text) {
         return constructBnodeOrIRI(text,
                 col -> termFactory.getIRIFunctionalTerm(col, true),
-                termFactory::getIRIFunctionalTerm,
-                false);
+                termFactory::getIRIFunctionalTerm);
     }
 
     private ImmutableTerm constructBnodeOrIRI(String text,
                                                 Function<Variable, ImmutableFunctionalTerm> columnFct,
-                                                BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct,
-                                                boolean isBnode) {
+                                                BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct) {
         final String PLACEHOLDER = "{}";
-        List<FormatString> tokens = parseIRIOrBnode(text, isBnode);
+        List<FormatString> tokens = parseIRIOrBnode(text);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
-                return termFactory.getConstantIRI(rdfFactory.createIRI(token.toString()));
+                return termFactory.getConstantIRI(rdfFactory.createIRI(token.str()));
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
-                Variable column = termFactory.getVariable(token.toString());
+                validateAttributeName(token.str());
+                Variable column = termFactory.getVariable(token.str());
                 return columnFct.apply(column);
             }
             throw new MinorOntopInternalBugException("Unexpected token: " + token);
@@ -125,10 +121,11 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
             List<ImmutableTerm> terms = new ArrayList<>();
             for (FormatString token : tokens) {
                 if (token instanceof FixedString) { // if part of URI template
-                    sb.append(token.toString());
+                    sb.append(token.str());
                 } else if (token instanceof ColumnString) {
                     sb.append(PLACEHOLDER);
-                    Variable column = termFactory.getVariable(token.toString());
+                    validateAttributeName(token.str());
+                    Variable column = termFactory.getVariable(token.str());
                     terms.add(termFactory.getPartiallyDefinedToStringCast(column));
                 }
             }
@@ -138,7 +135,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     }
 
 
-    private List<FormatString> parseIRIOrBnode(String text, boolean isBnode) {
+    private List<FormatString> parseIRIOrBnode(String text) {
         List<FormatString> toReturn = new ArrayList<>();
         Matcher m = varPattern.matcher(text);
         int i = 0;
@@ -146,16 +143,13 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
             if (m.find(i)) {
                 if (m.start() != i) {
                     String subString = text.substring(i, m.start());
-                    toReturn.add(new FixedString(
-                            // Remove the prefix _:
-                            (isBnode && (i == 0)) ? subString.substring(2) : subString));
+                    toReturn.add(new FixedString(subString));
                 }
                 String value = m.group(1);
-                if (validateAttributeName(value)) {
-                    toReturn.add(new ColumnString(value));
-                    i = m.end();
-                }
-            } else {
+                toReturn.add(new ColumnString(value));
+                i = m.end();
+            }
+            else {
                 toReturn.add(new FixedString(text.substring(i)));
                 break;
             }
@@ -163,22 +157,23 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         return toReturn;
     }
 
+    // Remove the prefix _:
+    private static String extractBnodeId(String text) {
+        return text.substring(2);
+    }
+
     private ImmutableTerm constructConstantBNode(String text) {
-        Matcher m = constantBnodePattern.matcher(text);
-        return termFactory.getConstantBNode(m.group(1));
+        return termFactory.getConstantBNode(extractBnodeId(text));
     }
 
     private ImmutableTerm constructBnodeFunction(String text) {
-        return constructBnodeOrIRI(text,
+        return constructBnodeOrIRI(extractBnodeId(text),
                 col -> termFactory.getBnodeFunctionalTerm(col, true),
-                termFactory::getBnodeFunctionalTerm,
-                true);
+                termFactory::getBnodeFunctionalTerm);
     }
 
     private interface FormatString {
-        int index();
-
-        String toString();
+        String str();
     }
 
     private static class FixedString implements FormatString {
@@ -189,12 +184,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         }
 
         @Override
-        public int index() {
-            return -1;
-        }  // flag code for fixed string
-
-        @Override
-        public String toString() {
+        public String str() {
             return s;
         }
     }
@@ -207,12 +197,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         }
 
         @Override
-        public int index() {
-            return 0;
-        }  // flag code for column string
-
-        @Override
-        public String toString() {
+        public String str() {
             return s;
         }
     }
@@ -220,10 +205,8 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     //this function distinguishes curly bracket with
     //back slash "\{" from curly bracket "{"
     private int getIndexOfCurlyB(String str) {
-        int i;
-        int j;
-        i = str.indexOf("{");
-        j = str.indexOf("\\{");
+        int i = str.indexOf("{");
+        int j = str.indexOf("\\{");
         while ((i - 1 == j) && (j != -1)) {
             i = str.indexOf("{", i + 1);
             j = str.indexOf("\\{", j + 1);
