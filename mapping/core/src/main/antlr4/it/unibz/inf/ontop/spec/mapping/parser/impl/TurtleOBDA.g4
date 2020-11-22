@@ -252,7 +252,9 @@ STRING_LITERAL_LONG_QUOTE // ok, not used
   ;
 */
 
-// original  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
+
+// TURTLE.g4 says  '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
+// but the one below is what is written in https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
 STRING_LITERAL_QUOTE
   : '"' (~ ["\\\r\n] | ECHAR |  UCHAR)* '"'
   ;
@@ -313,6 +315,7 @@ PLX // ok
   : PERCENT | PN_LOCAL_ESC
   ;
 
+// %-encoded sequences are not decoded during processing
 PERCENT // ok
   : '%' HEX HEX
   ;
@@ -321,7 +324,7 @@ HEX // ok
   : [0-9] | [A-F] | [a-f]
   ;
 
-// RDF-specific: the backslash (first character) is ignored when parsing the IRI
+// reserved character escape sequences for local names only
 PN_LOCAL_ESC  // ok
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
   ;
