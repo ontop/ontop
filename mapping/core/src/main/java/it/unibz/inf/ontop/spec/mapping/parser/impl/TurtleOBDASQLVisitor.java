@@ -20,7 +20,6 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -87,10 +86,6 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     private String removeBrackets(String text) {
         return text.substring(1, text.length() - 1);
-    }
-
-    private ImmutableTerm typeTerm(String text, IRI datatype) {
-        return termFactory.getRDFLiteralConstant(text, datatype);
     }
 
     private ImmutableTerm constructIRI(String text) {
@@ -461,22 +456,22 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
 
     @Override
-    public ImmutableTerm visitUntypedBooleanLiteral(TurtleOBDAParser.UntypedBooleanLiteralContext ctx) {
-        return typeTerm(ctx.BOOLEAN_LITERAL().getText(), XSD.BOOLEAN);
+    public ImmutableTerm visitBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx) {
+        return termFactory.getRDFLiteralConstant(ctx.getText(), XSD.BOOLEAN);
     }
 
     @Override
     public ImmutableTerm visitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx) {
         TerminalNode node = ctx.INTEGER();
         if (node != null) {
-            return typeTerm(node.getText(), XSD.INTEGER);
+            return termFactory.getRDFLiteralConstant(node.getText(), XSD.INTEGER);
         }
         node = ctx.DOUBLE();
         if (node != null) {
-            return typeTerm(node.getText(), XSD.DOUBLE);
+            return termFactory.getRDFLiteralConstant(node.getText(), XSD.DOUBLE);
         }
         node = ctx.DECIMAL();
-        return typeTerm(node.getText(), XSD.DECIMAL);
+        return termFactory.getRDFLiteralConstant(node.getText(), XSD.DECIMAL);
     }
 
 }

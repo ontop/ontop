@@ -72,22 +72,23 @@ quadsStatement
 
 triples
   : subject  predicateObjectList
+  // blankNodePropertyList predicateObjectList?
   ;
 
 predicateObjectList
   : predicateObject (';' predicateObject)*
   ;
 
-predicateObject
+predicateObject  // inline?
   : verb objectList
   ;
 
-objectList
+objectList // ok
   : object (',' object)*
   ;
 
 verb
-  : resource
+  : resource  // predicate = iri
   | 'a'
   ;
 
@@ -97,13 +98,13 @@ graph
   | blank
   ;
 
-subject
+subject    // iri, BlankNode, collection
   : resource
   | variable
   | blank
   ;
 
-object
+object   // iri, BlankNode, collection, blankNodePropertyList, literal
   : resource
   | blank
   | literal
@@ -140,27 +141,26 @@ iri
    | PREFIXED_NAME
    ;
 
-literal
+literal // ok
   : rdfLiteral
   | numericLiteral
-  | untypedBooleanLiteral
+  | booleanLiteral
   ;
 
-rdfLiteral
+rdfLiteral  // ok
   : litString (LANGTAG | '^^' iri)?
   ;
 
-
 litString
   : STRING_LITERAL_QUOTE
-//  : STRING_WITH_QUOTE_DOUBLE
+//  | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
   ;
 
-untypedBooleanLiteral
-  : BOOLEAN_LITERAL
+booleanLiteral  // only the first two are in Turtle
+  : 'true' | 'false'| 'TRUE' | 'True' | 'FALSE'| 'False'
   ;
 
-numericLiteral
+numericLiteral  // ok
   : INTEGER | DOUBLE | DECIMAL
   ;
 
@@ -179,10 +179,6 @@ STRING_WITH_CURLY_BRACKET
   : '{' VARIABLE_CHAR+ '}'
   ;
 
-BOOLEAN_LITERAL
-  : 'true' | 'TRUE' | 'True' | 'false'| 'FALSE'| 'False'
-  ;
-
 // extends IRIREF to allow curly brackets, and forces one curly bracket
 IRIREF_EXT
   : '<' IRIREF_INNER_CHAR_EXT* '{' IRIREF_INNER_CHAR_EXT+ '>'
@@ -192,17 +188,19 @@ IRIREF
    : '<' IRIREF_INNER_CHAR* '>'
    ;
 
-PNAME_NS
+PNAME_NS // ok
   : PN_PREFIX? ':'
   ;
 
-PN_PREFIX
+PN_PREFIX // ok
    : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
    ;
 
-PREFIXED_NAME
+PREFIXED_NAME // PNAME_LN
    : PNAME_NS PN_LOCAL
   ;
+
+// PrefixedName is PNAME_LN or PNAME_NS
 
 // extends PREFIXED_NAME to allow right-hand side curly brackets, and force one right-hand side opening curly bracket
 PREFIXED_NAME_EXT
@@ -214,72 +212,71 @@ BLANK_NODE_FUNCTION
   : '_:'  PN_LOCAL_EXT
   ;
 
-BLANK_NODE_LABEL
+BLANK_NODE_LABEL // ok
   : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS )?
   ;
 
-LANGTAG
+/* LANGTAG */
+
+LANGTAG // ok
   : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)*
   ;
 
-INTEGER
+/* NUMERIC LITERALS: START */
+
+INTEGER // ok
   : [+-]? [0-9] +
   ;
 
-DECIMAL
+DECIMAL // ok
   : [+-]? [0-9]* '.' [0-9] +
   ;
 
-DOUBLE
+DOUBLE // ok
   : [+-]? ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9] + EXPONENT | [0-9] + EXPONENT)
   ;
 
-EXPONENT
+EXPONENT // ok
   : [eE] [+-]? [0-9] +
   ;
 
-// not used
-STRING_LITERAL_LONG_SINGLE_QUOTE
+/* NUMERIC LITERALS: END */
+
+STRING_LITERAL_LONG_SINGLE_QUOTE // ok, not used
   : '\'\'\'' (('\'' | '\'\'')? ([^'\\] | ECHAR | UCHAR | '"'))* '\'\'\''
   ;
 
-// not used
-STRING_LITERAL_LONG_QUOTE
+STRING_LITERAL_LONG_QUOTE // ok, not used
   : '"""' (('"' | '""')? (~ ["\\] | ECHAR | UCHAR | '\''))* '"""'
   ;
 
 // extends STRING_LITERAL_QUOTE in the original grammar to allow curly brackets, space and escaped characters
+// original  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
 STRING_LITERAL_QUOTE
   : '"' (~ ["\\\r\n] | '\'' | '\\"' | '{' | '}' | ' ' | ECHAR)* '"'
   ;
-/* orginal version:
-  STRING_LITERAL_QUOTE
-  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
-  ;
-*/
 
-// not used
-STRING_LITERAL_SINGLE_QUOTE
+STRING_LITERAL_SINGLE_QUOTE // ok, not used
   : '\'' (~ [\u0027\u005C\u000A\u000D] | ECHAR | UCHAR | '"')* '\''
   ;
 
-UCHAR
+UCHAR // ok
   : '\\u' HEX HEX HEX HEX | '\\U' HEX HEX HEX HEX HEX HEX HEX HEX
   ;
 
-ECHAR
+ECHAR // ok
   : '\\' [tbnrf"'\\]
   ;
 
-ANON_WS
+ANON_WS // ok, called WS
   : ' ' | '\t' | '\r' | '\n'
   ;
 
-ANON
+ANON // ok
   : '[' ANON_WS* ']'
   ;
 
-PN_CHARS_BASE
+PN_CHARS_BASE // ok
   : 'A' .. 'Z' | 'a' .. 'z' | '\u00C0' .. '\u00D6' | '\u00D8' .. '\u00F6' | '\u00F8' .. '\u02FF' | '\u0370' .. '\u037D' |
   '\u037F' .. '\u1FFF' | '\u200C' .. '\u200D' | '\u2070' .. '\u218F' | '\u2C00' .. '\u2FEF' | '\u3001' .. '\uD7FF' |
     '\uF900' .. '\uFDCF' | '\uFDF0' .. '\uFFFD'
@@ -290,11 +287,11 @@ PN_CHARS_BASE
 //    '\uB0000' .. '\uBFFFD' | '\uC0000' .. '\uCFFFD' | '\uD0000' .. '\uDFFFD' | '\uE1000' .. '\uEFFFD'
   ;
 
-PN_CHARS_U
+PN_CHARS_U // ok
   : PN_CHARS_BASE | '_'
   ;
 
-PN_CHARS
+PN_CHARS // extends with ? and =
   : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
@@ -308,20 +305,20 @@ PN_LOCAL
   : RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL?
   ;
 
-PLX
+PLX // ok
   : PERCENT | PN_LOCAL_ESC
   ;
 
-PERCENT
+PERCENT // ok
   : '%' HEX HEX
   ;
 
-HEX
+HEX // ok
   : [0-9] | [A-F] | [a-f]
   ;
 
 // RDF-specific: the backslash (first character) is ignored when parsing the IRI
-PN_LOCAL_ESC
+PN_LOCAL_ESC  // ok
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
   ;
 
