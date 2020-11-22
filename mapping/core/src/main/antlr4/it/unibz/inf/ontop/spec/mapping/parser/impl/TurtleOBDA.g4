@@ -208,8 +208,11 @@ BLANK_NODE_FUNCTION
   : '_:'  PN_LOCAL_EXT
   ;
 
+// The characters _ and digits may appear anywhere in a blank node label.
+// The character . may appear anywhere except the first or last character.
+// The characters -, U+00B7, U+0300 to U+036F and U+203F to U+2040 are permitted anywhere except the first character.
 BLANK_NODE_LABEL // ok
-  : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS )?
+  : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)?
   ;
 
 /* LANGTAG */
@@ -278,9 +281,9 @@ ANON // ok
   ;
 
 PN_CHARS_BASE // ok
-  : 'A' .. 'Z' | 'a' .. 'z' | '\u00C0' .. '\u00D6' | '\u00D8' .. '\u00F6' | '\u00F8' .. '\u02FF' | '\u0370' .. '\u037D' |
-  '\u037F' .. '\u1FFF' | '\u200C' .. '\u200D' | '\u2070' .. '\u218F' | '\u2C00' .. '\u2FEF' | '\u3001' .. '\uD7FF' |
-    '\uF900' .. '\uFDCF' | '\uFDF0' .. '\uFFFD'
+  : [A-Z] | [a-z] | [\u00C0-\u00D6] | [\u00D8-\u00F6] | [\u00F8-\u02FF] | [\u0370-\u037D] |
+  [\u037F-\u1FFF] | [\u200C-\u200D] | [\u2070-\u218F] | [\u2C00-\u2FEF] | [\u3001-\uD7FF] |
+    [\uF900-\uFDCF] | [\uFDF0-\uFFFD]
 // Limitation: Unicode Characters beyond \uFFFF are not (yet?) supported by ANTLR
 //    | '\u10000' .. '\u1FFFD' | '\u20000' .. '\u2FFFD' |
 //    '\u30000' .. '\u3FFFD' | '\u40000' .. '\u4FFFD' | '\u50000' .. '\u5FFFD' | '\u60000' .. '\u6FFFD' |
@@ -298,13 +301,14 @@ PN_CHARS // extends with ? and =
 
 // extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
 PN_LOCAL_EXT
-  : '{' RIGHT_PART_TAIL_EXT + | RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL_EXT_MAND
+  : '{' ((RIGHT_PART_CHAR | '{' | '}')* (RIGHT_PART_END_CHAR | '}')) +
+  | (PN_CHARS_U | ':' | '#' | [0-9] | PLX) (RIGHT_PART_CHAR | '{' | '}')* '{' (RIGHT_PART_CHAR | '{' | '}')* (RIGHT_PART_END_CHAR | '}')
   ;
 
 // extends PN_LOCAL in the original grammar to allow '/' and '#'
 // original (PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
 PN_LOCAL
-  : RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL?
+  : (PN_CHARS_U | ':' | '#' | [0-9] | PLX) (RIGHT_PART_CHAR* RIGHT_PART_END_CHAR)?
   ;
 
 PLX // ok
@@ -325,42 +329,15 @@ PN_LOCAL_ESC  // ok
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
   ;
 
-fragment RIGHT_PART_FIRST_CHAR
-  : (PN_CHARS_U | ':' | '#' | [0-9] | PLX)
-  ;
-
-fragment RIGHT_PART_FIRST_CHAR_EXT
-  : (RIGHT_PART_FIRST_CHAR | '{')
-  ;
-
 fragment RIGHT_PART_CHAR
   : (PN_CHARS | '.' | ':' | '/' | '#' | ';' | PLX)
   ;
 
-fragment RIGHT_PART_CHAR_EXT
-  : (RIGHT_PART_CHAR | '{' | '}')
-  ;
-
 fragment RIGHT_PART_END_CHAR
-  : (PN_CHARS | ':' | '/'| PLX)
+  : (PN_CHARS | ':' | '/' | PLX)
   ;
 
-fragment RIGHT_PART_END_CHAR_EXT
-  : (RIGHT_PART_END_CHAR | '}')
-  ;
-
-fragment RIGHT_PART_TAIL
-  : RIGHT_PART_CHAR* RIGHT_PART_END_CHAR
-  ;
-
-fragment RIGHT_PART_TAIL_EXT
-  : RIGHT_PART_CHAR_EXT* RIGHT_PART_END_CHAR_EXT
-  ;
-
-fragment RIGHT_PART_TAIL_EXT_MAND
-  : RIGHT_PART_CHAR_EXT* '{' RIGHT_PART_CHAR_EXT* RIGHT_PART_END_CHAR_EXT
-  ;
-
+// adds " and ;
 fragment IRIREF_INNER_CHAR
   :  (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | ';' | UCHAR)
   ;
