@@ -15,11 +15,14 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.Templates;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -30,6 +33,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final DBTermType lexicalType;
     private final Pattern pattern;
     private final boolean isInjective;
+    // Use for checking compatibility
+    private final String onlyAlwaysSafeSeparators;
 
     /**
      * TODO: enrich this list (incomplete)
@@ -48,8 +53,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
         this.pattern = extractPattern(template, true);
-
         this.isInjective = isInjective(arity, template);
+        this.onlyAlwaysSafeSeparators = extractOnlyAlwaysSafeSeparators(template);
     }
 
     /**
@@ -237,11 +242,43 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (!prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength)))
             return false;
 
+        // Checks that both templates use the same safe separators in the same order
+        if (!extractOnlyAlwaysSafeSeparators(otherTemplate).equals(onlyAlwaysSafeSeparators))
+            return false;
+
         String remainingTemplate = template.substring(minLength);
         String otherRemainingTemplate = otherTemplate.substring(minLength);
 
-        Pattern subPattern = extractPattern(remainingTemplate, false);
-        return subPattern.matcher(otherRemainingTemplate).find();
+        ImmutableList<String> fragments = splitTemplate(remainingTemplate);
+        ImmutableList<String> otherFragments = splitTemplate(otherRemainingTemplate);
+
+        if (fragments.size() != otherFragments.size())
+            throw new MinorOntopInternalBugException("Internal inconsistency detected while splitting IRI templates");
+
+        return IntStream.range(0, fragments.size())
+                .allMatch(i -> matchPatterns(fragments.get(i), otherFragments.get(i)));
+    }
+
+    private static ImmutableList<String> splitTemplate(String remainingTemplate) {
+        return SOME_SAFE_SEPARATORS.stream()
+                .reduce(Stream.of(remainingTemplate),
+                        (st, c) -> st.flatMap(s -> Arrays.stream(s.split(Pattern.quote(c.toString())))),
+                        (s1, s2) -> {
+                            throw new MinorOntopInternalBugException("");
+                        })
+                .collect(ImmutableCollectors.toList());
+    }
+    private static boolean matchPatterns(String subTemplate1, String subTemplate2) {
+        if (subTemplate1.equals(subTemplate2))
+            return true;
+
+        return matchPattern(subTemplate1, subTemplate2)
+                || matchPattern(subTemplate2, subTemplate1);
+    }
+
+    private static boolean matchPattern(String subTemplate1, String subTemplate2) {
+        Pattern subPattern = extractPattern(subTemplate1, false);
+        return subPattern.matcher(subTemplate2).find();
     }
 
     protected static Pattern extractPattern(String template, boolean surroundWithParentheses) {
@@ -261,6 +298,15 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 + "$";
 
         return Pattern.compile(patternString);
+    }
+
+    private static String extractOnlyAlwaysSafeSeparators(String template) {
+        return template.chars().mapToObj(c -> (char) c)
+                .filter(SOME_SAFE_SEPARATORS::contains)
+                .collect(Collector.of(StringBuilder::new,
+                        StringBuilder::append,
+                        StringBuilder::append,
+                        StringBuilder::toString));
     }
 
     private static String makeRegexSafe(String s) {
