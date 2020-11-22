@@ -240,6 +240,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         String remainingTemplate = template.substring(minLength);
         String otherRemainingTemplate = otherTemplate.substring(minLength);
 
+        /**
+         * TODO: fix as it can return false negative
+         */
         return matchPattern(remainingTemplate, otherRemainingTemplate)
                 || matchPattern(otherRemainingTemplate, remainingTemplate);
     }
