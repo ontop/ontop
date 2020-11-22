@@ -94,14 +94,14 @@ verb
 
 graph
   : resource
-  | variable
   | blank
+  | variable   // treated as rr:column
   ;
 
 subject    // iri, BlankNode, collection
   : resource
-  | variable
   | blank
+  | variable   // treated as rr:column
   ;
 
 object   // iri, BlankNode, collection, blankNodePropertyList, literal
@@ -109,18 +109,17 @@ object   // iri, BlankNode, collection, blankNodePropertyList, literal
   | blank
   | literal
   | variableLiteral
-  | variable
   ;
 
 resource
   : iri
   | IRIREF_WITH_PLACEHOLDERS
-  | PREFIXED_NAME_EXT
+  | PREFIXED_NAME_WITH_PLACEHOLDERS
   ;
 
 blank
-  : BLANK_NODE_FUNCTION // addition
-  | BLANK_NODE_LABEL
+  : BLANK_NODE_LABEL
+  | BLANK_NODE_LABEL_WITH_PLACEHOLDERS // addition
   | ANON
   ;
 
@@ -129,7 +128,7 @@ variable
   ;
 
 variableLiteral
-  : variable (LANGTAG | '^^' iri)
+  : PLACEHOLDER (LANGTAG | '^^' iri)?
   ;
 
 iri
@@ -198,13 +197,11 @@ PREFIXED_NAME // PNAME_LN
 
 // PrefixedName is PNAME_LN or PNAME_NS
 
-// extends PREFIXED_NAME to allow right-hand side curly brackets, and force one right-hand side opening curly bracket
-PREFIXED_NAME_EXT
+PREFIXED_NAME_WITH_PLACEHOLDERS
   : PNAME_NS PN_LOCAL_WITH_PLACEHOLDERS
   ;
 
-// specific syntax for blank nodes with variables
-BLANK_NODE_FUNCTION
+BLANK_NODE_LABEL_WITH_PLACEHOLDERS
   : '_:'  PN_LOCAL_WITH_PLACEHOLDERS
   ;
 
@@ -300,7 +297,6 @@ PN_CHARS
   : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
-// extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
 PN_LOCAL_WITH_PLACEHOLDERS
   : PLACEHOLDER (PN_LOCAL_INNER_CHAR* PLACEHOLDER)*
   | (PN_LOCAL_FIRST_CHAR PN_LOCAL_INNER_CHAR*)? (PLACEHOLDER PN_LOCAL_INNER_CHAR*)+ PN_LOCAL_LAST_CHAR

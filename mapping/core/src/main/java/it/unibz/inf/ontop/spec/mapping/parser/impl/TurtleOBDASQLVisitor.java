@@ -373,7 +373,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         if (node != null) {
             return constructIRI(removeBrackets(node.getText()));
         }
-        node = ctx.PREFIXED_NAME_EXT();
+        node = ctx.PREFIXED_NAME_WITH_PLACEHOLDERS();
         if (node != null) {
             return constructIRI(concatPrefix(node.getText()));
         }
@@ -381,22 +381,32 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     }
 
     @Override
-    public ImmutableFunctionalTerm visitVariableLiteral(TurtleOBDAParser.VariableLiteralContext ctx) {
-        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
-                visitVariable(ctx.variable()));
+    public ImmutableTerm visitVariableLiteral(TurtleOBDAParser.VariableLiteralContext ctx) {
+        String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
+        validateAttributeName(variableName);
+        Variable variable = termFactory.getVariable(variableName);
+
         TerminalNode langTag = ctx.LANGTAG();
-        if (langTag != null)
+        if (langTag != null) {
+            ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(variable);
             return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, langTag.getText().substring(1).toLowerCase());
+        }
 
-        IRI iri = visitIri(ctx.iri());
+        TurtleOBDAParser.IriContext iriCtx = ctx.iri();
+        if (iriCtx != null) {
+            IRI iri = visitIri(iriCtx);
+            if ((!settings.areAbstractDatatypesToleratedInMapping())
+                    && typeFactory.getDatatype(iri).isAbstract())
+                // TODO: throw a better exception (invalid input)
+                throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
+                        + iri + "\nSet the property "
+                        + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
 
-        if ((!settings.areAbstractDatatypesToleratedInMapping())
-                && typeFactory.getDatatype(iri).isAbstract())
-            // TODO: throw a better exception (invalid input)
-            throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
-                    + iri + "\nSet the property "
-                    + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
-        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
+            ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(variable);
+            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
+        }
+
+        return variable;
     }
 
     @Override
@@ -417,11 +427,13 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     @Override
     public ImmutableTerm visitBlank(TurtleOBDAParser.BlankContext ctx) {
-        if (ctx.BLANK_NODE_FUNCTION() != null) {
-            return constructBnodeFunction(ctx.BLANK_NODE_FUNCTION().getText());
+        TerminalNode node = ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS();
+        if (node != null) {
+            return constructBnodeFunction(node.getText());
         }
-        if (ctx.BLANK_NODE_LABEL() != null) {
-            return constructConstantBNode(ctx.BLANK_NODE_LABEL().getText());
+        node = ctx.BLANK_NODE_LABEL();
+        if (node != null) {
+            return constructConstantBNode(node.getText());
         }
         throw new IllegalArgumentException("Anonymous blank nodes not supported yet in mapping targets");
     }
