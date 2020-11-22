@@ -240,8 +240,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         String remainingTemplate = template.substring(minLength);
         String otherRemainingTemplate = otherTemplate.substring(minLength);
 
-        Pattern subPattern = extractPattern(remainingTemplate, false);
-        return subPattern.matcher(otherRemainingTemplate).find();
+        return matchPattern(remainingTemplate, otherRemainingTemplate)
+                || matchPattern(otherRemainingTemplate, remainingTemplate);
+    }
+
+    private boolean matchPattern(String template1, String template2) {
+        Pattern subPattern = extractPattern(template1, false);
+        return subPattern.matcher(template2).find();
     }
 
     protected static Pattern extractPattern(String template, boolean surroundWithParentheses) {
