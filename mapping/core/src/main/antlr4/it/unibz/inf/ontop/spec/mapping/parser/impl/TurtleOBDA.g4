@@ -242,6 +242,7 @@ EXPONENT // ok
 
 /* NUMERIC LITERALS: END */
 
+/*
 STRING_LITERAL_LONG_SINGLE_QUOTE // ok, not used
   : '\'\'\'' (('\'' | '\'\'')? ([^'\\] | ECHAR | UCHAR | '"'))* '\'\'\''
   ;
@@ -249,26 +250,28 @@ STRING_LITERAL_LONG_SINGLE_QUOTE // ok, not used
 STRING_LITERAL_LONG_QUOTE // ok, not used
   : '"""' (('"' | '""')? (~ ["\\] | ECHAR | UCHAR | '\''))* '"""'
   ;
+*/
 
-// extends STRING_LITERAL_QUOTE in the original grammar to allow curly brackets, space and escaped characters
 // original  : '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
 STRING_LITERAL_QUOTE
-  : '"' (~ ["\\\r\n] | '\'' | '\\"' | '{' | '}' | ' ' | ECHAR)* '"'
+  : '"' (~ ["\\\r\n] | ECHAR |  UCHAR)* '"'
   ;
 
+/*
 STRING_LITERAL_SINGLE_QUOTE // ok, not used
   : '\'' (~ [\u0027\u005C\u000A\u000D] | ECHAR | UCHAR | '"')* '\''
   ;
+*/
 
-UCHAR // ok
+UCHAR // ok, numeric escapes for IRIs and Strings
   : '\\u' HEX HEX HEX HEX | '\\U' HEX HEX HEX HEX HEX HEX HEX HEX
   ;
 
-ECHAR // ok
+ECHAR // ok, string escapes for Strings only
   : '\\' [tbnrf"'\\]
   ;
 
-ANON_WS // ok, called WS
+ANON_WS // ok
   : ' ' | '\t' | '\r' | '\n'
   ;
 
@@ -301,6 +304,7 @@ PN_LOCAL_EXT
   ;
 
 // extends PN_LOCAL in the original grammar to allow '/' and '#'
+// original (PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
 PN_LOCAL
   : RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL?
   ;
