@@ -369,17 +369,13 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     @Override
     public ImmutableTerm visitResource(TurtleOBDAParser.ResourceContext ctx) {
-        if (ctx.iriExt() != null) {
-            return visitIriExt(ctx.iriExt());
-        }
-        return constructIRI(this.visitIri(ctx.iri()).getIRIString());
-    }
-
-    public ImmutableTerm visitIriExt(TurtleOBDAParser.IriExtContext ctx) {
         if (ctx.IRIREF_EXT() != null) {
             return constructIRI(removeBrackets(ctx.IRIREF_EXT().getText()));
         }
-        return constructIRI(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
+        if (ctx.PREFIXED_NAME_EXT() != null) {
+            return constructIRI(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
+        }
+        return constructIRI(this.visitIri(ctx.iri()).getIRIString());
     }
 
     @Override

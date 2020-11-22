@@ -114,16 +114,12 @@ object   // iri, BlankNode, collection, blankNodePropertyList, literal
 
 resource
   : iri
-  | iriExt
-  ;
-
-iriExt
-  : IRIREF_EXT
+  | IRIREF_EXT
   | PREFIXED_NAME_EXT
   ;
 
 blank
-  : BLANK_NODE_FUNCTION
+  : BLANK_NODE_FUNCTION // addition
   | BLANK_NODE_LABEL
   | ANON
   ;
