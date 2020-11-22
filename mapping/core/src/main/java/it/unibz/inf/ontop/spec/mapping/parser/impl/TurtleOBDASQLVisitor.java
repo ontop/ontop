@@ -369,11 +369,13 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     @Override
     public ImmutableTerm visitResource(TurtleOBDAParser.ResourceContext ctx) {
-        if (ctx.IRIREF_EXT() != null) {
-            return constructIRI(removeBrackets(ctx.IRIREF_EXT().getText()));
+        TerminalNode node = ctx.IRIREF_WITH_PLACEHOLDERS();
+        if (node != null) {
+            return constructIRI(removeBrackets(node.getText()));
         }
-        if (ctx.PREFIXED_NAME_EXT() != null) {
-            return constructIRI(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
+        node = ctx.PREFIXED_NAME_EXT();
+        if (node != null) {
+            return constructIRI(concatPrefix(node.getText()));
         }
         return constructIRI(this.visitIri(ctx.iri()).getIRIString());
     }
@@ -408,7 +410,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     @Override
     public Variable visitVariable(TurtleOBDAParser.VariableContext ctx) {
-        String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
+        String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
         validateAttributeName(variableName);
         return termFactory.getVariable(variableName);
     }

@@ -114,7 +114,7 @@ object   // iri, BlankNode, collection, blankNodePropertyList, literal
 
 resource
   : iri
-  | IRIREF_EXT
+  | IRIREF_WITH_PLACEHOLDERS
   | PREFIXED_NAME_EXT
   ;
 
@@ -125,7 +125,7 @@ blank
   ;
 
 variable
-  : STRING_WITH_CURLY_BRACKET
+  : PLACEHOLDER
   ;
 
 variableLiteral
@@ -171,13 +171,13 @@ WS
  - If there are several of them, the first one is applied
  *------------------------------------------------------------------*/
 
-STRING_WITH_CURLY_BRACKET
-  : '{' (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | '$' | UCHAR)+ '}'
+PLACEHOLDER
+  : '{' ~[{}]+ '}'
+  | '{"' (~["] | '""')+ '"}'
   ;
 
-// extends IRIREF to allow curly brackets, and forces one curly bracket
-IRIREF_EXT
-  : '<' IRIREF_INNER_CHAR* '{' (IRIREF_INNER_CHAR | '{' | '}')+ '>'
+IRIREF_WITH_PLACEHOLDERS
+  : '<' IRIREF_INNER_CHAR* (PLACEHOLDER IRIREF_INNER_CHAR*)+ '>'
   ;
 
 IRIREF
@@ -337,9 +337,9 @@ fragment RIGHT_PART_END_CHAR
   : (PN_CHARS | ':' | '/' | PLX)
   ;
 
-// adds " and ;
+// adds ? and ;
 fragment IRIREF_INNER_CHAR
-  :  (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | ';' | UCHAR)
+  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | '?' | ';')
   ;
 
 
