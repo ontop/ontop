@@ -176,12 +176,12 @@ WS
  *------------------------------------------------------------------*/
 
 STRING_WITH_CURLY_BRACKET
-  : '{' VARIABLE_CHAR+ '}'
+  : '{' (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | '$' | UCHAR)+ '}'
   ;
 
 // extends IRIREF to allow curly brackets, and forces one curly bracket
 IRIREF_EXT
-  : '<' IRIREF_INNER_CHAR_EXT* '{' IRIREF_INNER_CHAR_EXT+ '>'
+  : '<' IRIREF_INNER_CHAR* '{' (IRIREF_INNER_CHAR | '{' | '}')+ '>'
   ;
 
 IRIREF
@@ -369,10 +369,4 @@ fragment IRIREF_INNER_CHAR
   :  (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | ';' | UCHAR)
   ;
 
-fragment IRIREF_INNER_CHAR_EXT
-  :  (IRIREF_INNER_CHAR | '{' | '}')
-  ;
 
-fragment VARIABLE_CHAR
-  : (PN_CHARS | '"' | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | '$' | UCHAR)
-  ;
