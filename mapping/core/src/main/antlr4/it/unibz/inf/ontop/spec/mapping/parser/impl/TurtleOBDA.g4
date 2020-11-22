@@ -200,12 +200,12 @@ PREFIXED_NAME // PNAME_LN
 
 // extends PREFIXED_NAME to allow right-hand side curly brackets, and force one right-hand side opening curly bracket
 PREFIXED_NAME_EXT
-  : PNAME_NS PN_LOCAL_EXT
+  : PNAME_NS PN_LOCAL_WITH_PLACEHOLDERS
   ;
 
 // specific syntax for blank nodes with variables
 BLANK_NODE_FUNCTION
-  : '_:'  PN_LOCAL_EXT
+  : '_:'  PN_LOCAL_WITH_PLACEHOLDERS
   ;
 
 // The characters _ and digits may appear anywhere in a blank node label.
@@ -295,20 +295,22 @@ PN_CHARS_U // ok
   : PN_CHARS_BASE | '_'
   ;
 
-PN_CHARS // extends with ? and =
+// adds ? and =
+PN_CHARS
   : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
 // extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
-PN_LOCAL_EXT
-  : '{' ((RIGHT_PART_CHAR | '{' | '}')* (RIGHT_PART_END_CHAR | '}')) +
-  | (PN_CHARS_U | ':' | '#' | [0-9] | PLX) (RIGHT_PART_CHAR | '{' | '}')* '{' (RIGHT_PART_CHAR | '{' | '}')* (RIGHT_PART_END_CHAR | '}')
+PN_LOCAL_WITH_PLACEHOLDERS
+  : PLACEHOLDER (PN_LOCAL_INNER_CHAR* PLACEHOLDER)*
+  | (PN_LOCAL_FIRST_CHAR PN_LOCAL_INNER_CHAR*)? (PLACEHOLDER PN_LOCAL_INNER_CHAR*)+ PN_LOCAL_LAST_CHAR
+  | PN_LOCAL_FIRST_CHAR (PN_LOCAL_INNER_CHAR* PLACEHOLDER)+ (PN_LOCAL_INNER_CHAR* PN_LOCAL_LAST_CHAR)?
   ;
 
-// extends PN_LOCAL in the original grammar to allow '/' and '#'
+// extends PN_LOCAL in the original grammar to allow  #, ; and /
 // original (PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
 PN_LOCAL
-  : (PN_CHARS_U | ':' | '#' | [0-9] | PLX) (RIGHT_PART_CHAR* RIGHT_PART_END_CHAR)?
+  : PN_LOCAL_FIRST_CHAR (PN_LOCAL_INNER_CHAR* PN_LOCAL_LAST_CHAR)?
   ;
 
 PLX // ok
@@ -329,15 +331,22 @@ PN_LOCAL_ESC  // ok
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
   ;
 
-fragment RIGHT_PART_CHAR
-  : (PN_CHARS | '.' | ':' | '/' | '#' | ';' | PLX)
+// adds #
+fragment PN_LOCAL_FIRST_CHAR
+  : PN_CHARS_U | ':' | [0-9] | PLX | '#'
   ;
 
-fragment RIGHT_PART_END_CHAR
-  : (PN_CHARS | ':' | '/' | PLX)
+// adds ;, # and /
+fragment PN_LOCAL_INNER_CHAR
+  : PN_CHARS | '.' | ':' | PLX | ';' | '#' | '/'
   ;
 
-// adds ? and ;
+// adds /
+fragment PN_LOCAL_LAST_CHAR
+  : PN_CHARS | ':' | PLX | '/'
+  ;
+
+// adds ? and ; (? and = through PN_CHARS)
 fragment IRIREF_INNER_CHAR
   :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | '?' | ';')
   ;
