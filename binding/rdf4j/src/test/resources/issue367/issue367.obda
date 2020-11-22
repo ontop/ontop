@@ -1,0 +1,23 @@
+[PrefixDeclaration]
+: http://example.org/
+myBase: http://mybase.example.com/
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+
+[MappingDeclaration]` @collection [[
+mappingId	mapRA
+target		:ra/{id} a :RA ; :prop1 :ra/{id}/temp1 .
+source		select shopOrder as id from MesData
+
+mappingId	mapRAT
+target		:ra/{id}/{temp_type} a myBase:Prop ; :propID {ppvid}^^xsd:string .
+source		select
+			temp_type,
+			shopOrder as id,
+			concat(shopOrder,'_',temp_type) as ppvid
+			FROM
+			(select * from MesData) as M
+			cross join
+			(select distinct temp_type from Temperatures) as T
+			where temp_type='temp1'
+]]
