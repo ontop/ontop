@@ -70,20 +70,16 @@ quadsStatement
     : 'GRAPH' graph '{' (triples '.')+ '}'
     ;
 
-triples
-  : subject  predicateObjectList
+triples // [6]
+  : subject predicateObjectList
   // blankNodePropertyList predicateObjectList?
   ;
 
-predicateObjectList
-  : predicateObject (';' predicateObject)*
+predicateObjectList // [7]
+  : verb objectList (';' (verb objectList)?)*
   ;
 
-predicateObject
-  : predicate objectList
-  ;
-
-objectList // ok
+objectList // [8]
   : object (',' object)*
   ;
 
@@ -93,32 +89,33 @@ graph
   | variable   // treated as rr:column
   ;
 
-predicate
+verb  // [9] verb ::= predicate | 'a'
   : resource                 # predicateResource
   | 'a'                      # predicateRdfType
   ;
 
-subject    // iri, BlankNode, collection
+subject // [10]	subject ::= iri | BlankNode | collection
   : resource
   | blank
   | variable   // treated as rr:column
   ;
 
-object   // iri, BlankNode, collection, blankNodePropertyList, literal
+object  // [12]	object ::= iri | BlankNode | collection | blankNodePropertyList | literal
   : resource
   | blank
   | literal
   | variableLiteral
   ;
 
-resource
+resource // [11] predicate ::= iri // [135s] iri ::= IRIREF | PrefixedName
+                                   // [136s] PrefixedName ::= PNAME_LN | PNAME_NS
   : IRIREF                              # resourceIri
   | PREFIXED_NAME                       # resourcePrefixedIri
   | IRIREF_WITH_PLACEHOLDERS            # resourceTemplate
   | PREFIXED_NAME_WITH_PLACEHOLDERS     # resourcePrefixedTemplate
   ;
 
-blank
+blank  // [137s] BlankNode ::= BLANK_NODE_LABEL | ANON
   : BLANK_NODE_LABEL                    # blankNode
   | BLANK_NODE_LABEL_WITH_PLACEHOLDERS  # blankNodeTemplate
   | ANON                                # blankNodeAnonymous
@@ -132,26 +129,25 @@ variableLiteral
   : PLACEHOLDER (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
   ;
 
-literal // ok
+literal // [13] literal ::= RDFLiteral | NumericLiteral | BooleanLiteral
   : rdfLiteral
   | numericLiteral
   | booleanLiteral
   ;
 
-rdfLiteral  // ok
-  : litString (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
+rdfLiteral // [128s] RDFLiteral ::=	String (LANGTAG | '^^' iri)?
+  : string (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
   ;
 
-litString
+string  // 	[17] String ::=	STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
   : STRING_LITERAL_QUOTE
-//  | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
   ;
 
-booleanLiteral  // only the first two are in Turtle
+booleanLiteral // [133s] BooleanLiteral ::= 'true' | 'false'
   : 'true' | 'false'| 'TRUE' | 'True' | 'FALSE'| 'False'
   ;
 
-numericLiteral  // ok
+numericLiteral  // [16]
   : INTEGER   # integerLiteral
   | DOUBLE    # doubleLiteral
   | DECIMAL   # decimalLiteral
@@ -177,23 +173,23 @@ IRIREF_WITH_PLACEHOLDERS
   : '<' IRIREF_INNER_CHAR* (PLACEHOLDER IRIREF_INNER_CHAR*)+ '>'
   ;
 
-IRIREF
+IRIREF // [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>' /* #x00=NULL #01-#x1F=control codes #x20=space */
    : '<' IRIREF_INNER_CHAR* '>'
    ;
 
-PNAME_NS // ok
+PNAME_NS // [139s]
   : PN_PREFIX? ':'
   ;
 
-PN_PREFIX // ok
+PN_PREFIX // [167s]
    : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
    ;
 
-PREFIXED_NAME // PNAME_LN
+// [136s] PrefixedName ::=	PNAME_LN | PNAME_NS
+PREFIXED_NAME // [140s]	PNAME_LN ::= PNAME_NS PN_LOCAL
    : PNAME_NS PN_LOCAL
   ;
 
-// PrefixedName is PNAME_LN or PNAME_NS
 PREFIXED_NAME_WITH_PLACEHOLDERS
   : PNAME_NS PN_LOCAL_WITH_PLACEHOLDERS
   ;
@@ -205,60 +201,53 @@ BLANK_NODE_LABEL_WITH_PLACEHOLDERS
 // The characters _ and digits may appear anywhere in a blank node label.
 // The character . may appear anywhere except the first or last character.
 // The characters -, U+00B7, U+0300 to U+036F and U+203F to U+2040 are permitted anywhere except the first character.
-BLANK_NODE_LABEL // ok
+BLANK_NODE_LABEL // [141s]
   : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)?
   ;
 
-/* LANGTAG */
-
-LANGTAG // ok
-  : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)*
+LANGTAG // [144s]
+  : '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)*
   ;
 
-
-/* NUMERIC LITERALS: START */
-
-INTEGER // ok
-  : [+-]? [0-9] +
+INTEGER // [19]
+  : [+-]? [0-9]+
   ;
 
-DECIMAL // ok
-  : [+-]? [0-9]* '.' [0-9] +
+DECIMAL // [20]
+  : [+-]? [0-9]* '.' [0-9]+
   ;
 
-DOUBLE // ok
-  : [+-]? ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9] + EXPONENT | [0-9] + EXPONENT)
+DOUBLE // [21]
+  : [+-]? ([0-9]+ '.' [0-9]* EXPONENT | '.' [0-9]+ EXPONENT | [0-9]+ EXPONENT)
   ;
 
-EXPONENT // ok
-  : [eE] [+-]? [0-9] +
+EXPONENT // [154s]
+  : [eE] [+-]? [0-9]+
   ;
-
-/* NUMERIC LITERALS: END */
 
 // TURTLE.g4 says  '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
 // but the one below is what is written in https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
-STRING_LITERAL_QUOTE
+STRING_LITERAL_QUOTE // [22]
   : '"' (~ ["\\\r\n] | ECHAR |  UCHAR)* '"'
   ;
 
-UCHAR // ok, numeric escapes for IRIs and Strings
+UCHAR // [26]: numeric escapes for IRIs and Strings
   : '\\u' HEX HEX HEX HEX | '\\U' HEX HEX HEX HEX HEX HEX HEX HEX
   ;
 
-ECHAR // ok, string escapes for Strings only
+ECHAR // [159s]: string escapes for Strings only
   : '\\' [tbnrf"'\\]
   ;
 
-ANON_WS // ok
+ANON_WS // [161s] WS ::= #x20 | #x9 | #xD | #xA
   : ' ' | '\t' | '\r' | '\n'
   ;
 
-ANON // ok
+ANON // [162s] ANON ::= '[' WS* ']'
   : '[' ANON_WS* ']'
   ;
 
-PN_CHARS_BASE // ok
+PN_CHARS_BASE // [163s]
   : [A-Z] | [a-z] | [\u00C0-\u00D6] | [\u00D8-\u00F6] | [\u00F8-\u02FF] | [\u0370-\u037D] |
   [\u037F-\u1FFF] | [\u200C-\u200D] | [\u2070-\u218F] | [\u2C00-\u2FEF] | [\u3001-\uD7FF] |
     [\uF900-\uFDCF] | [\uFDF0-\uFFFD]
@@ -269,12 +258,12 @@ PN_CHARS_BASE // ok
 //    '\uB0000' .. '\uBFFFD' | '\uC0000' .. '\uCFFFD' | '\uD0000' .. '\uDFFFD' | '\uE1000' .. '\uEFFFD'
   ;
 
-PN_CHARS_U // ok
+PN_CHARS_U // [164s]
   : PN_CHARS_BASE | '_'
   ;
 
 // adds ? and =
-PN_CHARS
+PN_CHARS // [166s] PN_CHARS ::= PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x036F] | [#x203F-#x2040]
   : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
@@ -285,28 +274,27 @@ PN_LOCAL_WITH_PLACEHOLDERS
   ;
 
 // extends PN_LOCAL in the original grammar to allow  #, ; and /
-// original (PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
-PN_LOCAL
+PN_LOCAL // [168s] PN_LOCAL	::=	(PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
   : PN_LOCAL_FIRST_CHAR (PN_LOCAL_INNER_CHAR* PN_LOCAL_LAST_CHAR)?
   ;
 
-PLX // ok
+PLX // [169s]
   : PERCENT | PN_LOCAL_ESC
   ;
 
-// %-encoded sequences are not decoded during processing
-PERCENT // ok
+PERCENT // [170s]: %-encoded sequences are not decoded during processing
   : '%' HEX HEX
   ;
 
-HEX // ok
+HEX // [171s]
   : [0-9] | [A-F] | [a-f]
   ;
 
-// reserved character escape sequences for local names only
-PN_LOCAL_ESC  // ok
+PN_LOCAL_ESC  // [172s]: reserved character escape sequences for local names only
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
   ;
+
+// [168s] PN_LOCAL ::= (PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
 
 // adds #
 fragment PN_LOCAL_FIRST_CHAR
@@ -324,7 +312,7 @@ fragment PN_LOCAL_LAST_CHAR
   ;
 
 // adds ; (? and = through PN_CHARS)
-fragment IRIREF_INNER_CHAR
+fragment IRIREF_INNER_CHAR // [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>' /* #x00=NULL #01-#x1F=control codes #x20=space */
   :  PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | ';'
   ;
 

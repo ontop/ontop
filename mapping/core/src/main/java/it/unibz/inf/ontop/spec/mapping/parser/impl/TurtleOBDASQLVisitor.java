@@ -1,14 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.antlr.v4.runtime.tree.RuleNode;
-import org.apache.commons.rdf.api.RDF;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -23,14 +18,11 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor<Stream<TargetAto
     private ImmutableTerm currentPredicate;
 
     private final TargetAtomFactory targetAtomFactory;
-    private final TurtleOBDASQLTermVisitor turtleOBDASQLTermVisitor;
+    private final TurtleOBDAVisitor<ImmutableTerm> turtleOBDASQLTermVisitor;
 
-    protected TurtleOBDASQLVisitor(TermFactory termFactory, TypeFactory typeFactory,
-                                        TargetAtomFactory targetAtomFactory, RDF rdfFactory,
-                                        OntopMappingSettings settings,
-                                   ImmutableMap<String, String> prefixes) {
+    protected TurtleOBDASQLVisitor(TargetAtomFactory targetAtomFactory, TurtleOBDAVisitor<ImmutableTerm> turtleOBDASQLTermVisitor) {
         this.targetAtomFactory = targetAtomFactory;
-        this.turtleOBDASQLTermVisitor = new TurtleOBDASQLTermVisitor(termFactory, rdfFactory, typeFactory, settings, prefixes);
+        this.turtleOBDASQLTermVisitor = turtleOBDASQLTermVisitor;
     }
 
     @Override
@@ -59,9 +51,15 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor<Stream<TargetAto
     }
 
     @Override
-    public Stream<TargetAtom> visitPredicateObject(TurtleOBDAParser.PredicateObjectContext ctx) {
-        currentPredicate = ctx.predicate().accept(turtleOBDASQLTermVisitor);
-        return visitChildren(ctx);
+    public Stream<TargetAtom> visitPredicateResource(TurtleOBDAParser.PredicateResourceContext ctx) {
+        currentPredicate = ctx.accept(turtleOBDASQLTermVisitor);
+        return null;
+    }
+
+    @Override
+    public Stream<TargetAtom> visitPredicateRdfType(TurtleOBDAParser.PredicateRdfTypeContext ctx) {
+        currentPredicate = ctx.accept(turtleOBDASQLTermVisitor);
+        return null;
     }
 
     @Override

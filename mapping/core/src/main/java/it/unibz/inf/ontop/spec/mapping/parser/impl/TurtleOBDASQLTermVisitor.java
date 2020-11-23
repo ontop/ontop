@@ -42,7 +42,6 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         this.typeFactory = typeFactory;
         this.settings = settings;
         this.prefixes = prefixes;
-
     }
 
     private static void validateAttributeName(String value) {
@@ -53,12 +52,6 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     private String removeBrackets(String text) {
         return text.substring(1, text.length() - 1);
-    }
-
-    private ImmutableTerm constructIRI(String text) {
-        return constructBnodeOrIRI(text,
-                col -> termFactory.getIRIFunctionalTerm(col, true),
-                termFactory::getIRIFunctionalTerm);
     }
 
     private ImmutableTerm constructBnodeOrIRI(String text,
@@ -211,7 +204,9 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitResourceTemplate(TurtleOBDAParser.ResourceTemplateContext ctx) {
-        return constructIRI(removeBrackets(ctx.IRIREF_WITH_PLACEHOLDERS().getText()));
+        return constructBnodeOrIRI(removeBrackets(ctx.IRIREF_WITH_PLACEHOLDERS().getText()),
+                col -> termFactory.getIRIFunctionalTerm(col, true),
+                termFactory::getIRIFunctionalTerm);
     }
 
     @Override
@@ -221,7 +216,9 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitResourcePrefixedTemplate(TurtleOBDAParser.ResourcePrefixedTemplateContext ctx) {
-        return constructIRI(concatPrefix(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()));
+        return constructBnodeOrIRI(concatPrefix(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()),
+                col -> termFactory.getIRIFunctionalTerm(col, true),
+                termFactory::getIRIFunctionalTerm);
     }
 
     @Override
@@ -288,7 +285,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitRdfLiteral(TurtleOBDAParser.RdfLiteralContext ctx) {
-        ImmutableTerm stringValue = visitLitString(ctx.litString());
+        ImmutableTerm stringValue = visitString(ctx.string());
         TerminalNode node = ctx.LANGTAG();
         if (node != null) {
             return termFactory.getRDFLiteralFunctionalTerm(stringValue, node.getText().substring(1).toLowerCase());
@@ -309,7 +306,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     }
 
     @Override
-    public ImmutableTerm visitLitString(TurtleOBDAParser.LitStringContext ctx) {
+    public ImmutableTerm visitString(TurtleOBDAParser.StringContext ctx) {
         String str = removeBrackets(ctx.STRING_LITERAL_QUOTE().getText()); // without the double quotes
         List<ImmutableTerm> terms = addToTermsList(str);
         if (terms.size() == 1) {

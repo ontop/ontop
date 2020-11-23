@@ -21,7 +21,7 @@ public class TurtleOBDASQLParser extends AbstractTurtleOBDAParser implements Tar
     private TurtleOBDASQLParser(@Assisted ImmutableMap<String, String> prefixes, TermFactory termFactory,
                                 TypeFactory typeFactory, TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory,
                                 OntopMappingSettings settings) {
-        super(() -> new TurtleOBDASQLVisitor(termFactory, typeFactory, targetAtomFactory, rdfFactory, settings, addStandardPrefixes(prefixes)));
+        super(targetAtomFactory, () -> new TurtleOBDASQLTermVisitor(termFactory, rdfFactory, typeFactory, settings, addStandardPrefixes(prefixes)));
     }
 
     private static final ImmutableMap<String, String> standardPrefixes = ImmutableMap.of(
@@ -33,10 +33,9 @@ public class TurtleOBDASQLParser extends AbstractTurtleOBDAParser implements Tar
 
     private static ImmutableMap<String, String> addStandardPrefixes(ImmutableMap<String, String> prefixes) {
         return Stream.concat(standardPrefixes.entrySet().stream(), prefixes.entrySet().stream())
+                .distinct()
                 .collect(ImmutableCollectors.toMap(
                         e -> e.getKey().substring(0, e.getKey().length() - 1), // remove :
-                        Map.Entry::getValue,
-                        (v1, v2) -> v2)); // prefer new prefix definitions (or throw an exception if they differ?)
+                        Map.Entry::getValue));
     }
-
 }
