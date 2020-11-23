@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
 import java.util.*;
-import java.util.function.Function;
 
 public abstract class AbstractPrefixManager implements PrefixManager {
 
@@ -36,8 +35,10 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	private ImmutableList<Map.Entry<String, String>> getOrderedNamespaces() {
 		if (orderedNamespaces == null) {
 			List<Map.Entry<String, String>> namespaceList = new ArrayList<>(getPrefixMap().entrySet());
-			namespaceList.sort(Comparator.comparing((Function<Map.Entry<String, String>, String>) Map.Entry::getValue)
-					.thenComparing(Map.Entry::getKey));
+			Comparator<Map.Entry<String, String>> comparator =
+					Map.Entry.<String, String>comparingByValue()
+							.thenComparing(Map.Entry.comparingByKey());
+			namespaceList.sort(comparator);
 			orderedNamespaces = ImmutableList.copyOf(namespaceList);
 		}
 		return orderedNamespaces;

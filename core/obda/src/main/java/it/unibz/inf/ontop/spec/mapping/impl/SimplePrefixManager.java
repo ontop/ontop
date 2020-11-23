@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  */
 
 import com.github.jsonldjava.shaded.com.google.common.collect.Streams;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -29,7 +28,6 @@ import it.unibz.inf.ontop.model.vocabulary.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
 
