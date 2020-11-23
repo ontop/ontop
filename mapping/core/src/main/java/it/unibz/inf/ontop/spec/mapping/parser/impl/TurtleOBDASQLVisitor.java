@@ -203,18 +203,15 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     //and adds parsed constant literals and template literal to terms list
     private List<ImmutableTerm> addToTermsList(String str) {
         ArrayList<ImmutableTerm> terms = new ArrayList<>();
-        int i, j;
-        String st;
-        str = str.substring(1, str.length() - 1);
         while (str.contains("{")) {
-            i = getIndexOfCurlyB(str);
+            int i = getIndexOfCurlyB(str);
             if (i > 0) {
-                st = str.substring(0, i);
+                String st = str.substring(0, i);
                 st = st.replace("\\\\", "");
                 terms.add(termFactory.getDBStringConstant(st));
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
-                j = str.indexOf("}");
+                int j = str.indexOf("}");
                 terms.add(termFactory.getVariable(str.substring(1, j)));
                 str = str.substring(j + 1, str.length());
             } else {
@@ -226,16 +223,6 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
             terms.add(termFactory.getDBStringConstant(str));
         }
         return terms;
-    }
-
-    //this function returns nested concats
-    private ImmutableTerm getNestedConcat(String str) {
-        List<ImmutableTerm> terms = addToTermsList(str);
-        if (terms.size() == 1) {
-            return terms.get(0);
-        }
-
-        return termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.copyOf(terms));
     }
 
 
@@ -307,21 +294,9 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     @Override
     public Stream<ImmutableTerm> visitObjectList(TurtleOBDAParser.ObjectListContext ctx) {
         return ctx.object().stream()
-                .map(this::visitObject);
+                .map(o -> (ImmutableTerm)visitObject(o));
     }
 
-
-    @Override
-    public ImmutableTerm visitObject(TurtleOBDAParser.ObjectContext ctx) {
-        ImmutableTerm term = (ImmutableTerm) visit(ctx.children.iterator().next());
-        return (term instanceof Variable)
-                ? termFactory.getRDFLiteralFunctionalTerm(
-                termFactory.getPartiallyDefinedToStringCast((Variable) term),
-                // We give the abstract datatype RDFS.LITERAL when it is not determined yet
-                // --> The concrete datatype be inferred afterwards
-                RDFS.LITERAL)
-                : term;
-    }
 
     @Override
     public ImmutableTerm visitResource(TurtleOBDAParser.ResourceContext ctx) {
@@ -341,10 +316,10 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
         validateAttributeName(variableName);
         Variable variable = termFactory.getVariable(variableName);
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(variable);
 
         TerminalNode langTag = ctx.LANGTAG();
         if (langTag != null) {
-            ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(variable);
             return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, langTag.getText().substring(1).toLowerCase());
         }
 
@@ -358,11 +333,12 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
                         + iri + "\nSet the property "
                         + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
 
-            ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(variable);
             return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
         }
 
-        return variable;
+        // We give the abstract datatype RDFS.LITERAL when it is not determined yet
+        // --> The concrete datatype be inferred afterwards
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, RDFS.LITERAL);
     }
 
     @Override
@@ -382,17 +358,19 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     }
 
     @Override
-    public ImmutableTerm visitBlank(TurtleOBDAParser.BlankContext ctx) {
-        TerminalNode node = ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS();
-        if (node != null) {
-            return constructBnodeOrIRI(extractBnodeId(node.getText()),
-                    col -> termFactory.getBnodeFunctionalTerm(col, true),
-                    termFactory::getBnodeFunctionalTerm);
-        }
-        node = ctx.BLANK_NODE_LABEL();
-        if (node != null) {
-            return termFactory.getConstantBNode(extractBnodeId(node.getText()));
-        }
+    public ImmutableTerm visitBlankNodeTemplate(TurtleOBDAParser.BlankNodeTemplateContext ctx) {
+        return constructBnodeOrIRI(extractBnodeId(ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS().getText()),
+                col -> termFactory.getBnodeFunctionalTerm(col, true),
+                termFactory::getBnodeFunctionalTerm);
+    }
+
+    @Override
+    public ImmutableTerm visitBlankNode(TurtleOBDAParser.BlankNodeContext ctx) {
+            return termFactory.getConstantBNode(extractBnodeId(ctx.BLANK_NODE_LABEL().getText()));
+    }
+
+    @Override
+    public ImmutableTerm visitBlankNodeAnonymous(TurtleOBDAParser.BlankNodeAnonymousContext ctx) {
         throw new IllegalArgumentException("Anonymous blank nodes not supported yet in mapping targets");
     }
 
@@ -415,11 +393,12 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     @Override
     public ImmutableTerm visitLitString(TurtleOBDAParser.LitStringContext ctx) {
-        String str = ctx.STRING_LITERAL_QUOTE().getText();
-        if (str.contains("{")) {
-            return getNestedConcat(str);
+        String str = removeBrackets(ctx.STRING_LITERAL_QUOTE().getText()); // without the double quotes
+        List<ImmutableTerm> terms = addToTermsList(str);
+        if (terms.size() == 1) {
+            return terms.get(0);
         }
-        return termFactory.getDBStringConstant(str.substring(1, str.length() - 1)); // without the double quotes
+        return termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.copyOf(terms));
     }
 
 
@@ -429,17 +408,18 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     }
 
     @Override
-    public ImmutableTerm visitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx) {
-        TerminalNode node = ctx.INTEGER();
-        if (node != null) {
-            return termFactory.getRDFLiteralConstant(node.getText(), XSD.INTEGER);
-        }
-        node = ctx.DOUBLE();
-        if (node != null) {
-            return termFactory.getRDFLiteralConstant(node.getText(), XSD.DOUBLE);
-        }
-        node = ctx.DECIMAL();
-        return termFactory.getRDFLiteralConstant(node.getText(), XSD.DECIMAL);
+    public ImmutableTerm visitIntegerLiteral(TurtleOBDAParser.IntegerLiteralContext ctx) {
+            return termFactory.getRDFLiteralConstant(ctx.INTEGER().getText(), XSD.INTEGER);
+    }
+
+    @Override
+    public ImmutableTerm visitDoubleLiteral(TurtleOBDAParser.DoubleLiteralContext ctx) {
+            return termFactory.getRDFLiteralConstant(ctx.DOUBLE().getText(), XSD.DOUBLE);
+    }
+
+    @Override
+    public ImmutableTerm visitDecimalLiteral(TurtleOBDAParser.DecimalLiteralContext ctx) {
+        return termFactory.getRDFLiteralConstant(ctx.DECIMAL().getText(), XSD.DECIMAL);
     }
 
 }

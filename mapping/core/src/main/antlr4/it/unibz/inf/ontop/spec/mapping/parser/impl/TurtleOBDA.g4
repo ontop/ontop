@@ -118,9 +118,9 @@ resource
   ;
 
 blank
-  : BLANK_NODE_LABEL
-  | BLANK_NODE_LABEL_WITH_PLACEHOLDERS // addition
-  | ANON
+  : BLANK_NODE_LABEL                    # blankNode
+  | BLANK_NODE_LABEL_WITH_PLACEHOLDERS  # blankNodeTemplate
+  | ANON                                # blankNodeAnonymous
   ;
 
 variable
@@ -156,7 +156,9 @@ booleanLiteral  // only the first two are in Turtle
   ;
 
 numericLiteral  // ok
-  : INTEGER | DOUBLE | DECIMAL
+  : INTEGER   # integerLiteral
+  | DOUBLE    # doubleLiteral
+  | DECIMAL   # decimalLiteral
   ;
 
 WS
