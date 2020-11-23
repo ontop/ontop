@@ -24,6 +24,7 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
@@ -35,33 +36,34 @@ public class PrefixRendererTest extends TestCase {
 	private static final String INDIVIDUAL_IRI_STR = "http://obda.org/onto.owl#person-individual";
 
 	/**
-	 * Checking that the atoms that use the default namespace are renderered in
-	 * short form and those who don't have it are renderered with the full uri
+	 * Checking that the atoms that use the default namespace are rendered in
+	 * short form and those who don't have it are rendered with the full uri
 	 */
+	@Ignore
 	public void testNamespace1() {
         PrefixManager pm;
         Map<String, String> prefixes = new HashMap<>();
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
         pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
-		String name = pm.getShortForm(Q_IRI_STR, true);
-		assertTrue(name, name.equals("http://obda.org/predicates#q"));
+		//String name = pm.getShortForm(Q_IRI_STR, true);
+		//assertEquals("http://obda.org/predicates#q", name);
 
-		name = pm.getShortForm(PERSON_IRI_STR, true);
-		assertTrue(name, name.equals("&:;Person"));
+		//name = pm.getShortForm(PERSON_IRI_STR, true);
+		//assertEquals("&:;Person", name);
 
-		name = pm.getShortForm(INDIVIDUAL_IRI_STR, true);
-		assertTrue(name, name.equals("&:;person-individual"));
+		//name = pm.getShortForm(INDIVIDUAL_IRI_STR, true);
+		//assertEquals("&:;person-individual", name);
 
-		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
-        pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
-		name = pm.getShortForm(Q_IRI_STR, true);
-		assertTrue(name, name.equals("&:;q"));
+		//prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
+        //pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
+		//name = pm.getShortForm(Q_IRI_STR, true);
+		//assertEquals("&:;q", name);
 
-		name = pm.getShortForm(PERSON_IRI_STR, true);
-		assertTrue(name, name.equals("http://obda.org/onto.owl#Person"));
+		//name = pm.getShortForm(PERSON_IRI_STR, true);
+		//assertEquals("http://obda.org/onto.owl#Person", name);
 
-		name = pm.getShortForm(INDIVIDUAL_IRI_STR, true);
-		assertTrue(name, name.equals("http://obda.org/onto.owl#person-individual"));
+		//name = pm.getShortForm(INDIVIDUAL_IRI_STR, true);
+		//assertEquals("http://obda.org/onto.owl#person-individual", name);
 	}
 
 	/**
@@ -74,27 +76,26 @@ public class PrefixRendererTest extends TestCase {
 		prefixes.put("obdap:", "http://obda.org/predicates#");
         pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
-		String name = pm.getShortForm(Q_IRI_STR, false);
-		assertTrue(name, name.equals("obdap:q"));
+		String name = pm.getShortForm(Q_IRI_STR);
+		assertEquals("obdap:q", name);
 
-		name = pm.getShortForm(PERSON_IRI_STR, false);
-		assertTrue(name, name.equals(":Person"));
+		name = pm.getShortForm(PERSON_IRI_STR);
+		assertEquals(":Person", name);
 
-		name = pm.getShortForm(INDIVIDUAL_IRI_STR, false);
-		assertTrue(name, name.equals(":person-individual"));
+		name = pm.getShortForm(INDIVIDUAL_IRI_STR);
+		assertEquals(":person-individual", name);
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
 		prefixes.put("onto:", "http://obda.org/onto.owl#");
         pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
-		name = pm.getShortForm(Q_IRI_STR, false);
-		assertTrue(name, name.equals(":q"));
+		name = pm.getShortForm(Q_IRI_STR);
+		assertEquals(":q", name);
 
-		name = pm.getShortForm(PERSON_IRI_STR, false);
-		assertTrue(name, name.equals("onto:Person"));
+		name = pm.getShortForm(PERSON_IRI_STR);
+		assertEquals("onto:Person", name);
 
-		name = pm.getShortForm(INDIVIDUAL_IRI_STR, false);
-		assertTrue(name, name.equals("onto:person-individual"));
-
+		name = pm.getShortForm(INDIVIDUAL_IRI_STR);
+		assertEquals("onto:person-individual", name);
 	}
 
 	/**
@@ -105,26 +106,20 @@ public class PrefixRendererTest extends TestCase {
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
 		prefixes.put("obdap:", "http://obda.org/predicates#");
 
-		String uri = "http://obda.org/onto.owl#redirect=http://obda.org/predicates#";
-
 		PrefixManager pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
-		String shortForm = pm.getShortForm(uri, false);
+		String uri = "http://obda.org/onto.owl#redirect=http://obda.org/predicates#";
+		String shortForm = pm.getShortForm(uri);
 		System.out.println(shortForm);
-
 		assertEquals(":redirect=http://obda.org/predicates#", shortForm);
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://example.com/resource/");
 		prefixes.put("movie:", "http://www.movieontology.org/2009/10/01/movieontology.owl/");
-
 		pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
 		String uri2 = "http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951";
-		String shortForm2 = pm.getShortForm(uri2, false);
+		String shortForm2 = pm.getShortForm(uri2);
 		System.out.println(shortForm2);
 		assertEquals(":?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951", shortForm2);
-
-
-
 	}
 }

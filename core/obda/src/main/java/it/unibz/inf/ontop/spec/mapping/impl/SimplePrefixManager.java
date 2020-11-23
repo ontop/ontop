@@ -91,7 +91,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 *         registered
 	 */
     @Override
-	public String getURIDefinition(String prefix) {
+	protected String getURIDefinition(String prefix) {
 		return prefixToURIMap.get(prefix);
 	}
 
@@ -103,7 +103,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 * @return the corresponding prefix or null if the URI is not registered
 	 */
     @Override
-	public Optional<String> getPrefix(String uri) {
+	protected Optional<String> getPrefix(String uri) {
 		return Optional.ofNullable(uriToPrefixMap.get(uri));
 	}
 
@@ -117,22 +117,11 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 		return prefixToURIMap;
 	}
 
-	/**
-	 * Checks if the prefix manager stores the prefix name.
-	 * 
-	 * @param prefix
-	 *            The prefix name to check.
-	 */
-    @Override
-	public boolean contains(String prefix) {
-		Set<String> prefixes = prefixToURIMap.keySet();
-		return prefixes.contains(prefix);
-	}
 
 	@Override
-	public List<String> getOrderedNamespaces() {
+	protected List<String> getOrderedNamespaces() {
 		List<String> namespaceList = new ArrayList<>(getPrefixMap().values());
-		Collections.sort(namespaceList, Collections.reverseOrder());
+		namespaceList.sort(Collections.reverseOrder());
 		return namespaceList;
 	}
 }

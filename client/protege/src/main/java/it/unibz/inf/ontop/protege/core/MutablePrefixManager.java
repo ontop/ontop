@@ -39,19 +39,14 @@ import java.util.stream.StreamSupport;
  */
 public class MutablePrefixManager extends AbstractPrefixManager {
 
-    private PrefixDocumentFormat owlmapper;
+    private final PrefixDocumentFormat owlmapper;
 
 	MutablePrefixManager(PrefixDocumentFormat owlmapper) {
 		this.owlmapper = owlmapper;
 	}
-	
-	@Override
-	public String getDefaultPrefix() {
-		return super.getDefaultPrefix();
-	}
 
 	@Override
-	public Optional<String> getPrefix(String uri) {
+	protected Optional<String> getPrefix(String uri) {
 		return owlmapper.getPrefixName2PrefixMap().entrySet().stream()
 				.filter(e -> e.getValue().equals(uri))
 				.map(Map.Entry::getKey)
@@ -59,21 +54,20 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	}
 
 	@Override
-	public ImmutableMap<String, String> getPrefixMap() {
-		return ImmutableMap.copyOf(owlmapper.getPrefixName2PrefixMap());
-	}
-
-	@Override
-	public String getURIDefinition(String prefix) {
+	protected String getURIDefinition(String prefix) {
 		return owlmapper.getPrefix(prefix);
 	}
 
 	@Override
+	public ImmutableMap<String, String> getPrefixMap() {
+		return ImmutableMap.copyOf(owlmapper.getPrefixName2PrefixMap());
+	}
+
 	public boolean contains(String prefix) {
 		return owlmapper.containsPrefixMapping(prefix);
 	}
 
-	void addPrefix(String name, String uri) {
+	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, uri);
 	}
 
@@ -82,14 +76,10 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	}
 
 	@Override
-	public List<String> getOrderedNamespaces() {
+	protected List<String> getOrderedNamespaces() {
 		ArrayList<String> namespaceList = new ArrayList<>(getPrefixMap().values());
-		Collections.sort(namespaceList, Collections.reverseOrder());
+		namespaceList.sort(Collections.reverseOrder());
 		return namespaceList;
-	}
-
-	void addPrefixes(ImmutableMap<String, String> prefixMap) {
-		prefixMap.forEach((key, value) -> owlmapper.setPrefix(key, value));
 	}
 
 	/**
@@ -98,11 +88,11 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	 static Optional<String> getDeclaredDefaultPrefixNamespace(OWLOntology ontology){
 		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
 				ontology,
-				ontology.getOWLOntologyManager().getOntologyFormat(ontology)
-		);
-		if(StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
+				ontology.getOWLOntologyManager().getOntologyFormat(ontology));
+
+		if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
 			.anyMatch(p ->  p.equals(""))){
-			return Optional.of(nsm.getNamespaceForPrefix(""));
+			return Optional.ofNullable(nsm.getNamespaceForPrefix(""));
 		}
 		return Optional.empty();
 	}

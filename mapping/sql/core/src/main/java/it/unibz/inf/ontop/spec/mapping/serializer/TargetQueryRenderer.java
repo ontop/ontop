@@ -140,7 +140,7 @@ public class TargetQueryRenderer {
                 .map(tag -> "@" + tag.getFullString())
                 .orElseGet(() -> datatype.getIRI().equals(RDFS.LITERAL)
                             ? ""
-                            : "^^" + prefixManager.getShortForm(datatype.getIRI().getIRIString(), false));
+                            : "^^" + prefixManager.getShortForm(datatype.getIRI().getIRIString()));
 
         return lexicalString + suffix;
     }
@@ -149,7 +149,7 @@ public class TargetQueryRenderer {
         if (iri.equals(RDF.TYPE.getIRIString()))
             return "a"; // should be used only in predicate position, but...
 
-        String shortenedIri = prefixManager.getShortForm(iri, false);
+        String shortenedIri = prefixManager.getShortForm(iri);
         if (!shortenedIri.equals(iri))
             return shortenedIri;
 

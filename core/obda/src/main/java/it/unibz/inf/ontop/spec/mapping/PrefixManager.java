@@ -31,23 +31,13 @@ import java.util.Optional;
  */
 public interface PrefixManager {
 
-	String getURIDefinition(String prefix);
-
-	Optional<String> getPrefix(String uri);
-
-	String getDefaultPrefix();
-	
-	ImmutableMap<String, String> getPrefixMap();
-
 	String getShortForm(String uri);
 
-	String getShortForm(String uri, boolean insideQuotes);
-
 	String getExpandForm(String prefixedName);
-	
-	String getExpandForm(String prefixedName, boolean insideQuotes);
-	
-	boolean contains(String prefix);
+
+	ImmutableMap<String, String> getPrefixMap();
+
+	String getDefaultIriPrefix();
 
 	String DEFAULT_PREFIX = ":";
 }

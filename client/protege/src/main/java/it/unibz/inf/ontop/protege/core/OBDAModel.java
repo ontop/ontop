@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -16,7 +14,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.*;
-import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -137,7 +134,7 @@ public class OBDAModel {
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
         SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
-        prefixManager.addPrefixes(ppMapping.getPrefixManager().getPrefixMap());
+        ppMapping.getPrefixManager().getPrefixMap().forEach((k, v) -> prefixManager.addPrefix(k,v));
         // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(

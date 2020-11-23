@@ -78,7 +78,7 @@ public class BootstrapAction extends ProtegeAction {
 		Dimension minsize1 = new Dimension(10, 10);
 		panel.add(new Box.Filler(minsize1, minsize1, minsize1));
 		JTextField base_uri = new JTextField();
-		base_uri.setText(currentModel.getMutablePrefixManager().getDefaultPrefix()
+		base_uri.setText(currentModel.getMutablePrefixManager().getDefaultIriPrefix()
 				.replace("#", "/"));
 		base_uri.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(base_uri);
