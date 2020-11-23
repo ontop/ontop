@@ -270,13 +270,13 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     @Override
     public Stream<TargetAtom> visitQuadsStatement(TurtleOBDAParser.QuadsStatementContext ctx) {
-        this.currentGraph = visitGraph(ctx.graph());
+        this.currentGraph = (ImmutableTerm) visitGraph(ctx.graph());
         return ctx.triplesStatement().stream().flatMap(this::visitTriplesStatement);
     }
 
     @Override
     public Stream<TargetAtom> visitTriples(TurtleOBDAParser.TriplesContext ctx) {
-        currentSubject = visitSubject(ctx.subject());
+        currentSubject = (ImmutableTerm) visitSubject(ctx.subject());
         return visitPredicateObjectList(ctx.predicateObjectList());
     }
 
@@ -310,40 +310,6 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
                 .map(this::visitObject);
     }
 
-    @Override
-    public ImmutableTerm visitSubject(TurtleOBDAParser.SubjectContext ctx) {
-        TurtleOBDAParser.ResourceContext rc = ctx.resource();
-        if (rc != null) {
-            return visitResource(rc);
-        }
-        TurtleOBDAParser.VariableContext vc = ctx.variable();
-        if (vc != null) {
-            return termFactory.getIRIFunctionalTerm(visitVariable(vc), true);
-        }
-        TurtleOBDAParser.BlankContext bc = ctx.blank();
-        if (bc != null) {
-            return visitBlank(bc);
-        }
-        return null;
-    }
-
-    @Override
-    public ImmutableTerm visitGraph(TurtleOBDAParser.GraphContext ctx) {
-        if (ctx == null) return null;
-        TurtleOBDAParser.ResourceContext rc = ctx.resource();
-        if (rc != null) {
-            return visitResource(rc);
-        }
-        TurtleOBDAParser.VariableContext vc = ctx.variable();
-        if (vc != null) {
-            return termFactory.getIRIFunctionalTerm(visitVariable(vc), true);
-        }
-        TurtleOBDAParser.BlankContext bc = ctx.blank();
-        if (bc != null) {
-            return visitBlank(bc);
-        }
-        return null;
-    }
 
     @Override
     public ImmutableTerm visitObject(TurtleOBDAParser.ObjectContext ctx) {
@@ -409,10 +375,10 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     }
 
     @Override
-    public Variable visitVariable(TurtleOBDAParser.VariableContext ctx) {
+    public ImmutableFunctionalTerm visitVariable(TurtleOBDAParser.VariableContext ctx) {
         String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
         validateAttributeName(variableName);
-        return termFactory.getVariable(variableName);
+        return termFactory.getIRIFunctionalTerm(termFactory.getVariable(variableName), true);
     }
 
     @Override

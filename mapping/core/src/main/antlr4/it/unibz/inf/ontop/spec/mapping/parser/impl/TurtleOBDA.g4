@@ -79,7 +79,7 @@ predicateObjectList
   : predicateObject (';' predicateObject)*
   ;
 
-predicateObject  // inline?
+predicateObject
   : verb objectList
   ;
 
