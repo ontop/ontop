@@ -24,18 +24,20 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 
 public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractTurtleOBDAParser.class);
-	private final Supplier<TurtleOBDAVisitor> visitorSupplier;
+	private final Supplier<TurtleOBDAVisitor<Stream<TargetAtom>>> visitorSupplier;
 
 	/**
 	 * Constructs the parser object with prefixes. These prefixes will
@@ -43,7 +45,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * (i.e., the directives @base and @prefix).
 	 *
 	 */
-	public AbstractTurtleOBDAParser(Supplier<TurtleOBDAVisitor> visitorSupplier) {
+	public AbstractTurtleOBDAParser(Supplier<TurtleOBDAVisitor<Stream<TargetAtom>>> visitorSupplier) {
 		this.visitorSupplier = visitorSupplier;
 	}
 
@@ -69,7 +71,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 			parser.removeErrorListeners();
 			parser.addErrorListener(new ThrowingErrorListener());
 
-			return (ImmutableList<TargetAtom>)visitorSupplier.get().visitParse(parser.parse());
+			return visitorSupplier.get().visitParse(parser.parse()).collect(ImmutableCollectors.toList());
 		}
 		catch (RuntimeException e) {
 			throw new TargetQueryParserException(e.getMessage(), e);
