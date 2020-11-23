@@ -157,16 +157,6 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         return text.substring(2);
     }
 
-    private ImmutableTerm constructConstantBNode(String text) {
-        return termFactory.getConstantBNode(extractBnodeId(text));
-    }
-
-    private ImmutableTerm constructBnodeFunction(String text) {
-        return constructBnodeOrIRI(extractBnodeId(text),
-                col -> termFactory.getBnodeFunctionalTerm(col, true),
-                termFactory::getBnodeFunctionalTerm);
-    }
-
     private interface FormatString {
         String str();
     }
@@ -377,7 +367,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         if (node != null) {
             return constructIRI(concatPrefix(node.getText()));
         }
-        return constructIRI(this.visitIri(ctx.iri()).getIRIString());
+        return constructIRI(visitIri(ctx.iri()).getIRIString());
     }
 
     @Override
@@ -411,11 +401,11 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
     @Override
     public IRI visitIri(TurtleOBDAParser.IriContext ctx) {
-        TerminalNode token = ctx.PREFIXED_NAME();
-        return rdfFactory.createIRI(
-                token != null
-                        ? concatPrefix(token.getText())
-                        : removeBrackets(ctx.IRIREF().getText()));
+        TerminalNode node = ctx.IRIREF();
+        if (node != null)
+            return rdfFactory.createIRI(removeBrackets(node.getText()));
+
+        return rdfFactory.createIRI(concatPrefix(ctx.PREFIXED_NAME().getText()));
     }
 
     @Override
@@ -429,11 +419,13 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     public ImmutableTerm visitBlank(TurtleOBDAParser.BlankContext ctx) {
         TerminalNode node = ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS();
         if (node != null) {
-            return constructBnodeFunction(node.getText());
+            return constructBnodeOrIRI(extractBnodeId(node.getText()),
+                    col -> termFactory.getBnodeFunctionalTerm(col, true),
+                    termFactory::getBnodeFunctionalTerm);
         }
         node = ctx.BLANK_NODE_LABEL();
         if (node != null) {
-            return constructConstantBNode(node.getText());
+            return termFactory.getConstantBNode(extractBnodeId(node.getText()));
         }
         throw new IllegalArgumentException("Anonymous blank nodes not supported yet in mapping targets");
     }

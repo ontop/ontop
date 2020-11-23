@@ -196,7 +196,6 @@ PREFIXED_NAME // PNAME_LN
   ;
 
 // PrefixedName is PNAME_LN or PNAME_NS
-
 PREFIXED_NAME_WITH_PLACEHOLDERS
   : PNAME_NS PN_LOCAL_WITH_PLACEHOLDERS
   ;
@@ -238,28 +237,11 @@ EXPONENT // ok
 
 /* NUMERIC LITERALS: END */
 
-/*
-STRING_LITERAL_LONG_SINGLE_QUOTE // ok, not used
-  : '\'\'\'' (('\'' | '\'\'')? ([^'\\] | ECHAR | UCHAR | '"'))* '\'\'\''
-  ;
-
-STRING_LITERAL_LONG_QUOTE // ok, not used
-  : '"""' (('"' | '""')? (~ ["\\] | ECHAR | UCHAR | '\''))* '"""'
-  ;
-*/
-
-
 // TURTLE.g4 says  '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
 // but the one below is what is written in https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
 STRING_LITERAL_QUOTE
   : '"' (~ ["\\\r\n] | ECHAR |  UCHAR)* '"'
   ;
-
-/*
-STRING_LITERAL_SINGLE_QUOTE // ok, not used
-  : '\'' (~ [\u0027\u005C\u000A\u000D] | ECHAR | UCHAR | '"')* '\''
-  ;
-*/
 
 UCHAR // ok, numeric escapes for IRIs and Strings
   : '\\u' HEX HEX HEX HEX | '\\U' HEX HEX HEX HEX HEX HEX HEX HEX
@@ -332,19 +314,19 @@ fragment PN_LOCAL_FIRST_CHAR
   : PN_CHARS_U | ':' | [0-9] | PLX | '#'
   ;
 
-// adds ;, # and /
+// adds ;, # and /  (? and = through PN_CHARS)
 fragment PN_LOCAL_INNER_CHAR
   : PN_CHARS | '.' | ':' | PLX | ';' | '#' | '/'
   ;
 
-// adds /
+// adds /  (? and = through PN_CHARS)
 fragment PN_LOCAL_LAST_CHAR
   : PN_CHARS | ':' | PLX | '/'
   ;
 
-// adds ? and ; (? and = through PN_CHARS)
+// adds ; (? and = through PN_CHARS)
 fragment IRIREF_INNER_CHAR
-  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | '?' | ';')
+  :  PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | ';'
   ;
 
 
