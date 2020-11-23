@@ -200,11 +200,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     }
 
     @Override
-    public ImmutableTerm visitVerb(TurtleOBDAParser.VerbContext ctx) {
-        TurtleOBDAParser.ResourceContext rc = ctx.resource();
-        if (rc != null) {
-            return (ImmutableTerm)rc.accept(this);
-        }
+    public ImmutableTerm visitPredicateRdfType(TurtleOBDAParser.PredicateRdfTypeContext ctx) {
         return termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
     }
 

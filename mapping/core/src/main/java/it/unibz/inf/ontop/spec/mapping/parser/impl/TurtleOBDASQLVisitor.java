@@ -41,10 +41,9 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor<Stream<TargetAto
     }
 
     @Override
-    public Stream<TargetAtom> visitParse(TurtleOBDAParser.ParseContext ctx) {
-        return Stream.concat(// first process triples with currentGraph = null
-                ctx.triplesStatement().stream().flatMap(this::visitTriplesStatement),
-                ctx.quadsStatement().stream().flatMap(this::visitQuadsStatement));
+    public Stream<TargetAtom> visitTriplesStatement(TurtleOBDAParser.TriplesStatementContext ctx) {
+        currentGraph = null;
+        return visitChildren(ctx);
     }
 
     @Override
@@ -61,7 +60,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor<Stream<TargetAto
 
     @Override
     public Stream<TargetAtom> visitPredicateObject(TurtleOBDAParser.PredicateObjectContext ctx) {
-        currentPredicate = ctx.verb().accept(turtleOBDASQLTermVisitor);
+        currentPredicate = ctx.predicate().accept(turtleOBDASQLTermVisitor);
         return visitChildren(ctx);
     }
 

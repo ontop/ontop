@@ -67,7 +67,7 @@ triplesStatement
   ;
 
 quadsStatement
-    : 'GRAPH' graph '{' triplesStatement+ '}'
+    : 'GRAPH' graph '{' (triples '.')+ '}'
     ;
 
 triples
@@ -80,22 +80,22 @@ predicateObjectList
   ;
 
 predicateObject
-  : verb objectList
+  : predicate objectList
   ;
 
 objectList // ok
   : object (',' object)*
   ;
 
-verb
-  : resource  // predicate = iri
-  | 'a'
-  ;
-
 graph
   : resource
   | blank
   | variable   // treated as rr:column
+  ;
+
+predicate
+  : resource                 # predicateResource
+  | 'a'                      # predicateRdfType
   ;
 
 subject    // iri, BlankNode, collection
