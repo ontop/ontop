@@ -112,9 +112,10 @@ object   // iri, BlankNode, collection, blankNodePropertyList, literal
   ;
 
 resource
-  : iri
-  | IRIREF_WITH_PLACEHOLDERS
-  | PREFIXED_NAME_WITH_PLACEHOLDERS
+  : IRIREF                              # resourceIri
+  | PREFIXED_NAME                       # resourcePrefixedIri
+  | IRIREF_WITH_PLACEHOLDERS            # resourceTemplate
+  | PREFIXED_NAME_WITH_PLACEHOLDERS     # resourcePrefixedTemplate
   ;
 
 blank
@@ -128,13 +129,8 @@ variable
   ;
 
 variableLiteral
-  : PLACEHOLDER (LANGTAG | '^^' iri)?
+  : PLACEHOLDER (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
   ;
-
-iri
-   : IRIREF
-   | PREFIXED_NAME
-   ;
 
 literal // ok
   : rdfLiteral
@@ -143,7 +139,7 @@ literal // ok
   ;
 
 rdfLiteral  // ok
-  : litString (LANGTAG | '^^' iri)?
+  : litString (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
   ;
 
 litString
@@ -218,6 +214,7 @@ BLANK_NODE_LABEL // ok
 LANGTAG // ok
   : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)*
   ;
+
 
 /* NUMERIC LITERALS: START */
 

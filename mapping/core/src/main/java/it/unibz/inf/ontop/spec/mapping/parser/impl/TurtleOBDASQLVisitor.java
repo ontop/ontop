@@ -286,7 +286,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     public ImmutableTerm visitVerb(TurtleOBDAParser.VerbContext ctx) {
         TurtleOBDAParser.ResourceContext rc = ctx.resource();
         if (rc != null) {
-            return visitResource(rc);
+            return (ImmutableTerm)rc.accept(this);
         }
         return termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
     }
@@ -299,16 +299,23 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
 
 
     @Override
-    public ImmutableTerm visitResource(TurtleOBDAParser.ResourceContext ctx) {
-        TerminalNode node = ctx.IRIREF_WITH_PLACEHOLDERS();
-        if (node != null) {
-            return constructIRI(removeBrackets(node.getText()));
-        }
-        node = ctx.PREFIXED_NAME_WITH_PLACEHOLDERS();
-        if (node != null) {
-            return constructIRI(concatPrefix(node.getText()));
-        }
-        return constructIRI(visitIri(ctx.iri()).getIRIString());
+    public ImmutableTerm visitResourceIri(TurtleOBDAParser.ResourceIriContext ctx) {
+        return termFactory.getConstantIRI(rdfFactory.createIRI(removeBrackets(ctx.IRIREF().getText())));
+    }
+
+    @Override
+    public ImmutableTerm visitResourceTemplate(TurtleOBDAParser.ResourceTemplateContext ctx) {
+        return constructIRI(removeBrackets(ctx.IRIREF_WITH_PLACEHOLDERS().getText()));
+    }
+
+    @Override
+    public ImmutableTerm visitResourcePrefixedIri(TurtleOBDAParser.ResourcePrefixedIriContext ctx) {
+        return termFactory.getConstantIRI(rdfFactory.createIRI(concatPrefix(ctx.PREFIXED_NAME().getText())));
+    }
+
+    @Override
+    public ImmutableTerm visitResourcePrefixedTemplate(TurtleOBDAParser.ResourcePrefixedTemplateContext ctx) {
+        return constructIRI(concatPrefix(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()));
     }
 
     @Override
@@ -318,22 +325,30 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
         Variable variable = termFactory.getVariable(variableName);
         ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(variable);
 
-        TerminalNode langTag = ctx.LANGTAG();
-        if (langTag != null) {
-            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, langTag.getText().substring(1).toLowerCase());
+        TerminalNode node = ctx.LANGTAG();
+        if (node != null) {
+            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, node.getText().substring(1).toLowerCase());
         }
 
-        TurtleOBDAParser.IriContext iriCtx = ctx.iri();
-        if (iriCtx != null) {
-            IRI iri = visitIri(iriCtx);
+        IRI datatypeIri = null;
+        node = ctx.IRIREF();
+        if (node != null) {
+            datatypeIri = rdfFactory.createIRI(removeBrackets(node.getText()));
+        }
+        node = ctx.PREFIXED_NAME();
+        if (node != null) {
+            datatypeIri = rdfFactory.createIRI(concatPrefix(node.getText()));
+        }
+
+        if (datatypeIri != null) {
             if ((!settings.areAbstractDatatypesToleratedInMapping())
-                    && typeFactory.getDatatype(iri).isAbstract())
+                    && typeFactory.getDatatype(datatypeIri).isAbstract())
                 // TODO: throw a better exception (invalid input)
                 throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
-                        + iri + "\nSet the property "
+                        + datatypeIri + "\nSet the property "
                         + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
 
-            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
+            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatypeIri);
         }
 
         // We give the abstract datatype RDFS.LITERAL when it is not determined yet
@@ -342,16 +357,7 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     }
 
     @Override
-    public IRI visitIri(TurtleOBDAParser.IriContext ctx) {
-        TerminalNode node = ctx.IRIREF();
-        if (node != null)
-            return rdfFactory.createIRI(removeBrackets(node.getText()));
-
-        return rdfFactory.createIRI(concatPrefix(ctx.PREFIXED_NAME().getText()));
-    }
-
-    @Override
-    public ImmutableFunctionalTerm visitVariable(TurtleOBDAParser.VariableContext ctx) {
+    public ImmutableTerm visitVariable(TurtleOBDAParser.VariableContext ctx) {
         String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
         validateAttributeName(variableName);
         return termFactory.getIRIFunctionalTerm(termFactory.getVariable(variableName), true);
@@ -377,18 +383,23 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor implements Turtl
     @Override
     public ImmutableTerm visitRdfLiteral(TurtleOBDAParser.RdfLiteralContext ctx) {
         ImmutableTerm stringValue = visitLitString(ctx.litString());
-        TerminalNode langtag = ctx.LANGTAG();
-        if (langtag != null) {
-            return termFactory.getRDFLiteralFunctionalTerm(stringValue, langtag.getText().substring(1).toLowerCase());
+        TerminalNode node = ctx.LANGTAG();
+        if (node != null) {
+            return termFactory.getRDFLiteralFunctionalTerm(stringValue, node.getText().substring(1).toLowerCase());
         }
-        TurtleOBDAParser.IriContext iriCtx = ctx.iri();
-        if (iriCtx != null) {
-            IRI iri = visitIri(iriCtx);
-            return termFactory.getRDFLiteralFunctionalTerm(stringValue, iri)
-                    .simplify(); // why?
+        IRI datatypeIri = null;
+        node = ctx.IRIREF();
+        if (node != null) {
+            datatypeIri = rdfFactory.createIRI(removeBrackets(node.getText()));
         }
-        return termFactory.getRDFLiteralFunctionalTerm(stringValue, XSD.STRING)
-                .simplify(); // why?
+        node = ctx.PREFIXED_NAME();
+        if (node != null) {
+            datatypeIri = rdfFactory.createIRI(concatPrefix(node.getText()));
+        }
+        if (datatypeIri != null) {
+            return termFactory.getRDFLiteralFunctionalTerm(stringValue, datatypeIri);
+        }
+        return termFactory.getRDFLiteralFunctionalTerm(stringValue, XSD.STRING);
     }
 
     @Override
