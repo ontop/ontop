@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -71,8 +72,8 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private void runAnalysis(String source, String targetString) throws Exception {
 
-		TargetQueryParser targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(
-				ImmutableMap.of(":", "http://www.example.org/university#"));
+		TargetQueryParser targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(MAPPING_FACTORY.createPrefixManager(
+				ImmutableMap.of(":", "http://www.example.org/university#")));
 
 		SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("MAPID-0",
 				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));

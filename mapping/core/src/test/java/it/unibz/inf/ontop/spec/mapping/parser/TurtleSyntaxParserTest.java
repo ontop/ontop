@@ -55,7 +55,7 @@ public class TurtleSyntaxParserTest {
 				.defaultBuilder().build();
 		Injector injector = configuration.getInjector();
         specificationFactory = injector.getInstance(SpecificationFactory.class);
-		parser = TARGET_QUERY_PARSER_FACTORY.createParser(getPrefixManager().getPrefixMap());
+		parser = TARGET_QUERY_PARSER_FACTORY.createParser(getPrefixManager());
 	}
 
     @Test

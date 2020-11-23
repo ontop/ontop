@@ -69,9 +69,8 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	
 	@Override
 	public String getExpandForm(String prefixedName, boolean insideQuotes) {
-		String prefix = "";
-		String prefixPlaceHolder = "";
-		
+		String prefix;
+
 		try {
 			/* Clean the URI string from <"..."> signs, if they exist.
 			 * e.g., <"&ex;Book"> --> &ex;Book
@@ -86,7 +85,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				int end = prefixedName.indexOf(";");
 	
 				// extract the whole prefix placeholder, e.g., "&ex;Book" --> "&ex;"
-				prefixPlaceHolder = prefixedName.substring(start, end + 1);
+				String prefixPlaceHolder = prefixedName.substring(start, end + 1);
 	
 				// extract the prefix name, e.g., "&ex;" --> "ex:"
 				prefix = prefixPlaceHolder.substring(1, prefixPlaceHolder.length() - 1);
@@ -98,7 +97,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				int index = prefixedName.indexOf(":");
 				
 				// extract the whole prefix placeholder, e.g., "ex:Book" --> "ex:"
-				prefixPlaceHolder = prefixedName.substring(0, index);
+				String prefixPlaceHolder = prefixedName.substring(0, index);
 				
 				// extract the prefix name
 				prefix = prefixPlaceHolder + ":";

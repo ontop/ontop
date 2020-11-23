@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.*;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -125,8 +126,7 @@ public class OBDAModel {
     }
 
 
-    public void parseMapping(Reader mappingReader, Properties properties) throws DuplicateMappingException,
-            InvalidMappingException, MappingIOException {
+    public void parseMapping(Reader mappingReader, Properties properties) throws InvalidMappingException, MappingIOException {
 
 
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
@@ -480,11 +480,11 @@ public class OBDAModel {
 
 
     public TargetQueryParser createTargetQueryParser() {
-        return targetQueryParserFactory.createParser(getMutablePrefixManager().getPrefixMap());
+        return targetQueryParserFactory.createParser(getMutablePrefixManager());
     }
 
-    public TargetQueryParser createTargetQueryParser(ImmutableMap<String, String> prefixMap) {
-        return targetQueryParserFactory.createParser(prefixMap);
+    public TargetQueryParser createTargetQueryParser(PrefixManager prefixManager) {
+        return targetQueryParserFactory.createParser(prefixManager);
     }
 
     boolean hasTripleMaps(){

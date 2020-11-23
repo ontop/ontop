@@ -447,7 +447,7 @@ public class QueryPainter {
 
 	private ImmutableList<TargetAtom> parse(String query, PrefixManager man) {
 		try {
-            TargetQueryParser textParser = apic.createTargetQueryParser(man.getPrefixMap());
+            TargetQueryParser textParser = apic.createTargetQueryParser(man);
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
@@ -29,19 +30,19 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     /**
      * Map of prefixes
      */
-    private final ImmutableMap<String, String> prefixes;
+    private final PrefixManager prefixManager;
 
     private final TermFactory termFactory;
     private final RDF rdfFactory;
     private final TypeFactory typeFactory;
     private final OntopMappingSettings settings;
 
-    TurtleOBDASQLTermVisitor(TermFactory termFactory, RDF rdfFactory, TypeFactory typeFactory, OntopMappingSettings settings, ImmutableMap<String, String> prefixes) {
+    TurtleOBDASQLTermVisitor(TermFactory termFactory, RDF rdfFactory, TypeFactory typeFactory, OntopMappingSettings settings, PrefixManager prefixManager) {
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
         this.typeFactory = typeFactory;
         this.settings = settings;
-        this.prefixes = prefixes;
+        this.prefixManager = prefixManager;
     }
 
     private static void validateAttributeName(String value) {
@@ -185,13 +186,6 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         return terms;
     }
 
-
-    private String concatPrefix(String prefixedName) {
-        String[] tokens = prefixedName.split(":", 2);
-        String uri = prefixes.get(tokens[0]);  // the first token is the prefix
-        return uri + tokens[1];  // the second token is the local name
-    }
-
     @Override
     public ImmutableTerm visitPredicateRdfType(TurtleOBDAParser.PredicateRdfTypeContext ctx) {
         return termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
@@ -211,12 +205,12 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitResourcePrefixedIri(TurtleOBDAParser.ResourcePrefixedIriContext ctx) {
-        return termFactory.getConstantIRI(rdfFactory.createIRI(concatPrefix(ctx.PREFIXED_NAME().getText())));
+        return termFactory.getConstantIRI(rdfFactory.createIRI(prefixManager.getExpandForm(ctx.PREFIXED_NAME().getText())));
     }
 
     @Override
     public ImmutableTerm visitResourcePrefixedTemplate(TurtleOBDAParser.ResourcePrefixedTemplateContext ctx) {
-        return constructBnodeOrIRI(concatPrefix(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()),
+        return constructBnodeOrIRI(prefixManager.getExpandForm(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()),
                 col -> termFactory.getIRIFunctionalTerm(col, true),
                 termFactory::getIRIFunctionalTerm);
     }
@@ -240,7 +234,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         }
         node = ctx.PREFIXED_NAME();
         if (node != null) {
-            datatypeIri = rdfFactory.createIRI(concatPrefix(node.getText()));
+            datatypeIri = rdfFactory.createIRI(prefixManager.getExpandForm(node.getText()));
         }
 
         if (datatypeIri != null) {
@@ -297,7 +291,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         }
         node = ctx.PREFIXED_NAME();
         if (node != null) {
-            datatypeIri = rdfFactory.createIRI(concatPrefix(node.getText()));
+            datatypeIri = rdfFactory.createIRI(prefixManager.getExpandForm(node.getText()));
         }
         if (datatypeIri != null) {
             return termFactory.getRDFLiteralFunctionalTerm(stringValue, datatypeIri);

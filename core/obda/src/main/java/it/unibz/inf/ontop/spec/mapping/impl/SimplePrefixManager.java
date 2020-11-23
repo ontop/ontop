@@ -41,13 +41,8 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 */
 	private final ImmutableMap<String, String> prefixToURIMap;
 
-	/**
-	 * The default constructor. It creates a new instance of the prefix manager
-     *
-     * TODO: make it private (again).
-	 */
     @Inject
-	public SimplePrefixManager(@Assisted ImmutableMap<String, String> prefixToURIMap) {
+	private SimplePrefixManager(@Assisted ImmutableMap<String, String> prefixToURIMap) {
         checkPrefixToURIMap(prefixToURIMap);
         Map<String, String> newPrefixToURIMap = new HashMap<>(prefixToURIMap);
 		newPrefixToURIMap.putAll(initKnownPrefixes());

@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -148,7 +149,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                         prefixes.putAll(readPrefixDeclaration(lineNumberReader));
                     }
                     else if (line.contains(MAPPING_DECLARATION_TAG)) {
-                        TargetQueryParser parser = targetQueryParserFactory.createParser(prefixes.build());
+                        TargetQueryParser parser = targetQueryParserFactory.createParser(specificationFactory.createPrefixManager(prefixes.build()));
                         mappings.addAll(readMappingDeclaration(lineNumberReader, parser, invalidMappingIndicators));
                     }
                     else if (line.contains(CLASS_DECLARATION_TAG)) { // deprecated tag

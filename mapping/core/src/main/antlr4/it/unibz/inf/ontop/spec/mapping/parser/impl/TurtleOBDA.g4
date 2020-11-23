@@ -177,6 +177,12 @@ IRIREF // [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>' /* #x00=NULL 
    : '<' IRIREF_INNER_CHAR* '>'
    ;
 
+// adds ; (? and = through PN_CHARS)
+fragment IRIREF_INNER_CHAR
+  :  PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | ';'
+  ;
+
+
 PNAME_NS // [139s]
   : PN_PREFIX? ':'
   ;
@@ -185,13 +191,13 @@ PN_PREFIX // [167s]
    : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
    ;
 
+PREFIXED_NAME_WITH_PLACEHOLDERS
+  : PNAME_NS PN_LOCAL_WITH_PLACEHOLDERS
+  ;
+
 // [136s] PrefixedName ::=	PNAME_LN | PNAME_NS
 PREFIXED_NAME // [140s]	PNAME_LN ::= PNAME_NS PN_LOCAL
    : PNAME_NS PN_LOCAL
-  ;
-
-PREFIXED_NAME_WITH_PLACEHOLDERS
-  : PNAME_NS PN_LOCAL_WITH_PLACEHOLDERS
   ;
 
 BLANK_NODE_LABEL_WITH_PLACEHOLDERS
@@ -278,24 +284,6 @@ PN_LOCAL // [168s] PN_LOCAL	::=	(PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.
   : PN_LOCAL_FIRST_CHAR (PN_LOCAL_INNER_CHAR* PN_LOCAL_LAST_CHAR)?
   ;
 
-PLX // [169s]
-  : PERCENT | PN_LOCAL_ESC
-  ;
-
-PERCENT // [170s]: %-encoded sequences are not decoded during processing
-  : '%' HEX HEX
-  ;
-
-HEX // [171s]
-  : [0-9] | [A-F] | [a-f]
-  ;
-
-PN_LOCAL_ESC  // [172s]: reserved character escape sequences for local names only
-  : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
-  ;
-
-// [168s] PN_LOCAL ::= (PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
-
 // adds #
 fragment PN_LOCAL_FIRST_CHAR
   : PN_CHARS_U | ':' | [0-9] | PLX | '#'
@@ -311,9 +299,18 @@ fragment PN_LOCAL_LAST_CHAR
   : PN_CHARS | ':' | PLX | '/'
   ;
 
-// adds ; (? and = through PN_CHARS)
-fragment IRIREF_INNER_CHAR // [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>' /* #x00=NULL #01-#x1F=control codes #x20=space */
-  :  PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | ';'
+PLX // [169s]
+  : PERCENT | PN_LOCAL_ESC
   ;
 
+PERCENT // [170s]: %-encoded sequences are not decoded during processing
+  : '%' HEX HEX
+  ;
 
+HEX // [171s]
+  : [0-9] | [A-F] | [a-f]
+  ;
+
+PN_LOCAL_ESC  // [172s]: reserved character escape sequences for local names only
+  : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
+  ;
