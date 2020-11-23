@@ -20,91 +20,54 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
+import com.github.jsonldjava.shaded.com.google.common.collect.Streams;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.vocabulary.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
 
-	/**
-	 * A simple map containing for each ontology URI the corresponding prefix.
-     * Immutable.
-	 */
-	private final ImmutableMap<String, String> uriToPrefixMap;
-
-	/**
-	 * A simple map containing for each prefix the corresponding ontology URI.
-     * Immutable.
-	 */
-	private final ImmutableMap<String, String> prefixToURIMap;
+	private final ImmutableMap<String, String> prefixToIriMap;
 
     @Inject
-	private SimplePrefixManager(@Assisted ImmutableMap<String, String> prefixToURIMap) {
-        checkPrefixToURIMap(prefixToURIMap);
-        Map<String, String> newPrefixToURIMap = new HashMap<>(prefixToURIMap);
-		newPrefixToURIMap.putAll(initKnownPrefixes());
-        this.prefixToURIMap = ImmutableMap.copyOf(newPrefixToURIMap);
-        this.uriToPrefixMap = reversePrefixToURI(newPrefixToURIMap);
+	private SimplePrefixManager(@Assisted ImmutableMap<String, String> prefixToIriMap) {
+    	if (prefixToIriMap.containsValue(null))
+			throw new NullPointerException("Prefix name must not be null");
+
+    	if (!prefixToIriMap.keySet().stream().allMatch(p -> p.endsWith(":")))
+			throw new IllegalArgumentException("Prefix names must end with a colon (:)");
+
+        this.prefixToIriMap = Streams.concat(
+        			prefixToIriMap.entrySet().stream(),
+					standardIriPrefixes.entrySet().stream())
+				.distinct()
+				.collect(ImmutableCollectors.toMap());
 	}
 
-    private static ImmutableMap<String, String> reversePrefixToURI(Map<String, String> prefixToURIMap) {
-        Map<String, String> uriToPrefixMap = new HashMap<>();
-        for (Map.Entry<String, String> entry : prefixToURIMap.entrySet()) {
-            uriToPrefixMap.put(entry.getValue(), entry.getKey());
-        }
-        return ImmutableMap.copyOf(uriToPrefixMap);
-    }
-
-    private static void checkPrefixToURIMap(Map<String, String> prefixToURIMap) {
-        for (Map.Entry<String, String> entry : prefixToURIMap.entrySet()) {
-            String prefix = entry.getKey();
-            String uri = entry.getValue();
-
-            if (uri == null) {
-                throw new NullPointerException("Prefix name must not be null");
-            }
-            if (!prefix.endsWith(":")) {
-                throw new IllegalArgumentException("Prefix names must end with a colon (:)");
-            }
-        }
-    }
-
-    private static Map<String, String> initKnownPrefixes() {
-        Map<String, String> prefixToURIMap = new HashMap<>();
-        prefixToURIMap.put(OntopInternal.PREFIX_RDF, RDF.PREFIX);
-        prefixToURIMap.put(OntopInternal.PREFIX_RDFS, RDFS.PREFIX);
-        prefixToURIMap.put(OntopInternal.PREFIX_OWL, OWL.PREFIX);
-        prefixToURIMap.put(OntopInternal.PREFIX_XSD, XSD.PREFIX);
-        prefixToURIMap.put(OntopInternal.PREFIX_OBDA, Ontop.PREFIX);
-        return prefixToURIMap;
-	}
+    private static final ImmutableMap<String, String> standardIriPrefixes = ImmutableMap.of(
+        		OntopInternal.PREFIX_RDF, RDF.PREFIX,
+        		OntopInternal.PREFIX_RDFS, RDFS.PREFIX,
+        		OntopInternal.PREFIX_OWL, OWL.PREFIX,
+        		OntopInternal.PREFIX_XSD, XSD.PREFIX,
+        		OntopInternal.PREFIX_OBDA, Ontop.PREFIX);
 
 	/**
-	 * Returns the corresponding URI definition for the given prefix
+	 * Returns the corresponding IRI definition for the given prefix
 	 * 
 	 * @param prefix
 	 *            the prefix name
-	 * @return the corresponding URI definition or null if the prefix is not
+	 * @return the corresponding IRI definition or null if the prefix is not
 	 *         registered
 	 */
     @Override
-	protected String getURIDefinition(String prefix) {
-		return prefixToURIMap.get(prefix);
-	}
-
-	/**
-	 * Returns the corresponding prefix for the given URI.
-	 * 
-	 * @param uri
-     *
-	 * @return the corresponding prefix or null if the URI is not registered
-	 */
-    @Override
-	protected Optional<String> getPrefix(String uri) {
-		return Optional.ofNullable(uriToPrefixMap.get(uri));
+	protected Optional<String> getIriDefinition(String prefix) {
+		return Optional.ofNullable(prefixToIriMap.get(prefix));
 	}
 
 	/**
@@ -114,14 +77,6 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 */
     @Override
 	public ImmutableMap<String, String> getPrefixMap() {
-		return prefixToURIMap;
-	}
-
-
-	@Override
-	protected List<String> getOrderedNamespaces() {
-		List<String> namespaceList = new ArrayList<>(getPrefixMap().values());
-		namespaceList.sort(Collections.reverseOrder());
-		return namespaceList;
+		return prefixToIriMap;
 	}
 }

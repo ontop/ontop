@@ -46,16 +46,8 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	}
 
 	@Override
-	protected Optional<String> getPrefix(String uri) {
-		return owlmapper.getPrefixName2PrefixMap().entrySet().stream()
-				.filter(e -> e.getValue().equals(uri))
-				.map(Map.Entry::getKey)
-				.findFirst();
-	}
-
-	@Override
-	protected String getURIDefinition(String prefix) {
-		return owlmapper.getPrefix(prefix);
+	protected Optional<String> getIriDefinition(String prefix) {
+		return Optional.ofNullable(owlmapper.getPrefix(prefix));
 	}
 
 	@Override
@@ -73,13 +65,6 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 
 	public void clear() {
 		owlmapper.clear();
-	}
-
-	@Override
-	protected List<String> getOrderedNamespaces() {
-		ArrayList<String> namespaceList = new ArrayList<>(getPrefixMap().values());
-		namespaceList.sort(Collections.reverseOrder());
-		return namespaceList;
 	}
 
 	/**
