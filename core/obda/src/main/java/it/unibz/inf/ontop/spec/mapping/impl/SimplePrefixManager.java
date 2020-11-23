@@ -69,7 +69,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	}
 
 	/**
-	 * Returns a map with all registered prefixes and the corresponding URI
+	 * Returns a map with all registered prefixes and the corresponding IRI
 	 * 
 	 * @return an immutable map
 	 */
