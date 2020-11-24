@@ -76,6 +76,10 @@ public class TurtleSyntaxParserTest {
 		return TARGET_ATOM_FACTORY.getTripleTargetAtom(s, p, o);
 	}
 
+	private static TargetAtom getQuadTargetAtom(ImmutableTerm s, ImmutableTerm p, ImmutableTerm o, ImmutableTerm g) {
+		return TARGET_ATOM_FACTORY.getQuadTargetAtom(s, p, o, g);
+	}
+
 	private static ImmutableFunctionalTerm getIRIFunctionalTerm(String template, Variable v1) {
 		return TERM_FACTORY.getIRIFunctionalTerm(template,
 				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
@@ -717,34 +721,163 @@ public class TurtleSyntaxParserTest {
 
 	@Test
 	public void test_GRAPH_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("GRAPH <http://www.ciao.it/{id}> { :{id} a :C . }");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"GRAPH <http://www.ciao.it/{id}> { :{id} a :C . }");
+
+		assertEquals(ImmutableList.of(getQuadTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#{}",
+						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#C"),
+				getIRIFunctionalTerm("http://www.ciao.it/{}",
+						getVariable("id")))), result);
 	}
 
 	@Test
 	public void test_GRAPH_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("GRAPH <http://www.ciao.it/{id}> { :{id} a :C ; :P :{attr1} . }");
-		assertEquals(2, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"GRAPH <http://www.ciao.it/{id}> { :{id} a :C ; :P :{attr1} . }");
+
+		assertEquals(ImmutableList.of(
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#C"),
+						getIRIFunctionalTerm("http://www.ciao.it/{}",
+								getVariable("id"))),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#P"),
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#{}",
+								getVariable("attr1")),
+						getIRIFunctionalTerm("http://www.ciao.it/{}",
+								getVariable("id")))), result);
 	}
 
 	@Test
 	public void test_GRAPH_3() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("GRAPH <http://www.ciao.it/{id}> { :{id} a :C . :{id} :P :{attr1} . }");
-		assertEquals(2, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"GRAPH <http://www.ciao.it/{id}> { :{id} a :C . :{id} :P :{attr1} . }");
+
+		assertEquals(ImmutableList.of(
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#C"),
+						getIRIFunctionalTerm("http://www.ciao.it/{}",
+								getVariable("id"))),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#P"),
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#{}",
+								getVariable("attr1")),
+						getIRIFunctionalTerm("http://www.ciao.it/{}",
+								getVariable("id")))), result);
 	}
 
 	@Test
 	public void test_GRAPH_4() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . }");
-		assertEquals(3, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . }");
+
+		assertEquals(ImmutableList.of(
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni1/student/{}",
+								getVariable("s_id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni1/student/{}",
+								getVariable("s_id")),
+						getConstantIRI("http://www.example.org/firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("first_name")), XSD.STRING),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni1/student/{}",
+								getVariable("s_id")),
+						getConstantIRI("http://www.example.org/lastName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("last_name")), XSD.STRING),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1"))), result);
 	}
 
 	@Test
 	public void test_GRAPH_5() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . } " +
-				"GRAPH :uni2 { :uni2/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . }");
-		assertEquals(6, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"GRAPH :uni1 { :uni1/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . } " +
+				"GRAPH :uni2 { :uni2/student/{s_id} a :Student . }");
+
+		assertEquals(ImmutableList.of(
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni1/student/{}",
+								getVariable("s_id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni1/student/{}",
+								getVariable("s_id")),
+						getConstantIRI("http://www.example.org/firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("first_name")), XSD.STRING),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni1/student/{}",
+								getVariable("s_id")),
+						getConstantIRI("http://www.example.org/lastName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("last_name")), XSD.STRING),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni2/student/{}",
+								getVariable("s_id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni2"))), result);
 	}
+
+	@Test
+	public void test_GRAPH_6() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				"GRAPH :uni1 { :uni1/student/{s_id} a :Student . } " +
+						" :uni3/student/{s_id} a :Student . " +
+						"GRAPH :uni2 { :uni2/student/{s_id} a :Student . }");
+
+		assertEquals(ImmutableList.of(
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni1/student/{}",
+								getVariable("s_id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni1")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni3/student/{}",
+								getVariable("s_id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Student")),
+
+				getQuadTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#uni2/student/{}",
+								getVariable("s_id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Student"),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#uni2"))), result);
+	}
+
 
 	@Ignore("Anonymous blank nodes are not supported in general")
 	@Test
