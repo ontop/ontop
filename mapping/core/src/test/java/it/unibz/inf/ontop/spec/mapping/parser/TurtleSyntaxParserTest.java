@@ -201,6 +201,7 @@ public class TurtleSyntaxParserTest {
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
+						// TODO: use getPartiallyDefinedToStringCast
 						getVariable("fname"), XSD.STRING))), result);
 	}
 
@@ -214,6 +215,7 @@ public class TurtleSyntaxParserTest {
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(
+						// TODO: use getPartiallyDefinedToStringCast
 						getVariable("fname"), XSD.STRING))), result);
 	}
 
@@ -254,6 +256,7 @@ public class TurtleSyntaxParserTest {
 				getRDFLiteralFunctionalTerm(
 						TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
 								TERM_FACTORY.getDBStringConstant("hello "),
+								// TODO: use getPartiallyDefinedToStringCast
 								getVariable("fname"))), XSD.STRING))), result);
 	}
 
@@ -269,6 +272,7 @@ public class TurtleSyntaxParserTest {
 				getRDFLiteralFunctionalTerm(
 						TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
 								TERM_FACTORY.getDBStringConstant("hello "),
+								// TODO: use getPartiallyDefinedToStringCast
 								getVariable("fname"))), XSD.DOUBLE))), result);
 	}
 
