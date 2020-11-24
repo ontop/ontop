@@ -172,8 +172,16 @@ public class Templates {
                 .replace("{", "\\{")
                 .replace("}", "\\}");
         }
+        
         if (term instanceof Variable)
             return "{" + ((Variable)term).getName() + "}";
+
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm)term;
+            if (ift.getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol) {
+                return concatArg2String(ift.getTerm(0));
+            }
+        }
 
         throw new IllegalArgumentException("Unexpected term type (only Constant and Variable are allowed):" + term);
     }
