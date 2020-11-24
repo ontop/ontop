@@ -200,9 +200,8 @@ public class TurtleSyntaxParserTest {
 				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
-				getRDFLiteralFunctionalTerm(
-						// TODO: use getPartiallyDefinedToStringCast
-						getVariable("fname"), XSD.STRING))), result);
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+						getVariable("fname")), XSD.STRING))), result);
 	}
 
 	@Test
@@ -214,9 +213,8 @@ public class TurtleSyntaxParserTest {
 				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
-				getRDFLiteralFunctionalTerm(
-						// TODO: use getPartiallyDefinedToStringCast
-						getVariable("fname"), XSD.STRING))), result);
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+						getVariable("fname")), XSD.STRING))), result);
 	}
 
 	@Test
@@ -256,8 +254,7 @@ public class TurtleSyntaxParserTest {
 				getRDFLiteralFunctionalTerm(
 						TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
 								TERM_FACTORY.getDBStringConstant("hello "),
-								// TODO: use getPartiallyDefinedToStringCast
-								getVariable("fname"))), XSD.STRING))), result);
+								TERM_FACTORY.getPartiallyDefinedToStringCast(getVariable("fname")))), XSD.STRING))), result);
 	}
 
 	@Test
@@ -272,8 +269,8 @@ public class TurtleSyntaxParserTest {
 				getRDFLiteralFunctionalTerm(
 						TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
 								TERM_FACTORY.getDBStringConstant("hello "),
-								// TODO: use getPartiallyDefinedToStringCast
-								getVariable("fname"))), XSD.DOUBLE))), result);
+								TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")))), XSD.DOUBLE))), result);
 	}
 
 	public void test_3_3() throws TargetQueryParserException {

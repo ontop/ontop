@@ -173,7 +173,8 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
                 int j = str.indexOf("}");
-                terms.add(termFactory.getVariable(str.substring(1, j)));
+                terms.add(termFactory.getPartiallyDefinedToStringCast(
+                        termFactory.getVariable(str.substring(1, j))));
                 str = str.substring(j + 1, str.length());
             } else {
                 break;
