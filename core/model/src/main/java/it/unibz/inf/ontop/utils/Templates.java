@@ -157,12 +157,13 @@ public class Templates {
     }
 
     public static String getDBConcatTemplateString(ImmutableFunctionalTerm ift) {
-        if (!(ift.getFunctionSymbol() instanceof DBConcatFunctionSymbol))
-            throw new IllegalArgumentException("Invalid term type (DBConcat is expected): " + ift);
-
-        return ift.getTerms().stream()
+        if (ift.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
+            return ift.getTerms().stream()
+                    .map(DBTypeConversionFunctionSymbol::uncast)
                     .map(Templates::concatArg2String)
                     .collect(Collectors.joining());
+
+        throw new IllegalArgumentException("Invalid term type (DBConcat is expected): " + ift);
     }
 
     private static String concatArg2String(ImmutableTerm term) {
@@ -172,16 +173,9 @@ public class Templates {
                 .replace("{", "\\{")
                 .replace("}", "\\}");
         }
-        
+
         if (term instanceof Variable)
             return "{" + ((Variable)term).getName() + "}";
-
-        if (term instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm)term;
-            if (ift.getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol) {
-                return concatArg2String(ift.getTerm(0));
-            }
-        }
 
         throw new IllegalArgumentException("Unexpected term type (only Constant and Variable are allowed):" + term);
     }

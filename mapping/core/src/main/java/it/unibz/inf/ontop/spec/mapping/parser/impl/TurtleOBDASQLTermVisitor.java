@@ -45,10 +45,12 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         this.prefixManager = prefixManager;
     }
 
-    private static void validateAttributeName(String value) {
-        if (value.contains(".")) {
-            throw new IllegalArgumentException("Fully qualified columns as "+value+" are not accepted.\nPlease, use an alias instead.");
-        }
+    private ImmutableFunctionalTerm getVariable(String id) {
+        if (id.contains("."))
+            throw new IllegalArgumentException("Fully qualified columns as "+id+" are not accepted.\nPlease, use an alias instead.");
+
+        Variable column = termFactory.getVariable(id);
+        return termFactory.getPartiallyDefinedToStringCast(column);
     }
 
     private String removeBrackets(String text) {
@@ -56,7 +58,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     }
 
     private ImmutableTerm constructBnodeOrIRI(String text,
-                                              Function<Variable, ImmutableFunctionalTerm> columnFct,
+                                              Function<ImmutableTerm, ImmutableFunctionalTerm> columnFct,
                                               BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct) {
         final String PLACEHOLDER = "{}";
         List<FormatString> tokens = parseIRIOrBnode(text);
@@ -67,9 +69,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                 return termFactory.getConstantIRI(rdfFactory.createIRI(token.str()));
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
-                validateAttributeName(token.str());
-                Variable column = termFactory.getVariable(token.str());
-                return columnFct.apply(column);
+                return columnFct.apply(getVariable(token.str()));
             }
             throw new MinorOntopInternalBugException("Unexpected token: " + token);
         } else {
@@ -80,9 +80,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                     sb.append(token.str());
                 } else if (token instanceof ColumnString) {
                     sb.append(PLACEHOLDER);
-                    validateAttributeName(token.str());
-                    Variable column = termFactory.getVariable(token.str());
-                    terms.add(termFactory.getPartiallyDefinedToStringCast(column));
+                    terms.add(getVariable(token.str()));
                 }
             }
             String iriTemplate = sb.toString(); // complete IRI template
@@ -173,8 +171,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
                 int j = str.indexOf("}");
-                terms.add(termFactory.getPartiallyDefinedToStringCast(
-                        termFactory.getVariable(str.substring(1, j))));
+                terms.add(getVariable(str.substring(1, j)));
                 str = str.substring(j + 1, str.length());
             } else {
                 break;
@@ -200,7 +197,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     @Override
     public ImmutableTerm visitResourceTemplate(TurtleOBDAParser.ResourceTemplateContext ctx) {
         return constructBnodeOrIRI(removeBrackets(ctx.IRIREF_WITH_PLACEHOLDERS().getText()),
-                col -> termFactory.getIRIFunctionalTerm(col, true),
+                termFactory::getIRIFunctionalTerm,
                 termFactory::getIRIFunctionalTerm);
     }
 
@@ -212,16 +209,14 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     @Override
     public ImmutableTerm visitResourcePrefixedTemplate(TurtleOBDAParser.ResourcePrefixedTemplateContext ctx) {
         return constructBnodeOrIRI(prefixManager.getExpandForm(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()),
-                col -> termFactory.getIRIFunctionalTerm(col, true),
+                termFactory::getIRIFunctionalTerm,
                 termFactory::getIRIFunctionalTerm);
     }
 
     @Override
     public ImmutableTerm visitVariableLiteral(TurtleOBDAParser.VariableLiteralContext ctx) {
         String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
-        validateAttributeName(variableName);
-        Variable variable = termFactory.getVariable(variableName);
-        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(variable);
+        ImmutableFunctionalTerm lexicalTerm = getVariable(variableName);
 
         TerminalNode node = ctx.LANGTAG();
         if (node != null) {
@@ -257,14 +252,13 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     @Override
     public ImmutableTerm visitVariable(TurtleOBDAParser.VariableContext ctx) {
         String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
-        validateAttributeName(variableName);
-        return termFactory.getIRIFunctionalTerm(termFactory.getVariable(variableName), true);
+        return termFactory.getIRIFunctionalTerm(getVariable(variableName));
     }
 
     @Override
     public ImmutableTerm visitBlankNodeTemplate(TurtleOBDAParser.BlankNodeTemplateContext ctx) {
         return constructBnodeOrIRI(extractBnodeId(ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS().getText()),
-                col -> termFactory.getBnodeFunctionalTerm(col, true),
+                termFactory::getBnodeFunctionalTerm,
                 termFactory::getBnodeFunctionalTerm);
     }
 

@@ -291,9 +291,9 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**
-	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 * @param term is a variable or a cast variable
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableTerm term);
 
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
@@ -307,9 +307,9 @@ public interface TermFactory {
 												 ImmutableList<DBConstant> arguments);
 
 	/**
-	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 * @param term is a variable or a cast variable
 	 */
-	ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString);
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableTerm term);
 
 	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
 												   ImmutableList<? extends ImmutableTerm> arguments);

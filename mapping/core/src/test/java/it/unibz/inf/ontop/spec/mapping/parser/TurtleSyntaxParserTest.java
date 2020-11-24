@@ -226,7 +226,8 @@ public class TurtleSyntaxParserTest {
 				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
-				TERM_FACTORY.getIRIFunctionalTerm(getVariable("fname"), true))), result);
+				TERM_FACTORY.getIRIFunctionalTerm(
+						TERM_FACTORY.getPartiallyDefinedToStringCast(getVariable("fname"))))), result);
 	}
 
 	@Test

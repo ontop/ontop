@@ -102,24 +102,20 @@ public class R2RMLParser {
 			return termFactory.getConstantIRI(rdfFactory.createIRI(constant.toString()));
 		}
 
+		RDFTermTypeConstant termTypeConstant = termFactory.getRDFTermTypeConstant(isIRI
+				? typeFactory.getIRITermType()
+				: typeFactory.getBlankNodeType());
+
 		return Optional.ofNullable(termMap.getTemplate())
 				// TEMPLATE CASE
 				// TODO: should we use the Template object instead?
 				.map(Template::toString)
-				.map(s -> isIRI
-						? extractTemplateLexicalTerm(s, RDFCategory.IRI)
-						: extractTemplateLexicalTerm(s, RDFCategory.BNODE))
-				.map(l -> termFactory.getRDFFunctionalTerm(l,
-						termFactory.getRDFTermTypeConstant(isIRI
-								? typeFactory.getIRITermType()
-								: typeFactory.getBlankNodeType())))
+				.map(s -> extractTemplateLexicalTerm(s, isIRI ? RDFCategory.IRI : RDFCategory.BNODE))
+				.map(l -> termFactory.getRDFFunctionalTerm(l, termTypeConstant))
 				// COLUMN case
 				.orElseGet(() -> Optional.ofNullable(termMap.getColumn())
 						.map(this::getVariable)
-						.map(lex -> termFactory.getRDFFunctionalTerm(
-								lex,
-								termFactory.getRDFTermTypeConstant(
-										isIRI ? typeFactory.getIRITermType() : typeFactory.getBlankNodeType())))
+						.map(v -> termFactory.getRDFFunctionalTerm(v, termTypeConstant))
 						.orElseThrow(() -> new R2RMLParsingBugException("A term map is either constant-valued, " +
 								"column-valued or template-valued.")));
 	}

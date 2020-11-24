@@ -243,7 +243,7 @@ public class OntopMaterializerTest {
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));
 
-		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getVariable("schooluri"), true);
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable("schooluri")));
 
 		RDFDatatype stringDatatype = xsdStringDt;
 
@@ -271,7 +271,7 @@ public class OntopMaterializerTest {
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));
 
-		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getVariable("schooluri"), true);
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable("schooluri")));
 
 		RDFDatatype stringDatatype = xsdStringDt;
 

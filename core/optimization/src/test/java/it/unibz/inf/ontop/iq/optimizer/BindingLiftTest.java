@@ -341,7 +341,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(F0),
                             //generateIRIWithTemplate1(F0, AF1),
                         Y, generateIRIWithTemplate1(BF1))));
 
@@ -675,7 +675,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1, false),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1),
                         Y, TERM_FACTORY.getRDFFunctionalTerm(f2, f3))));
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
@@ -1052,7 +1052,7 @@ public class BindingLiftTest {
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         W, generateInt(H),
-                        X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(F0),
                         Y, generateInt(BF1),
                         Z, TERM_FACTORY.getRDFFunctionalTerm(
                                 F,
@@ -1183,7 +1183,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f2, false),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f2),
                         Y, generateIRIWithTemplate1(B))));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         UnionNode newTopUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f2, B));
@@ -1289,7 +1289,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1, false),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1),
                         Y, generateIRIWithTemplate1(B))));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         UnionNode newTopUnionNode = IQ_FACTORY.createUnionNode(newRootNode.getChildVariables());
@@ -1988,7 +1988,7 @@ public class BindingLiftTest {
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(B));
 
         // TODO: use another function (a UDF for instance)
-        ImmutableFunctionalTerm functionalTerm = TERM_FACTORY.getIRIFunctionalTerm(A, false);
+        ImmutableFunctionalTerm functionalTerm = TERM_FACTORY.getIRIFunctionalTerm(A);
 
         IQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
@@ -2348,7 +2348,7 @@ public class BindingLiftTest {
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(
                 initialLeftJoinTree.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(F0),
                         Y, TERM_FACTORY.getRDFFunctionalTerm(D,
                                 TERM_FACTORY.getIfElseNull(
                                         TERM_FACTORY.getDBIsNotNull(D),
