@@ -22,16 +22,23 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.TARGET_ATOM_FACTORY;
 import static org.junit.Assert.assertEquals;
 
 
@@ -44,181 +51,530 @@ import static org.junit.Assert.assertEquals;
 
 public class TurtleSyntaxParserTest {
 
-    private final SpecificationFactory specificationFactory;
 	private final TargetQueryParser parser;
 
 	public TurtleSyntaxParserTest() {
-		OntopMappingConfiguration configuration = OntopMappingConfiguration
-				.defaultBuilder().build();
-		Injector injector = configuration.getInjector();
-        specificationFactory = injector.getInstance(SpecificationFactory.class);
-		parser = TARGET_QUERY_PARSER_FACTORY.createParser(
-				specificationFactory.createPrefixManager(ImmutableMap.of(
-					PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#",
-						"ex:", "http://www.example.org/")));
+		PrefixManager prefixManager = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of(
+				PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#",
+				"ex:", "http://www.example.org/"));
+		parser = TARGET_QUERY_PARSER_FACTORY.createParser(prefixManager);
 	}
 
-    @Test
+	private static IRIConstant getConstantIRI(String iri) {
+		return TERM_FACTORY.getConstantIRI(iri);
+	}
+
+	private static IRIConstant getConstantIRI(IRI iri) {
+		return TERM_FACTORY.getConstantIRI(iri);
+	}
+
+	private static Variable getVariable(String variable) {
+		return TERM_FACTORY.getVariable(variable);
+	}
+
+	private static TargetAtom getTripleTargetAtom(ImmutableTerm s, ImmutableTerm p, ImmutableTerm o) {
+		return TARGET_ATOM_FACTORY.getTripleTargetAtom(s, p, o);
+	}
+
+	private static ImmutableFunctionalTerm getIRIFunctionalTerm(String template, Variable v1) {
+		return TERM_FACTORY.getIRIFunctionalTerm(template,
+				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
+	}
+
+	private static ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm t, IRI type) {
+		return TERM_FACTORY.getRDFLiteralFunctionalTerm(t, type);
+	}
+
+	private static ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm t, String lang) {
+		return TERM_FACTORY.getRDFLiteralFunctionalTerm(t, lang);
+	}
+
+	@Test
 	public void test_1_1() throws TargetQueryParserException {
-		final ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
 	}
 
 	@Test
 	public void test_1_2() throws TargetQueryParserException {
-		final ImmutableList<TargetAtom> result = parser.parse("<http://example.org/testcase#Person-{id}> a :Person .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"<http://example.org/testcase#Person-{id}> a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://example.org/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
 	}
 
 	@Test
 	public void test_1_3() throws TargetQueryParserException {
-		final ImmutableList<TargetAtom> result = parser.parse("<http://example.org/testcase#Person-{id}> a <http://example.org/testcase#Person> .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"<http://example.org/testcase#Person-{id}> a <http://example.org/testcase#Person> .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://example.org/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://example.org/testcase#Person"))), result);
 	}
 
 	@Test
 	public void test_1_4() throws TargetQueryParserException {
-		final ImmutableList<TargetAtom> result = parser.parse("<http://example.org/testcase#Person-{id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/testcase#Person> .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"<http://example.org/testcase#Person-{id}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/testcase#Person> .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://example.org/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://example.org/testcase#Person"))), result);
 	}
 
 	@Test
 	public void test_2_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :hasFather :Person-{id} .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :hasFather :Person-{id} .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")))), result);
 	}
 
 	@Test
 	public void test_2_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :hasFather <http://example.org/testcase#Person-12> .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :hasFather <http://example.org/testcase#Person-12> .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
+				getConstantIRI("http://example.org/testcase#Person-12"))), result);
 	}
 
 	@Test
 	public void test_2_3() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} <http://example.org/testcase#hasFather> <http://example.org/testcase#Person-12> .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} <http://example.org/testcase#hasFather> <http://example.org/testcase#Person-12> .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://example.org/testcase#hasFather"),
+				getConstantIRI("http://example.org/testcase#Person-12"))), result);
 	}
 
 	@Test
 	public void test_3_1_database() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName {fname} .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName {fname} .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+						getVariable("fname")), RDFS.LITERAL))), result);
 	}
 
 	@Test
 	public void test_3_1_new_literal() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"{fname}\" .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"{fname}\" .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						getVariable("fname"), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_3_1_new_string() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"{fname}\"^^xsd:string .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"{fname}\"^^xsd:string .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						getVariable("fname"), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_3_1_new_iri() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName <{fname}> .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName <{fname}> .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				TERM_FACTORY.getIRIFunctionalTerm(getVariable("fname"), true))), result);
 	}
+
 	@Test
 	public void test_3_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":erson-{id} :firstName {fname}^^xsd:string .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName {fname}^^xsd:string .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+						getVariable("fname")), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_3_concat() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"hello {fname}\"^^xsd:string .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"hello {fname}\"^^xsd:string .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
+								TERM_FACTORY.getDBStringConstant("hello "),
+								getVariable("fname"))), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_3_concat_number() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"hello {fname}\"^^xsd:double .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"hello {fname}\"^^xsd:double .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
+								TERM_FACTORY.getDBStringConstant("hello "),
+								getVariable("fname"))), XSD.DOUBLE))), result);
 	}
 
 	public void test_3_3() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName {fname}@en-US .");
-		assertEquals(1, result.size());
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+						getVariable("fname")), "en-us"))), result);
 	}
 
 	@Test
 	public void test_4_1_1() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"John\"^^xsd:string .");
-		assertEquals(1, result.size());
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						TERM_FACTORY.getDBStringConstant("John"), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_4_1_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} <http://example.org/testcase#firstName> \"John\"^^xsd:string .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} <http://example.org/testcase#firstName> \"John\"^^xsd:string .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://example.org/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						TERM_FACTORY.getDBStringConstant("John"), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_4_2_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"John\"^^rdfs:Literal .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"John\"^^rdfs:Literal .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						TERM_FACTORY.getDBStringConstant("John"), RDFS.LITERAL))), result);
 	}
 
 	@Test
 	public void test_4_2_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName \"John\"@en-US .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"John\"@en-US .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(
+						TERM_FACTORY.getDBStringConstant("John"), "en-us"))), result);
 	}
 
 	@Test
 	public void test_5_1_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname} .");
-		assertEquals(2, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :firstName {fname} .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), RDFS.LITERAL))), result);
 	}
 
 	@Test
 	public void test_5_1_2() throws TargetQueryParserException {
-		final ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname} ; :age {age} .");
-		assertEquals(3, result.size());
+		final ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :firstName {fname} ; :age {age} .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), RDFS.LITERAL)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("age")), RDFS.LITERAL))), result);
 	}
 
 	@Test
 	public void test_5_1_3() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname} ; :age {age} .");
-		assertEquals(4, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname} ; :age {age} .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id"))),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), RDFS.LITERAL)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("age")), RDFS.LITERAL))), result);
 	}
 
 	@Test
 	public void test_5_2_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname}^^xsd:string .");
-		assertEquals(2, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :firstName {fname}^^xsd:string .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_5_2_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer .");
-		assertEquals(3, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), XSD.STRING)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("age")), XSD.INTEGER))), result);
 	}
 
 	@Test
 	public void test_5_2_3() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer .");
-		assertEquals(4, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id"))),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), XSD.STRING)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("age")), XSD.INTEGER))), result);
 	}
 
 	@Test
 	public void test_5_2_4() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer ; :description {text}@en-US .");
-		assertEquals(5, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :hasFather :Person-{id} ; :firstName {fname}^^xsd:string ; :age {age}^^xsd:integer ; :description {text}@en-US .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#hasFather"),
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id"))),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), XSD.STRING)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("age")), XSD.INTEGER)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#description"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("text")), "en-us"))), result);
 	}
 
 	@Test
 	public void test_5_2_5() throws TargetQueryParserException {
-		final ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a <http://example.org/testcase#Person> ; <http://example.org/testcase:hasFather> :Person-{id} ; <http://example.org/testcase#firstName> {fname}^^xsd:string ; <http://example.org/testcase#age> {age}^^xsd:integer ; <http://example.org/testcase#description> {text}@en-US .");
-		assertEquals(5, result.size());
+		final ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a <http://example.org/testcase#Person> ; <http://example.org/testcase:hasFather> :Person-{id} ; <http://example.org/testcase#firstName> {fname}^^xsd:string ; <http://example.org/testcase#age> {age}^^xsd:integer ; <http://example.org/testcase#description> {text}@en-US .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://example.org/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://example.org/testcase:hasFather"),
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id"))),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://example.org/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")), XSD.STRING)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://example.org/testcase#age"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("age")), XSD.INTEGER)),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://example.org/testcase#description"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("text")), "en-us"))), result);
 	}
 
-	@Ignore("TODO: should we forbid not-recognized datatypes using the XSD prefix?")
+	@Ignore("TODO: should we forbid non-recognized datatypes using the XSD prefix?")
 	@Test
 	public void test_6_1() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname}^^xsd:String .");
@@ -227,50 +583,90 @@ public class TurtleSyntaxParserTest {
 
 	@Test
 	public void test_6_1_literal() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName \"Sarah\" .");
-		assertEquals(2, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} a :Person ; :firstName \"Sarah\" .");
+
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
+
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(
+								TERM_FACTORY.getDBStringConstant("Sarah"), XSD.STRING))), result);
 	}
 
 	@Test
 	public void test_6_2() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {fname}^^ex:randomDatatype .");
-		assertEquals(2, result.size());
-	}
 
-	@Test
-	public void test_7_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person .");
-		assertEquals(1, result.size());
-	}
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#Person")),
 
-	@Test
-	public void test_7_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :hasFather :Person-{id} .");
-		assertEquals(1, result.size());
+				getTripleTargetAtom(
+						getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+								getVariable("id")),
+						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+								getVariable("fname")),
+								RDF_FACTORY.createIRI("http://www.example.org/randomDatatype")))), result);
 	}
 
 	@Test
 	public void test_8_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} rdf:type :Person .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} rdf:type :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
 	}
 
 	@Test
 	public void test_8_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("ex:Person-{id} rdf:type ex:Person .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"ex:Person-{id} rdf:type ex:Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://www.example.org/Person-{}",
+						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://www.example.org/Person"))), result);
 	}
 
 	@Test
 	public void test_8_3() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("ex:Person-{id} ex:hasFather ex:Person-123 .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"ex:Person-{id} ex:hasFather ex:Person-123 .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://www.example.org/Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://www.example.org/hasFather"),
+				getConstantIRI("http://www.example.org/Person-123"))), result);
 	}
 
 	@Test
 	public void test_8_4() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("ex:Person/{id}/ ex:hasFather ex:Person/123/ .");
-		assertEquals(1, result.size());
+		ImmutableList<TargetAtom> result = parser.parse(
+				"ex:Person/{id}/ ex:hasFather ex:Person/123/ .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://www.example.org/Person/{}/",
+						getVariable("id")),
+				getConstantIRI("http://www.example.org/hasFather"),
+				getConstantIRI("http://www.example.org/Person/123/"))), result);
 	}
 
 	@Test
@@ -349,4 +745,19 @@ public class TurtleSyntaxParserTest {
 				"GRAPH :uni2 { :uni2/student/{s_id} a :Student ; ex:firstName {first_name}^^xsd:string ; ex:lastName {last_name}^^xsd:string . }");
 		assertEquals(6, result.size());
 	}
+
+	@Ignore("Anonymous blank nodes are not supported in general")
+	@Test
+	public void test_qootec() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":observation/{observationID} a ex:Observation ;\n" +
+				"\tex:hasFeatureOfInterest :apartment/{apartmentID} ;\n" +
+				"\tex:hasResult [\n" +
+				"\ta ex:QuantityValue ;\n" +
+				"\tex:unit ex:DegreeCelsius ;\n" +
+				"\tex:numericValue {observedTemperature}^^xsd:double ] .");
+		assertEquals(6, result.size());
+	}
+
+
 }

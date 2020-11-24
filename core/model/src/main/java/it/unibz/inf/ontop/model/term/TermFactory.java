@@ -280,7 +280,7 @@ public interface TermFactory {
 	 *            the name of the variable.
 	 * @return the variable object.
 	 */
-	public Variable getVariable(String name);
+	Variable getVariable(String name);
 
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
 
