@@ -24,10 +24,6 @@ public class SparkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String LONG_STR = "LONG";
     protected static final String STRING_STR = "STRING";
     protected static final String DEC_STR = "DEC";
-    protected static final String INTERVAL_STR = "INTERVAL"; //TODO
-    protected static final String ARRAY_STR = "ARRAY"; //TODO
-    protected static final String STRUCT_STR = "STRUCT"; //TODO
-    protected static final String MAP_STR = "MAP"; //TODO
 
     @AssistedInject
     protected SparkSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {

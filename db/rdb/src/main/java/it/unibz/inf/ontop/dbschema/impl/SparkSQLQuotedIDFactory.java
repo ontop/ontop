@@ -6,12 +6,11 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 
 /**
  * Creates QuotedIdentifiers following the rules of SparkSQL:
- *    - double and single quotes are not tolerated only for schema and attributes definition
+ *    - double and single quotes are not tolerated for schema and attributes definition
  */
 
 public class SparkSQLQuotedIDFactory implements QuotedIDFactory {
 
-    private static final String SINGLE_QUOTATION_STRING = "'";
     private static final String SQL_QUOTATION_STRING = "`";
     private final boolean caseSensitiveTableNames;
 
@@ -29,11 +28,6 @@ public class SparkSQLQuotedIDFactory implements QuotedIDFactory {
         return new RelationIDImpl(createFromString(schema), createFromString(table));
     }
 
-    /**
-     *
-     * @param s schema/table/attribute string name possibly quoted (SQL rendering)
-     * @return
-     */
     private QuotedID createFromString(String s) {
         if (s == null)
             return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION);
@@ -42,7 +36,7 @@ public class SparkSQLQuotedIDFactory implements QuotedIDFactory {
         if (s.startsWith(SQL_QUOTATION_STRING) && s.endsWith(SQL_QUOTATION_STRING))
             return new QuotedIDImpl(s.substring(1, s.length() - 1), SQL_QUOTATION_STRING, caseSensitiveTableNames);
 
-        return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION, caseSensitiveTableNames);
+        return new QuotedIDImpl(s, SQL_QUOTATION_STRING, caseSensitiveTableNames);
     }
 
     @Override
