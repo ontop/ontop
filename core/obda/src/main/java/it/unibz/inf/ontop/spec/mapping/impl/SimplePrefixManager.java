@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  */
 
 import com.github.jsonldjava.shaded.com.google.common.collect.Streams;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -66,6 +67,15 @@ public class SimplePrefixManager extends AbstractPrefixManager {
     @Override
 	protected Optional<String> getIriDefinition(String prefix) {
 		return Optional.ofNullable(prefixToIriMap.get(prefix));
+	}
+
+	private ImmutableList<Map.Entry<String, String>> orderedMap; // lazy instantiation
+
+	@Override
+	protected ImmutableList<Map.Entry<String, String>> getOrderedMap() {
+		if (orderedMap == null)
+			orderedMap = orderMap(prefixToIriMap);
+		return orderedMap;
 	}
 
 	/**

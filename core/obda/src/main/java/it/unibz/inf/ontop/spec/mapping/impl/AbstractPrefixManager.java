@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
@@ -30,24 +31,19 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 
 	protected abstract Optional<String> getIriDefinition(String prefix);
 
-	private ImmutableList<Map.Entry<String, String>> orderedNamespaces; // lazy evaluation
+	protected abstract ImmutableList<Map.Entry<String, String>> getOrderedMap();
 
-	private ImmutableList<Map.Entry<String, String>> getOrderedNamespaces() {
-		if (orderedNamespaces == null) {
-			List<Map.Entry<String, String>> namespaceList = new ArrayList<>(getPrefixMap().entrySet());
-			Comparator<Map.Entry<String, String>> comparator =
-					Map.Entry.<String, String>comparingByValue()
-							.thenComparing(Map.Entry.comparingByKey());
-			namespaceList.sort(comparator);
-			orderedNamespaces = ImmutableList.copyOf(namespaceList);
-		}
-		return orderedNamespaces;
+	protected static ImmutableList<Map.Entry<String, String>> orderMap(Map<String, String> map) {
+		List<Map.Entry<String, String>> list = new ArrayList<>(map.entrySet());
+		Comparator<Map.Entry<String, String>> comparator =
+				Map.Entry.<String, String>comparingByValue()
+						.thenComparing(Map.Entry.comparingByKey());
+		list.sort(comparator);
+		return ImmutableList.copyOf(list);
 	}
 
 	@Override
 	public String getShortForm(String originalUri) {
-		ImmutableList<Map.Entry<String, String>> namespaceList = getOrderedNamespaces();
-		
 		// Clean the URI string from <...> signs, if they exist.
 		// <http://www.example.org/library#Book> --> http://www.example.org/library#Book
 		String cleanUri = originalUri.startsWith("<") && originalUri.endsWith(">")
@@ -55,7 +51,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				: originalUri;
 		
 		// Check if the URI string has a matched prefix
-		for (Map.Entry<String, String> e : namespaceList) {
+		for (Map.Entry<String, String> e : getOrderedMap()) {
 			String iri = e.getValue();
 			if (cleanUri.startsWith(iri)) {
 				return cleanUri.replace(iri, e.getKey()); // Replace the URI with the corresponding prefix.

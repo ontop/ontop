@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
@@ -48,6 +49,11 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	@Override
 	protected Optional<String> getIriDefinition(String prefix) {
 		return Optional.ofNullable(owlmapper.getPrefix(prefix));
+	}
+
+	@Override
+	protected ImmutableList<Map.Entry<String, String>> getOrderedMap() {
+		return orderMap(owlmapper.getPrefixName2PrefixMap());
 	}
 
 	@Override
@@ -84,9 +90,9 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 
 	static Optional<String> generateDefaultPrefixNamespaceFromID(OWLOntologyID ontologyID) {
 		com.google.common.base.Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
-		return ontologyIRI.isPresent()?
-				Optional.of(getProperPrefixURI(ontologyIRI.get().toString())):
-				Optional.empty();
+		return ontologyIRI.isPresent()
+				? Optional.of(getProperPrefixURI(ontologyIRI.get().toString()))
+				: Optional.empty();
 	}
 
 	/**
