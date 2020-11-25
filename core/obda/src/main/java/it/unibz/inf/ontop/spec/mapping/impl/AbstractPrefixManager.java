@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 
@@ -34,12 +34,12 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	protected abstract ImmutableList<Map.Entry<String, String>> getOrderedMap();
 
 	protected static ImmutableList<Map.Entry<String, String>> orderMap(Map<String, String> map) {
-		List<Map.Entry<String, String>> list = new ArrayList<>(map.entrySet());
 		Comparator<Map.Entry<String, String>> comparator =
 				Map.Entry.<String, String>comparingByValue()
 						.thenComparing(Map.Entry.comparingByKey());
-		list.sort(comparator);
-		return ImmutableList.copyOf(list);
+		return map.entrySet().stream()
+				.sorted(comparator)
+				.collect(ImmutableCollectors.toList());
 	}
 
 	@Override

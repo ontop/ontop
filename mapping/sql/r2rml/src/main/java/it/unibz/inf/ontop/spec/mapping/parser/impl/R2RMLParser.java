@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
@@ -53,98 +54,124 @@ public class R2RMLParser {
 		return tm.getLogicalTable().getSQLQuery();
 	}
 
-
 	public Stream<IRI> extractClassIRIs(SubjectMap subjectMap) {
 		return subjectMap.getClasses().stream();
 	}
 
 	public ImmutableList<NonVariableTerm> extractGraphTerms(List<GraphMap> graphMaps) {
-
-		for (GraphMap graphMap : graphMaps) {
-			if (!graphMap.getTermType().equals(R2RMLVocabulary.iri))
-				throw new R2RMLParsingBugException("The graph map must be an IRI, not " + graphMap.getTermType());
-		}
 		return graphMaps.stream()
-				.map(this::extractIRIorBnodeTerm)
+				.map(m -> extract(iriTerm, m))
 				.collect(ImmutableCollectors.toList());
 	}
 
-	public ImmutableTerm extractSubjectTerm(SubjectMap subjectMap) {
-		return extractIRIorBnodeTerm(subjectMap);
+	public ImmutableTerm extractSubjectTerm(SubjectMap m) {
+		return extract(iriOrBnodeTerm, m);
 	}
 
 	public ImmutableList<NonVariableTerm> extractPredicateTerms(PredicateObjectMap pom) {
 		return pom.getPredicateMaps().stream()
-				.map(this::extractIRITerm)
+				.map(m -> extract(iriTerm, m))
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private NonVariableTerm extractIRITerm(TermMap termMap) {
-		if (!termMap.getTermType().equals(R2RMLVocabulary.iri))
-			throw new R2RMLParsingBugException("The term map must be an IRI, not " + termMap.getTermType());
-
-		return extractIRIorBnodeTerm(termMap);
+	public ImmutableList<NonVariableTerm> extractRegularObjectTerms(PredicateObjectMap pom) {
+		return pom.getObjectMaps().stream()
+				.map(m -> extract(iriOrBnodeOrLiteral, m))
+				.collect(ImmutableCollectors.toList());
 	}
 
-	private NonVariableTerm extractIRIorBnodeTerm(TermMap termMap) {
-		IRI termTypeIRI = termMap.getTermType();
+	private final ImmutableMap<IRI, Extractor<TermMap>> iriTerm = ImmutableMap.of(
+			R2RMLVocabulary.iri, new IriExtractor<>());
 
-		boolean isIRI = termTypeIRI.equals(R2RMLVocabulary.iri);
-		if ((!isIRI) && (!termTypeIRI.equals(R2RMLVocabulary.blankNode)))
-			throw new R2RMLParsingBugException("Was expecting an IRI or a blank node, not a " + termTypeIRI);
+	private final ImmutableMap<IRI, Extractor<TermMap>> iriOrBnodeTerm = ImmutableMap.of(
+			R2RMLVocabulary.iri, new IriExtractor<>(),
+			R2RMLVocabulary.blankNode, new BnodeExtractor<>());
 
-		// CONSTANT CASE
-		RDFTerm constant = termMap.getConstant();
-		if (constant != null) {
-			if (!isIRI)
-				throw new R2RMLParsingBugException("Constant blank nodes are not accepted in R2RML " +
-						"(should have been detected earlier)");
+	private final ImmutableMap<IRI, Extractor<ObjectMap>> iriOrBnodeOrLiteral = ImmutableMap.of(
+			R2RMLVocabulary.iri, new IriExtractor<>(),
+			R2RMLVocabulary.blankNode, new BnodeExtractor<>(),
+			R2RMLVocabulary.literal, new LiteralExtractor<>());
+
+	private <T extends TermMap> NonVariableTerm extract(ImmutableMap<IRI, Extractor<T>> map, T termMap) {
+		return map.computeIfAbsent(termMap.getTermType(), k -> {
+			throw new R2RMLParsingBugException("Was expecting one of " + map.keySet() +
+						" when encountered " + termMap);
+		}).extract(termMap);
+	}
+
+	private interface Extractor<T extends TermMap> {
+		NonVariableTerm extract(RDFTerm constant, T termMap);
+		NonVariableTerm extract(Template template, T termMap);
+		NonVariableTerm extract(String column, T termMap);
+
+		default NonVariableTerm extract(T termMap) {
+			if (termMap.getConstant() != null)
+				return extract(termMap.getConstant(), termMap);
+
+			if (termMap.getTemplate() != null)
+				return extract(termMap.getTemplate(), termMap);
+
+			if (termMap.getColumn() != null)
+				return extract(termMap.getColumn(), termMap);
+
+			throw new R2RMLParsingBugException("A term map is either constant-valued, column-valued or template-valued.");
+		}
+	}
+
+	private class IriExtractor<T extends TermMap> implements Extractor<T> {
+		@Override
+		public NonVariableTerm extract(RDFTerm constant, T termMap) {
 			return termFactory.getConstantIRI(rdfFactory.createIRI(constant.toString()));
 		}
-
-		RDFTermTypeConstant termTypeConstant = termFactory.getRDFTermTypeConstant(isIRI
-				? typeFactory.getIRITermType()
-				: typeFactory.getBlankNodeType());
-
-		return Optional.ofNullable(termMap.getTemplate())
-				// TEMPLATE CASE
-				// TODO: should we use the Template object instead?
-				.map(Template::toString)
-				.map(s -> extractTemplateLexicalTerm(s, isIRI ? RDFCategory.IRI : RDFCategory.BNODE))
-				.map(l -> termFactory.getRDFFunctionalTerm(l, termTypeConstant))
-				// COLUMN case
-				.orElseGet(() -> Optional.ofNullable(termMap.getColumn())
-						.map(this::getVariable)
-						.map(v -> termFactory.getRDFFunctionalTerm(v, termTypeConstant))
-						.orElseThrow(() -> new R2RMLParsingBugException("A term map is either constant-valued, " +
-								"column-valued or template-valued.")));
-	}
-
-
-	/**
-	 * Extracts the object terms, they can be constants, columns or templates
-	 *
-	 */
-
-	public ImmutableList<NonVariableTerm> extractRegularObjectTerms(PredicateObjectMap pom) {
-		ImmutableList.Builder<NonVariableTerm> termListBuilder = ImmutableList.builder();
-		for (ObjectMap om : pom.getObjectMaps()) {
-			termListBuilder.add(extractRegularObjectTerm(om));
+		@Override
+		public NonVariableTerm extract(Template template, T termMap) {
+			return termFactory.getIRIFunctionalTerm(extractTemplateLexicalTerm(template, RDFCategory.IRI));
 		}
-		return termListBuilder.build();
+		@Override
+		public 	NonVariableTerm extract(String column, T termMap) {
+			return termFactory.getIRIFunctionalTerm(getVariable(column));
+		}
 	}
 
-	private NonVariableTerm extractRegularObjectTerm(ObjectMap om) {
-		return om.getTermType().equals(R2RMLVocabulary.literal)
-				? extractLiteral(om)
-				: extractIRIorBnodeTerm(om);
+	private class BnodeExtractor<T extends TermMap> implements Extractor<T> {
+		@Override
+		public NonVariableTerm extract(RDFTerm constant, T termMap) {
+			throw new R2RMLParsingBugException("Constant blank nodes are not accepted in R2RML (should have been detected earlier)");
+		}
+		@Override
+		public NonVariableTerm extract(Template template, T termMap) {
+			return termFactory.getBnodeFunctionalTerm(extractTemplateLexicalTerm(template, RDFCategory.BNODE));
+		}
+		@Override
+		public 	NonVariableTerm extract(String column, T termMap) {
+			return termFactory.getBnodeFunctionalTerm(getVariable(column));
+		}
 	}
 
-	private NonVariableTerm extractLiteral(ObjectMap om) {
-		NonVariableTerm lexicalTerm = extractLiteralLexicalTerm(om);
+	private class LiteralExtractor<T extends ObjectMap> implements Extractor<T> {
+		@Override
+		public NonVariableTerm extract(RDFTerm constant, T om) {
+			if (constant instanceof Literal) {
+				return termFactory.getRDFLiteralFunctionalTerm(
+						termFactory.getDBStringConstant(((Literal) constant).getLexicalForm()), extractDatatype(om));
+			}
+			throw new R2RMLParsingBugException("Was expecting a Literal as constant, not a " + constant.getClass());
+		}
+		@Override
+		public NonVariableTerm extract(Template template, T om) {
+			return termFactory.getRDFLiteralFunctionalTerm(
+					extractTemplateLexicalTerm(template, RDFCategory.LITERAL), extractDatatype(om));
+		}
+		@Override
+		public 	NonVariableTerm extract(String column, T om) {
+			return 	termFactory.getRDFLiteralFunctionalTerm(getVariable(column), extractDatatype(om));
+		}
+	}
 
-		// Datatype -> first try: language tag
-		RDFDatatype datatype =  Optional.ofNullable(om.getLanguageTag())
+
+	private RDFDatatype extractDatatype(ObjectMap om) {
+		return 	// Datatype -> first try: language tag
+				Optional.ofNullable(om.getLanguageTag())
 				.filter(tag -> !tag.isEmpty())
 				.map(typeFactory::getLangTermType)
 				// Second try: explicit datatype
@@ -152,61 +179,34 @@ public class R2RMLParser {
 						.map(typeFactory::getDatatype)
 						// Third try: datatype of the constant
 						.orElseGet(() -> Optional.ofNullable(om.getConstant())
-										.map(c -> (Literal) c)
-										.map(Literal::getDatatype)
-										.map(typeFactory::getDatatype)
+								.map(c -> (Literal) c)
+								.map(Literal::getDatatype)
+								.map(typeFactory::getDatatype)
 								// Default case: RDFS.LITERAL (abstract, to be inferred later)
-										.orElseGet(typeFactory::getAbstractRDFSLiteral)));
-
-		return (NonVariableTerm) termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatype).simplify();
+								.orElseGet(typeFactory::getAbstractRDFSLiteral)));
 	}
 
-
-	private NonVariableTerm extractLiteralLexicalTerm(ObjectMap om) {
-
-		// CONSTANT
-		RDFTerm constantObj = om.getConstant();
-		if (constantObj != null) {
-			if (constantObj instanceof Literal){
-				return termFactory.getDBStringConstant(((Literal) constantObj).getLexicalForm());
-			}
-			else
-				throw new R2RMLParsingBugException("Was expecting a Literal as constant, not a " + constantObj.getClass());
-		}
-
-		// COLUMN
-		String col = om.getColumn();
-		if (col != null) {
-			return getVariable(col);
-		}
-
-		// TEMPLATE
-		Template t = om.getTemplate();
-		if (t != null) {
-			return extractTemplateLexicalTerm(t.toString(), RDFCategory.LITERAL);
-		}
-		throw new R2RMLParsingBugException("Was expecting a Constant/Column/Template");
-	}
 
 	/**
 	 * gets the lexical term of a template-valued term map
 	 *
-	 * @param templateString
+	 * @param template
 	 * @param type
-	 *            IRI, BNODE, LITERAL§
+	 *            IRI, BNODE, LITERAL
 	 * @return the constructed Function atom
 	 */
-	private NonVariableTerm extractTemplateLexicalTerm(String templateString, RDFCategory type) {
+	private NonVariableTerm extractTemplateLexicalTerm(Template template, RDFCategory type) {
 
+		// TODO: should we use the Template object instead?
 		// Non-final
-		String string = templateString;
-		if (!templateString.contains("{")) {
-			return termFactory.getDBStringConstant(templateString);
+		String string = template.toString();
+		if (!string.contains("{")) {
+			return termFactory.getDBStringConstant(string);
 		}
 
 		if (type == RDFCategory.IRI) {
 			// TODO: give the base IRI
-			string = R2RMLVocabulary.resolveIri(templateString, "http://example.com/base/");
+			string = R2RMLVocabulary.resolveIri(string, "http://example.com/base/");
 		}
 
 		String suffix = string; // literal case
@@ -303,6 +303,4 @@ public class R2RMLParser {
 		BNODE,
 		LITERAL
 	}
-
-
 }
