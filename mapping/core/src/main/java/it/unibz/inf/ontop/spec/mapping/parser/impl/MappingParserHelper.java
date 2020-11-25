@@ -48,7 +48,7 @@ public class MappingParserHelper {
                 .collect(Collectors.joining());
     }
 
-    public ImmutableList<ImmutableFunctionalTerm> getTemplateTerms(ImmutableList<TemplateComponent> components) {
+    public ImmutableList<ImmutableTerm> getTemplateTerms(ImmutableList<TemplateComponent> components) {
         return components.stream()
                 .filter(TemplateComponent::isColumnNameReference)
                 .map(c -> getVariable(c.getComponent()))

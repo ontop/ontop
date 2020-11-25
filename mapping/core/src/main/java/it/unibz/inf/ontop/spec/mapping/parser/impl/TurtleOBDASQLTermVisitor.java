@@ -56,32 +56,14 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     private ImmutableTerm constructBnodeOrIRI(String text,
                                               Function<ImmutableTerm, ImmutableFunctionalTerm> columnFct,
                                               BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct) {
-        final String PLACEHOLDER = "{}";
-        List<FormatString> tokens = parseIRIOrBnode(text);
-        int size = tokens.size();
-        if (size == 1) {
-            FormatString token = tokens.get(0);
-            if (token instanceof FixedString) {
-                return termFactory.getConstantIRI(rdfFactory.createIRI(token.str()));
-            } else if (token instanceof ColumnString) {
-                // the IRI string is coming from the DB (no escaping needed)
-                return columnFct.apply(factory.getVariable(token.str()));
-            }
-            throw new MinorOntopInternalBugException("Unexpected token: " + token);
-        } else {
-            StringBuilder sb = new StringBuilder();
-            List<ImmutableTerm> terms = new ArrayList<>();
-            for (FormatString token : tokens) {
-                if (token instanceof FixedString) { // if part of URI template
-                    sb.append(token.str());
-                } else if (token instanceof ColumnString) {
-                    sb.append(PLACEHOLDER);
-                    terms.add(factory.getVariable(token.str()));
-                }
-            }
-            String iriTemplate = sb.toString(); // complete IRI template
-            return templateFct.apply(iriTemplate, ImmutableList.copyOf(terms));
+        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(text);
+        if (components.size() == 1) {
+            TemplateComponent c = components.get(0);
+            if (c.isColumnNameReference())
+                return columnFct.apply(factory.getVariable(c.getUnescapedComponent()));
+            return  termFactory.getConstantIRI(c.getUnescapedComponent());
         }
+        return templateFct.apply(factory.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
 

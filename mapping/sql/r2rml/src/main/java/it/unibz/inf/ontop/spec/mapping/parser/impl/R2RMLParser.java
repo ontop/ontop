@@ -129,7 +129,7 @@ public class R2RMLParser {
 					// Q: WHY DOES IT NOT APPLY TO OTHER CASES?
 					R2RMLVocabulary.resolveIri(template.toString(), "http://example.com/base/"));
 
-			ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
+			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
 					? termFactory.getIRIFunctionalTerm(// Q: DOES IT MAKE SENSE?
 					termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
@@ -149,7 +149,7 @@ public class R2RMLParser {
 		@Override
 		public NonVariableTerm extract(Template template, T termMap) {
 			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template.toString());
-			ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
+			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
 					? termFactory.getBnodeFunctionalTerm(// Q: DOES IT MAKE SENSE?
 							termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
