@@ -9,7 +9,6 @@ import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -19,7 +18,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class R2RMLParser {
@@ -28,16 +26,13 @@ public class R2RMLParser {
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
 	private final RDF rdfFactory;
-	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
 	private final MappingParserHelper factory;
 
 	@Inject
-	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory,
-					    DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
-		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 		this.manager = RDF4JR2RMLMappingManager.getInstance();
 		this.rdfFactory = rdfFactory;
 		this.factory = new MappingParserHelper(termFactory, typeFactory);
@@ -130,7 +125,14 @@ public class R2RMLParser {
 		}
 		@Override
 		public NonVariableTerm extract(Template template, T termMap) {
-			return termFactory.getIRIFunctionalTerm(extractTemplateLexicalTerm(template, RDFCategory.IRI));
+			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
+					R2RMLVocabulary.resolveIri(template.toString(), "http://example.com/base/"));
+
+			ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
+			return terms.isEmpty()
+					? termFactory.getIRIFunctionalTerm(
+					termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
+					: termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), terms);
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
@@ -145,7 +147,12 @@ public class R2RMLParser {
 		}
 		@Override
 		public NonVariableTerm extract(Template template, T termMap) {
-			return termFactory.getBnodeFunctionalTerm(extractTemplateLexicalTerm(template, RDFCategory.BNODE));
+			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template.toString());
+			ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
+			return terms.isEmpty()
+					? termFactory.getBnodeFunctionalTerm(
+							termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
+					: termFactory.getBnodeFunctionalTerm(factory.getTemplateString(components), terms);
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
@@ -164,8 +171,17 @@ public class R2RMLParser {
 		}
 		@Override
 		public NonVariableTerm extract(Template template, T om) {
-			return termFactory.getRDFLiteralFunctionalTerm(
-					extractTemplateLexicalTerm(template, RDFCategory.LITERAL), extractDatatype(om));
+			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template.toString());
+			ImmutableList<NonVariableTerm> terms = factory.getLiteralTemplateTerms(components);
+			RDFDatatype datatype = extractDatatype(om);
+			switch (terms.size()) {
+				case 0:
+					return termFactory.getRDFLiteralFunctionalTerm(termFactory.getDBStringConstant(""), datatype);
+				case 1:
+					return termFactory.getRDFLiteralFunctionalTerm(terms.get(0), datatype);
+				default:
+					return termFactory.getRDFLiteralFunctionalTerm(termFactory.getNullRejectingDBConcatFunctionalTerm(terms), datatype);
+			}
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T om) {
@@ -186,59 +202,6 @@ public class R2RMLParser {
 		}
 	}
 
-
-
-
-	/**
-	 * gets the lexical term of a template-valued term map
-	 *
-	 * @param template
-	 * @param type
-	 *            IRI, BNODE, LITERAL
-	 * @return the constructed Function atom
-	 */
-	private NonVariableTerm extractTemplateLexicalTerm(Template template, RDFCategory type) {
-
-		String string = template.toString();
-
-		if (type == RDFCategory.IRI) {
-			// TODO: give the base IRI
-			string = R2RMLVocabulary.resolveIri(string, "http://example.com/base/");
-		}
-
-		ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(string);
-
-		switch (type) {
-			case IRI: {
-				ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
-				if (terms.isEmpty())
-					return termFactory.getDBStringConstant(components.get(0).getUnescapedComponent());
-				return termFactory.getImmutableFunctionalTerm(
-						dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(factory.getTemplateString(components)), terms);
-						}
-			case BNODE: {
-				ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
-				if (terms.isEmpty())
-					return termFactory.getDBStringConstant(components.get(0).getUnescapedComponent());
-				return termFactory.getImmutableFunctionalTerm(
-						dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(factory.getTemplateString(components)),
-						terms);
-			}
-			case LITERAL:
-				ImmutableList<NonVariableTerm> terms = factory.getLiteralTemplateTerms(components);
-				switch (terms.size()) {
-					case 0:
-						return termFactory.getDBStringConstant("");
-					case 1:
-						return terms.get(0);
-					default:
-						return termFactory.getNullRejectingDBConcatFunctionalTerm(terms);
-				}
-			default:
-				throw new R2RMLParsingBugException("Unexpected type code: " + type);
-		}
-	}
-
 	/**
 	 * Bug most likely coming from the R2RML library, but we classify as an "internal" bug
 	 */
@@ -247,11 +210,5 @@ public class R2RMLParser {
 		protected R2RMLParsingBugException(String message) {
 			super(message);
 		}
-	}
-
-	private enum RDFCategory {
-		IRI,
-		BNODE,
-		LITERAL
 	}
 }
