@@ -205,6 +205,18 @@ public class TurtleSyntaxParserTest {
 	}
 
 	@Test
+	public void test_3_1_empty_literal() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"\" .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getDBStringConstant(""), XSD.STRING))), result);
+	}
+
+	@Test
 	public void test_3_1_new_string() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"{fname}\"^^xsd:string .");

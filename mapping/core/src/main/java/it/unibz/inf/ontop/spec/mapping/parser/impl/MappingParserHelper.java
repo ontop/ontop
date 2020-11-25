@@ -63,4 +63,17 @@ public class MappingParserHelper {
                 .collect(ImmutableCollectors.toList());
     }
 
+    public ImmutableTerm getLiteralTemplateTerm(String template) {
+        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template);
+        ImmutableList<NonVariableTerm> terms = getLiteralTemplateTerms(components);
+        switch (terms.size()) {
+            case 0:
+                return termFactory.getDBStringConstant("");
+            case 1:
+                return terms.get(0);
+            default:
+                return termFactory.getNullRejectingDBConcatFunctionalTerm(terms);
+        }
+    }
+
 }

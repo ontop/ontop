@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -141,44 +142,6 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         }
     }
 
-    //this function distinguishes curly bracket with
-    //back slash "\{" from curly bracket "{"
-    private int getIndexOfCurlyB(String str) {
-        int i = str.indexOf("{");
-        int j = str.indexOf("\\{");
-        while ((i - 1 == j) && (j != -1)) {
-            i = str.indexOf("{", i + 1);
-            j = str.indexOf("\\{", j + 1);
-        }
-        return i;
-    }
-
-    //in case of concat this function parses the literal
-    //and adds parsed constant literals and template literal to terms list
-    private List<ImmutableTerm> addToTermsList(String str) {
-        ArrayList<ImmutableTerm> terms = new ArrayList<>();
-        while (str.contains("{")) {
-            int i = getIndexOfCurlyB(str);
-            if (i > 0) {
-                String st = str.substring(0, i);
-                st = st.replace("\\\\", "");
-                terms.add(termFactory.getDBStringConstant(st));
-                str = str.substring(str.indexOf("{", i), str.length());
-            } else if (i == 0) {
-                int j = str.indexOf("}");
-                terms.add(factory.getVariable(str.substring(1, j)));
-                str = str.substring(j + 1, str.length());
-            } else {
-                break;
-            }
-        }
-        if (!str.equals("")) {
-            str = str.replace("\\\\", "");
-            terms.add(termFactory.getDBStringConstant(str));
-        }
-        return terms;
-    }
-
     @Override
     public ImmutableTerm visitPredicateRdfType(TurtleOBDAParser.PredicateRdfTypeContext ctx) {
         return termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
@@ -274,16 +237,11 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         return Optional.empty();
     }
 
-    @Override
+    @Override // used once - remove from grammar?
     public ImmutableTerm visitString(TurtleOBDAParser.StringContext ctx) {
-        String str = removeBrackets(ctx.STRING_LITERAL_QUOTE().getText()); // without the double quotes
-        List<ImmutableTerm> terms = addToTermsList(str);
-        if (terms.size() == 1) {
-            return terms.get(0);
-        }
-        return termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.copyOf(terms));
+        String template = removeBrackets(ctx.STRING_LITERAL_QUOTE().getText()); // without the double quotes
+        return factory.getLiteralTemplateTerm(template);
     }
-
 
     @Override
     public ImmutableTerm visitBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx) {

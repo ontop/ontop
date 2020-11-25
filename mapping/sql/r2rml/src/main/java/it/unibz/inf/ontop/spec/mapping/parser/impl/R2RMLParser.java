@@ -126,11 +126,12 @@ public class R2RMLParser {
 		@Override
 		public NonVariableTerm extract(Template template, T termMap) {
 			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
+					// Q: WHY DOES IT NOT APPLY TO OTHER CASES?
 					R2RMLVocabulary.resolveIri(template.toString(), "http://example.com/base/"));
 
 			ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
-					? termFactory.getIRIFunctionalTerm(
+					? termFactory.getIRIFunctionalTerm(// Q: DOES IT MAKE SENSE?
 					termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
 					: termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), terms);
 		}
@@ -150,7 +151,7 @@ public class R2RMLParser {
 			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template.toString());
 			ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
-					? termFactory.getBnodeFunctionalTerm(
+					? termFactory.getBnodeFunctionalTerm(// Q: DOES IT MAKE SENSE?
 							termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
 					: termFactory.getBnodeFunctionalTerm(factory.getTemplateString(components), terms);
 		}
@@ -165,27 +166,22 @@ public class R2RMLParser {
 		public NonVariableTerm extract(RDFTerm constant, T om) {
 			if (constant instanceof Literal) {
 				return termFactory.getRDFLiteralFunctionalTerm(
-						termFactory.getDBStringConstant(((Literal) constant).getLexicalForm()), extractDatatype(om));
+						termFactory.getDBStringConstant(((Literal) constant).getLexicalForm()),
+						extractDatatype(om));
 			}
 			throw new R2RMLParsingBugException("Was expecting a Literal as constant, not a " + constant.getClass());
 		}
 		@Override
 		public NonVariableTerm extract(Template template, T om) {
-			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template.toString());
-			ImmutableList<NonVariableTerm> terms = factory.getLiteralTemplateTerms(components);
-			RDFDatatype datatype = extractDatatype(om);
-			switch (terms.size()) {
-				case 0:
-					return termFactory.getRDFLiteralFunctionalTerm(termFactory.getDBStringConstant(""), datatype);
-				case 1:
-					return termFactory.getRDFLiteralFunctionalTerm(terms.get(0), datatype);
-				default:
-					return termFactory.getRDFLiteralFunctionalTerm(termFactory.getNullRejectingDBConcatFunctionalTerm(terms), datatype);
-			}
+			return termFactory.getRDFLiteralFunctionalTerm(
+					factory.getLiteralTemplateTerm(template.toString()),
+					extractDatatype(om));
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T om) {
-			return 	termFactory.getRDFLiteralFunctionalTerm(factory.getVariable(column), extractDatatype(om));
+			return 	termFactory.getRDFLiteralFunctionalTerm(
+					factory.getVariable(column),
+					extractDatatype(om));
 		}
 
 		private RDFDatatype extractDatatype(ObjectMap om) {
@@ -206,7 +202,6 @@ public class R2RMLParser {
 	 * Bug most likely coming from the R2RML library, but we classify as an "internal" bug
 	 */
 	private static class R2RMLParsingBugException extends OntopInternalBugException {
-
 		protected R2RMLParsingBugException(String message) {
 			super(message);
 		}
