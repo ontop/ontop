@@ -8,6 +8,7 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -198,12 +199,7 @@ public class R2RMLParser {
 	 */
 	private NonVariableTerm extractTemplateLexicalTerm(Template template, RDFCategory type) {
 
-		// TODO: should we use the Template object instead?
-		// Non-final
 		String string = template.toString();
-		if (!string.contains("{")) {
-			return termFactory.getDBStringConstant(string);
-		}
 
 		if (type == RDFCategory.IRI) {
 			// TODO: give the base IRI
@@ -213,14 +209,21 @@ public class R2RMLParser {
 		ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(string);
 
 		switch (type) {
-			case IRI:
+			case IRI: {
+				ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
+				if (terms.isEmpty())
+					return termFactory.getDBStringConstant(components.get(0).getUnescapedComponent());
 				return termFactory.getImmutableFunctionalTerm(
-						dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(factory.getTemplateString(components)),
-						factory.getTemplateTerms(components));
-			case BNODE:
+						dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(factory.getTemplateString(components)), terms);
+						}
+			case BNODE: {
+				ImmutableList<ImmutableFunctionalTerm> terms = factory.getTemplateTerms(components);
+				if (terms.isEmpty())
+					return termFactory.getDBStringConstant(components.get(0).getUnescapedComponent());
 				return termFactory.getImmutableFunctionalTerm(
 						dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(factory.getTemplateString(components)),
-						factory.getTemplateTerms(components));
+						terms);
+			}
 			case LITERAL:
 				ImmutableList<NonVariableTerm> terms = factory.getLiteralTemplateTerms(components);
 				switch (terms.size()) {
