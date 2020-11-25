@@ -1,15 +1,14 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -18,6 +17,7 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -37,20 +37,15 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     private final TypeFactory typeFactory;
     private final OntopMappingSettings settings;
 
+    private final MappingParserHelper factory;
+
     TurtleOBDASQLTermVisitor(TermFactory termFactory, RDF rdfFactory, TypeFactory typeFactory, OntopMappingSettings settings, PrefixManager prefixManager) {
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
         this.typeFactory = typeFactory;
         this.settings = settings;
         this.prefixManager = prefixManager;
-    }
-
-    private ImmutableFunctionalTerm getVariable(String id) {
-        if (id.contains("."))
-            throw new IllegalArgumentException("Fully qualified columns as "+id+" are not accepted.\nPlease, use an alias instead.");
-
-        Variable column = termFactory.getVariable(id);
-        return termFactory.getPartiallyDefinedToStringCast(column);
+        this.factory = new MappingParserHelper(termFactory, typeFactory);
     }
 
     private String removeBrackets(String text) {
@@ -69,7 +64,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                 return termFactory.getConstantIRI(rdfFactory.createIRI(token.str()));
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
-                return columnFct.apply(getVariable(token.str()));
+                return columnFct.apply(factory.getVariable(token.str()));
             }
             throw new MinorOntopInternalBugException("Unexpected token: " + token);
         } else {
@@ -80,7 +75,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                     sb.append(token.str());
                 } else if (token instanceof ColumnString) {
                     sb.append(PLACEHOLDER);
-                    terms.add(getVariable(token.str()));
+                    terms.add(factory.getVariable(token.str()));
                 }
             }
             String iriTemplate = sb.toString(); // complete IRI template
@@ -171,7 +166,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
                 int j = str.indexOf("}");
-                terms.add(getVariable(str.substring(1, j)));
+                terms.add(factory.getVariable(str.substring(1, j)));
                 str = str.substring(j + 1, str.length());
             } else {
                 break;
@@ -215,44 +210,27 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitVariableLiteral(TurtleOBDAParser.VariableLiteralContext ctx) {
-        String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
-        ImmutableFunctionalTerm lexicalTerm = getVariable(variableName);
+        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.PLACEHOLDER().getText()));
+        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME());
 
-        TerminalNode node = ctx.LANGTAG();
-        if (node != null) {
-            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, node.getText().substring(1).toLowerCase());
-        }
+        rdfDatatype.filter(dt -> !settings.areAbstractDatatypesToleratedInMapping())
+                .filter(TermType::isAbstract)
+                .ifPresent(dt -> {
+                    // TODO: throw a better exception (invalid input)
+                    throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
+                            + dt.getIRI() + "\nSet the property "
+                            + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them."); });
 
-        IRI datatypeIri = null;
-        node = ctx.IRIREF();
-        if (node != null) {
-            datatypeIri = rdfFactory.createIRI(removeBrackets(node.getText()));
-        }
-        node = ctx.PREFIXED_NAME();
-        if (node != null) {
-            datatypeIri = rdfFactory.createIRI(prefixManager.getExpandForm(node.getText()));
-        }
-
-        if (datatypeIri != null) {
-            if ((!settings.areAbstractDatatypesToleratedInMapping())
-                    && typeFactory.getDatatype(datatypeIri).isAbstract())
-                // TODO: throw a better exception (invalid input)
-                throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
-                        + datatypeIri + "\nSet the property "
-                        + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
-
-            return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatypeIri);
-        }
-
-        // We give the abstract datatype RDFS.LITERAL when it is not determined yet
-        // --> The concrete datatype be inferred afterwards
-        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, RDFS.LITERAL);
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm,
+                // We give the abstract datatype RDFS.LITERAL when it is not determined yet
+                // --> The concrete datatype be inferred afterwards
+                rdfDatatype.orElse(typeFactory.getAbstractRDFSLiteral()));
     }
 
     @Override
     public ImmutableTerm visitVariable(TurtleOBDAParser.VariableContext ctx) {
         String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
-        return termFactory.getIRIFunctionalTerm(getVariable(variableName));
+        return termFactory.getIRIFunctionalTerm(factory.getVariable(variableName));
     }
 
     @Override
@@ -274,24 +252,27 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitRdfLiteral(TurtleOBDAParser.RdfLiteralContext ctx) {
-        ImmutableTerm stringValue = visitString(ctx.string());
-        TerminalNode node = ctx.LANGTAG();
-        if (node != null) {
-            return termFactory.getRDFLiteralFunctionalTerm(stringValue, node.getText().substring(1).toLowerCase());
-        }
-        IRI datatypeIri = null;
-        node = ctx.IRIREF();
-        if (node != null) {
-            datatypeIri = rdfFactory.createIRI(removeBrackets(node.getText()));
-        }
-        node = ctx.PREFIXED_NAME();
-        if (node != null) {
-            datatypeIri = rdfFactory.createIRI(prefixManager.getExpandForm(node.getText()));
-        }
-        if (datatypeIri != null) {
-            return termFactory.getRDFLiteralFunctionalTerm(stringValue, datatypeIri);
-        }
-        return termFactory.getRDFLiteralFunctionalTerm(stringValue, XSD.STRING);
+        RDFDatatype rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME())
+                .orElse(typeFactory.getXsdStringDatatype());
+        return termFactory.getRDFLiteralFunctionalTerm(visitString(ctx.string()), rdfDatatype);
+    }
+
+    private Optional<RDFDatatype> extractDatatype(TerminalNode langNode, TerminalNode iriNode, TerminalNode prefixedNameNode) {
+        return factory.extractDatatype(
+                Optional.ofNullable(langNode)
+                        .map(l -> l.getText().substring(1).toLowerCase()),
+                extractIRI(iriNode, prefixedNameNode)
+                        .map(rdfFactory::createIRI));
+    }
+
+    private Optional<String> extractIRI(TerminalNode iriNode, TerminalNode prefixedNameNode) {
+        if (iriNode != null)
+            return Optional.of(removeBrackets(iriNode.getText()));
+
+        if (prefixedNameNode != null)
+            return Optional.of(prefixManager.getExpandForm(prefixedNameNode.getText()));
+
+        return Optional.empty();
     }
 
     @Override

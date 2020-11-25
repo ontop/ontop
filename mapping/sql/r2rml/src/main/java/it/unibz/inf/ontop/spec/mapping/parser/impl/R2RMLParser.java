@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -7,7 +8,6 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -28,6 +28,8 @@ public class R2RMLParser {
 	private final RDF rdfFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
+	private final MappingParserHelper factory;
+
 	@Inject
 	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory,
 					    DBFunctionSymbolFactory dbFunctionSymbolFactory) {
@@ -36,6 +38,7 @@ public class R2RMLParser {
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 		this.manager = RDF4JR2RMLMappingManager.getInstance();
 		this.rdfFactory = rdfFactory;
+		this.factory = new MappingParserHelper(termFactory, typeFactory);
 	}
 
 	/**
@@ -129,7 +132,7 @@ public class R2RMLParser {
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
-			return termFactory.getIRIFunctionalTerm(getVariable(column));
+			return termFactory.getIRIFunctionalTerm(factory.getVariable(column));
 		}
 	}
 
@@ -144,7 +147,7 @@ public class R2RMLParser {
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
-			return termFactory.getBnodeFunctionalTerm(getVariable(column));
+			return termFactory.getBnodeFunctionalTerm(factory.getVariable(column));
 		}
 	}
 
@@ -164,27 +167,24 @@ public class R2RMLParser {
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T om) {
-			return 	termFactory.getRDFLiteralFunctionalTerm(getVariable(column), extractDatatype(om));
+			return 	termFactory.getRDFLiteralFunctionalTerm(factory.getVariable(column), extractDatatype(om));
+		}
+
+		private RDFDatatype extractDatatype(ObjectMap om) {
+			return  factory.extractDatatype(
+					Optional.ofNullable(om.getLanguageTag()),
+					Optional.ofNullable(om.getDatatype()))
+					// Third try: datatype of the constant
+					.orElseGet(() -> Optional.ofNullable(om.getConstant())
+							.map(c -> (Literal) c)
+							.map(Literal::getDatatype)
+							.map(typeFactory::getDatatype)
+							// Default case: RDFS.LITERAL (abstract, to be inferred later)
+							.orElseGet(typeFactory::getAbstractRDFSLiteral));
 		}
 	}
 
 
-	private RDFDatatype extractDatatype(ObjectMap om) {
-		return 	// Datatype -> first try: language tag
-				Optional.ofNullable(om.getLanguageTag())
-				.filter(tag -> !tag.isEmpty())
-				.map(typeFactory::getLangTermType)
-				// Second try: explicit datatype
-				.orElseGet(() -> Optional.ofNullable(om.getDatatype())
-						.map(typeFactory::getDatatype)
-						// Third try: datatype of the constant
-						.orElseGet(() -> Optional.ofNullable(om.getConstant())
-								.map(c -> (Literal) c)
-								.map(Literal::getDatatype)
-								.map(typeFactory::getDatatype)
-								// Default case: RDFS.LITERAL (abstract, to be inferred later)
-								.orElseGet(typeFactory::getAbstractRDFSLiteral)));
-	}
 
 
 	/**
@@ -241,7 +241,7 @@ public class R2RMLParser {
 			int end = string.indexOf("}");
 			int begin = string.lastIndexOf("{", end);
 			String var = string.substring(begin + 1, end);
-			termListBuilder.add(getVariable(var));
+			termListBuilder.add(factory.getVariable(var));
 
 			string = string.substring(0, begin) + "[]" + string.substring(end + 1);
 		}
@@ -282,10 +282,6 @@ public class R2RMLParser {
 		s = s.replace("\\}", "}");
 		s = s.replace("\\\\", "\\");
 		return s;
-	}
-
-	private ImmutableFunctionalTerm getVariable(String variableName) {
-		return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));
 	}
 
 	/**
