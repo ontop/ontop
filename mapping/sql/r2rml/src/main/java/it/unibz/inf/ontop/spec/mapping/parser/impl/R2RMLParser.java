@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class R2RMLParser {
@@ -209,61 +210,19 @@ public class R2RMLParser {
 			string = R2RMLVocabulary.resolveIri(string, "http://example.com/base/");
 		}
 
-		String suffix = string; // literal case
-
-		string = string.replace("\\{", "[");
-		string = string.replace("\\}", "]");
-
-		ImmutableList.Builder<NonVariableTerm> termListBuilder = ImmutableList.builder();
-
-		while (string.contains("{")) {
-
-			// Literal: if there is constant string in template, adds it to the term list
-			if (type == RDFCategory.LITERAL) {
-				int i = suffix.indexOf("{");
-				int j = suffix.indexOf("\\{");
-
-				while ((i - 1 == j) && (j != -1)) {
-					i = suffix.indexOf("{",i + 1);
-					j = suffix.indexOf("\\{",j + 1);
-				}
-
-				if (i > 0) {
-					String cons = suffix.substring(0, i);
-					termListBuilder.add(termFactory.getDBStringConstant(deEscape(cons)));
-					suffix = suffix.substring(suffix.indexOf("}", i) + 1);
-				}
-				else {
-					suffix = suffix.substring(suffix.indexOf("}") + 1);
-				}
-			}
-
-			int end = string.indexOf("}");
-			int begin = string.lastIndexOf("{", end);
-			String var = string.substring(begin + 1, end);
-			termListBuilder.add(factory.getVariable(var));
-
-			string = string.substring(0, begin) + "[]" + string.substring(end + 1);
-		}
-		if (type == RDFCategory.LITERAL && !suffix.isEmpty()) {
-			termListBuilder.add(termFactory.getDBStringConstant(deEscape(suffix)));
-		}
-
-		string = string.replace("[", "{");
-		string = string.replace("]", "}");
-
-		ImmutableList<NonVariableTerm> terms = termListBuilder.build();
+		ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(string);
 
 		switch (type) {
 			case IRI:
 				return termFactory.getImmutableFunctionalTerm(
-						dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(string),
-						terms);
+						dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(factory.getTemplateString(components)),
+						factory.getTemplateTerms(components));
 			case BNODE:
 				return termFactory.getImmutableFunctionalTerm(
-						dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(string),
-						terms);
+						dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(factory.getTemplateString(components)),
+						factory.getTemplateTerms(components));
 			case LITERAL:
+				ImmutableList<NonVariableTerm> terms = factory.getLiteralTemplateTerms(components);
 				switch (terms.size()) {
 					case 0:
 						return termFactory.getDBStringConstant("");
@@ -275,13 +234,6 @@ public class R2RMLParser {
 			default:
 				throw new R2RMLParsingBugException("Unexpected type code: " + type);
 		}
-	}
-
-	private static String deEscape(String s) {
-		s = s.replace("\\{", "{");
-		s = s.replace("\\}", "}");
-		s = s.replace("\\\\", "\\");
-		return s;
 	}
 
 	/**

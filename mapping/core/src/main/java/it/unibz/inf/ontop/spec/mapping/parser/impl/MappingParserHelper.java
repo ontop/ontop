@@ -1,14 +1,17 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.Literal;
-import org.apache.commons.rdf.api.RDF;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MappingParserHelper {
     private final TermFactory termFactory;
@@ -26,16 +29,38 @@ public class MappingParserHelper {
         return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(id));
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public Optional<RDFDatatype> extractDatatype(Optional<String> lang, Optional<IRI> iri) {
-        // Datatype -> first try: language tag
-        Optional<RDFDatatype> datatype = lang
+        Optional<RDFDatatype> datatype = lang       // First try: language tag
                 .filter(tag -> !tag.isEmpty())
                 .map(typeFactory::getLangTermType);
 
-        if (datatype.isPresent())
-            return datatype;
-
-        // Second try: explicit datatype
-         return iri.map(typeFactory::getDatatype);
+        return datatype.isPresent()
+                ? datatype
+                : iri.map(typeFactory::getDatatype); // Second try: explicit datatype
     }
+
+    public String getTemplateString(ImmutableList<TemplateComponent> components) {
+        return components.stream()
+                .map(c -> c.isColumnNameReference()
+                        ? "{}"
+                        : c.getUnescapedComponent())
+                .collect(Collectors.joining());
+    }
+
+    public ImmutableList<ImmutableFunctionalTerm> getTemplateTerms(ImmutableList<TemplateComponent> components) {
+        return components.stream()
+                .filter(TemplateComponent::isColumnNameReference)
+                .map(c -> getVariable(c.getComponent()))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    public ImmutableList<NonVariableTerm> getLiteralTemplateTerms(ImmutableList<TemplateComponent> components) {
+        return components.stream()
+                .map(c -> c.isColumnNameReference()
+                        ? getVariable(c.getComponent())
+                        : termFactory.getDBStringConstant(c.getUnescapedComponent()))
+                .collect(ImmutableCollectors.toList());
+    }
+
 }

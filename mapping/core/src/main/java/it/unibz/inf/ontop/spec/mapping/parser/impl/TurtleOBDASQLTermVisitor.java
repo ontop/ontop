@@ -210,9 +210,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitVariableLiteral(TurtleOBDAParser.VariableLiteralContext ctx) {
-        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.PLACEHOLDER().getText()));
         Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME());
-
         rdfDatatype.filter(dt -> !settings.areAbstractDatatypesToleratedInMapping())
                 .filter(TermType::isAbstract)
                 .ifPresent(dt -> {
@@ -221,6 +219,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                             + dt.getIRI() + "\nSet the property "
                             + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them."); });
 
+        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.PLACEHOLDER().getText()));
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm,
                 // We give the abstract datatype RDFS.LITERAL when it is not determined yet
                 // --> The concrete datatype be inferred afterwards
@@ -252,9 +251,9 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitRdfLiteral(TurtleOBDAParser.RdfLiteralContext ctx) {
-        RDFDatatype rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME())
-                .orElse(typeFactory.getXsdStringDatatype());
-        return termFactory.getRDFLiteralFunctionalTerm(visitString(ctx.string()), rdfDatatype);
+        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME());
+        return termFactory.getRDFLiteralFunctionalTerm(visitString(ctx.string()),
+                rdfDatatype.orElse(typeFactory.getXsdStringDatatype()));
     }
 
     private Optional<RDFDatatype> extractDatatype(TerminalNode langNode, TerminalNode iriNode, TerminalNode prefixedNameNode) {

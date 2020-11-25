@@ -30,7 +30,7 @@ import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 
-public class PrefixRendererTest {
+public class PrefixManagerTest {
 
 	private static final String Q_IRI_STR = "http://obda.org/predicates#q";
 	private static final String PERSON_IRI_STR = "http://obda.org/onto.owl#Person";
