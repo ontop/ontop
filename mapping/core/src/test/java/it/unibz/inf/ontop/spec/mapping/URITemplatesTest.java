@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.utils;
+package it.unibz.inf.ontop.spec.mapping;
 
 /*
  * #%L
@@ -25,9 +25,10 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.MappingParserHelper;
+import it.unibz.inf.ontop.utils.ObjectTemplates;
+import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,29 +38,29 @@ public class URITemplatesTest {
 	
     @Test
 	public void testFormat(){
-		assertEquals("http://example.org/A/1", Templates.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
+		Assert.assertEquals("http://example.org/A/1", ObjectTemplates.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
 		
-		assertEquals("http://example.org/A", Templates.format("http://example.org/{}", ImmutableList.of("A")));
+		assertEquals("http://example.org/A", ObjectTemplates.format("http://example.org/{}", ImmutableList.of("A")));
 		
-		assertEquals("http://example.org/A/1", Templates.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
+		assertEquals("http://example.org/A/1", ObjectTemplates.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
 		
-		assertEquals("http://example.org/A", Templates.format("http://example.org/{}", ImmutableList.of("A")));
+		assertEquals("http://example.org/A", ObjectTemplates.format("http://example.org/{}", ImmutableList.of("A")));
 
-        assertEquals("http://example.org/A", Templates.format("{}", ImmutableList.of("http://example.org/A")));
+        assertEquals("http://example.org/A", ObjectTemplates.format("{}", ImmutableList.of("http://example.org/A")));
 	}
 
     @Test
     public void testGetUriTemplateString1(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
-        assertEquals("http://example.org/{X}/{Y}", Templates.getTemplateString2(f1));
+        assertEquals("http://example.org/{X}/{Y}", MappingParserHelper.serializeObjectTemplate(f1));
     }
 
     @Test
     public void testGetUriTemplateString2(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}",
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
-        assertEquals("{X}", Templates.getTemplateString2(f1));
+        assertEquals("{X}", MappingParserHelper.serializeObjectTemplate(f1));
     }
 
     @Test
@@ -67,7 +68,7 @@ public class URITemplatesTest {
 
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}/", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
-        assertEquals("{X}/", Templates.getTemplateString2(f1));
+        assertEquals("{X}/", MappingParserHelper.serializeObjectTemplate(f1));
     }
 
     @Test
@@ -75,7 +76,7 @@ public class URITemplatesTest {
 
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
-        assertEquals("http://example.org/{X}/{Y}/", Templates.getTemplateString2(f1));
+        assertEquals("http://example.org/{X}/{Y}/", MappingParserHelper.serializeObjectTemplate(f1));
     }
 
     @Test
@@ -83,7 +84,7 @@ public class URITemplatesTest {
 
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/{}", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"), TERM_FACTORY.getVariable("X")));
-        assertEquals("http://example.org/{X}/{Y}/{X}", Templates.getTemplateString2(f1));
+        assertEquals("http://example.org/{X}/{Y}/{X}", MappingParserHelper.serializeObjectTemplate(f1));
     }
 
     /**

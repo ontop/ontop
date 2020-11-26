@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.impl.MappingParserHelper;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.Templates;
 import org.apache.commons.rdf.api.*;
 
 import java.util.Collection;
@@ -254,10 +253,10 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private String getTemplate(ImmutableFunctionalTerm lexicalTerm) {
 		FunctionSymbol functionSymbol = lexicalTerm.getFunctionSymbol();
 		if (functionSymbol instanceof BnodeStringTemplateFunctionSymbol) {
-			return Templates.getTemplateString2(lexicalTerm);
+			return MappingParserHelper.serializeObjectTemplate(lexicalTerm);
 		}
 		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-			String prefixedTemplate = Templates.getTemplateString2(lexicalTerm);
+			String prefixedTemplate = MappingParserHelper.serializeObjectTemplate(lexicalTerm);
 			try {
 				return prefixManager.getExpandForm(prefixedTemplate);
 			}
@@ -266,7 +265,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			}
 		}
 		if (functionSymbol instanceof DBConcatFunctionSymbol) {
-			return MappingParserHelper.getLiteralTemplateString(lexicalTerm);
+			return MappingParserHelper.serializeLiteralTemplate(lexicalTerm);
 		}
 		throw new R2RMLSerializationException("Unexpected function symbol " + functionSymbol + " in term " + lexicalTerm);
 	}
@@ -295,7 +294,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
 			if (functionalLexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol) { //concat
 				termMap = templateFct.apply(mappingFactory.createTemplate(
-						MappingParserHelper.getLiteralTemplateString(functionalLexicalTerm)));
+						MappingParserHelper.serializeLiteralTemplate(functionalLexicalTerm)));
 			}
 			else
 				throw new R2RMLSerializationException("Unexpected function symbol in: " + lexicalTerm);

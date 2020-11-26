@@ -20,25 +20,15 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A utility class for URI and BNode templates
  *
  * @author xiao
  */
-public class Templates {
+public class ObjectTemplates {
 
     private static final String PLACE_HOLDER = "{}";
     private static final int PLACE_HOLDER_LENGTH = PLACE_HOLDER.length();
@@ -73,37 +63,5 @@ public class Templates {
     }
 
 
-    /**
-     * Converts a IRI or BNode template function into a template
-     * <p>
-     * For instance:
-     * <pre>
-     * {@code http://example.org/{}/{}/{}(X, Y, X) -> "http://example.org/{X}/{Y}/{X}"}
-     * </pre>
-     *
-     * @param ift URI or BNode Function
-     * @return a template with variable names inside the placeholders
-     */
-
-    public static String getTemplateString2(ImmutableFunctionalTerm ift) {
-
-        if (!(ift.getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol))
-            throw new IllegalArgumentException(
-                    "The lexical term was expected to have a ObjectStringTemplateFunctionSymbol: "
-                            + ift);
-
-        ImmutableList<Variable> vars = ift.getTerms().stream()
-                .map(DBTypeConversionFunctionSymbol::uncast)
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable)t)
-                .collect(ImmutableCollectors.toList());
-
-        ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) ift.getFunctionSymbol();
-        if (vars.size() != fs.getArity())
-            throw new IllegalArgumentException("The number of placeholders does not match the arity: " + ift);
-
-        ImmutableList<String> varNames = vars.stream().map(v -> "{" + v + "}").collect(ImmutableCollectors.toList());
-        return Templates.format(fs.getTemplate(), varNames);
-    }
 
 }

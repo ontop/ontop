@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.ObjectTemplates;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -39,16 +41,19 @@ public class MappingParserHelper {
                 : iri.map(typeFactory::getDatatype); // Second try: explicit datatype
     }
 
-    public String getTemplateString(ImmutableList<TemplateComponent> components) {
+    /*
+          IRI and Bnode templates are modelled by ImmutableFunctionalTerm
+          with ObjectStringTemplateFunctionSymbol
+     */
+
+    public static String getTemplateString(ImmutableList<TemplateComponent> components) {
         if (components.stream()
                 .filter(c -> !c.isColumnNameReference())
                 .anyMatch(TemplateComponent::containsEscapeSequence))
             throw new IllegalArgumentException("Illegal escape sequence in template " + components);
 
         return components.stream()
-                .map(c -> c.isColumnNameReference()
-                        ? "{}"
-                        : c.getComponent())
+                .map(c -> c.isColumnNameReference() ? "{}" : c.getComponent())
                 .collect(Collectors.joining());
     }
 
@@ -58,6 +63,41 @@ public class MappingParserHelper {
                 .map(c -> getVariable(c.getComponent()))
                 .collect(ImmutableCollectors.toList());
     }
+
+    /**
+     * Converts a IRI or BNode template function into a template
+     * <p>
+     * For instance:
+     * <pre>
+     * {@code http://example.org/{}/{}/{}(X, Y, X) -> "http://example.org/{X}/{Y}/{X}"}
+     * </pre>
+     *
+     * @param ift URI or BNode Function
+     * @return a template with variable names inside the placeholders
+     */
+
+    public static String serializeObjectTemplate(ImmutableFunctionalTerm ift) {
+
+        ImmutableList<String> varNames = ift.getTerms().stream()
+                .map(DBTypeConversionFunctionSymbol::uncast)
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .map(v -> "{" + v.getName() + "}")
+                .collect(ImmutableCollectors.toList());
+
+        if (!(ift.getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol))
+            throw new IllegalArgumentException(
+                    "The lexical term was expected to have a ObjectStringTemplateFunctionSymbol: "
+                            + ift);
+
+        ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) ift.getFunctionSymbol();
+        return ObjectTemplates.format(fs.getTemplate(), varNames);
+    }
+
+
+    /*
+        Literal templates are modelled by a database concatenation function
+     */
 
     private NonVariableTerm templateComponentToTerm(TemplateComponent c) {
         return c.isColumnNameReference()
@@ -83,13 +123,13 @@ public class MappingParserHelper {
             case 1:
                 return templateComponentToTerm(components.get(0));
             default:
-                return termFactory.getNullRejectingDBConcatFunctionalTerm(components.stream()
+                return termFactory.getNullRejectingDBConcatOrSimplerFunctionalTerm(components.stream()
                         .map(this::templateComponentToTerm)
                         .collect(ImmutableCollectors.toList()));
         }
     }
 
-    public static String getLiteralTemplateString(ImmutableFunctionalTerm dbConcatFunctionalTerm) {
+    public static String serializeLiteralTemplate(ImmutableFunctionalTerm dbConcatFunctionalTerm) {
         if (dbConcatFunctionalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
             return dbConcatFunctionalTerm.getTerms().stream()
                     .map(DBTypeConversionFunctionSymbol::uncast)
