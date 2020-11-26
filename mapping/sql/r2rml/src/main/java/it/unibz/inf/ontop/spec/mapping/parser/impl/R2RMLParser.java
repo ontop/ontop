@@ -27,6 +27,8 @@ public class R2RMLParser {
 
 	private final Templates factory;
 
+	private final String baseIri = "http://example.com/base/";
+
 	@Inject
 	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory) {
 		this.termFactory = termFactory;
@@ -118,22 +120,20 @@ public class R2RMLParser {
 	private class IriExtractor<T extends TermMap> implements Extractor<T> {
 		@Override
 		public NonVariableTerm extract(RDFTerm constant, T termMap) {
-			return termFactory.getConstantIRI(constant.toString());
+			return factory.getIRITemplate(ImmutableList.of(
+					new TemplateComponent(false,
+							R2RMLVocabulary.resolveIri(constant.toString(), baseIri))));
 		}
 		@Override
 		public NonVariableTerm extract(Template template, T termMap) {
 			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-					// Q: WHY DOES IT NOT APPLY TO OTHER CASES?
-					R2RMLVocabulary.resolveIri(template.toString(), "http://example.com/base/"));
+					R2RMLVocabulary.resolveIri(template.toString(), baseIri));
 
-			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
-			return terms.isEmpty()
-					? termFactory.getConstantIRI(components.get(0).getComponent())
-					: termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), terms);
+			return factory.getIRITemplate(components);
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
-			return termFactory.getIRIFunctionalTerm(factory.getVariable(column));
+			return factory.getIRIColumn(column);
 		}
 	}
 
@@ -146,14 +146,11 @@ public class R2RMLParser {
 		@Override
 		public NonVariableTerm extract(Template template, T termMap) {
 			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template.toString());
-			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
-			return terms.isEmpty()
-					? termFactory.getConstantBNode(components.get(0).getComponent())
-					: termFactory.getBnodeFunctionalTerm(Templates.getTemplateString(components), terms);
+			return factory.getBnodeTemplate(components);
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
-			return termFactory.getBnodeFunctionalTerm(factory.getVariable(column));
+			return factory.getBnodeColumn(column);
 		}
 	}
 

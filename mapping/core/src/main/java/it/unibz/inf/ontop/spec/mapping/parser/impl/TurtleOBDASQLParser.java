@@ -14,8 +14,8 @@ public class TurtleOBDASQLParser extends AbstractTurtleOBDAParser implements Tar
 
     @AssistedInject
     private TurtleOBDASQLParser(@Assisted PrefixManager prefixManager, TermFactory termFactory,
-                                TypeFactory typeFactory, TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory,
+                                TypeFactory typeFactory, TargetAtomFactory targetAtomFactory,
                                 OntopMappingSettings settings) {
-        super(targetAtomFactory, () -> new TurtleOBDASQLTermVisitor(termFactory, rdfFactory, typeFactory, settings, prefixManager));
+        super(targetAtomFactory, () -> new TurtleOBDASQLTermVisitor(termFactory, typeFactory, settings, prefixManager));
     }
 }

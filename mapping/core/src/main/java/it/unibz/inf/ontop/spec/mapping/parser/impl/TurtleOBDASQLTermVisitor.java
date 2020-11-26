@@ -23,22 +23,20 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     private final PrefixManager prefixManager;
 
     private final TermFactory termFactory;
-    private final RDF rdfFactory;
     private final TypeFactory typeFactory;
     private final OntopMappingSettings settings;
 
     private final Templates factory;
 
-    TurtleOBDASQLTermVisitor(TermFactory termFactory, RDF rdfFactory, TypeFactory typeFactory, OntopMappingSettings settings, PrefixManager prefixManager) {
+    TurtleOBDASQLTermVisitor(TermFactory termFactory, TypeFactory typeFactory, OntopMappingSettings settings, PrefixManager prefixManager) {
         this.termFactory = termFactory;
-        this.rdfFactory = rdfFactory;
         this.typeFactory = typeFactory;
         this.settings = settings;
         this.prefixManager = prefixManager;
         this.factory = new Templates(termFactory, typeFactory);
     }
 
-    private String removeBrackets(String text) {
+    private static String removeBrackets(String text) {
         return text.substring(1, text.length() - 1);
     }
 
@@ -55,58 +53,33 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     public ImmutableTerm visitResourceIri(TurtleOBDAParser.ResourceIriContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
                 removeBrackets(ctx.IRIREF().getText()));
-        if (components.size() == 1) {
-            TemplateComponent c = components.get(0);
-            return (c.isColumnNameReference())
-                ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
-                : termFactory.getConstantIRI(rdfFactory.createIRI(c.getComponent()));
-        }
-        return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
-    }
 
+        if (components.size() == 1 && components.get(0).isColumnNameReference())
+            return  factory.getIRIColumn(components.get(0).getComponent());
+
+        return factory.getIRITemplate(components);
+    }
 
     @Override
     public ImmutableTerm visitResourcePrefixedIri(TurtleOBDAParser.ResourcePrefixedIriContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
                 prefixManager.getExpandForm(ctx.PNAME_LN().getText()));
-        if (components.size() == 1) {
-            TemplateComponent c = components.get(0);
-            return (c.isColumnNameReference())
-                ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
-                : termFactory.getConstantIRI(rdfFactory.createIRI(c.getComponent()));
-        }
-        return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
-    }
 
-    @Override
-    public ImmutableTerm visitVariableRdfLiteral(TurtleOBDAParser.VariableRdfLiteralContext ctx) {
-        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.iri());
-        rdfDatatype.filter(dt -> !settings.areAbstractDatatypesToleratedInMapping())
-                .filter(TermType::isAbstract)
-                .ifPresent(dt -> {
-                    // TODO: throw a better exception (invalid input)
-                    throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
-                            + dt.getIRI() + "\nSet the property "
-                            + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them."); });
+        if (components.size() == 1 && components.get(0).isColumnNameReference())
+            return  factory.getIRIColumn(components.get(0).getComponent());
 
-        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.ENCLOSED_COLUMN_NAME().getText()));
-        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm,
-                // We give the abstract datatype RDFS.LITERAL when it is not determined yet
-                // --> The concrete datatype be inferred afterwards
-                rdfDatatype.orElse(typeFactory.getAbstractRDFSLiteral()));
+        return factory.getIRITemplate(components);
     }
 
     @Override
     public ImmutableTerm visitBlankNode(TurtleOBDAParser.BlankNodeContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
                 extractBnodeId(ctx.BLANK_NODE_LABEL().getText()));
-        if (components.size() == 1) {
-            TemplateComponent c = components.get(0);
-            return c.isColumnNameReference()
-                    ? termFactory.getBnodeFunctionalTerm(factory.getVariable(c.getComponent()))
-                    : termFactory.getConstantBNode(c.getComponent());
-        }
-        return termFactory.getBnodeFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
+
+        if (components.size() == 1 && components.get(0).isColumnNameReference())
+            return  factory.getBnodeColumn(components.get(0).getComponent());
+
+        return factory.getBnodeTemplate(components);
     }
 
     @Override
@@ -130,6 +103,24 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
         return termFactory.getRDFLiteralFunctionalTerm(lexicalValue,
                 rdfDatatype.orElse(typeFactory.getXsdStringDatatype()));
+    }
+
+    @Override
+    public ImmutableTerm visitVariableRdfLiteral(TurtleOBDAParser.VariableRdfLiteralContext ctx) {
+        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.iri());
+        rdfDatatype.filter(dt -> !settings.areAbstractDatatypesToleratedInMapping())
+                .filter(TermType::isAbstract)
+                .ifPresent(dt -> {
+                    // TODO: throw a better exception (invalid input)
+                    throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
+                            + dt.getIRI() + "\nSet the property "
+                            + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them."); });
+
+        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.ENCLOSED_COLUMN_NAME().getText()));
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm,
+                // We give the abstract datatype RDFS.LITERAL when it is not determined yet
+                // --> The concrete datatype be inferred afterwards
+                rdfDatatype.orElse(typeFactory.getAbstractRDFSLiteral()));
     }
 
     private Optional<RDFDatatype> extractDatatype(TerminalNode langNode, TurtleOBDAParser.IriContext iri) {
@@ -162,5 +153,4 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     public ImmutableTerm visitDecimalLiteral(TurtleOBDAParser.DecimalLiteralContext ctx) {
         return termFactory.getRDFLiteralConstant(ctx.DECIMAL().getText(), XSD.DECIMAL);
     }
-
 }

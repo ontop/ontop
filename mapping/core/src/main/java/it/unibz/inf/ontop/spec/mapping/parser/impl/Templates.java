@@ -64,6 +64,36 @@ public class Templates {
                 .collect(ImmutableCollectors.toList());
     }
 
+    public ImmutableFunctionalTerm getIRIColumn(String column) {
+        return termFactory.getIRIFunctionalTerm(getVariable(column));
+    }
+
+    public ImmutableFunctionalTerm getBnodeColumn(String column) {
+        return termFactory.getBnodeFunctionalTerm(getVariable(column));
+    }
+
+    public NonVariableTerm getIRITemplate(ImmutableList<TemplateComponent> components) {
+        int size = components.size();
+        if (size == 0)
+                return termFactory.getConstantIRI("");
+
+        if (size == 1 && !components.get(0).isColumnNameReference())
+            return termFactory.getConstantIRI(components.get(0).getComponent());
+
+        return termFactory.getIRIFunctionalTerm(getTemplateString(components), getTemplateTerms(components));
+    }
+
+    public NonVariableTerm getBnodeTemplate(ImmutableList<TemplateComponent> components) {
+        int size = components.size();
+        if (size == 0)
+            return termFactory.getConstantBNode("");
+
+        if (size == 1 && !components.get(0).isColumnNameReference())
+                return termFactory.getConstantBNode(components.get(0).getComponent());
+
+        return termFactory.getBnodeFunctionalTerm(getTemplateString(components), getTemplateTerms(components));
+    }
+
     /**
      * Converts a IRI or BNode template function into a template
      * <p>
