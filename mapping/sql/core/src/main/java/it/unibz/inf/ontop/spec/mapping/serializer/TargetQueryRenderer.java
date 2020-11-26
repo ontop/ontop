@@ -18,8 +18,9 @@ import it.unibz.inf.ontop.model.type.impl.IRITermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.MappingParserHelper;
 import it.unibz.inf.ontop.utils.Templates;
+import org.eclipse.rdf4j.rio.turtle.TurtleUtil;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -79,7 +80,7 @@ public class TargetQueryRenderer {
                 return renderRDFFunction(ift);
 
             if (fs instanceof DBConcatFunctionSymbol)
-                return "\"" + Templates.getDBConcatTemplateString(ift) + "\"";
+                return "\"" + TurtleUtil.encodeString(MappingParserHelper.getLiteralTemplateString(ift)) + "\"";
 
             return ift.getFunctionSymbol().getName() + "(" + ift.getTerms().stream()
                     .map(this::renderTerm)

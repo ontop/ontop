@@ -29,11 +29,20 @@ public class TemplateComponent {
         return component;
     }
 
-    public String getUnescapedComponent() {
-        return component
-                .replace("\\{", "{")
+    public static String decode(String s) {
+        return s.replace("\\{", "{")
                 .replace("\\}", "}")
                 .replace("\\\\", "\\");
+    }
+
+    public static String encode(String s) {
+        return s.replace("\\", "\\\\")
+                .replace("{", "\\{")
+                .replace("}", "\\}");
+    }
+
+    public boolean containsEscapeSequence() {
+        return component.contains("\\\\") || component.contains("\\{") || component.contains("\\}");
     }
 
     @Override

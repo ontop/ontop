@@ -132,7 +132,7 @@ public class R2RMLParser {
 			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
 					? termFactory.getIRIFunctionalTerm(// Q: DOES IT MAKE SENSE?
-					termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
+					termFactory.getDBStringConstant(components.get(0).getComponent()))
 					: termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), terms);
 		}
 		@Override
@@ -152,7 +152,7 @@ public class R2RMLParser {
 			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
 					? termFactory.getBnodeFunctionalTerm(// Q: DOES IT MAKE SENSE?
-							termFactory.getDBStringConstant(components.get(0).getUnescapedComponent()))
+							termFactory.getDBStringConstant(components.get(0).getComponent()))
 					: termFactory.getBnodeFunctionalTerm(factory.getTemplateString(components), terms);
 		}
 		@Override

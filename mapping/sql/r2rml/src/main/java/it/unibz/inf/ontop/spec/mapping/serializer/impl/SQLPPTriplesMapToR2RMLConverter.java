@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.MappingParserHelper;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -266,7 +266,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			}
 		}
 		if (functionSymbol instanceof DBConcatFunctionSymbol) {
-			return Templates.getDBConcatTemplateString(lexicalTerm);
+			return MappingParserHelper.getLiteralTemplateString(lexicalTerm);
 		}
 		throw new R2RMLSerializationException("Unexpected function symbol " + functionSymbol + " in term " + lexicalTerm);
 	}
@@ -295,7 +295,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
 			if (functionalLexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol) { //concat
 				termMap = templateFct.apply(mappingFactory.createTemplate(
-						Templates.getDBConcatTemplateString(functionalLexicalTerm)));
+						MappingParserHelper.getLiteralTemplateString(functionalLexicalTerm)));
 			}
 			else
 				throw new R2RMLSerializationException("Unexpected function symbol in: " + lexicalTerm);

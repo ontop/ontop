@@ -64,7 +64,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
             if (!c.isColumnNameReference())
                 throw new MinorOntopInternalBugException("IRI template with a column name has no variables");
 
-            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getUnescapedComponent()));
+            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()));
         }
         return termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
     }
@@ -83,7 +83,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
             if (!c.isColumnNameReference())
                 throw new MinorOntopInternalBugException("Prefixed name template with a column name has no variables");
 
-            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getUnescapedComponent()));
+            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()));
         }
         return termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
     }
@@ -121,7 +121,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
             if (!c.isColumnNameReference())
                 throw new MinorOntopInternalBugException("Bnode label template with a column name has no variables");
 
-            return termFactory.getBnodeFunctionalTerm(factory.getVariable(c.getUnescapedComponent()));
+            return termFactory.getBnodeFunctionalTerm(factory.getVariable(c.getComponent()));
         }
         return termFactory.getBnodeFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
     }

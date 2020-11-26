@@ -156,28 +156,4 @@ public class Templates {
         return Templates.format(fs.getTemplate(), varNames);
     }
 
-    public static String getDBConcatTemplateString(ImmutableFunctionalTerm ift) {
-        if (ift.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
-            return ift.getTerms().stream()
-                    .map(DBTypeConversionFunctionSymbol::uncast)
-                    .map(Templates::concatArg2String)
-                    .collect(Collectors.joining());
-
-        throw new IllegalArgumentException("Invalid term type (DBConcat is expected): " + ift);
-    }
-
-    private static String concatArg2String(ImmutableTerm term) {
-        if (term instanceof Constant) {
-            return ((Constant) term).getValue()
-                .replace("\\", "\\\\")
-                .replace("{", "\\{")
-                .replace("}", "\\}");
-        }
-
-        if (term instanceof Variable)
-            return "{" + ((Variable)term).getName() + "}";
-
-        throw new IllegalArgumentException("Unexpected term type (only Constant and Variable are allowed):" + term);
-    }
-
 }
