@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -13,24 +12,12 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTerm> implements TurtleOBDAVisitor<ImmutableTerm> {
-    // Column placeholder pattern
-    private static final Pattern varPattern = Pattern.compile("\\{([^}]+)}");
 
-    /**
-     * Map of prefixes
-     */
     private final PrefixManager prefixManager;
 
     private final TermFactory termFactory;
@@ -53,75 +40,8 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         return text.substring(1, text.length() - 1);
     }
 
-    private ImmutableTerm constructBnodeOrIRI(String text,
-                                              Function<ImmutableTerm, ImmutableFunctionalTerm> columnFct,
-                                              BiFunction<String, ImmutableList<ImmutableTerm>, ImmutableFunctionalTerm> templateFct) {
-        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(text);
-        if (components.size() == 1) {
-            TemplateComponent c = components.get(0);
-            if (c.isColumnNameReference())
-                return columnFct.apply(factory.getVariable(c.getUnescapedComponent()));
-            return  termFactory.getConstantIRI(c.getUnescapedComponent());
-        }
-        return templateFct.apply(factory.getTemplateString(components), factory.getTemplateTerms(components));
-    }
-
-
-    private List<FormatString> parseIRIOrBnode(String text) {
-        List<FormatString> toReturn = new ArrayList<>();
-        Matcher m = varPattern.matcher(text);
-        int i = 0;
-        while (i < text.length()) {
-            if (m.find(i)) {
-                if (m.start() != i) {
-                    String subString = text.substring(i, m.start());
-                    toReturn.add(new FixedString(subString));
-                }
-                String value = m.group(1);
-                toReturn.add(new ColumnString(value));
-                i = m.end();
-            }
-            else {
-                toReturn.add(new FixedString(text.substring(i)));
-                break;
-            }
-        }
-        return toReturn;
-    }
-
-    // Remove the prefix _:
     private static String extractBnodeId(String text) {
-        return text.substring(2);
-    }
-
-    private interface FormatString {
-        String str();
-    }
-
-    private static class FixedString implements FormatString {
-        private final String s;
-
-        FixedString(String s) {
-            this.s = s;
-        }
-
-        @Override
-        public String str() {
-            return s;
-        }
-    }
-
-    private static class ColumnString implements FormatString {
-        private final String s;
-
-        ColumnString(String s) {
-            this.s = s;
-        }
-
-        @Override
-        public String str() {
-            return s;
-        }
+        return text.substring(2); // Remove the prefix _:
     }
 
     @Override
@@ -136,9 +56,16 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitResourceTemplate(TurtleOBDAParser.ResourceTemplateContext ctx) {
-        return constructBnodeOrIRI(removeBrackets(ctx.IRIREF_WITH_PLACEHOLDERS().getText()),
-                termFactory::getIRIFunctionalTerm,
-                termFactory::getIRIFunctionalTerm);
+        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
+                removeBrackets(ctx.IRIREF_WITH_PLACEHOLDERS().getText()));
+        if (components.size() == 1) {
+            TemplateComponent c = components.get(0);
+            if (!c.isColumnNameReference())
+                throw new MinorOntopInternalBugException("IRI template with a column name has no variables");
+
+            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getUnescapedComponent()));
+        }
+        return termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
     @Override
@@ -148,9 +75,16 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitResourcePrefixedTemplate(TurtleOBDAParser.ResourcePrefixedTemplateContext ctx) {
-        return constructBnodeOrIRI(prefixManager.getExpandForm(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()),
-                termFactory::getIRIFunctionalTerm,
-                termFactory::getIRIFunctionalTerm);
+        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
+                prefixManager.getExpandForm(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()));
+        if (components.size() == 1) {
+            TemplateComponent c = components.get(0);
+            if (!c.isColumnNameReference())
+                throw new MinorOntopInternalBugException("Prefixed name template with a column name has no variables");
+
+            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getUnescapedComponent()));
+        }
+        return termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
     @Override
@@ -179,9 +113,16 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitBlankNodeTemplate(TurtleOBDAParser.BlankNodeTemplateContext ctx) {
-        return constructBnodeOrIRI(extractBnodeId(ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS().getText()),
-                termFactory::getBnodeFunctionalTerm,
-                termFactory::getBnodeFunctionalTerm);
+        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
+                extractBnodeId(ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS().getText()));
+        if (components.size() == 1) {
+            TemplateComponent c = components.get(0);
+            if (!c.isColumnNameReference())
+                throw new MinorOntopInternalBugException("Bnode label template with a column name has no variables");
+
+            return termFactory.getBnodeFunctionalTerm(factory.getVariable(c.getUnescapedComponent()));
+        }
+        return termFactory.getBnodeFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
     @Override
