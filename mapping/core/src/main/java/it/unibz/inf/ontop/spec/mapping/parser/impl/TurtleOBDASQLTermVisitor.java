@@ -113,22 +113,16 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     }
 
     @Override
-    public ImmutableTerm visitBlankNodeTemplate(TurtleOBDAParser.BlankNodeTemplateContext ctx) {
+    public ImmutableTerm visitBlankNode(TurtleOBDAParser.BlankNodeContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                extractBnodeId(ctx.BLANK_NODE_LABEL_WITH_PLACEHOLDERS().getText()));
+                extractBnodeId(ctx.BLANK_NODE_LABEL().getText()));
         if (components.size() == 1) {
             TemplateComponent c = components.get(0);
-            if (!c.isColumnNameReference())
-                throw new MinorOntopInternalBugException("Bnode label template with a column name has no variables");
-
-            return termFactory.getBnodeFunctionalTerm(factory.getVariable(c.getComponent()));
+            return c.isColumnNameReference()
+                    ? termFactory.getBnodeFunctionalTerm(factory.getVariable(c.getComponent()))
+                    : termFactory.getConstantBNode(c.getComponent());
         }
-        return termFactory.getBnodeFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
-    }
-
-    @Override
-    public ImmutableTerm visitBlankNode(TurtleOBDAParser.BlankNodeContext ctx) {
-        return termFactory.getConstantBNode(extractBnodeId(ctx.BLANK_NODE_LABEL().getText()));
+        return termFactory.getBnodeFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
     @Override

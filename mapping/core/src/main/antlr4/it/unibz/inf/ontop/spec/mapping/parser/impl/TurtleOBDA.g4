@@ -116,8 +116,7 @@ resource // [11] predicate ::= iri // [135s] iri ::= IRIREF | PrefixedName
   ;
 
 blank  // [137s] BlankNode ::= BLANK_NODE_LABEL | ANON
-  : BLANK_NODE_LABEL                    # blankNode
-  | BLANK_NODE_LABEL_WITH_PLACEHOLDERS  # blankNodeTemplate
+  : BLANK_NODE_LABEL                    # blankNode  // includes templates
   | ANON                                # blankNodeAnonymous
   ;
 
@@ -197,15 +196,11 @@ PREFIXED_NAME // [140s]	PNAME_LN ::= PNAME_NS PN_LOCAL
    : PNAME_NS PN_LOCAL
   ;
 
-BLANK_NODE_LABEL_WITH_PLACEHOLDERS
-  : '_:'  PN_LOCAL_WITH_PLACEHOLDERS
-  ;
-
 // The characters _ and digits may appear anywhere in a blank node label.
 // The character . may appear anywhere except the first or last character.
 // The characters -, U+00B7, U+0300 to U+036F and U+203F to U+2040 are permitted anywhere except the first character.
 BLANK_NODE_LABEL // [141s]
-  : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)?
+  : '_:' (PN_CHARS_U | [0-9] | PLACEHOLDER) ((PN_CHARS | '.' | PLACEHOLDER)* (PN_CHARS | PLACEHOLDER))?
   ;
 
 LANGTAG // [144s]
