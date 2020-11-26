@@ -111,8 +111,6 @@ resource // [11] predicate ::= iri // [135s] iri ::= IRIREF | PrefixedName
                                    // [136s] PrefixedName ::= PNAME_LN | PNAME_NS
   : IRIREF                              # resourceIri
   | PREFIXED_NAME                       # resourcePrefixedIri
-  | IRIREF_WITH_PLACEHOLDERS            # resourceTemplate
-  | PREFIXED_NAME_WITH_PLACEHOLDERS     # resourcePrefixedTemplate
   ;
 
 blank  // [137s] BlankNode ::= BLANK_NODE_LABEL | ANON
@@ -165,19 +163,9 @@ PLACEHOLDER
   | '{"' (~["] | '""')+ '"}'
   ;
 
-IRIREF_WITH_PLACEHOLDERS
-  : '<' IRIREF_INNER_CHAR* (PLACEHOLDER IRIREF_INNER_CHAR*)+ '>'
-  ;
-
 IRIREF // [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>' /* #x00=NULL #01-#x1F=control codes #x20=space */
-   : '<' IRIREF_INNER_CHAR* '>'
+   : '<'  (~[\u0000-\u0020<>"{}|^`\\] | UCHAR | PLACEHOLDER)* '>'
    ;
-
-// adds ; (? and = through PN_CHARS)
-fragment IRIREF_INNER_CHAR
-  :  PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR | ';'
-  ;
-
 
 PNAME_NS // [139s]
   : PN_PREFIX? ':'
@@ -187,10 +175,6 @@ PN_PREFIX // [167s]
    : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
    ;
 
-PREFIXED_NAME_WITH_PLACEHOLDERS
-  : PNAME_NS PN_LOCAL_WITH_PLACEHOLDERS
-  ;
-
 // [136s] PrefixedName ::=	PNAME_LN | PNAME_NS
 PREFIXED_NAME // [140s]	PNAME_LN ::= PNAME_NS PN_LOCAL
    : PNAME_NS PN_LOCAL
@@ -199,8 +183,10 @@ PREFIXED_NAME // [140s]	PNAME_LN ::= PNAME_NS PN_LOCAL
 // The characters _ and digits may appear anywhere in a blank node label.
 // The character . may appear anywhere except the first or last character.
 // The characters -, U+00B7, U+0300 to U+036F and U+203F to U+2040 are permitted anywhere except the first character.
-BLANK_NODE_LABEL // [141s]
-  : '_:' (PN_CHARS_U | [0-9] | PLACEHOLDER) ((PN_CHARS | '.' | PLACEHOLDER)* (PN_CHARS | PLACEHOLDER))?
+// Important: the rule below is an extension of
+//      [141s] BLANK_NODE_LABEL ::= '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)?
+BLANK_NODE_LABEL
+  : '_:' PN_LOCAL
   ;
 
 LANGTAG // [144s]
@@ -265,30 +251,24 @@ PN_CHARS // [166s] PN_CHARS ::= PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x03
   : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
-PN_LOCAL_WITH_PLACEHOLDERS
-  : PLACEHOLDER (PN_LOCAL_INNER_CHAR* PLACEHOLDER)*
-  | (PN_LOCAL_FIRST_CHAR PN_LOCAL_INNER_CHAR*)? (PLACEHOLDER PN_LOCAL_INNER_CHAR*)+ PN_LOCAL_LAST_CHAR
-  | PN_LOCAL_FIRST_CHAR (PN_LOCAL_INNER_CHAR* PLACEHOLDER)+ (PN_LOCAL_INNER_CHAR* PN_LOCAL_LAST_CHAR)?
-  ;
-
-// extends PN_LOCAL in the original grammar to allow  #, ; and /
+// extends PN_LOCAL in the original grammar to allow  #, ; and / as well as PLACEHOLDER
 PN_LOCAL // [168s] PN_LOCAL	::=	(PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
   : PN_LOCAL_FIRST_CHAR (PN_LOCAL_INNER_CHAR* PN_LOCAL_LAST_CHAR)?
   ;
 
 // adds #
 fragment PN_LOCAL_FIRST_CHAR
-  : PN_CHARS_U | ':' | [0-9] | PLX | '#'
+  : PN_CHARS_U | ':' | [0-9] | PLX | '#' | PLACEHOLDER
   ;
 
 // adds ;, # and /  (? and = through PN_CHARS)
 fragment PN_LOCAL_INNER_CHAR
-  : PN_CHARS | '.' | ':' | PLX | ';' | '#' | '/'
+  : PN_CHARS | '.' | ':' | PLX | '#' | ';' | '/' | PLACEHOLDER
   ;
 
 // adds /  (? and = through PN_CHARS)
 fragment PN_LOCAL_LAST_CHAR
-  : PN_CHARS | ':' | PLX | '/'
+  : PN_CHARS | ':' | PLX | '/' | PLACEHOLDER
   ;
 
 PLX // [169s]

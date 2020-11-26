@@ -52,38 +52,27 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitResourceIri(TurtleOBDAParser.ResourceIriContext ctx) {
-        return termFactory.getConstantIRI(rdfFactory.createIRI(removeBrackets(ctx.IRIREF().getText())));
-    }
-
-    @Override
-    public ImmutableTerm visitResourceTemplate(TurtleOBDAParser.ResourceTemplateContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                removeBrackets(ctx.IRIREF_WITH_PLACEHOLDERS().getText()));
+                removeBrackets(ctx.IRIREF().getText()));
         if (components.size() == 1) {
             TemplateComponent c = components.get(0);
-            if (!c.isColumnNameReference())
-                throw new MinorOntopInternalBugException("IRI template with a column name has no variables");
-
-            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()));
+            return (c.isColumnNameReference())
+                ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
+                : termFactory.getConstantIRI(rdfFactory.createIRI(removeBrackets(ctx.IRIREF().getText())));
         }
         return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
+
     @Override
     public ImmutableTerm visitResourcePrefixedIri(TurtleOBDAParser.ResourcePrefixedIriContext ctx) {
-        return termFactory.getConstantIRI(rdfFactory.createIRI(prefixManager.getExpandForm(ctx.PREFIXED_NAME().getText())));
-    }
-
-    @Override
-    public ImmutableTerm visitResourcePrefixedTemplate(TurtleOBDAParser.ResourcePrefixedTemplateContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                prefixManager.getExpandForm(ctx.PREFIXED_NAME_WITH_PLACEHOLDERS().getText()));
+                prefixManager.getExpandForm(ctx.PREFIXED_NAME().getText()));
         if (components.size() == 1) {
             TemplateComponent c = components.get(0);
-            if (!c.isColumnNameReference())
-                throw new MinorOntopInternalBugException("Prefixed name template with a column name has no variables");
-
-            return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()));
+            return (c.isColumnNameReference())
+                ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
+                : termFactory.getConstantIRI(rdfFactory.createIRI(prefixManager.getExpandForm(ctx.PREFIXED_NAME().getText())));
         }
         return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
