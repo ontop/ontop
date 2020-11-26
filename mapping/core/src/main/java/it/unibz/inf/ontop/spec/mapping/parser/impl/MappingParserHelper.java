@@ -123,7 +123,7 @@ public class MappingParserHelper {
             case 1:
                 return templateComponentToTerm(components.get(0));
             default:
-                return termFactory.getNullRejectingDBConcatOrSimplerFunctionalTerm(components.stream()
+                return termFactory.getNullRejectingDBConcatFunctionalTerm(components.stream()
                         .map(this::templateComponentToTerm)
                         .collect(ImmutableCollectors.toList()));
         }
