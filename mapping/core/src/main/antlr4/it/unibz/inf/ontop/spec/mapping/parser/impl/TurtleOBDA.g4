@@ -84,46 +84,34 @@ objectList // [8]
   ;
 
 graph
-  : resource
+  : iri
   | blank
-  | variable   // treated as rr:column
   ;
 
-verb  // [9] verb ::= predicate | 'a'
-  : resource                 # predicateResource
-  | 'a'                      # predicateRdfType
+verb  // [9] verb ::= predicate | 'a' [11] predicate ::= iri
+  : iri        # predicateResource
+  | 'a'        # predicateRdfType
   ;
 
 subject // [10]	subject ::= iri | BlankNode | collection
-  : resource
+  : iri
   | blank
-  | variable   // treated as rr:column
   ;
 
 object  // [12]	object ::= iri | BlankNode | collection | blankNodePropertyList | literal
-  : resource
+  : iri
   | blank
   | literal
-  | variableLiteral
   ;
 
-resource // [11] predicate ::= iri // [135s] iri ::= IRIREF | PrefixedName
-                                   // [136s] PrefixedName ::= PNAME_LN | PNAME_NS
-  : IRIREF                              # resourceIri
-  | PREFIXED_NAME                       # resourcePrefixedIri
+iri // [135s] iri ::= IRIREF | PrefixedName  [136s] PrefixedName ::= PNAME_LN | PNAME_NS
+  : IRIREF        # resourceIri         // includes templates
+  | PNAME_LN      # resourcePrefixedIri // includes templates
   ;
 
 blank  // [137s] BlankNode ::= BLANK_NODE_LABEL | ANON
-  : BLANK_NODE_LABEL                    # blankNode  // includes templates
-  | ANON                                # blankNodeAnonymous
-  ;
-
-variable
-  : PLACEHOLDER
-  ;
-
-variableLiteral
-  : PLACEHOLDER (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
+  : BLANK_NODE_LABEL     # blankNode    // includes templates
+  | ANON                 # blankNodeAnonymous
   ;
 
 literal // [13] literal ::= RDFLiteral | NumericLiteral | BooleanLiteral
@@ -134,17 +122,18 @@ literal // [13] literal ::= RDFLiteral | NumericLiteral | BooleanLiteral
 
 rdfLiteral // [128s] RDFLiteral ::=	String (LANGTAG | '^^' iri)?
           // [17] String ::= STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
-  : STRING_LITERAL_QUOTE (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
-  ;
-
-booleanLiteral // [133s] BooleanLiteral ::= 'true' | 'false'
-  : 'true' | 'false'| 'TRUE' | 'True' | 'FALSE'| 'False'
+  : STRING_LITERAL_QUOTE (LANGTAG | '^^' iri)?  # constantRdfLiteral  // includes templates
+  | ENCLOSED_COLUMN_NAME (LANGTAG | '^^' iri)?  # variableRdfLiteral
   ;
 
 numericLiteral  // [16]
   : INTEGER   # integerLiteral
   | DOUBLE    # doubleLiteral
   | DECIMAL   # decimalLiteral
+  ;
+
+booleanLiteral // [133s] BooleanLiteral ::= 'true' | 'false'
+  : 'true' | 'false'| 'TRUE' | 'True' | 'FALSE'| 'False'
   ;
 
 WS
@@ -158,13 +147,14 @@ WS
  - If there are several of them, the first one is applied
  *------------------------------------------------------------------*/
 
-PLACEHOLDER
+ENCLOSED_COLUMN_NAME
   : '{' ~[{}]+ '}'
   | '{"' (~["] | '""')+ '"}'
   ;
 
-IRIREF // [18]	IRIREF	::=	'<' ([^#x00-#x20<>"{}|^`\] | UCHAR)* '>' /* #x00=NULL #01-#x1F=control codes #x20=space */
-   : '<'  (~[\u0000-\u0020<>"{}|^`\\] | UCHAR | PLACEHOLDER)* '>'
+// extends with ENCLOSED_COLUMN_NAME
+IRIREF // [18]
+   : '<'  (~[\u0000-\u0020<>"{}|^`\\] | UCHAR | ENCLOSED_COLUMN_NAME)* '>'
    ;
 
 PNAME_NS // [139s]
@@ -175,8 +165,7 @@ PN_PREFIX // [167s]
    : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
    ;
 
-// [136s] PrefixedName ::=	PNAME_LN | PNAME_NS
-PREFIXED_NAME // [140s]	PNAME_LN ::= PNAME_NS PN_LOCAL
+PNAME_LN // [140s]
    : PNAME_NS PN_LOCAL
   ;
 
@@ -232,14 +221,12 @@ ANON // [162s] ANON ::= '[' WS* ']'
   ;
 
 PN_CHARS_BASE // [163s]
-  : [A-Z] | [a-z] | [\u00C0-\u00D6] | [\u00D8-\u00F6] | [\u00F8-\u02FF] | [\u0370-\u037D] |
-  [\u037F-\u1FFF] | [\u200C-\u200D] | [\u2070-\u218F] | [\u2C00-\u2FEF] | [\u3001-\uD7FF] |
-    [\uF900-\uFDCF] | [\uFDF0-\uFFFD]
-// Limitation: Unicode Characters beyond \uFFFF are not (yet?) supported by ANTLR
-//    | '\u10000' .. '\u1FFFD' | '\u20000' .. '\u2FFFD' |
-//    '\u30000' .. '\u3FFFD' | '\u40000' .. '\u4FFFD' | '\u50000' .. '\u5FFFD' | '\u60000' .. '\u6FFFD' |
-//    '\u70000' .. '\u7FFFD' | '\u80000' .. '\u8FFFD' | '\u90000' .. '\u9FFFD' | '\uA0000' .. '\uAFFFD' |
-//    '\uB0000' .. '\uBFFFD' | '\uC0000' .. '\uCFFFD' | '\uD0000' .. '\uDFFFD' | '\uE1000' .. '\uEFFFD'
+  : [A-Z] | [a-z] | [\u00C0-\u00D6] | [\u00D8-\u00F6] | [\u00F8-\u02FF] | [\u0370-\u037D]
+  | [\u037F-\u1FFF] | [\u200C-\u200D] | [\u2070-\u218F] | [\u2C00-\u2FEF] | [\u3001-\uD7FF]
+  | [\uF900-\uFDCF] | [\uFDF0-\uFFFD] | [\u{10000}-\u{1FFFD}] | [\u{20000}-\u{2FFFD}]
+  | [\u{30000}-\u{3FFFD}] | [\u{40000}-\u{4FFFD}] | [\u{50000}-\u{5FFFD}] | [\u{60000}-\u{6FFFD}]
+  | [\u{70000}-\u{7FFFD}] | [\u{80000}-\u{8FFFD}] | [\u{90000}-\u{9FFFD}] | [\u{A0000}-\u{AFFFD}]
+  | [\u{B0000}-\u{BFFFD}] | [\u{C0000}-\u{CFFFD}] | [\u{D0000}-\u{DFFFD}] | [\u{E1000}-\u{EFFFD}]
   ;
 
 PN_CHARS_U // [164s]
@@ -251,24 +238,11 @@ PN_CHARS // [166s] PN_CHARS ::= PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x03
   : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
-// extends PN_LOCAL in the original grammar to allow  #, ; and / as well as PLACEHOLDER
+// extends PN_LOCAL in the original grammar to allow  #, ; and / as well as ENCLOSED_COLUMN_NAME
 PN_LOCAL // [168s] PN_LOCAL	::=	(PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
-  : PN_LOCAL_FIRST_CHAR (PN_LOCAL_INNER_CHAR* PN_LOCAL_LAST_CHAR)?
-  ;
-
-// adds #
-fragment PN_LOCAL_FIRST_CHAR
-  : PN_CHARS_U | ':' | [0-9] | PLX | '#' | PLACEHOLDER
-  ;
-
-// adds ;, # and /  (? and = through PN_CHARS)
-fragment PN_LOCAL_INNER_CHAR
-  : PN_CHARS | '.' | ':' | PLX | '#' | ';' | '/' | PLACEHOLDER
-  ;
-
-// adds /  (? and = through PN_CHARS)
-fragment PN_LOCAL_LAST_CHAR
-  : PN_CHARS | ':' | PLX | '/' | PLACEHOLDER
+  : (PN_CHARS_U | ':' | [0-9] | PLX | '#' | ENCLOSED_COLUMN_NAME)            // first: adds #
+    ((PN_CHARS | '.' | ':' | PLX | '#' | ';' | '/' | ENCLOSED_COLUMN_NAME)*  // middle: adds ;, # and /  (? and = through PN_CHARS)
+     (PN_CHARS | ':' | PLX | '/' | ENCLOSED_COLUMN_NAME))?                   // last: adds /  (? and = through PN_CHARS)
   ;
 
 PLX // [169s]

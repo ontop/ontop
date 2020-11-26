@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -46,7 +45,6 @@ import static org.junit.Assert.assertEquals;
  * Test syntax of the parser.
  * Added new extension. Define if the mapping column contains a data property with rdfs:Literal ("{column}")
  * or an object property (<{column}>)
- * @link {it.unibz.inf.obda.parser.TurtleOBDA.g}
  * */
 
 public class TurtleSyntaxParserTest {
@@ -709,20 +707,22 @@ public class TurtleSyntaxParserTest {
 				getConstantIRI("http://www.example.org/Person/123/"))), result);
 	}
 
+	// ROMAN 26/11/20: added : to make {first_name} an IRI template
 	@Test
 	public void test_9_1() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":S_{id} a :Student ; :fname {first_name} ; :hasCourse :C_{course_id}  .\n" +
+		ImmutableList<TargetAtom> result = parser.parse(":S_{id} a :Student ; :fname :{first_name} ; :hasCourse :C_{course_id}  .\n" +
 				":C_{course_id} a :Course ; :hasProfessor :P_{id} . \n" +
 				":P_{id} a :Professor ; :teaches :C_{course_id} .\n" +
-				"{first_name} a :Name . ");
+				":{first_name} a :Name . ");
 		assertEquals(8, result.size());
 	}
 
+	// ROMAN 26/11/20: added a few : to make them IRI templates
 	@Test
 	public void test_9_2() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse("{idEmigrante} a  :E21_Person ; :P131_is_identified_by {nome} ; :P11i_participated_in {numCM} .\n" +
-				"{nome} a :E82_Actor_Appellation ; :P3_has_note {nome}^^xsd:string .\n" +
-				"{numCM} a :E9_Move .");
+		ImmutableList<TargetAtom> result = parser.parse(":{idEmigrante} a  :E21_Person ; :P131_is_identified_by :{nome} ; :P11i_participated_in :{numCM} .\n" +
+				":{nome} a :E82_Actor_Appellation ; :P3_has_note {nome}^^xsd:string .\n" +
+				":{numCM} a :E9_Move .");
 		assertEquals(6, result.size());
 	}
 

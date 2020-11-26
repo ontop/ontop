@@ -24,16 +24,14 @@ public class R2RMLParser {
 	private final RDF4JR2RMLMappingManager manager;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-	private final RDF rdfFactory;
 
 	private final Templates factory;
 
 	@Inject
-	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
+	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.manager = RDF4JR2RMLMappingManager.getInstance();
-		this.rdfFactory = rdfFactory;
 		this.factory = new Templates(termFactory, typeFactory);
 	}
 
@@ -120,7 +118,7 @@ public class R2RMLParser {
 	private class IriExtractor<T extends TermMap> implements Extractor<T> {
 		@Override
 		public NonVariableTerm extract(RDFTerm constant, T termMap) {
-			return termFactory.getConstantIRI(rdfFactory.createIRI(constant.toString()));
+			return termFactory.getConstantIRI(constant.toString());
 		}
 		@Override
 		public NonVariableTerm extract(Template template, T termMap) {
@@ -130,8 +128,7 @@ public class R2RMLParser {
 
 			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
-					? termFactory.getIRIFunctionalTerm(// Q: DOES IT MAKE SENSE?
-					termFactory.getDBStringConstant(components.get(0).getComponent()))
+					? termFactory.getConstantIRI(components.get(0).getComponent())
 					: termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), terms);
 		}
 		@Override
@@ -143,6 +140,7 @@ public class R2RMLParser {
 	private class BnodeExtractor<T extends TermMap> implements Extractor<T> {
 		@Override
 		public NonVariableTerm extract(RDFTerm constant, T termMap) {
+			// https://www.w3.org/TR/r2rml/#constant says none can be an Bnode
 			throw new R2RMLParsingBugException("Constant blank nodes are not accepted in R2RML (should have been detected earlier)");
 		}
 		@Override
@@ -150,8 +148,7 @@ public class R2RMLParser {
 			ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(template.toString());
 			ImmutableList<ImmutableTerm> terms = factory.getTemplateTerms(components);
 			return terms.isEmpty()
-					? termFactory.getBnodeFunctionalTerm(// Q: DOES IT MAKE SENSE?
-							termFactory.getDBStringConstant(components.get(0).getComponent()))
+					? termFactory.getConstantBNode(components.get(0).getComponent())
 					: termFactory.getBnodeFunctionalTerm(Templates.getTemplateString(components), terms);
 		}
 		@Override

@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.rio.turtle.TurtleUtil;
 
@@ -58,7 +59,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
             TemplateComponent c = components.get(0);
             return (c.isColumnNameReference())
                 ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
-                : termFactory.getConstantIRI(rdfFactory.createIRI(removeBrackets(ctx.IRIREF().getText())));
+                : termFactory.getConstantIRI(rdfFactory.createIRI(removeBrackets(c.getComponent())));
         }
         return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
@@ -67,19 +68,19 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     @Override
     public ImmutableTerm visitResourcePrefixedIri(TurtleOBDAParser.ResourcePrefixedIriContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                prefixManager.getExpandForm(ctx.PREFIXED_NAME().getText()));
+                prefixManager.getExpandForm(ctx.PNAME_LN().getText()));
         if (components.size() == 1) {
             TemplateComponent c = components.get(0);
             return (c.isColumnNameReference())
                 ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
-                : termFactory.getConstantIRI(rdfFactory.createIRI(prefixManager.getExpandForm(ctx.PREFIXED_NAME().getText())));
+                : termFactory.getConstantIRI(rdfFactory.createIRI(prefixManager.getExpandForm(c.getComponent())));
         }
         return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
     @Override
-    public ImmutableTerm visitVariableLiteral(TurtleOBDAParser.VariableLiteralContext ctx) {
-        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME());
+    public ImmutableTerm visitVariableRdfLiteral(TurtleOBDAParser.VariableRdfLiteralContext ctx) {
+        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.iri());
         rdfDatatype.filter(dt -> !settings.areAbstractDatatypesToleratedInMapping())
                 .filter(TermType::isAbstract)
                 .ifPresent(dt -> {
@@ -88,17 +89,11 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                             + dt.getIRI() + "\nSet the property "
                             + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them."); });
 
-        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.PLACEHOLDER().getText()));
+        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.ENCLOSED_COLUMN_NAME().getText()));
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm,
                 // We give the abstract datatype RDFS.LITERAL when it is not determined yet
                 // --> The concrete datatype be inferred afterwards
                 rdfDatatype.orElse(typeFactory.getAbstractRDFSLiteral()));
-    }
-
-    @Override
-    public ImmutableTerm visitVariable(TurtleOBDAParser.VariableContext ctx) {
-        String variableName = removeBrackets(ctx.PLACEHOLDER().getText());
-        return termFactory.getIRIFunctionalTerm(factory.getVariable(variableName));
     }
 
     @Override
@@ -120,8 +115,8 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     }
 
     @Override
-    public ImmutableTerm visitRdfLiteral(TurtleOBDAParser.RdfLiteralContext ctx) {
-        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME());
+    public ImmutableTerm visitConstantRdfLiteral(TurtleOBDAParser.ConstantRdfLiteralContext ctx) {
+        Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.iri());
 
         // https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
         // [22]	STRING_LITERAL_QUOTE ::= '"' ([^#x22#x5C#xA#xD] | ECHAR | UCHAR)* '"'
@@ -137,22 +132,15 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                 rdfDatatype.orElse(typeFactory.getXsdStringDatatype()));
     }
 
-    private Optional<RDFDatatype> extractDatatype(TerminalNode langNode, TerminalNode iriNode, TerminalNode prefixedNameNode) {
+    private Optional<RDFDatatype> extractDatatype(TerminalNode langNode, TurtleOBDAParser.IriContext iri) {
         return factory.extractDatatype(
                 Optional.ofNullable(langNode)
                         .map(l -> l.getText().substring(1).toLowerCase()),
-                extractIRI(iriNode, prefixedNameNode)
-                        .map(rdfFactory::createIRI));
-    }
-
-    private Optional<String> extractIRI(TerminalNode iriNode, TerminalNode prefixedNameNode) {
-        if (iriNode != null)
-            return Optional.of(removeBrackets(iriNode.getText()));
-
-        if (prefixedNameNode != null)
-            return Optional.of(prefixManager.getExpandForm(prefixedNameNode.getText()));
-
-        return Optional.empty();
+                Optional.ofNullable(iri)
+                        .map(i -> i.accept(this))
+                        .filter(term -> term instanceof IRIConstant)
+                        .map(term -> (IRIConstant)term)
+                        .map(IRIConstant::getIRI));
     }
 
     @Override
