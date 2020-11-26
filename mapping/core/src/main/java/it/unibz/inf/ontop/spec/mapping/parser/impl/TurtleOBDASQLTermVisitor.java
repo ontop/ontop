@@ -59,7 +59,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
             TemplateComponent c = components.get(0);
             return (c.isColumnNameReference())
                 ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
-                : termFactory.getConstantIRI(rdfFactory.createIRI(removeBrackets(c.getComponent())));
+                : termFactory.getConstantIRI(rdfFactory.createIRI(c.getComponent()));
         }
         return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
@@ -73,7 +73,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
             TemplateComponent c = components.get(0);
             return (c.isColumnNameReference())
                 ? termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()))
-                : termFactory.getConstantIRI(rdfFactory.createIRI(prefixManager.getExpandForm(c.getComponent())));
+                : termFactory.getConstantIRI(rdfFactory.createIRI(c.getComponent()));
         }
         return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
