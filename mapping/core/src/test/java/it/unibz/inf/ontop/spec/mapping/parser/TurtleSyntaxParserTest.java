@@ -255,6 +255,28 @@ public class TurtleSyntaxParserTest {
 						getVariable("fname")), XSD.STRING))), result);
 	}
 
+
+
+
+	@Test
+	public void test_3_escape_concat() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} rdfs:label \"adres : {Address} \\\\{city:\\\\} {City}{Country}something\"@en-us .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm("http://obda.inf.unibz.it/testcase#Person-{}",
+						getVariable("id")),
+				getConstantIRI("http://www.w3.org/2000/01/rdf-schema#label"),
+				getRDFLiteralFunctionalTerm(
+						TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
+								TERM_FACTORY.getDBStringConstant("adres : "),
+								TERM_FACTORY.getPartiallyDefinedToStringCast(getVariable("Address")),
+								TERM_FACTORY.getDBStringConstant(" {city:} "),
+								TERM_FACTORY.getPartiallyDefinedToStringCast(getVariable("City")),
+								TERM_FACTORY.getPartiallyDefinedToStringCast(getVariable("Country")),
+								TERM_FACTORY.getDBStringConstant("something"))), "en-us"))), result);
+	}
+
 	@Test
 	public void test_3_concat() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(

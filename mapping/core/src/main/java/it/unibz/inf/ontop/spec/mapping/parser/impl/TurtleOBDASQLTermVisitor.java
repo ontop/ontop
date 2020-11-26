@@ -221,7 +221,8 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override // used once - remove from grammar?
     public ImmutableTerm visitString(TurtleOBDAParser.StringContext ctx) {
-        String template = removeBrackets(ctx.STRING_LITERAL_QUOTE().getText()); // without the double quotes
+        String template = removeBrackets(ctx.STRING_LITERAL_QUOTE().getText())
+                .replace("\\\\", "\\"); // without the double quotes
         return factory.getLiteralTemplateTerm(template);
     }
 
