@@ -12,8 +12,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.rio.turtle.TurtleUtil;
 
 import java.util.Optional;
@@ -36,14 +34,6 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         this.factory = new Templates(termFactory, typeFactory);
     }
 
-    private static String removeBrackets(String text) {
-        return text.substring(1, text.length() - 1);
-    }
-
-    private static String extractBnodeId(String text) {
-        return text.substring(2); // Remove the prefix _:
-    }
-
     @Override
     public ImmutableTerm visitPredicateRdfType(TurtleOBDAParser.PredicateRdfTypeContext ctx) {
         return termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
@@ -51,8 +41,9 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
     @Override
     public ImmutableTerm visitResourceIri(TurtleOBDAParser.ResourceIriContext ctx) {
+        String text = ctx.IRIREF().getText();
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                removeBrackets(ctx.IRIREF().getText()));
+                text.substring(1, text.length() - 1)); // remove " "
 
         if (components.size() == 1 && components.get(0).isColumnNameReference())
             return  factory.getIRIColumn(components.get(0).getComponent());
@@ -74,7 +65,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     @Override
     public ImmutableTerm visitBlankNode(TurtleOBDAParser.BlankNodeContext ctx) {
         ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                extractBnodeId(ctx.BLANK_NODE_LABEL().getText()));
+                ctx.BLANK_NODE_LABEL().getText().substring(2)); // remove the _: prefix
 
         if (components.size() == 1 && components.get(0).isColumnNameReference())
             return  factory.getBnodeColumn(components.get(0).getComponent());
@@ -98,7 +89,8 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         // [159s] ECHAR ::= '\' [tbnrf"'\]
         // TurtleUtil.decodeString deals with UCHAR and ECHAR, in particular, replace \\ by \, etc.
 
-        String template = TurtleUtil.decodeString(removeBrackets(ctx.STRING_LITERAL_QUOTE().getText()));
+        String text = ctx.STRING_LITERAL_QUOTE().getText();
+        String template = TurtleUtil.decodeString(text.substring(1, text.length() - 1)); // remove " "
         ImmutableTerm lexicalValue = factory.getLiteralTemplateTerm(template);
 
         return termFactory.getRDFLiteralFunctionalTerm(lexicalValue,
@@ -116,7 +108,8 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                             + dt.getIRI() + "\nSet the property "
                             + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them."); });
 
-        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(removeBrackets(ctx.ENCLOSED_COLUMN_NAME().getText()));
+        String text = ctx.ENCLOSED_COLUMN_NAME().getText();
+        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(text.substring(1, text.length() - 1)); // remove " "
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm,
                 // We give the abstract datatype RDFS.LITERAL when it is not determined yet
                 // --> The concrete datatype be inferred afterwards

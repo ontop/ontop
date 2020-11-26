@@ -75,7 +75,7 @@ public class Templates {
     public NonVariableTerm getIRITemplate(ImmutableList<TemplateComponent> components) {
         int size = components.size();
         if (size == 0)
-                return termFactory.getConstantIRI("");
+            return termFactory.getConstantIRI("");
 
         if (size == 1 && !components.get(0).isColumnNameReference())
             return termFactory.getConstantIRI(components.get(0).getComponent());
@@ -89,7 +89,7 @@ public class Templates {
             return termFactory.getConstantBNode("");
 
         if (size == 1 && !components.get(0).isColumnNameReference())
-                return termFactory.getConstantBNode(components.get(0).getComponent());
+            return termFactory.getConstantBNode(components.get(0).getComponent());
 
         return termFactory.getBnodeFunctionalTerm(getTemplateString(components), getTemplateTerms(components));
     }
