@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.rdf.api.RDF;
+import org.eclipse.rdf4j.rio.turtle.TurtleUtil;
 
 import java.util.Optional;
 
@@ -138,7 +139,18 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     @Override
     public ImmutableTerm visitRdfLiteral(TurtleOBDAParser.RdfLiteralContext ctx) {
         Optional<RDFDatatype> rdfDatatype = extractDatatype(ctx.LANGTAG(), ctx.IRIREF(), ctx.PREFIXED_NAME());
-        return termFactory.getRDFLiteralFunctionalTerm(visitString(ctx.string()),
+
+        // https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
+        // [22]	STRING_LITERAL_QUOTE ::= '"' ([^#x22#x5C#xA#xD] | ECHAR | UCHAR)* '"'
+        //    (inserted a space below because the Java compiler complains of invalid Unicode)
+        // [26] UCHAR ::= '\ u' HEX HEX HEX HEX | \U HEX HEX HEX HEX HEX HEX HEX HEX
+        // [159s] ECHAR ::= '\' [tbnrf"'\]
+        // TurtleUtil.decodeString deals with UCHAR and ECHAR, in particular, replace \\ by \, etc.
+
+        String template = TurtleUtil.decodeString(removeBrackets(ctx.STRING_LITERAL_QUOTE().getText()));
+        ImmutableTerm lexicalValue = factory.getLiteralTemplateTerm(template);
+
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalValue,
                 rdfDatatype.orElse(typeFactory.getXsdStringDatatype()));
     }
 
@@ -158,13 +170,6 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
             return Optional.of(prefixManager.getExpandForm(prefixedNameNode.getText()));
 
         return Optional.empty();
-    }
-
-    @Override // used once - remove from grammar?
-    public ImmutableTerm visitString(TurtleOBDAParser.StringContext ctx) {
-        String template = removeBrackets(ctx.STRING_LITERAL_QUOTE().getText())
-                .replace("\\\\", "\\"); // without the double quotes
-        return factory.getLiteralTemplateTerm(template);
     }
 
     @Override

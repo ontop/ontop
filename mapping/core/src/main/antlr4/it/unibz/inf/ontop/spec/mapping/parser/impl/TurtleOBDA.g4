@@ -136,11 +136,8 @@ literal // [13] literal ::= RDFLiteral | NumericLiteral | BooleanLiteral
   ;
 
 rdfLiteral // [128s] RDFLiteral ::=	String (LANGTAG | '^^' iri)?
-  : string (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
-  ;
-
-string  // 	[17] String ::=	STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
-  : STRING_LITERAL_QUOTE
+          // [17] String ::= STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
+  : STRING_LITERAL_QUOTE (LANGTAG | '^^' IRIREF | '^^' PREFIXED_NAME)?
   ;
 
 booleanLiteral // [133s] BooleanLiteral ::= 'true' | 'false'
