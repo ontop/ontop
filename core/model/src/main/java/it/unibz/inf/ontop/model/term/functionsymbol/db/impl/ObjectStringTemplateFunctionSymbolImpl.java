@@ -42,20 +42,21 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Nullable
     private ImmutableList<DBConstant> templateConstants;
 
-    protected ObjectStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
-        super(template, createBaseTypes(arity, typeFactory));
+    protected ObjectStringTemplateFunctionSymbolImpl(String template, TypeFactory typeFactory) {
+        super(template, createBaseTypes(getArity(template), typeFactory));
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
         this.pattern = extractPattern(template, true);
 
-        this.isInjective = isInjective(arity, template);
+        this.isInjective = isInjective(template);
     }
 
     /**
      * Must not produce false positive
      */
-    protected boolean isInjective(int arity, String template) {
+    protected boolean isInjective(String template) {
+        int arity = getArity(template);
         if (arity < 2)
             return true;
 
@@ -68,6 +69,16 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return intermediateStrings.stream()
                 .allMatch(interm -> SOME_SAFE_SEPARATORS.stream()
                         .anyMatch(sep -> interm.indexOf(sep) >= 0));
+    }
+
+    private static int getArity(String iriOrBnodeTemplate) {
+        int count = 0;
+        for (int currentIndex = iriOrBnodeTemplate.indexOf(PLACE_HOLDER);
+             currentIndex >= 0;
+             currentIndex = iriOrBnodeTemplate.indexOf(PLACE_HOLDER, currentIndex + 1)) {
+            count++;
+        }
+        return count;
     }
 
     /**
@@ -93,8 +104,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         TermType stringType = typeFactory.getXsdStringDatatype();
 
         return IntStream.range(0, arity)
-                .boxed()
-                .map(i -> stringType)
+                .mapToObj(i -> stringType)
                 .collect(ImmutableCollectors.toList());
     }
 

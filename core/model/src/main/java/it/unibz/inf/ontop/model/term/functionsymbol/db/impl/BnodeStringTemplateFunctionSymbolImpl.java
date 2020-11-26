@@ -7,13 +7,12 @@ import it.unibz.inf.ontop.utils.Templates;
 public class BnodeStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFunctionSymbolImpl
         implements BnodeStringTemplateFunctionSymbol {
 
-    private BnodeStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
-        super(template, arity, typeFactory);
+    private BnodeStringTemplateFunctionSymbolImpl(String template, TypeFactory typeFactory) {
+        super(template, typeFactory);
     }
 
     public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(String template,
                                                                          TypeFactory typeFactory) {
-        int arity = Templates.getArity(template);
-        return new BnodeStringTemplateFunctionSymbolImpl(template, arity, typeFactory);
+        return new BnodeStringTemplateFunctionSymbolImpl(template, typeFactory);
     }
 }
