@@ -14,11 +14,11 @@ import org.apache.commons.rdf.api.IRI;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class MappingParserHelper {
+public class Templates {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
 
-    public MappingParserHelper(TermFactory termFactory, TypeFactory typeFactory) {
+    public Templates(TermFactory termFactory, TypeFactory typeFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
     }
@@ -133,7 +133,7 @@ public class MappingParserHelper {
         if (dbConcatFunctionalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
             return dbConcatFunctionalTerm.getTerms().stream()
                     .map(DBTypeConversionFunctionSymbol::uncast)
-                    .map(MappingParserHelper::termToTemplateComponentString)
+                    .map(Templates::termToTemplateComponentString)
                     .collect(Collectors.joining());
 
         throw new IllegalArgumentException("Invalid term type (DBConcat is expected): " + dbConcatFunctionalTerm);

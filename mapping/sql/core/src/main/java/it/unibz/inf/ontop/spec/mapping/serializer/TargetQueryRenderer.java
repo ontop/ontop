@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.model.type.impl.IRITermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.MappingParserHelper;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.Templates;
 import org.eclipse.rdf4j.rio.turtle.TurtleUtil;
 
 import java.util.Optional;
@@ -79,7 +79,7 @@ public class TargetQueryRenderer {
                 return renderRDFFunction(ift);
 
             if (fs instanceof DBConcatFunctionSymbol)
-                return "\"" + TurtleUtil.encodeString(MappingParserHelper.serializeLiteralTemplate(ift)) + "\"";
+                return "\"" + TurtleUtil.encodeString(Templates.serializeLiteralTemplate(ift)) + "\"";
 
             return ift.getFunctionSymbol().getName() + "(" + ift.getTerms().stream()
                     .map(this::renderTerm)
@@ -116,7 +116,7 @@ public class TargetQueryRenderer {
         if (termType instanceof RDFTermTypeConstant) {
             String identifier = (lexicalTerm instanceof ImmutableFunctionalTerm
                             && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol)
-                    ? MappingParserHelper.serializeObjectTemplate((ImmutableFunctionalTerm) lexicalTerm)
+                    ? Templates.serializeObjectTemplate((ImmutableFunctionalTerm) lexicalTerm)
                     // case of RDF(TermToTxt(variable), X) or RDF(variable, X), where X = BNODE / IRI
                     : renderTerm(lexicalTerm);
 

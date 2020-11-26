@@ -26,7 +26,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     private final TypeFactory typeFactory;
     private final OntopMappingSettings settings;
 
-    private final MappingParserHelper factory;
+    private final Templates factory;
 
     TurtleOBDASQLTermVisitor(TermFactory termFactory, RDF rdfFactory, TypeFactory typeFactory, OntopMappingSettings settings, PrefixManager prefixManager) {
         this.termFactory = termFactory;
@@ -34,7 +34,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         this.typeFactory = typeFactory;
         this.settings = settings;
         this.prefixManager = prefixManager;
-        this.factory = new MappingParserHelper(termFactory, typeFactory);
+        this.factory = new Templates(termFactory, typeFactory);
     }
 
     private String removeBrackets(String text) {
@@ -66,7 +66,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
             return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()));
         }
-        return termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
+        return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
     @Override
@@ -85,7 +85,7 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
             return termFactory.getIRIFunctionalTerm(factory.getVariable(c.getComponent()));
         }
-        return termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), factory.getTemplateTerms(components));
+        return termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), factory.getTemplateTerms(components));
     }
 
     @Override

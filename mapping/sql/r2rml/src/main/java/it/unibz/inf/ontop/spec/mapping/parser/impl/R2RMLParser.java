@@ -8,7 +8,6 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -27,7 +26,7 @@ public class R2RMLParser {
 	private final TypeFactory typeFactory;
 	private final RDF rdfFactory;
 
-	private final MappingParserHelper factory;
+	private final Templates factory;
 
 	@Inject
 	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
@@ -35,7 +34,7 @@ public class R2RMLParser {
 		this.typeFactory = typeFactory;
 		this.manager = RDF4JR2RMLMappingManager.getInstance();
 		this.rdfFactory = rdfFactory;
-		this.factory = new MappingParserHelper(termFactory, typeFactory);
+		this.factory = new Templates(termFactory, typeFactory);
 	}
 
 	/**
@@ -133,7 +132,7 @@ public class R2RMLParser {
 			return terms.isEmpty()
 					? termFactory.getIRIFunctionalTerm(// Q: DOES IT MAKE SENSE?
 					termFactory.getDBStringConstant(components.get(0).getComponent()))
-					: termFactory.getIRIFunctionalTerm(factory.getTemplateString(components), terms);
+					: termFactory.getIRIFunctionalTerm(Templates.getTemplateString(components), terms);
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
@@ -153,7 +152,7 @@ public class R2RMLParser {
 			return terms.isEmpty()
 					? termFactory.getBnodeFunctionalTerm(// Q: DOES IT MAKE SENSE?
 							termFactory.getDBStringConstant(components.get(0).getComponent()))
-					: termFactory.getBnodeFunctionalTerm(factory.getTemplateString(components), terms);
+					: termFactory.getBnodeFunctionalTerm(Templates.getTemplateString(components), terms);
 		}
 		@Override
 		public 	NonVariableTerm extract(String column, T termMap) {
@@ -186,8 +185,8 @@ public class R2RMLParser {
 
 		private RDFDatatype extractDatatype(ObjectMap om) {
 			return  factory.extractDatatype(
-					Optional.ofNullable(om.getLanguageTag()),
-					Optional.ofNullable(om.getDatatype()))
+						Optional.ofNullable(om.getLanguageTag()),
+						Optional.ofNullable(om.getDatatype()))
 					// Third try: datatype of the constant
 					.orElseGet(() -> Optional.ofNullable(om.getConstant())
 							.map(c -> (Literal) c)
