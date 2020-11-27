@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import eu.optique.r2rml.api.MappingFactory;
 import eu.optique.r2rml.api.model.*;
-import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -230,51 +229,37 @@ public class SQLPPTriplesMapToR2RMLConverter {
                                                            Function<String, T> columnFct,
                                                            Function<IRI, T> iriFct,
                                                            Function<BlankNode, T> bNodeFct) {
-		T termMap;
 		if (lexicalTerm instanceof DBConstant) { //fixed string
 			String lexicalString = ((DBConstant) lexicalTerm).getValue();
-			termMap = termType.isBlankNode()
+			return termType.isBlankNode()
 					? bNodeFct.apply(rdfFactory.createBlankNode(lexicalString))
 					: iriFct.apply(rdfFactory.createIRI(lexicalString));
 		}
 		else if (lexicalTerm instanceof Variable) {
-			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
+			T termMap = columnFct.apply(((Variable) lexicalTerm).getName());
+			termMap.setTermType(termType.isBlankNode() ? R2RMLVocabulary.blankNode : R2RMLVocabulary.iri);
+			return termMap;
 		}
 		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-			String templateString = getTemplate((ImmutableFunctionalTerm) lexicalTerm);
-			termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+			if (termType.isBlankNode()) {
+				String templateString = bnodeTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm);
+				T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+				termMap.setTermType(R2RMLVocabulary.blankNode);
+				return termMap;
+			}
+			else  {
+				String templateString = iriTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm);
+				T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+				termMap.setTermType(R2RMLVocabulary.iri);
+				return termMap;
+			}
 		}
-		else {
-			throw new MinorOntopInternalBugException("Unexpected lexical term for an IRI/Bnode: " + lexicalTerm);
-		}
-
-		termMap.setTermType(termType.isBlankNode() ? R2RMLVocabulary.blankNode : R2RMLVocabulary.iri);
-		return termMap;
+		throw new MinorOntopInternalBugException("Unexpected lexical term for an IRI/Bnode: " + lexicalTerm);
 	}
 
 	private final BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(null);
 	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
 	private final LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(null, null);
-
-	private String getTemplate(ImmutableFunctionalTerm lexicalTerm) {
-		FunctionSymbol functionSymbol = lexicalTerm.getFunctionSymbol();
-		if (functionSymbol instanceof BnodeStringTemplateFunctionSymbol) {
-			return bnodeTemplateFactory.serializeTemplateTerm(lexicalTerm);
-		}
-		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-			String prefixedTemplate = iriTemplateFactory.serializeTemplateTerm(lexicalTerm);
-			try {
-				String expanded = prefixManager.getExpandForm(prefixedTemplate);
-				if (!expanded.equals(prefixedTemplate))
-					System.out.println("TEMPLATE BINGO");
-				return expanded;
-			}
-			catch (InvalidPrefixWritingException e) {
-				return prefixedTemplate;
-			}
-		}
-		throw new R2RMLSerializationException("Unexpected function symbol " + functionSymbol + " in term " + lexicalTerm);
-	}
 
 
 	/**
@@ -286,24 +271,20 @@ public class SQLPPTriplesMapToR2RMLConverter {
 														Function<String, T> columnFct,
 														Function<Literal, T> literalFct) {
 		T termMap;
-		if (lexicalTerm instanceof Variable) {
-			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
-		}
-		else if (lexicalTerm instanceof DBConstant) {
+		if (lexicalTerm instanceof DBConstant) {
 			String lexicalString = ((DBConstant) lexicalTerm).getValue();
 			Literal literal = datatype.getLanguageTag()
 					.map(lang -> rdfFactory.createLiteral(lexicalString, lang.getFullString()))
 					.orElseGet(() -> rdfFactory.createLiteral(lexicalString, datatype.getIRI()));
 			termMap = literalFct.apply(literal);
 		}
+		else if (lexicalTerm instanceof Variable) {
+			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
+		}
 		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
-			if (functionalLexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol) { //concat
-				termMap = templateFct.apply(mappingFactory.createTemplate(
+			termMap = templateFct.apply(mappingFactory.createTemplate(
 						literalTemplateFactory.serializeTemplateTerm(functionalLexicalTerm)));
-			}
-			else
-				throw new R2RMLSerializationException("Unexpected function symbol in: " + lexicalTerm);
 		}
 		else {
 			throw new MinorOntopInternalBugException("Unexpected lexical term for a literal: " + lexicalTerm);
@@ -337,7 +318,10 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			return true;
 		if (lexicalTerm instanceof ImmutableFunctionalTerm) {
 			FunctionSymbol fs = ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol();
-			return fs instanceof BnodeStringTemplateFunctionSymbol || fs instanceof IRIStringTemplateFunctionSymbol;
+			boolean r = fs instanceof BnodeStringTemplateFunctionSymbol || fs instanceof IRIStringTemplateFunctionSymbol;
+			if (r)
+				System.out.println("isOntopInternalRDFLiteral BINGO");
+			return r;
 		}
 		return false;
 	}
