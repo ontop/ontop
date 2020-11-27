@@ -11,10 +11,14 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
+
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -67,7 +71,7 @@ public abstract class QuestStatement implements OntopStatement {
 		private boolean executingTargetQuery;
 
 		QueryExecutionThread(Q inputQuery, IQ executableQuery, QueryLogger queryLogger, Evaluator<R,Q> evaluator,
-							 CountDownLatch monitor) {
+				CountDownLatch monitor) {
 			this.executableQuery = executableQuery;
 			this.inputQuery = inputQuery;
 			this.queryLogger = queryLogger;
@@ -101,11 +105,11 @@ public abstract class QuestStatement implements OntopStatement {
 		@Override
 		public void run() {
 			//                        FOR debugging H2 in-memory database
-//			try {
-//				org.h2.tools.Server.startWebServer(((QuestConnection)conn).getSQLConnection());
-//			} catch (SQLException e) {
-//				e.printStackTrace();
-//			}
+			//			try {
+			//				org.h2.tools.Server.startWebServer(((QuestConnection)conn).getSQLConnection());
+			//			} catch (SQLException e) {
+			//				e.printStackTrace();
+			//			}
 			try {
 				/*
 				 * Executes the target query.
@@ -160,7 +164,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * TODO: refactor
 	 */
 	protected abstract SimpleGraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery,
-															  boolean collectResults, QueryLogger queryLogger)
+			boolean collectResults, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
 	/**
@@ -174,7 +178,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	@Override
 	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopConnectionException,
-            OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+			                                                                            OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 		return execute(inputQuery, ImmutableMultimap.of());
 	}
 
@@ -205,7 +209,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	private SimpleGraphResultSet executeDescribeQuery(DescribeQuery inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopReformulationException, OntopResultConversionException, OntopConnectionException,
-			OntopQueryEvaluationException {
+					       OntopQueryEvaluationException {
 
 		ImmutableSet<String> constants = extractDescribeQueryConstants(inputQuery);
 
@@ -224,8 +228,10 @@ public abstract class QuestStatement implements OntopStatement {
 					describeResultSet = set;
 				} else if (set != null) {
 					// 2nd and manyth times execute, but collect result into one object
-					while (set.hasNext())
-						describeResultSet.addNewResult(set.next());
+					Iterator<Statement> iterator = set.iterator();
+					while (iterator.hasNext()){
+						describeResultSet.addNewResult(iterator.next());
+					}
 				}
 			}
 			// execute describe <uriconst> in object position
@@ -238,8 +244,10 @@ public abstract class QuestStatement implements OntopStatement {
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;
 				} else if (set != null) {
-					while (set.hasNext())
-						describeResultSet.addNewResult(set.next());
+					Iterator<Statement> iterator = set.iterator();
+					while (iterator.hasNext()){
+						describeResultSet.addNewResult(iterator.next());
+					}
 				}
 			}
 			// Exception is re-cast because not due to the initial input query
@@ -251,7 +259,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private ImmutableSet<String> extractDescribeQueryConstants(DescribeQuery inputQuery)
 			throws OntopQueryEvaluationException, OntopConnectionException,
-            OntopReformulationException, OntopResultConversionException {
+					       OntopReformulationException, OntopResultConversionException {
 		String inputQueryString = inputQuery.getInputString();
 
 		// create list of URI constants we want to describe
@@ -264,8 +272,8 @@ public abstract class QuestStatement implements OntopStatement {
 
 				ImmutableSet.Builder<String> constantSetBuilder = ImmutableSet.builder();
 				while (resultSet.hasNext()) {
-                    final OntopBindingSet bindingSet = resultSet.next();
-                    Constant constant = bindingSet.getValues().get(0);
+					final OntopBindingSet bindingSet = resultSet.next();
+					Constant constant = Arrays.stream(bindingSet.getBindings()).findFirst().get().getValue();
 					if (constant instanceof IRIConstant) {
 						// collect constants in list
 						constantSetBuilder.add(((IRIConstant) constant).getIRI().getIRIString());
@@ -296,7 +304,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
 	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, ImmutableMultimap<String, String> httpHeaders,
-																				 Evaluator<R, Q> evaluator)
+			Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
 		QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
 
@@ -338,7 +346,7 @@ public abstract class QuestStatement implements OntopStatement {
 		return resultSet;
 	}
 
-	
+
 	@Override
 	public void cancel() throws OntopConnectionException {
 		canceled = true;
@@ -364,7 +372,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
-			return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
+		return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 
 }

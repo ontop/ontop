@@ -54,8 +54,8 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
     @Override
     public ImmutableList<String> getSignature() {
         return signature.stream()
-                .map(Variable::getName)
-                .collect(ImmutableCollectors.toList());
+                       .map(Variable::getName)
+                       .collect(ImmutableCollectors.toList());
     }
 
 
@@ -105,6 +105,14 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
         try {
             rs.close();
         } catch (Exception e) {
+            throw buildConnectionException(e);
+        }
+    }
+    @Override
+    public boolean isConnectionAlive() throws OntopConnectionException {
+        try {
+            return !rs.isClosed();
+        } catch (SQLException e) {
             throw buildConnectionException(e);
         }
     }

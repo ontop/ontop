@@ -1,181 +1,306 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
+import java.security.SecureRandom;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.algebra.BNodeGenerator;
+import org.eclipse.rdf4j.query.algebra.Extension;
+import org.eclipse.rdf4j.query.algebra.ExtensionElem;
+import org.eclipse.rdf4j.query.algebra.ProjectionElem;
+import org.eclipse.rdf4j.query.algebra.ProjectionElemList;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
+import org.eclipse.rdf4j.query.algebra.ValueExpr;
+import org.eclipse.rdf4j.sail.SailException;
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.model.term.RDFConstant;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.query.algebra.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import it.unibz.inf.ontop.utils.RDF4JHelper;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
-	private final List<RDFFact> results = new ArrayList<>();
+	private final StatementIterator iterator;
 
-	private final TupleResultSet tupleResultSet;
+	private final int fetchSize;
 
-	private final ConstructTemplate constructTemplate;
+	private final TermFactory termFactory;
 
-	private final ImmutableMap<String, ValueExpr> extMap;
+	public DefaultSimpleGraphResultSet(
+			TupleResultSet tupleResultSet,
+			ConstructTemplate constructTemplate,
+			TermFactory termFactory,
+			org.apache.commons.rdf.api.RDF rdfFactory,
+			boolean preloadStatements)
+			throws OntopConnectionException {
+		this.termFactory = termFactory;
+		this.fetchSize = tupleResultSet.getFetchSize();
+		try {
+			iterator =
+					new StatementIterator(
+							tupleResultSet, constructTemplate, termFactory, rdfFactory, preloadStatements);
+		} catch (OntopResultConversionException e) {
+			throw new SailException(e.getCause());
+		}
+	}
 
-	// store results in case of describe queries
-	private final boolean storeResults;
-    private final QueryLogger queryLogger;
-    private final TermFactory termFactory;
-    private final org.apache.commons.rdf.api.RDF rdfFactory;
+	@Override
+	public boolean hasNext() {
+		return iterator().hasNext();
+	}
 
-    public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
-                                       boolean storeResults, QueryLogger queryLogger, TermFactory termFactory,
-                                       org.apache.commons.rdf.api.RDF rdfFactory) throws OntopResultConversionException, OntopConnectionException {
-		this.tupleResultSet = tupleResultSet;
-		this.constructTemplate = constructTemplate;
-        this.queryLogger = queryLogger;
-        this.termFactory = termFactory;
-        this.rdfFactory = rdfFactory;
+	@Override
+	public RDFFact next() {
+		Statement statement = iterator().next();
+		ObjectConstant subjectConstant = null;
+		IRIConstant propertyConstant;
+		RDFConstant objectConstant;
+		if (statement.getSubject() instanceof IRI) {
+			subjectConstant = termFactory.getConstantIRI(statement.getSubject().stringValue());
+		} else if (statement.getSubject() instanceof BNode) {
+			subjectConstant = termFactory.getConstantBNode(statement.getSubject().stringValue());
+		}
+		propertyConstant = termFactory.getConstantIRI(statement.getPredicate().stringValue());
+		if (statement.getObject() instanceof IRI) {
+			objectConstant = termFactory.getConstantIRI(statement.getObject().stringValue());
+		} else if (statement.getObject() instanceof BNode) {
+			objectConstant = termFactory.getConstantBNode(statement.getObject().stringValue());
+		} else {
+			objectConstant =
+					termFactory.getRDFLiteralConstant(statement.getObject().stringValue(), XSD.STRING);
+		}
+		return RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant);
+	}
 
-        Extension ex = constructTemplate.getExtension();
-        if (ex != null) {
-            extMap = ex.getElements().stream()
-                    .collect(ImmutableCollectors.toMap(ExtensionElem::getName, ExtensionElem::getExpr));
-        }
-        else
-            extMap = null;
+	@Override
+	public Iterator<Statement> iterator() {
+		return iterator;
+	}
 
-        this.storeResults = storeResults;
-        if (storeResults) {
-            //process current result set into local buffer,
-            //since additional results will be collected
-            while (tupleResultSet.hasNext()) {
-                results.addAll(processResults(tupleResultSet.next()));
-            }
-        }
-    }
-
-
-    @Override
-    public int getFetchSize() throws OntopConnectionException {
-        return tupleResultSet.getFetchSize();
-    }
-
-    @Override
-	public void addNewResult(RDFFact assertion)
-	{
-		results.add(assertion);
+	@Override
+	public void close() throws OntopConnectionException {
+		// doesn't do anything, kept for conformance
 	}
 
 	/**
-	 * The method to actually process the current result set Row.
-	 * Construct a list of assertions from the current result set row.
-	 * In case of describe it is called to process and store all
-	 * the results from a resultset.
-	 * In case of construct it is called upon next, to process
-	 * the only current result set.
+	 * The method to actually process the current result set Row. Construct a list of assertions from
+	 * the current result set row. In case of describe it is called to process and store all the
+	 * results from a resultset. In case of construct it is called upon next, to process the only
+	 * current result set.
 	 */
-    private List<RDFFact> processResults(OntopBindingSet bindingSet)
-            throws OntopResultConversionException, OntopConnectionException {
+	@Override
+	public int getFetchSize() {
+		return fetchSize;
+	}
 
-        List<RDFFact> tripleAssertions = new ArrayList<>();
+	@Override
+	public void addNewResult(Statement statement) {
+		iterator.addNewStatement(statement);
+	}
 
+	@Override
+	public void addStatementClosable(AutoCloseable sqlStatement) {
+		iterator.sqlStatement = sqlStatement;
+	}
 
-        for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
-            int size = peList.getElements().size();
-            for (int i = 0; i < size / 3; i++) {
+	private static class StatementIterator implements Iterator<Statement> {
+		private final TupleResultSet resultSet;
+		private final ConstructTemplate constructTemplate;
+		private final TermFactory termFactory;
+		private final org.apache.commons.rdf.api.RDF rdfFactory;
+		private ImmutableMap<String, ValueExpr> extMap;
+		private final Queue<Statement> statementBuffer;
+		private final ValueFactory valueFactory;
+		private final SecureRandom random;
+		private AutoCloseable sqlStatement;
+		private final byte[] salt;
+		private final boolean preloadStatements;
 
-                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
-                IRIConstant propertyConstant = (IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
-                RDFConstant objectConstant = (RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
-                if (subjectConstant != null && propertyConstant != null && objectConstant != null)
-                    tripleAssertions.add(RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
-            }
-        }
-        return tripleAssertions;
-    }
+		private StatementIterator(
+				TupleResultSet resultSet,
+				ConstructTemplate constructTemplate,
+				TermFactory termFactory,
+				org.apache.commons.rdf.api.RDF rdfFactory,
+				boolean preloadStatements)
+				throws OntopConnectionException, OntopResultConversionException {
+			this.resultSet = resultSet;
+			this.constructTemplate = constructTemplate;
+			this.termFactory = termFactory;
+			this.rdfFactory = rdfFactory;
+			intExtMap();
+			this.statementBuffer = new LinkedList<>();
+			this.valueFactory = SimpleValueFactory.getInstance();
+			this.random = new SecureRandom();
+			this.salt = initByteSalt();
+			this.preloadStatements = preloadStatements;
+			if (preloadStatements) {
+				while (resultSet.hasNext()) {
+					addStatementsFromSet(resultSet.next());
+				}
+				if (sqlStatement != null) {
+					try {
+						sqlStatement.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				resultSet.close();
+			}
+		}
 
-    @Override
-    public boolean hasNext() throws OntopConnectionException, OntopResultConversionException {
-        if (results.size() > 0)
-            return true;
-        //in case of describe, we return the collected results list information
-        if (storeResults)
-            return false;
-        // construct
-        while(tupleResultSet.hasNext()) {
-            List<RDFFact> newTriples = processResults(tupleResultSet.next());
-            if (!newTriples.isEmpty()) {
-                results.addAll(newTriples);
-                return true;
-            }
-        }
-        return false;
-    }
+		@Override
+		public boolean hasNext() {
+			try {
+				if (statementBuffer.isEmpty() && resultSetHasNext()) {
+					addStatementsFromSet(resultSet.next());
+				}
+				boolean hasNext = !statementBuffer.isEmpty();
+				if (!hasNext && !preloadStatements) {
+					resultSet.close();
+					if (sqlStatement != null) {
+						sqlStatement.close();
+					}
+				}
+				return hasNext;
+			} catch (Exception e) {
+				throw new SailException(e.getMessage());
+			}
+		}
 
-    @Override
-    public RDFFact next() {
-        if (results.size() > 0)
-            return results.remove(0);
-        else
-            throw new NoSuchElementException("Please call hasNext() before calling next()");
-    }
+		@Override
+		public Statement next() {
+			try {
+				if (statementBuffer.isEmpty() && !preloadStatements) {
+					resultSet.close();
+					if (sqlStatement != null) {
+						sqlStatement.close();
+					}
+				}
+				return statementBuffer.remove();
+			} catch (Exception e) {
+				throw new SailException(e.getMessage());
+			}
+		}
 
-    private Constant getConstant(ProjectionElem node, OntopBindingSet bindingSet)
-            throws OntopResultConversionException, OntopConnectionException {
-        Constant constant = null;
-        String node_name = node.getSourceName();
-        ValueExpr ve = null;
+		private void addStatementsFromSet(OntopBindingSet bindingSet)
+				throws OntopResultConversionException {
+			for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
+				int size = peList.getElements().size();
+				for (int i = 0; i < size / 3; i++) {
+					ObjectConstant subjectConstant =
+							(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
+					IRIConstant propertyConstant =
+							(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
+					RDFConstant objectConstant =
+							(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
+					if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
+						addStatement(subjectConstant, propertyConstant, objectConstant);
+					}
+				}
+			}
+		}
 
-        if (extMap != null) {
-            ve = extMap.get(node_name);
-        }
+		private void addStatement(
+				ObjectConstant subjectConstant, IRIConstant propertyConstant, RDFConstant objectConstant) {
+			statementBuffer.add(
+					valueFactory.createStatement(
+							RDF4JHelper.getResource(subjectConstant, salt),
+							valueFactory.createIRI(propertyConstant.getIRI().getIRIString()),
+							RDF4JHelper.getValue(objectConstant, salt)));
+		}
 
-//		if (node_name.charAt(0) == '-') {
-        if (ve instanceof ValueConstant) {
-            ValueConstant vc = (ValueConstant) ve;
-            if (vc.getValue() instanceof IRI) {
-                constant = termFactory.getConstantIRI(rdfFactory.createIRI(vc.getValue().stringValue()));
-            }
-            else if (vc.getValue() instanceof Literal) {
-                constant = termFactory.getRDFLiteralConstant(vc.getValue().stringValue(), XSD.STRING);
-            }
-            else {
-                constant = termFactory.getConstantBNode(vc.getValue().stringValue());
-            }
-        }
-        else if (ve instanceof BNodeGenerator) {
-            // See https://www.w3.org/TR/sparql11-query/#tempatesWithBNodes
-            String rowId = bindingSet.getRowUUIDStr();
+		private Constant getConstant(ProjectionElem node, OntopBindingSet bindingSet)
+				throws OntopResultConversionException {
+			Constant constant = null;
+			String nodeName = node.getSourceName();
+			ValueExpr ve = null;
 
-            String label = Optional.ofNullable(((BNodeGenerator) ve).getNodeIdExpr())
-                    // If defined, we expected the b-node label to be constant (as appearing in the CONSTRUCT block)
-                    .filter(e -> e instanceof ValueConstant)
-                    .map(v -> ((ValueConstant) v).getValue().stringValue())
-                    .map(s -> s + rowId)
-                    .orElseGet(() -> node_name + rowId);
+			if (extMap != null) {
+				ve = extMap.get(nodeName);
+			}
 
-            constant = termFactory.getConstantBNode(label);
-        }
-        else {
-            constant = bindingSet.getConstant(node_name);
-        }
-        return constant;
-    }
+			if (ve instanceof ValueConstant) {
+				ValueConstant vc = (ValueConstant) ve;
+				if (vc.getValue() instanceof IRI) {
+					constant = termFactory.getConstantIRI(rdfFactory.createIRI(vc.getValue().stringValue()));
+				} else if (vc.getValue() instanceof Literal) {
+					constant = termFactory.getRDFLiteralConstant(vc.getValue().stringValue(), XSD.STRING);
+				} else {
+					constant = termFactory.getConstantBNode(vc.getValue().stringValue());
+				}
+			} else if (ve instanceof BNodeGenerator) {
+				// See https://www.w3.org/TR/sparql11-query/#tempatesWithBNodes
+				String rowId = bindingSet.getRowUUIDStr();
 
-    @Override
-	public void close() throws OntopConnectionException {
-		tupleResultSet.close();
+				String label =
+						Optional.ofNullable(((BNodeGenerator) ve).getNodeIdExpr())
+								// If defined, we expected the b-node label to be constant (as appearing in the
+								// CONSTRUCT block)
+								.filter(e -> e instanceof ValueConstant)
+								.map(v -> ((ValueConstant) v).getValue().stringValue())
+								.map(s -> s + rowId)
+								.orElseGet(() -> nodeName + rowId);
+
+				constant = termFactory.getConstantBNode(label);
+			} else {
+				constant = bindingSet.getConstant(nodeName);
+			}
+			return constant;
+		}
+
+		private byte[] initByteSalt() {
+			byte[] salt = new byte[20];
+			random.nextBytes(salt);
+			return salt;
+		}
+
+		private void addNewStatement(Statement statement) {
+			statementBuffer.add(statement);
+		}
+
+		private void intExtMap() {
+			Extension ex = constructTemplate.getExtension();
+			if (ex != null) {
+				extMap =
+						ex.getElements().stream()
+								.collect(ImmutableCollectors.toMap(ExtensionElem::getName, ExtensionElem::getExpr));
+			} else {
+				extMap = null;
+			}
+		}
+
+		private boolean resultSetHasNext() {
+			try {
+				if (preloadStatements) {
+					return false;
+				}
+				if (!resultSet.isConnectionAlive()) {
+					return false;
+				}
+				return resultSet.hasNext();
+			} catch (OntopConnectionException | OntopResultConversionException e) {
+				throw new SailException(e.getCause());
+			}
+		}
 	}
 }

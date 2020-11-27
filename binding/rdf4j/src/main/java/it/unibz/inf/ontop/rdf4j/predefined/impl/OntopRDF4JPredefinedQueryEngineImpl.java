@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import static it.unibz.inf.ontop.utils.RDF4JHelper.createStatement;
+
 import com.github.jsonldjava.core.DocumentLoader;
 import com.github.jsonldjava.utils.JsonUtils;
 import com.google.common.cache.Cache;
@@ -44,13 +46,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefinedQueryEngine {
@@ -68,8 +67,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     private final SecureRandom random;
 
     public OntopRDF4JPredefinedQueryEngineImpl(OntopQueryEngine ontopEngine,
-                                               PredefinedQueries predefinedQueries,
-                                               OntopSystemConfiguration configuration) {
+            PredefinedQueries predefinedQueries,
+            OntopSystemConfiguration configuration) {
         this.ontopEngine = ontopEngine;
         this.graphQueries = predefinedQueries.getGraphQueries();
         this.tupleQueries = predefinedQueries.getTupleQueries();
@@ -81,7 +80,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
         // TODO: think about the dimensions
         referenceQueryCache = CacheBuilder.newBuilder()
-                .build();
+                                      .build();
 
         documentLoader = new DocumentLoader();
         predefinedQueries.getContextMap().forEach(
@@ -99,11 +98,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
     @Override
     public void evaluate(String queryId, ImmutableMap<String, String> bindings,
-                         ImmutableList<String> acceptMediaTypes,
-                         ImmutableMultimap<String, String> httpHeaders,
-                         Consumer<Integer> httpStatusSetter,
-                         BiConsumer<String, String> httpHeaderSetter,
-                         OutputStream outputStream) throws LateEvaluationOrConversionException {
+            ImmutableList<String> acceptMediaTypes,
+            ImmutableMultimap<String, String> httpHeaders,
+            Consumer<Integer> httpStatusSetter,
+            BiConsumer<String, String> httpHeaderSetter,
+            OutputStream outputStream) throws LateEvaluationOrConversionException {
 
         Optional<QueryType> optionalQueryType = getQueryType(queryId);
         if (!optionalQueryType.isPresent()) {
@@ -128,8 +127,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
     @Override
     public String evaluate(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                           ImmutableMultimap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
-                           BiConsumer<String, String> httpHeaderSetter) {
+            ImmutableMultimap<String, String> httpHeaders, Consumer<Integer> httpStatusSetter,
+            BiConsumer<String, String> httpHeaderSetter) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             evaluate(queryId, bindings, acceptMediaTypes, httpHeaders, httpStatusSetter, httpHeaderSetter, outputStream);
@@ -149,28 +148,28 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     public boolean shouldStream(String queryId) {
         if (graphQueries.containsKey(queryId))
             return graphQueries.get(queryId)
-                    .isResultStreamingEnabled();
+                           .isResultStreamingEnabled();
         else if (tupleQueries.containsKey(queryId))
             return tupleQueries.get(queryId)
-                    .isResultStreamingEnabled();
+                           .isResultStreamingEnabled();
         else
             return false;
     }
 
     private void evaluateGraphWithHandler(PredefinedGraphQuery predefinedQuery, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                                          ImmutableMultimap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
-                                          Consumer<Integer> httpStatusSetter, OutputStream outputStream) throws LateEvaluationOrConversionException {
+            ImmutableMultimap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
+            Consumer<Integer> httpStatusSetter, OutputStream outputStream) throws LateEvaluationOrConversionException {
 
         RDFWriterRegistry registry = RDFWriterRegistry.getInstance();
 
         Stream<String> mediaTypes = acceptMediaTypes.stream()
-                // So as to give priority to JSON-LD in browser
-                .filter(s -> !s.equals("application/xml"));
+                                            // So as to give priority to JSON-LD in browser
+                                            .filter(s -> !s.equals("application/xml"));
 
         Optional<RDFFormat> optionalFormat = extractFormat(mediaTypes, registry, RDFFormat.JSONLD,
                 m -> Optional.of(m)
-                        .filter(a -> a.contains("json"))
-                        .map(a -> RDFFormat.JSONLD));
+                             .filter(a -> a.contains("json"))
+                             .map(a -> RDFFormat.JSONLD));
 
         if (!optionalFormat.isPresent()) {
             // 406: Not acceptable
@@ -186,11 +185,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         // TODO: caching headers (on a per queryId basis)
 
         RDFWriterFactory rdfWriterFactory = predefinedQuery.getJsonLdFrame()
-                .filter(f -> rdfFormat.equals(RDFFormat.JSONLD))
-                .map(jsonLdFrame -> createJSONLDFrameWriterFactory(jsonLdFrame, predefinedQuery.shouldReturn404IfEmpty()))
-                .orElseGet(() -> registry.get(rdfFormat)
-                        .orElseThrow(() -> new MinorOntopInternalBugException(
-                                "The selected RDF format should have a writer factory")));
+                                                    .filter(f -> rdfFormat.equals(RDFFormat.JSONLD))
+                                                    .map(jsonLdFrame -> createJSONLDFrameWriterFactory(jsonLdFrame, predefinedQuery.shouldReturn404IfEmpty()))
+                                                    .orElseGet(() -> registry.get(rdfFormat)
+                                                                             .orElseThrow(() -> new MinorOntopInternalBugException(
+                                                                                     "The selected RDF format should have a writer factory")));
 
         QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, httpHeaders);
         try {
@@ -235,24 +234,24 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private RDFWriterFactory createJSONLDFrameWriterFactory(Map<String, Object> jsonLdFrame,
-                                                            boolean throwExceptionIfEmpty) {
+            boolean throwExceptionIfEmpty) {
         return new FramedJSONLDWriterFactory(jsonLdFrame, documentLoader, throwExceptionIfEmpty);
     }
 
     private <FF extends FileFormat, S> Optional<FF> extractFormat(Stream<String> acceptMediaTypes,
-                                                                  FileFormatServiceRegistry<FF, S> registry,
-                                                                  FF defaultFormat,
-                                                                  Function<String, Optional<FF>> otherFormatFct) {
+            FileFormatServiceRegistry<FF, S> registry,
+            FF defaultFormat,
+            Function<String, Optional<FF>> otherFormatFct) {
         return acceptMediaTypes
-                .map(m -> m.startsWith("*/*")
-                        ? Optional.of(defaultFormat)
-                        : registry.getFileFormatForMIMEType(m)
-                        .map(Optional::of)
-                        .orElseGet(() -> otherFormatFct.apply(m)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(f -> registry.get(f).isPresent())
-                .findFirst();
+                       .map(m -> m.startsWith("*/*")
+                                         ? Optional.of(defaultFormat)
+                                         : registry.getFileFormatForMIMEType(m)
+                                                   .map(Optional::of)
+                                                   .orElseGet(() -> otherFormatFct.apply(m)))
+                       .filter(Optional::isPresent)
+                       .map(Optional::get)
+                       .filter(f -> registry.get(f).isPresent())
+                       .findFirst();
     }
 
     private Optional<QueryType> getQueryType(String queryId) {
@@ -268,7 +267,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     public GraphQueryResult evaluateGraph(String queryId, ImmutableMap<String, String> bindings) throws QueryEvaluationException {
 
         PredefinedGraphQuery predefinedQuery = Optional.ofNullable(graphQueries.get(queryId))
-                .orElseThrow(() -> new IllegalArgumentException("The query" + queryId + " is not defined as a graph query"));
+                                                       .orElseThrow(() -> new IllegalArgumentException("The query" + queryId + " is not defined as a graph query"));
         ConstructTemplate constructTemplate = predefinedQuery.getConstructTemplate();
         QueryLogger queryLogger = createQueryLogger(predefinedQuery, bindings, ImmutableMultimap.of());
         try {
@@ -280,7 +279,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private IQ createExecutableQuery(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
-                                     QueryLogger queryLogger) throws OntopReformulationException, InvalidBindingSetException {
+            QueryLogger queryLogger) throws OntopReformulationException, InvalidBindingSetException {
 
         // May throw an InvalidBindingSetException
         predefinedQuery.validate(bindings);
@@ -290,8 +289,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         IQ existingReferenceIQ = referenceQueryCache.getIfPresent(bindingWithReferences);
         // NB: no problem if concurrent reference queries are generated (deterministic results)
         IQ referenceIQ = existingReferenceIQ == null
-                ? generateReferenceQuery(predefinedQuery, bindingWithReferences)
-                : existingReferenceIQ;
+                                 ? generateReferenceQuery(predefinedQuery, bindingWithReferences)
+                                 : existingReferenceIQ;
         if (existingReferenceIQ == null)
             referenceQueryCache.put(bindingWithReferences, referenceIQ);
 
@@ -303,11 +302,11 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private IQ generateReferenceQuery(PredefinedQuery predefinedQuery,
-                                      ImmutableMap<String, String> bindingWithReferences)
+            ImmutableMap<String, String> bindingWithReferences)
             throws OntopReformulationException {
         BindingSet bindingSet = predefinedQuery.convertBindings(bindingWithReferences);
         RDF4JInputQuery newQuery = predefinedQuery.getInputQuery()
-                .newBindings(bindingSet);
+                                           .newBindings(bindingSet);
 
         // TODO: shall we consider some HTTP headers?
         QueryLogger tmpQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
@@ -320,14 +319,14 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private QueryLogger createQueryLogger(PredefinedQuery predefinedQuery, ImmutableMap<String, String> bindings,
-                                          ImmutableMultimap<String, String> httpHeaders) {
+            ImmutableMultimap<String, String> httpHeaders) {
         QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
         queryLogger.setPredefinedQuery(predefinedQuery.getId(), bindings);
         return queryLogger;
     }
 
     private GraphQueryResult executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery,
-                                                   QueryLogger queryLogger) {
+            QueryLogger queryLogger) {
         try (
                 OntopConnection conn = ontopEngine.getConnection();
                 OntopStatement stm = conn.createStatement();
@@ -355,8 +354,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
     }
 
     private void evaluateTupleWithHandler(String queryId, ImmutableMap<String, String> bindings, ImmutableList<String> acceptMediaTypes,
-                                          ImmutableMultimap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
-                                          Consumer<Integer> httpStatusSetter, OutputStream outputStream) {
+            ImmutableMultimap<String, String> httpHeaders, BiConsumer<String, String> httpHeaderSetter,
+            Consumer<Integer> httpStatusSetter, OutputStream outputStream) {
         throw new RuntimeException("TODO: support SELECT queries");
     }
 }
