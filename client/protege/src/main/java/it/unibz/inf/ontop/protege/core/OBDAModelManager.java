@@ -48,6 +48,7 @@ public class OBDAModelManager implements Disposable {
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
 	private static final String PROPERTY_EXT = ".properties"; // The default property file extension.
 	private static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
+    private static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
 	private final OWLEditorKit owlEditorKit;
 
@@ -479,6 +480,7 @@ public class OBDAModelManager implements Disposable {
 			loadVocabularyAndDefaultPrefix(obdaModel, mmgr.getOntologies(), ontology);
 
 			configurationManager.clearImplicitDBConstraintFile();
+            configurationManager.clearDBMetadataFile();
 			DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
 			configurationManager.resetProperties(settings.clone());
 
@@ -510,14 +512,19 @@ public class OBDAModelManager implements Disposable {
 				String queryDocumentIri = owlName + QUERY_EXT;
 				String propertyFilePath = owlName + PROPERTY_EXT;
 				String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
+                String dbMetadataFilePath = owlName + DBMETADATA_EXT;
 
 				File obdaFile = new File(URI.create(obdaDocumentIri));
 				File queryFile = new File(URI.create(queryDocumentIri));
 				File propertyFile = new File(URI.create(propertyFilePath));
 				File implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
+                File dbMetadataFile = new File(URI.create(dbMetadataFilePath));
 
 				if (implicitDBConstraintFile.exists())
 					configurationManager.setImplicitDBConstraintFile(implicitDBConstraintFile);
+
+                if(dbMetadataFile.exists())
+                    configurationManager.setDBMetadataFile(dbMetadataFile);
 
 				/*cd
 				 * Loads the properties (and the data source)

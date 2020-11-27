@@ -171,6 +171,38 @@ public class LeftJoinOptimizationTest {
     }
 
     @Test
+    public void testSelfJoinElimination1_IQ()  {
+
+        //IQ query;
+        //IQTree newTree = query.getTree();
+        //newTree.getChildren()
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, O1));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1,  ImmutableList.of(M, N1, O));
+
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+        //queryBuilder.get(leftJoinNode, dataNode1, LEFT);
+        //queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        //IQ query = (IQ) queryBuilder.build();
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
+
+        ExtensionalDataNode dataNode5 =  createExtensionalDataNode(TABLE1,  ImmutableList.of(M, N, O));
+        expectedQueryBuilder.init(projectionAtom1, dataNode5);
+
+        optimizeAndCheck(query, expectedQueryBuilder.build());
+    }
+
+    @Test
     public void testSelfJoinElimination2()  {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();

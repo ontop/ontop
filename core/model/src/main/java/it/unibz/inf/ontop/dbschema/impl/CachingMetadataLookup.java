@@ -15,11 +15,11 @@ public class CachingMetadataLookup implements MetadataLookup {
 
     private final MetadataProvider provider;
     private final Map<RelationID, DatabaseRelationDefinition> map = new HashMap<>();
-    private final File viewFile;
+    private final File dbMetadataFile;
 
-    public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; viewFile = null;}
+    public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; dbMetadataFile = null;}
 
-    public CachingMetadataLookup(File viewFile) { this.viewFile = viewFile; provider = null;}
+    public CachingMetadataLookup(File dbMetadata) { this.dbMetadataFile = dbMetadata; provider = null;}
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
@@ -64,6 +64,6 @@ public class CachingMetadataLookup implements MetadataLookup {
 //        List<ImmutableMetadata> list = lookup.loadRelations();
 //        for (ImmutableMetadata relation : list)
 //            provider.insertIntegrityConstraints(relation, lookup);
-        return new ImmutableMetadataImpl(viewFile);
+        return new ImmutableMetadataImpl(dbMetadataFile);
     }
 }

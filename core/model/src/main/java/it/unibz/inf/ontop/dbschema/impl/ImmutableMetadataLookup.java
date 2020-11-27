@@ -56,11 +56,11 @@ public class ImmutableMetadataLookup implements MetadataLookup {
 
     protected List<ImmutableMetadata> loadRelations() throws MetadataExtractionException, IOException {
         try {
-            File viewsFile = new File(filepath);
+            File dbMetadataFile = new File(filepath);
 
             ObjectMapper mapper = new ObjectMapper();
             //List<ImmutableMetadata> metadata = mapper.readValue(viewsFile, ImmutableMetadata.class);
-            List<ImmutableMetadata> metadata = mapper.readValue(viewsFile,mapper.getTypeFactory().constructCollectionType(List.class, ImmutableMetadata.class));
+            List<ImmutableMetadata> metadata = mapper.readValue(dbMetadataFile,mapper.getTypeFactory().constructCollectionType(List.class, ImmutableMetadata.class));
             return metadata;
         }
         catch (

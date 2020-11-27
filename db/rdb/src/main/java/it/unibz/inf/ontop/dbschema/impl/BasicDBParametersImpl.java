@@ -7,16 +7,19 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.util.List;
+import java.util.Map;
 
 public class BasicDBParametersImpl implements DBParameters {
 
+    @JsonProperty("metadata")
+    private String metadata;
     @JsonProperty("idFactory")
-    private final QuotedIDFactory idFactory;
+    private QuotedIDFactory idFactory;
     @JsonProperty("dbTypeFactory")
-    private final DBTypeFactory dbTypeFactory;
+    private DBTypeFactory dbTypeFactory;
 
     @JsonProperty("driverName")
-    private final String driverName;
+    private String driverName;
     @JsonProperty("driverVersion")
     private final String driverVersion;
     @JsonProperty("databaseProductName")
@@ -39,20 +42,49 @@ public class BasicDBParametersImpl implements DBParameters {
         this.databaseVersion = databaseVersion;
     }
 
+    /*@JsonProperty("metadata")
+    @Override
+    public QuotedIDFactory getMetadata() {
+        return metadata;
+    }*/
+
     @JsonProperty("idFactory")
     @Override
     public QuotedIDFactory getQuotedIDFactory() {
         return idFactory;
     }
 
+    @JsonProperty("idFactory")
+    public void setQuotedIDFactory(QuotedIDFactory idFactory) {
+        this.idFactory = idFactory;
+    }
+
     @JsonProperty("dbTypeFactory")
     @Override
     public DBTypeFactory getDBTypeFactory() { return dbTypeFactory; }
+
+    @JsonProperty("dbTypeFactory")
+    public void setDbTypeFactory(DBTypeFactory dbTypeFactory) {
+        this.dbTypeFactory = dbTypeFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    @JsonProperty("driverName")
+    private void unpackNested(Map<String,Object> metadataN) {
+        this.metadata = (String)metadataN.get("metadata");
+        Map<String,String> dName = (Map<String,String>)metadataN.get("driverName");
+        this.driverName = dName.get("driverName");
+    }
 
     @JsonProperty("driverName")
     @Override
     public String getDriverName() {
         return driverName;
+    }
+
+    @JsonProperty("driverName")
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
     }
 
     @JsonProperty("driverVersion")
