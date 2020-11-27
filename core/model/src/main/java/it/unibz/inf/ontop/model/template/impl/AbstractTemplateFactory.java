@@ -1,8 +1,32 @@
-package it.unibz.inf.ontop.spec.mapping.parser.impl;
+package it.unibz.inf.ontop.model.template.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.template.TemplateFactory;
+import it.unibz.inf.ontop.model.term.*;
 
-/*
+public abstract class AbstractTemplateFactory implements TemplateFactory {
+    protected final TermFactory termFactory;
+
+    protected AbstractTemplateFactory(TermFactory termFactory) {
+        this.termFactory = termFactory;
+    }
+
+    protected ImmutableFunctionalTerm getVariable(String id) {
+        if (id.contains("."))
+            throw new IllegalArgumentException("Fully qualified columns as " + id + " are not accepted.\nPlease, use an alias instead.");
+
+        return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(id));
+    }
+
+
+    protected NonVariableTerm templateComponentToTerm(TemplateComponent c) {
+        return c.isColumnNameReference()
+                ? getVariable(c.getComponent())
+                : termFactory.getDBStringConstant(c.getComponent());
+    }
+
+    /*
     https://www.w3.org/TR/r2rml/#from-template
 
     Curly braces that do not enclose column names must be escaped by a backslash character (“\”).
@@ -12,53 +36,32 @@ import com.google.common.collect.ImmutableList;
     yielding “\\”. This also applies to backslashes within column names.
  */
 
-public class TemplateComponent {
-    private final boolean isColumnNameReference;
-    private final String component;
-
-    public TemplateComponent(boolean isColumnNameReference, String component) {
-        this.isColumnNameReference = isColumnNameReference;
-        this.component = component;
-    }
-
-    public boolean isColumnNameReference() {
-        return isColumnNameReference;
-    }
-
-    public String getComponent() {
-        return component;
-    }
-
-    public static String decode(String s) {
+    private static String decode(String s) {
         return s.replace("\\{", "{")
                 .replace("\\}", "}")
                 .replace("\\\\", "\\");
     }
 
-    public static String encode(String s) {
+    private static String encode(String s) {
         return s.replace("\\", "\\\\")
                 .replace("{", "\\{")
                 .replace("}", "\\}");
     }
 
-    public boolean containsEscapeSequence() {
-        return component.contains("\\\\") || component.contains("\\{") || component.contains("\\}");
+
+    protected String termToTemplateComponentString(ImmutableTerm term) {
+        if (term instanceof Variable)
+            return "{" + encode(((Variable)term).getName()) + "}";
+
+        if (term instanceof Constant)
+            return encode(((Constant) term).getValue());
+
+        throw new IllegalArgumentException("Unexpected term type (only Constant and Variable are allowed):" + term);
     }
 
-    @Override
-    public String toString() { return isColumnNameReference ? "_" + component + "_" : component; }
 
     @Override
-    public boolean equals(Object o) {
-        if (o instanceof TemplateComponent) {
-            TemplateComponent other = (TemplateComponent)o;
-            return this.component.equals(other.component)
-                    && this.isColumnNameReference == other.isColumnNameReference;
-        }
-        return false;
-    }
-
-    public static ImmutableList<TemplateComponent> getComponents(String template) {
+    public ImmutableList<TemplateComponent> getComponents(String template) {
         ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
         boolean escape = false;
         boolean insideCurlyBracket = false;
@@ -72,7 +75,7 @@ public class TemplateComponent {
                         if (insideCurlyBracket)
                             throw new IllegalArgumentException("Nested curly brackets are not allowed");
                         if (i > currentStart)
-                            builder.add(new TemplateComponent(false, template.substring(currentStart, i)));
+                            builder.add(new TemplateComponent(false, decode(template.substring(currentStart, i))));
                         currentStart = i + 1;
                         insideCurlyBracket = true;
                         break;
@@ -81,7 +84,7 @@ public class TemplateComponent {
                             throw new IllegalArgumentException("No matching opening curly bracket");
                         if (i == currentStart)
                             throw new IllegalArgumentException("Empty column reference");
-                        builder.add(new TemplateComponent(true, template.substring(currentStart, i)));
+                        builder.add(new TemplateComponent(true, decode(template.substring(currentStart, i))));
                         currentStart = i + 1;
                         insideCurlyBracket = false;
                         break;
@@ -96,8 +99,9 @@ public class TemplateComponent {
         if (currentStart != template.length()) {
             if (insideCurlyBracket)
                 throw new IllegalArgumentException("No matching closing curly bracket");
-            builder.add(new TemplateComponent(false, template.substring(currentStart)));
+            builder.add(new TemplateComponent(false, decode(template.substring(currentStart))));
         }
         return builder.build();
     }
+
 }

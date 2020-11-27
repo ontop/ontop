@@ -9,6 +9,9 @@ import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -23,7 +26,6 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.Templates;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -250,22 +252,26 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		return termMap;
 	}
 
+	private final BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(null);
+	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
+	private final LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(null, null);
+
 	private String getTemplate(ImmutableFunctionalTerm lexicalTerm) {
 		FunctionSymbol functionSymbol = lexicalTerm.getFunctionSymbol();
 		if (functionSymbol instanceof BnodeStringTemplateFunctionSymbol) {
-			return Templates.serializeObjectTemplate(lexicalTerm);
+			return bnodeTemplateFactory.serializeTemplateTerm(lexicalTerm);
 		}
 		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-			String prefixedTemplate = Templates.serializeObjectTemplate(lexicalTerm);
+			String prefixedTemplate = iriTemplateFactory.serializeTemplateTerm(lexicalTerm);
 			try {
-				return prefixManager.getExpandForm(prefixedTemplate);
+				String expanded = prefixManager.getExpandForm(prefixedTemplate);
+				if (!expanded.equals(prefixedTemplate))
+					System.out.println("TEMPLATE BINGO");
+				return expanded;
 			}
 			catch (InvalidPrefixWritingException e) {
 				return prefixedTemplate;
 			}
-		}
-		if (functionSymbol instanceof DBConcatFunctionSymbol) {
-			return Templates.serializeLiteralTemplate(lexicalTerm);
 		}
 		throw new R2RMLSerializationException("Unexpected function symbol " + functionSymbol + " in term " + lexicalTerm);
 	}
@@ -294,7 +300,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
 			if (functionalLexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol) { //concat
 				termMap = templateFct.apply(mappingFactory.createTemplate(
-						Templates.serializeLiteralTemplate(functionalLexicalTerm)));
+						literalTemplateFactory.serializeTemplateTerm(functionalLexicalTerm)));
 			}
 			else
 				throw new R2RMLSerializationException("Unexpected function symbol in: " + lexicalTerm);

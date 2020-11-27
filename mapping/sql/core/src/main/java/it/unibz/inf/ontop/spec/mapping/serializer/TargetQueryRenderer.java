@@ -5,6 +5,9 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.QuadPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
+import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -18,7 +21,6 @@ import it.unibz.inf.ontop.model.type.impl.IRITermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.Templates;
 import org.eclipse.rdf4j.rio.turtle.TurtleUtil;
 
 import java.util.Optional;
@@ -31,12 +33,18 @@ import java.util.stream.Collectors;
 public class TargetQueryRenderer {
 
     private final PrefixManager prefixManager;
+    private final IRITemplateFactory iriTemplateFactory;
+    private final BnodeTemplateFactory bnodeTemplateFactory;
+    private final LiteralTemplateFactory literalTemplateFactory;
 
     /**
      * @param prefixManager that is used to shorten full IRI name.
      */
     public TargetQueryRenderer(PrefixManager prefixManager) {
         this.prefixManager = prefixManager;
+        this.iriTemplateFactory = new IRITemplateFactory(null);
+        this.bnodeTemplateFactory = new BnodeTemplateFactory(null);
+        this.literalTemplateFactory = new LiteralTemplateFactory(null, null);
     }
 
     /**
@@ -79,7 +87,7 @@ public class TargetQueryRenderer {
                 return renderRDFFunction(ift);
 
             if (fs instanceof DBConcatFunctionSymbol)
-                return "\"" + TurtleUtil.encodeString(Templates.serializeLiteralTemplate(ift)) + "\"";
+                return "\"" + TurtleUtil.encodeString(literalTemplateFactory.serializeTemplateTerm(ift)) + "\"";
 
             return ift.getFunctionSymbol().getName() + "(" + ift.getTerms().stream()
                     .map(this::renderTerm)
@@ -114,17 +122,21 @@ public class TargetQueryRenderer {
 
         ImmutableTerm termType = function.getTerm(1);
         if (termType instanceof RDFTermTypeConstant) {
-            String identifier = (lexicalTerm instanceof ImmutableFunctionalTerm
-                            && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol)
-                    ? Templates.serializeObjectTemplate((ImmutableFunctionalTerm) lexicalTerm)
-                    // case of RDF(TermToTxt(variable), X) or RDF(variable, X), where X = BNODE / IRI
-                    : renderTerm(lexicalTerm);
-
             RDFTermType rdfTermType = ((RDFTermTypeConstant) termType).getRDFTermType();
-            if (rdfTermType instanceof BlankNodeTermType)
+            if (rdfTermType instanceof BlankNodeTermType) {
+                String identifier = ((lexicalTerm instanceof ImmutableFunctionalTerm)
+                        && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof BnodeStringTemplateFunctionSymbol)
+                        ? bnodeTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm)
+                        : renderTerm(lexicalTerm); // variable
                 return "_:" + identifier;
-            if (rdfTermType instanceof IRITermType)
+            }
+            if (rdfTermType instanceof IRITermType) {
+                String identifier = ((lexicalTerm instanceof ImmutableFunctionalTerm)
+                        && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol)
+                        ? iriTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm)
+                        : renderTerm(lexicalTerm); // variable
                 return renderIRI(identifier);
+            }
         }
 
         throw new IllegalArgumentException("unsupported function " + function);

@@ -2,8 +2,12 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.ObjectTemplateFactory;
 import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -24,14 +28,18 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     private final TypeFactory typeFactory;
     private final OntopMappingSettings settings;
 
-    private final Templates factory;
+    private final IRITemplateFactory iriTemplateFactory;
+    private final BnodeTemplateFactory bnodeTemplateFactory;
+    private final LiteralTemplateFactory literalTemplateFactory;
 
     TurtleOBDASQLTermVisitor(TermFactory termFactory, TypeFactory typeFactory, OntopMappingSettings settings, PrefixManager prefixManager) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.settings = settings;
         this.prefixManager = prefixManager;
-        this.factory = new Templates(termFactory, typeFactory);
+        this.iriTemplateFactory = new IRITemplateFactory(termFactory);
+        this.bnodeTemplateFactory = new BnodeTemplateFactory(termFactory);
+        this.literalTemplateFactory = new LiteralTemplateFactory(termFactory, typeFactory);
     }
 
     @Override
@@ -42,35 +50,32 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     @Override
     public ImmutableTerm visitResourceIri(TurtleOBDAParser.ResourceIriContext ctx) {
         String text = ctx.IRIREF().getText();
-        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                text.substring(1, text.length() - 1)); // remove " "
-
-        if (components.size() == 1 && components.get(0).isColumnNameReference())
-            return  factory.getIRIColumn(components.get(0).getComponent());
-
-        return factory.getIRITemplate(components);
+        return getTermForObjectTemplate(
+                text.substring(1, text.length() - 1), // remove " "
+                iriTemplateFactory);
     }
 
     @Override
     public ImmutableTerm visitResourcePrefixedIri(TurtleOBDAParser.ResourcePrefixedIriContext ctx) {
-        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                prefixManager.getExpandForm(ctx.PNAME_LN().getText()));
-
-        if (components.size() == 1 && components.get(0).isColumnNameReference())
-            return  factory.getIRIColumn(components.get(0).getComponent());
-
-        return factory.getIRITemplate(components);
+        return getTermForObjectTemplate(
+                prefixManager.getExpandForm(ctx.PNAME_LN().getText()),
+                iriTemplateFactory);
     }
 
     @Override
     public ImmutableTerm visitBlankNode(TurtleOBDAParser.BlankNodeContext ctx) {
-        ImmutableList<TemplateComponent> components = TemplateComponent.getComponents(
-                ctx.BLANK_NODE_LABEL().getText().substring(2)); // remove the _: prefix
+        return getTermForObjectTemplate(
+                ctx.BLANK_NODE_LABEL().getText().substring(2), // remove the _: prefix
+                bnodeTemplateFactory);
+    }
+
+    private static ImmutableTerm getTermForObjectTemplate(String template, ObjectTemplateFactory factory) {
+        ImmutableList<TemplateComponent> components = factory.getComponents(template);
 
         if (components.size() == 1 && components.get(0).isColumnNameReference())
-            return  factory.getBnodeColumn(components.get(0).getComponent());
+            return factory.getColumn(components.get(0).getComponent());
 
-        return factory.getBnodeTemplate(components);
+        return factory.getTemplate(components);
     }
 
     @Override
@@ -91,8 +96,9 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
 
         String text = ctx.STRING_LITERAL_QUOTE().getText();
         String template = TurtleUtil.decodeString(text.substring(1, text.length() - 1)); // remove " "
-        ImmutableTerm lexicalValue = factory.getLiteralTemplateTerm(template);
 
+        ImmutableList<TemplateComponent> components = literalTemplateFactory.getComponents(template);
+        ImmutableTerm lexicalValue = literalTemplateFactory.getTemplate(components);
         return termFactory.getRDFLiteralFunctionalTerm(lexicalValue,
                 rdfDatatype.orElse(typeFactory.getXsdStringDatatype()));
     }
@@ -109,15 +115,16 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
                             + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them."); });
 
         String text = ctx.ENCLOSED_COLUMN_NAME().getText();
-        ImmutableFunctionalTerm lexicalTerm = factory.getVariable(text.substring(1, text.length() - 1)); // remove " "
-        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm,
+        String column = text.substring(1, text.length() - 1); // remove " "
+
+        return termFactory.getRDFLiteralFunctionalTerm(literalTemplateFactory.getColumn(column),
                 // We give the abstract datatype RDFS.LITERAL when it is not determined yet
                 // --> The concrete datatype be inferred afterwards
                 rdfDatatype.orElse(typeFactory.getAbstractRDFSLiteral()));
     }
 
     private Optional<RDFDatatype> extractDatatype(TerminalNode langNode, TurtleOBDAParser.IriContext iri) {
-        return factory.extractDatatype(
+        return literalTemplateFactory.extractDatatype(
                 Optional.ofNullable(langNode)
                         .map(l -> l.getText().substring(1).toLowerCase()),
                 Optional.ofNullable(iri)

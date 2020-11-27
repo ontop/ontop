@@ -22,10 +22,10 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.Templates;
 import it.unibz.inf.ontop.utils.ObjectTemplates;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +35,8 @@ import static org.junit.Assert.assertEquals;
 public class URITemplatesTest {
 
     private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
-	
+	private static final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(TERM_FACTORY);
+
     @Test
 	public void testFormat(){
 		Assert.assertEquals("http://example.org/A/1", ObjectTemplates.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
@@ -53,14 +54,14 @@ public class URITemplatesTest {
     public void testGetUriTemplateString1(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
-        assertEquals("http://example.org/{X}/{Y}", Templates.serializeObjectTemplate(f1));
+        assertEquals("http://example.org/{X}/{Y}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
 
     @Test
     public void testGetUriTemplateString2(){
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}",
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
-        assertEquals("{X}", Templates.serializeObjectTemplate(f1));
+        assertEquals("{X}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
 
     @Test
@@ -68,7 +69,7 @@ public class URITemplatesTest {
 
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}/", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
-        assertEquals("{X}/", Templates.serializeObjectTemplate(f1));
+        assertEquals("{X}/", iriTemplateFactory.serializeTemplateTerm(f1));
     }
 
     @Test
@@ -76,7 +77,7 @@ public class URITemplatesTest {
 
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
-        assertEquals("http://example.org/{X}/{Y}/", Templates.serializeObjectTemplate(f1));
+        assertEquals("http://example.org/{X}/{Y}/", iriTemplateFactory.serializeTemplateTerm(f1));
     }
 
     @Test
@@ -84,7 +85,7 @@ public class URITemplatesTest {
 
         ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/{}", //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"), TERM_FACTORY.getVariable("X")));
-        assertEquals("http://example.org/{X}/{Y}/{X}", Templates.serializeObjectTemplate(f1));
+        assertEquals("http://example.org/{X}/{Y}/{X}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
 
     /**
