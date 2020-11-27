@@ -49,6 +49,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
     public final static IRI PROPERTIESFILE;
     public final static IRI CONSTRAINTFILE;
+    public final static IRI DBMETADATAFILE;
     
     public final static IRI EXISTENTIAL;
     
@@ -60,6 +61,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         OBDAFILE = factory.createIRI(NAMESPACE, "obdaFile");
         PROPERTIESFILE =  factory.createIRI(NAMESPACE, "propertiesFile");
         CONSTRAINTFILE =  factory.createIRI(NAMESPACE, "constraintFile");
+        DBMETADATAFILE =  factory.createIRI(NAMESPACE, "dbMetadataFile");
         EXISTENTIAL = factory.createIRI(NAMESPACE, "existential");
     }
 
@@ -68,6 +70,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     private File obdaFile;
     private File propertiesFile;
     private Optional<File> constraintFile;
+    private Optional<File> dbMetadataFile;
 
     /**
      * The repository has to be built by this class
@@ -168,6 +171,18 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                             file.getAbsolutePath()));
                 }
             }
+
+            if (dbMetadataFile.isPresent()) {
+                File file = dbMetadataFile.get();
+                if (!file.exists()) {
+                    throw new RepositoryConfigException(String.format("The db-metadata file %s does not exist!",
+                        file.getAbsolutePath()));
+                }
+                if (!file.canRead()) {
+                    throw new RepositoryConfigException(String.format("The db-metadata file %s is not accessible!",
+                        file.getAbsolutePath()));
+                }
+            }
         }
         /*
          * Sometimes thrown when there is no access right to the files.
@@ -224,6 +239,8 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
             constraintFile.ifPresent(configurationBuilder::basicImplicitConstraintFile);
 
+            dbMetadataFile.ifPresent(configurationBuilder::basicDBMetadataFile);
+
             repository = OntopRepository.defaultRepository(configurationBuilder.build());
 
         }
@@ -264,6 +281,11 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                     .map(File::getAbsolutePath)
                     .ifPresent(path -> graph.add(implNode, CONSTRAINTFILE, vf.createLiteral(path)));
         }
+        if (dbMetadataFile != null) {
+            dbMetadataFile
+                .map(File::getAbsolutePath)
+                .ifPresent(path -> graph.add(implNode, DBMETADATAFILE, vf.createLiteral(path)));
+        }
 
         return implNode;
     }
@@ -293,6 +315,10 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             this.constraintFile = objectLiteral(graph.filter(implNode, CONSTRAINTFILE, null))
                     .filter(l -> !l.getLabel().isEmpty())
                     .map(l -> new File(l.getLabel()));
+
+            this.dbMetadataFile = objectLiteral(graph.filter(implNode, DBMETADATAFILE, null))
+                .filter(l -> !l.getLabel().isEmpty())
+                .map(l -> new File(l.getLabel()));
 
         } catch (Exception e) {
             throw new RepositoryConfigException(e.getMessage(), e);

@@ -48,7 +48,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                 () -> options.mappingFile,
                 () -> options.mappingReader,
                 () -> options.mappingGraph,
-                () -> options.constraintFile);
+                () -> options.constraintFile,
+                () -> options.dbMetadataFile);
     }
 
     @Override
@@ -76,15 +77,18 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private final Optional<Reader> mappingReader;
         private final Optional<Graph> mappingGraph;
         private final Optional<File> constraintFile;
+        private final Optional<File> dbMetadataFile;
         final OntopMappingSQLOptions mappingSQLOptions;
 
         OntopMappingSQLAllOptions(Optional<File> mappingFile, Optional<Reader> mappingReader,
                                   Optional<Graph> mappingGraph, Optional<File> constraintFile,
+                                  Optional<File> dbMetadataFile,
                                   OntopMappingSQLOptions mappingSQLOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
             this.constraintFile = constraintFile;
+            this.dbMetadataFile = dbMetadataFile;
             this.mappingSQLOptions = mappingSQLOptions;
         }
     }
@@ -95,11 +99,13 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private final B builder;
         private final Runnable declareMappingDefinedCB;
         private final Runnable declareImplicitConstraintSetDefinedCB;
+        private final Runnable declareDBMetadataSetDefinedCB;
 
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
         private Optional<Graph> mappingGraph = Optional.empty();
         private Optional<File> constraintFile = Optional.empty();
+        private Optional<File> dbMetadataFile = Optional.empty();
 
         private boolean useR2rml = false;
 
@@ -107,10 +113,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
          * Default constructor
          */
         protected StandardMappingSQLAllBuilderFragment(B builder, Runnable declareMappingDefinedCB,
-                                                       Runnable declareImplicitConstraintSetDefinedCB) {
+                                                       Runnable declareImplicitConstraintSetDefinedCB,
+                                                       Runnable declareDBMetadataSetDefinedCB) {
             this.builder = builder;
             this.declareMappingDefinedCB = declareMappingDefinedCB;
             this.declareImplicitConstraintSetDefinedCB = declareImplicitConstraintSetDefinedCB;
+            this.declareDBMetadataSetDefinedCB = declareDBMetadataSetDefinedCB;
         }
 
 
@@ -211,6 +219,35 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
             }
         }
 
+        @Override
+        public B basicDBMetadataFile(@Nonnull File dbMetadataFile) {
+            declareDBMetadataSetDefinedCB.run();
+            this.dbMetadataFile = Optional.of(dbMetadataFile);
+            return builder;
+        }
+
+        @Override
+        public B basicDBMetadataFile(@Nonnull String dbMetadataFilename) {
+            declareDBMetadataSetDefinedCB.run();
+            try {
+                URI fileURI = new URI(dbMetadataFilename);
+                String scheme = fileURI.getScheme();
+                if (scheme == null) {
+                    this.dbMetadataFile = Optional.of(new File(fileURI.getPath()));
+                }
+                else if (scheme.equals("file")) {
+                    this.dbMetadataFile = Optional.of(new File(fileURI));
+                }
+                else {
+                    throw new InvalidOntopConfigurationException("Currently only local files are supported" +
+                        "as db-metadata files");
+                }
+                return builder;
+            } catch (URISyntaxException e) {
+                throw new InvalidOntopConfigurationException("Invalid db-metadata file path: " + e.getMessage());
+            }
+        }
+
         protected Properties generateProperties() {
             Properties p = new Properties();
 
@@ -244,7 +281,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions(OntopMappingSQLOptions mappingOptions) {
-            return new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, constraintFile, mappingOptions);
+            return new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, constraintFile, dbMetadataFile, mappingOptions);
         }
 
     }
@@ -259,7 +296,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         OntopMappingSQLAllBuilderMixin() {
             B builder = (B) this;
             this.localFragmentBuilder = new StandardMappingSQLAllBuilderFragment<>(builder,
-                    this::declareMappingDefined, this::declareImplicitConstraintSetDefined);
+                    this::declareMappingDefined, this::declareImplicitConstraintSetDefined,
+                this::declareDBMetadataDefined);
         }
 
         @Override
@@ -305,6 +343,16 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         @Override
         public B basicImplicitConstraintFile(@Nonnull String constraintFilename) {
             return localFragmentBuilder.basicImplicitConstraintFile(constraintFilename);
+        }
+
+        @Override
+        public B basicDBMetadataFile(@Nonnull File dbmetadataFile) {
+            return localFragmentBuilder.basicDBMetadataFile(dbmetadataFile);
+        }
+
+        @Override
+        public B basicDBMetadataFile(@Nonnull String dbmetadataFilename) {
+            return localFragmentBuilder.basicDBMetadataFile(dbmetadataFilename);
         }
 
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {

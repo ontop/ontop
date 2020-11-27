@@ -87,6 +87,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
+                Optional::empty,
                 Optional::empty
                 );
     }
@@ -96,7 +97,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Graph>> mappingGraphSupplier,
-                                                  Supplier<Optional<File>> constraintFileSupplier
+                                                  Supplier<Optional<File>> constraintFileSupplier,
+                                                  Supplier<Optional<File>> dbMetadataFileSupplier
                                                   ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
@@ -110,6 +112,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         OBDASpecInput.Builder specInputBuilder = OBDASpecInput.defaultBuilder();
         constraintFileSupplier.get()
                 .ifPresent(specInputBuilder::addConstraintFile);
+        dbMetadataFileSupplier.get()
+            .ifPresent(specInputBuilder::addDBMetadataFile);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();

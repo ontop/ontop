@@ -18,11 +18,11 @@ import java.io.IOException;
 public class RDBMetadataLoaderImpl implements RDBMetadataLoader {
 
     //private final String filepath;
-    private final File viewFile;
+    private final File dbMetadataFile;
 
     @Inject
-    public RDBMetadataLoaderImpl(File viewFile) {
-        this.viewFile = viewFile;
+    public RDBMetadataLoaderImpl(File dbMetadataFile) {
+        this.dbMetadataFile = dbMetadataFile;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RDBMetadataLoaderImpl implements RDBMetadataLoader {
             // convert JSON file to dbschema
             //File viewsFile = new File("c://user//book.json");
             //String viewPath = "c://user//book.json";
-            ImmutableMetadata metadata = mapper.readValue(viewFile, ImmutableMetadata.class);
+            ImmutableMetadata metadata = mapper.readValue(dbMetadataFile, ImmutableMetadata.class);
             return metadata;
 
         //} catch (JsonProcessingException e) {
@@ -55,7 +55,7 @@ public class RDBMetadataLoaderImpl implements RDBMetadataLoader {
         DBParameters dbParameters0 = new ObjectMapper()
             .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
             .readerFor(BasicDBParametersImpl.class)
-            .readValue(viewFile);
+            .readValue(dbMetadataFile);
 
         DBParameters dbParameters = new BasicDBParametersImpl(dbParameters0.getDriverName(),
             dbParameters0.getDriverVersion(),

@@ -25,8 +25,8 @@ public interface ImmutableMetadata {
         return lookup.extractImmutableMetadata();
     }
 
-    static ImmutableMetadata loadImmutableMetadata(File viewFile) throws MetadataExtractionException, IOException {
-        CachingMetadataLookup lookup = new CachingMetadataLookup(viewFile);
+    static ImmutableMetadata loadImmutableMetadata(File dbMetadataFile) throws MetadataExtractionException, IOException {
+        CachingMetadataLookup lookup = new CachingMetadataLookup(dbMetadataFile);
 //        for (RelationID id : metadataProvider.getRelationIDs())
 //            lookup.getRelation(id);
         return lookup.loadImmutableMetadata();

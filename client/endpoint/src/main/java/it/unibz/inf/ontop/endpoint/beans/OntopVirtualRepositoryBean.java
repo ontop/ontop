@@ -20,7 +20,8 @@ public class OntopVirtualRepositoryBean {
                                                              @Value("${constraint:#{null}}") String constraint,
                                                              @Value("${db-user:#{null}}") String dbUser,
                                                              @Value("${db-password:#{null}}") String dbPassword,
-                                                             @Value("${db-url:#{null}}") String dbUrl) throws RepositoryException {
+                                                             @Value("${db-url:#{null}}") String dbUrl,
+                                                             @Value("${db-metadata:#{null}}") String dbMetadata) throws RepositoryException {
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .propertyFile(properties);
 
@@ -47,6 +48,9 @@ public class OntopVirtualRepositoryBean {
 
         if (dbUrl != null && !dbUrl.isEmpty())
             builder.jdbcUrl(dbUrl);
+
+        if (dbMetadata !=null && !dbMetadata.isEmpty())
+            builder.basicDBMetadataFile(dbMetadata);
 
         return builder.build();
     }

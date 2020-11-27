@@ -16,16 +16,16 @@ import java.util.Map;
 public class ImmutableMetadataImpl implements ImmutableMetadata {
     private final DBParameters dbParameters;
     private final ImmutableList<DatabaseRelationDefinition> relations;
-    private final File viewFile;
+    private final File dbMetadataFile;
 
     ImmutableMetadataImpl(DBParameters dbParameters, ImmutableList<DatabaseRelationDefinition> relations) {
         this.dbParameters = dbParameters;
         this.relations = relations;
-        viewFile = null;
+        dbMetadataFile = null;
     }
 
-    ImmutableMetadataImpl(File viewFile) {
-        this.viewFile = viewFile;
+    ImmutableMetadataImpl(File dbMetadataFileFile) {
+        this.dbMetadataFile = dbMetadataFileFile;
         dbParameters = null;
         relations = null;
     }
@@ -45,7 +45,7 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     @JsonIgnore
     @Override
     public File getFile() {
-        return viewFile;
+        return dbMetadataFile;
     }
 
     @SuppressWarnings("unused")
