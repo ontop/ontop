@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 public class SQLPPTriplesMapToR2RMLConverter {
 
 	private final RDF rdfFactory;
-	private final TermFactory termFactory;
 	private final MappingFactory mappingFactory;
 
 	private static final String baseIRIString = "urn:";
@@ -49,9 +48,8 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private final Function<RDFTermType, TermMapFactory<ObjectMap>> objectTermMapFactorySupplier;
 
 
-	public SQLPPTriplesMapToR2RMLConverter(RDF rdfFactory, TermFactory termFactory, MappingFactory mappingFactory) {
+	public SQLPPTriplesMapToR2RMLConverter(RDF rdfFactory, MappingFactory mappingFactory) {
 		this.rdfFactory = rdfFactory;
-		this.termFactory = termFactory;
 		this.mappingFactory = mappingFactory;
 
 		this.graphTermMapFactorySupplier =  new TermMapFactorySupplier<>(mappingFactory::createGraphMap,
@@ -171,7 +169,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			if (type instanceof RDFDatatype) {
 				RDFDatatype datatype = (RDFDatatype) type;
 				return map.computeIfAbsent(datatype,
-						d -> new LiteralTermMapFactory<T>(datatype, iri.columnFct, iri.templateFct, rdfTermFct));
+						d -> new LiteralTermMapFactory<>(datatype, iri.columnFct, iri.templateFct, rdfTermFct));
 			}
 			return super.apply(type);
 		}
@@ -180,39 +178,35 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private <T extends TermMap> T getTermMap(ImmutableTerm term,
 											 Function<RDFTermType, TermMapFactory<T>> termMapFactorySupplier) {
 
-		ImmutableTerm lexicalTerm;
-		RDFTermType termType;
-
 		if (term instanceof RDFConstant) {
 			RDFConstant constant = (RDFConstant) term;
-			lexicalTerm =  termFactory.getDBStringConstant(constant.getValue());
-			termType = constant.getType();
+			RDFTermType termType = constant.getType();
+			return termMapFactorySupplier.apply(termType).forConstant(constant.getValue());
 		}
-		else if (term instanceof ImmutableFunctionalTerm) {
+		if (term instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm rdfFunctionalTerm = (ImmutableFunctionalTerm) term;
-			lexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfFunctionalTerm.getTerm(0));
+			ImmutableTerm lexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfFunctionalTerm.getTerm(0));
 
 			// Might be abstract (e.g. partially defined literal map)
-			termType = Optional.of(rdfFunctionalTerm.getTerm(1))
+			RDFTermType termType = Optional.of(rdfFunctionalTerm.getTerm(1))
 					.filter(t -> t instanceof RDFTermTypeConstant)
 					.map(t -> (RDFTermTypeConstant) t)
 					.map(RDFTermTypeConstant::getRDFTermType)
 					.orElseThrow(() -> new R2RMLSerializationException(
 							"Was expecting a RDFTermTypeConstant in the mapping assertion, not "
 									+ rdfFunctionalTerm.getTerm(1)));
-		}
-		else
-			throw new MinorOntopInternalBugException("Unexpected term: " + term);
 
-		return termMapFactorySupplier.apply(termType).create(lexicalTerm);
+			return termMapFactorySupplier.apply(termType).create(lexicalTerm);
+		}
+		throw new MinorOntopInternalBugException("Unexpected term: " + term);
 	}
 
 
 	private abstract class TermMapFactory<T extends TermMap> {
-		final IRI termType;
-		final TemplateFactory templateFactory;
-		final Function<String, T> columnFct;
-		final Function<Template, T> templateFct;
+		protected final IRI termType;
+		protected final TemplateFactory templateFactory;
+		protected final Function<String, T> columnFct;
+		protected final Function<Template, T> templateFct;
 
 		TermMapFactory(IRI termType, TemplateFactory templateFactory, Function<String, T> columnFct, Function<Template, T> templateFct) {
 			this.termType = termType;
@@ -221,7 +215,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			this.templateFct = templateFct;
 		}
 
-		protected abstract T forConstant(DBConstant term);
+		public abstract T forConstant(String value);
 
 		protected T forColumn(Variable term) {
 			T termMap = columnFct.apply(term.getName());
@@ -237,7 +231,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 
 		public T create(ImmutableTerm term) {
 			if (term instanceof DBConstant)
-				return forConstant((DBConstant)term);
+				return forConstant(((DBConstant)term).getValue());
 			if (term instanceof Variable)
 				return forColumn((Variable)term);
 			if (term instanceof ImmutableFunctionalTerm)
@@ -258,9 +252,8 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		    use a column-free template instead
 		 */
 		@Override
-		protected T forConstant(DBConstant term) {
-			String templateString = term.getValue();
-			T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+		public T forConstant(String value) {
+			T termMap = templateFct.apply(mappingFactory.createTemplate(value));
 			termMap.setTermType(termType);
 			return termMap;
 		}
@@ -275,15 +268,14 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		}
 
 		@Override
-		protected T forConstant(DBConstant term) {
-			IRI iri = rdfFactory.createIRI(term.getValue());
-			return constantFct.apply(iri);
+		public T forConstant(String value) {
+			return constantFct.apply(rdfFactory.createIRI(value));
 		}
 	}
 
 	private class LiteralTermMapFactory<T extends ObjectMap> extends TermMapFactory<T> {
-		final RDFDatatype datatype;
-		final Function<Literal, T> constantFct;
+		private final RDFDatatype datatype;
+		private final Function<Literal, T> constantFct;
 
 		LiteralTermMapFactory(RDFDatatype datatype, Function<String, T> columnFct, Function<Template, T> templateFct, Function<Literal, T> constantFct) {
 			super(R2RMLVocabulary.literal, new LiteralTemplateFactory(null, null), columnFct, templateFct);
@@ -292,10 +284,10 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		}
 
 		@Override
-		protected T forConstant(DBConstant term) {
+		public T forConstant(String value) {
 			Literal literal = datatype.getLanguageTag()
-					.map(lang -> rdfFactory.createLiteral(term.getValue(), lang.getFullString()))
-					.orElseGet(() -> rdfFactory.createLiteral(term.getValue(), datatype.getIRI()));
+					.map(lang -> rdfFactory.createLiteral(value, lang.getFullString()))
+					.orElseGet(() -> rdfFactory.createLiteral(value, datatype.getIRI()));
 
 			return constantFct.apply(literal);
 		}

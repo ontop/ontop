@@ -41,7 +41,7 @@ public class R2RMLMappingSerializer implements MappingSerializer {
     @Override
     public void write(File file, SQLPPMapping ppMapping) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
-            SQLPPTriplesMapToR2RMLConverter transformer = new SQLPPTriplesMapToR2RMLConverter(rdfFactory, termFactory, manager.getMappingFactory());
+            SQLPPTriplesMapToR2RMLConverter transformer = new SQLPPTriplesMapToR2RMLConverter(rdfFactory, manager.getMappingFactory());
             ImmutableList<TriplesMap> tripleMaps = ppMapping.getTripleMaps().stream()
                     .flatMap(transformer::convert)
                     .collect(ImmutableCollectors.toList());
