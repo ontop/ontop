@@ -183,12 +183,21 @@ public class SQLPPTriplesMapToR2RMLConverter {
 												 Function<BlankNode, T> bNodeFct,
 												 Function<Literal, T> literalFct) {
 
-		ImmutableFunctionalTerm rdfFunctionalTerm = Optional.of(term)
-				.filter(t -> t instanceof NonVariableTerm)
-				.map(t -> convertIntoRDFFunctionalTerm((NonVariableTerm) t))
-				.filter(t -> t.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
-				.orElseThrow(() -> new R2RMLSerializationException(
-						"Was expecting a RDFTerm functional or constant term, not " + term));
+		if (term instanceof RDFConstant) {
+			RDFConstant constant = (RDFConstant) term;
+			ImmutableTerm lexicalTerm =  termFactory.getDBStringConstant(constant.getValue());
+			RDFTermType termType = constant.getType();
+			if (termType instanceof ObjectRDFType) {
+				if (((ObjectRDFType) termType).isBlankNode())
+					return extractBnodeTermMap(lexicalTerm, templateFct, columnFct, bNodeFct);
+				else
+					return extractIriTermMap(lexicalTerm, templateFct, columnFct, iriFct);
+			}
+			if (termType instanceof RDFDatatype)
+				return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
+		}
+
+		ImmutableFunctionalTerm rdfFunctionalTerm = (ImmutableFunctionalTerm) term;
 
 		ImmutableTerm lexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfFunctionalTerm.getTerm(0));
 
@@ -211,16 +220,6 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
 
 		throw new MinorOntopInternalBugException("An RDF termType must be either an object type or a datatype");
-	}
-
-	private ImmutableFunctionalTerm convertIntoRDFFunctionalTerm(NonVariableTerm term) {
-		if (term instanceof  RDFConstant) {
-			RDFConstant constant = (RDFConstant) term;
-			return termFactory.getRDFFunctionalTerm(
-					termFactory.getDBStringConstant(constant.getValue()),
-					termFactory.getRDFTermTypeConstant(constant.getType()));
-		}
-		return (ImmutableFunctionalTerm) term;
 	}
 
 	private <T extends TermMap> T extractIriTermMap(ImmutableTerm lexicalTerm,
