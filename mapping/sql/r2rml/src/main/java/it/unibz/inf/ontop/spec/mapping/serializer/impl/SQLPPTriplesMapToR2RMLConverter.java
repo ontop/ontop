@@ -44,15 +44,13 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private final RDF rdfFactory;
 	private final TermFactory termFactory;
 	private final MappingFactory mappingFactory;
-	private final PrefixManager prefixManager;
 
 	private static final String baseIRIString = "urn:";
 
-	public SQLPPTriplesMapToR2RMLConverter(RDF rdfFactory, TermFactory termFactory, MappingFactory mappingFactory, PrefixManager prefixManager) {
+	public SQLPPTriplesMapToR2RMLConverter(RDF rdfFactory, TermFactory termFactory, MappingFactory mappingFactory) {
 		this.rdfFactory = rdfFactory;
 		this.termFactory = termFactory;
 		this.mappingFactory = mappingFactory;
-		this.prefixManager = prefixManager;
 	}
 
     /**
@@ -193,6 +191,7 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		Extractor<T, Literal> literalExtractor = new Extractor<>(R2RMLVocabulary.literal, literalTemplateFactory, columnFct, templateFct, literalFct);
 
 		if (term instanceof RDFConstant) {
+			System.out.println("RDFConstant BINGO: " + term);
 			RDFConstant constant = (RDFConstant) term;
 			ImmutableTerm lexicalTerm =  termFactory.getDBStringConstant(constant.getValue());
 			RDFTermType termType = constant.getType();
@@ -230,25 +229,13 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			RDFDatatype datatype = (RDFDatatype) termType;
 			T termMap = literalExtractor.extract(lexicalTerm, v -> createLiteral(v, datatype));
 
-			if (!(termMap instanceof ObjectMap))
-				throw new MinorOntopInternalBugException("The termMap was expected to be an ObjectMap");
 			ObjectMap objectMap = (ObjectMap) termMap;
-
 			Optional<LanguageTag> optionalLangTag = datatype.getLanguageTag();
 			if (optionalLangTag.isPresent())
 				objectMap.setLanguageTag(optionalLangTag.get().getFullString());
-			else {
-				/*
-				 * Ontop may use rdfs:literal internally for some terms whose datatype is not specified in the obda mapping.
-				 *  If the term is built from a column or pattern, then its datatype must be inferred from the DB schema
-				 *  (according to the R2RML spec),
-				 *  so the R2RML mapping should not use rr:datatype for this term map
-				 */
-				if (!datatype.isAbstract()
-						&& (!datatype.getIRI().equals(RDFS.LITERAL) ||
-						!(lexicalTerm instanceof Variable)))
+			else if (!datatype.getIRI().equals(RDFS.LITERAL))
 					objectMap.setDatatype(datatype.getIRI());
-			}
+
 			return termMap;
 		}
 

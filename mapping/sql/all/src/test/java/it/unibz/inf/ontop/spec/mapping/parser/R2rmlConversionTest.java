@@ -28,8 +28,7 @@ public class R2rmlConversionTest {
        SQLPPMapping ppMapping = config.loadProvidedPPMapping();
        SQLPPTriplesMapToR2RMLConverter transformer = new SQLPPTriplesMapToR2RMLConverter(config.getRdfFactory(),
                config.getTermFactory(),
-               RDF4JR2RMLMappingManager.getInstance().getMappingFactory(),
-               ppMapping.getPrefixManager());
+               RDF4JR2RMLMappingManager.getInstance().getMappingFactory());
        ImmutableList<TriplesMap> triplesMaps = ppMapping.getTripleMaps().stream()
                .flatMap(transformer::convert)
                .collect(ImmutableCollectors.toList());
