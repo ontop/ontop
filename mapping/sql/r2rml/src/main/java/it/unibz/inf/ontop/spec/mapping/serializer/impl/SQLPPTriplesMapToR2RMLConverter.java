@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -129,80 +128,58 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		return tm;
 	}
 
-
-	private static <T> T unsupportedBlankNode(BlankNode t) {
-		throw new MinorOntopInternalBugException("Unexpected transformation: " + t.toString());
-	}
-
 	private SubjectMap extractSubjectMap(ImmutableTerm term) {
-		return extractTermMap(term,
-				getExtractor(mappingFactory::createSubjectMap,
-				mappingFactory::createSubjectMap,
-				mappingFactory::createSubjectMap,
-				// TODO: allow blank nodes to appear in a subject map
-				SQLPPTriplesMapToR2RMLConverter::unsupportedBlankNode));
+		// TODO: allow blank nodes to appear in a subject map
+		return extractTermMap(term, getExtractorFactory(mappingFactory::createSubjectMap,
+				mappingFactory::createSubjectMap, mappingFactory::createSubjectMap));
 	}
 
 	private GraphMap extractGraphMap(ImmutableTerm term) {
-		return extractTermMap(term,
-				getExtractor(mappingFactory::createGraphMap,
-				mappingFactory::createGraphMap,
-				mappingFactory::createGraphMap,
-				SQLPPTriplesMapToR2RMLConverter::unsupportedBlankNode));
+		return extractTermMap(term, getExtractorFactory(mappingFactory::createGraphMap,
+				mappingFactory::createGraphMap, mappingFactory::createGraphMap));
 	}
 
 	private PredicateMap extractPredicateMap(ImmutableTerm term) {
-		return extractTermMap(term,
-				getExtractor(mappingFactory::createPredicateMap,
-				mappingFactory::createPredicateMap,
-				mappingFactory::createPredicateMap,
-				SQLPPTriplesMapToR2RMLConverter::unsupportedBlankNode));
+		return extractTermMap(term, getExtractorFactory(mappingFactory::createPredicateMap,
+				mappingFactory::createPredicateMap, mappingFactory::createPredicateMap));
 	}
 
 	private ObjectMap extractObjectMap(ImmutableTerm term) {
-		return extractTermMap(term,
-				getExtractor(mappingFactory::createObjectMap,
-				mappingFactory::createObjectMap,
-				mappingFactory::createObjectMap,
-				mappingFactory::createObjectMap,
-				mappingFactory::createObjectMap));
+		return extractTermMap(term, getObjectExtractorFactory(mappingFactory::createObjectMap,
+				mappingFactory::createObjectMap, mappingFactory::createObjectMap));
 	}
 
 	private final BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(null);
 	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
 	private final LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(null, null);
 
-	private <T extends TermMap> Function<RDFTermType, Extractor<T>> getExtractor(
-														  Function<Template, T> templateFct,
-														  Function<String, T> columnFct,
-														  Function<IRI, T> iriFct,
-														  Function<BlankNode, T> bNodeFct) {
+	private <T extends TermMap> Function<RDFTermType, Extractor<T>> getExtractorFactory(
+														Function<Template, T> templateFct,
+														Function<String, T> columnFct,
+														Function<IRI, T> iriFct) {
 		return type -> {
-			if (type instanceof ObjectRDFType) {
-				return (((ObjectRDFType) type).isBlankNode())
-						? new Extractor<>(R2RMLVocabulary.blankNode, bnodeTemplateFactory, columnFct, templateFct, v -> bNodeFct.apply(rdfFactory.createBlankNode(v)))
-						: new Extractor<>(R2RMLVocabulary.iri, iriTemplateFactory, columnFct, templateFct, v -> iriFct.apply(rdfFactory.createIRI(v)));
-			}
-			throw new MinorOntopInternalBugException("Unexpected term type termMap: " + type);
+			if (type instanceof ObjectRDFType && !((ObjectRDFType) type).isBlankNode())
+				return new Extractor<>(R2RMLVocabulary.iri, iriTemplateFactory, columnFct, templateFct, v -> iriFct.apply(rdfFactory.createIRI(v)));
+
+			throw new MinorOntopInternalBugException("Unexpected term type: " + type);
 		};
 	}
 
-	private <T extends ObjectMap> Function<RDFTermType, Extractor<T>> getExtractor(
+	private <T extends ObjectMap> Function<RDFTermType, Extractor<T>> getObjectExtractorFactory(
 														Function<Template, T> templateFct,
 														Function<String, T> columnFct,
-														Function<IRI, T> iriFct,
-														Function<BlankNode, T> bNodeFct,
-														Function<Literal, T> literalFct) {
+														Function<RDFTerm, T> rdfTermFct) {
 		return type -> {
 			if (type instanceof ObjectRDFType) {
 				return (((ObjectRDFType) type).isBlankNode())
-						? new Extractor<>(R2RMLVocabulary.blankNode, bnodeTemplateFactory, columnFct, templateFct, v -> bNodeFct.apply(rdfFactory.createBlankNode(v)))
-						: new Extractor<>(R2RMLVocabulary.iri, iriTemplateFactory, columnFct, templateFct, v -> iriFct.apply(rdfFactory.createIRI(v)));
-			} else if (type instanceof RDFDatatype) {
-				RDFDatatype datatype = (RDFDatatype) type;
-				return new LiteralExtractor<>(R2RMLVocabulary.literal, datatype, literalTemplateFactory, columnFct, templateFct, literalFct);
+						? new Extractor<>(R2RMLVocabulary.blankNode, bnodeTemplateFactory, columnFct, templateFct, v -> rdfTermFct.apply(rdfFactory.createBlankNode(v)))
+						: new Extractor<>(R2RMLVocabulary.iri, iriTemplateFactory, columnFct, templateFct, v -> rdfTermFct.apply(rdfFactory.createIRI(v)));
 			}
-			throw new MinorOntopInternalBugException("Unexpected term type termMap: " + type);
+			if (type instanceof RDFDatatype) {
+				RDFDatatype datatype = (RDFDatatype) type;
+				return new LiteralExtractor<>(R2RMLVocabulary.literal, datatype, literalTemplateFactory, columnFct, templateFct, rdfTermFct::apply);
+			}
+			throw new MinorOntopInternalBugException("Unexpected term type: " + type);
 		};
 	}
 
@@ -248,26 +225,27 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			this.constantFct = constantFct;
 		}
 
-		public T extractConstant(DBConstant term) {
+		protected T extractConstant(DBConstant term) {
 			return constantFct.apply(term.getValue());
 		}
-		public T extractColumn(Variable term) {
+		protected T extractColumn(Variable term) {
 			T termMap = columnFct.apply(term.getName());
 			termMap.setTermType(termType);
 			return termMap;
 		}
-		public T extractTemplate(ImmutableFunctionalTerm term) {
+		protected T extractTemplate(ImmutableFunctionalTerm term) {
 			String templateString = templateFactory.serializeTemplateTerm(term);
 			T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
 			termMap.setTermType(termType);
 			return termMap;
 		}
+
 		public T extract(ImmutableTerm term) {
 			if (term instanceof DBConstant)
 				return extractConstant((DBConstant)term);
-			else if (term instanceof Variable)
+			if (term instanceof Variable)
 				return extractColumn((Variable)term);
-			else if (term instanceof ImmutableFunctionalTerm)
+			if (term instanceof ImmutableFunctionalTerm)
 				return extractTemplate((ImmutableFunctionalTerm)term);
 
 			throw new MinorOntopInternalBugException("Unexpected lexical term for an termMap: " + term);
@@ -285,34 +263,31 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		}
 
 		@Override
-		public T extractConstant(DBConstant term) {
+		protected T extractConstant(DBConstant term) {
 			Literal literal = datatype.getLanguageTag()
 					.map(lang -> rdfFactory.createLiteral(term.getValue(), lang.getFullString()))
 					.orElseGet(() -> rdfFactory.createLiteral(term.getValue(), datatype.getIRI()));
 
 			return constantFct.apply(literal);
 		}
-		public T extractColumn(Variable term) {
-			T termMap = super.extractColumn(term);
-			setDatatype(termMap, datatype);
-			return termMap;
+		@Override
+		protected T extractColumn(Variable term) {
+			return setDatatype(super.extractColumn(term), datatype);
 		}
-		public T extractTemplate(ImmutableFunctionalTerm term) {
-			T termMap = super.extractTemplate(term);
-			setDatatype(termMap, datatype);
-			return termMap;
+		@Override
+		protected T extractTemplate(ImmutableFunctionalTerm term) {
+			return setDatatype(super.extractTemplate(term), datatype);
 		}
 
-		private void setDatatype(ObjectMap objectMap, RDFDatatype datatype) {
+		private T setDatatype(T objectMap, RDFDatatype datatype) {
 			Optional<LanguageTag> optionalLangTag = datatype.getLanguageTag();
 			if (optionalLangTag.isPresent())
 				objectMap.setLanguageTag(optionalLangTag.get().getFullString());
 			else if (!datatype.getIRI().equals(RDFS.LITERAL))
 				objectMap.setDatatype(datatype.getIRI());
+			return objectMap;
 		}
 	}
-
-
 
 	/**
 	 * TODO: shall we consider as an internal bug or differently?
