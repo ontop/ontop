@@ -25,17 +25,14 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 
 /**
- * Transform OBDA mappings in R2rml mappings
- * Initial @author s Sarah, Mindas, Timi, Guohui, Martin
+ * Transform OBDA mappings in R2RML mappings
+ * @author Sarah, Mindas, Timi, Guohui, Martin
  *
  */
 public class SQLPPTriplesMapToR2RMLConverter {
@@ -46,10 +43,25 @@ public class SQLPPTriplesMapToR2RMLConverter {
 
 	private static final String baseIRIString = "urn:";
 
+	private final Function<RDFTermType, TermMapFactory<GraphMap>> graphTermMapFactorySupplier;
+	private final Function<RDFTermType, TermMapFactory<SubjectMap>> subjectTermMapFactorySupplier;
+	private final Function<RDFTermType, TermMapFactory<PredicateMap>> predicateTermMapFactorySupplier;
+	private final Function<RDFTermType, TermMapFactory<ObjectMap>> objectTermMapFactorySupplier;
+
+
 	public SQLPPTriplesMapToR2RMLConverter(RDF rdfFactory, TermFactory termFactory, MappingFactory mappingFactory) {
 		this.rdfFactory = rdfFactory;
 		this.termFactory = termFactory;
 		this.mappingFactory = mappingFactory;
+
+		this.graphTermMapFactorySupplier =  new TermMapFactorySupplier<>(mappingFactory::createGraphMap,
+				mappingFactory::createGraphMap, mappingFactory::createGraphMap);
+		this.subjectTermMapFactorySupplier =  new TermMapFactorySupplier<>(mappingFactory::createSubjectMap,
+				mappingFactory::createSubjectMap, mappingFactory::createSubjectMap);
+		this.predicateTermMapFactorySupplier = new TermMapFactorySupplier<>(mappingFactory::createPredicateMap,
+				mappingFactory::createPredicateMap, mappingFactory::createPredicateMap);
+		this.objectTermMapFactorySupplier = new ObjectTermMapFactorySupplier<>(mappingFactory::createObjectMap,
+				mappingFactory::createObjectMap, mappingFactory::createObjectMap);
 	}
 
     /**
@@ -106,9 +118,9 @@ public class SQLPPTriplesMapToR2RMLConverter {
 				graph.map(t -> mainNodeIriPrefix + "-" + UUID.randomUUID().toString())
 						.orElse(mainNodeIriPrefix));
 
-		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, extractSubjectMap(subject), iri);
+		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, getTermMap(subject, subjectTermMapFactorySupplier), iri);
 
-		graph.ifPresent(t -> tm.getSubjectMap().addGraphMap(extractGraphMap(t)));
+		graph.ifPresent(t -> tm.getSubjectMap().addGraphMap(getTermMap(t, graphTermMapFactorySupplier)));
 
 		for (Map.Entry<RDFAtomPredicate, TargetAtom> e : targetAtoms)  {
 			RDFAtomPredicate predicate = e.getKey();
@@ -120,153 +132,167 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			}
 			else {
 				tm.addPredicateObjectMap(mappingFactory.createPredicateObjectMap(
-						extractPredicateMap(predicate.getProperty(terms)),
-						extractObjectMap(predicate.getObject(terms))));
+						getTermMap(predicate.getProperty(terms), predicateTermMapFactorySupplier),
+						getTermMap(predicate.getObject(terms), objectTermMapFactorySupplier)));
 			}
 		}
 
 		return tm;
 	}
 
-	private SubjectMap extractSubjectMap(ImmutableTerm term) {
-		// TODO: allow *constant* blank nodes to appear in a subject map
-		//  (eu.optique.r2rml.api.MappingFactory does not allow that at the moment)
-		return extractTermMap(term, getExtractorFactory(mappingFactory::createSubjectMap,
-				mappingFactory::createSubjectMap, mappingFactory::createSubjectMap));
-	}
+	private class TermMapFactorySupplier<T extends TermMap> implements Function<RDFTermType, TermMapFactory<T>> {
+		protected final TermMapFactory<T> bnode, iri;
 
-	private GraphMap extractGraphMap(ImmutableTerm term) {
-		return extractTermMap(term, getExtractorFactory(mappingFactory::createGraphMap,
-				mappingFactory::createGraphMap, mappingFactory::createGraphMap));
-	}
+		TermMapFactorySupplier(Function<Template, T> templateFct, Function<String, T> columnFct, Function<IRI, T> iriFct) {
+			bnode = new BnodeTermMapFactory<>(columnFct, templateFct);
+			iri = new IriTermMapFactory<>(columnFct, templateFct, iriFct);
+		}
 
-	private PredicateMap extractPredicateMap(ImmutableTerm term) {
-		return extractTermMap(term, getExtractorFactory(mappingFactory::createPredicateMap,
-				mappingFactory::createPredicateMap, mappingFactory::createPredicateMap));
-	}
+		@Override
+		public TermMapFactory<T> apply(RDFTermType type) {
+			if (type instanceof ObjectRDFType)
+				return (((ObjectRDFType) type).isBlankNode()) ? bnode : iri;
 
-	private ObjectMap extractObjectMap(ImmutableTerm term) {
-		return extractTermMap(term, getObjectExtractorFactory(mappingFactory::createObjectMap,
-				mappingFactory::createObjectMap, mappingFactory::createObjectMap));
-	}
-
-	private <T extends TermMap> Function<RDFTermType, Extractor<T>> getExtractorFactory(
-														Function<Template, T> templateFct,
-														Function<String, T> columnFct,
-														Function<IRI, T> iriFct) {
-		return type -> {
-			if (type instanceof ObjectRDFType) {
-				return (((ObjectRDFType) type).isBlankNode())
-						? new Extractor<>(R2RMLVocabulary.blankNode, new BnodeTemplateFactory(null), columnFct, templateFct,
-								v -> { throw new MinorOntopInternalBugException("Constant blank nodes are not allowed"); })
-						: new Extractor<>(R2RMLVocabulary.iri, new IRITemplateFactory(null), columnFct, templateFct,
-								v -> iriFct.apply(rdfFactory.createIRI(v)));
-			}
 			throw new MinorOntopInternalBugException("Unexpected term type: " + type);
-		};
+		}
 	}
 
-	private <T extends ObjectMap> Function<RDFTermType, Extractor<T>> getObjectExtractorFactory(
-														Function<Template, T> templateFct,
-														Function<String, T> columnFct,
-														Function<RDFTerm, T> rdfTermFct) {
-		return type -> {
-			if (type instanceof ObjectRDFType) {
-				return (((ObjectRDFType) type).isBlankNode())
-						? new Extractor<>(R2RMLVocabulary.blankNode, new BnodeTemplateFactory(null), columnFct, templateFct,
-									v -> rdfTermFct.apply(rdfFactory.createBlankNode(v)))
-						: new Extractor<>(R2RMLVocabulary.iri, new IRITemplateFactory(null), columnFct, templateFct,
-									v -> rdfTermFct.apply(rdfFactory.createIRI(v)));
-			}
+	private class ObjectTermMapFactorySupplier<T extends ObjectMap> extends TermMapFactorySupplier<T> {
+		private final Map<RDFDatatype, LiteralTermMapFactory<T>> map = new HashMap<>();
+		private final Function<Literal, T> rdfTermFct;
+
+		ObjectTermMapFactorySupplier(Function<Template, T> templateFct, Function<String, T> columnFct, Function<RDFTerm, T> rdfTermFct) {
+			super(templateFct, columnFct, rdfTermFct::apply);
+			this.rdfTermFct = rdfTermFct::apply;
+		}
+
+		@Override
+		public TermMapFactory<T> apply(RDFTermType type) {
 			if (type instanceof RDFDatatype) {
 				RDFDatatype datatype = (RDFDatatype) type;
-				return new LiteralExtractor<>(R2RMLVocabulary.literal, datatype, new LiteralTemplateFactory(null, null), columnFct, templateFct, rdfTermFct::apply);
+				return map.computeIfAbsent(datatype,
+						d -> new LiteralTermMapFactory<T>(datatype, iri.columnFct, iri.templateFct, rdfTermFct));
 			}
-			throw new MinorOntopInternalBugException("Unexpected term type: " + type);
-		};
+			return super.apply(type);
+		}
 	}
 
-	private <T extends TermMap> T extractTermMap(ImmutableTerm term,
-												 Function<RDFTermType, Extractor<T>> extractorFactory) {
+	private <T extends TermMap> T getTermMap(ImmutableTerm term,
+											 Function<RDFTermType, TermMapFactory<T>> termMapFactorySupplier) {
+
+		ImmutableTerm lexicalTerm;
+		RDFTermType termType;
 
 		if (term instanceof RDFConstant) {
 			RDFConstant constant = (RDFConstant) term;
-			ImmutableTerm lexicalTerm =  termFactory.getDBStringConstant(constant.getValue());
-			RDFTermType termType = constant.getType();
-			return extractorFactory.apply(termType).extract(lexicalTerm);
+			lexicalTerm =  termFactory.getDBStringConstant(constant.getValue());
+			termType = constant.getType();
 		}
+		else if (term instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm rdfFunctionalTerm = (ImmutableFunctionalTerm) term;
+			lexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfFunctionalTerm.getTerm(0));
 
-		ImmutableFunctionalTerm rdfFunctionalTerm = (ImmutableFunctionalTerm) term;
+			// Might be abstract (e.g. partially defined literal map)
+			termType = Optional.of(rdfFunctionalTerm.getTerm(1))
+					.filter(t -> t instanceof RDFTermTypeConstant)
+					.map(t -> (RDFTermTypeConstant) t)
+					.map(RDFTermTypeConstant::getRDFTermType)
+					.orElseThrow(() -> new R2RMLSerializationException(
+							"Was expecting a RDFTermTypeConstant in the mapping assertion, not "
+									+ rdfFunctionalTerm.getTerm(1)));
+		}
+		else
+			throw new MinorOntopInternalBugException("Unexpected term: " + term);
 
-		ImmutableTerm lexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfFunctionalTerm.getTerm(0));
-
-		// Might be abstract (e.g. partially defined literal map)
-		RDFTermType termType = Optional.of(rdfFunctionalTerm.getTerm(1))
-				.filter(t -> t instanceof RDFTermTypeConstant)
-				.map(t -> (RDFTermTypeConstant) t)
-				.map(RDFTermTypeConstant::getRDFTermType)
-				.orElseThrow(() -> new R2RMLSerializationException(
-						"Was expecting a RDFTermTypeConstant in the mapping assertion, not "
-								+ rdfFunctionalTerm.getTerm(1)));
-
-		return extractorFactory.apply(termType).extract(lexicalTerm);
+		return termMapFactorySupplier.apply(termType).create(lexicalTerm);
 	}
 
 
-	private class Extractor<T extends TermMap> {
+	private abstract class TermMapFactory<T extends TermMap> {
 		final IRI termType;
 		final TemplateFactory templateFactory;
 		final Function<String, T> columnFct;
 		final Function<Template, T> templateFct;
-		final Function<String, T> constantFct;
 
-		Extractor(IRI termType, TemplateFactory templateFactory, Function<String, T> columnFct, Function<Template, T> templateFct, Function<String, T> constantFct) {
+		TermMapFactory(IRI termType, TemplateFactory templateFactory, Function<String, T> columnFct, Function<Template, T> templateFct) {
 			this.termType = termType;
 			this.templateFactory = templateFactory;
 			this.columnFct = columnFct;
 			this.templateFct = templateFct;
-			this.constantFct = constantFct;
 		}
 
-		protected T extractConstant(DBConstant term) {
-			return constantFct.apply(term.getValue());
-		}
-		protected T extractColumn(Variable term) {
+		protected abstract T forConstant(DBConstant term);
+
+		protected T forColumn(Variable term) {
 			T termMap = columnFct.apply(term.getName());
 			termMap.setTermType(termType);
 			return termMap;
 		}
-		protected T extractTemplate(ImmutableFunctionalTerm term) {
+		protected T forTemplate(ImmutableFunctionalTerm term) {
 			String templateString = templateFactory.serializeTemplateTerm(term);
 			T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
 			termMap.setTermType(termType);
 			return termMap;
 		}
 
-		public T extract(ImmutableTerm term) {
+		public T create(ImmutableTerm term) {
 			if (term instanceof DBConstant)
-				return extractConstant((DBConstant)term);
+				return forConstant((DBConstant)term);
 			if (term instanceof Variable)
-				return extractColumn((Variable)term);
+				return forColumn((Variable)term);
 			if (term instanceof ImmutableFunctionalTerm)
-				return extractTemplate((ImmutableFunctionalTerm)term);
+				return forTemplate((ImmutableFunctionalTerm)term);
 
 			throw new MinorOntopInternalBugException("Unexpected lexical term for an termMap: " + term);
 		}
 	}
 
-	private class LiteralExtractor<T extends ObjectMap> extends Extractor<T> {
+	private class BnodeTermMapFactory<T extends TermMap> extends TermMapFactory<T> {
+
+		BnodeTermMapFactory(Function<String, T> columnFct, Function<Template, T> templateFct) {
+			super(R2RMLVocabulary.blankNode, new BnodeTemplateFactory(null), columnFct, templateFct);
+		}
+
+		/**
+			constant Bnodes do not exist (https://www.w3.org/TR/r2rml/#constant)
+		    use a column-free template instead
+		 */
+		@Override
+		protected T forConstant(DBConstant term) {
+			String templateString = term.getValue();
+			T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+			termMap.setTermType(termType);
+			return termMap;
+		}
+	}
+
+	private class IriTermMapFactory<T extends TermMap> extends TermMapFactory<T> {
+		private final Function<IRI, T> constantFct;
+
+		IriTermMapFactory(Function<String, T> columnFct, Function<Template, T> templateFct, Function<IRI, T> constantFct) {
+			super(R2RMLVocabulary.iri, new IRITemplateFactory(null), columnFct, templateFct);
+			this.constantFct = constantFct;
+		}
+
+		@Override
+		protected T forConstant(DBConstant term) {
+			IRI iri = rdfFactory.createIRI(term.getValue());
+			return constantFct.apply(iri);
+		}
+	}
+
+	private class LiteralTermMapFactory<T extends ObjectMap> extends TermMapFactory<T> {
 		final RDFDatatype datatype;
 		final Function<Literal, T> constantFct;
 
-		LiteralExtractor(IRI termType, RDFDatatype datatype, TemplateFactory templateFactory, Function<String, T> columnFct, Function<Template, T> templateFct, Function<Literal, T> constantFct) {
-			super(termType, templateFactory, columnFct, templateFct, null);
+		LiteralTermMapFactory(RDFDatatype datatype, Function<String, T> columnFct, Function<Template, T> templateFct, Function<Literal, T> constantFct) {
+			super(R2RMLVocabulary.literal, new LiteralTemplateFactory(null, null), columnFct, templateFct);
 			this.datatype = datatype;
 			this.constantFct = constantFct;
 		}
 
 		@Override
-		protected T extractConstant(DBConstant term) {
+		protected T forConstant(DBConstant term) {
 			Literal literal = datatype.getLanguageTag()
 					.map(lang -> rdfFactory.createLiteral(term.getValue(), lang.getFullString()))
 					.orElseGet(() -> rdfFactory.createLiteral(term.getValue(), datatype.getIRI()));
@@ -274,12 +300,12 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			return constantFct.apply(literal);
 		}
 		@Override
-		protected T extractColumn(Variable term) {
-			return setDatatype(super.extractColumn(term), datatype);
+		protected T forColumn(Variable term) {
+			return setDatatype(super.forColumn(term), datatype);
 		}
 		@Override
-		protected T extractTemplate(ImmutableFunctionalTerm term) {
-			return setDatatype(super.extractTemplate(term), datatype);
+		protected T forTemplate(ImmutableFunctionalTerm term) {
+			return setDatatype(super.forTemplate(term), datatype);
 		}
 
 		private T setDatatype(T objectMap, RDFDatatype datatype) {
