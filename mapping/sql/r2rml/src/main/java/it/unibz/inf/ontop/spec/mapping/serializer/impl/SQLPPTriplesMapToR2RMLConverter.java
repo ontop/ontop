@@ -129,7 +129,8 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	}
 
 	private SubjectMap extractSubjectMap(ImmutableTerm term) {
-		// TODO: allow blank nodes to appear in a subject map
+		// TODO: allow *constant* blank nodes to appear in a subject map
+		//  (eu.optique.r2rml.api.MappingFactory does not allow that at the moment)
 		return extractTermMap(term, getExtractorFactory(mappingFactory::createSubjectMap,
 				mappingFactory::createSubjectMap, mappingFactory::createSubjectMap));
 	}
@@ -149,18 +150,18 @@ public class SQLPPTriplesMapToR2RMLConverter {
 				mappingFactory::createObjectMap, mappingFactory::createObjectMap));
 	}
 
-	private final BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(null);
-	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
-	private final LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(null, null);
-
 	private <T extends TermMap> Function<RDFTermType, Extractor<T>> getExtractorFactory(
 														Function<Template, T> templateFct,
 														Function<String, T> columnFct,
 														Function<IRI, T> iriFct) {
 		return type -> {
-			if (type instanceof ObjectRDFType && !((ObjectRDFType) type).isBlankNode())
-				return new Extractor<>(R2RMLVocabulary.iri, iriTemplateFactory, columnFct, templateFct, v -> iriFct.apply(rdfFactory.createIRI(v)));
-
+			if (type instanceof ObjectRDFType) {
+				return (((ObjectRDFType) type).isBlankNode())
+						? new Extractor<>(R2RMLVocabulary.blankNode, new BnodeTemplateFactory(null), columnFct, templateFct,
+								v -> { throw new MinorOntopInternalBugException("Constant blank nodes are not allowed"); })
+						: new Extractor<>(R2RMLVocabulary.iri, new IRITemplateFactory(null), columnFct, templateFct,
+								v -> iriFct.apply(rdfFactory.createIRI(v)));
+			}
 			throw new MinorOntopInternalBugException("Unexpected term type: " + type);
 		};
 	}
@@ -172,12 +173,14 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		return type -> {
 			if (type instanceof ObjectRDFType) {
 				return (((ObjectRDFType) type).isBlankNode())
-						? new Extractor<>(R2RMLVocabulary.blankNode, bnodeTemplateFactory, columnFct, templateFct, v -> rdfTermFct.apply(rdfFactory.createBlankNode(v)))
-						: new Extractor<>(R2RMLVocabulary.iri, iriTemplateFactory, columnFct, templateFct, v -> rdfTermFct.apply(rdfFactory.createIRI(v)));
+						? new Extractor<>(R2RMLVocabulary.blankNode, new BnodeTemplateFactory(null), columnFct, templateFct,
+									v -> rdfTermFct.apply(rdfFactory.createBlankNode(v)))
+						: new Extractor<>(R2RMLVocabulary.iri, new IRITemplateFactory(null), columnFct, templateFct,
+									v -> rdfTermFct.apply(rdfFactory.createIRI(v)));
 			}
 			if (type instanceof RDFDatatype) {
 				RDFDatatype datatype = (RDFDatatype) type;
-				return new LiteralExtractor<>(R2RMLVocabulary.literal, datatype, literalTemplateFactory, columnFct, templateFct, rdfTermFct::apply);
+				return new LiteralExtractor<>(R2RMLVocabulary.literal, datatype, new LiteralTemplateFactory(null, null), columnFct, templateFct, rdfTermFct::apply);
 			}
 			throw new MinorOntopInternalBugException("Unexpected term type: " + type);
 		};
