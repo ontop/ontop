@@ -8,6 +8,7 @@ import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
@@ -175,6 +176,11 @@ public class SQLPPTriplesMapToR2RMLConverter {
 				mappingFactory::createObjectMap);
 	}
 
+	private final BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(null);
+	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
+	private final LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(null, null);
+
+
 	private <T extends TermMap> T extractTermMap(ImmutableTerm term,
 												 Function<Template, T> templateFct,
 												 Function<String, T> columnFct,
@@ -182,11 +188,15 @@ public class SQLPPTriplesMapToR2RMLConverter {
 												 Function<BlankNode, T> bNodeFct,
 												 Function<Literal, T> literalFct) {
 
+		Extractor<T, IRI> iriExtractor = new Extractor<>(R2RMLVocabulary.iri, iriTemplateFactory, columnFct, templateFct, iriFct);
+		Extractor<T, BlankNode> bnodeExtractor = new Extractor<>(R2RMLVocabulary.blankNode, bnodeTemplateFactory, columnFct, templateFct, bNodeFct);
+		Extractor<T, Literal> literalExtractor = new Extractor<>(R2RMLVocabulary.literal, literalTemplateFactory, columnFct, templateFct, literalFct);
+
 		if (term instanceof RDFConstant) {
 			RDFConstant constant = (RDFConstant) term;
 			ImmutableTerm lexicalTerm =  termFactory.getDBStringConstant(constant.getValue());
 			RDFTermType termType = constant.getType();
-			return extract(termType, lexicalTerm, templateFct, columnFct, iriFct, bNodeFct, literalFct);
+			return extract(termType, lexicalTerm, iriExtractor, bnodeExtractor, literalExtractor);
 		}
 
 		ImmutableFunctionalTerm rdfFunctionalTerm = (ImmutableFunctionalTerm) term;
@@ -202,24 +212,23 @@ public class SQLPPTriplesMapToR2RMLConverter {
 						"Was expecting a RDFTermTypeConstant in the mapping assertion, not "
 								+ rdfFunctionalTerm.getTerm(1)));
 
-		return extract(termType, lexicalTerm, templateFct, columnFct, iriFct, bNodeFct, literalFct);
+		return extract(termType, lexicalTerm, iriExtractor, bnodeExtractor, literalExtractor);
 	}
 
-	private <T extends TermMap> T extract(RDFTermType termType, ImmutableTerm lexicalTerm,
-												 Function<Template, T> templateFct,
-												 Function<String, T> columnFct,
-												 Function<IRI, T> iriFct,
-												 Function<BlankNode, T> bNodeFct,
-												 Function<Literal, T> literalFct) {
+	private <T extends TermMap> T extract(RDFTermType termType,
+										  ImmutableTerm lexicalTerm,
+										  Extractor<T, IRI> iriExtractor,
+										  Extractor<T, BlankNode> bnodeExtractor,
+										  Extractor<T, Literal> literalExtractor) {
+
 		if (termType instanceof ObjectRDFType) {
-			if (((ObjectRDFType) termType).isBlankNode())
-				return extractBnodeTermMap(lexicalTerm, templateFct, columnFct, bNodeFct);
-			else
-				return extractIriTermMap(lexicalTerm, templateFct, columnFct, iriFct);
+			return (((ObjectRDFType) termType).isBlankNode())
+				? bnodeExtractor.extract(lexicalTerm, rdfFactory::createBlankNode)
+			    : iriExtractor.extract(lexicalTerm, rdfFactory::createIRI);
 		}
 		else if (termType instanceof RDFDatatype) {
 			RDFDatatype datatype = (RDFDatatype) termType;
-			T termMap = extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
+			T termMap = literalExtractor.extract(lexicalTerm, v -> createLiteral(v, datatype));
 
 			if (!(termMap instanceof ObjectMap))
 				throw new MinorOntopInternalBugException("The termMap was expected to be an ObjectMap");
@@ -246,114 +255,47 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		throw new MinorOntopInternalBugException("An RDF termType must be either an object type or a datatype");
 	}
 
-	private <T extends TermMap> T extractConstantIriTermMap(String lexicalString, Function<IRI, T> iriFct) {
-		return iriFct.apply(rdfFactory.createIRI(lexicalString));
-	}
+	private class Extractor<T extends TermMap, C> {
+		final IRI termType;
+		final TemplateFactory templateFactory;
+		final Function<String, T> columnFct;
+		final Function<Template, T> templateFct;
+		final Function<C, T> constantFct;
 
-	private <T extends TermMap> T extractColumnIriTermMap(Variable variable, Function<String, T> columnFct) {
-		T termMap = columnFct.apply(variable.getName());
-		termMap.setTermType(R2RMLVocabulary.iri);
-		return termMap;
-	}
+		Extractor(IRI termType, TemplateFactory templateFactory, Function<String, T> columnFct, Function<Template, T> templateFct, Function<C, T> constantFct) {
+			this.termType = termType;
+			this.templateFactory = templateFactory;
+			this.columnFct = columnFct;
+			this.templateFct = templateFct;
+			this.constantFct = constantFct;
+		}
 
-	private <T extends TermMap> T extractTemplateIriTermMap(ImmutableFunctionalTerm functionalTerm, Function<Template, T> templateFct) {
-		String templateString = iriTemplateFactory.serializeTemplateTerm(functionalTerm);
-		T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
-		termMap.setTermType(R2RMLVocabulary.iri);
-		return termMap;
-	}
+		public T extract(ImmutableTerm term, Function<String, C> cFct) {
+			if (term instanceof DBConstant) {
+				String v = ((DBConstant) term).getValue();
+				return constantFct.apply(cFct.apply(v));
+			}
+			else if (term instanceof Variable) {
+				T termMap = columnFct.apply(((Variable) term).getName());
+				termMap.setTermType(termType);
+				return termMap;
+			}
+			else if (term instanceof ImmutableFunctionalTerm) {
+				String templateString = templateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) term);
+				T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+				termMap.setTermType(termType);
+				return termMap;
+			}
 
-	private <T extends TermMap> T extractIriTermMap(ImmutableTerm lexicalTerm,
-                                                           Function<Template, T> templateFct,
-                                                           Function<String, T> columnFct,
-                                                           Function<IRI, T> iriFct) {
-		if (lexicalTerm instanceof DBConstant)
-			return extractConstantIriTermMap(((DBConstant) lexicalTerm).getValue(), iriFct);
-
-		if (lexicalTerm instanceof Variable)
-			return extractColumnIriTermMap((Variable) lexicalTerm, columnFct);
-
-		if (lexicalTerm instanceof ImmutableFunctionalTerm)
-			return extractTemplateIriTermMap((ImmutableFunctionalTerm) lexicalTerm, templateFct);
-
-		throw new MinorOntopInternalBugException("Unexpected lexical term for an IRI: " + lexicalTerm);
-	}
-
-	private <T extends TermMap> T extractConstantBnodeTermMap(String lexicalString, Function<BlankNode, T> bNodeFct) {
-		return bNodeFct.apply(rdfFactory.createBlankNode(lexicalString));
-	}
-
-	private <T extends TermMap> T extractColumnBnodeTermMap(Variable variable, Function<String, T> columnFct) {
-		T termMap = columnFct.apply(variable.getName());
-		termMap.setTermType(R2RMLVocabulary.blankNode);
-		return termMap;
-	}
-
-	private <T extends TermMap> T extractTemplateBnodeTermMap(ImmutableFunctionalTerm functionalTerm, Function<Template, T> templateFct) {
-		String templateString = bnodeTemplateFactory.serializeTemplateTerm(functionalTerm);
-		T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
-		termMap.setTermType(R2RMLVocabulary.blankNode);
-		return termMap;
-	}
-
-	private <T extends TermMap> T extractBnodeTermMap(ImmutableTerm lexicalTerm,
-														   Function<Template, T> templateFct,
-														   Function<String, T> columnFct,
-														   Function<BlankNode, T> bNodeFct) {
-		if (lexicalTerm instanceof DBConstant)
-			return extractConstantBnodeTermMap(((DBConstant) lexicalTerm).getValue(), bNodeFct);
-
-		if (lexicalTerm instanceof Variable)
-			return extractColumnBnodeTermMap((Variable) lexicalTerm, columnFct);
-
-		if (lexicalTerm instanceof ImmutableFunctionalTerm)
-			return extractTemplateBnodeTermMap((ImmutableFunctionalTerm)lexicalTerm, templateFct);
-
-		throw new MinorOntopInternalBugException("Unexpected lexical term for an Bnode: " + lexicalTerm);
+			throw new MinorOntopInternalBugException("Unexpected lexical term for an IRI: " + term);
+		}
 	}
 
 
-	private final BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(null);
-	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
-	private final LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(null, null);
-
-	private <T extends TermMap> T extractConstantLiteralTermMap(String lexicalString,
-														RDFDatatype datatype,
-														Function<Literal, T> literalFct) {
-		Literal literal = datatype.getLanguageTag()
+	private Literal createLiteral(String lexicalString, RDFDatatype datatype) {
+		return datatype.getLanguageTag()
 				.map(lang -> rdfFactory.createLiteral(lexicalString, lang.getFullString()))
 				.orElseGet(() -> rdfFactory.createLiteral(lexicalString, datatype.getIRI()));
-		return literalFct.apply(literal);
-	}
-
-	private <T extends TermMap> T extractColumnLiteralTermMap(Variable variable, Function<String, T> columnFct) {
-		T termMap = columnFct.apply(variable.getName());
-		termMap.setTermType(R2RMLVocabulary.literal);
-		return termMap;
-	}
-
-	private <T extends TermMap> T extractTemplateLiteralTermMap(ImmutableFunctionalTerm functionalTerm, Function<Template, T> templateFct) {
-		String templateString = literalTemplateFactory.serializeTemplateTerm(functionalTerm);
-		T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
-		termMap.setTermType(R2RMLVocabulary.literal);
-		return termMap;
-	}
-
-	private <T extends TermMap> T extractLiteralTermMap(ImmutableTerm lexicalTerm,
-														RDFDatatype datatype,
-														Function<Template, T> templateFct,
-														Function<String, T> columnFct,
-														Function<Literal, T> literalFct) {
-		if (lexicalTerm instanceof DBConstant)
-			return extractConstantLiteralTermMap(((DBConstant) lexicalTerm).getValue(), datatype, literalFct);
-
-		if (lexicalTerm instanceof Variable)
-			return extractColumnLiteralTermMap((Variable) lexicalTerm, columnFct);
-
-		if (lexicalTerm instanceof ImmutableFunctionalTerm)
-			return extractTemplateLiteralTermMap((ImmutableFunctionalTerm)lexicalTerm, templateFct);
-
-		throw new MinorOntopInternalBugException("Unexpected lexical term for a literal: " + lexicalTerm);
 	}
 
 
