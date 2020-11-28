@@ -13,12 +13,8 @@ import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -205,8 +201,12 @@ public class SQLPPTriplesMapToR2RMLConverter {
 						"Was expecting a RDFTermTypeConstant in the mapping assertion, not "
 								+ rdfFunctionalTerm.getTerm(1)));
 
-		if (termType instanceof ObjectRDFType)
-			return extractIriOrBnodeTermMap(lexicalTerm, (ObjectRDFType) termType, templateFct, columnFct, iriFct, bNodeFct);
+		if (termType instanceof ObjectRDFType) {
+			if (((ObjectRDFType) termType).isBlankNode())
+				return extractBnodeTermMap(lexicalTerm, templateFct, columnFct, bNodeFct);
+			else
+				return extractIriTermMap(lexicalTerm, templateFct, columnFct, iriFct);
+		}
 		if (termType instanceof RDFDatatype)
 			return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
 
@@ -223,39 +223,51 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		return (ImmutableFunctionalTerm) term;
 	}
 
-	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm,
-														   ObjectRDFType termType,
+	private <T extends TermMap> T extractIriTermMap(ImmutableTerm lexicalTerm,
                                                            Function<Template, T> templateFct,
                                                            Function<String, T> columnFct,
-                                                           Function<IRI, T> iriFct,
-                                                           Function<BlankNode, T> bNodeFct) {
+                                                           Function<IRI, T> iriFct) {
 		if (lexicalTerm instanceof DBConstant) { //fixed string
 			String lexicalString = ((DBConstant) lexicalTerm).getValue();
-			return termType.isBlankNode()
-					? bNodeFct.apply(rdfFactory.createBlankNode(lexicalString))
-					: iriFct.apply(rdfFactory.createIRI(lexicalString));
+			return iriFct.apply(rdfFactory.createIRI(lexicalString));
 		}
 		else if (lexicalTerm instanceof Variable) {
 			T termMap = columnFct.apply(((Variable) lexicalTerm).getName());
-			termMap.setTermType(termType.isBlankNode() ? R2RMLVocabulary.blankNode : R2RMLVocabulary.iri);
+			termMap.setTermType(R2RMLVocabulary.iri);
 			return termMap;
 		}
 		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-			if (termType.isBlankNode()) {
-				String templateString = bnodeTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm);
-				T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
-				termMap.setTermType(R2RMLVocabulary.blankNode);
-				return termMap;
-			}
-			else  {
-				String templateString = iriTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm);
-				T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
-				termMap.setTermType(R2RMLVocabulary.iri);
-				return termMap;
-			}
+			String templateString = iriTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm);
+			T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+			termMap.setTermType(R2RMLVocabulary.iri);
+			return termMap;
 		}
-		throw new MinorOntopInternalBugException("Unexpected lexical term for an IRI/Bnode: " + lexicalTerm);
+		throw new MinorOntopInternalBugException("Unexpected lexical term for an IRI: " + lexicalTerm);
 	}
+
+
+	private <T extends TermMap> T extractBnodeTermMap(ImmutableTerm lexicalTerm,
+														   Function<Template, T> templateFct,
+														   Function<String, T> columnFct,
+														   Function<BlankNode, T> bNodeFct) {
+		if (lexicalTerm instanceof DBConstant) { //fixed string
+			String lexicalString = ((DBConstant) lexicalTerm).getValue();
+			return bNodeFct.apply(rdfFactory.createBlankNode(lexicalString));
+		}
+		else if (lexicalTerm instanceof Variable) {
+			T termMap = columnFct.apply(((Variable) lexicalTerm).getName());
+			termMap.setTermType(R2RMLVocabulary.blankNode);
+			return termMap;
+		}
+		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+			String templateString = bnodeTemplateFactory.serializeTemplateTerm((ImmutableFunctionalTerm) lexicalTerm);
+			T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+			termMap.setTermType(R2RMLVocabulary.blankNode);
+			return termMap;
+		}
+		throw new MinorOntopInternalBugException("Unexpected lexical term for an Bnode: " + lexicalTerm);
+	}
+
 
 	private final BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(null);
 	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
@@ -299,31 +311,19 @@ public class SQLPPTriplesMapToR2RMLConverter {
 		Optional<LanguageTag> optionalLangTag = datatype.getLanguageTag();
 		if (optionalLangTag.isPresent())
 			objectMap.setLanguageTag(optionalLangTag.get().getFullString());
-		else if (!datatype.isAbstract()
-				&& !isOntopInternalRDFLiteral(datatype, lexicalTerm))
-			objectMap.setDatatype(datatype.getIRI());
+		else {
+			/*
+			 * Ontop may use rdfs:literal internally for some terms whose datatype is not specified in the obda mapping.
+			 *  If the term is built from a column or pattern, then its datatype must be inferred from the DB schema (according to the R2RML spec),
+			 *  so the R2RML mapping should not use rr:datatype for this term map
+			 */
+			if (!datatype.isAbstract()
+					&& (!datatype.getIRI().equals(RDFS.LITERAL) ||
+					!(lexicalTerm instanceof Variable)))
+				objectMap.setDatatype(datatype.getIRI());
+		}
 
 		return termMap;
-	}
-
-	/**
-	 * Ontop may use rdfs:literal internally for some terms whose datatype is not specified in the obda mapping.
-	 *  If the term is built from a column or pattern, then its datatype must be inferred from the DB schema (according to the R2RML spec),
-	 *  so the R2RML mapping should not use rr:datatype for this term map
-	 */
-	private boolean isOntopInternalRDFLiteral(RDFDatatype datatype, ImmutableTerm lexicalTerm) {
-		if (!datatype.getIRI().equals(RDFS.LITERAL))
-			return false;
-		if (lexicalTerm instanceof Variable)
-			return true;
-		if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-			FunctionSymbol fs = ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol();
-			boolean r = fs instanceof BnodeStringTemplateFunctionSymbol || fs instanceof IRIStringTemplateFunctionSymbol;
-			if (r)
-				System.out.println("isOntopInternalRDFLiteral BINGO");
-			return r;
-		}
-		return false;
 	}
 
 
