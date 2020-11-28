@@ -217,8 +217,31 @@ public class SQLPPTriplesMapToR2RMLConverter {
 			else
 				return extractIriTermMap(lexicalTerm, templateFct, columnFct, iriFct);
 		}
-		if (termType instanceof RDFDatatype)
-			return extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
+		else if (termType instanceof RDFDatatype) {
+			RDFDatatype datatype = (RDFDatatype) termType;
+			T termMap = extractLiteralTermMap(lexicalTerm, (RDFDatatype) termType, templateFct, columnFct, literalFct);
+
+			if (!(termMap instanceof ObjectMap))
+				throw new MinorOntopInternalBugException("The termMap was expected to be an ObjectMap");
+			ObjectMap objectMap = (ObjectMap) termMap;
+
+			Optional<LanguageTag> optionalLangTag = datatype.getLanguageTag();
+			if (optionalLangTag.isPresent())
+				objectMap.setLanguageTag(optionalLangTag.get().getFullString());
+			else {
+				/*
+				 * Ontop may use rdfs:literal internally for some terms whose datatype is not specified in the obda mapping.
+				 *  If the term is built from a column or pattern, then its datatype must be inferred from the DB schema
+				 *  (according to the R2RML spec),
+				 *  so the R2RML mapping should not use rr:datatype for this term map
+				 */
+				if (!datatype.isAbstract()
+						&& (!datatype.getIRI().equals(RDFS.LITERAL) ||
+						!(lexicalTerm instanceof Variable)))
+					objectMap.setDatatype(datatype.getIRI());
+			}
+			return termMap;
+		}
 
 		throw new MinorOntopInternalBugException("An RDF termType must be either an object type or a datatype");
 	}
@@ -294,58 +317,43 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(null);
 	private final LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(null, null);
 
+	private <T extends TermMap> T extractConstantLiteralTermMap(String lexicalString,
+														RDFDatatype datatype,
+														Function<Literal, T> literalFct) {
+		Literal literal = datatype.getLanguageTag()
+				.map(lang -> rdfFactory.createLiteral(lexicalString, lang.getFullString()))
+				.orElseGet(() -> rdfFactory.createLiteral(lexicalString, datatype.getIRI()));
+		return literalFct.apply(literal);
+	}
 
-	/**
-	 * NB: T is assumed to be an ObjectMap
-	 */
+	private <T extends TermMap> T extractColumnLiteralTermMap(Variable variable, Function<String, T> columnFct) {
+		T termMap = columnFct.apply(variable.getName());
+		termMap.setTermType(R2RMLVocabulary.literal);
+		return termMap;
+	}
+
+	private <T extends TermMap> T extractTemplateLiteralTermMap(ImmutableFunctionalTerm functionalTerm, Function<Template, T> templateFct) {
+		String templateString = literalTemplateFactory.serializeTemplateTerm(functionalTerm);
+		T termMap = templateFct.apply(mappingFactory.createTemplate(templateString));
+		termMap.setTermType(R2RMLVocabulary.literal);
+		return termMap;
+	}
+
 	private <T extends TermMap> T extractLiteralTermMap(ImmutableTerm lexicalTerm,
 														RDFDatatype datatype,
 														Function<Template, T> templateFct,
 														Function<String, T> columnFct,
 														Function<Literal, T> literalFct) {
-		T termMap;
-		if (lexicalTerm instanceof DBConstant) {
-			String lexicalString = ((DBConstant) lexicalTerm).getValue();
-			Literal literal = datatype.getLanguageTag()
-					.map(lang -> rdfFactory.createLiteral(lexicalString, lang.getFullString()))
-					.orElseGet(() -> rdfFactory.createLiteral(lexicalString, datatype.getIRI()));
-			termMap = literalFct.apply(literal);
-		}
-		else if (lexicalTerm instanceof Variable) {
-			termMap = columnFct.apply(((Variable) lexicalTerm).getName());
-			termMap.setTermType(R2RMLVocabulary.literal);
-		}
-		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
-			termMap = templateFct.apply(mappingFactory.createTemplate(
-						literalTemplateFactory.serializeTemplateTerm(functionalLexicalTerm)));
-			termMap.setTermType(R2RMLVocabulary.literal);
-		}
-		else {
-			throw new MinorOntopInternalBugException("Unexpected lexical term for a literal: " + lexicalTerm);
-		}
+		if (lexicalTerm instanceof DBConstant)
+			return extractConstantLiteralTermMap(((DBConstant) lexicalTerm).getValue(), datatype, literalFct);
 
-		if (!(termMap instanceof ObjectMap))
-			throw new MinorOntopInternalBugException("The termMap was expected to be an ObjectMap");
-		ObjectMap objectMap = (ObjectMap) termMap;
+		if (lexicalTerm instanceof Variable)
+			return extractColumnLiteralTermMap((Variable) lexicalTerm, columnFct);
 
-		Optional<LanguageTag> optionalLangTag = datatype.getLanguageTag();
-		if (optionalLangTag.isPresent())
-			objectMap.setLanguageTag(optionalLangTag.get().getFullString());
-		else {
-			/*
-			 * Ontop may use rdfs:literal internally for some terms whose datatype is not specified in the obda mapping.
-			 *  If the term is built from a column or pattern, then its datatype must be inferred from the DB schema
-			 *  (according to the R2RML spec),
-			 *  so the R2RML mapping should not use rr:datatype for this term map
-			 */
-			if (!datatype.isAbstract()
-					&& (!datatype.getIRI().equals(RDFS.LITERAL) ||
-					!(lexicalTerm instanceof Variable)))
-				objectMap.setDatatype(datatype.getIRI());
-		}
+		if (lexicalTerm instanceof ImmutableFunctionalTerm)
+			return extractTemplateLiteralTermMap((ImmutableFunctionalTerm)lexicalTerm, templateFct);
 
-		return termMap;
+		throw new MinorOntopInternalBugException("Unexpected lexical term for a literal: " + lexicalTerm);
 	}
 
 
