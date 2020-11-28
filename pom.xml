@@ -125,7 +125,7 @@
         <license.roots>src/main/java,src/test/java</license.roots>
 
         <rdf4j.version>3.3.0</rdf4j.version>
-        <owlapi.version>4.5.9</owlapi.version>
+        <owlapi.version>4.5.19</owlapi.version>
         <logback.version>1.2.3</logback.version>
         <antlr4.version>4.8-1</antlr4.version>
         <airline.version>2.8.0</airline.version>

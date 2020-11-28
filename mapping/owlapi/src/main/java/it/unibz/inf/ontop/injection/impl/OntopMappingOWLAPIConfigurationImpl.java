@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -77,9 +78,11 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
         try {
             Optional<URL> optionalURL = options.mappingOntologyOptions.ontologyURL;
             if (optionalURL.isPresent()) {
-                owlOntology = Optional.of(
-                        manager.loadOntologyFromOntologyDocument(
-                                optionalURL.get().openStream()));
+                try (InputStream is = optionalURL.get().openStream()) {
+                    owlOntology = Optional.of(
+                            manager.loadOntologyFromOntologyDocument(is
+                            ));
+                }
             }
 
         } catch (MalformedURLException e ) {
