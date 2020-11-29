@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.rdf4j.RDF4J;
@@ -224,7 +223,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
             List<NonVariableTerm> predicates = r2rmlParser.extractPredicateTerms(pobm);
 
             SubjectMap sm = tm.getSubjectMap();
-
             ImmutableList<NonVariableTerm> subject_graphs_and_predicate_object_graphs = Stream.concat(
                     r2rmlParser.extractGraphTerms(sm.getGraphMaps()).stream(),
                     r2rmlParser.extractGraphTerms(pobm.getGraphMaps()).stream())
@@ -239,46 +237,28 @@ public class R2RMLMappingParser implements SQLMappingParser {
                     throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
                             tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
-                ImmutableTerm childSubject = Optional.ofNullable(regularTriplesMap.get(tm))
-                        .map(this::extractSubjectTerm)
-                        .orElseGet(() -> r2rmlParser.extractSubjectTerm(tm.getSubjectMap()));
+                ImmutableTermWithRenaming subject = new ImmutableTermWithRenaming(tm,
+                        robm.getJoinConditions().isEmpty() ? "TMP" : "CHILD", regularTriplesMap);
 
-                String childPrefix = robm.getJoinConditions().isEmpty() ? "TMP" : "CHILD";
+                ImmutableTermWithRenaming object = new ImmutableTermWithRenaming(parent,
+                        robm.getJoinConditions().isEmpty() ? "TMP" : "PARENT", regularTriplesMap);
 
-                Var2VarSubstitution childSub = getRenaming(childSubject, childPrefix);
-                ImmutableTerm childSubject2 = childSub.apply(childSubject);
-
-                /*
-                 * Re-uses the already created subject term. Important when dealing with blank nodes.
-                 */
-                ImmutableTerm parentSubject = Optional.ofNullable(regularTriplesMap.get(parent))
-                        .map(this::extractSubjectTerm)
-                        .orElseGet(() -> r2rmlParser.extractSubjectTerm(parent.getSubjectMap()));
-
-                String parentPrefix = robm.getJoinConditions().isEmpty() ? "TMP" : "PARENT";
-
-                Var2VarSubstitution parentSub = getRenaming(parentSubject, parentPrefix);
-                ImmutableTerm parentSubject2 = parentSub.apply(parentSubject);
-
+                // TODO: child sub should be applied to graphs and predicates
                 ImmutableList<TargetAtom> targetAtoms = predicates.stream()
-                        .flatMap(p -> getTargetAtoms(childSubject2, p, parentSubject2, subject_graphs_and_predicate_object_graphs))
+                        .flatMap(p -> getTargetAtoms(subject.term, p, object.term, subject_graphs_and_predicate_object_graphs))
                         .collect(ImmutableCollectors.toList());
 
                 String sourceQuery =
-                        "SELECT " + Stream.concat(
-                                childSub.getImmutableMap().entrySet().stream()
-                                    .map(e -> childPrefix + "." + e.getKey() + " AS " + e.getValue()),
-                                parentSub.getImmutableMap().entrySet().stream()
-                                    .map(e -> parentPrefix + "." + e.getKey() + " AS " + e.getValue()))
+                        "SELECT " + Stream.concat(subject.sqlAS(), object.sqlAS())
                                 .collect(Collectors.joining(", ")) +
-                        " FROM (" + tm.getLogicalTable().getSQLQuery() + ") " + childPrefix +
+                        " FROM (" + tm.getLogicalTable().getSQLQuery() + ") " + subject.prefix +
                         (robm.getJoinConditions().isEmpty()
                                 ? ""
                                 :
-                        ", (" + parent.getLogicalTable().getSQLQuery() + ") " + parentPrefix +
+                        ", (" + parent.getLogicalTable().getSQLQuery() + ") " + object.prefix +
                         " WHERE " + robm.getJoinConditions().stream()
-                                .map(j -> childPrefix + "." + j.getChild() +
-                                        " = " + parentPrefix + "." + j.getParent())
+                                .map(j -> subject.prefix + "." + j.getChild() +
+                                        " = " + object.prefix + "." + j.getParent())
                                 .collect(Collectors.joining(",")));
 
                 // use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
@@ -292,12 +272,30 @@ public class R2RMLMappingParser implements SQLMappingParser {
         return joinPPTriplesMapsBuilder.build();
     }
 
-    private Var2VarSubstitution getRenaming(ImmutableTerm term, String prefix) {
-        ImmutableMap<Variable, Variable> parentMap = term.getVariableStream()
-                .collect(ImmutableCollectors.toMap(Function.identity(),
-                        v -> prefixAttributeName(prefix + "_", v)));
+    private class ImmutableTermWithRenaming {
+        private final ImmutableTerm term;
+        private final ImmutableMap<Variable, Variable> map;
+        private final String prefix;
 
-        return substitutionFactory.getVar2VarSubstitution(parentMap);
+        ImmutableTermWithRenaming(TriplesMap tm, String prefix, ImmutableMap<TriplesMap, SQLPPTriplesMap> regularTriplesMap) {
+            this.prefix = prefix;
+
+            // Re-uses the already created subject term. Important when dealing with blank nodes.
+            ImmutableTerm subject = Optional.ofNullable(regularTriplesMap.get(tm))
+                    .map(R2RMLMappingParser.this::extractSubjectTerm)
+                    .orElseGet(() -> r2rmlParser.extractSubjectTerm(tm.getSubjectMap()));
+
+            map = subject.getVariableStream()
+                    .collect(ImmutableCollectors.toMap(Function.identity(),
+                            v -> prefixAttributeName(prefix + "_", v)));
+
+            term = substitutionFactory.getVar2VarSubstitution(map).apply(subject);
+        }
+
+        Stream<String> sqlAS() {
+            return map.entrySet().stream()
+                    .map(e -> prefix + "." + e.getKey() + " AS " + e.getValue());
+        }
     }
 
     private Variable prefixAttributeName(String prefix, Variable var) {
