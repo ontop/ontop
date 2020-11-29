@@ -124,26 +124,20 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
 
         // Pass 1: creates "regular" PP triples maps using the original SQL queries
-        ImmutableList<Map.Entry<TriplesMap, SQLPPTriplesMap>> regularMap = tripleMaps.stream()
+        ImmutableMap<TriplesMap, SQLPPTriplesMap> regularMap = tripleMaps.stream()
                 .map(tm -> extractPPTriplesMap(tm)
                         .map(pp -> Maps.immutableEntry(tm, pp)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(ImmutableCollectors.toList());
-
-        // It is important to create subject terms only once because of blank nodes.
-        ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap = regularMap.stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> extractSubjectTerm(e.getValue())));
+                .collect(ImmutableCollectors.toMap());
 
         return Stream.concat(
-                regularMap.stream()
-                    .map(Map.Entry::getValue),
+                regularMap.values().stream(),
                 // Pass 2 - Creates new PP triples maps for object ref maps
                 // NB: these triples maps are novel because the SQL queries are different
                 tripleMaps.stream()
-                    .flatMap(tm -> extractJoinPPTriplesMaps(tm, subjectTermMap).stream()))
+                    // It is important to create subject terms only once because of blank nodes.
+                    .flatMap(tm -> extractJoinPPTriplesMaps(tm, regularMap).stream()))
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -151,8 +145,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         return sqlppTriplesMap.getTargetAtoms().stream()
                 .map(a -> a.getSubstitutedTerm(0))
                 .findAny()
-                .orElseThrow(() -> new MinorOntopInternalBugException("" +
-                        "All created SQLPPTriplesMaps must have at least one target atom"));
+                .orElseThrow(() -> new MinorOntopInternalBugException("All created SQLPPTriplesMaps must have at least one target atom"));
     }
 
     private Optional<SQLPPTriplesMap> extractPPTriplesMap(TriplesMap tm)  {
@@ -180,7 +173,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 .forEach(targetAtoms::add);
 
         for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
-
             List<NonVariableTerm> predicateTerms = r2rmlParser.extractPredicateTerms(pom);
             for (ImmutableTerm objectTerm : r2rmlParser.extractRegularObjectTerms(pom)) {
                 predicateTerms.stream()
@@ -206,7 +198,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
     }
 
     private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(TriplesMap tm,
-                                                           ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap)  {
+                                                           ImmutableMap<TriplesMap, SQLPPTriplesMap> regularTriplesMap)  {
 
         ImmutableList.Builder<SQLPPTriplesMap> joinPPTriplesMapsBuilder = ImmutableList.builder();
         for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
@@ -233,7 +225,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
                     throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
                             tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
-                ImmutableTerm childSubject = Optional.ofNullable(subjectTermMap.get(tm))
+                ImmutableTerm childSubject = Optional.ofNullable(regularTriplesMap.get(tm))
+                        .map(this::extractSubjectTerm)
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(tm.getSubjectMap()));
 
                 String childPrefix = robm.getJoinConditions().isEmpty() ? "TMP" : "CHILD";
@@ -247,7 +240,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 /*
                  * Re-uses the already created subject term. Important when dealing with blank nodes.
                  */
-                ImmutableTerm parentSubject = Optional.ofNullable(subjectTermMap.get(parent))
+                ImmutableTerm parentSubject = Optional.ofNullable(regularTriplesMap.get(parent))
+                        .map(this::extractSubjectTerm)
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(parent.getSubjectMap()));
 
                 String parentPrefix =  robm.getJoinConditions().isEmpty() ? "TMP" : "PARENT";
