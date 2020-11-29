@@ -47,7 +47,6 @@ public class SQLPPTriplesMapToR2RMLConverter {
 	private final Function<RDFTermType, TermMapFactory<PredicateMap>> predicateTermMapFactorySupplier;
 	private final Function<RDFTermType, TermMapFactory<ObjectMap>> objectTermMapFactorySupplier;
 
-
 	public SQLPPTriplesMapToR2RMLConverter(RDF rdfFactory, MappingFactory mappingFactory) {
 		this.rdfFactory = rdfFactory;
 		this.mappingFactory = mappingFactory;

@@ -34,6 +34,14 @@ public class LiteralTemplateFactory extends AbstractTemplateFactory {
                 : iri.map(typeFactory::getDatatype); // Second try: explicit datatype
     }
 
+    public RDFDatatype getDatatype(IRI datatype) {
+        return typeFactory.getDatatype(datatype);
+    }
+
+    public RDFDatatype getAbstractRDFSLiteral() {
+        return typeFactory.getAbstractRDFSLiteral();
+    }
+
     @Override
     public NonVariableTerm getConstant(String constant) {
         return termFactory.getDBStringConstant(constant);

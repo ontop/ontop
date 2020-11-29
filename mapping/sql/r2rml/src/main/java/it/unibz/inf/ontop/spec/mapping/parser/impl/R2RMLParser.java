@@ -8,6 +8,7 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
@@ -26,33 +27,40 @@ public class R2RMLParser {
 
 	private final RDF4JR2RMLMappingManager manager;
 	private final TermFactory termFactory;
-	private final TypeFactory typeFactory;
 
 	private final String baseIri = "http://example.com/base/";
 
-	final IRITemplateFactory iriTemplateFactory;
-	final BnodeTemplateFactory bnodeTemplateFactory;
-	final LiteralTemplateFactory literalTemplateFactory;
-
+	private final ImmutableMap<IRI, TermMapFactory<TermMap, ? extends TemplateFactory>> iriTerm;
+	private final ImmutableMap<IRI, TermMapFactory<TermMap, ? extends TemplateFactory>> iriOrBnodeTerm;
+	private final ImmutableMap<IRI, TermMapFactory<ObjectMap, ? extends TemplateFactory>> iriOrBnodeOrLiteralTerm;
 
 	@Inject
 	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory) {
 		this.termFactory = termFactory;
-		this.typeFactory = typeFactory;
 		this.manager = RDF4JR2RMLMappingManager.getInstance();
 
-		this.iriTemplateFactory = new IRITemplateFactory(termFactory);
-		this.bnodeTemplateFactory =  new BnodeTemplateFactory(termFactory);
-		this.literalTemplateFactory = new LiteralTemplateFactory(termFactory, typeFactory);
+		IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(termFactory);
+		BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(termFactory);
+		LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(termFactory, typeFactory);
+
+		this.iriTerm = ImmutableMap.of(
+				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory));
+		this.iriOrBnodeTerm = ImmutableMap.of(
+				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory),
+				R2RMLVocabulary.blankNode, new BnodeTermMapFactory<>(bnodeTemplateFactory));
+		this.iriOrBnodeOrLiteralTerm = ImmutableMap.of(
+				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory),
+				R2RMLVocabulary.blankNode, new BnodeTermMapFactory<>(bnodeTemplateFactory),
+				R2RMLVocabulary.literal, new LiteralTermMapFactory<>(literalTemplateFactory));
 	}
 
 	/**
 	 * method to get the TriplesMaps from the given Graph
-	 * @param myGraph - the Graph to process
-	 * @return Collection<TriplesMap> - the collection of mappings
+	 * @param graph - the Graph to process
+	 * @return the collection of triples maps
 	 */
-	public Collection<TriplesMap> extractTripleMaps(Graph myGraph) throws InvalidR2RMLMappingException {
-		return manager.importMappings(myGraph);
+	public Collection<TriplesMap> extractTripleMaps(Graph graph) throws InvalidR2RMLMappingException {
+		return manager.importMappings(graph);
 	}
 
 	/**
@@ -88,110 +96,102 @@ public class R2RMLParser {
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private final ImmutableMap<IRI, Extractor<TermMap>> iriTerm = ImmutableMap.of(
-			R2RMLVocabulary.iri, new IriExtractor<>());
 
-	private final ImmutableMap<IRI, Extractor<TermMap>> iriOrBnodeTerm = ImmutableMap.of(
-			R2RMLVocabulary.iri, new IriExtractor<>(),
-			R2RMLVocabulary.blankNode, new BnodeExtractor<>());
-
-	private final ImmutableMap<IRI, Extractor<ObjectMap>> iriOrBnodeOrLiteralTerm = ImmutableMap.of(
-			R2RMLVocabulary.iri, new IriExtractor<>(),
-			R2RMLVocabulary.blankNode, new BnodeExtractor<>(),
-			R2RMLVocabulary.literal, new LiteralExtractor<>());
-
-	private <T extends TermMap> NonVariableTerm extract(ImmutableMap<IRI, Extractor<T>> map, T termMap) {
+	private <T extends TermMap> NonVariableTerm extract(ImmutableMap<IRI, TermMapFactory<T, ? extends TemplateFactory>> map, T termMap) {
 		return map.computeIfAbsent(termMap.getTermType(), k -> {
 			throw new R2RMLParsingBugException("Was expecting one of " + map.keySet() +
 						" when encountered " + termMap);
 		}).extract(termMap);
 	}
 
-	private interface Extractor<T extends TermMap> {
-		NonVariableTerm extract(RDFTerm constant, T termMap);
-		NonVariableTerm extract(Template template, T termMap);
-		NonVariableTerm extract(String column, T termMap);
+	/*
+	   @see it.unibz.inf.ontop.spec.mapping.serializer.impl.SQLPPTriplesMapToR2RMLConverter
+	 */
 
-		default NonVariableTerm extract(T termMap) {
+	private abstract static class TermMapFactory<T extends TermMap, F extends TemplateFactory> {
+		protected final F templateFactory;
+		public TermMapFactory(F templateFactory) {
+			this.templateFactory = templateFactory;
+		}
+
+		protected abstract NonVariableTerm onConstant(RDFTerm constant);
+
+		protected NonVariableTerm onColumn(String column) {
+			return templateFactory.getColumn(column);
+		}
+
+		protected NonVariableTerm onTemplate(String template) {
+			return templateFactory.getTemplate(templateFactory.getComponents(template));
+		}
+
+		public NonVariableTerm extract(T termMap) {
 			if (termMap.getConstant() != null)
-				return extract(termMap.getConstant(), termMap);
+				return onConstant(termMap.getConstant());
 
 			if (termMap.getTemplate() != null)
-				return extract(termMap.getTemplate(), termMap);
+				return onTemplate(termMap.getTemplate().toString());
 
 			if (termMap.getColumn() != null)
-				return extract(termMap.getColumn(), termMap);
+				return onColumn(termMap.getColumn());
 
 			throw new R2RMLParsingBugException("A term map is either constant-valued, column-valued or template-valued.");
 		}
 	}
 
-	private class IriExtractor<T extends TermMap> implements Extractor<T> {
+	private class IriTermMapFactory<T extends TermMap> extends TermMapFactory<T, IRITemplateFactory> {
+		public IriTermMapFactory(IRITemplateFactory templateFactory) {
+			super(templateFactory);
+		}
+
 		@Override
-		public NonVariableTerm extract(RDFTerm constant, T termMap) {
-			return iriTemplateFactory.getConstant(
+		protected NonVariableTerm onConstant(RDFTerm constant) {
+			return templateFactory.getConstant(
 							R2RMLVocabulary.resolveIri(constant.toString(), baseIri));
 		}
 		@Override
-		public NonVariableTerm extract(Template template, T termMap) {
-			return iriTemplateFactory.getTemplate(iriTemplateFactory.getComponents(
-					R2RMLVocabulary.resolveIri(template.toString(), baseIri)));
-		}
-		@Override
-		public 	NonVariableTerm extract(String column, T termMap) {
-			return iriTemplateFactory.getColumn(column);
+		protected NonVariableTerm onTemplate(String template) {
+			return super.onTemplate(R2RMLVocabulary.resolveIri(template, baseIri));
 		}
 	}
 
-	private class BnodeExtractor<T extends TermMap> implements Extractor<T> {
+	private static class BnodeTermMapFactory<T extends TermMap> extends TermMapFactory<T, BnodeTemplateFactory> {
+		public BnodeTermMapFactory(BnodeTemplateFactory templateFactory) {
+			super(templateFactory);
+		}
 
 		@Override
-		public NonVariableTerm extract(RDFTerm constant, T termMap) {
+		protected NonVariableTerm onConstant(RDFTerm constant) {
 			// https://www.w3.org/TR/r2rml/#constant says none can be an Bnode
 			throw new R2RMLParsingBugException("Constant blank nodes are not accepted in R2RML (should have been detected earlier)");
 		}
-		@Override
-		public NonVariableTerm extract(Template template, T termMap) {
-			return bnodeTemplateFactory.getTemplate(bnodeTemplateFactory.getComponents(template.toString()));
-		}
-		@Override
-		public 	NonVariableTerm extract(String column, T termMap) {
-			return bnodeTemplateFactory.getColumn(column);
-		}
 	}
 
-	private class LiteralExtractor<T extends ObjectMap> implements Extractor<T> {
+	private class LiteralTermMapFactory<T extends ObjectMap> extends TermMapFactory<T, LiteralTemplateFactory> {
+		public LiteralTermMapFactory(LiteralTemplateFactory templateFactory) {
+			super(templateFactory);
+		}
 		@Override
-		public NonVariableTerm extract(RDFTerm constant, T om) {
+		protected NonVariableTerm onConstant(RDFTerm constant) {
 			if (constant instanceof Literal) {
-				return extract(literalTemplateFactory.getConstant(
-						((Literal)constant).getLexicalForm()), om);
+				return templateFactory.getConstant(((Literal)constant).getLexicalForm());
 			}
 			throw new R2RMLParsingBugException("Was expecting a Literal as constant, not a " + constant.getClass());
 		}
-		@Override
-		public NonVariableTerm extract(Template template, T om) {
-			return extract(literalTemplateFactory.getTemplate(
-					literalTemplateFactory.getComponents(template.toString())), om);
-		}
-		@Override
-		public 	NonVariableTerm extract(String column, T om) {
-			return extract(literalTemplateFactory.getColumn(column), om);
-		}
 
-		private NonVariableTerm extract(ImmutableTerm t, T om) {
-			RDFDatatype datatype = literalTemplateFactory.extractDatatype(
+		@Override
+		public NonVariableTerm extract(T om) {
+			RDFDatatype datatype = templateFactory.extractDatatype(
 						Optional.ofNullable(om.getLanguageTag()),
 						Optional.ofNullable(om.getDatatype()))
 					// Third try: datatype of the constant
 					.orElseGet(() -> Optional.ofNullable(om.getConstant())
 							.map(c -> (Literal) c)
 							.map(Literal::getDatatype)
-							.map(typeFactory::getDatatype)
+							.map(templateFactory::getDatatype)
 							// Default case: RDFS.LITERAL (abstract, to be inferred later)
-							.orElseGet(typeFactory::getAbstractRDFSLiteral));
+							.orElseGet(templateFactory::getAbstractRDFSLiteral));
 
-			return termFactory.getRDFLiteralFunctionalTerm(t,datatype);
+			return termFactory.getRDFLiteralFunctionalTerm(super.extract(om), datatype);
 		}
 	}
 
