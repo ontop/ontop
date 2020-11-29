@@ -71,7 +71,7 @@ public abstract class QuestStatement implements OntopStatement {
 		private boolean executingTargetQuery;
 
 		QueryExecutionThread(Q inputQuery, IQ executableQuery, QueryLogger queryLogger, Evaluator<R,Q> evaluator,
-				CountDownLatch monitor) {
+						CountDownLatch monitor) {
 			this.executableQuery = executableQuery;
 			this.inputQuery = inputQuery;
 			this.queryLogger = queryLogger;
@@ -105,11 +105,11 @@ public abstract class QuestStatement implements OntopStatement {
 		@Override
 		public void run() {
 			//                        FOR debugging H2 in-memory database
-			//			try {
-			//				org.h2.tools.Server.startWebServer(((QuestConnection)conn).getSQLConnection());
-			//			} catch (SQLException e) {
-			//				e.printStackTrace();
-			//			}
+//			try {
+//				org.h2.tools.Server.startWebServer(((QuestConnection)conn).getSQLConnection());
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
 			try {
 				/*
 				 * Executes the target query.
@@ -209,7 +209,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	private SimpleGraphResultSet executeDescribeQuery(DescribeQuery inputQuery, ImmutableMultimap<String, String> httpHeaders)
 			throws OntopReformulationException, OntopResultConversionException, OntopConnectionException,
-					       OntopQueryEvaluationException {
+			OntopQueryEvaluationException {
 
 		ImmutableSet<String> constants = extractDescribeQueryConstants(inputQuery);
 
@@ -259,7 +259,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private ImmutableSet<String> extractDescribeQueryConstants(DescribeQuery inputQuery)
 			throws OntopQueryEvaluationException, OntopConnectionException,
-					       OntopReformulationException, OntopResultConversionException {
+		  OntopReformulationException, OntopResultConversionException {
 		String inputQueryString = inputQuery.getInputString();
 
 		// create list of URI constants we want to describe
@@ -372,7 +372,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
-		return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
+			return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 
 }

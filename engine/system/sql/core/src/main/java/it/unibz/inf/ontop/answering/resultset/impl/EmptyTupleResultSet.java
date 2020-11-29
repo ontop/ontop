@@ -38,7 +38,7 @@ public class EmptyTupleResultSet implements TupleResultSet {
 	private boolean hasNextCalled = false;
 
 	public EmptyTupleResultSet(ImmutableList<Variable> answerVariables,
-			QueryLogger queryLogger) {
+							   QueryLogger queryLogger) {
 		this.signature = answerVariables.stream()
 				                 .map(Variable::getName)
 				                 .collect(ImmutableCollectors.toList());

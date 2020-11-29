@@ -57,10 +57,10 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
 
     DefaultMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
-            OntopQueryEngine queryEngine,
-            InputQueryFactory inputQueryFactory,
-            TermFactory termFactory,
-            org.apache.commons.rdf.api.RDF rdfFactory) {
+                                      OntopQueryEngine queryEngine,
+                                      InputQueryFactory inputQueryFactory,
+                                      TermFactory termFactory,
+                                      org.apache.commons.rdf.api.RDF rdfFactory) {
 
         this.termFactory = termFactory;
         this.vocabulary = vocabulary;
@@ -139,7 +139,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
             } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                 if (canBeIncomplete) {
                     LOGGER.warn("Possibly incomplete class/property " + predicate + " (materialization problem).\n"
-                                        + "Details: " + e);
+                            + "Details: " + e);
                     possiblyIncompleteClassesAndProperties.add(predicate.name);
                 } else {
                     LOGGER.error("Problem materializing the class/property " + predicate);
@@ -161,8 +161,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
         ObjectConstant g = (ObjectConstant)tuple.getConstant("g");
 
         return (g == null)
-                       ? RDFFact.createTripleFact(s, p, o)
-                       : RDFFact.createQuadFact(s, p, o, g);
+                ? RDFFact.createTripleFact(s, p, o)
+                : RDFFact.createQuadFact(s, p, o, g);
     }
 
     @Override

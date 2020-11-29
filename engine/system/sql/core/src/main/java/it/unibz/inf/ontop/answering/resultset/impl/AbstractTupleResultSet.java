@@ -54,8 +54,8 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
     @Override
     public ImmutableList<String> getSignature() {
         return signature.stream()
-                       .map(Variable::getName)
-                       .collect(ImmutableCollectors.toList());
+                .map(Variable::getName)
+                .collect(ImmutableCollectors.toList());
     }
 
 

@@ -29,7 +29,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     private final byte[] salt;
 
     public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet,
-            byte[] salt) {
+                                byte[] salt) {
         this.ontopBindingSet = ontopBindingSet;
         this.salt = salt;
     }
@@ -39,8 +39,8 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     public Binding getBinding(String bindingName) {
         OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
         return ontopBinding == null?
-                       null:
-                       convertBinding(ontopBinding);
+                null:
+                convertBinding(ontopBinding);
     }
 
     @Override
@@ -54,8 +54,8 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
         try {
             final RDFConstant constant = ontopBindingSet.getConstant(variableName);
             return constant == null?
-                           null:
-                           RDF4JHelper.getValue(constant, salt);
+                    null:
+                    RDF4JHelper.getValue(constant, salt);
         } catch (OntopResultConversionException e) {
             throw new RuntimeException(e);
         }
@@ -71,19 +71,19 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     @Nonnull
     public Iterator<Binding> iterator() {
         return Arrays.stream(ontopBindingSet.getBindings())
-                       .map(this::convertBinding)
-                       .iterator();
+                .map(this::convertBinding)
+                .iterator();
     }
 
     private Binding convertBinding(OntopBinding ontopBinding) {
-        //        try {
-        return new SimpleBinding(
-                ontopBinding.getName(),
-                RDF4JHelper.getValue(ontopBinding.getValue(), salt)
-        );
-        //        } catch (OntopResultConversionException e) {
-        //            throw new RuntimeException(e);
-        //        }
+//        try {
+            return new SimpleBinding(
+                    ontopBinding.getName(),
+                    RDF4JHelper.getValue(ontopBinding.getValue(), salt)
+            );
+//        } catch (OntopResultConversionException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     @Override

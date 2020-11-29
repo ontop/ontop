@@ -43,10 +43,10 @@ public class SQLQuestStatement extends QuestStatement {
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
-            InputQueryFactory inputQueryFactory,
-            TermFactory termFactory,
-            RDF rdfFactory, SubstitutionFactory substitutionFactory,
-            OntopSystemSQLSettings settings) {
+                             InputQueryFactory inputQueryFactory,
+                             TermFactory termFactory,
+                             RDF rdfFactory, SubstitutionFactory substitutionFactory,
+                             OntopSystemSQLSettings settings) {
         super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
         this.termFactory = termFactory;
@@ -191,8 +191,8 @@ public class SQLQuestStatement extends QuestStatement {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 queryLogger.declareResultSetUnblockedAndSerialize();
                 return settings.isDistinctPostProcessingEnabled()
-                               ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory)
-                               : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory);
+                        ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory)
+                        : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), queryLogger, termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e);
             }
@@ -204,7 +204,7 @@ public class SQLQuestStatement extends QuestStatement {
 
     @Override
     protected SimpleGraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, boolean collectResults,
-            QueryLogger queryLogger)
+                                                     QueryLogger queryLogger)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         TupleResultSet tuples;
         try {
@@ -234,12 +234,12 @@ public class SQLQuestStatement extends QuestStatement {
             throw new EmptyQueryException();
         }
         return Optional.of(tree)
-                       .filter(t -> t instanceof UnaryIQTree)
-                       .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
-                       .filter(n -> n instanceof NativeNode)
-                       .map(n -> (NativeNode) n)
-                       .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
-                                                                                     "for an executable query\n" + executableQuery));
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> (NativeNode) n)
+                .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
+                        "for an executable query\n" + executableQuery));
     }
 
     private String extractSQLQuery(IQ executableQuery) throws EmptyQueryException, OntopInternalBugException {
@@ -248,13 +248,13 @@ public class SQLQuestStatement extends QuestStatement {
             throw new EmptyQueryException();
 
         String queryString = Optional.of(tree)
-                                     .filter(t -> t instanceof UnaryIQTree)
-                                     .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
-                                     .filter(n -> n instanceof NativeNode)
-                                     .map(n -> (NativeNode) n)
-                                     .map(NativeNode::getNativeQueryString)
-                                     .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
-                                                                                                   "of an executable query\n" + executableQuery));
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> (NativeNode) n)
+                .map(NativeNode::getNativeQueryString)
+                .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
+                        "of an executable query\n" + executableQuery));
 
         if (queryString.equals(""))
             throw new EmptyQueryException();
@@ -268,9 +268,9 @@ public class SQLQuestStatement extends QuestStatement {
             throw new EmptyQueryException();
 
         return Optional.of(tree.getRootNode())
-                       .filter(n -> n instanceof ConstructionNode)
-                       .map(n -> (ConstructionNode)n)
-                       .orElseThrow(() -> new MinorOntopInternalBugException(
-                               "The \"executable\" query is not starting with a construction node\n" + executableQuery));
+                .filter(n -> n instanceof ConstructionNode)
+                .map(n -> (ConstructionNode)n)
+                .orElseThrow(() -> new MinorOntopInternalBugException(
+                        "The \"executable\" query is not starting with a construction node\n" + executableQuery));
     }
 }

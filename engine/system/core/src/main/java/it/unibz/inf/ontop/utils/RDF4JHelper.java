@@ -44,9 +44,9 @@ public class RDF4JHelper {
             throw new IllegalStateException("A ValueConstant given to OWLAPI must have a RDF datatype");
 
         return type.getLanguageTag()
-                       .map(lang -> fact.createLiteral(literal.getValue(), lang.getFullString()))
-                       .orElseGet(() -> fact.createLiteral(literal.getValue(),
-                               fact.createIRI(type.getIRI().getIRIString())));
+                .map(lang -> fact.createLiteral(literal.getValue(), lang.getFullString()))
+                .orElseGet(() -> fact.createLiteral(literal.getValue(),
+                        fact.createIRI(type.getIRI().getIRIString())));
     }
 
     public static Value getValue(RDFConstant c, byte[] salt) {
@@ -69,14 +69,14 @@ public class RDF4JHelper {
     public static Statement createStatement(RDFFact assertion, byte[] salt) {
 
         return assertion.getGraph()
-                       .map(g -> fact.createStatement(
-                               getResource(assertion.getSubject(), salt),
-                               createURI(assertion.getProperty().getIRI().getIRIString()),
-                               getValue(assertion.getObject(), salt),
-                               getResource(g, salt)))
-                       .orElseGet(() -> fact.createStatement(
-                               getResource(assertion.getSubject(), salt),
-                               createURI(assertion.getProperty().getIRI().getIRIString()),
-                               getValue(assertion.getObject(), salt)));
+                .map(g -> fact.createStatement(
+                        getResource(assertion.getSubject(), salt),
+                        createURI(assertion.getProperty().getIRI().getIRIString()),
+                        getValue(assertion.getObject(), salt),
+                        getResource(g, salt)))
+                .orElseGet(() -> fact.createStatement(
+                        getResource(assertion.getSubject(), salt),
+                        createURI(assertion.getProperty().getIRI().getIRIString()),
+                        getValue(assertion.getObject(), salt)));
     }
 }

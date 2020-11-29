@@ -28,8 +28,8 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 	private final boolean isConstruct;
 
 	public OntopGraphQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection ontopConnection,
-			ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory inputQueryFactory,
-			OntopSystemSettings settings) {
+											   ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory inputQueryFactory,
+											   OntopSystemSettings settings) {
 		super(queryString, baseIRI, parsedQuery, ontopConnection, httpHeaders, settings);
 		// TODO: replace by something stronger (based on the parsed query)
 		this.isConstruct = SPARQLQueryUtility.isConstructQuery(queryString);
@@ -40,9 +40,10 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 	@Override
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
 		ParsedQuery parsedQuery = getParsedQuery();
-		GraphSPARQLQuery query = isConstruct
-				                         ? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery, bindings)
-				                         : inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery, bindings);;
+	    GraphSPARQLQuery query =
+    	    isConstruct
+        	    ? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery, bindings)
+            	: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery, bindings);
 		try
 		{
 			OntopStatement stm = conn.createStatement();
@@ -56,7 +57,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 
 	@Override
 	public void evaluate(RDFHandler handler) throws QueryEvaluationException,
-			                                                RDFHandlerException {
+			        RDFHandlerException {
 		try(GraphQueryResult result =  evaluate()) {
 			handler.startRDF();
 			while (result.hasNext())

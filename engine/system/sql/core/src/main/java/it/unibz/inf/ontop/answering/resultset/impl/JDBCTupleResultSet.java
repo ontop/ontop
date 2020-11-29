@@ -26,12 +26,12 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     private final TermFactory termFactory;
 
     public JDBCTupleResultSet(ResultSet rs,
-            ImmutableSortedSet<Variable> sqlSignature,
-            ImmutableMap<Variable, DBTermType> sqlTypeMap,
-            ConstructionNode constructionNode,
-            DistinctVariableOnlyDataAtom answerAtom,
-            QueryLogger queryLogger, TermFactory termFactory,
-            SubstitutionFactory substitutionFactory) {
+                              ImmutableSortedSet<Variable> sqlSignature,
+                              ImmutableMap<Variable, DBTermType> sqlTypeMap,
+                              ConstructionNode constructionNode,
+                              DistinctVariableOnlyDataAtom answerAtom,
+                              QueryLogger queryLogger, TermFactory termFactory,
+                              SubstitutionFactory substitutionFactory) {
         super(rs, answerAtom.getArguments(),queryLogger);
         this.sqlSignature = sqlSignature;
         this.sqlTypeMap = sqlTypeMap;
@@ -52,8 +52,8 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
                 builder.put(
                         var,
                         convertToConstant(
-                                rs.getString(i),
-                                sqlTypeMap.get(var)
+                            rs.getString(i),
+                            sqlTypeMap.get(var)
                         ));
             }
         } catch (SQLException e) {

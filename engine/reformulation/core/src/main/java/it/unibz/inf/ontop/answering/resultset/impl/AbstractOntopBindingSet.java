@@ -48,8 +48,8 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     public RDFConstant getConstant(String name) {
         OntopBinding binding = getBinding(name);
         return (binding == null)
-                       ? null
-                       : binding.getValue();
+                ? null
+                : binding.getValue();
     }
 
     @Override
