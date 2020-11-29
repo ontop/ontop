@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
@@ -173,41 +174,30 @@ public class R2RMLMappingParser implements SQLMappingParser {
         ImmutableTerm subjectTerm = r2rmlParser.extractSubjectTerm(subjectMap);
 
         ImmutableList<NonVariableTerm> graphTerms = r2rmlParser.extractGraphTerms(subjectMap.getGraphMaps());
-        boolean includeDefaultGraph = graphTerms.isEmpty() ||
-                graphTerms.stream().anyMatch(R2RMLMappingParser::isDefaultGraph);
-
-        ImmutableList<NonVariableTerm> namedGraphTerms = graphTerms.stream()
-                .filter(t -> !isDefaultGraph(t))
-                .collect(ImmutableCollectors.toList());
 
         subjectMap.getClasses().stream()
-                .flatMap(i -> {
-
-                    Stream<TargetAtom> quads = namedGraphTerms.stream()
-                            .map(g -> targetAtomFactory.getQuadTargetAtom(subjectTerm, i, g));
-
-                    return includeDefaultGraph
-                            ? Stream.concat(
-                                Stream.of(targetAtomFactory.getTripleTargetAtom(subjectTerm, i)),
-                                quads)
-                            : quads;
-                })
+                .flatMap(i -> getTargetAtoms(subjectTerm, termFactory.getConstantIRI(RDF.TYPE), termFactory.getConstantIRI(i), graphTerms))
                 .forEach(targetAtoms::add);
 
         for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
 
             List<NonVariableTerm> predicateTerms = r2rmlParser.extractPredicateTerms(pom);
             for (ImmutableTerm objectTerm : r2rmlParser.extractRegularObjectTerms(pom)) {
-                for (NonVariableTerm predicateTerm : predicateTerms) {
-                    if (includeDefaultGraph)
-                        targetAtoms.add(targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateTerm, objectTerm));
-                    for (NonVariableTerm graphTerm : namedGraphTerms) {
-                        targetAtoms.add(targetAtomFactory.getQuadTargetAtom(subjectTerm, predicateTerm, objectTerm, graphTerm));
-                    }
-                }
+                predicateTerms.stream()
+                        .flatMap(p -> getTargetAtoms(subjectTerm, p, objectTerm, graphTerms))
+                        .forEach(targetAtoms::add);
             }
         }
         return targetAtoms.build();
+    }
+
+    private Stream<TargetAtom> getTargetAtoms(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object, ImmutableList<NonVariableTerm> graphs) {
+        return (graphs.isEmpty())
+            ? Stream.of(targetAtomFactory.getTripleTargetAtom(subject, predicate, object))
+            : graphs.stream()
+                .map(g -> isDefaultGraph(g)
+                    ? targetAtomFactory.getTripleTargetAtom(subject, predicate, object)
+                    : targetAtomFactory.getQuadTargetAtom(subject, predicate, object, g));
     }
 
     private static boolean isDefaultGraph(ImmutableTerm graphTerm) {
@@ -233,13 +223,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
                     r2rmlParser.extractGraphTerms(pobm.getGraphMaps()).stream(),
                     r2rmlParser.extractGraphTerms(subjectMap.getGraphMaps()).stream())
                     .distinct()
-                    .collect(ImmutableCollectors.toList());
-
-            boolean includeDefaultGraph = graphTerms.isEmpty() ||
-                    graphTerms.stream().anyMatch(R2RMLMappingParser::isDefaultGraph);
-
-            ImmutableList<NonVariableTerm> namedGraphTerms = graphTerms.stream()
-                    .filter(t -> !isDefaultGraph(t))
                     .collect(ImmutableCollectors.toList());
 
             for (RefObjectMap robm : refObjectMaps) {
@@ -275,14 +258,9 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 ImmutableTerm parentSubject2 = substitutionFactory
                         .getVar2VarSubstitution(parentMap).apply(parentSubject);
 
-                ImmutableList.Builder<TargetAtom> targetAtoms = ImmutableList.builder();
-                for (NonVariableTerm predicateTerm : predicateTerms) {
-                    if (includeDefaultGraph)
-                        targetAtoms.add(targetAtomFactory.getTripleTargetAtom(childSubject2, predicateTerm, parentSubject2));
-                    for (NonVariableTerm graphTerm : namedGraphTerms) {
-                        targetAtoms.add(targetAtomFactory.getQuadTargetAtom(childSubject2, predicateTerm, parentSubject2, graphTerm));
-                    }
-                }
+                ImmutableList<TargetAtom> targetAtoms = predicateTerms.stream()
+                        .flatMap(p -> getTargetAtoms(childSubject2, p, parentSubject2, graphTerms))
+                        .collect(ImmutableCollectors.toList());
 
                 String sourceQuery =
                         "SELECT " + Stream.concat(
@@ -303,7 +281,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
                 // use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
                 SQLPPTriplesMap ppTriplesMap = new R2RMLSQLPPtriplesMap("tm-join-" + robm.hashCode(),
-                        sourceQueryFactory.createSourceQuery(sourceQuery), targetAtoms.build());
+                        sourceQueryFactory.createSourceQuery(sourceQuery), targetAtoms);
                 LOGGER.info("Join \"triples map\" introduced: " + ppTriplesMap);
                 joinPPTriplesMapsBuilder.add(ppTriplesMap);
             }
