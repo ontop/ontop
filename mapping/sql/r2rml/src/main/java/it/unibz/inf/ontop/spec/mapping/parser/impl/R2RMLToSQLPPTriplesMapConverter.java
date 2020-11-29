@@ -23,9 +23,8 @@ import org.apache.commons.rdf.api.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class R2RMLParser {
+public class R2RMLToSQLPPTriplesMapConverter {
 
-	private final RDF4JR2RMLMappingManager manager;
 	private final TermFactory termFactory;
 
 	private final String baseIri = "http://example.com/base/";
@@ -35,9 +34,8 @@ public class R2RMLParser {
 	private final ImmutableMap<IRI, TermMapFactory<ObjectMap, ? extends TemplateFactory>> iriOrBnodeOrLiteralTerm;
 
 	@Inject
-	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory) {
+	private R2RMLToSQLPPTriplesMapConverter(TermFactory termFactory, TypeFactory typeFactory) {
 		this.termFactory = termFactory;
-		this.manager = RDF4JR2RMLMappingManager.getInstance();
 
 		IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(termFactory);
 		BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(termFactory);
@@ -52,26 +50,6 @@ public class R2RMLParser {
 				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory),
 				R2RMLVocabulary.blankNode, new BnodeTermMapFactory<>(bnodeTemplateFactory),
 				R2RMLVocabulary.literal, new LiteralTermMapFactory<>(literalTemplateFactory));
-	}
-
-	/**
-	 * method to get the TriplesMaps from the given Graph
-	 * @param graph - the Graph to process
-	 * @return the collection of triples maps
-	 */
-	public Collection<TriplesMap> extractTripleMaps(Graph graph) throws InvalidR2RMLMappingException {
-		return manager.importMappings(graph);
-	}
-
-	/**
-	 * Get SQL query of the TriplesMap
-	 */
-	public String extractSQLQuery(TriplesMap tm) {
-		return tm.getLogicalTable().getSQLQuery();
-	}
-
-	public Stream<IRI> extractClassIRIs(SubjectMap subjectMap) {
-		return subjectMap.getClasses().stream();
 	}
 
 	public ImmutableList<NonVariableTerm> extractGraphTerms(List<GraphMap> graphMaps) {

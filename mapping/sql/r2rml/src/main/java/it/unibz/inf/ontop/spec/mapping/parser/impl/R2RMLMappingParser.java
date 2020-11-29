@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.PredicateObjectMap;
 import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.SubjectMap;
@@ -50,14 +52,15 @@ public class R2RMLMappingParser implements SQLMappingParser {
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final TargetAtomFactory targetAtomFactory;
-    private final R2RMLParser r2rmlParser;
+    private final R2RMLToSQLPPTriplesMapConverter r2rmlParser;
     private final SQLPPSourceQueryFactory sourceQueryFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final RDF4JR2RMLMappingManager manager;
 
     @Inject
     private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
-                               TargetAtomFactory targetAtomFactory, R2RMLParser r2rmlParser,
+                               TargetAtomFactory targetAtomFactory, R2RMLToSQLPPTriplesMapConverter r2rmlParser,
                                SQLPPSourceQueryFactory sourceQueryFactory,
                                TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         this.ppMappingFactory = ppMappingFactory;
@@ -67,6 +70,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         this.sourceQueryFactory = sourceQueryFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.manager = RDF4JR2RMLMappingManager.getInstance();
     }
 
 
@@ -115,38 +119,31 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     private ImmutableList<SQLPPTriplesMap> extractPPTriplesMaps(Graph mappingGraph) throws InvalidR2RMLMappingException {
 
-        Collection<TriplesMap> tripleMaps = r2rmlParser.extractTripleMaps(mappingGraph);
+        Collection<TriplesMap> tripleMaps = manager.importMappings(mappingGraph);
 
-        /*
-         * Pass 1: creates "regular" PP triples maps using the original SQL queries
-         */
-        Map<TriplesMap, SQLPPTriplesMap> regularMap = new HashMap<>();
 
-        for (TriplesMap tm : tripleMaps) {
-            extractPPTriplesMap(tm)
-                    .ifPresent(m -> regularMap.put(tm, m));
-        }
+        // Pass 1: creates "regular" PP triples maps using the original SQL queries
+        ImmutableList<Map.Entry<TriplesMap, SQLPPTriplesMap>> regularMap = tripleMaps.stream()
+                .map(tm -> extractPPTriplesMap(tm)
+                        .map(pp -> Maps.immutableEntry(tm, pp)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
 
-        /*
-         * It is important to create subject terms only once because of blank nodes.
-         */
-        ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap = regularMap.entrySet().stream()
+        // It is important to create subject terms only once because of blank nodes.
+        ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap = regularMap.stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> extractSubjectTerm(e.getValue())));
 
-        List<SQLPPTriplesMap> ppTriplesMaps = Lists.newArrayList();
-        ppTriplesMaps.addAll(regularMap.values());
-
-        /*
-         * Pass 2 - Creates new PP triples maps for object ref maps
-         * NB: these triples maps are novel because the SQL queries are different
-         */
-        for (TriplesMap tm : tripleMaps) {
-            ppTriplesMaps.addAll(extractJoinPPTriplesMaps(tm, subjectTermMap));
-        }
-
-        return ImmutableList.copyOf(ppTriplesMaps);
+        return Stream.concat(
+                regularMap.stream()
+                    .map(Map.Entry::getValue),
+                // Pass 2 - Creates new PP triples maps for object ref maps
+                // NB: these triples maps are novel because the SQL queries are different
+                tripleMaps.stream()
+                    .flatMap(tm -> extractJoinPPTriplesMaps(tm, subjectTermMap).stream()))
+                .collect(ImmutableCollectors.toList());
     }
 
     private ImmutableTerm extractSubjectTerm(SQLPPTriplesMap sqlppTriplesMap) {
@@ -157,13 +154,12 @@ public class R2RMLMappingParser implements SQLMappingParser {
                         "All created SQLPPTriplesMaps must have at least one target atom"));
     }
 
-    private Optional<SQLPPTriplesMap> extractPPTriplesMap(TriplesMap tm) throws InvalidR2RMLMappingException {
-        String sourceQuery = r2rmlParser.extractSQLQuery(tm).trim();
+    private Optional<SQLPPTriplesMap> extractPPTriplesMap(TriplesMap tm)  {
         ImmutableList<TargetAtom> targetAtoms = extractMappingTargetAtoms(tm);
-
-        if (targetAtoms.isEmpty()){
+        if (targetAtoms.isEmpty()) {
             LOGGER.warn("WARNING a triples map without target query will not be introduced : "+ tm);
         }
+        String sourceQuery = tm.getLogicalTable().getSQLQuery().trim();
         return Optional.of(targetAtoms)
                 .filter(as -> !as.isEmpty())
                 .map(as -> new R2RMLSQLPPtriplesMap("mapping-" + tm.hashCode(),
@@ -184,7 +180,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 .filter(t -> !isDefaultGraph(t))
                 .collect(ImmutableCollectors.toList());
 
-        r2rmlParser.extractClassIRIs(subjectMap)
+        subjectMap.getClasses().stream()
                 .flatMap(i -> {
 
                     Stream<TargetAtom> quads = namedGraphTerms.stream()
