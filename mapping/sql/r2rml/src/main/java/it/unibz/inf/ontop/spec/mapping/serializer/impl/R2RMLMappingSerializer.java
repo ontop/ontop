@@ -23,13 +23,11 @@ import java.io.*;
 public class R2RMLMappingSerializer implements MappingSerializer {
 
     private final RDF rdfFactory;
-    private final TermFactory termFactory;
     private final RDF4JR2RMLMappingManager manager;
 
-    public R2RMLMappingSerializer(RDF rdfFactory, TermFactory termFactory) {
+    public R2RMLMappingSerializer(RDF rdfFactory) {
         this.manager = RDF4JR2RMLMappingManager.getInstance();
         this.rdfFactory = rdfFactory;
-        this.termFactory = termFactory;
     }
 
     /**

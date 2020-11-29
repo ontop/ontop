@@ -102,7 +102,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
         }
 
         OntopSQLOWLAPIConfiguration config = configBuilder.build();
-        R2RMLMappingSerializer converter = new R2RMLMappingSerializer(config.getRdfFactory(), config.getTermFactory());
+        R2RMLMappingSerializer converter = new R2RMLMappingSerializer(config.getRdfFactory());
 
         try {
             SQLPPMapping ppMapping = config.loadProvidedPPMapping();

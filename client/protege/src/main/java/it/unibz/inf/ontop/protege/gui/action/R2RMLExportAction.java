@@ -48,7 +48,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	private OBDAModel obdaModel = null;
 	private OWLModelManager modelManager= null;
 	
-	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
+	private final Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 	
 	@Override
 	public void initialise()  {
@@ -137,7 +137,7 @@ public class R2RMLExportAction extends ProtegeAction {
         }
 
         public void run(File file) throws IOException {
-            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModel.getRdfFactory(), obdaModel.getTermFactory());
+            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModel.getRdfFactory());
             writer.write(file, obdaModel.generatePPMapping());
         }
 
