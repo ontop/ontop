@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
@@ -23,6 +22,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.rdf4j.RDF4J;
@@ -58,6 +58,9 @@ public class R2RMLMappingParser implements SQLMappingParser {
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final RDF4JR2RMLMappingManager manager;
+    private final IRIConstant rdfType;
+
+
 
     @Inject
     private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
@@ -72,6 +75,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.manager = RDF4JR2RMLMappingManager.getInstance();
+        this.rdfType = termFactory.getConstantIRI(RDF.TYPE);
     }
 
 
@@ -160,27 +164,37 @@ public class R2RMLMappingParser implements SQLMappingParser {
                         sourceQueryFactory.createSourceQuery(sourceQuery),  as));
     }
 
+    /*
+         see https://www.w3.org/TR/r2rml/#generated-triples for the definitions of all variables
+     */
+
     private ImmutableList<TargetAtom> extractMappingTargetAtoms(TriplesMap tm)  {
-        ImmutableList.Builder<TargetAtom> targetAtoms = ImmutableList.builder();
-
         SubjectMap subjectMap = tm.getSubjectMap();
-        ImmutableTerm subjectTerm = r2rmlParser.extractSubjectTerm(subjectMap);
 
-        ImmutableList<NonVariableTerm> graphTerms = r2rmlParser.extractGraphTerms(subjectMap.getGraphMaps());
+        ImmutableTerm subject = r2rmlParser.extractSubjectTerm(subjectMap);
+        ImmutableList<NonVariableTerm> subject_graphs = r2rmlParser.extractGraphTerms(subjectMap.getGraphMaps());
 
-        subjectMap.getClasses().stream()
-                .flatMap(i -> getTargetAtoms(subjectTerm, termFactory.getConstantIRI(RDF.TYPE), termFactory.getConstantIRI(i), graphTerms))
-                .forEach(targetAtoms::add);
+        return Stream.concat(
+                subjectMap.getClasses().stream()
+                        .map(termFactory::getConstantIRI)
+                        .flatMap(iri -> getTargetAtoms(subject, rdfType, iri, subject_graphs)),
+                tm.getPredicateObjectMaps().stream()
+                        .flatMap(pom -> getPredicateObjectMapTargetAtoms(subject, pom, subject_graphs)))
+                .collect(ImmutableCollectors.toList());
+    }
 
-        for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
-            List<NonVariableTerm> predicateTerms = r2rmlParser.extractPredicateTerms(pom);
-            for (ImmutableTerm objectTerm : r2rmlParser.extractRegularObjectTerms(pom)) {
-                predicateTerms.stream()
-                        .flatMap(p -> getTargetAtoms(subjectTerm, p, objectTerm, graphTerms))
-                        .forEach(targetAtoms::add);
-            }
-        }
-        return targetAtoms.build();
+    private Stream<TargetAtom> getPredicateObjectMapTargetAtoms(ImmutableTerm subject, PredicateObjectMap pom, ImmutableList<NonVariableTerm> subject_graphs) {
+        List<NonVariableTerm> predicates = r2rmlParser.extractPredicateTerms(pom);
+        List<NonVariableTerm> objects = r2rmlParser.extractRegularObjectTerms(pom);
+        ImmutableList<NonVariableTerm> subject_graphs_and_predicate_object_graphs = Stream.concat(
+                    subject_graphs.stream(),
+                    r2rmlParser.extractGraphTerms(pom.getGraphMaps()).stream())
+                .distinct()
+                .collect(ImmutableCollectors.toList());
+
+        return predicates.stream()
+                .flatMap(p -> objects.stream().map(o -> Maps.immutableEntry(p, o)))
+                .flatMap(e -> getTargetAtoms(subject, e.getKey(), e.getValue(), subject_graphs_and_predicate_object_graphs));
     }
 
     private Stream<TargetAtom> getTargetAtoms(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object, ImmutableList<NonVariableTerm> graphs) {
@@ -207,13 +221,13 @@ public class R2RMLMappingParser implements SQLMappingParser {
             if (refObjectMaps.isEmpty())
                 continue;
 
-            List<NonVariableTerm> predicateTerms = r2rmlParser.extractPredicateTerms(pobm);
+            List<NonVariableTerm> predicates = r2rmlParser.extractPredicateTerms(pobm);
 
-            SubjectMap subjectMap = tm.getSubjectMap();
+            SubjectMap sm = tm.getSubjectMap();
 
-            ImmutableList<NonVariableTerm> graphTerms = Stream.concat(
-                    r2rmlParser.extractGraphTerms(pobm.getGraphMaps()).stream(),
-                    r2rmlParser.extractGraphTerms(subjectMap.getGraphMaps()).stream())
+            ImmutableList<NonVariableTerm> subject_graphs_and_predicate_object_graphs = Stream.concat(
+                    r2rmlParser.extractGraphTerms(sm.getGraphMaps()).stream(),
+                    r2rmlParser.extractGraphTerms(pobm.getGraphMaps()).stream())
                     .distinct()
                     .collect(ImmutableCollectors.toList());
 
@@ -230,12 +244,9 @@ public class R2RMLMappingParser implements SQLMappingParser {
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(tm.getSubjectMap()));
 
                 String childPrefix = robm.getJoinConditions().isEmpty() ? "TMP" : "CHILD";
-                ImmutableMap<Variable, Variable> childMap = childSubject.getVariableStream()
-                        .collect(ImmutableCollectors.toMap(Function.identity(),
-                                v -> prefixAttributeName(childPrefix + "_", v)));
 
-                ImmutableTerm childSubject2 = substitutionFactory
-                        .getVar2VarSubstitution(childMap).apply(childSubject);
+                Var2VarSubstitution childSub = getRenaming(childSubject, childPrefix);
+                ImmutableTerm childSubject2 = childSub.apply(childSubject);
 
                 /*
                  * Re-uses the already created subject term. Important when dealing with blank nodes.
@@ -244,23 +255,20 @@ public class R2RMLMappingParser implements SQLMappingParser {
                         .map(this::extractSubjectTerm)
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(parent.getSubjectMap()));
 
-                String parentPrefix =  robm.getJoinConditions().isEmpty() ? "TMP" : "PARENT";
-                ImmutableMap<Variable, Variable> parentMap = parentSubject.getVariableStream()
-                        .collect(ImmutableCollectors.toMap(Function.identity(),
-                                v -> prefixAttributeName(parentPrefix + "_", v)));
+                String parentPrefix = robm.getJoinConditions().isEmpty() ? "TMP" : "PARENT";
 
-                ImmutableTerm parentSubject2 = substitutionFactory
-                        .getVar2VarSubstitution(parentMap).apply(parentSubject);
+                Var2VarSubstitution parentSub = getRenaming(parentSubject, parentPrefix);
+                ImmutableTerm parentSubject2 = parentSub.apply(parentSubject);
 
-                ImmutableList<TargetAtom> targetAtoms = predicateTerms.stream()
-                        .flatMap(p -> getTargetAtoms(childSubject2, p, parentSubject2, graphTerms))
+                ImmutableList<TargetAtom> targetAtoms = predicates.stream()
+                        .flatMap(p -> getTargetAtoms(childSubject2, p, parentSubject2, subject_graphs_and_predicate_object_graphs))
                         .collect(ImmutableCollectors.toList());
 
                 String sourceQuery =
                         "SELECT " + Stream.concat(
-                                childMap.entrySet().stream()
+                                childSub.getImmutableMap().entrySet().stream()
                                     .map(e -> childPrefix + "." + e.getKey() + " AS " + e.getValue()),
-                                parentMap.entrySet().stream()
+                                parentSub.getImmutableMap().entrySet().stream()
                                     .map(e -> parentPrefix + "." + e.getKey() + " AS " + e.getValue()))
                                 .collect(Collectors.joining(", ")) +
                         " FROM (" + tm.getLogicalTable().getSQLQuery() + ") " + childPrefix +
@@ -284,6 +292,13 @@ public class R2RMLMappingParser implements SQLMappingParser {
         return joinPPTriplesMapsBuilder.build();
     }
 
+    private Var2VarSubstitution getRenaming(ImmutableTerm term, String prefix) {
+        ImmutableMap<Variable, Variable> parentMap = term.getVariableStream()
+                .collect(ImmutableCollectors.toMap(Function.identity(),
+                        v -> prefixAttributeName(prefix + "_", v)));
+
+        return substitutionFactory.getVar2VarSubstitution(parentMap);
+    }
 
     private Variable prefixAttributeName(String prefix, Variable var) {
         String attributeName = var.getName();
