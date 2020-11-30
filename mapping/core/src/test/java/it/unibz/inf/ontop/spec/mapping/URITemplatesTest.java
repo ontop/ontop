@@ -54,7 +54,8 @@ public class URITemplatesTest {
 
     @Test
     public void testGetUriTemplateString1(){
-        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(Template.of("http://example.org/", 0, "/", 1), //
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(
+                Template.builder().addSeparator("http://example.org/").addColumn().addSeparator("/").addColumn().build(), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
         assertEquals("http://example.org/{X}/{Y}", iriTemplateFactory.serializeTemplateTerm(f1));
     }

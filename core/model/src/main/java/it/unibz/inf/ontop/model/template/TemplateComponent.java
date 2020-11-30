@@ -28,16 +28,6 @@ public class TemplateComponent {
     public int getIndex() {
         return index;
     }
-    
-    public static TemplateComponent ofColumn(int index, String s) {
-        return new TemplateComponent(index, s);
-    }
-    public static TemplateComponent ofColumn(int index) {
-        return new TemplateComponent(index, "");
-    }
-    public static TemplateComponent ofSeparator(String s) {
-        return new TemplateComponent(s);
-    }
 
     @Override
     public String toString() { return isColumnNameReference ? "_" + component + "_" : component; }

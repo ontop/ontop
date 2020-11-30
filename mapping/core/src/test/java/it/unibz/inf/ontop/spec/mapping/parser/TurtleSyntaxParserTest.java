@@ -703,7 +703,7 @@ public class TurtleSyntaxParserTest {
 				"ex:Person/{id}/ ex:hasFather ex:Person/123/ .");
 
 		assertEquals(ImmutableList.of(getTripleTargetAtom(
-				getIRIFunctionalTerm(Template.of("http://www.example.org/Person/", 0, "/"),
+				getIRIFunctionalTerm(Template.builder().addSeparator("http://www.example.org/Person/").addColumn().addSeparator("/").build(),
 						getVariable("id")),
 				getConstantIRI("http://www.example.org/hasFather"),
 				getConstantIRI("http://www.example.org/Person/123/"))), result);
