@@ -18,19 +18,32 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     private final ImmutableList<DatabaseRelationDefinition> relations;
     private final File dbMetadataFile;
 
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    ImmutableMetadataImpl(@JsonProperty("dbParameters") DBParameters dbParameters,
+                          @JsonProperty("relationss") ImmutableList<DatabaseRelationDefinition> relations,
+                          @JsonProperty("dbMetadataFile") File dbMetadataFile){
+        //super();
+        this.dbParameters = dbParameters;
+        this.relations = relations;
+        this.dbMetadataFile = dbMetadataFile;
+        //this(dbParameters, relations, dbMetadataFile);
+    }
+
     ImmutableMetadataImpl(DBParameters dbParameters, ImmutableList<DatabaseRelationDefinition> relations) {
         this.dbParameters = dbParameters;
         this.relations = relations;
         dbMetadataFile = null;
     }
 
-    ImmutableMetadataImpl(File dbMetadataFileFile) {
-        this.dbMetadataFile = dbMetadataFileFile;
+    ImmutableMetadataImpl(File dbMetadataFile) {
+        this.dbMetadataFile = dbMetadataFile;
         dbParameters = null;
         relations = null;
     }
 
-    @JsonProperty("relations")
+
+
+    //@JsonProperty("relations")
     @Override
     public ImmutableList<DatabaseRelationDefinition> getAllRelations() {
         return relations;
@@ -55,13 +68,13 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
         String extractionTime = dateFormat.format(Calendar.getInstance().getTime());
 
         return ImmutableMap.<String, String>builder()
-                .put("dbmsProductName", getDBParameters().getDbmsProductName())
-                .put("dbmsVersion", getDBParameters().getDbmsVersion())
-                .put("driverName", getDBParameters().getDriverName())
-                .put("driverVersion", getDBParameters().getDriverVersion())
-                .put("quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString())
-                .put("extractionTime", extractionTime)
-                .build();
+            .put("dbmsProductName", getDBParameters().getDbmsProductName())
+            .put("dbmsVersion", getDBParameters().getDbmsVersion())
+            .put("driverName", getDBParameters().getDriverName())
+            .put("driverVersion", getDBParameters().getDriverVersion())
+            .put("quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString())
+            .put("extractionTime", extractionTime)
+            .build();
     }
 
     @Override
@@ -83,263 +96,167 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
         return bf.toString();
     }
 
-//    @JsonProperty("relationss")
-//    private List<Relations> relations2;
-
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-//    @JsonProperty("relations")
-//    public void setRelations(ImmutableList<DatabaseRelationDefinition> relations) {
-//        this.relations = relations;
-//    }
+    /*@JsonProperty("relations")
+    public void setRelations(ImmutableList<DatabaseRelationDefinition> relations) {
+        this.relations = relations;
+    }*/
 
-//    @JsonProperty("relationss")
-//    public List<Relations> getRelations() {
-//        return relations2;
-//    }
 
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
+    @JsonProperty("relations")
+    private void unpackNested(Map<String,Object> metadata) {
+        this.uniqueConstraints = (Map<String,Object>) metadata.get("uniqueConstraints");
+        this.otherFunctionalDependencies = (String) metadata.get("otherFunctionalDependencies");
+        this.foreignKeys = (Map<String,Object>) metadata.get("foreignKeys");
+        this.columns = (Map<String,Object>) metadata.get("columns");
+        this.name = (String) metadata.get("name");
+        this.constraintname = (String) uniqueConstraints.get("name");
+        this.determinants = (List<String>) uniqueConstraints.get("determinants");
+        this.isPrimaryKey = (Boolean) uniqueConstraints.get("isPrimaryKey");
+        this.foreignkeyname = (String) foreignKeys.get("name");
+        this.from = (Map<String,Object>) foreignKeys.get("from");
+        this.to = (Map<String,Object>) foreignKeys.get("to");
+        this.fromrelation = (String) from.get("relation");
+        this.torelation = (String) to.get("relation");
+        this.fromcolumns = (List<String>) from.get("columns");
+        this.tocolumns = (List<String>) to.get("columns");
+        this.columnname = (String) columns.get("name");
+        this.isNullable = (Boolean) columns.get("isNullable");
+        this.datatype = (String) columns.get("datatype");
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonPropertyOrder({ "uniqueConstraints", "otherFunctionalDependencies", "foreignKeys", "columns", "name" })
-    private class Relations {
+    /*Relations*/
+    @JsonProperty("uniqueConstraints")
+    private Map<String,Object> uniqueConstraints;
 
-            @JsonProperty("uniqueConstraints")
-            private List<UniqueConstraints> uniqueConstraints;
+    @JsonProperty("otherFunctionalDependencies")
+    private String otherFunctionalDependencies;
 
-            @JsonProperty("otherFunctionalDependencies")
-            private List<String> otherFunctionalDependencies;
+    @JsonProperty("foreignKeys")
+    private Map<String,Object> foreignKeys;
 
-            @JsonProperty("foreignKeys")
-            private List<ForeignKeys> foreignKeys;
+    @JsonProperty("columns")
+    private Map<String,Object> columns;
 
-            @JsonProperty("columns")
-            private List<Columns> columns;
+    @JsonProperty("name")
+    private String name;
 
-            @JsonProperty("name")
-            private String name;
+    @JsonProperty("otherFunctionalDependencies")
+    public String getOtherFunctionalDependencies() {
+        return otherFunctionalDependencies;
+    }
 
-            @JsonIgnore
-            private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("otherFunctionalDependencies")
+    public void setOtherFunctionalDependencies(String otherFunctionalDependencies) {
+        this.otherFunctionalDependencies = otherFunctionalDependencies;
+    }
 
-            @JsonProperty("uniqueConstraints")
-            public List<UniqueConstraints> getUniqueConstraints() {
-                return uniqueConstraints;
-            }
+    @JsonProperty("name")
+    public String getName() { return name; }
 
-            @JsonProperty("uniqueConstraints")
-            public void setUniqueConstraints(List<UniqueConstraints> uniqueConstraints) {
-                this.uniqueConstraints = uniqueConstraints;
-            }
+    @JsonProperty("name")
+    public void setName(String name) { this.name = name; }
 
-            @JsonProperty("otherFunctionalDependencies")
-            public List<String> getOtherFunctionalDependencies() {
-                return otherFunctionalDependencies;
-            }
+    /*Unique Constraints*/
+    //@JsonProperty("name")
+    private String constraintname;
+    @JsonProperty("determinants")
+    private List<String> determinants;
+    @JsonProperty("isPrimaryKey")
+    private boolean isPrimaryKey;
 
-            @JsonProperty("otherFunctionalDependencies")
-            public void setOtherFunctionalDependencies(List<String> otherFunctionalDependencies) {
-                this.otherFunctionalDependencies = otherFunctionalDependencies;
-            }
+    @JsonProperty("name")
+    public void setConstraintname(String constraintname) { this.constraintname = constraintname; }
 
-            @JsonProperty("foreignKeys")
-            public List<ForeignKeys> getForeignKeys() {
-                return foreignKeys;
-            }
+    @JsonProperty("determinants")
+    public void setDeterminants(List<String> determinants) {
+        this.determinants = determinants;
+    }
 
-            @JsonProperty("foreignKeys")
-            public void setForeignKeys(List<ForeignKeys> foreignKeys) {
-                this.foreignKeys = foreignKeys;
-            }
+    @JsonProperty("isPrimaryKey")
+    public boolean getIsPrimaryKey() {
+        return isPrimaryKey;
+    }
 
-            @JsonProperty("columns")
-            public List<Columns> getColumns() {
-                return columns;
-            }
+    @JsonProperty("isPrimaryKey")
+    public void setIsPrimaryKey(boolean isPrimaryKey) {
+        this.isPrimaryKey = isPrimaryKey;
+    }
 
-            @JsonProperty("columns")
-            public void setColumns(List<Columns> columns) {
-                this.columns = columns;
-            }
+    /*Foreign Keys*/
+    //@JsonProperty("name")
+    private String foreignkeyname;
+    @JsonProperty("from")
+    private Map<String,Object> from;
+    @JsonProperty("to")
+    private Map<String,Object> to;
 
-            @JsonProperty("name")
-            public String getName() {
-                return name;
-            }
 
-            @JsonProperty("name")
-            public void setName(String name) {
-                this.name = name;
-            }
+    //@JsonProperty("name")
+    public String getForeignkeyname() { return name; }
 
-            @JsonAnySetter
-            public void setAdditionalProperty(String name, Object value) {
-                this.additionalProperties.put(name, value);
-        }
+    //@JsonProperty("name")
+    public void setForeignkeyname(String name) { this.name = name; }
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        @JsonPropertyOrder({ "name", "determinants", "isPrimaryKey" })
-        private class UniqueConstraints {
+    //@JsonProperty("from")
+    public Map<String,Object> getFrom() { return from; }
 
-                @JsonProperty("name")
-                private String name;
+    //@JsonProperty("from")
+    public void setFrom(Map<String,Object> from) { this.from = from; }
 
-                @JsonProperty("determinants")
-                private List<String> determinants;
+    //@JsonProperty("to")
+    public Map<String,Object> getTo() { return to; }
 
-                @JsonProperty("isPrimaryKey")
-                private boolean isPrimaryKey;
+    //@JsonProperty("to")
+    public void setTo(Map<String,Object> to) { this.to = to; }
 
-    /*@JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();*/
+    /* From and To*/
+    //@JsonProperty("relation")
+    private String fromrelation;
+    private String torelation;
+    //@JsonProperty("columns")
+    private List<String> fromcolumns;
+    private List<String> tocolumns;
 
-                @JsonProperty("name")
-                public void setName(String name) {
-                    this.name = name;
-                }
+    /*@JsonProperty("relation")*/
+    public String getFromrelation() { return fromrelation; }
+    public String getTorelation() { return torelation; }
 
-                @JsonProperty("determinants")
-                public void setDeterminants(List<String> determinants) {
-                    this.determinants = determinants;
-                }
+    /*@JsonProperty("relation")*/
+    public void setFromrelation(String fromrelation) { this.fromrelation = fromrelation; }
+    public void setTorelation(String torelation) { this.torelation = torelation; }
 
-                @JsonProperty("isPrimaryKey")
-                public boolean getIsPrimaryKey() {
-                    return isPrimaryKey;
-                }
+    //@JsonProperty("columns")
+    public List<String> getFromcolumns() { return fromcolumns; }
+    public List<String> getTocolumns() { return tocolumns; }
 
-                @JsonProperty("isPrimaryKey")
-                public void setIsPrimaryKey(boolean isPrimaryKey) {
-                    this.isPrimaryKey = isPrimaryKey;
-                }
+    //@JsonProperty("columns")
+    public void setFromcolumns(List<String> fromcolumns) { this.fromcolumns = fromcolumns; }
+    public void setTocolumns(List<String> tocolumns) { this.tocolumns = tocolumns; }
 
-    /*@JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-    }*/
-        }
+    //@JsonProperty("name")
+    private String columnname;
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        @JsonPropertyOrder({ "name", "from", "to" })
-        private class ForeignKeys {
+    @JsonProperty("isNullable")
+    private boolean isNullable;
 
-                @JsonProperty("name")
-                private String name;
-                @JsonProperty("from")
-                private List<FromToObject> from;
-                @JsonProperty("to")
-                private List<FromToObject> to;
+    @JsonProperty("datatype")
+    private String datatype;
 
-    /*@JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();*/
+    //@JsonProperty("name")
+    public void setColumnname(String columnname) {
+        this.columnname = columnname;
+    }
 
-                @JsonProperty("name")
-                public String getName() {
-                    return name;
-                }
+    @JsonProperty("isNullable")
+    public void setIsNullable(boolean isNullable) {
+        this.isNullable = isNullable;
+    }
 
-                @JsonProperty("name")
-                public void setName(String name) {
-                    this.name = name;
-                }
-
-                @JsonProperty("from")
-                public List<FromToObject> getFrom() { return from; }
-
-                @JsonProperty("from")
-                public void setFrom(List<FromToObject> from) { this.from = from; }
-
-                @JsonProperty("to")
-                public List<FromToObject> getTo() {
-                    return to;
-                }
-
-                @JsonProperty("to")
-                public void setTo(List<FromToObject> to) {
-                    this.to = to;
-                }
-
-            @JsonInclude(JsonInclude.Include.NON_NULL)
-            @JsonPropertyOrder({ "relation", "columns" })
-            private class FromToObject {
-
-                    @JsonProperty("relation")
-                    private String relation;
-                    @JsonProperty("columns")
-                    private List<String> columns;
-
-    /*@JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();*/
-
-                    @JsonProperty("relation")
-                    public String getRelation() { return relation; }
-
-                    @JsonProperty("relation")
-                    public void setRelation(String relation) {
-                        this.relation = relation;
-                    }
-
-                    @JsonProperty("columns")
-                    public List<String> getColumns() {
-                        return columns;
-                    }
-
-                    @JsonProperty("columns")
-                    public void setColumns(List<String> columns) {
-                        this.columns = columns;
-                    }
-
-    /*@JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-    }*/
-            }
-
-    /*@JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-    }*/
-        }
-
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        @JsonPropertyOrder({ "name", "isNullable", "datatype" })
-        private class Columns {
-
-            @JsonProperty("name")
-            private String name;
-
-            @JsonProperty("isNullable")
-            private boolean isNullable;
-
-            @JsonProperty("datatype")
-            private String datatype;
-
-    /*@JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();*/
-
-            @JsonProperty("name")
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            @JsonProperty("isNullable")
-            public void setIsNullable(boolean isNullable) {
-                this.isNullable = isNullable;
-            }
-
-            @JsonProperty("datatype")
-            public void setDatatype(String datatype) {
-                this.datatype = datatype;
-            }
-
-    /*@JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-        }*/
-        }
+    @JsonProperty("datatype")
+    public void setDatatype(String datatype) {
+        this.datatype = datatype;
     }
 }
