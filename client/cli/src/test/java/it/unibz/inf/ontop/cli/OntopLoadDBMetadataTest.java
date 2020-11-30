@@ -2,13 +2,10 @@ package it.unibz.inf.ontop.cli;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
+import com.fasterxml.jackson.datatype.*;
+//import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
-import it.unibz.inf.ontop.spec.dbschema.tools.impl.ForeignKeys;
-import it.unibz.inf.ontop.spec.dbschema.tools.impl.Metadata;
-import it.unibz.inf.ontop.spec.dbschema.tools.impl.Relations;
-import it.unibz.inf.ontop.spec.dbschema.tools.impl.UniqueConstraints;
 import org.junit.Test;
 
 import java.io.File;
@@ -21,6 +18,13 @@ public class OntopLoadDBMetadataTest {
 
     // Test file
     File dbMetadataFile = new File("src/test/resources/output/exampleBooks-metadata.json");
+    /*ImmutableMetadataImpl metadata = new ObjectMapper()
+        .registerModule(new GuavaModule())
+        .readerFor(ImmutableMetadataImpl.class)
+        .readValue(dbMetadataFile);*/
+//    ObjectMapper metadata = JsonMapper.builder()
+//        .addModule(new GuavaModule())
+//        .build();
     ImmutableMetadataImpl metadata = new ObjectMapper()
         .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
         .readerFor(ImmutableMetadataImpl.class)

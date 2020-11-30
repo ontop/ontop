@@ -20,7 +20,7 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     ImmutableMetadataImpl(@JsonProperty("dbParameters") DBParameters dbParameters,
-                          @JsonProperty("relationss") ImmutableList<DatabaseRelationDefinition> relations,
+                          @JsonProperty("relations") ImmutableList<DatabaseRelationDefinition> relations,
                           @JsonProperty("dbMetadataFile") File dbMetadataFile){
         //super();
         this.dbParameters = dbParameters;
@@ -35,7 +35,8 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
         dbMetadataFile = null;
     }
 
-    ImmutableMetadataImpl(File dbMetadataFile) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    ImmutableMetadataImpl(@JsonProperty("dbMetadataFile") File dbMetadataFile) {
         this.dbMetadataFile = dbMetadataFile;
         dbParameters = null;
         relations = null;
@@ -167,7 +168,7 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     @JsonProperty("isPrimaryKey")
     private boolean isPrimaryKey;
 
-    @JsonProperty("name")
+    //@JsonProperty("name")
     public void setConstraintname(String constraintname) { this.constraintname = constraintname; }
 
     @JsonProperty("determinants")
