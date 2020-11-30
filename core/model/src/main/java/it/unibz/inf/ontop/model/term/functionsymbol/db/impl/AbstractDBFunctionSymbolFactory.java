@@ -227,8 +227,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<String, Integer, DBBooleanFunctionSymbol> notPredefinedBooleanFunctionTable;
 
-    private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
-    private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+    private final Map<ImmutableList<TemplateComponent>, IRIStringTemplateFunctionSymbol> iriTemplateMap;
+    private final Map<ImmutableList<TemplateComponent>, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
     private final Map<IRI, DBFunctionSymbol> iriStringResolverMap;
 
@@ -408,22 +408,20 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> iriTemplate) {
-        return iriTemplateMap
-                .computeIfAbsent(ObjectStringTemplateFunctionSymbolImpl.extractStringTemplate(iriTemplate),
+        return iriTemplateMap.computeIfAbsent(iriTemplate,
                         t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(iriTemplate, typeFactory));
     }
 
     @Override
     public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> bnodeTemplate) {
-        return bnodeTemplateMap
-                .computeIfAbsent(ObjectStringTemplateFunctionSymbolImpl.extractStringTemplate(bnodeTemplate),
+        return bnodeTemplateMap.computeIfAbsent(bnodeTemplate,
                         t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(bnodeTemplate, typeFactory));
     }
 
     @Override
     public BnodeStringTemplateFunctionSymbol getFreshBnodeStringTemplateFunctionSymbol(int arity) {
         if (arity <= 0)
-            throw new IllegalArgumentException("Non-positive BNode arity");
+            throw new IllegalArgumentException("A positive BNode arity is expected");
 
         Template.Builder builder = Template.builder();
         builder.addSeparator(BNODE_PREFIX + counter.incrementAndGet());

@@ -1,17 +1,37 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class TemplateComponentTest {
 
     TemplateFactory factory = new IRITemplateFactory(TERM_FACTORY);
+
+    @Test
+    public void test_equality() {
+        assertEquals(new TemplateComponent(0, "template"),
+                        new TemplateComponent(0, "template22"));
+    }
+
+    @Test
+    public void test_inequality() {
+        assertNotEquals(new TemplateComponent(0, "template"),
+                new TemplateComponent(1, "template"));
+    }
+
+    @Test
+    public void test_hashcode() {
+        assertEquals(ImmutableSet.of(new TemplateComponent(0, "template")),
+                ImmutableSet.of(new TemplateComponent(0, "template"),
+                        new TemplateComponent(0, "template22")));
+    }
 
     @Test
     public void test_simple_string() {
