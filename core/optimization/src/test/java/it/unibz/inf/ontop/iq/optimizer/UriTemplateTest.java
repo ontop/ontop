@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -23,10 +24,8 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 
 public class UriTemplateTest {
     private static String URI_TEMPLATE_STR_1_PREFIX =  "http://example.org/ds1/";
-    private static String URI_TEMPLATE_STR_1 =  URI_TEMPLATE_STR_1_PREFIX + "{}";
     private static String URI_TEMPLATE_STR_2_PREFIX =  "http://example.org/ds2/";
-    private static String URI_TEMPLATE_STR_2 =  URI_TEMPLATE_STR_2_PREFIX + "{}";
-    private static String URI_TEMPLATE_STR_3 =  "{}";
+    private static String URI_TEMPLATE_STR_3_PREFIX =  "";
 
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
@@ -56,21 +55,21 @@ public class UriTemplateTest {
         initialQueryBuilder.addChild(leftJoinNode, joinNode, LEFT);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1_PREFIX, A)));
         initialQueryBuilder.addChild(joinNode, leftConstructionNode);
 
         ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         initialQueryBuilder.addChild(leftConstructionNode, leftDataNode);
 
         ConstructionNode middleConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3_PREFIX, C)));
         initialQueryBuilder.addChild(joinNode, middleConstructionNode);
 
         ExtensionalDataNode middleDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
         initialQueryBuilder.addChild(middleConstructionNode, middleDataNode);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2_PREFIX, E)));
         initialQueryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(E));
@@ -102,7 +101,7 @@ public class UriTemplateTest {
     }
 
 
-    private static ImmutableFunctionalTerm generateOneVarURITemplate(String templateString, ImmutableTerm value) {
-        return TERM_FACTORY.getIRIFunctionalTerm(templateString, ImmutableList.of(value));
+    private static ImmutableFunctionalTerm generateOneVarURITemplate(String prefix, ImmutableTerm value) {
+        return TERM_FACTORY.getIRIFunctionalTerm(TemplateComponent.unaryTemplate(prefix), ImmutableList.of(value));
     }
 }

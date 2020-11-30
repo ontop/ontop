@@ -32,7 +32,7 @@ public class IRITemplateFactory extends ObjectTemplateFactory {
         if (size == 1 && !components.get(0).isColumnNameReference())
             return getConstant(components.get(0).getComponent());
 
-        return termFactory.getIRIFunctionalTerm(getTemplateString(components), getTemplateTerms(components));
+        return termFactory.getIRIFunctionalTerm(components, getTemplateTerms(components));
     }
 
     @Override

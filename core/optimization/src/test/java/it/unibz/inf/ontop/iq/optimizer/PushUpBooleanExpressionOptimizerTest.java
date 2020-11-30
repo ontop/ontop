@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
@@ -558,13 +559,12 @@ public class PushUpBooleanExpressionOptimizerTest {
 
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
-        String uriTemplateString = "http://example.org/ds1/";
+        ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
+        builder.add(TemplateComponent.ofSeparator("http://example.org/ds1/"));
         for (VariableOrGroundTerm argument : arguments) {
-            uriTemplateString = uriTemplateString.toString() + "{}";
+            builder.add(TemplateComponent.ofColumn());
         }
-        ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-        builder.add(arguments);
-        return TERM_FACTORY.getIRIFunctionalTerm(uriTemplateString, builder.build());
+        return TERM_FACTORY.getIRIFunctionalTerm(builder.build(), ImmutableList.copyOf(arguments));
     }
 
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {

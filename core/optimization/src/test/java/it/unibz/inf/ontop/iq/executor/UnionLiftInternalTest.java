@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.UnionLiftProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -25,7 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 public class UnionLiftInternalTest {
 
-    private static String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
+    private static ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = TemplateComponent.unaryTemplate("http://example.org/ds1/{}");
     private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
     private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);

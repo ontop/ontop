@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -52,14 +53,14 @@ public class URITemplatesTest {
 
     @Test
     public void testGetUriTemplateString1(){
-        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}", //
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(TemplateComponent.binaryTemplate("http://example.org/"), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
         assertEquals("http://example.org/{X}/{Y}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
 
     @Test
     public void testGetUriTemplateString2(){
-        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}",
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(ImmutableList.of(TemplateComponent.ofColumn()),
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
         assertEquals("{X}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -67,7 +68,7 @@ public class URITemplatesTest {
     @Test
     public void testGetUriTemplateString3(){
 
-        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("{}/", //
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(ImmutableList.of(TemplateComponent.ofColumn(), TemplateComponent.ofSeparator("/")), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X")));
         assertEquals("{X}/", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -75,7 +76,10 @@ public class URITemplatesTest {
     @Test
     public void testGetUriTemplateString4(){
 
-        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/", //
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(ImmutableList.of(
+                TemplateComponent.ofSeparator("http://example.org/"),
+                TemplateComponent.ofColumn(), TemplateComponent.ofSeparator("/"),
+                TemplateComponent.ofColumn(), TemplateComponent.ofSeparator("/")), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y")));
         assertEquals("http://example.org/{X}/{Y}/", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -83,7 +87,11 @@ public class URITemplatesTest {
     @Test
     public void testGetUriTemplateString5(){
 
-        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm("http://example.org/{}/{}/{}", //
+        ImmutableFunctionalTerm f1 = createIRITemplateFunctionalTerm(ImmutableList.of(
+                TemplateComponent.ofSeparator("http://example.org/"),
+                TemplateComponent.ofColumn(), TemplateComponent.ofSeparator("/"),
+                TemplateComponent.ofColumn(), TemplateComponent.ofSeparator("/"),
+                TemplateComponent.ofColumn()), //
                 ImmutableList.of(TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"), TERM_FACTORY.getVariable("X")));
         assertEquals("http://example.org/{X}/{Y}/{X}", iriTemplateFactory.serializeTemplateTerm(f1));
     }
@@ -91,7 +99,7 @@ public class URITemplatesTest {
     /**
      * Functional term corresponding to the lexical term
      */
-    private ImmutableFunctionalTerm createIRITemplateFunctionalTerm(String iriTemplate,
+    private ImmutableFunctionalTerm createIRITemplateFunctionalTerm(ImmutableList<TemplateComponent> iriTemplate,
                                                                     ImmutableList<? extends ImmutableTerm> arguments) {
         return (ImmutableFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(iriTemplate, arguments).getTerm(0);
     }

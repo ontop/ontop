@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model.template;
 
+import com.google.common.collect.ImmutableList;
+
 public class TemplateComponent {
     private final boolean isColumnNameReference;
     private final String component;
@@ -17,6 +19,36 @@ public class TemplateComponent {
         return component;
     }
 
+    public static TemplateComponent ofColumn(String s) {
+        return new TemplateComponent(true, s);
+    }
+    public static TemplateComponent ofColumn() {
+        return new TemplateComponent(true, "");
+    }
+    public static TemplateComponent ofSeparator(String s) {
+        return new TemplateComponent(false, s);
+    }
+
+    public static ImmutableList<TemplateComponent> unaryTemplate(String prefix) {
+        return ImmutableList.of(
+                TemplateComponent.ofSeparator(prefix),
+                TemplateComponent.ofColumn());
+    }
+
+    public static ImmutableList<TemplateComponent> binaryTemplate(String prefix) {
+       return ImmutableList.of(
+                TemplateComponent.ofSeparator(prefix),
+                TemplateComponent.ofColumn(),
+                TemplateComponent.ofSeparator("/"),
+                TemplateComponent.ofColumn());
+    }
+
+    public static ImmutableList<TemplateComponent> binaryTemplateNoSeparator(String prefix) {
+        return ImmutableList.of(
+                TemplateComponent.ofSeparator(prefix),
+                TemplateComponent.ofColumn(),
+                TemplateComponent.ofColumn());
+    }
 
     @Override
     public String toString() { return isColumnNameReference ? "_" + component + "_" : component; }

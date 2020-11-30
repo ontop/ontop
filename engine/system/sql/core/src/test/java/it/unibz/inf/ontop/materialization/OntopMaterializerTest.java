@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -238,7 +239,10 @@ public class OntopMaterializerTest {
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
-				"http://schools.com/person/{}-{}",
+				ImmutableList.of(
+						TemplateComponent.ofSeparator("http://schools.com/person/"),
+						TemplateComponent.ofColumn(), TemplateComponent.ofSeparator("-"),
+						TemplateComponent.ofColumn()),
 				ImmutableList.of(
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));
@@ -266,7 +270,10 @@ public class OntopMaterializerTest {
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
-				"http://schools.com/person/{}-{}",
+				ImmutableList.of(
+						TemplateComponent.ofSeparator("http://schools.com/person/"),
+						TemplateComponent.ofColumn(), TemplateComponent.ofSeparator("-"),
+						TemplateComponent.ofColumn()),
 				ImmutableList.of(
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));

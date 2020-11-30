@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -234,16 +235,25 @@ public class DirectMappingAxiomProducer {
 		Optional<UniqueConstraint> pko = td.getPrimaryKey();
 		if (pko.isPresent()) {
 			UniqueConstraint pk = pko.get();
-			String template = getTableIRIString(td) + "/"
-					+ pk.getAttributes().stream()
-						.map(a -> R2RMLIRISafeEncoder.encode(a.getID().getName()) + "={}")
-						.collect(Collectors.joining(";"));
+
+			ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
+
+			// TODO: IMPROVE
+			builder.add(TemplateComponent.ofSeparator(getTableIRIString(td) + "/" +
+							R2RMLIRISafeEncoder.encode(pk.getAttributes().get(0).getID().getName()) + "="));
+			builder.add(TemplateComponent.ofColumn());
+
+			for (int i = 1; i < pk.getAttributes().size(); i++) {
+				builder.add(TemplateComponent.ofSeparator(
+						";" + R2RMLIRISafeEncoder.encode(pk.getAttributes().get(i).getID().getName()) + "="));
+				builder.add(TemplateComponent.ofColumn());
+			}
 
 			ImmutableList<Variable> arguments = pk.getAttributes().stream()
 					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
 					.collect(ImmutableCollectors.toList());
 
-			return termFactory.getIRIFunctionalTerm(template, arguments);
+			return termFactory.getIRIFunctionalTerm(builder.build(), arguments);
 		}
 		else {
 			ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()

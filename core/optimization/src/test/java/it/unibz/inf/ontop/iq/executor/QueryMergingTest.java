@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -55,9 +56,9 @@ public class QueryMergingTest {
     private static DistinctVariableOnlyDataAtom ANS0_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS0_PREDICATE, ImmutableList.of());
     private static DistinctVariableOnlyDataAtom P1_ST_ATOM = ATOM_FACTORY.getDistinctTripleAtom(S, P, T);
-    private static String URI_TEMPLATE_STR_1 = "http://example.org/ds1/{}";
-    private static String URI_TEMPLATE_STR_2 = "http://example.org/ds2/{}";
-    private static String URI_TEMPLATE_STR_3 = "http://example.org/ds3/{}/{}";
+    private static ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = TemplateComponent.unaryTemplate("http://example.org/ds1/");
+    private static ImmutableList<TemplateComponent> URI_TEMPLATE_STR_2 = TemplateComponent.unaryTemplate("http://example.org/ds2/");
+    private static ImmutableList<TemplateComponent> URI_TEMPLATE_STR_3 = TemplateComponent.binaryTemplate("http://example.org/ds3/");
     private static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private static Constant ONE_STR = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBStringType());
     private static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());

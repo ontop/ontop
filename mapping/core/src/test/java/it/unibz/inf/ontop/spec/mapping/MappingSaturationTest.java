@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -30,7 +31,9 @@ public class MappingSaturationTest {
     private static final Variable P = TERM_FACTORY.getVariable("p");
     private static final Variable O = TERM_FACTORY.getVariable("o");
 
-    private static final String URI_TEMPLATE_PERSON, URI_TEMPLATE_COURSE1, URI_TEMPLATE_COURSE2;
+    private static final ImmutableList<TemplateComponent> URI_TEMPLATE_PERSON = TemplateComponent.unaryTemplate("http://example.org/person/");
+    private static final ImmutableList<TemplateComponent>  URI_TEMPLATE_COURSE1 =  TemplateComponent.unaryTemplate("http://example.org/uni1/course/");
+    private static final ImmutableList<TemplateComponent>  URI_TEMPLATE_COURSE2 =  TemplateComponent.unaryTemplate("http://example.org/uni2/course/");
 
     private static final IRI PROP_GIVES_LECTURE, PROP_TEACHES, PROP_GIVES_LAB, PROP_IS_TAUGHT_BY;
 
@@ -41,10 +44,6 @@ public class MappingSaturationTest {
         P1 = builder.createDatabaseRelation("p1",
             "col1", largeIntDBType, false,
             "col12", largeIntDBType, false);
-
-        URI_TEMPLATE_PERSON =  "http://example.org/person/{}";
-        URI_TEMPLATE_COURSE1 =  "http://example.org/uni1/course/{}";
-        URI_TEMPLATE_COURSE2 =  "http://example.org/uni2/course/{}";
 
         PROP_GIVES_LECTURE = RDF_FACTORY.createIRI("http://example.org/voc#givesLecture");
         PROP_TEACHES = RDF_FACTORY.createIRI("http://example.org/voc#teaches");

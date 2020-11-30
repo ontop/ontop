@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
@@ -38,9 +39,9 @@ public class BindingLiftTest {
     private final AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
 
     // TEMPORARY HACK!
-    private String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
-    private String URI_TEMPLATE_STR_2 =  "http://example.org/ds2/{}";
-    private String URI_TEMPLATE_STR_2_2 = "http://example.org/ds2/{}/{}";
+    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = TemplateComponent.unaryTemplate("http://example.org/ds1/");
+    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_2 =  TemplateComponent.unaryTemplate("http://example.org/ds2/");
+    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_2_2 = TemplateComponent.binaryTemplate("http://example.org/ds2/");
 
     private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
     private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, E));
@@ -582,13 +583,13 @@ public class BindingLiftTest {
         return generateURI1(URI_TEMPLATE_STR_1, argument);
     }
 
-    private ImmutableFunctionalTerm generateIRIString(String template, Variable... variables) {
+    private ImmutableFunctionalTerm generateIRIString(ImmutableList<TemplateComponent> template, Variable... variables) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
                 FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getIRIStringTemplateFunctionSymbol(template),
                 variables);
     }
 
-    private ImmutableFunctionalTerm generateURI1(String prefix, VariableOrGroundTerm argument) {
+    private ImmutableFunctionalTerm generateURI1(ImmutableList<TemplateComponent> prefix, VariableOrGroundTerm argument) {
         return TERM_FACTORY.getIRIFunctionalTerm(prefix, ImmutableList.of(argument));
     }
 

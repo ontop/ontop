@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -405,29 +406,29 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
 
     @Override
-    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
+    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> iriTemplate) {
         return iriTemplateMap
-                .computeIfAbsent(iriTemplate,
-                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+                .computeIfAbsent(ObjectStringTemplateFunctionSymbolImpl.extractStringTemplate(iriTemplate),
+                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(iriTemplate, typeFactory));
     }
 
     @Override
-    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(String bnodeTemplate) {
+    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> bnodeTemplate) {
         return bnodeTemplateMap
-                .computeIfAbsent(bnodeTemplate,
-                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+                .computeIfAbsent(ObjectStringTemplateFunctionSymbolImpl.extractStringTemplate(bnodeTemplate),
+                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(bnodeTemplate, typeFactory));
     }
 
     @Override
     public BnodeStringTemplateFunctionSymbol getFreshBnodeStringTemplateFunctionSymbol(int arity) {
-        String bnodeTemplate = IntStream.range(0, arity)
-                .boxed()
-                .map(i -> PLACEHOLDER)
-                .reduce(
-                        BNODE_PREFIX + counter.incrementAndGet(),
-                        (prefix, suffix) -> prefix + "/" + suffix);
-
-        return getBnodeStringTemplateFunctionSymbol(bnodeTemplate);
+        ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
+        builder.add(TemplateComponent.ofSeparator(BNODE_PREFIX + counter.incrementAndGet()));
+        for (int i = 0; i < arity; i++) {
+            builder.add(TemplateComponent.ofColumn());
+            if (i < arity - 1)
+                builder.add(TemplateComponent.ofSeparator("/"));
+        }
+        return getBnodeStringTemplateFunctionSymbol(builder.build());
     }
 
     @Override

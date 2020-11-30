@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -298,7 +299,7 @@ public interface TermFactory {
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
 
 	/**
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
@@ -311,7 +312,7 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableTerm term);
 
-	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> bnodeTemplate,
 												   ImmutableList<? extends ImmutableTerm> arguments);
 
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);

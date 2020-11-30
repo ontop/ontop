@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -48,7 +49,8 @@ public class MappingTest {
 
     private final static Variable Y = TERM_FACTORY.getVariable("company");
 
-    private static final String URI_TEMPLATE_STR_1;
+    private static final ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 =
+            TemplateComponent.unaryTemplate("http://example.org/person/");
 
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
@@ -73,8 +75,6 @@ public class MappingTest {
             "broker", integerDBType, false,
             "company", integerDBType, true,
             "client", integerDBType, true);
-
-        URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";
 
         PROP_1 = RDF_FACTORY.createIRI("http://example.org/voc#Prop1");
         PROP_2 = RDF_FACTORY.createIRI("http://example.org/voc#Prop2");

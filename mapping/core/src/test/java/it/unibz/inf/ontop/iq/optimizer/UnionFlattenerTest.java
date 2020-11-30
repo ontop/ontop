@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class UnionFlattenerTest {
             TABLE2_AR2, ImmutableMap.of(0, Y, 1, Z));
 
     private final static String uriTemplate1 = "http://example.org/ds1/{}";
-    private final static String uriTemplate2 = "http://example.org/ds1/{}{}";
+    private final static ImmutableList<TemplateComponent> uriTemplate2 = TemplateComponent.binaryTemplateNoSeparator("http://example.org/ds1/");
 
     private final static DBConstant CONSTANT_STRING = TERM_FACTORY.getDBConstant("john",
             TYPE_FACTORY.getDBTypeFactory().getDBStringType());

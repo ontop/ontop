@@ -32,7 +32,7 @@ public class BnodeTemplateFactory extends ObjectTemplateFactory {
         if (size == 1 && !components.get(0).isColumnNameReference())
             return getConstant(components.get(0).getComponent());
 
-        return termFactory.getBnodeFunctionalTerm(getTemplateString(components), getTemplateTerms(components));
+        return termFactory.getBnodeFunctionalTerm(components, getTemplateTerms(components));
     }
 
     @Override

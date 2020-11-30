@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -42,12 +44,12 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Nullable
     private ImmutableList<DBConstant> templateConstants;
 
-    protected ObjectStringTemplateFunctionSymbolImpl(String template, TypeFactory typeFactory) {
-        super(template, createBaseTypes(getArity(template), typeFactory));
-        this.template = template;
+    protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<TemplateComponent> template, TypeFactory typeFactory) {
+        super(extractStringTemplate(template), createBaseTypes(template, typeFactory));
+        this.template = extractStringTemplate(template);
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
-        this.pattern = extractPattern(template, true);
+        this.pattern = extractPattern(this.template, true);
 
         this.isInjective = isInjective(template);
     }
@@ -55,30 +57,26 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     /**
      * Must not produce false positive
      */
-    protected boolean isInjective(String template) {
+    protected boolean isInjective(ImmutableList<TemplateComponent> template) {
         int arity = getArity(template);
         if (arity < 2)
             return true;
 
-        ImmutableList<String> intermediateStrings = extractIntermediateStrings(template);
-        if (intermediateStrings.size() != (arity - 1))
-            throw new IllegalArgumentException(
-                    String.format("The template %s is not matching the arity %d",
-                            template,
-                            arity));
-        return intermediateStrings.stream()
+        return template.stream()
+                .filter(c -> !c.isColumnNameReference())
+                .map(TemplateComponent::getComponent)
                 .allMatch(interm -> SOME_SAFE_SEPARATORS.stream()
                         .anyMatch(sep -> interm.indexOf(sep) >= 0));
     }
 
-    private static int getArity(String iriOrBnodeTemplate) {
-        int count = 0;
-        for (int currentIndex = iriOrBnodeTemplate.indexOf(PLACE_HOLDER);
-             currentIndex >= 0;
-             currentIndex = iriOrBnodeTemplate.indexOf(PLACE_HOLDER, currentIndex + 1)) {
-            count++;
-        }
-        return count;
+    private static int getArity(ImmutableList<TemplateComponent> template) {
+        return (int)template.stream().filter(TemplateComponent::isColumnNameReference).count();
+    }
+
+    public static String extractStringTemplate(ImmutableList<TemplateComponent> template) {
+        return template.stream()
+                .map(c -> c.isColumnNameReference() ? "{}" : c.getComponent())
+                .collect(Collectors.joining());
     }
 
     /**
@@ -99,12 +97,12 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return builder.build();
     }
 
-    private static ImmutableList<TermType> createBaseTypes(int arity, TypeFactory typeFactory) {
+    private static ImmutableList<TermType> createBaseTypes(ImmutableList<TemplateComponent> template, TypeFactory typeFactory) {
         // TODO: require DB string instead
         TermType stringType = typeFactory.getXsdStringDatatype();
-
-        return IntStream.range(0, arity)
-                .mapToObj(i -> stringType)
+        return template.stream()
+                .filter(TemplateComponent::isColumnNameReference)
+                .map(c -> stringType)
                 .collect(ImmutableCollectors.toList());
     }
 
