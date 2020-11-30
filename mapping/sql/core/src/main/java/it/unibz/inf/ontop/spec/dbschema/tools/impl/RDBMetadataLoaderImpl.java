@@ -7,9 +7,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
-import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.io.IOException;
 
 public class RDBMetadataLoaderImpl implements RDBMetadataLoader {
 
-    //private final String filepath;
     private final File dbMetadataFile;
 
     @Inject
@@ -29,21 +27,11 @@ public class RDBMetadataLoaderImpl implements RDBMetadataLoader {
     public ImmutableMetadata loadAndDeserialize() throws MetadataExtractionException, IOException {
 
         try {
-            //File viewFile = new File(filepath);
-            //File file = ImmutableMetadata.loadImmutableMetadata(filepath);
             // create object mapper instance
             ObjectMapper mapper = new ObjectMapper();
             // convert JSON file to dbschema
-            //File viewsFile = new File("c://user//book.json");
-            //String viewPath = "c://user//book.json";
-            ImmutableMetadata metadata = mapper.readValue(dbMetadataFile, ImmutableMetadata.class);
+            ImmutableMetadata metadata = mapper.readValue(dbMetadataFile, ImmutableMetadataImpl.class);
             return metadata;
-
-        //} catch (JsonProcessingException e) {
-        //    e.printStackTrace();
-
-        /*} catch (IOException e) {
-            e.printStackTrace();*/
         }
         catch (JsonProcessingException e) {
             throw new MetadataExtractionException("problem with JSON processing.\n" + e);

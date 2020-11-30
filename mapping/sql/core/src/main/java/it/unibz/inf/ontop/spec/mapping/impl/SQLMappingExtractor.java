@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
-import cdjd.com.google.common.base.Charsets;
-import cdjd.com.google.common.io.Files;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -177,29 +175,20 @@ public class SQLMappingExtractor implements MappingExtractor {
                                            Optional<File> constraintFile,
                                            Optional<File> dbMetadataFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
-        //viewsfile --> metadatafile
-        //IOException must be encapsulated inside the MetadataExtractionException
-
         if (dbMetadataFile.isPresent()) {
             //try {
-            System.out.println("viewfile found");
                 File dbMetadataFile2 = dbMetadataFile.get();
-            System.out.println("viewfile found");
-//                System.out.println(Files.asCharSource(dbMetadataFile2, Charsets.UTF_8));
                 CachingMetadataLookup metadataLookup = new CachingMetadataLookup(dbMetadataFile2);
-            System.out.println("viewfile found");
                 // Get DB Schema
                 RDBMetadataLoaderImpl dbLoader = new RDBMetadataLoaderImpl(dbMetadataFile2);
-            System.out.println("viewfile found");
                 DBParameters dbParameters;
                 try {
-                    System.out.println("parameters found 0");
                     dbParameters = dbLoader.loadDBParameters();
-                    System.out.println("parameters found 1");
                 } catch (IOException io) {
-                    throw new MetadataExtractionException(io.getMessage());
+                    throw new MetadataExtractionException(io);
                 }
                 ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
+            System.out.println("parameters found 2");
                 metadataLookup.loadImmutableMetadata();
 
                 return new MappingAndDBParametersImpl(provMapping, dbParameters);

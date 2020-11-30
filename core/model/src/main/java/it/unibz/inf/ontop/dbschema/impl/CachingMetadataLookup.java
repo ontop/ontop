@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class CachingMetadataLookup implements MetadataLookup {
@@ -19,7 +19,16 @@ public class CachingMetadataLookup implements MetadataLookup {
 
     public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; dbMetadataFile = null;}
 
-    public CachingMetadataLookup(File dbMetadata) { this.dbMetadataFile = dbMetadata; provider = null;}
+    public CachingMetadataLookup(File dbMetadata) {
+        this.dbMetadataFile = dbMetadata;
+        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
+            .enableTestMode()
+            .build();
+        Injector injector = defaultConfiguration.getInjector();
+        TypeFactory TYPE_FACTORY = injector.getInstance(TypeFactory.class);
+        OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(TYPE_FACTORY);
+        provider = builder.build();
+    }
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
@@ -54,16 +63,6 @@ public class CachingMetadataLookup implements MetadataLookup {
     }
 
     public ImmutableMetadata loadImmutableMetadata() throws MetadataExtractionException {
-
-        //File viewsFile = new File(filepath);
-//        Metadata metadata = new ObjectMapper()
-//            .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
-//            .readerFor(Metadata.class)
-//            .readValue(viewsFile);
-//        ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(filepath);
-//        List<ImmutableMetadata> list = lookup.loadRelations();
-//        for (ImmutableMetadata relation : list)
-//            provider.insertIntegrityConstraints(relation, lookup);
         return new ImmutableMetadataImpl(dbMetadataFile);
     }
 }
