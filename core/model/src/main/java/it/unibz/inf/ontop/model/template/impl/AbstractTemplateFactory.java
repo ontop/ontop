@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.template.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -62,7 +63,7 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
 
     @Override
     public ImmutableList<TemplateComponent> getComponents(String template) {
-        ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
+        Template.Builder builder = Template.builder();
         boolean escape = false;
         boolean insideCurlyBracket = false;
         int currentStart = 0;
@@ -75,7 +76,7 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
                         if (insideCurlyBracket)
                             throw new IllegalArgumentException("Nested curly brackets are not allowed");
                         if (i > currentStart)
-                            builder.add(new TemplateComponent(false, decode(template.substring(currentStart, i))));
+                            builder.addSeparator(decode(template.substring(currentStart, i)));
                         currentStart = i + 1;
                         insideCurlyBracket = true;
                         break;
@@ -84,7 +85,7 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
                             throw new IllegalArgumentException("No matching opening curly bracket");
                         if (i == currentStart)
                             throw new IllegalArgumentException("Empty column reference");
-                        builder.add(new TemplateComponent(true, decode(template.substring(currentStart, i))));
+                        builder.addColumn(decode(template.substring(currentStart, i)));
                         currentStart = i + 1;
                         insideCurlyBracket = false;
                         break;
@@ -99,7 +100,7 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
         if (currentStart != template.length()) {
             if (insideCurlyBracket)
                 throw new IllegalArgumentException("No matching closing curly bracket");
-            builder.add(new TemplateComponent(false, decode(template.substring(currentStart))));
+            builder.addSeparator(decode(template.substring(currentStart)));
         }
         return builder.build();
     }

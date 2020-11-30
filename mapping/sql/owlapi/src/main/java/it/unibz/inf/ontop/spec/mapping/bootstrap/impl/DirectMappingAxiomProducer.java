@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -236,17 +237,17 @@ public class DirectMappingAxiomProducer {
 		if (pko.isPresent()) {
 			UniqueConstraint pk = pko.get();
 
-			ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
+			Template.Builder builder = Template.builder();
 
 			// TODO: IMPROVE
-			builder.add(TemplateComponent.ofSeparator(getTableIRIString(td) + "/" +
-							R2RMLIRISafeEncoder.encode(pk.getAttributes().get(0).getID().getName()) + "="));
-			builder.add(TemplateComponent.ofColumn());
+			builder.addSeparator(getTableIRIString(td) + "/" +
+							R2RMLIRISafeEncoder.encode(pk.getAttributes().get(0).getID().getName()) + "=");
+			builder.addColumn();
 
 			for (int i = 1; i < pk.getAttributes().size(); i++) {
-				builder.add(TemplateComponent.ofSeparator(
-						";" + R2RMLIRISafeEncoder.encode(pk.getAttributes().get(i).getID().getName()) + "="));
-				builder.add(TemplateComponent.ofColumn());
+				builder.addSeparator(
+						";" + R2RMLIRISafeEncoder.encode(pk.getAttributes().get(i).getID().getName()) + "=");
+				builder.addColumn();
 			}
 
 			ImmutableList<Variable> arguments = pk.getAttributes().stream()

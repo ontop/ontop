@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
@@ -559,11 +560,10 @@ public class PushUpBooleanExpressionOptimizerTest {
 
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
-        ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
-        builder.add(TemplateComponent.ofSeparator("http://example.org/ds1/"));
-        for (VariableOrGroundTerm argument : arguments) {
-            builder.add(TemplateComponent.ofColumn());
-        }
+        Template.Builder builder = Template.builder();
+        builder.addSeparator("http://example.org/ds1/");
+        for (VariableOrGroundTerm argument : arguments)
+            builder.addColumn();
         return TERM_FACTORY.getIRIFunctionalTerm(builder.build(), ImmutableList.copyOf(arguments));
     }
 

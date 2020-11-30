@@ -15,55 +15,55 @@ public class TemplateComponentTest {
 
     @Test
     public void test_simple_string() {
-        assertEquals(ImmutableList.of(new TemplateComponent(false, "template")),
+        assertEquals(ImmutableList.of(new TemplateComponent("template")),
                 factory.getComponents("template"));
     }
 
     @Test
     public void test_single_column() {
-        assertEquals(ImmutableList.of(new TemplateComponent(true, "template")),
+        assertEquals(ImmutableList.of(new TemplateComponent(0, "template")),
                 factory.getComponents("{template}"));
     }
 
     @Test
     public void test_single_string_column() {
         assertEquals(ImmutableList.of(
-                new TemplateComponent(false, "fish"),
-                new TemplateComponent(true, "template")),
+                new TemplateComponent( "fish"),
+                new TemplateComponent(1, "template")),
                 factory.getComponents("fish{template}"));
     }
 
     @Test
     public void test_single_column_string() {
         assertEquals(ImmutableList.of(
-                new TemplateComponent(true, "template"),
-                new TemplateComponent(false, "fish")),
+                new TemplateComponent(0, "template"),
+                new TemplateComponent("fish")),
                 factory.getComponents("{template}fish"));
     }
 
     @Test
     public void test_two_columns() {
         assertEquals(ImmutableList.of(
-                new TemplateComponent(true, "template"),
-                new TemplateComponent(true, "fish")),
+                new TemplateComponent(0, "template"),
+                new TemplateComponent(1, "fish")),
                 factory.getComponents("{template}{fish}"));
     }
 
     @Test
     public void test_column_string_column() {
         assertEquals(ImmutableList.of(
-                new TemplateComponent(true, "template"),
-                new TemplateComponent(false, "fish"),
-                new TemplateComponent(true, "carp")),
+                new TemplateComponent(0, "template"),
+                new TemplateComponent("fish"),
+                new TemplateComponent(1, "carp")),
                 factory.getComponents("{template}fish{carp}"));
     }
 
     @Test
     public void test_string_column_string() {
         assertEquals(ImmutableList.of(
-                new TemplateComponent(false, "template"),
-                new TemplateComponent(true, "fish"),
-                new TemplateComponent(false, "carp")),
+                new TemplateComponent("template"),
+                new TemplateComponent(0, "fish"),
+                new TemplateComponent("carp")),
                 factory.getComponents("template{fish}carp"));
     }
 
@@ -94,25 +94,25 @@ public class TemplateComponentTest {
 
     @Test
     public void test_simple_string_with_escape_backslash() {
-        assertEquals(ImmutableList.of(new TemplateComponent(false, "temp\\late")),
+        assertEquals(ImmutableList.of(new TemplateComponent("temp\\late")),
                 factory.getComponents("temp\\\\late"));
     }
 
     @Test
     public void test_simple_string_with_escape_backslash_and_other_escape() {
-        assertEquals(ImmutableList.of(new TemplateComponent(false, "temp\\\\nlate")),
+        assertEquals(ImmutableList.of(new TemplateComponent("temp\\\\nlate")),
                 factory.getComponents("temp\\\\\\nlate"));
     }
 
     @Test
     public void test_simple_string_with_escape_opening_bracket() {
-        assertEquals(ImmutableList.of(new TemplateComponent(false, "temp{late")),
+        assertEquals(ImmutableList.of(new TemplateComponent("temp{late")),
                 factory.getComponents("temp\\{late"));
     }
 
     @Test
     public void test_simple_string_with_escape_closing_bracket() {
-        assertEquals(ImmutableList.of(new TemplateComponent(false, "temp}late")),
+        assertEquals(ImmutableList.of(new TemplateComponent("temp}late")),
                 factory.getComponents("temp\\}late"));
     }
 }

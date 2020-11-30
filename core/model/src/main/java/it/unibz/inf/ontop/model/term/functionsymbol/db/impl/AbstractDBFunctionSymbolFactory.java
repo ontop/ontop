@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -421,13 +422,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public BnodeStringTemplateFunctionSymbol getFreshBnodeStringTemplateFunctionSymbol(int arity) {
-        ImmutableList.Builder<TemplateComponent> builder = ImmutableList.builder();
-        builder.add(TemplateComponent.ofSeparator(BNODE_PREFIX + counter.incrementAndGet()));
-        for (int i = 0; i < arity; i++) {
-            builder.add(TemplateComponent.ofColumn());
-            if (i < arity - 1)
-                builder.add(TemplateComponent.ofSeparator("/"));
-        }
+        if (arity <= 0)
+            throw new IllegalArgumentException("Non-positive BNode arity");
+
+        Template.Builder builder = Template.builder();
+        builder.addSeparator(BNODE_PREFIX + counter.incrementAndGet());
+        for (int i = 0; i < arity - 1; i++) // except the last one
+            builder.addColumn().addSeparator("/");
+        builder.addColumn();
         return getBnodeStringTemplateFunctionSymbol(builder.build());
     }
 

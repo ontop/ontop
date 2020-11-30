@@ -1,14 +1,20 @@
 package it.unibz.inf.ontop.model.template;
 
-import com.google.common.collect.ImmutableList;
-
 public class TemplateComponent {
     private final boolean isColumnNameReference;
     private final String component;
+    private final int index;
 
-    public TemplateComponent(boolean isColumnNameReference, String component) {
-        this.isColumnNameReference = isColumnNameReference;
+    public TemplateComponent(String component) {
+        this.isColumnNameReference = false;
         this.component = component;
+        this.index = -1;
+    }
+
+    public TemplateComponent(int index, String component) {
+        this.isColumnNameReference = true;
+        this.component = component;
+        this.index = index;
     }
 
     public boolean isColumnNameReference() {
@@ -19,35 +25,18 @@ public class TemplateComponent {
         return component;
     }
 
-    public static TemplateComponent ofColumn(String s) {
-        return new TemplateComponent(true, s);
+    public int getIndex() {
+        return index;
     }
-    public static TemplateComponent ofColumn() {
-        return new TemplateComponent(true, "");
+    
+    public static TemplateComponent ofColumn(int index, String s) {
+        return new TemplateComponent(index, s);
+    }
+    public static TemplateComponent ofColumn(int index) {
+        return new TemplateComponent(index, "");
     }
     public static TemplateComponent ofSeparator(String s) {
-        return new TemplateComponent(false, s);
-    }
-
-    public static ImmutableList<TemplateComponent> unaryTemplate(String prefix) {
-        return ImmutableList.of(
-                TemplateComponent.ofSeparator(prefix),
-                TemplateComponent.ofColumn());
-    }
-
-    public static ImmutableList<TemplateComponent> binaryTemplate(String prefix) {
-       return ImmutableList.of(
-                TemplateComponent.ofSeparator(prefix),
-                TemplateComponent.ofColumn(),
-                TemplateComponent.ofSeparator("/"),
-                TemplateComponent.ofColumn());
-    }
-
-    public static ImmutableList<TemplateComponent> binaryTemplateNoSeparator(String prefix) {
-        return ImmutableList.of(
-                TemplateComponent.ofSeparator(prefix),
-                TemplateComponent.ofColumn(),
-                TemplateComponent.ofColumn());
+        return new TemplateComponent(s);
     }
 
     @Override

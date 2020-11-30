@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
@@ -39,8 +40,8 @@ public class ExpressionEvaluatorTest {
     private final Variable C = TERM_FACTORY.getVariable("c");
     private final Variable D = TERM_FACTORY.getVariable("d");
 
-    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = TemplateComponent.unaryTemplate("http://example.org/stock/");
-    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_2 = TemplateComponent.binaryTemplate("http://example.org/something/");
+    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = Template.of("http://example.org/stock/", 0);
+    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_2 = Template.of("http://example.org/something/", 0, "/", 1);
 
 
     private ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));

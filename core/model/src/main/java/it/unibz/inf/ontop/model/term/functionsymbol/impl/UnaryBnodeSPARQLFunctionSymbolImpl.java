@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -21,10 +22,7 @@ public class UnaryBnodeSPARQLFunctionSymbolImpl extends AbstractBnodeSPARQLFunct
 
         return termFactory.getImmutableFunctionalTerm(
                 termFactory.getDBFunctionSymbolFactory().getBnodeStringTemplateFunctionSymbol(
-                        ImmutableList.of(
-                            TemplateComponent.ofColumn(),
-                            TemplateComponent.ofSeparator("/"),
-                            TemplateComponent.ofColumn())),
+                        Template.builder().addColumn().addSeparator("/").addColumn().build()),
                 subLexicalTerm, termFactory.getDBRowUniqueStr());
     }
 }
