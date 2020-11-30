@@ -29,7 +29,7 @@ public class TemplateComponentTest {
     public void test_single_string_column() {
         assertEquals(ImmutableList.of(
                 new TemplateComponent( "fish"),
-                new TemplateComponent(1, "template")),
+                new TemplateComponent(0, "template")),
                 factory.getComponents("fish{template}"));
     }
 
