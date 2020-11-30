@@ -21,13 +21,12 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.commons.rdf.api.IRI;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
@@ -184,8 +183,9 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
         return null;
     }
 
+    //TODO implement a closable iterator
     @Override
-    public Iterator<Statement> iterator() {
+    public CloseableIteration iterator() {
         throw new UnsupportedOperationException("iterator");
     }
 

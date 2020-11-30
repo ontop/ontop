@@ -2,7 +2,10 @@ package it.unibz.inf.ontop.answering.resultset;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OntopConnectionIterationException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
+import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
+
 import org.apache.commons.rdf.api.IRI;
 
 /**
@@ -11,7 +14,7 @@ import org.apache.commons.rdf.api.IRI;
  * Does not allocate resources (e.g. connection) before hasNext() is called.
  *
  */
-public interface MaterializedGraphResultSet extends GraphResultSet<OntopQueryAnsweringException> {
+public interface MaterializedGraphResultSet extends GraphResultSet<OntopQueryAnsweringException, OntopConnectionIterationException> {
 
     /**
      * Number of RDF triples that have been materialized.

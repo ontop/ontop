@@ -12,13 +12,13 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -228,7 +228,7 @@ public abstract class QuestStatement implements OntopStatement {
 					describeResultSet = set;
 				} else if (set != null) {
 					// 2nd and manyth times execute, but collect result into one object
-					Iterator<Statement> iterator = set.iterator();
+					CloseableIteration<Statement, OntopConnectionIterationException> iterator = set.iterator();
 					while (iterator.hasNext()){
 						describeResultSet.addNewResult(iterator.next());
 					}
@@ -244,7 +244,7 @@ public abstract class QuestStatement implements OntopStatement {
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;
 				} else if (set != null) {
-					Iterator<Statement> iterator = set.iterator();
+					CloseableIteration<Statement, OntopConnectionIterationException> iterator = set.iterator();
 					while (iterator.hasNext()){
 						describeResultSet.addNewResult(iterator.next());
 					}
@@ -372,7 +372,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
-			return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
+		return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(ImmutableMultimap.of()));
 	}
 
 }

@@ -269,7 +269,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         //Checks whether the repository contains the specified statement,
         //optionally in the specified contexts.
         return hasStatement(st.getSubject(), st.getPredicate(), st
-                                                                        .getObject(), includeInferred, contexts);
+                .getObject(), includeInferred, contexts);
     }
 
     @Override

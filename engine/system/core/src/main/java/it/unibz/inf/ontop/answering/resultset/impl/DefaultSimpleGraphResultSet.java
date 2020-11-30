@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
 import java.security.SecureRandom;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
+import it.unibz.inf.ontop.exception.OntopConnectionIterationException;
+import org.eclipse.rdf4j.common.iteration.AbstractCloseableIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -59,19 +61,19 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 			iterator =
 					new StatementIterator(
 							tupleResultSet, constructTemplate, termFactory, rdfFactory, preloadStatements);
-		} catch (OntopResultConversionException e) {
+		} catch (Exception e) {
 			throw new SailException(e.getCause());
 		}
 	}
 
 	@Override
 	public boolean hasNext() {
-		return iterator().hasNext();
+		return iterator.hasNext();
 	}
 
 	@Override
 	public RDFFact next() {
-		Statement statement = iterator().next();
+		Statement statement = iterator.next();
 		ObjectConstant subjectConstant = null;
 		IRIConstant propertyConstant;
 		RDFConstant objectConstant;
@@ -93,13 +95,13 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	}
 
 	@Override
-	public Iterator<Statement> iterator() {
+	public CloseableIteration<Statement, OntopConnectionIterationException> iterator() {
 		return iterator;
 	}
 
 	@Override
-	public void close() throws OntopConnectionException {
-		// doesn't do anything, kept for conformance
+	public void close() {
+		iterator.close();
 	}
 
 	/**
@@ -123,7 +125,11 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		iterator.sqlStatement = sqlStatement;
 	}
 
-	private static class StatementIterator implements Iterator<Statement> {
+	/**
+	 * RDF4J's closable statement object iterator that converts from TupleResultSet's BindingSet to Statement objects,
+	 * with an option to load entire result set or stream it.
+	 */
+	private static class StatementIterator extends AbstractCloseableIteration<Statement, OntopConnectionIterationException> {
 		private final TupleResultSet resultSet;
 		private final ConstructTemplate constructTemplate;
 		private final TermFactory termFactory;
@@ -134,14 +140,14 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		private final SecureRandom random;
 		private AutoCloseable sqlStatement;
 		private final byte[] salt;
-		private final boolean preloadStatements;
+		private final boolean enablePreloadStatements;
 
 		private StatementIterator(
 				TupleResultSet resultSet,
 				ConstructTemplate constructTemplate,
 				TermFactory termFactory,
 				org.apache.commons.rdf.api.RDF rdfFactory,
-				boolean preloadStatements)
+				boolean enablePreloadStatements)
 				throws OntopConnectionException, OntopResultConversionException {
 			this.resultSet = resultSet;
 			this.constructTemplate = constructTemplate;
@@ -152,75 +158,107 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 			this.valueFactory = SimpleValueFactory.getInstance();
 			this.random = new SecureRandom();
 			this.salt = initByteSalt();
-			this.preloadStatements = preloadStatements;
-			if (preloadStatements) {
-				while (resultSet.hasNext()) {
-					addStatementsFromSet(resultSet.next());
-				}
-				if (sqlStatement != null) {
-					try {
-						sqlStatement.close();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				resultSet.close();
+			this.enablePreloadStatements = enablePreloadStatements;
+			if (enablePreloadStatements) {
+				preloadStatements();
 			}
 		}
 
+		/**
+		 * Checks if there are more statements in the result set (if not preloaded) and the statement buffer,
+		 * and if not closes the connection automatically.
+		 *
+		 * @return whether there are any more statements left in the iterator
+		 */
 		@Override
 		public boolean hasNext() {
-			try {
-				if (statementBuffer.isEmpty() && resultSetHasNext()) {
-					addStatementsFromSet(resultSet.next());
-				}
-				boolean hasNext = !statementBuffer.isEmpty();
-				if (!hasNext && !preloadStatements) {
-					resultSet.close();
-					if (sqlStatement != null) {
-						sqlStatement.close();
-					}
-				}
-				return hasNext;
-			} catch (Exception e) {
-				throw new SailException(e.getMessage());
+			if (statementBuffer.isEmpty() && resultSetHasNext()) {
+				addStatementFromResultSet();
 			}
+			boolean hasNext = !statementBuffer.isEmpty();
+			if (!hasNext && !enablePreloadStatements) {
+				handleClose();
+			}
+			return hasNext;
 		}
 
+		/**
+		 * Fetches next Statement from buffer, and if there aren't any
+		 * closes the connection (unless statements are preloaded)
+		 *
+		 * @return next statement in the buffer
+		 */
 		@Override
 		public Statement next() {
+			if (statementBuffer.isEmpty() && !enablePreloadStatements) {
+				handleClose();
+			}
+			return statementBuffer.remove();
+		}
+
+		/**
+		 * Removes next Statement from buffer, and if there aren't any
+		 * closes the connection (unless statements are preloaded)
+		 *
+		 * @return next statement in the buffer
+		 */
+		@Override
+		public void remove() {
+			next();
+		}
+
+		/**
+		 * Closes connection to underlying result set.
+		 */
+		@Override
+		public void handleClose() {
 			try {
-				if (statementBuffer.isEmpty() && !preloadStatements) {
-					resultSet.close();
+				if (resultSet.isConnectionAlive()) {
+					// closing sql statement, automatically closes the result set as well
 					if (sqlStatement != null) {
 						sqlStatement.close();
+          			} else {
+            			resultSet.close();
 					}
 				}
-				return statementBuffer.remove();
 			} catch (Exception e) {
-				throw new SailException(e.getMessage());
+				throw new OntopConnectionIterationException(e);
 			}
 		}
 
-		private void addStatementsFromSet(OntopBindingSet bindingSet)
-				throws OntopResultConversionException {
-			for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
-				int size = peList.getElements().size();
-				for (int i = 0; i < size / 3; i++) {
-					ObjectConstant subjectConstant =
-							(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
-					IRIConstant propertyConstant =
-							(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
-					RDFConstant objectConstant =
-							(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
-					if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
-						addStatement(subjectConstant, propertyConstant, objectConstant);
+		/**
+		 * Adds result set's next binding set as a statement to the buffer
+		 */
+		private void addStatementFromResultSet() {
+			try {
+			 	OntopBindingSet bindingSet = resultSet.next();
+				for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
+					int size = peList.getElements().size();
+					for (int i = 0; i < size / 3; i++) {
+						ObjectConstant subjectConstant =
+								(ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
+						IRIConstant propertyConstant =
+								(IRIConstant) getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
+						RDFConstant objectConstant =
+								(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
+						if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
+							addStatementToBuffer(subjectConstant, propertyConstant, objectConstant);
+						}
 					}
 				}
+			} catch (OntopResultConversionException | OntopConnectionException e) {
+				throw new OntopConnectionIterationException(e);
 			}
 		}
 
-		private void addStatement(
+		/**
+		 * Adds a new triple to the statement buffer based on input params
+		 *
+		 * @param subjectConstant is the triple subject
+		 * @param propertyConstant is the triple property
+		 * @param objectConstant is the triple object
+		 */
+		private void addStatementToBuffer(
 				ObjectConstant subjectConstant, IRIConstant propertyConstant, RDFConstant objectConstant) {
 			statementBuffer.add(
 					valueFactory.createStatement(
@@ -289,17 +327,37 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 			}
 		}
 
+		/**
+		 * Preloads entire result set to the statement buffer, keeping it in memory and
+		 * closing the underlying tuple result set connection.
+		 *
+		 * @throws OntopConnectionException
+		 * @throws OntopResultConversionException
+		 */
+		private void preloadStatements() throws OntopConnectionException, OntopResultConversionException {
+			while (resultSet.hasNext()) {
+				addStatementFromResultSet();
+			}
+			handleClose();
+		}
+
+		/**
+		 * Checks whether the result set can return any more binding sets.
+		 *
+		 * @return whether there are any more binding sets left in the result set
+		 */
 		private boolean resultSetHasNext() {
 			try {
-				if (preloadStatements) {
+				if (enablePreloadStatements) {
 					return false;
 				}
 				if (!resultSet.isConnectionAlive()) {
 					return false;
 				}
 				return resultSet.hasNext();
+
 			} catch (OntopConnectionException | OntopResultConversionException e) {
-				throw new SailException(e.getCause());
+				throw new OntopConnectionIterationException(e);
 			}
 		}
 	}
