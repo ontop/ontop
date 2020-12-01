@@ -39,7 +39,7 @@ public class ApproximateSelectQueryAttributeExtractor {
     private static final Pattern AS = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
     private static final Pattern BRACKETS = Pattern.compile("\\([^()]*\\)");
     private static final Pattern COL_SEP = Pattern.compile(",");
-    private static final Pattern SELECT = Pattern.compile("\\A[\\s]*SELECT\\s", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SELECT = Pattern.compile("\\A[\\s]*SELECT\\s+(DISTINCT\\s)?", Pattern.CASE_INSENSITIVE);
     private static final Pattern FROM = Pattern.compile("\\sFROM\\s", Pattern.CASE_INSENSITIVE);
 
     public ApproximateSelectQueryAttributeExtractor(QuotedIDFactory idfac) {
@@ -53,7 +53,7 @@ public class ApproximateSelectQueryAttributeExtractor {
         Matcher startMatcher = SELECT.matcher(sql);
         if (!startMatcher.find())
             throw new InvalidSelectQueryException("Error parsing SQL query: Couldn't find SELECT clause", sql);
-        int start = startMatcher.start() + "select".length();
+        int start = startMatcher.end();
 
         Matcher endMatcher = FROM.matcher(sql);
         if (!endMatcher.find())

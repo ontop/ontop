@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
@@ -51,8 +52,7 @@ public class SelectQueryAttributeExtractorTest {
                 "     ALESFO001.PRECIOFINAL\n"+
                 "\t             \n"+
                 "FROM ALMAES001 "+
-                "LEFT JOIN ALESFO001 ON ALMAES001.IDART = ALESFO001.IDART" +
-                ""
+                "LEFT JOIN ALESFO001 ON ALMAES001.IDART = ALESFO001.IDART"
         );
         assertEquals(ImmutableList.of(
                 idfac.createAttributeID("IDART"),
@@ -66,4 +66,43 @@ public class SelectQueryAttributeExtractorTest {
                 idfac.createAttributeID("STCMIN"),
                 idfac.createAttributeID("PRECIOFINAL")), res);
     }
+
+    // issue 366
+    @Test
+    public void test_approximation_distinct() throws InvalidSelectQueryException {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        QuotedIDFactory idfac = builder.getQuotedIDFactory();
+
+        ApproximateSelectQueryAttributeExtractor aex = new ApproximateSelectQueryAttributeExtractor(idfac);
+
+        ImmutableList<QuotedID> res = aex.getAttributes("select \n distinct \n rotorID from\n" +
+                "(select zpolrotorid as rotorID from LinkData\n" +
+                "union\n" +
+                "select abomSerialNumberMale as rotorID from AssemblyData\n" +
+                "union\n" +
+                "select abomSerialNumberFemale as rotorID from AssemblyData) as R"
+        );
+        assertEquals(ImmutableList.of(
+                idfac.createAttributeID("rotorID")), res);
+    }
+
+    @Test(expected = it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException.class) // issue 366
+    public void test_distinct_union() throws Exception {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        builder.createDatabaseRelation("LinkData", "zpolrotorid", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
+        builder.createDatabaseRelation("AssemblyData",
+                "abomSerialNumberMale", builder.getDBTypeFactory().getDBLargeIntegerType(), false,
+                "abomSerialNumberFemale", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
+        MetadataLookup metadataLookup = builder.build();
+        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
+        DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
+        RAExpressionAttributes r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select \n distinct \n rotorID from\n" +
+                "(select zpolrotorid as rotorID from LinkData\n" +
+                "union\n" +
+                "select abomSerialNumberMale as rotorID from AssemblyData\n" +
+                "union\n" +
+                "select abomSerialNumberFemale as rotorID from AssemblyData) as R"));
+    }
+
+
 }

@@ -51,12 +51,13 @@ public class R2RMLMappingParser implements SQLMappingParser {
         try {
             LinkedHashModel rdf4jGraph = new LinkedHashModel();
             RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
-            InputStream in = new FileInputStream(mappingFile);
-            URL documentUrl = new URL("file://" + mappingFile);
-            StatementCollector collector = new StatementCollector(rdf4jGraph);
-            parser.setRDFHandler(collector);
-            parser.parse(in, documentUrl.toString());
-            return parse(new RDF4J().asGraph(rdf4jGraph));
+            try (InputStream in = new FileInputStream(mappingFile)) {
+                URL documentUrl = new URL("file://" + mappingFile);
+                StatementCollector collector = new StatementCollector(rdf4jGraph);
+                parser.setRDFHandler(collector);
+                parser.parse(in, documentUrl.toString());
+                return parse(new RDF4J().asGraph(rdf4jGraph));
+            }
         }
         catch (IOException e) {
             throw new MappingIOException(e);

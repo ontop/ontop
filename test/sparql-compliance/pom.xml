@@ -37,40 +37,9 @@
             <artifactId>owlapi-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <!-- scope>test</scope -->
-        </dependency>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>db2jcc4.jar</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
@@ -95,21 +64,7 @@
             <artifactId>rdf4j-queryparser-serql</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>bolzano-nexus-public</id>
-            <url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>

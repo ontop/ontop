@@ -73,12 +73,9 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
         Properties properties = new Properties();
-        InputStream in = localClass.getResourceAsStream(fileName);
-        if (in == null)
-            throw new RuntimeException("Configuration " + fileName + " not found.");
-
-        try {
-
+        try (InputStream in = localClass.getResourceAsStream(fileName)) {
+            if (in == null)
+                throw new RuntimeException("Configuration " + fileName + " not found.");
             properties.load(in);
         } catch (IOException e1) {
             LOG.error("Error reading default OBDA properties.");
