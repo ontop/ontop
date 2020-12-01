@@ -21,7 +21,12 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 
 import java.util.Optional;
 
@@ -32,6 +37,10 @@ import java.util.Optional;
  *
  */
 
+//@JsonDeserialize(as = ImmutableMetadataImpl.class)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@name")
+//@JsonSubTypes({@JsonSubTypes.Type(value = ImmutableMetadataImpl.class, name = "relation")})
+//@JsonTypeName("type")
 public interface DatabaseRelationDefinition extends RelationDefinition {
 
 	RelationID getID();
