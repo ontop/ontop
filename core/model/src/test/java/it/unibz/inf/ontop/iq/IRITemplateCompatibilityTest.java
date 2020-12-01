@@ -67,7 +67,6 @@ public class IRITemplateCompatibilityTest {
                 Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2));
     }
 
-    @Ignore
     @Test
     public void test8splitbug() {
         assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("//").build(), 1,
@@ -102,6 +101,18 @@ public class IRITemplateCompatibilityTest {
     public void test13() {
         assertFalse(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("A").build(), 2,
                 Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("B").build(), 2));
+    }
+
+    @Test
+    public void test14() {
+        assertFalse(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("A").build(), 2,
+                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("BAB").build(), 2));
+    }
+
+    @Test
+    public void test15() {
+        assertTrue(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("AB").build(), 2,
+                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("BAB").build(), 2));
     }
 
     private boolean areCompatible(ImmutableList<TemplateComponent> template1, int arity1, ImmutableList<TemplateComponent> template2, int arity2) {

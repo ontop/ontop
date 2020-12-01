@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -24,7 +23,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSymbolImpl
         implements ObjectStringTemplateFunctionSymbol {
@@ -214,19 +212,23 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
         String prefix = extractPrefix(template);
         String otherPrefix = extractPrefix(otherTemplate);
-
-        int minLength = Math.min(prefix.length(), otherPrefix.length());
-
+        int minPrefixLength = Math.min(prefix.length(), otherPrefix.length());
         // Prefix comparison
-        if (!prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength)))
+        if (!prefix.substring(0, minPrefixLength).equals(otherPrefix.substring(0, minPrefixLength)))
+            return false;
+
+        String suffix = extractSuffix(template);
+        String otherSuffix = extractSuffix(otherTemplate);
+        int minSuffixLength = Math.min(suffix.length(), otherSuffix.length());
+        if (!suffix.substring(suffix.length() - minSuffixLength).equals(otherSuffix.substring(otherSuffix.length() - minSuffixLength)))
             return false;
 
         // Checks that both templates use the same safe separators in the same order
         if (!extractOnlyAlwaysSafeSeparators(otherTemplate).equals(onlyAlwaysSafeSeparators))
             return false;
 
-        ImmutableList<String> fragments = splitTemplate(template.substring(minLength));
-        ImmutableList<String> otherFragments = splitTemplate(otherTemplate.substring(minLength));
+        ImmutableList<String> fragments = splitOnSafeSeparators(template.substring(minPrefixLength, template.length() - minSuffixLength));
+        ImmutableList<String> otherFragments = splitOnSafeSeparators(otherTemplate.substring(minPrefixLength, otherTemplate.length() - minSuffixLength));
 
         if (fragments.size() != otherFragments.size())
             throw new MinorOntopInternalBugException("Internal inconsistency detected while splitting IRI templates");
@@ -235,15 +237,24 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 .allMatch(i -> matchPatterns(fragments.get(i), otherFragments.get(i)));
     }
 
-    private static ImmutableList<String> splitTemplate(String remainingTemplate) {
-        return SOME_SAFE_SEPARATORS.stream()
-                .reduce(Stream.of(remainingTemplate),
-                        (st, c) -> st.flatMap(s -> Arrays.stream(s.split(Pattern.quote(c.toString())))),
-                        (s1, s2) -> {
-                            throw new MinorOntopInternalBugException("");
-                        })
-                .collect(ImmutableCollectors.toList());
+    private static ImmutableList<String> splitOnSafeSeparators(String s) {
+        ImmutableList.Builder<String> builder = ImmutableList.builder();
+        int start = 0, end;
+        while ((end = firstIndexOfSafeSeparator(s, start)) != -1) {
+            builder.add(s.substring(start, end));
+            start = end + 1;
+        }
+        builder.add(s.substring(start));
+        return builder.build();
     }
+
+    private static int firstIndexOfSafeSeparator(String s, int start) {
+        for (int i = start; i < s.length(); i++)
+            if (SOME_SAFE_SEPARATORS.contains(s.charAt(i)))
+                return i;
+        return -1;
+    }
+
     private static boolean matchPatterns(String subTemplate1, String subTemplate2) {
         return subTemplate1.equals(subTemplate2)
                 || subTemplate1.matches(extractPattern(subTemplate2))
@@ -290,6 +301,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         int index = template.indexOf("{");
         return index >= 0
                 ? template.substring(0, index)
+                : template;
+    }
+
+    private static String extractSuffix(String template) {
+        int index = template.lastIndexOf("}");
+        return index >= 0
+                ? template.substring(index + 1)
                 : template;
     }
 
