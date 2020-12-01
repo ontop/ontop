@@ -86,6 +86,24 @@ public class IRITemplateCompatibilityTest {
                 Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address+").addColumn().build(), 2));
     }
 
+    @Test
+    public void test11() {
+        assertTrue(areCompatible(Template.builder().addColumn().addColumn().build(), 2,
+                Template.builder().addColumn().build(), 1));
+    }
+
+    @Test
+    public void test12() {
+        assertFalse(areCompatible(Template.builder().addColumn().addSeparator("/").addColumn().build(), 2,
+                Template.builder().addColumn().build(), 1));
+    }
+
+    @Test
+    public void test13() {
+        assertFalse(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("A").build(), 2,
+                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("B").build(), 2));
+    }
+
     private boolean areCompatible(ImmutableList<TemplateComponent> template1, int arity1, ImmutableList<TemplateComponent> template2, int arity2) {
         ImmutableFunctionalTerm term1 = createIRIFunctionalTerm(template1, arity1, "x");
         ImmutableFunctionalTerm term2 = createIRIFunctionalTerm(template2, arity2, "y");

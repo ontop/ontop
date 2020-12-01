@@ -42,11 +42,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
      */
     protected static final ImmutableSet<Character> SOME_SAFE_SEPARATORS = ImmutableSet.of(
         '/','!','$','&','\'', '(', ')','*','+',',',';', '=', '#');
-    protected static final String NOT_A_SAFE_SEPARATOR_REGEX = "[^" +
+    protected static final String SAFE_SEPARATOR_REGEX_PART =
             SOME_SAFE_SEPARATORS.stream()
                     .map(Object::toString)
                     .map(ObjectStringTemplateFunctionSymbolImpl::makeRegexSafe)
-                    .collect(Collectors.joining()) + "]*";
+                    .collect(Collectors.joining());
+
+    protected static final String NOT_A_SAFE_SEPARATOR_REGEX = "[^" + SAFE_SEPARATOR_REGEX_PART + "]*";
 
     protected static final String PLACEHOLDER = "{}";
 
@@ -55,7 +57,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.template = extractStringTemplate(components);
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.components = components;
-        this.pattern = extractPattern(this.template, true);
+        this.pattern = extractPattern(components);
         this.isInjective = isInjective();
         this.onlyAlwaysSafeSeparators = extractOnlyAlwaysSafeSeparators(template);
     }
@@ -70,11 +72,17 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (arity < 2)
             return true;
 
-        return components.stream()
+        // two consecutive columns
+        for (int i = 1; i < components.size(); i++)
+            if (components.get(i - 1).isColumnNameReference()
+                    && components.get(i).isColumnNameReference())
+                return false;
+
+        // the prefix and the suffix of the template do not matter
+        return components.subList(1, components.size() - 1).stream()
                 .filter(c -> !c.isColumnNameReference())
                 .map(TemplateComponent::getComponent)
-                .allMatch(interm -> SOME_SAFE_SEPARATORS.stream()
-                        .anyMatch(sep -> interm.indexOf(sep) >= 0));
+                .allMatch(s -> s.matches("[" + SAFE_SEPARATOR_REGEX_PART + "]"));
     }
 
     public static String extractStringTemplate(ImmutableList<TemplateComponent> template) {
@@ -126,7 +134,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
+    private static String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
         return Optional.of(constant)
                 .map(termFactory::getR2RMLIRISafeEncodeFunctionalTerm)
                 .map(t -> t.simplify(variableNullability))
@@ -209,9 +217,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
         int minLength = Math.min(prefix.length(), otherPrefix.length());
 
-        /*
-         * Prefix comparison
-         */
+        // Prefix comparison
         if (!prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength)))
             return false;
 
@@ -240,23 +246,27 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
     private static boolean matchPatterns(String subTemplate1, String subTemplate2) {
         return subTemplate1.equals(subTemplate2)
-                || matchPattern(subTemplate1, subTemplate2)
-                || matchPattern(subTemplate2, subTemplate1);
+                || subTemplate1.matches(extractPattern(subTemplate2))
+                || subTemplate2.matches(extractPattern(subTemplate1));
     }
 
-    private static boolean matchPattern(String subTemplate1, String subTemplate2) {
-        return extractPattern(subTemplate1, false).matcher(subTemplate2).find();
-    }
-
-    protected static Pattern extractPattern(String template, boolean surroundWithParentheses) {
+    protected static String extractPattern(String template) {
         String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
         String safeTemplate = makeRegexSafe(template
                 .replace(PLACEHOLDER, tmpPlaceholder));
 
-        String replacement = surroundWithParentheses ? "(" + NOT_A_SAFE_SEPARATOR_REGEX + ")" : NOT_A_SAFE_SEPARATOR_REGEX;
-
         String patternString = safeTemplate
-                .replace(tmpPlaceholder, replacement);
+                .replace(tmpPlaceholder, NOT_A_SAFE_SEPARATOR_REGEX);
+
+        return "^" + patternString + "$";
+    }
+
+    protected static Pattern extractPattern(ImmutableList<TemplateComponent> components) {
+        String patternString = components.stream()
+                .map(c -> c.isColumnNameReference()
+                    ? "(" + NOT_A_SAFE_SEPARATOR_REGEX + ")"
+                    : makeRegexSafe(c.getComponent()))
+                .collect(Collectors.joining());
 
         return Pattern.compile("^" + patternString + "$");
     }
