@@ -54,7 +54,7 @@ public class TurtleSyntaxParserTest {
 	private final TargetQueryParser parser;
 
 	public TurtleSyntaxParserTest() {
-		PrefixManager prefixManager = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of(
+		PrefixManager prefixManager = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#",
 				"ex:", "http://www.example.org/"));
 		parser = TARGET_QUERY_PARSER_FACTORY.createParser(prefixManager);

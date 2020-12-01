@@ -116,12 +116,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g) {
-        return substitutionFactory.getVar2VarSubstitution(composeRenaming(g)
-                .collect(ImmutableCollectors.toMap()));
-    }
-
-    @Override
     public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
         if (term instanceof Variable)
             return applyToVariable((Variable)term);

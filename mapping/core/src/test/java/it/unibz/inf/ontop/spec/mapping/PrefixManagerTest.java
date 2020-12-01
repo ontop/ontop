@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.spec.mapping;
  * #L%
  */
 
-import java.util.*;
-
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.injection.OntopOBDAConfiguration;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.SPECIFICATION_FACTORY;
 import static org.junit.Assert.assertEquals;
 
 
@@ -64,7 +65,7 @@ public class PrefixManagerTest {
 
 	@Test
 	public void testPrefix1() {
-		PrefixManager pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of(
+		PrefixManager pm = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#",
 				"obdap:", "http://obda.org/predicates#"));
 
@@ -77,7 +78,7 @@ public class PrefixManagerTest {
 
 	@Test
 	public void testPrefix1a() {
-		PrefixManager pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of(
+		PrefixManager pm = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#",
 				"onto:", "http://obda.org/onto.owl#"));
 
@@ -93,7 +94,7 @@ public class PrefixManagerTest {
 	 */
 	@Test
 	public void testPrefixInsideURI() {
-		PrefixManager pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of(
+		PrefixManager pm = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#",
 				"obdap:", "http://obda.org/predicates#"));
 
@@ -103,7 +104,7 @@ public class PrefixManagerTest {
 
 	@Test
 	public void testPrefixInsideURI2() {
-		PrefixManager pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of(
+		PrefixManager pm = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://example.com/resource/",
 				"movie:", "http://www.movieontology.org/2009/10/01/movieontology.owl/"));
 

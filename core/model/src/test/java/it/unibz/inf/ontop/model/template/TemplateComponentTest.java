@@ -1,18 +1,16 @@
-package it.unibz.inf.ontop.spec.mapping.parser;
+package it.unibz.inf.ontop.model.template;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
-import it.unibz.inf.ontop.model.template.TemplateFactory;
+import it.unibz.inf.ontop.OntopModelTestingTools;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
 import static org.junit.Assert.*;
 
 public class TemplateComponentTest {
 
-    TemplateFactory factory = new IRITemplateFactory(TERM_FACTORY);
+    private final TemplateFactory factory = new IRITemplateFactory(OntopModelTestingTools.TERM_FACTORY);
 
     @Test
     public void test_equality() {

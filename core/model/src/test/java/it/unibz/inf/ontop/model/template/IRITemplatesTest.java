@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping;
+package it.unibz.inf.ontop.model.template;
 
 /*
  * #%L
@@ -21,23 +21,19 @@ package it.unibz.inf.ontop.spec.mapping;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.utils.ObjectTemplates;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
 import static org.junit.Assert.assertEquals;
 
-public class URITemplatesTest {
+public class IRITemplatesTest {
 
-    private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
-	private static final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(TERM_FACTORY);
+	private final IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(TERM_FACTORY);
 
     @Test
 	public void testFormat(){
