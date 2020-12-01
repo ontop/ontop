@@ -22,10 +22,9 @@ package it.unibz.inf.ontop.model.template;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.ObjectTemplateFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.utils.ObjectTemplates;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
@@ -37,15 +36,15 @@ public class IRITemplatesTest {
 
     @Test
 	public void testFormat(){
-		Assert.assertEquals("http://example.org/A/1", ObjectTemplates.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
+		assertEquals("http://example.org/A/1", ObjectTemplateFactory.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
 		
-		assertEquals("http://example.org/A", ObjectTemplates.format("http://example.org/{}", ImmutableList.of("A")));
+		assertEquals("http://example.org/A", ObjectTemplateFactory.format("http://example.org/{}", ImmutableList.of("A")));
 		
-		assertEquals("http://example.org/A/1", ObjectTemplates.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
+		assertEquals("http://example.org/A/1", ObjectTemplateFactory.format("http://example.org/{}/{}", ImmutableList.of("A", 1)));
 		
-		assertEquals("http://example.org/A", ObjectTemplates.format("http://example.org/{}", ImmutableList.of("A")));
+		assertEquals("http://example.org/A", ObjectTemplateFactory.format("http://example.org/{}", ImmutableList.of("A")));
 
-        assertEquals("http://example.org/A", ObjectTemplates.format("{}", ImmutableList.of("http://example.org/A")));
+        assertEquals("http://example.org/A", ObjectTemplateFactory.format("{}", ImmutableList.of("http://example.org/A")));
 	}
 
     @Test

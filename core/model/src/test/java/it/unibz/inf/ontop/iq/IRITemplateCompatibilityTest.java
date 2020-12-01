@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
@@ -64,6 +65,13 @@ public class IRITemplateCompatibilityTest {
     public void test8Same() {
         assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
                 Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2));
+    }
+
+    @Ignore
+    @Test
+    public void test8splitbug() {
+        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("//").build(), 1,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/ / ").addColumn().build(), 2));
     }
 
     @Test

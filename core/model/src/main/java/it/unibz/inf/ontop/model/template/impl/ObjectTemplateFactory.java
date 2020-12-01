@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.ObjectTemplates;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 public abstract class ObjectTemplateFactory extends AbstractTemplateFactory {
@@ -66,6 +66,39 @@ public abstract class ObjectTemplateFactory extends AbstractTemplateFactory {
                 .collect(ImmutableCollectors.toList());
 
         ObjectStringTemplateFunctionSymbol fs = (ObjectStringTemplateFunctionSymbol) functionalTerm.getFunctionSymbol();
-        return ObjectTemplates.format(fs.getTemplate(), varNames);
+        return format(fs.getTemplate(), varNames);
     }
+
+    private static final String PLACE_HOLDER = "{}";
+    private static final int PLACE_HOLDER_LENGTH = PLACE_HOLDER.length();
+
+    /**
+     * This method instantiates the input uri template by arguments
+     * <p>
+     * Example:
+     * <p>
+     * If {@code args = ["A", 1]}, then
+     * <p>
+     * {@code  URITemplates.format("http://example.org/{}/{}", args)}
+     * results {@code "http://example.org/A/1" }
+     */
+    public static String format(String iriOrBnodeTemplate, Collection<?> args) {
+        StringBuilder sb = new StringBuilder();
+        int beginIndex = 0;
+        for (Object arg : args) {
+            int endIndex = iriOrBnodeTemplate.indexOf(PLACE_HOLDER, beginIndex);
+            if (endIndex == -1)
+                throw new IllegalArgumentException("the number of place holders should be equal to the number of other terms.");
+
+            sb.append(iriOrBnodeTemplate.subSequence(beginIndex, endIndex)).append(arg);
+            beginIndex = endIndex + PLACE_HOLDER_LENGTH;
+        }
+        int endIndex = iriOrBnodeTemplate.indexOf(PLACE_HOLDER, beginIndex);
+        if (endIndex != -1)
+            throw new IllegalArgumentException("the number of place holders should be equal to the number of other terms.");
+
+        sb.append(iriOrBnodeTemplate.substring(beginIndex));
+        return sb.toString();
+    }
+
 }
