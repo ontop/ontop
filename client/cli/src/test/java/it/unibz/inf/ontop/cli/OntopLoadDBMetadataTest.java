@@ -1,9 +1,14 @@
 package it.unibz.inf.ontop.cli;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.*;
-//import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 import org.junit.Test;
@@ -18,17 +23,31 @@ public class OntopLoadDBMetadataTest {
 
     // Test file
     File dbMetadataFile = new File("src/test/resources/output/exampleBooks-metadata.json");
+
+    // DatabaseRelationDefinition error
     /*ImmutableMetadataImpl metadata = new ObjectMapper()
         .registerModule(new GuavaModule())
-        .readerFor(ImmutableMetadataImpl.class)
-        .readValue(dbMetadataFile);*/
-//    ObjectMapper metadata = JsonMapper.builder()
-//        .addModule(new GuavaModule())
-//        .build();
-    ImmutableMetadataImpl metadata = new ObjectMapper()
         .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
-        .readerFor(ImmutableMetadataImpl.class)
-        .readValue(dbMetadataFile);
+        .readerFor(ImmutableMetadataImpl[].class)
+        .readValue(dbMetadataFile);*/
+
+    // Other error
+    ObjectMapper objectMapper = new ObjectMapper()
+        .registerModule(new GuavaModule())
+        .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
+        .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+        //.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_CONCRETE_AND_ARRAYS);
+        //.enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
+    CollectionType javatype = objectMapper.getTypeFactory().constructCollectionType(List.class,ImmutableMetadataImpl.class);
+    List<ImmutableMetadataImpl> metadata = objectMapper.readValue(dbMetadataFile, javatype);
+
+    //CollectionType listType = obj.getTypeFactory().constructCollectionType(ArrayList.class, tClass);
+    //List<ImmutableMetadataImpl> metadata = obj.convertValue(dbMetadataFile, new TypeReference<List<ImmutableMetadataImpl>>(){});
+    //List<ImmutableMetadataImpl> metadata = obj.readValue(dbMetadataFile, typeFactory.constructCollectionType(List.class, SomeClass.class));
+
+
+        //.getTypeFactory.constructParametricType()
+        //, new TypeReference<List<ImmutableMetadataImpl>>()
 
     BasicDBParametersImpl metadata2 = new ObjectMapper()
         .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
@@ -41,8 +60,9 @@ public class OntopLoadDBMetadataTest {
     @Test // Check relation name
     public void TestLoadMetadataFromJSON() throws IOException {
 
-        //List<Relations> rel2 = metadata.getRelations();
-        String name = metadata.getName();
+        //ImmutableList rel = metadata.getAllRelations();
+        //String name = rel.get(0).toString();
+        String name = metadata.get(0).getName();
         assertEquals("\"tb_emerge_authors\"", name);
     }
 
