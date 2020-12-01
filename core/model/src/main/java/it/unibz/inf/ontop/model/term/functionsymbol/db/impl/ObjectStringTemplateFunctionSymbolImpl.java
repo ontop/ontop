@@ -32,6 +32,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final DBTermType lexicalType;
     private final Pattern pattern;
     private final boolean isInjective;
+    private final ImmutableList<TemplateComponent> components;
 
     /**
      * TODO: enrich this list (incomplete)
@@ -44,25 +45,26 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Nullable
     private ImmutableList<DBConstant> templateConstants;
 
-    protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<TemplateComponent> template, TypeFactory typeFactory) {
-        super(extractStringTemplate(template), createBaseTypes(template, typeFactory));
-        this.template = extractStringTemplate(template);
+    protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<TemplateComponent> components, TypeFactory typeFactory) {
+        super(extractStringTemplate(components), createBaseTypes(components, typeFactory));
+        this.template = extractStringTemplate(components);
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
+        this.components = components;
         this.pattern = extractPattern(this.template, true);
 
-        this.isInjective = isInjective(template);
+        this.isInjective = isInjective();
     }
 
     /**
      * Must not produce false positive
      */
-    protected boolean isInjective(ImmutableList<TemplateComponent> template) {
-        int arity = getArity(template);
+    protected boolean isInjective() {
+        int arity = getArity(components);
         if (arity < 2)
             return true;
 
-        return template.stream()
+        return components.stream()
                 .filter(c -> !c.isColumnNameReference())
                 .map(TemplateComponent::getComponent)
                 .allMatch(interm -> SOME_SAFE_SEPARATORS.stream()
@@ -79,23 +81,6 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 .collect(Collectors.joining());
     }
 
-    /**
-     * Strings between the place holders
-     */
-    protected static ImmutableList<String> extractIntermediateStrings(String template) {
-        ImmutableList.Builder<String> builder = ImmutableList.builder();
-
-        // Non-final
-        int afterPlaceHolderIndex = template.indexOf(PLACE_HOLDER) + 2;
-        // Following index
-        int nextPlaceHolderIndex = template.indexOf(PLACE_HOLDER, afterPlaceHolderIndex);
-        while(nextPlaceHolderIndex > 0) {
-            builder.add(template.substring(afterPlaceHolderIndex, nextPlaceHolderIndex));
-            afterPlaceHolderIndex = nextPlaceHolderIndex + 2;
-            nextPlaceHolderIndex = template.indexOf(PLACE_HOLDER, afterPlaceHolderIndex);
-        }
-        return builder.build();
-    }
 
     private static ImmutableList<TermType> createBaseTypes(ImmutableList<TemplateComponent> template, TypeFactory typeFactory) {
         // TODO: require DB string instead
@@ -143,24 +128,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 .map(t -> ((DBConstant) t).getValue())
                 .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting " +
                         "the getR2RMLIRISafeEncodeFunctionalTerm to simplify itself to a DBConstant " +
-                        "when receving a DBConstant"));
+                        "when receiving a DBConstant"));
     }
 
-
-    protected ImmutableList<DBConstant> getTemplateConstants(TermFactory termFactory) {
-        if (templateConstants == null) {
-            // An actual template: the first term is a string of the form
-            // http://.../.../ or empty "{}" with placeholders of the form {}
-            // The other terms are variables or constants that should replace
-            // the placeholders. We need to tokenize and form the CONCAT
-            String[] split = template.split("[{][}]");
-            templateConstants = Stream.of(split)
-                    .map(termFactory::getDBStringConstant)
-                    .collect(ImmutableCollectors.toList());
-        }
-
-        return templateConstants;
-    }
 
 
     @Override
@@ -186,17 +156,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        ImmutableList<DBConstant> templateCsts = getTemplateConstants(termFactory);
 
-        ImmutableList<ImmutableTerm> termsToConcatenate = IntStream.range(0, templateCsts.size())
-                .boxed()
-                .flatMap(i -> (i < terms.size())
-                        ? Stream.of(
-                                templateCsts.get(i),
-                                termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i))
-                                        // Avoids the encoding when possible
-                                        .simplify())
-                        : Stream.of(templateCsts.get(i)))
+        ImmutableList<ImmutableTerm> termsToConcatenate = components.stream()
+                .map(c -> c.isColumnNameReference()
+                ? termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(c.getIndex()))
+                        // Avoids the encoding when possible
+                        .simplify()
+                : termFactory.getDBStringConstant(c.getComponent()))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableTerm concatTerm = termsToConcatenate.isEmpty()
