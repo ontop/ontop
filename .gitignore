@@ -32,6 +32,8 @@ catalog-v*.xml
 *~
 \#*
 tmp.*
+**.swp
+**.swo
 
 # Antlr generated files
 *.tokens
