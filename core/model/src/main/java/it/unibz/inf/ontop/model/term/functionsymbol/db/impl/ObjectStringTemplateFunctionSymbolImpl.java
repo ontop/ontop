@@ -63,19 +63,21 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     /**
      * Must not produce false positive
      */
-    protected boolean isInjective() {
+    private boolean isInjective() {
         long arity = components.stream()
                 .filter(TemplateComponent::isColumnNameReference)
                 .count();
         if (arity < 2)
             return true;
-/*
+
         // two consecutive columns
         for (int i = 1; i < components.size(); i++)
             if (components.get(i - 1).isColumnNameReference()
-                    && components.get(i).isColumnNameReference())
-                return false;
-
+                    && components.get(i).isColumnNameReference()) {
+                // return false;
+                System.out.println("NON-INJECTIVE: " + template);
+            }
+/*
         // the prefix and the suffix of the template do not matter
         return components.subList(1, components.size() - 1).stream()
                 .filter(c -> !c.isColumnNameReference())
@@ -85,8 +87,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return components.stream()
                 .filter(c -> !c.isColumnNameReference())
                 .map(TemplateComponent::getComponent)
-                .allMatch(interm -> SOME_SAFE_SEPARATORS.stream()
-                        .anyMatch(sep -> interm.indexOf(sep) >= 0));
+                .allMatch(interm -> firstIndexOfSafeSeparator(interm, 0) >= 0);
     }
 
     public static String extractStringTemplate(ImmutableList<TemplateComponent> template) {
@@ -263,12 +264,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private static boolean matchPatterns(String subTemplate1, String subTemplate2) {
         return subTemplate1.equals(subTemplate2)
-                || matchPattern(subTemplate1, subTemplate2)
-                || matchPattern(subTemplate2, subTemplate1);
-    }
-
-    private static boolean matchPattern(String subTemplate1, String subTemplate2) {
-        return extractPattern(subTemplate1).matcher(subTemplate2).find();
+                || extractPattern(subTemplate1).matcher(subTemplate2).find()
+                || extractPattern(subTemplate2).matcher(subTemplate1).find();
     }
 
     protected static Pattern extractPattern(String template) {

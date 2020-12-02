@@ -265,13 +265,10 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     }
 
     public static Properties extractProperties(File propertyFile) throws InvalidOntopConfigurationException {
-        try {
-            Properties p = new Properties();
-            try (FileReader reader  = new FileReader(propertyFile)) {
-                p.load(reader);
-                return p;
-            }
-
+        Properties p = new Properties();
+        try (FileReader reader  = new FileReader(propertyFile)) {
+            p.load(reader);
+            return p;
         } catch (IOException e) {
 //                System.out.println(e);
             throw new InvalidOntopConfigurationException("Cannot reach the property file: " + propertyFile);

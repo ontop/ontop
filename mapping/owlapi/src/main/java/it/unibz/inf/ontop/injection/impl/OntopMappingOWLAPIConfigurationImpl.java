@@ -75,20 +75,19 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
         /*
          * URL
          */
-        try {
-            Optional<URL> optionalURL = options.mappingOntologyOptions.ontologyURL;
-            if (optionalURL.isPresent()) {
-                try (InputStream is = optionalURL.get().openStream()) {
-                    owlOntology = Optional.of(
-                            manager.loadOntologyFromOntologyDocument(is
-                            ));
-                }
+        Optional<URL> optionalURL = options.mappingOntologyOptions.ontologyURL;
+        if (optionalURL.isPresent()) {
+            try (InputStream is = optionalURL.get().openStream()) {
+                owlOntology = Optional.of(
+                        manager.loadOntologyFromOntologyDocument(is
+                        ));
             }
-
-        } catch (MalformedURLException e ) {
-            throw new OWLOntologyCreationException("Invalid URI: " + e.getMessage());
-        } catch (IOException e) {
-            throw new OWLOntologyCreationException(e.getMessage());
+            catch (MalformedURLException e ) {
+                throw new OWLOntologyCreationException("Invalid URI: " + e.getMessage());
+            }
+            catch (IOException e) {
+                throw new OWLOntologyCreationException(e.getMessage());
+            }
         }
 
         return owlOntology;
