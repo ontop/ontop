@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 public class SafeSeparatorFragment {
     private final String fragment;
     private final char separator;
+    private final boolean containsPlaceholder;
 
     /**
      * TODO: enrich this list (incomplete)
@@ -25,9 +26,14 @@ public class SafeSeparatorFragment {
             .collect(Collectors.joining())
             + "]*";
 
-    private SafeSeparatorFragment(String fragment, char separator) {
+    private SafeSeparatorFragment(String fragment, char separator, boolean containsPlaceholder) {
         this.fragment = fragment;
         this.separator = separator;
+        this.containsPlaceholder = containsPlaceholder;
+    }
+
+    private SafeSeparatorFragment(String fragment, char separator) {
+        this(fragment, separator, fragment.indexOf('{') > 0);
     }
 
     public String getFragment() {
@@ -40,7 +46,7 @@ public class SafeSeparatorFragment {
 
     @Override
     public String toString() {
-        return fragment + separator;
+        return fragment + separator + (containsPlaceholder ? "P" : "");
     }
 
     public static ImmutableList<SafeSeparatorFragment> split(String s) {
@@ -49,17 +55,18 @@ public class SafeSeparatorFragment {
         while ((end = firstIndexOfSafeSeparator(s, current_start)) != -1) {
             String fragment = s.substring(current_start, end);
             if (fragment.indexOf('{') >= 0) {
-                if (current_start != start)
-                    builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1)));
-                builder.add(new SafeSeparatorFragment(s.substring(current_start, end), s.charAt(end)));
+                if (current_start > start)
+                    builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), false));
+                builder.add(new SafeSeparatorFragment(s.substring(current_start, end), s.charAt(end), true));
                 start = end + 1;
             }
             current_start = end + 1;
         }
-        if (current_start != start)
-            builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1)));
-        builder.add(new SafeSeparatorFragment(s.substring(current_start), (char) 0));
-        System.out.println("SPLIT: " + s + " INTO " + builder.build());
+        if (current_start > start)
+            builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), false));
+        if (current_start < s.length())
+            builder.add(new SafeSeparatorFragment(s.substring(current_start), (char) 0));
+
         return builder.build();
     }
 
@@ -90,15 +97,10 @@ public class SafeSeparatorFragment {
         return pattern;
     }
 
-    private boolean matchDifferent(String other) {
-        return fragment.indexOf('{') >= 0
-                && getPattern().matcher(other).find();
-    }
-
     private static boolean matchFragments(SafeSeparatorFragment subTemplate1, SafeSeparatorFragment subTemplate2) {
         return subTemplate1.getFragment().equals(subTemplate2.getFragment())
-                || subTemplate1.matchDifferent(subTemplate2.getFragment())
-                || subTemplate2.matchDifferent(subTemplate1.getFragment());
+                || subTemplate1.containsPlaceholder && subTemplate1.getPattern().matcher(subTemplate2.getFragment()).find()
+                || subTemplate2.containsPlaceholder && subTemplate2.getPattern().matcher(subTemplate1.getFragment()).find();
     }
 
     /**
