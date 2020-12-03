@@ -30,14 +30,20 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
+
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMapping2DatalogConverterTest.class);
 
 	private MetadataLookup getMetadataLookup() {
 		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
@@ -81,7 +87,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				.stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
 		
 		assertFalse(dp.isEmpty());
-		System.out.println(dp.toString());
+		LOGGER.debug(dp.toString());
 	}
 
 	public void testAnalysis_1() throws Exception {
