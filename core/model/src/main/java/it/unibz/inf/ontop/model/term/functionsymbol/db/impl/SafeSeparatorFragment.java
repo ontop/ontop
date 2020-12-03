@@ -38,14 +38,27 @@ public class SafeSeparatorFragment {
         return separator;
     }
 
+    @Override
+    public String toString() {
+        return fragment + separator;
+    }
+
     public static ImmutableList<SafeSeparatorFragment> split(String s) {
         ImmutableList.Builder<SafeSeparatorFragment> builder = ImmutableList.builder();
-        int start = 0, end;
-        while ((end = firstIndexOfSafeSeparator(s, start)) != -1) {
-            builder.add(new SafeSeparatorFragment(s.substring(start, end), s.charAt(end)));
-            start = end + 1;
+        int start = 0, current_start = 0, end;
+        while ((end = firstIndexOfSafeSeparator(s, current_start)) != -1) {
+            String fragment = s.substring(current_start, end);
+            if (fragment.indexOf('{') >= 0) {
+                if (current_start != start)
+                    builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1)));
+                builder.add(new SafeSeparatorFragment(s.substring(current_start, end), s.charAt(end)));
+                start = end + 1;
+            }
+            current_start = end + 1;
         }
-        builder.add(new SafeSeparatorFragment(s.substring(start), (char) 0));
+        if (current_start != start)
+            builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1)));
+        builder.add(new SafeSeparatorFragment(s.substring(current_start), (char) 0));
         System.out.println("SPLIT: " + s + " INTO " + builder.build());
         return builder.build();
     }
