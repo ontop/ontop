@@ -75,13 +75,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             if (components.get(i - 1).isColumnNameReference()
                     && components.get(i).isColumnNameReference())
                 return false;
-/*
-        // the prefix and the suffix of the template do not matter
-        return components.subList(1, components.size() - 1).stream()
-                .filter(c -> !c.isColumnNameReference())
-                .map(TemplateComponent::getComponent)
-                .allMatch(s -> s.matches("[" + SAFE_SEPARATOR_REGEX_PART + "]"));
- */
+
         return components.stream()
                 .filter(c -> !c.isColumnNameReference())
                 .map(TemplateComponent::getComponent)
@@ -142,7 +136,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 .map(termFactory::getR2RMLIRISafeEncodeFunctionalTerm)
                 .map(t -> t.simplify(variableNullability))
                 .filter(t -> t instanceof DBConstant)
-                .map(t -> ((DBConstant) t).getValue())
+                .map(t -> ((DBConstant) t))
+                .map(Constant::getValue)
                 .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting " +
                         "the getR2RMLIRISafeEncodeFunctionalTerm to simplify itself to a DBConstant " +
                         "when receiving a DBConstant"));
@@ -219,7 +214,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         String otherPrefix = extractPrefix(otherTemplate);
         int minPrefixLength = Math.min(prefix.length(), otherPrefix.length());
         // Prefix comparison
-        if (!prefix.substring(0, minPrefixLength).equals(otherPrefix.substring(0, minPrefixLength)))
+        if (minPrefixLength > 0 &&
+                !prefix.substring(0, minPrefixLength).equals(otherPrefix.substring(0, minPrefixLength)))
             return false;
 /*
         String suffix = extractSuffix(template);
@@ -262,11 +258,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private static boolean matchPatterns(String subTemplate1, String subTemplate2) {
         return subTemplate1.equals(subTemplate2)
-                || extractPattern(subTemplate1).matcher(subTemplate2).find()
-                || extractPattern(subTemplate2).matcher(subTemplate1).find();
+                || subTemplate1.indexOf('{') >= 0 && extractPattern(subTemplate1).matcher(subTemplate2).find()
+                || subTemplate2.indexOf('{') >= 0 && extractPattern(subTemplate2).matcher(subTemplate1).find();
     }
-
-    private static final String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
 
     protected static Pattern extractPattern(String template) {
         StringBuilder patternString = new StringBuilder();
@@ -278,12 +272,6 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         }
         if (start < template.length())
             patternString.append(makeRegexSafe(template.substring(start)));
-
-//        String safeTemplate = makeRegexSafe(template
-//                .replace(PLACEHOLDER, tmpPlaceholder));
-//
-//        String patternString = safeTemplate
-//                .replace(tmpPlaceholder, NOT_A_SAFE_SEPARATOR_REGEX);
 
         return Pattern.compile("^" + patternString + "$");
     }
@@ -314,14 +302,14 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
 
     private static String extractPrefix(String template) {
-        int index = template.indexOf("{");
+        int index = template.indexOf('{');
         return index >= 0
                 ? template.substring(0, index)
                 : template;
     }
 
     private static String extractSuffix(String template) {
-        int index = template.lastIndexOf("}");
+        int index = template.lastIndexOf('}');
         return index >= 0
                 ? template.substring(index + 1)
                 : template;
