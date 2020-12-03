@@ -249,7 +249,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             builder.add(s.substring(start, end));
             start = end + 1;
         }
-        builder.add(s.substring(start));
+        if (start < s.length())
+            builder.add(s.substring(start));
         return builder.build();
     }
 
@@ -266,8 +267,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 || extractPattern(subTemplate2).matcher(subTemplate1).find();
     }
 
+    private static final String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
+
     protected static Pattern extractPattern(String template) {
-        String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
         String safeTemplate = makeRegexSafe(template
                 .replace(PLACEHOLDER, tmpPlaceholder));
 
