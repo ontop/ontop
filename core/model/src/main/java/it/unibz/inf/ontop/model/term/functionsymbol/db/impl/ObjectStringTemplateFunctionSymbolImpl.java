@@ -249,8 +249,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             builder.add(s.substring(start, end));
             start = end + 1;
         }
-        if (start < s.length())
-            builder.add(s.substring(start));
+        builder.add(s.substring(start));
         return builder.build();
     }
 
@@ -270,11 +269,21 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private static final String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
 
     protected static Pattern extractPattern(String template) {
-        String safeTemplate = makeRegexSafe(template
-                .replace(PLACEHOLDER, tmpPlaceholder));
+        StringBuilder patternString = new StringBuilder();
+        int start = 0, end;
+        while ((end = template.indexOf('{', start)) != -1) {
+            patternString.append(makeRegexSafe(template.substring(start, end)))
+                    .append(NOT_A_SAFE_SEPARATOR_REGEX);
+            start = end + 2;
+        }
+        if (start < template.length())
+            patternString.append(makeRegexSafe(template.substring(start)));
 
-        String patternString = safeTemplate
-                .replace(tmpPlaceholder, NOT_A_SAFE_SEPARATOR_REGEX);
+//        String safeTemplate = makeRegexSafe(template
+//                .replace(PLACEHOLDER, tmpPlaceholder));
+//
+//        String patternString = safeTemplate
+//                .replace(tmpPlaceholder, NOT_A_SAFE_SEPARATOR_REGEX);
 
         return Pattern.compile("^" + patternString + "$");
     }
