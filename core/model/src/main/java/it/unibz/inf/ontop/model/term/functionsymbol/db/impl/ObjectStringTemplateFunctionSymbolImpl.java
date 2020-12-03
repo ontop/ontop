@@ -178,10 +178,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                                                        ImmutableFunctionalTerm otherTerm, TermFactory termFactory,
                                                                        VariableNullability variableNullability) {
         FunctionSymbol otherFunctionSymbol = otherTerm.getFunctionSymbol();
-        if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
-            String otherTemplate = ((ObjectStringTemplateFunctionSymbol) otherFunctionSymbol).getTemplate();
+        if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbolImpl) {
+            ObjectStringTemplateFunctionSymbolImpl other = (ObjectStringTemplateFunctionSymbolImpl) otherFunctionSymbol;
 
-            if (!areCompatible(otherTemplate))
+            if (!areCompatible(other.safeSeparatorFragments))
                 return IncrementalEvaluation.declareIsFalse();
         }
 
@@ -192,10 +192,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     /**
      * Is guaranteed not to return false negative.
      */
-    protected boolean areCompatible(String otherTemplate) {
-        if (template.equals(otherTemplate))
-            return true;
+    protected boolean areCompatible(ImmutableList<SafeSeparatorFragment> otherFragments) {
+//        if (template.equals(otherTemplate))
+//            return true;
 
+/*
         String prefix = extractPrefix(template);
         String otherPrefix = extractPrefix(otherTemplate);
         int minPrefixLength = Math.min(prefix.length(), otherPrefix.length());
@@ -203,6 +204,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (minPrefixLength > 0 &&
                 !prefix.substring(0, minPrefixLength).equals(otherPrefix.substring(0, minPrefixLength)))
             return false;
+ */
 /*
         String suffix = extractSuffix(template);
         String otherSuffix = extractSuffix(otherTemplate);
@@ -210,8 +212,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (!suffix.substring(suffix.length() - minSuffixLength).equals(otherSuffix.substring(otherSuffix.length() - minSuffixLength)))
             return false;
 */
-        ImmutableList<SafeSeparatorFragment> fragments = SafeSeparatorFragment.split(template); // .substring(minPrefixLength), template.length() - minSuffixLength
-        ImmutableList<SafeSeparatorFragment> otherFragments = SafeSeparatorFragment.split(otherTemplate); // .substring(minPrefixLength) , otherTemplate.length() - minSuffixLength
+        ImmutableList<SafeSeparatorFragment> fragments = this.safeSeparatorFragments; // .substring(minPrefixLength), template.length() - minSuffixLength
+//        ImmutableList<SafeSeparatorFragment> otherFragments = SafeSeparatorFragment.split(otherTemplate); // .substring(minPrefixLength) , otherTemplate.length() - minSuffixLength
+
+        if (fragments == otherFragments)
+            return true;
 
         if (fragments.size() != otherFragments.size())
             return false;
@@ -281,7 +286,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             else
                 return IncrementalEvaluation.declareIsFalse();
         }
-        else if (!areCompatible(otherValue))
+        else if (!areCompatible(SafeSeparatorFragment.split(otherValue)))
             return IncrementalEvaluation.declareIsFalse();
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
