@@ -228,8 +228,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (!extractOnlyAlwaysSafeSeparators(otherTemplate).equals(onlyAlwaysSafeSeparators))
             return false;
 
-        ImmutableList<String> fragments = splitOnSafeSeparators(template.substring(minPrefixLength)); // , template.length() - minSuffixLength
-        ImmutableList<String> otherFragments = splitOnSafeSeparators(otherTemplate.substring(minPrefixLength)); // , otherTemplate.length() - minSuffixLength
+        ImmutableList<String> fragments = splitOnSafeSeparators(template); // .substring(minPrefixLength), template.length() - minSuffixLength
+        ImmutableList<String> otherFragments = splitOnSafeSeparators(otherTemplate); // .substring(minPrefixLength) , otherTemplate.length() - minSuffixLength
 
         if (fragments.size() != otherFragments.size())
             throw new MinorOntopInternalBugException("Internal inconsistency detected while splitting IRI templates");
