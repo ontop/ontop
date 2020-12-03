@@ -73,10 +73,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // two consecutive columns
         for (int i = 1; i < components.size(); i++)
             if (components.get(i - 1).isColumnNameReference()
-                    && components.get(i).isColumnNameReference()) {
-                // return false;
-                System.out.println("NON-INJECTIVE: " + template);
-            }
+                    && components.get(i).isColumnNameReference())
+                return false;
 /*
         // the prefix and the suffix of the template do not matter
         return components.subList(1, components.size() - 1).stream()
@@ -87,7 +85,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return components.stream()
                 .filter(c -> !c.isColumnNameReference())
                 .map(TemplateComponent::getComponent)
-                .allMatch(interm -> firstIndexOfSafeSeparator(interm, 0) >= 0);
+                .allMatch(s -> firstIndexOfSafeSeparator(s, 0) >= 0);
     }
 
     public static String extractStringTemplate(ImmutableList<TemplateComponent> template) {
