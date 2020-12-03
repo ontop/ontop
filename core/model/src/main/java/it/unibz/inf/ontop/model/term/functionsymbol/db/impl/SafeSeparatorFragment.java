@@ -33,7 +33,7 @@ public class SafeSeparatorFragment {
     }
 
     private SafeSeparatorFragment(String fragment, char separator) {
-        this(fragment, separator, fragment.indexOf('{') > 0);
+        this(fragment, separator, fragment.indexOf('{') >= 0);
     }
 
     public String getFragment() {
