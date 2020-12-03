@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -23,6 +24,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.SafeSeparatorFragment.NOT_A_SAFE_SEPARATOR_REGEX;
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.SafeSeparatorFragment.SOME_SAFE_SEPARATORS;
 
 public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSymbolImpl
         implements ObjectStringTemplateFunctionSymbol {
@@ -33,20 +37,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final boolean isInjective;
     private final ImmutableList<TemplateComponent> components;
     // Use for checking compatibility
-    private final String onlyAlwaysSafeSeparators;
+    private final ImmutableList<SafeSeparatorFragment> safeSeparatorFragments;
 
-    /**
-     * TODO: enrich this list (incomplete)
-     */
-    protected static final ImmutableSet<Character> SOME_SAFE_SEPARATORS = ImmutableSet.of(
-        '/','!','$','&','\'', '(', ')','*','+',',',';', '=', '#');
-
-    protected static final String NOT_A_SAFE_SEPARATOR_REGEX = "[^"
-            + SOME_SAFE_SEPARATORS.stream()
-                    .map(Object::toString)
-                    .map(ObjectStringTemplateFunctionSymbolImpl::makeRegexSafe)
-                    .collect(Collectors.joining())
-            + "]*";
 
     protected static final String PLACEHOLDER = "{}";
 
@@ -56,30 +48,24 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.components = components;
         this.pattern = extractPattern(components);
+        this.safeSeparatorFragments = SafeSeparatorFragment.split(template);
         this.isInjective = isInjective();
-        this.onlyAlwaysSafeSeparators = extractOnlyAlwaysSafeSeparators(template);
     }
 
     /**
      * Must not produce false positive
      */
     private boolean isInjective() {
-        long arity = components.stream()
-                .filter(TemplateComponent::isColumnNameReference)
-                .count();
-        if (arity < 2)
+        return safeSeparatorFragments.stream()
+                .map(SafeSeparatorFragment::getFragment)
+                .allMatch(ObjectStringTemplateFunctionSymbolImpl::atMostOnePlaceholder);
+    }
+
+    private static boolean atMostOnePlaceholder(String s) {
+        int first = s.indexOf('{');
+        if (first < 0)
             return true;
-
-        // two consecutive columns
-        for (int i = 1; i < components.size(); i++)
-            if (components.get(i - 1).isColumnNameReference()
-                    && components.get(i).isColumnNameReference())
-                return false;
-
-        return components.stream()
-                .filter(c -> !c.isColumnNameReference())
-                .map(TemplateComponent::getComponent)
-                .allMatch(s -> firstIndexOfSafeSeparator(s, 0) >= 0);
+        return s.indexOf('{', first + 1) < 0;
     }
 
     public static String extractStringTemplate(ImmutableList<TemplateComponent> template) {
@@ -224,63 +210,32 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (!suffix.substring(suffix.length() - minSuffixLength).equals(otherSuffix.substring(otherSuffix.length() - minSuffixLength)))
             return false;
 */
-        // Checks that both templates use the same safe separators in the same order
-        if (!extractOnlyAlwaysSafeSeparators(otherTemplate).equals(onlyAlwaysSafeSeparators))
-            return false;
-
-        ImmutableList<String> fragments = splitOnSafeSeparators(template); // .substring(minPrefixLength), template.length() - minSuffixLength
-        ImmutableList<String> otherFragments = splitOnSafeSeparators(otherTemplate); // .substring(minPrefixLength) , otherTemplate.length() - minSuffixLength
+        ImmutableList<SafeSeparatorFragment> fragments = SafeSeparatorFragment.split(template); // .substring(minPrefixLength), template.length() - minSuffixLength
+        ImmutableList<SafeSeparatorFragment> otherFragments = SafeSeparatorFragment.split(otherTemplate); // .substring(minPrefixLength) , otherTemplate.length() - minSuffixLength
 
         if (fragments.size() != otherFragments.size())
-            throw new MinorOntopInternalBugException("Internal inconsistency detected while splitting IRI templates");
+            return false;
 
-        return IntStream.range(0, fragments.size())
+        // Checks that both templates use the same safe separators in the same order
+        boolean separatorsMatch = IntStream.range(0, fragments.size())
+            .allMatch(i -> fragments.get(i).getSeparator() == otherFragments.get(i).getSeparator());
+
+        return separatorsMatch && IntStream.range(0, fragments.size())
                 .allMatch(i -> matchPatterns(fragments.get(i), otherFragments.get(i)));
     }
 
-    private static ImmutableList<String> splitOnSafeSeparators(String s) {
-        ImmutableList.Builder<String> builder = ImmutableList.builder();
-        int start = 0, end;
-        while ((end = firstIndexOfSafeSeparator(s, start)) != -1) {
-            builder.add(s.substring(start, end));
-            start = end + 1;
-        }
-        builder.add(s.substring(start));
-        return builder.build();
+    private static boolean matchPatterns(SafeSeparatorFragment subTemplate1, SafeSeparatorFragment subTemplate2) {
+        return subTemplate1.getFragment().equals(subTemplate2.getFragment())
+                || subTemplate1.getFragment().indexOf('{') >= 0 && subTemplate1.extractPattern().matcher(subTemplate2.getFragment()).find()
+                || subTemplate2.getFragment().indexOf('{') >= 0 && subTemplate2.extractPattern().matcher(subTemplate1.getFragment()).find();
     }
 
-    private static int firstIndexOfSafeSeparator(String s, int start) {
-        for (int i = start; i < s.length(); i++)
-            if (SOME_SAFE_SEPARATORS.contains(s.charAt(i)))
-                return i;
-        return -1;
-    }
-
-    private static boolean matchPatterns(String subTemplate1, String subTemplate2) {
-        return subTemplate1.equals(subTemplate2)
-                || subTemplate1.indexOf('{') >= 0 && extractPattern(subTemplate1).matcher(subTemplate2).find()
-                || subTemplate2.indexOf('{') >= 0 && extractPattern(subTemplate2).matcher(subTemplate1).find();
-    }
-
-    protected static Pattern extractPattern(String template) {
-        StringBuilder patternString = new StringBuilder();
-        int start = 0, end;
-        while ((end = template.indexOf('{', start)) != -1) {
-            patternString.append(makeRegexSafe(template.substring(start, end)))
-                    .append(NOT_A_SAFE_SEPARATOR_REGEX);
-            start = end + 2;
-        }
-        if (start < template.length())
-            patternString.append(makeRegexSafe(template.substring(start)));
-
-        return Pattern.compile("^" + patternString + "$");
-    }
 
     protected static Pattern extractPattern(ImmutableList<TemplateComponent> components) {
         String patternString = components.stream()
                 .map(c -> c.isColumnNameReference()
                     ? "(" + NOT_A_SAFE_SEPARATOR_REGEX + ")"
-                    : makeRegexSafe(c.getComponent()))
+                    : SafeSeparatorFragment.makeRegexSafe(c.getComponent()))
                 .collect(Collectors.joining());
 
         return Pattern.compile("^" + patternString + "$");
@@ -296,22 +251,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                         StringBuilder::toString));
     }
 
-    private static String makeRegexSafe(String s) {
-        return s.replaceAll("[<(\\[{\\\\^=$!|\\]})?*+.>]", "\\\\$0");
-    }
-
 
     private static String extractPrefix(String template) {
         int index = template.indexOf('{');
         return index >= 0
                 ? template.substring(0, index)
-                : template;
-    }
-
-    private static String extractSuffix(String template) {
-        int index = template.lastIndexOf('}');
-        return index >= 0
-                ? template.substring(index + 1)
                 : template;
     }
 
@@ -347,4 +291,76 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return true;
     }
+}
+
+class SafeSeparatorFragment {
+    private final String fragment;
+    private final char separator;
+
+    /**
+     * TODO: enrich this list (incomplete)
+     */
+    protected static final ImmutableSet<Character> SOME_SAFE_SEPARATORS = ImmutableSet.of(
+            '/','!','$','&','\'', '(', ')','*','+',',',';', '=', '#');
+
+    protected static final String NOT_A_SAFE_SEPARATOR_REGEX = "[^"
+            + SOME_SAFE_SEPARATORS.stream()
+            .map(Object::toString)
+            .map(SafeSeparatorFragment::makeRegexSafe)
+            .collect(Collectors.joining())
+            + "]*";
+
+    SafeSeparatorFragment(String fragment, char separator) {
+        this.fragment = fragment;
+        this.separator = separator;
+    }
+
+    public String getFragment() { return fragment; }
+
+    public char getSeparator() { return separator; }
+
+    static ImmutableList<SafeSeparatorFragment> split(String s) {
+        ImmutableList.Builder<SafeSeparatorFragment> builder = ImmutableList.builder();
+        int start = 0, end;
+        while ((end = firstIndexOfSafeSeparator(s, start)) != -1) {
+            builder.add(new SafeSeparatorFragment(s.substring(start, end), s.charAt(end)));
+            start = end + 1;
+        }
+        builder.add(new SafeSeparatorFragment(s.substring(start), (char)0));
+        return builder.build();
+    }
+
+    private static int firstIndexOfSafeSeparator(String s, int start) {
+        for (int i = start; i < s.length(); i++)
+            if (SOME_SAFE_SEPARATORS.contains(s.charAt(i)))
+                return i;
+        return -1;
+    }
+
+    @Nullable
+    private Pattern pattern;
+
+    public Pattern extractPattern() {
+        if (pattern == null) {
+            StringBuilder patternString = new StringBuilder();
+            int start = 0, end;
+            while ((end = fragment.indexOf('{', start)) != -1) {
+                patternString.append(makeRegexSafe(fragment.substring(start, end)))
+                        .append(NOT_A_SAFE_SEPARATOR_REGEX);
+                start = end + 2;
+            }
+            if (start < fragment.length())
+                patternString.append(makeRegexSafe(fragment.substring(start)));
+
+            pattern = Pattern.compile("^" + patternString + "$");
+        }
+        return pattern;
+    }
+
+
+    public static String makeRegexSafe(String s) {
+        return s.replaceAll("[<(\\[{\\\\^=$!|\\]})?*+.>]", "\\\\$0");
+    }
+
+
 }
