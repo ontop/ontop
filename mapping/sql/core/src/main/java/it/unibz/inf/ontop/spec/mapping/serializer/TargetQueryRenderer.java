@@ -58,15 +58,16 @@ public class TargetQueryRenderer {
             String subject = renderTerm(pred.getSubject(atom.getSubstitutedTerms()));
             String predicate = renderTerm(pred.getProperty(atom.getSubstitutedTerms()));
             String object = renderTerm(pred.getObject(atom.getSubstitutedTerms()));
+            Optional<String> graph;
             if (pred instanceof TriplePredicate) {
-                turtleWriter.put(subject, predicate, object);
+                graph = Optional.empty();
             }
             else if (pred instanceof QuadPredicate) {
-                String graph = renderTerm(pred.getGraph(atom.getSubstitutedTerms()).get());
-                turtleWriter.put(subject, predicate, object, graph);
+                graph = pred.getGraph(atom.getSubstitutedTerms()).map(this::renderTerm);
             }
             else
                 throw new UnsupportedOperationException("unsupported predicate! " + pred);
+            turtleWriter.put(subject, predicate, object, graph);
         }
         return turtleWriter.print();
     }
@@ -158,9 +159,6 @@ public class TargetQueryRenderer {
     }
 
     private String renderIRI(String iri) {
-        if (iri.equals(RDF.TYPE.getIRIString()))
-            return "a"; // should be used only in predicate position, but...
-
         String shortenedIri = prefixManager.getShortForm(iri);
         if (!shortenedIri.equals(iri))
             return shortenedIri;

@@ -3,9 +3,8 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A utility class to store the Turtle main components, i.e., subject, predicate
@@ -40,64 +39,41 @@ import java.util.Optional;
  */
 class TurtleWriter {
 
-	private Multimap<Optional<String>, String> graphToSubjects = ArrayListMultimap.create();
-	private HashMap<String, ArrayList<String>> subjectToPredicates = new HashMap<String, ArrayList<String>>();
-	private HashMap<String, ArrayList<String>> predicateToObjects = new HashMap<String, ArrayList<String>>();
+	private final Multimap<Optional<String>, String> graphToSubjects = ArrayListMultimap.create();
+	private final HashMap<String, ArrayList<String>> subjectToPredicates = new HashMap<>();
+	private final HashMap<String, LinkedHashSet<String>> predicateToObjects = new HashMap<>();
 
 	/**
-	 * Adding the subject, predicate and object components to this container.
+	 * Adding the subject, predicate, object and graph components to this container.
 	 *
-	 * @param subject
-	 *            The subject term of the Function.
-	 * @param predicate
-	 *            The Function predicate.
-	 * @param object
-	 *            The object term of the Function.
+	 * @param subject of the quad/triple
+	 * @param predicate of the quad/triple
+	 * @param object of the quad/triple
+	 * @param graph optional
 	 */
-	void put(String subject, String predicate, String object) {
-		Optional<String> graph = Optional.empty();
+
+	public void put(String subject, String predicate, String object, Optional<String> graph) {
 		if (!graphToSubjects.containsEntry(graph, subject))
 			graphToSubjects.put(graph, subject);
-		insertSPO(subject, predicate, object);
-	}
 
-	void insertSPO(String subjectKey, String predicate, String object) {
-		// Subject to Predicates map
-		ArrayList<String> predicateList = subjectToPredicates.get(subjectKey);
-		if (predicateList == null) {
-			predicateList = new ArrayList<String>();
-		}
-		insert(predicateList, predicate);
-		subjectToPredicates.put(subjectKey, predicateList);
+		if (predicate.equals("rdf:type"))
+			predicate = "a";
 
-		String predicateKey = computePredicateKey(subjectKey, predicate);
-
-		// Predicate to Objects map
-		ArrayList<String> objectList = predicateToObjects.get(predicateKey); // predicate that appears in 2 different subjects should not have all objects assigned  to both subjects
-		if (objectList == null) {
-			objectList = new ArrayList<String>();
-		}
-		if (!objectList.contains(object))
-			objectList.add(object);
-		predicateToObjects.put(predicateKey, objectList);
-	}
-
-	public void put(String subject, String predicate, String object, String graph) {
-		Optional<String> optionalGraph = Optional.of(graph);
-		if (!graphToSubjects.containsEntry(optionalGraph, subject))
-			graphToSubjects.put(optionalGraph, subject);
-		insertSPO(computeSubjectKey(graph, subject), predicate, object);
-	}
-
-	// Utility method to insert the predicate
-	private void insert(ArrayList<String> list, String input) {
-		if (!list.contains(input)) {
-			if (input.equals("a") || input.equals("rdf:type")) {
-				list.add(0, input);
+		ArrayList<String> predicateList = subjectToPredicates.computeIfAbsent(
+				subjectKeyOf(graph, subject),
+				(k) -> new ArrayList<>());
+		if (!predicateList.contains(predicate)) {
+			if (predicate.equals("a")) {
+				predicateList.add(0, predicate);
 			} else {
-				list.add(input);
+				predicateList.add(predicate);
 			}
 		}
+
+		LinkedHashSet<String> objectList = predicateToObjects.computeIfAbsent(
+				predicateKeyOf(graph, subject, predicate),
+				(k) -> new LinkedHashSet<>());
+		objectList.add(object);
 	}
 
 	/**
@@ -108,48 +84,28 @@ class TurtleWriter {
 	String print() {
 		StringBuilder sb = new StringBuilder();
 
-		for (Optional<String> graph : graphToSubjects.keySet()) {
-			graph.ifPresent(g -> sb.append(String.format("GRAPH %s { ", g)));
+		for (Map.Entry<Optional<String>, Collection<String>> e : graphToSubjects.asMap().entrySet()) {
+			e.getKey().ifPresent(g -> sb.append(String.format("GRAPH %s { ", g)));
 
-			for (String subject : graphToSubjects.get(graph)) {
-				String subjectKey = graph
-						.map(g -> computeSubjectKey(g, subject))
-						.orElse(subject);
-				sb.append(subject);
-				sb.append(" ");
-				boolean semiColonSeparator = false;
-				for (String predicate : subjectToPredicates.get(subjectKey)) {
-					if (semiColonSeparator) {
-						sb.append(" ; ");
-					}
-					sb.append(predicate);
-					sb.append(" ");
-					semiColonSeparator = true;
+			sb.append(e.getValue().stream()
+					.map(subject -> subject + " " +
+							subjectToPredicates.get(subjectKeyOf(e.getKey(), subject)).stream()
+							.map(predicate -> predicate + " " + String.join(" , ",
+									predicateToObjects.get(predicateKeyOf(e.getKey(), subject, predicate))))
+						.collect(Collectors.joining(" ; ")) + " . ")
+					.collect(Collectors.joining("")));
 
-					boolean commaSeparator = false;
-					for (String object : predicateToObjects.get(computePredicateKey(subjectKey, predicate))) {
-						if (commaSeparator) {
-							sb.append(" , ");
-						}
-						sb.append(object);
-						commaSeparator = true;
-					}
-				}
-				sb.append(" ");
-				sb.append(".");
-				sb.append(" ");
-			}
-			graph.ifPresent(g -> sb.append("} "));
+			e.getKey().ifPresent(g -> sb.append("} "));
 		}
 		return sb.toString();
 	}
 
-	private String computeSubjectKey(String graph, String subject) {
-		return subject + "_" + graph;
+	private static String subjectKeyOf(Optional<String> graph, String subject) {
+		return graph.map(g -> subject + "_" + g).orElse(subject);
 	}
 
-	private String computePredicateKey(String subjectKey, String predicate) {
-		return predicate+ "_" + subjectKey;
+	private static String predicateKeyOf(Optional<String> graph, String subject, String predicate) {
+		return predicate + "_" + subjectKeyOf(graph, subject);
 	}
 
 }

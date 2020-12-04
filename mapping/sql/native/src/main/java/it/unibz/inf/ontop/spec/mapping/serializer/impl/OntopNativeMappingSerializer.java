@@ -75,20 +75,17 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
                     targetQueryRenderer.encode(axiom.getTargetAtoms()) + "\n");
 
             writer.write(OntopNativeMappingParser.SOURCE_LABEL + "\t\t" +
-                    printSourceQuery(axiom.getSourceQuery()) + "\n");
+                    renderSourceQuery(axiom.getSourceQuery()) + "\n");
             needLineBreak = true;
         }
         writer.write(OntopNativeMappingParser.END_COLLECTION_SYMBOL);
         writer.write("\n\n");
     }
 
-    private static String printSourceQuery(SQLPPSourceQuery query) {
-        String sourceString = SourceQueryRenderer.encode(query);
-        String toReturn = convertTabToSpaces(sourceString);
-        return toReturn.replaceAll("\n", "\n\t\t\t");
+    private static String renderSourceQuery(SQLPPSourceQuery query) {
+        return SourceQueryRenderer.encode(query)
+                .replaceAll("\t", "   ")
+                .replaceAll("\n", "\n\t\t\t");
     }
 
-    private static String convertTabToSpaces(String input) {
-        return input.replaceAll("\t", "   ");
-    }
 }

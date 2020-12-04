@@ -35,7 +35,7 @@ public class SourceQueryRenderer {
 		if (input == null) {
 			return "";
 		}
-		return input.toString();
+		return input.getSQL();
 	}
 	
 	private SourceQueryRenderer() {
