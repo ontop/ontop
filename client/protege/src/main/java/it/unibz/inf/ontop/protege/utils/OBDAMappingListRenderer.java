@@ -24,8 +24,8 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import it.unibz.inf.ontop.protege.core.SourceQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 
 import javax.swing.*;
 import javax.swing.text.Style;

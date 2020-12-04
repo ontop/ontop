@@ -2,16 +2,13 @@ package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.OntopNativeMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.MappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 
 import java.io.*;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Serializer for the Ontop Native Mapping Language (SQL-specific).
@@ -29,8 +26,18 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
     @Override
     public void write(File file, SQLPPMapping ppMapping) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writePrefixDeclaration(writer, ppMapping.getPrefixManager());
-            writeMappingDeclaration(writer, ppMapping);
+            writer.write(renderPrefixDeclaration(ppMapping.getPrefixManager()));
+
+            TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(ppMapping.getPrefixManager());
+
+            writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " "
+                    + OntopNativeMappingParser.START_COLLECTION_SYMBOL + "\n");
+
+            writer.write(ppMapping.getTripleMaps().stream()
+                    .map(ax -> renderMappingAssertion(ax, targetQueryRenderer))
+                    .collect(Collectors.joining("\n")));
+
+            writer.write(OntopNativeMappingParser.END_COLLECTION_SYMBOL + "\n\n");
         }
         catch (IOException e) {
             throw new IOException(String.format("Error while saving the OBDA model to the file located at %s.\n" +
@@ -39,53 +46,30 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
     }
 
 
-    private void writePrefixDeclaration(BufferedWriter writer, PrefixManager prefixManager) throws IOException {
+    private String renderPrefixDeclaration(PrefixManager prefixManager)  {
         final ImmutableMap<String, String> prefixMap = prefixManager.getPrefixMap();
 
-        if (prefixMap.size() == 0) {
-            return; // do nothing if there is no prefixes to write
-        }
+        if (prefixMap.isEmpty())
+            return "";
 
-        writer.write(OntopNativeMappingParser.PREFIX_DECLARATION_TAG);
-        writer.write("\n");
-        for (Map.Entry<String, String> e : prefixMap.entrySet()) {
-            String prefix = e.getKey();
-            String uri = e.getValue();
-            writer.write(prefix + (prefix.length() >= 9 ? "\t" : "\t\t") + uri + "\n");
-        }
-        writer.write("\n");
+        return OntopNativeMappingParser.PREFIX_DECLARATION_TAG + "\n" +
+                prefixMap.entrySet().stream()
+                .map(e -> e.getKey() + (e.getKey().length() >= 9 ? "\t" : "\t\t") + e.getValue())
+                .collect(Collectors.joining("\n"))
+                + "\n\n";
     }
 
-    private void writeMappingDeclaration(BufferedWriter writer, SQLPPMapping ppMapping) throws IOException {
 
-        TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(ppMapping.getPrefixManager());
-
-        writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " " + OntopNativeMappingParser.START_COLLECTION_SYMBOL);
-        writer.write("\n");
-
-        boolean needLineBreak = false;
-        for (SQLPPTriplesMap axiom : ppMapping.getTripleMaps()) {
-            if (needLineBreak) {
-                writer.write("\n");
-            }
-            writer.write(OntopNativeMappingParser.MAPPING_ID_LABEL + "\t" +
-                    axiom.getId() + "\n");
-
-            writer.write(OntopNativeMappingParser.TARGET_LABEL + "\t\t" +
-                    targetQueryRenderer.encode(axiom.getTargetAtoms()) + "\n");
-
-            writer.write(OntopNativeMappingParser.SOURCE_LABEL + "\t\t" +
-                    renderSourceQuery(axiom.getSourceQuery()) + "\n");
-            needLineBreak = true;
-        }
-        writer.write(OntopNativeMappingParser.END_COLLECTION_SYMBOL);
-        writer.write("\n\n");
-    }
-
-    private static String renderSourceQuery(SQLPPSourceQuery query) {
-        return SourceQueryRenderer.encode(query)
-                .replaceAll("\t", "   ")
-                .replaceAll("\n", "\n\t\t\t");
+    private String renderMappingAssertion(SQLPPTriplesMap axiom, TargetQueryRenderer targetQueryRenderer) {
+        return OntopNativeMappingParser.MAPPING_ID_LABEL + "\t" +
+                axiom.getId() + "\n" +
+                OntopNativeMappingParser.TARGET_LABEL + "\t\t" +
+                targetQueryRenderer.encode(axiom.getTargetAtoms()) + "\n" +
+                OntopNativeMappingParser.SOURCE_LABEL + "\t\t" +
+                axiom.getSourceQuery().getSQL()
+                        .replaceAll("\t", "   ")
+                        .replaceAll("\n", "\n\t\t\t") +
+                "\n";
     }
 
 }
