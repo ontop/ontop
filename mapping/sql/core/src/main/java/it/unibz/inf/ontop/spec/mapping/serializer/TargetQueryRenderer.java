@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.QuadPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -37,12 +39,15 @@ public class TargetQueryRenderer {
     private final IRITemplateFactory iriTemplateFactory;
     private final BnodeTemplateFactory bnodeTemplateFactory;
     private final LiteralTemplateFactory literalTemplateFactory;
+    private final String rdfType;
+
 
     /**
      * @param prefixManager that is used to shorten full IRI name.
      */
     public TargetQueryRenderer(PrefixManager prefixManager) {
         this.prefixManager = prefixManager;
+        this.rdfType = prefixManager.getShortForm(RDF.TYPE.getIRIString());
         this.iriTemplateFactory = new IRITemplateFactory(null);
         this.bnodeTemplateFactory = new BnodeTemplateFactory(null);
         this.literalTemplateFactory = new LiteralTemplateFactory(null, null);
@@ -78,14 +83,12 @@ public class TargetQueryRenderer {
         return store.entrySet().stream()
                 .map(e -> e.getKey().isPresent()
                         ? "GRAPH " + e.getKey().get() + " { "
-                        + getSubjectPredicateObjects(e.getValue()) + "}"
+                            + getSubjectPredicateObjects(e.getValue()) + "}"
                         :		getSubjectPredicateObjects(e.getValue()))
                 .collect(Collectors.joining(" "));
     }
 
-    private static final String rdfType = "rdf:type";
-
-    private static String getPredicateObjects(Map<String, Set<String>> predicateObjects) {
+    private String getPredicateObjects(Map<String, Set<String>> predicateObjects) {
         Set<String> type = predicateObjects.get(rdfType);
         Stream<Map.Entry<String, Set<String>>> stream = type != null
                 ? Stream.concat(
@@ -98,13 +101,13 @@ public class TargetQueryRenderer {
                 .collect(Collectors.joining(" ; "));
     }
 
-    private static String getSubjectPredicateObjects(Map<String, Map<String, Set<String >>> map) {
+    private String getSubjectPredicateObjects(Map<String, Map<String, Set<String >>> map) {
         return map.entrySet().stream()
                 .map(e -> e.getKey() + " " + getPredicateObjects(e.getValue()) + " . ")
                 .collect(Collectors.joining(""));
     }
 
-    
+
     private String renderTerm(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) term;
@@ -113,7 +116,7 @@ public class TargetQueryRenderer {
                 ImmutableTerm uncast = DBTypeConversionFunctionSymbol.uncast(ift);
                 if (uncast instanceof Variable)
                     return renderVariable((Variable)uncast);
-                throw new UnexpectedTermException(term);
+                throw new MinorOntopInternalBugException("Unexpected type " + term.getClass() + " for term: " + term);
             }
 
             // RDF(..)
@@ -135,7 +138,7 @@ public class TargetQueryRenderer {
             return ((RDFLiteralConstant) term).toString();
         if (term instanceof BNode)
             return ((BNode) term).getInternalLabel();
-        throw new UnexpectedTermException(term);
+        throw new MinorOntopInternalBugException("Unexpected type " + term.getClass() + " for term: " + term);
     }
 
     private static String renderVariable(Variable term) {
@@ -173,7 +176,7 @@ public class TargetQueryRenderer {
             }
         }
 
-        throw new IllegalArgumentException("unsupported function " + function);
+        throw new MinorOntopInternalBugException("unsupported function " + function);
     }
 
     private String renderRDFLiteral(ImmutableTerm lexicalTerm, RDFDatatype datatype) {
@@ -197,12 +200,6 @@ public class TargetQueryRenderer {
             return shortenedIri;
 
         return "<" + iri + ">";
-    }
-
-    private static class UnexpectedTermException extends OntopInternalBugException {
-        private UnexpectedTermException(ImmutableTerm term) {
-            super("Unexpected type " + term.getClass() + " for term: " + term);
-        }
     }
 }
 

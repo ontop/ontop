@@ -125,7 +125,6 @@ public class OBDAModel {
 
     public void parseMapping(Reader mappingReader, Properties properties) throws InvalidMappingException, MappingIOException {
 
-
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopMappingReader(mappingReader)
                 .properties(properties)
