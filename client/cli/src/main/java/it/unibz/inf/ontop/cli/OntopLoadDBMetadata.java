@@ -8,11 +8,7 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
-import it.unibz.inf.ontop.spec.dbschema.tools.impl.Metadata;
-import it.unibz.inf.ontop.spec.dbschema.tools.impl.RDBMetadataLoader;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import it.unibz.inf.ontop.spec.dbschema.tools.RDBMetadataLoader;
 
 @Command(name = "load-db-metadata",
     description = "Load the DB metadata from a JSON file and deserialize it")

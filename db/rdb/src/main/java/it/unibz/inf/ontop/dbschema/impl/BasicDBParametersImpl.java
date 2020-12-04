@@ -3,14 +3,22 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.inject.Injector;
 
 public class BasicDBParametersImpl implements DBParameters {
 
@@ -54,11 +62,26 @@ public class BasicDBParametersImpl implements DBParameters {
     @JsonIgnore
     private List<?> getRelations() {return relations;}
 
+
+    //Class QuotedIDFactory = Class.forName(cname)
+
     @SuppressWarnings("unchecked")
     @JsonProperty("metadata")
-    private void unpackNested(Map<String,Object> metadata) {
-        this.idFactory = (QuotedIDFactory) metadata.get("idFactory");
-        this.dbTypeFactory = (DBTypeFactory) metadata.get("dbTypeFactory");
+    private void unpackNested(Map<String,Object> metadata) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+
+        Class<QuotedIDFactory> cls = (Class<QuotedIDFactory>) Class.forName(metadata.get("quotedIdFactory").toString());
+        Constructor<QuotedIDFactory> cons = cls.getConstructor();
+        this.idFactory = cons.newInstance();
+
+        OntopSQLCoreConfiguration defaultConfiguration = OntopSQLCoreConfiguration.defaultBuilder()
+            //OntopModelConfiguration.defaultBuilder()
+            .jdbcDriver("")
+            .jdbcUrl("\"jdbc:h2:tcp://localhost/DBName\"")
+            .build();
+        Injector injector = defaultConfiguration.getInjector();
+        TypeFactory TYPE_FACTORY = injector.getInstance(TypeFactory.class);
+        this.dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
         this.driverName = (String) metadata.get("driverName");
         this.driverVersion = (String) metadata.get("driverVersion");
         this.databaseProductName = (String) metadata.get("dbmsProductName");

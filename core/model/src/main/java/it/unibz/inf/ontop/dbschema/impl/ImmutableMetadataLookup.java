@@ -1,34 +1,38 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 public class ImmutableMetadataLookup implements MetadataLookup {
 
     protected final QuotedIDFactory idFactory;
     protected final ImmutableMap<RelationID, DatabaseRelationDefinition> map;
-    protected final String filepath;
+    protected final File dbMetadataFile;
 
     ImmutableMetadataLookup(QuotedIDFactory idFactory, ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
         this.idFactory = idFactory;
         this.map = map;
-        filepath=null;
+        dbMetadataFile=null;
     }
 
-    ImmutableMetadataLookup(String filepath) {
+    ImmutableMetadataLookup(File dbMetadataFile) {
         idFactory = null;
         map = null;
-        this.filepath=filepath;
+        this.dbMetadataFile=dbMetadataFile;
     }
 
     @Override
@@ -54,13 +58,18 @@ public class ImmutableMetadataLookup implements MetadataLookup {
                 .collect(ImmutableCollectors.toList());
     }
 
-    protected List<ImmutableMetadata> loadRelations() throws MetadataExtractionException, IOException {
-        try {
-            File dbMetadataFile = new File(filepath);
+    protected ImmutableList<DatabaseRelationDefinition> loadRelations() throws MetadataExtractionException, IOException {
 
-            ObjectMapper mapper = new ObjectMapper();
-            //List<ImmutableMetadata> metadata = mapper.readValue(viewsFile, ImmutableMetadata.class);
+        try {
+            /*ObjectMapper mapper = new ObjectMapper();
             List<ImmutableMetadata> metadata = mapper.readValue(dbMetadataFile,mapper.getTypeFactory().constructCollectionType(List.class, ImmutableMetadata.class));
+            return metadata;*/
+            ObjectMapper objectMapper = new ObjectMapper()
+                .registerModule(new GuavaModule())
+                .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
+                .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+            CollectionType javatype = objectMapper.getTypeFactory().constructCollectionType(ImmutableList.class,ImmutableMetadataImpl.class);
+            ImmutableList<DatabaseRelationDefinition> metadata = objectMapper.readValue(dbMetadataFile, javatype);
             return metadata;
         }
         catch (

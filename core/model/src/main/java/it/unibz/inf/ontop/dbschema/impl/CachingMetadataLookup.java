@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class CachingMetadataLookup implements MetadataLookup {
@@ -24,7 +25,7 @@ public class CachingMetadataLookup implements MetadataLookup {
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
             .enableTestMode()
             .build();
-        Injector injector = defaultConfiguration.getInjector();
+        Injector injector = defaultConfiguration.getInjector(); //avoid defaultconfiguration
         TypeFactory TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(TYPE_FACTORY);
         provider = builder.build();
@@ -62,7 +63,15 @@ public class CachingMetadataLookup implements MetadataLookup {
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }
 
-    public ImmutableMetadata loadImmutableMetadata() throws MetadataExtractionException {
-        return new ImmutableMetadataImpl(dbMetadataFile);
+    public ImmutableMetadata loadImmutableMetadata() throws MetadataExtractionException, IOException {
+
+        ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(dbMetadataFile);
+        ImmutableList<DatabaseRelationDefinition> list = lookup.loadRelations();
+
+        for (DatabaseRelationDefinition relation : list)
+            provider.insertIntegrityConstraints(relation, lookup);
+
+        //return new ImmutableMetadataImpl(dbMetadataFile);
+        return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }
 }
