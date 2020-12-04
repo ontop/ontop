@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.exception;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 /**
  * Exception while extracting the DB metadata
  */
