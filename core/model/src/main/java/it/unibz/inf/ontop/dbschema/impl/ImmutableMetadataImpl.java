@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -13,31 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@JsonTypeName("type")
 public class ImmutableMetadataImpl implements ImmutableMetadata {
     private final DBParameters dbParameters;
     private final ImmutableList<DatabaseRelationDefinition> relations;
     private final File dbMetadataFile;
-
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    ImmutableMetadataImpl(@JsonProperty("dbParameters") DBParameters dbParameters,
-                          @JsonProperty("relations") ImmutableList<DatabaseRelationDefinition> relations,
-                          @JsonProperty("dbMetadataFile") File dbMetadataFile
-                          /*@JsonProperty("uniqueConstraints") List<Map<String,Object>> uniqueConstraints,
-                          @JsonProperty("otherFunctionalDependencies") String otherFunctionalDependencies,
-                          @JsonProperty("foreignKeys") Map<String,Object> foreignKeys,
-                          @JsonProperty("columns")Map<String,Object> columns,
-                          @JsonProperty("name")String name*/
-                          ){
-        this.dbParameters = dbParameters;
-        this.relations = relations;
-        this.dbMetadataFile = dbMetadataFile;
-        /*this.uniqueConstraints = uniqueConstraints;
-        this.otherFunctionalDependencies = otherFunctionalDependencies;
-        this.foreignKeys = foreignKeys;
-        this.columns = columns;
-        this.name = name;*/
-    }
 
     ImmutableMetadataImpl(DBParameters dbParameters, ImmutableList<DatabaseRelationDefinition> relations) {
         this.dbParameters = dbParameters;
@@ -74,6 +54,7 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     Map<String, String> getMetadataForJsonExport() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         String extractionTime = dateFormat.format(Calendar.getInstance().getTime());
+        //Field[] fields = c.getDeclaredFields();
 
         return ImmutableMap.<String, String>builder()
             .put("dbmsProductName", getDBParameters().getDbmsProductName())
@@ -82,6 +63,10 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
             .put("driverVersion", getDBParameters().getDriverVersion())
             .put("quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString())
             .put("extractionTime", extractionTime)
+            //.put("idFactory1", getDBParameters().getQuotedIDFactory().get)
+            .put("idFactory", getDBParameters().getQuotedIDFactory().getClass().toString())
+            //.put("dbTypeFactory", getDBParameters().getDBTypeFactory().toString())
+            .put("dbTypeFactory", getDBParameters().getDBTypeFactory().getDBStringType().toString())
             .build();
     }
 
@@ -117,43 +102,39 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
         this.additionalProperties.put(name, value);
     }
 
-
-
     @JsonIgnore
     private Map<String, String> metadata;
     @JsonProperty("metadata")
     private void setMetadata(Map<String, String> metadata) {this.metadata = metadata;}
 
     @JsonProperty("relations")
-    //@JsonPropertyOrder({ "name" })
     private void unpackNested(List<Map<String,Object>> metadata) {
         for(Map<String,Object> md: metadata) {
+            this.uniqueConstraints = (List<Map<String,Object>>) md.get("uniqueConstraints");
+            for (Map<String, Object> uc: uniqueConstraints) {
+                this.constraintname = (String) uc.get("name");
+                this.determinants = (List<String>) uc.get("determinants");
+                this.isPrimaryKey = (Boolean) uc.get("isPrimaryKey");
+            }
+            this.otherFunctionalDependencies = (List<String>) md.get("otherFunctionalDependencies");
+            this.foreignKeys = (List<Map<String,Object>>) md.get("foreignKeys");
+            for (Map<String, Object> fk: foreignKeys) {
+                this.foreignkeyname = (String) fk.get("name");
+                this.from = (Map<String,Object>) fk.get("from");
+                this.fromrelation = (String) from.get("relation");
+                this.fromcolumns = (List<String>) from.get("columns");
+                this.to = (Map<String,Object>) fk.get("to");
+                this.torelation = (String) to.get("relation");
+                this.tocolumns = (List<String>) to.get("columns");
+            }
+            this.columns = (List<Map<String,Object>>) md.get("columns");
+            for (Map<String, Object> cl: columns) {
+                this.columnname = (String) cl.get("name");
+                this.isNullable = (Boolean) cl.get("isNullable");
+                this.datatype = (String) cl.get("datatype");
+            }
             this.name = (String) md.get("name");
         }
-        //unpack for every single item of the list ... not just item 0
-        /*this.uniqueConstraints = (List<Map<String,Object>>) metadata.get(0);
-        for (Map<String, Object> map : uniqueConstraints) {
-            this.constraintname = (String) map.get("name");
-            this.determinants = (List<String>) map.get("determinants");
-            this.isPrimaryKey = (Boolean) map.get("isPrimaryKey");
-        }*/
-
-        /*this.otherFunctionalDependencies = (String) metadata.get("otherFunctionalDependencies");
-        this.foreignKeys = (Map<String,Object>) metadata.get("foreignKeys");
-        this.columns = (Map<String,Object>) metadata.get("columns");
-        this.name = (String) metadata.get("name");
-
-
-        this.foreignkeyname = (String) foreignKeys.get("name");
-        this.from = (Map<String,Object>) foreignKeys.get("from");
-        this.to = (Map<String,Object>) foreignKeys.get("to");
-        this.fromrelation = (String) from.get("relation");
-        this.torelation = (String) to.get("relation");
-        this.fromcolumns = (List<String>) from.get("columns");
-        this.tocolumns = (List<String>) to.get("columns");
-        this.columnname = (String) columns.get("name");
-        this.isNullable = (Boolean) columns.get("isNullable");
-        this.datatype = (String) columns.get("datatype");*/
     }
 
     /*@JsonProperty("relations")
@@ -167,25 +148,40 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     //private Map<String,Object> uniqueConstraints;
 
     @JsonProperty("otherFunctionalDependencies")
-    private String otherFunctionalDependencies;
+    private List<String> otherFunctionalDependencies;
 
     @JsonProperty("foreignKeys")
-    private Map<String,Object> foreignKeys;
+    private List<Map<String,Object>> foreignKeys;
 
     @JsonProperty("columns")
-    private Map<String,Object> columns;
+    private List<Map<String,Object>> columns;
 
     @JsonProperty("name")
     private String name;
 
+    @JsonProperty("uniqueConstraints")
+    public List<Map<String,Object>> getUniqueConstraints() {
+        return uniqueConstraints;
+    }
+
     @JsonProperty("otherFunctionalDependencies")
-    public String getOtherFunctionalDependencies() {
+    public List<String> getOtherFunctionalDependencies() {
         return otherFunctionalDependencies;
     }
 
     @JsonProperty("otherFunctionalDependencies")
-    public void setOtherFunctionalDependencies(String otherFunctionalDependencies) {
+    public void setOtherFunctionalDependencies(List<String> otherFunctionalDependencies) {
         this.otherFunctionalDependencies = otherFunctionalDependencies;
+    }
+
+    @JsonProperty("foreignKeys")
+    public List<Map<String,Object>> getForeignKeys() {
+        return foreignKeys;
+    }
+
+    @JsonProperty("columns")
+    public List<Map<String,Object>> getColumns() {
+        return columns;
     }
 
     @JsonProperty("name")
@@ -202,6 +198,9 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     @JsonProperty("isPrimaryKey")
     private boolean isPrimaryKey;
 
+    public String getConstraintname() {
+        return constraintname;
+    }
     //@JsonProperty("name")
     public void setConstraintname(String constraintname) { this.constraintname = constraintname; }
 

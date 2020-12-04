@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.datatype.*;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
@@ -16,6 +15,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static junit.framework.TestCase.*;
 
@@ -43,7 +43,9 @@ public class OntopLoadDBMetadataTest {
 
     //CollectionType listType = obj.getTypeFactory().constructCollectionType(ArrayList.class, tClass);
     //List<ImmutableMetadataImpl> metadata = obj.convertValue(dbMetadataFile, new TypeReference<List<ImmutableMetadataImpl>>(){});
-    //List<ImmutableMetadataImpl> metadata = obj.readValue(dbMetadataFile, typeFactory.constructCollectionType(List.class, SomeClass.class));
+    /*List<ImmutableMetadataImpl> metadata = objectMapper
+        .readerFor(ImmutableMetadataImpl.class)
+        .readValue(dbMetadataFile);*/
 
 
         //.getTypeFactory.constructParametricType()
@@ -60,19 +62,20 @@ public class OntopLoadDBMetadataTest {
     @Test // Check relation name
     public void TestLoadMetadataFromJSON() throws IOException {
 
-        //ImmutableList rel = metadata.getAllRelations();
-        //String name = rel.get(0).toString();
+        //metadata.get(0);
         String name = metadata.get(0).getName();
-        assertEquals("\"tb_emerge_authors\"", name);
+        assertEquals("\"tb_bk_gen\"", name);
     }
 
-//    @Test // Check primary key
-//    public void TestLoadMetadataFromJSON2() throws IOException {
-//
-//        List<Relations> rel2 = metadata.getRelations();
-//        List<UniqueConstraints> uq2 = rel2.get(0).getUniqueConstraints();
-//        assertEquals(uq2.get(0).getIsPrimaryKey(), true);
-//    }
+    @Test // Check primary key
+    public void TestLoadMetadataFromJSON2() throws IOException {
+
+        //Map<String, Object> temp1 = metadata.get(0).getUniqueConstraints();
+        String name = metadata.get(0).getConstraintname();
+        //String name = metadata.get(0).getUniqueConstraints().get(0).toString();//.getUniqueConstraints().get(0).get("constraintName");
+        //assertTrue(name);
+        assertEquals("pk_gen", name);
+    }
 //
 //    @Test // Check foreign key name
 //    public void TestLoadMetadataFromJSON3() throws IOException {

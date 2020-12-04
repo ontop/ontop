@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.dbschema.tools.RDBMetadataLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,15 +18,15 @@ import java.io.IOException;
 
 public class RDBMetadataLoaderImpl implements RDBMetadataLoader {
 
-    private final File dbMetadataFile;
+    private final TypeFactory typeFactory;
 
     @Inject
-    public RDBMetadataLoaderImpl(File dbMetadataFile) {
-        this.dbMetadataFile = dbMetadataFile;
+    private RDBMetadataLoaderImpl(TypeFactory typeFactory) {
+        this.typeFactory = typeFactory;
     }
 
     @Override
-    public ImmutableMetadata loadAndDeserialize() throws MetadataExtractionException, IOException {
+    public ImmutableMetadata loadAndDeserialize(File dbMetadataFile) throws MetadataExtractionException, IOException {
 
         try {
             // create object mapper instance
