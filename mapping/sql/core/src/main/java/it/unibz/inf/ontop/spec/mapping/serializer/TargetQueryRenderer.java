@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.serializer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.QuadPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -18,13 +19,13 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.impl.BlankNodeTermType;
 import it.unibz.inf.ontop.model.type.impl.IRITermType;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.eclipse.rdf4j.rio.turtle.TurtleUtil;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A utility class to render a Target Query object into its representational
@@ -52,12 +53,9 @@ public class TargetQueryRenderer {
      */
     public String encode(ImmutableList<TargetAtom> body) {
 
-        TurtleWriter turtleWriter = new TurtleWriter();
+        Map<Optional<String>, Map<String, Map<String, Set<String>>>> store = new LinkedHashMap<>();
         for (TargetAtom atom : body) {
             RDFAtomPredicate pred = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
-            String subject = renderTerm(pred.getSubject(atom.getSubstitutedTerms()));
-            String predicate = renderTerm(pred.getProperty(atom.getSubstitutedTerms()));
-            String object = renderTerm(pred.getObject(atom.getSubstitutedTerms()));
             Optional<String> graph;
             if (pred instanceof TriplePredicate) {
                 graph = Optional.empty();
@@ -67,11 +65,46 @@ public class TargetQueryRenderer {
             }
             else
                 throw new UnsupportedOperationException("unsupported predicate! " + pred);
-            turtleWriter.put(subject, predicate, object, graph);
+
+            String subject = renderTerm(pred.getSubject(atom.getSubstitutedTerms()));
+            String predicate = renderTerm(pred.getProperty(atom.getSubstitutedTerms()));
+            String object = renderTerm(pred.getObject(atom.getSubstitutedTerms()));
+
+            store.computeIfAbsent(graph, (g) -> new LinkedHashMap<>())
+                    .computeIfAbsent(subject, (s) -> new LinkedHashMap<>())
+                    .computeIfAbsent(predicate, (p) -> new LinkedHashSet<>())
+                    .add(object);
         }
-        return turtleWriter.print();
+        return store.entrySet().stream()
+                .map(e -> e.getKey().isPresent()
+                        ? "GRAPH " + e.getKey().get() + " { "
+                        + getSubjectPredicateObjects(e.getValue()) + "}"
+                        :		getSubjectPredicateObjects(e.getValue()))
+                .collect(Collectors.joining(" "));
     }
 
+    private static final String rdfType = "rdf:type";
+
+    private static String getPredicateObjects(Map<String, Set<String>> predicateObjects) {
+        Set<String> type = predicateObjects.get(rdfType);
+        Stream<Map.Entry<String, Set<String>>> stream = type != null
+                ? Stream.concat(
+                    Stream.of(Maps.immutableEntry("a", type)), // rename and place first
+                    predicateObjects.entrySet().stream().filter(e -> !e.getKey().equals(rdfType)))
+                : predicateObjects.entrySet().stream();
+
+        return stream
+                .map(e -> e.getKey() + " " + String.join(" , ", e.getValue()))
+                .collect(Collectors.joining(" ; "));
+    }
+
+    private static String getSubjectPredicateObjects(Map<String, Map<String, Set<String >>> map) {
+        return map.entrySet().stream()
+                .map(e -> e.getKey() + " " + getPredicateObjects(e.getValue()) + " . ")
+                .collect(Collectors.joining(""));
+    }
+
+    
     private String renderTerm(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) term;
