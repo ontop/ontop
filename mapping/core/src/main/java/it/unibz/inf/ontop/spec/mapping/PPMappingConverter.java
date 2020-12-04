@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.MetadataLookup;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 
 /**

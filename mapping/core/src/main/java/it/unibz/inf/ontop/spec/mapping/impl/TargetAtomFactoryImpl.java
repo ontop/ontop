@@ -8,11 +8,9 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.stream.IntStream;
 
@@ -21,13 +19,11 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final Variable s, p, o, g;
-    private final TermFactory termFactory;
 
     @Inject
     private TargetAtomFactoryImpl(AtomFactory atomFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
         this.s = termFactory.getVariable("s");
         this.p = termFactory.getVariable("p");
         this.o = termFactory.getVariable("o");
@@ -69,22 +65,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
     }
 
     @Override
-    public TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI classIRI) {
-        return getTripleTargetAtom(subjectTerm, createIRIConstant(RDF.TYPE), createIRIConstant(classIRI));
-    }
-
-    @Override
-    public TargetAtom getQuadTargetAtom(ImmutableTerm subjectTerm, IRI classIRI, ImmutableTerm graphTerm) {
-        return getQuadTargetAtom(subjectTerm, createIRIConstant(RDF.TYPE), createIRIConstant(classIRI), graphTerm);
-    }
-
-    @Override
     public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
         return new TargetAtomImpl(projectionAtom, substitution);
     }
-
-    private IRIConstant createIRIConstant(IRI iri) {
-        return termFactory.getConstantIRI(iri);
-    }
-
 }
