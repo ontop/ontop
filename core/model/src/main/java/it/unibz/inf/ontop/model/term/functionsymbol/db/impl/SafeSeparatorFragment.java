@@ -11,13 +11,14 @@ import java.util.stream.IntStream;
 public class SafeSeparatorFragment {
     private final String fragment;
     private final char separator;
-    private final boolean containsPlaceholder;
+    private final int firstPlaceholderIndex;
 
     /**
      * TODO: enrich this list (incomplete)
      */
     protected static final ImmutableSet<Character> SOME_SAFE_SEPARATORS = ImmutableSet.of(
-            '/', '!', '$', '&', '\'', '(', ')', '*', '+', ',', ';', '=', '#');
+            '!', '$', '&', '\'', '(', ')', '*', '+', ',', ';', '=',  // sub-delims
+            '#', '/');
 
     public static final String NOT_A_SAFE_SEPARATOR_REGEX = "[^"
             + SOME_SAFE_SEPARATORS.stream()
@@ -26,14 +27,14 @@ public class SafeSeparatorFragment {
             .collect(Collectors.joining())
             + "]*";
 
-    private SafeSeparatorFragment(String fragment, char separator, boolean containsPlaceholder) {
+    private SafeSeparatorFragment(String fragment, char separator, int firstPlaceholderIndex) {
         this.fragment = fragment;
         this.separator = separator;
-        this.containsPlaceholder = containsPlaceholder;
+        this.firstPlaceholderIndex = firstPlaceholderIndex;
     }
 
     private SafeSeparatorFragment(String fragment, char separator) {
-        this(fragment, separator, fragment.indexOf('{') >= 0);
+        this(fragment, separator, fragment.indexOf('{'));
     }
 
     public String getFragment() {
@@ -46,7 +47,7 @@ public class SafeSeparatorFragment {
 
     @Override
     public String toString() {
-        return fragment + separator + (containsPlaceholder ? "P" : "");
+        return fragment + separator + (firstPlaceholderIndex != -1 ? "P" : "");
     }
 
     public static ImmutableList<SafeSeparatorFragment> split(String s) {
@@ -54,16 +55,17 @@ public class SafeSeparatorFragment {
         int start = 0, current_start = 0, end;
         while ((end = firstIndexOfSafeSeparator(s, current_start)) != -1) {
             String fragment = s.substring(current_start, end);
-            if (fragment.indexOf('{') >= 0) {
+            int firstPlaceholderIndex = fragment.indexOf('{');
+            if (firstPlaceholderIndex >= 0) {
                 if (current_start > start)
-                    builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), false));
-                builder.add(new SafeSeparatorFragment(s.substring(current_start, end), s.charAt(end), true));
+                    builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), -1));
+                builder.add(new SafeSeparatorFragment(s.substring(current_start, end), s.charAt(end), firstPlaceholderIndex));
                 start = end + 1;
             }
             current_start = end + 1;
         }
         if (current_start > start)
-            builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), false));
+            builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), -1));
         if (current_start < s.length())
             builder.add(new SafeSeparatorFragment(s.substring(current_start), (char) 0));
 
@@ -97,16 +99,31 @@ public class SafeSeparatorFragment {
         return pattern;
     }
 
+    private int getPrefixLength() {
+        return firstPlaceholderIndex != -1 ? firstPlaceholderIndex : fragment.length();
+    }
+
     private static boolean matchFragments(SafeSeparatorFragment subTemplate1, SafeSeparatorFragment subTemplate2) {
-        return subTemplate1.getFragment().equals(subTemplate2.getFragment())
-                || subTemplate1.containsPlaceholder && subTemplate1.getPattern().matcher(subTemplate2.getFragment()).find()
-                || subTemplate2.containsPlaceholder && subTemplate2.getPattern().matcher(subTemplate1.getFragment()).find();
+        boolean equal = subTemplate1.fragment.equals(subTemplate2.fragment);
+        if (equal)
+            return true;
+
+        if (subTemplate1.firstPlaceholderIndex == -1 && subTemplate2.firstPlaceholderIndex == -1)
+            return equal;
+
+        int prefix = Math.min(subTemplate1.getPrefixLength(), subTemplate2.getPrefixLength());
+        if (!subTemplate1.fragment.substring(0, prefix).equals(subTemplate2.fragment.substring(0, prefix)))
+            return false;
+
+        return subTemplate1.firstPlaceholderIndex != -1 && subTemplate1.getPattern().matcher(subTemplate2.fragment).find()
+            || subTemplate2.firstPlaceholderIndex != -1 && subTemplate2.getPattern().matcher(subTemplate1.fragment).find();
     }
 
     /**
      * Is guaranteed not to return false negative.
      */
     public static boolean areCompatible(ImmutableList<SafeSeparatorFragment> fragments1, ImmutableList<SafeSeparatorFragment> fragments2) {
+
         if (fragments1 == fragments2)
             return true;
 
