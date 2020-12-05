@@ -34,8 +34,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
     private final R2RMLToSQLPPTriplesMapConverter transformer;
     private final RDF4JR2RMLMappingManager manager;
 
-
-
     @Inject
     private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
                                R2RMLToSQLPPTriplesMapConverter transformer) {

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
@@ -73,9 +72,9 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
         try (InputStream in = localClass.getResourceAsStream(fileName)) {
-            Properties properties = new Properties();
             if (in == null)
                 throw new RuntimeException("Configuration " + fileName + " not found.");
+            Properties properties = new Properties();
             properties.load(in);
             return properties;
         }
