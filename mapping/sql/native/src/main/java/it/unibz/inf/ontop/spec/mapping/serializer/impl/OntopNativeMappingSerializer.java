@@ -25,16 +25,17 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
      */
     @Override
     public void write(File file, SQLPPMapping ppMapping) throws IOException {
+        PrefixManager prefixManager = ppMapping.getPrefixManager();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write(renderPrefixDeclaration(ppMapping.getPrefixManager()));
+            writer.write(renderPrefixDeclaration(prefixManager));
 
-            TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(ppMapping.getPrefixManager());
+            TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
 
             writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " "
                     + OntopNativeMappingParser.START_COLLECTION_SYMBOL + "\n");
 
             writer.write(ppMapping.getTripleMaps().stream()
-                    .map(ax -> renderMappingAssertion(ax, targetQueryRenderer))
+                    .map(ax -> renderTriplesMap(ax, targetQueryRenderer))
                     .collect(Collectors.joining("\n")));
 
             writer.write(OntopNativeMappingParser.END_COLLECTION_SYMBOL + "\n\n");
@@ -45,22 +46,20 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
         }
     }
 
-
     private String renderPrefixDeclaration(PrefixManager prefixManager)  {
-        final ImmutableMap<String, String> prefixMap = prefixManager.getPrefixMap();
+        ImmutableMap<String, String> prefixMap = prefixManager.getPrefixMap();
 
         if (prefixMap.isEmpty())
             return "";
 
         return OntopNativeMappingParser.PREFIX_DECLARATION_TAG + "\n" +
                 prefixMap.entrySet().stream()
-                .map(e -> e.getKey() + (e.getKey().length() >= 9 ? "\t" : "\t\t") + e.getValue())
-                .collect(Collectors.joining("\n"))
+                    .map(e -> e.getKey() + (e.getKey().length() >= 9 ? "\t" : "\t\t") + e.getValue())
+                    .collect(Collectors.joining("\n"))
                 + "\n\n";
     }
 
-
-    private String renderMappingAssertion(SQLPPTriplesMap axiom, TargetQueryRenderer targetQueryRenderer) {
+    private String renderTriplesMap(SQLPPTriplesMap axiom, TargetQueryRenderer targetQueryRenderer) {
         return OntopNativeMappingParser.MAPPING_ID_LABEL + "\t" +
                 axiom.getId() + "\n" +
                 OntopNativeMappingParser.TARGET_LABEL + "\t\t" +
@@ -71,5 +70,4 @@ public class OntopNativeMappingSerializer implements MappingSerializer {
                         .replaceAll("\n", "\n\t\t\t") +
                 "\n";
     }
-
 }
