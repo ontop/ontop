@@ -13,6 +13,8 @@ public class SafeSeparatorFragment {
     private final char separator;
     private final int firstPlaceholderIndex;
 
+    private static final Pattern TO_BE_ESCAPED = Pattern.compile("[<(\\[{\\\\^=$!|\\]})?*+.>]");
+
     /**
      * TODO: enrich this list (incomplete)
      */
@@ -136,9 +138,8 @@ public class SafeSeparatorFragment {
                 .allMatch(i -> SafeSeparatorFragment.matchFragments(fragments1.get(i), fragments2.get(i)));
     }
 
-
     public static String makeRegexSafe(String s) {
-        return s.replaceAll("[<(\\[{\\\\^=$!|\\]})?*+.>]", "\\\\$0");
+        return TO_BE_ESCAPED.matcher(s).replaceAll("\\\\$0");
     }
 
 

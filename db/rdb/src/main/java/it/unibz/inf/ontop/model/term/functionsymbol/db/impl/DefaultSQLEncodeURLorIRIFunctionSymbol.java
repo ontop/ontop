@@ -6,8 +6,8 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
-import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DefaultSQLEncodeURLorIRIFunctionSymbol extends AbstractEncodeURIorIRIFunctionSymbol {
@@ -49,13 +49,15 @@ public class DefaultSQLEncodeURLorIRIFunctionSymbol extends AbstractEncodeURIorI
         return encodeForIriStart + termConverter.apply(terms.get(0)) + encodeForIriEnd;
     }
 
+    private static final Pattern QUOTATION_MARK = Pattern.compile("(?<!')'(?!')");
+
     /**
      * Imported from SQL99DialectAdapter
      *
      * By default, quotes and escapes isolated single quotes
      */
     protected String encodeSQLStringConstant(String constant) {
-        return "'" + constant.replaceAll("(?<!')'(?!')", getEscapedSingleQuote()) + "'";
+        return "'" + QUOTATION_MARK.matcher(constant).replaceAll(getEscapedSingleQuote()) + "'";
     }
 
     /**
