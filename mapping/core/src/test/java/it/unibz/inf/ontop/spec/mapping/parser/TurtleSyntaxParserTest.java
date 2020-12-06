@@ -85,12 +85,22 @@ public class TurtleSyntaxParserTest {
 				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
 	}
 
+	private static ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> template, Variable v1) {
+		return TERM_FACTORY.getBnodeFunctionalTerm(template,
+				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
+	}
+
 	private static ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm t, IRI type) {
 		return TERM_FACTORY.getRDFLiteralFunctionalTerm(t, type);
 	}
 
 	private static ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm t, String lang) {
 		return TERM_FACTORY.getRDFLiteralFunctionalTerm(t, lang);
+	}
+
+	@Test(expected = TargetQueryParserException.class)
+	public void test_1_1_empty_placeholder() throws TargetQueryParserException {
+		parser.parse(":Person-{} a :Person .");
 	}
 
 	@Test
@@ -106,6 +116,47 @@ public class TurtleSyntaxParserTest {
 	}
 
 	@Test
+	public void test_1_1_quotation() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{\"id\"} a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getVariable("\"id\"")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
+	}
+
+	@Test
+	public void test_1_1_mysql_quotation() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{`id`} a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getVariable("`id`")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
+	}
+
+	@Test
+	public void test_1_1_quotation_nested() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{\"id\"\"\"} a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getVariable("\"id\"\"\"")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
+	}
+
+	@Test(expected = TargetQueryParserException.class)
+	public void test_1_2_empty_placeholder() throws TargetQueryParserException {
+		parser.parse("<http://example.org/testcase#Person-{}> a :Person .");
+	}
+
+	@Test
 	public void test_1_2() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(
 				"<http://example.org/testcase#Person-{id}> a :Person .");
@@ -116,6 +167,31 @@ public class TurtleSyntaxParserTest {
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
 	}
+
+	@Test
+	public void test_1_2_quotation() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				"<http://example.org/testcase#Person-{\"id\"}> a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://example.org/testcase#Person-", 0),
+						getVariable("\"id\"")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
+	}
+
+	@Test
+	public void test_1_2_quotation_nested() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				"<http://example.org/testcase#Person-{\"\"\"id\"\"\"}> a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://example.org/testcase#Person-", 0),
+						getVariable("\"\"\"id\"\"\"")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
+	}
+
 
 	@Test
 	public void test_1_3() throws TargetQueryParserException {
@@ -192,6 +268,19 @@ public class TurtleSyntaxParserTest {
 	}
 
 	@Test
+	public void test_3_1_database_quotation() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName {\"fname\"} .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+						getVariable("\"fname\"")), RDFS.LITERAL))), result);
+	}
+
+	@Test
 	public void test_3_1_new_literal() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(
 				":Person-{id} :firstName \"{fname}\" .");
@@ -202,6 +291,19 @@ public class TurtleSyntaxParserTest {
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
 						getVariable("fname")), XSD.STRING))), result);
+	}
+
+	@Test
+	public void test_3_1_new_literal_quotation() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":Person-{id} :firstName \"{\\\"fname\\\"}\" .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
+						getVariable("id")),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
+				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
+						getVariable("\"fname\"")), XSD.STRING))), result);
 	}
 
 	@Test
@@ -255,9 +357,6 @@ public class TurtleSyntaxParserTest {
 						getVariable("fname")), XSD.STRING))), result);
 	}
 
-
-
-
 	@Test
 	public void test_3_escape_concat() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(
@@ -308,6 +407,7 @@ public class TurtleSyntaxParserTest {
 								getVariable("fname")))), XSD.DOUBLE))), result);
 	}
 
+	@Test
 	public void test_3_3() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} :firstName {fname}@en-US .");
 
@@ -736,25 +836,41 @@ public class TurtleSyntaxParserTest {
 
 	@Test(expected = TargetQueryParserException.class)
 	public void test_for_fully_qualified_column() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{person.id} a  :Person ;  :age 25 .");
+		parser.parse(":Person-{person.id} a  :Person ;  :age 25 .");
 	}
 
 	@Test(expected = TargetQueryParserException.class)
 	public void test_for_language_tag_from_a_variable() throws TargetQueryParserException {
-		ImmutableList<TargetAtom> result = parser.parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
+		parser.parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
 	}
 
 	@Test
 	public void test_BNODE_object() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse("<http://example.com/emp/{empno}> <http://example.com/emp#c_ref_deptno> _:{deptId} .");
-		assertEquals(1, result.size());
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://example.com/emp/", 0),
+						getVariable("empno")),
+				getConstantIRI("http://example.com/emp#c_ref_deptno"),
+				TERM_FACTORY.getBnodeFunctionalTerm(
+						TERM_FACTORY.getPartiallyDefinedToStringCast(getVariable("deptId"))))), result);
 	}
 
 	// Reproduces Issue #319
 	@Test
 	public void test_BNODE_function() throws TargetQueryParserException {
 		ImmutableList<TargetAtom> result = parser.parse("<http://esricanada.com/gfx_ontology_prototype/{feature_hash}> a <http://ontology.eil.utoronto.ca/icity/LandUse/Parcel> ; <http://ontology.eil.utoronto.ca/icity/LandUse/hasLandUse> _:landuse{feature_hash} .");
-		assertEquals(2, result.size());
+		assertEquals(ImmutableList.of(
+				getTripleTargetAtom(
+						getIRIFunctionalTerm(Template.of("http://esricanada.com/gfx_ontology_prototype/", 0),
+								getVariable("feature_hash")),
+						getConstantIRI(RDF.TYPE),
+						getConstantIRI("http://ontology.eil.utoronto.ca/icity/LandUse/Parcel")),
+				getTripleTargetAtom(
+						getIRIFunctionalTerm(Template.of("http://esricanada.com/gfx_ontology_prototype/", 0),
+								getVariable("feature_hash")),
+						getConstantIRI("http://ontology.eil.utoronto.ca/icity/LandUse/hasLandUse"),
+						getBnodeFunctionalTerm(Template.of("landuse", 0),
+								getVariable("feature_hash")))), result);
 	}
 
 	@Test
@@ -929,6 +1045,4 @@ public class TurtleSyntaxParserTest {
 				"\tex:numericValue {observedTemperature}^^xsd:double ] .");
 		assertEquals(6, result.size());
 	}
-
-
 }

@@ -149,7 +149,6 @@ WS
 
 ENCLOSED_COLUMN_NAME
   : '{' ~[{}]+ '}'
-  | '{"' (~["] | '""')+ '"}'
   ;
 
 // extends with ENCLOSED_COLUMN_NAME
@@ -201,7 +200,7 @@ EXPONENT // [154s]
 // TURTLE.g4 says  '"' (~ ["\\\r\n] | '\'' | '\\"')* '"'
 // but the one below is what is written in https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
 STRING_LITERAL_QUOTE // [22]
-  : '"' (~ ["\\\r\n] | ECHAR |  UCHAR)* '"'
+  : '"' (~["\\\r\n] | ECHAR |  UCHAR)* '"'
   ;
 
 UCHAR // [26]: numeric escapes for IRIs and Strings
