@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
  */
 public class SelectQueryParserTest {
 
-    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_SP, TABLE_SQ;
+    private NamedRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_SP, TABLE_SQ;
     private DBTermType integerDBType;
     private QuotedIDFactory idfac;
 

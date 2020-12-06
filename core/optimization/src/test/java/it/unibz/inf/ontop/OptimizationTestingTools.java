@@ -2,7 +2,6 @@ package it.unibz.inf.ontop;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
@@ -185,7 +184,7 @@ public class OptimizationTestingTools {
 
         public OfflineMetadataProviderBuilder3(TypeFactory typeFactory) { super(typeFactory); }
 
-        public DatabaseRelationDefinition createRelation(String tableName, int arity, DBTermType termType, boolean canBeNull) {
+        public NamedRelationDefinition createRelation(String tableName, int arity, DBTermType termType, boolean canBeNull) {
             QuotedIDFactory idFactory = getQuotedIDFactory();
             RelationDefinition.AttributeListBuilder builder =  DatabaseTableDefinition.attributeListBuilder();
             for (int i = 1; i <= arity; i++) {
@@ -195,20 +194,20 @@ public class OptimizationTestingTools {
             return createDatabaseRelation(ImmutableList.of(id), builder);
         }
 
-        public DatabaseRelationDefinition createRelation(int tableNumber, int arity, DBTermType termType, String prefix, boolean canBeNull) {
+        public NamedRelationDefinition createRelation(int tableNumber, int arity, DBTermType termType, String prefix, boolean canBeNull) {
             return createRelation(prefix + "TABLE" + tableNumber + "AR" + arity, arity, termType, canBeNull);
         }
 
-        public DatabaseRelationDefinition createRelationWithPK(int tableNumber, int arity) {
+        public NamedRelationDefinition createRelationWithPK(int tableNumber, int arity) {
             DBTermType stringDBType = getDBTypeFactory().getDBStringType();
-            DatabaseRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "PK_", false);
+            NamedRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "PK_", false);
             UniqueConstraint.primaryKeyOf(tableDef.getAttribute(1));
             return tableDef;
         }
 
-        public DatabaseRelationDefinition createRelationWithUC(int tableNumber, int arity, boolean canNull) {
+        public NamedRelationDefinition createRelationWithUC(int tableNumber, int arity, boolean canNull) {
             DBTermType stringDBType = getDBTypeFactory().getDBStringType();
-            DatabaseRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "UC_", canNull);
+            NamedRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "UC_", canNull);
             UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
                     .addDeterminant(1)
                     .build();

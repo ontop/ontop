@@ -54,12 +54,12 @@ public class MappingTestingTools {
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
 
-    public static final DatabaseRelationDefinition TABLE1_AR2;
-    public static final DatabaseRelationDefinition TABLE2_AR2;
-    public static final DatabaseRelationDefinition TABLE1_AR3;
-    public static final DatabaseRelationDefinition TABLE2_AR3;
-    public static final DatabaseRelationDefinition TABLE3_AR3;
-    public static final DatabaseRelationDefinition TABLE4_AR3;
+    public static final NamedRelationDefinition TABLE1_AR2;
+    public static final NamedRelationDefinition TABLE2_AR2;
+    public static final NamedRelationDefinition TABLE1_AR3;
+    public static final NamedRelationDefinition TABLE2_AR3;
+    public static final NamedRelationDefinition TABLE3_AR3;
+    public static final NamedRelationDefinition TABLE4_AR3;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -114,7 +114,7 @@ public class MappingTestingTools {
 
         public OfflineMetadataProviderBuilder2(TypeFactory typeFactory) { super(typeFactory); }
 
-        private DatabaseRelationDefinition createRelationPredicate(int tableNumber, int arity) {
+        private NamedRelationDefinition createRelationPredicate(int tableNumber, int arity) {
             QuotedIDFactory idFactory = getQuotedIDFactory();
             DBTermType stringDBType = getDBTypeFactory().getDBStringType();
 

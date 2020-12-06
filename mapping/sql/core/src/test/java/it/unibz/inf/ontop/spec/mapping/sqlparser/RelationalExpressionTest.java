@@ -29,7 +29,7 @@ public class RelationalExpressionTest {
 
     private static QuotedIDFactory MDFAC;
 
-    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R;
+    private NamedRelationDefinition TABLE_P, TABLE_Q, TABLE_R;
 
     private ExtensionalDataNode f1, f2;
     private ImmutableFunctionalTerm eq;
@@ -84,7 +84,7 @@ public class RelationalExpressionTest {
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
 
-        DatabaseRelationDefinition Q = builder.createDatabaseRelation("Q",
+        NamedRelationDefinition Q = builder.createDatabaseRelation("Q",
             "A", integerDBType, true,
             "C", integerDBType, true);
 

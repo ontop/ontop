@@ -23,7 +23,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     }
 
     @Override
-    public RAExpressionAttributes create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
+    public RAExpressionAttributes create(NamedRelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<QuotedID, ImmutableTerm> map = getAttributesMap(relation, variables);
         return new RAExpressionAttributes(attachAliases(map, relation.getAllIDs().stream()
                 .flatMap(id -> Stream.of(id, id.getTableOnlyID()))

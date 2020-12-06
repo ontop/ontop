@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractDatabaseRelationDefinition extends AbstractRelationDefinition implements DatabaseRelationDefinition {
+public abstract class AbstractNamedRelationDefinition extends AbstractRelationDefinition implements NamedRelationDefinition {
 
     private final RelationID id;
     private final ImmutableSet<RelationID> allIds;
@@ -22,7 +22,7 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
     private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
     private final List<ForeignKeyConstraint> foreignKeys = new ArrayList<>();
 
-    AbstractDatabaseRelationDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
+    AbstractNamedRelationDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
         super(allIds.get(0).getSQLRendering(), builder);
         this.id = allIds.get(0);
         this.allIds =  ImmutableSet.copyOf(allIds);
