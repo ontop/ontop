@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -110,14 +111,14 @@ public class TargetQueryRenderer {
     private String renderTerm(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm ift = (ImmutableFunctionalTerm) term;
-            FunctionSymbol fs = ift.getFunctionSymbol();
-            if (DBTypeConversionFunctionSymbol.isTemporary(fs)) { // TmpToTEXT(...)
-                ImmutableTerm uncast = DBTypeConversionFunctionSymbol.uncast(ift);
-                if (uncast instanceof Variable)
-                    return renderVariable((Variable)uncast);
-                throw new MinorOntopInternalBugException("Unexpected type " + term.getClass() + " for term: " + term);
-            }
+            ImmutableTerm uncast = DBTypeConversionFunctionSymbol.uncast(ift);  // TmpToTEXT(...)
+            if (uncast instanceof Variable)
+                return renderVariable((Variable)uncast);
 
+            if (uncast != ift)
+                throw new MinorOntopInternalBugException("Unexpected type " + term.getClass() + " for term: " + term);
+
+            FunctionSymbol fs = ift.getFunctionSymbol();
             // RDF(..)
             if (fs instanceof RDFTermFunctionSymbol)
                 return renderRDFFunction(ift);
@@ -186,8 +187,8 @@ public class TargetQueryRenderer {
 
         String suffix = datatype.getLanguageTag()
                 .map(tag -> "@" + tag.getFullString())
-                .orElseGet(() -> datatype.getIRI().equals(RDFS.LITERAL)
-                            ? ""
+                .orElseGet(() -> datatype.getIRI().equals(XSD.STRING)
+                            ? ""  // in Turtle, the default datatype is xsd:string
                             : "^^" + prefixManager.getShortForm(datatype.getIRI().getIRIString()));
 
         return lexicalString + suffix;

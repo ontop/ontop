@@ -28,14 +28,14 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
     }
 
     /*
-    https://www.w3.org/TR/r2rml/#from-template
+       https://www.w3.org/TR/r2rml/#from-template
 
-    Curly braces that do not enclose column names must be escaped by a backslash character (“\”).
-    This also applies to curly braces within column names.
+       Curly braces that do not enclose column names must be escaped by a backslash character (“\”).
+       This also applies to curly braces within column names.
 
-    Backslash characters (“\”) must be escaped by preceding them with another backslash character,
-    yielding “\\”. This also applies to backslashes within column names.
- */
+       Backslash characters (“\”) must be escaped by preceding them with another backslash character,
+       yielding “\\”. This also applies to backslashes within column names.
+    */
 
     private static String decode(String s) {
         return s.replace("\\{", "{")
