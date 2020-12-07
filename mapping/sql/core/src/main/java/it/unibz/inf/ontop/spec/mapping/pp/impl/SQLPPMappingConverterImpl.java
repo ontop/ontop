@@ -126,7 +126,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> e.getValue().orElseThrow(() -> new MinorOntopInternalBugException("Impossible"))));
 
         ImmutableSubstitution<ImmutableTerm> targetRenamingPart = substitutionFactory.getSubstitution(targetMap.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable) // getVar2VarFragment
+                .filter(e -> e.getValue() instanceof Variable) // getVar2VarFragment (NON-INJECTIVE)
                 .filter(e -> !e.getValue().equals(e.getKey()))
                 .collect(ImmutableCollectors.toMap()));
 

@@ -61,25 +61,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return (ImmutableMap<Integer, ? extends VariableOrGroundTerm>) newArgumentMap;
     }
 
-    @Override
-    public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
-            throws ConversionException {
-        ImmutableList<? extends ImmutableTerm> newArguments = apply(dataAtom.getArguments());
-
-        if (!newArguments.stream().allMatch(t -> t instanceof Variable)) {
-            throw new ConversionException("The substitution applied to a DistinctVariableOnlyDataAtom has " +
-                    " produced some non-Variable arguments " + newArguments);
-        }
-        ImmutableList<Variable> variableArguments =  (ImmutableList<Variable>) newArguments;
-
-        if (variableArguments.size() == ImmutableSet.copyOf(variableArguments).size())
-            return atomFactory.getDistinctVariableOnlyDataAtom(dataAtom.getPredicate(), variableArguments);
-        else {
-            throw new ConversionException("The substitution applied a DistinctVariableOnlyDataAtom has introduced" +
-                    " redundant variables: " + newArguments);
-        }
-    }
-
 
     /**
      *" "this o f"
@@ -381,10 +362,5 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         e -> (NonVariableTerm) e.getValue()));
 
         return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
-    public TermFactory getTermFactory() {
-        return termFactory;
     }
 }

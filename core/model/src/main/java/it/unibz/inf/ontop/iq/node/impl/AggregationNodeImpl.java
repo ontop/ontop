@@ -111,8 +111,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         if (blockedSubstitutionToGroundTerm.isEmpty() && blockedVar2VarSubstitution.isEmpty())
             return newSubTree;
 
-        TermFactory termFactory = substitution.getTermFactory();
-
         // Blocked entries -> reconverted into a filter
         ImmutableExpression condition = termFactory.getConjunction(
                 Stream.concat(

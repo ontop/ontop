@@ -19,13 +19,5 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      */
     <T extends ImmutableTerm> T applyToTerm(T term);
 
-    /**
-     * Applies the substitution to the domain and co-domain terms
-     *
-     * Returns Optional.empty() if the results is not a substitution (incompatible entries)
-     */
-    <T extends ImmutableTerm>
-    Optional<ImmutableSubstitution<T>> applyToSubstitution(ImmutableSubstitution<T> substitution);
-
     NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
 }

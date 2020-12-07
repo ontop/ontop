@@ -38,9 +38,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
             throws ConversionException;
 
-    DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
-            throws ConversionException;
-
     /**
      * Viewing a substitution as a function (takes a term, returns a term).
      * This method yield the substitution "(g o f)" where g is this substitution.
@@ -84,7 +81,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
     ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment();
     ImmutableSubstitution<NonVariableTerm> getNonVariableTermFragment();
-
     ImmutableSubstitution<GroundTerm> getGroundTermFragment();
 
     /**
@@ -95,7 +91,4 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability);
 
     ImmutableSubstitution<ImmutableTerm> simplifyValues();
-
-    TermFactory getTermFactory();
-
 }
