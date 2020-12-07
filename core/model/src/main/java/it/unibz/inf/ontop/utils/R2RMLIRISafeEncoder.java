@@ -76,16 +76,16 @@ public class R2RMLIRISafeEncoder {
             // .put("%7F", "\u007F") // DEL
             .build();
 
-        private static final ImmutableBiMap<Character, String> INVERSE = TABLE.inverse();
+    private static final ImmutableBiMap<Character, String> INVERSE = TABLE.inverse();
 
     /*
      * percent encoding for a String
      */
-    public static String encode(String pe) {
-        int length = pe.length();
-        StringBuilder sb = new StringBuilder(length);
+    public static String encode(String s) {
+        int length = s.length();
+        StringBuilder sb = new StringBuilder(length * 5 / 4);
         for (int i = 0; i < length; i++) {
-            char c = pe.charAt(i);
+            char c = s.charAt(i);
             String r = INVERSE.get(c);
             if (r == null)
                 sb.append(c);
@@ -96,50 +96,43 @@ public class R2RMLIRISafeEncoder {
     }
 
     /***
-     * Given a string representing a URI, this method will return a new String
+     * Given a string representing an IRI, this method will return a new String
      * in which all percent encoded characters (e.g., %20) will
      * be restored to their original characters (e.g., ' ').
-     * This is necessary to transform some URIs into the original database values.
-     *
      */
-    public static String decode(String encodedURI) {
+    public static String decode(String encoded) {
 
-        int length = encodedURI.length();
-        StringBuilder strBuilder = new StringBuilder(length);
+        int length = encoded.length();
+        StringBuilder sb = new StringBuilder(length);
         char[] codeBuffer = new char[3];
 
         for (int i = 0; i < length; i++) {
-            char c = encodedURI.charAt(i);
+            char c = encoded.charAt(i);
 
             if (c != '%') {
                 // base case, the character is a normal character, just append
-                strBuilder.append(c);
+                sb.append(c);
                 continue;
             }
 
-            // found a escape, processing the code and replacing it by
-            // the original value that should be found on the DB. This
-            // should not be used all the time, only when working in
-            // virtual mode... we need to fix this with a FLAG.
-            // First we get the 2 chars next to %
+            // found a escape
             codeBuffer[0] = '%';
-            codeBuffer[1] = encodedURI.charAt(i + 1);
-            codeBuffer[2] = encodedURI.charAt(i + 2);
+            codeBuffer[1] = encoded.charAt(++i);
+            codeBuffer[2] = encoded.charAt(++i);
 
             // now we check if they match any of our escape codes, if
             // they do the char to be inserted is put in codeBuffer otherwise
             String code = String.copyValueOf(codeBuffer);
             Character rep = TABLE.get(code);
             if (rep != null)
-                strBuilder.append(rep);
+                sb.append(rep);
             else {
                 // This was not an escape code, so we just append the characters and continue;
-                log.warn("Error decoding an encoded URI from the query. Problematic code: {}\nProblematic URI: {}", code, encodedURI);
-                strBuilder.append(codeBuffer);
+                log.warn("Error decoding an encoded IRI from the query. Problematic code: {}\nProblematic IRI: {}", code, encoded);
+                sb.append(codeBuffer);
             }
-            i += 2;
         }
-        return strBuilder.toString();
+        return sb.toString();
     }
 
 

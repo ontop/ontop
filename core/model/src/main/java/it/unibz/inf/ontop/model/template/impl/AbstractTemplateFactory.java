@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.term.*;
 
+import java.util.regex.Pattern;
+
 public abstract class AbstractTemplateFactory implements TemplateFactory {
     protected final TermFactory termFactory;
 
@@ -38,17 +40,34 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
     */
 
     private static String decode(String s) {
-        return s.replace("\\{", "{")
-                .replace("\\}", "}")
-                .replace("\\\\", "\\");
+        int length = s.length();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            char c = s.charAt(i);
+            if (c == '\\') {
+                char n = s.charAt(++i);
+                if (n != '\\' && n != '}' && n != '{')
+                    sb.append(c); 
+                sb.append(n);
+            }
+            else
+                sb.append(c);
+        }
+        return sb.toString();
     }
 
     private static String encode(String s) {
-        return s.replace("\\", "\\\\")
-                .replace("{", "\\{")
-                .replace("}", "\\}");
+        int length = s.length();
+        StringBuilder sb = new StringBuilder(length * 5 / 4);
+        for (int i = 0; i < length; i++) {
+            char c = s.charAt(i);
+            if (c == '\\' || c == '}' || c == '{') {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
-
 
     protected String termToTemplateComponentString(ImmutableTerm term) {
         if (term instanceof Variable)
