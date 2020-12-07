@@ -4,11 +4,13 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -79,33 +81,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return (ImmutableSubstitution<ImmutableTerm>)this;
         }
 
-        Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
-
-        /*
-         * For all variables in the domain of f
-         */
-
-        for (Map.Entry<Variable, ? extends ImmutableTerm> gEntry :  f.getImmutableMap().entrySet()) {
-            substitutionMap.put(gEntry.getKey(), apply(gEntry.getValue()));
-        }
-
-        /*
-         * For the other variables (in the local domain but not in f)
-         */
-        for (Map.Entry<Variable, ? extends ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
-            Variable localVariable = localEntry.getKey();
-
-            if (substitutionMap.containsKey(localVariable))
-                continue;
-
-            substitutionMap.put(localVariable, localEntry.getValue());
-        }
-
-        return substitutionFactory.getSubstitution(
-                substitutionMap.entrySet().stream()
-                        // Clean out entries like t/t
-                        .filter(entry -> !entry.getKey().equals(entry.getValue()))
-                        .collect(ImmutableCollectors.toMap()));
+        return substitutionFactory.getSubstitution(Stream.concat(
+                f.getImmutableMap().entrySet().stream()
+                        .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue()))),
+                getImmutableMap().entrySet().stream())
+                        .filter(e -> !e.getKey().equals(e.getValue()))
+                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                // keep the value from f
+                                (vf, v) -> vf)));
     }
 
     @Override
@@ -123,16 +106,17 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return Optional.of(otherSubstitution);
 
         try {
-            ImmutableMap<Variable, T> map = Stream.concat(
-                        this.getImmutableMap().entrySet().stream(),
-                        otherSubstitution.getImmutableMap().entrySet().stream())
+            ImmutableMap<Variable, T> map = Stream.of(this, otherSubstitution)
+                    .map(ProtoSubstitution::getImmutableMap)
+                    .map(ImmutableMap::entrySet)
+                    .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (v1, v2) -> {
                                 if (!v1.equals(v2))
                                     throw new NotASubstitutionException();
                                 return v1;
                             }));
-            
+
             return Optional.of(substitutionFactory.getSubstitution(map));
         }
         catch (NotASubstitutionException e) {
