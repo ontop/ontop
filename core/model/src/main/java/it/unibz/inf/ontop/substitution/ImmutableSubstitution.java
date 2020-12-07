@@ -77,8 +77,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      */
     ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
-    Optional<ImmutableExpression> convertIntoBooleanExpression();
-
     Var2VarSubstitution getVar2VarFragment();
     ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
     ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();

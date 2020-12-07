@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -11,11 +12,13 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements InjectiveVar2VarSubstitution {
     private final boolean isEmpty;
@@ -23,7 +26,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     /**
      * Regular constructor
      */
-    protected InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap, AtomFactory atomFactory,
+    protected InjectiveVar2VarSubstitutionImpl(ImmutableMap<Variable, Variable> substitutionMap, AtomFactory atomFactory,
                                                TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         super(substitutionMap, atomFactory, termFactory, substitutionFactory);
         isEmpty = substitutionMap.isEmpty();
@@ -75,6 +78,19 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
                 .map(substitutionFactory::getInjectiveVar2VarSubstitution);
     }
 
+    protected Stream<Map.Entry<Variable, Variable>> composeRenaming(Var2VarSubstitution g ) {
+        ImmutableSet<Variable> gDomain = g.getDomain();
+
+        Stream<Map.Entry<Variable, Variable>> gEntryStream = g.getImmutableMap().entrySet().stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), applyToVariable(e.getValue())));
+
+        Stream<Map.Entry<Variable, Variable>> localEntryStream = getImmutableMap().entrySet().stream()
+                .filter(e -> !gDomain.contains(e.getKey()));
+
+        return Stream.concat(gEntryStream, localEntryStream)
+                .filter(e -> !e.getKey().equals(e.getValue()));
+    }
+
     @Override
     public InjectiveVar2VarSubstitution reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
         if (restrictingDomain.containsAll(getDomain()))
@@ -96,7 +112,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
         return Optional.of(applyRenaming(substitution));
     }
 
-    private static boolean isInjective(Map<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
+    private static boolean isInjective(ImmutableMap<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
         ImmutableSet<VariableOrGroundTerm> valueSet = ImmutableSet.copyOf(substitutionMap.values());
         return valueSet.size() == substitutionMap.keySet().size();
     }

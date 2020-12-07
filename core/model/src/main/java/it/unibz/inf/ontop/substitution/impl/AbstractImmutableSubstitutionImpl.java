@@ -289,11 +289,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public  Optional<ImmutableExpression> convertIntoBooleanExpression() {
-        return convertIntoBooleanExpression(this);
-    }
-
-    @Override
     public ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
         if (restrictingDomain.containsAll(getDomain()))
             return this;
@@ -313,38 +308,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return simplifyValues(Optional.empty());
     }
 
-    public ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
+    private ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
         return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> variableNullability
                                 .map(n -> e.getValue().simplify(n))
                                 .orElseGet(() -> e.getValue().simplify()))));
-    }
-
-    protected Optional<ImmutableExpression> convertIntoBooleanExpression(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-
-        List<ImmutableExpression> equalities = new ArrayList<>();
-
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(termFactory.getStrictEquality(entry.getKey(), entry.getValue()));
-        }
-
-        switch(equalities.size()) {
-            case 0:
-                return Optional.empty();
-            case 1:
-                return Optional.of(equalities.get(0));
-            default:
-                Iterator<ImmutableExpression> equalityIterator = equalities.iterator();
-                // Non-final
-                ImmutableExpression aggregateExpression = equalityIterator.next();
-                while (equalityIterator.hasNext()) {
-                    aggregateExpression = termFactory.getConjunction(aggregateExpression, equalityIterator.next());
-                }
-                return Optional.of(aggregateExpression);
-        }
     }
 
     @Override
