@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
@@ -210,7 +211,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
                             Map.Entry::getKey,
                             e -> termFactory.getVariable(e.getValue().get().getSQLRendering())));
 
-            ImmutableSubstitution<Variable> sub = substitutionFactory.getSubstitution(targetMap);
+            Var2VarSubstitution sub = substitutionFactory.getVar2VarSubstitution(targetMap);
             ImmutableSubstitution<ImmutableTerm> newSubtitution = sub.applyToTarget(target.getSubstitution());
             return targetAtomFactory.getTargetAtom(target.getProjectionAtom(), newSubtitution);
         }

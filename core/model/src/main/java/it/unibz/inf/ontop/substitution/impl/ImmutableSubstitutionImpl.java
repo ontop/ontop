@@ -63,24 +63,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
-    public Var2VarSubstitution getVar2VarFragment() {
-        ImmutableMap<Variable, Variable> newMap = map.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable)
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> (Variable)e.getValue()));
-
-        return substitutionFactory.getVar2VarSubstitution(newMap);
-    }
-
-    @Override
-    public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
-        ImmutableMap<Variable, GroundTerm> newMap = map.entrySet().stream()
-                .filter(e -> e.getValue() instanceof GroundTerm)
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> (GroundTerm)e.getValue()));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }

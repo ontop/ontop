@@ -97,7 +97,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .reduceDomainToIntersectionWith(aggregationVariables);
 
         ImmutableSubstitution<Variable> blockedVar2VarSubstitution = extractBlockedVar2VarSubstitutionMap(
-                descendingSubstitution.getVar2VarFragment(),
+                descendingSubstitution.getFragment(Variable.class),
                 aggregationVariables);
 
         ImmutableSubstitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution
@@ -141,7 +141,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     /**
      * Blocks implicit equalities involving aggregation variables but let other entries (like renamings) go.
      */
-    private ImmutableSubstitution<Variable> extractBlockedVar2VarSubstitutionMap(Var2VarSubstitution descendingVar2Var,
+    private ImmutableSubstitution<Variable> extractBlockedVar2VarSubstitutionMap(ImmutableSubstitution<Variable> descendingVar2Var,
                                                                                  ImmutableSet<Variable> aggregationVariables) {
         // Substitution value -> substitution keys
         ImmutableMultimap<Variable, Variable> invertedMultimap = descendingVar2Var.getImmutableMap().entrySet().stream()

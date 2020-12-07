@@ -186,20 +186,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm>
-                                                                          otherSubstitution) {
-        ImmutableMap.Builder<Variable, ImmutableTerm> mapBuilder = ImmutableMap.builder();
-
-        ImmutableMap<Variable, ? extends ImmutableTerm> otherSubstitutionMap = otherSubstitution.getImmutableMap();
-        for (Map.Entry<Variable, ? extends ImmutableTerm> otherEntry : otherSubstitutionMap.entrySet()) {
-            ImmutableTerm newValue = apply(otherEntry.getValue());
-            if (!otherEntry.getKey().equals(newValue))
-                mapBuilder.put(otherEntry.getKey(), newValue);
-        }
-        return substitutionFactory.getSubstitution(mapBuilder.build());
-    }
-
-    @Override
     public boolean equals(Object other) {
         if (other instanceof ImmutableSubstitution) {
             return getImmutableMap().equals(((ImmutableSubstitution) other).getImmutableMap());
@@ -298,71 +284,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                                 .orElseGet(() -> e.getValue().simplify()))));
     }
 
-    @Override
-    public ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment() {
-        ImmutableMap<Variable, VariableOrGroundTerm> newMap = getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof VariableOrGroundTerm)
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> (VariableOrGroundTerm) e.getValue()));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
-    public ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment() {
-        ImmutableMap<Variable, NonGroundFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof NonGroundFunctionalTerm)
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> (NonGroundFunctionalTerm) e.getValue()));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
-    public ImmutableSubstitution<GroundFunctionalTerm> getGroundFunctionalTermFragment() {
-        ImmutableMap<Variable, GroundFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof GroundFunctionalTerm)
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> (GroundFunctionalTerm) e.getValue()));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
-    public ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment() {
-        ImmutableMap<Variable, NonFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof NonFunctionalTerm)
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> (NonFunctionalTerm) e.getValue()));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
-    public ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment() {
-        ImmutableMap<Variable, ImmutableFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> (ImmutableFunctionalTerm) e.getValue()));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
-    public ImmutableSubstitution<NonVariableTerm> getNonVariableTermFragment() {
-        ImmutableMap<Variable, NonVariableTerm> newMap = getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof NonVariableTerm)
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> (NonVariableTerm) e.getValue()));
-
-        return substitutionFactory.getSubstitution(newMap);
-    }
 
     @Override
     public <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type) {

@@ -59,11 +59,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
             ImmutableSubstitution<? extends ImmutableTerm> other);
 
     /**
-     * Applies the current substitution to the "target" part of another substitution
-     */
-    ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution);
-
-    /**
      * Returns a "similar" substitution that avoids (if possible) to substitute certain variables.
      * <p>
      * Acts on equality between variables.
@@ -74,17 +69,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      */
     ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
-    Var2VarSubstitution getVar2VarFragment();
-
     <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
-
-    ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
-    ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
-    ImmutableSubstitution<GroundFunctionalTerm> getGroundFunctionalTermFragment();
-    ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
-    ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment();
-    ImmutableSubstitution<NonVariableTerm> getNonVariableTermFragment();
-    ImmutableSubstitution<GroundTerm> getGroundTermFragment();
 
     /**
      * Reduces the substitution's domain to its intersection with the argument domain
