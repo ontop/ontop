@@ -319,8 +319,9 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .map(s -> s.reduceDomainToIntersectionWith(groupingVariables))
                 .collect(ImmutableCollectors.toSet());
 
+        ImmutableSubstitution<NonVariableTerm> def = substitution.getFragment(NonVariableTerm.class);
+
         if (groupingVariableDefs.isEmpty()) {
-            ImmutableSubstitution<NonVariableTerm> def = substitution.getFragment(NonVariableTerm.class);
             return def.isEmpty()
                     ? ImmutableSet.of()
                     : ImmutableSet.of(def);
@@ -328,9 +329,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         // For Aggregation functional terms, we don't look further on for child definitions
         return groupingVariableDefs.stream()
-                .map(childDef -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) childDef)
-                .map(childDef -> childDef.union((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) substitution).get())
-                .map(childDef -> childDef.getFragment(NonVariableTerm.class))
+                .map(childDef -> childDef.union(def).get())
                 .collect(ImmutableCollectors.toSet());
     }
 

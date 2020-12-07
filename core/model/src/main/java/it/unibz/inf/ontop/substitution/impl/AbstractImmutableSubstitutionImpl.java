@@ -113,46 +113,35 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return (ImmutableSubstitution<T>) composeWith(g);
     }
 
-    /**
-     * In case some sub-classes wants to add a new unionXX method returning an optional in their own type.
-     *
-     * TODO: explain
-     */
+    private static class NotASubstitutionException extends RuntimeException {};
+
     protected Optional<ImmutableMap<Variable, T>> computeUnionMap(ImmutableSubstitution<T> otherSubstitution) {
-        ImmutableMap.Builder<Variable, T> mapBuilder = ImmutableMap.builder();
-        mapBuilder.putAll(getImmutableMap());
-
-        ImmutableMap<Variable, T> otherMap = otherSubstitution.getImmutableMap();
-        for(Variable otherVariable : otherMap.keySet()) {
-
-            T otherTerm = otherMap.get(otherVariable);
-
-            /*
-             * TODO: explain
-             */
-            if (isDefining(otherVariable) && (!get(otherVariable).equals(otherTerm))) {
-                return Optional.empty();
-            }
-
-            mapBuilder.put(otherVariable, otherTerm);
+        try {
+            ImmutableMap<Variable, T> map = Stream.concat(
+                        this.getImmutableMap().entrySet().stream(),
+                        otherSubstitution.getImmutableMap().entrySet().stream())
+                    .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                            (v1, v2) -> {
+                                if (!v1.equals(v2))
+                                    throw new NotASubstitutionException();
+                                return v1;
+                            }));
+            return Optional.of(map);
         }
-
-        return Optional.of(mapBuilder.build());
+        catch (NotASubstitutionException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
         if (otherSubstitution.isEmpty())
             return Optional.of(this);
-        else if(isEmpty())
+        if (isEmpty())
             return Optional.of(otherSubstitution);
 
-        Optional<ImmutableMap<Variable, T>> optionalMap = computeUnionMap(otherSubstitution);
-        if (optionalMap.isPresent()) {
-            ImmutableSubstitution<T> unionSubstitution = substitutionFactory.getSubstitution(optionalMap.get());
-            return Optional.of(unionSubstitution);
-        }
-        return Optional.empty();
+        return computeUnionMap(otherSubstitution)
+                .map(substitutionFactory::getSubstitution);
     }
 
     @Override
