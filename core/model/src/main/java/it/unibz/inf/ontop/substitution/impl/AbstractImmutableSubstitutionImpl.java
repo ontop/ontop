@@ -363,4 +363,15 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         return substitutionFactory.getSubstitution(newMap);
     }
+
+    @Override
+    public <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type) {
+        ImmutableMap<Variable, S> newMap = getImmutableMap().entrySet().stream()
+                .filter(e -> type.isInstance(e.getValue()))
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> type.cast(e.getValue())));
+
+        return substitutionFactory.getSubstitution(newMap);
+    }
 }

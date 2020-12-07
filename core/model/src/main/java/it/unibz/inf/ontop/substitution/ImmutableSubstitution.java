@@ -75,6 +75,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
     Var2VarSubstitution getVar2VarFragment();
+
+    <S extends ImmutableTerm> ImmutableSubstitution<S> getFragment(Class<S> type);
+
     ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
     ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
     ImmutableSubstitution<GroundFunctionalTerm> getGroundFunctionalTermFragment();

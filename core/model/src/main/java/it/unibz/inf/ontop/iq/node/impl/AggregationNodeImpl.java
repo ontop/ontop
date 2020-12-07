@@ -93,7 +93,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
-        ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.getGroundTermFragment()
+        ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.getFragment(GroundTerm.class)
                 .reduceDomainToIntersectionWith(aggregationVariables);
 
         ImmutableSubstitution<Variable> blockedVar2VarSubstitution = extractBlockedVar2VarSubstitutionMap(
@@ -320,7 +320,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .collect(ImmutableCollectors.toSet());
 
         if (groupingVariableDefs.isEmpty()) {
-            ImmutableSubstitution<NonVariableTerm> def = substitution.getNonVariableTermFragment();
+            ImmutableSubstitution<NonVariableTerm> def = substitution.getFragment(NonVariableTerm.class);
             return def.isEmpty()
                     ? ImmutableSet.of()
                     : ImmutableSet.of(def);
@@ -330,7 +330,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         return groupingVariableDefs.stream()
                 .map(childDef -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) childDef)
                 .map(childDef -> childDef.union((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) substitution).get())
-                .map(ImmutableSubstitution::getNonVariableTermFragment)
+                .map(childDef -> childDef.getFragment(NonVariableTerm.class))
                 .collect(ImmutableCollectors.toSet());
     }
 
