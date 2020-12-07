@@ -85,6 +85,12 @@ public class TurtleSyntaxParserTest {
 				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
 	}
 
+	private static ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> template, Variable v1, Variable v2) {
+		return TERM_FACTORY.getIRIFunctionalTerm(template,
+				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1),
+				TERM_FACTORY.getPartiallyDefinedToStringCast(v2)));
+	}
+
 	private static ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> template, Variable v1) {
 		return TERM_FACTORY.getBnodeFunctionalTerm(template,
 				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
@@ -111,6 +117,18 @@ public class TurtleSyntaxParserTest {
 		assertEquals(ImmutableList.of(getTripleTargetAtom(
 				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
 						getVariable("id")),
+				getConstantIRI(RDF.TYPE),
+				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
+	}
+
+	@Test
+	public void test_1_1_equality() throws TargetQueryParserException {
+		ImmutableList<TargetAtom> result = parser.parse(
+				":x={x}&y={y} a :Person .");
+
+		assertEquals(ImmutableList.of(getTripleTargetAtom(
+				getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#x=", 0, "&y=", 1),
+						getVariable("x"), getVariable("y")),
 				getConstantIRI(RDF.TYPE),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#Person"))), result);
 	}

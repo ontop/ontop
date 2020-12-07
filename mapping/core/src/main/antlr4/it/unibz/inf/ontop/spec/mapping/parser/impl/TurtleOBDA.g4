@@ -240,7 +240,7 @@ PN_CHARS // [166s] PN_CHARS ::= PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x03
 // extends PN_LOCAL in the original grammar to allow  #, ; and / as well as ENCLOSED_COLUMN_NAME
 PN_LOCAL // [168s] PN_LOCAL	::=	(PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
   : (PN_CHARS_U | ':' | [0-9] | PLX | '#' | ENCLOSED_COLUMN_NAME)            // first: adds #
-    ((PN_CHARS | '.' | ':' | PLX | '#' | ';' | '/' | ENCLOSED_COLUMN_NAME)*  // middle: adds ;, # and /  (? and = through PN_CHARS)
+    ((PN_CHARS | '.' | ':' | PLX | '#' | ';' | '/' | '&' | ENCLOSED_COLUMN_NAME)*  // middle: adds ;, #, / and &  (? and = through PN_CHARS)
      (PN_CHARS | ':' | PLX | '/' | ENCLOSED_COLUMN_NAME))?                   // last: adds /  (? and = through PN_CHARS)
   ;
 
