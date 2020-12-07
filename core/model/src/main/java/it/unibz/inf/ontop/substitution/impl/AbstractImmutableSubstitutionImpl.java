@@ -115,7 +115,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     private static class NotASubstitutionException extends RuntimeException {};
 
-    protected Optional<ImmutableMap<Variable, T>> computeUnionMap(ImmutableSubstitution<T> otherSubstitution) {
+    @Override
+    public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
+        if (otherSubstitution.isEmpty())
+            return Optional.of(this);
+        if (isEmpty())
+            return Optional.of(otherSubstitution);
+
         try {
             ImmutableMap<Variable, T> map = Stream.concat(
                         this.getImmutableMap().entrySet().stream(),
@@ -126,53 +132,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                                     throw new NotASubstitutionException();
                                 return v1;
                             }));
-            return Optional.of(map);
+            
+            return Optional.of(substitutionFactory.getSubstitution(map));
         }
         catch (NotASubstitutionException e) {
             return Optional.empty();
         }
     }
 
-    @Override
-    public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
-        if (otherSubstitution.isEmpty())
-            return Optional.of(this);
-        if (isEmpty())
-            return Optional.of(otherSubstitution);
-
-        return computeUnionMap(otherSubstitution)
-                .map(substitutionFactory::getSubstitution);
-    }
-
-    @Override
-    public Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
-            ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
-        if (otherSubstitution.isEmpty())
-            return Optional.of(this);
-        else if(isEmpty())
-            return Optional.of(otherSubstitution);
-
-        ImmutableMap<Variable, T> localMap = getImmutableMap();
-        ImmutableSet<? extends Map.Entry<Variable, ? extends ImmutableTerm>> otherEntrySet = otherSubstitution.getImmutableMap().entrySet();
-
-        /*
-         * Checks for multiple entries of the same variable
-         */
-        if (otherEntrySet.stream()
-                .filter(e -> localMap.containsKey(e.getKey()))
-                .anyMatch(e -> !localMap.get(e.getKey()).equals(e.getValue()))) {
-            return Optional.empty();
-        }
-        else {
-            ImmutableMap<Variable, ? extends ImmutableTerm> newMap = Stream.concat(localMap.entrySet().stream(),
-                    otherEntrySet.stream())
-                    .distinct()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue));
-            return Optional.of(substitutionFactory.getSubstitution(newMap));
-        }
-    }
 
     @Override
     public boolean equals(Object other) {

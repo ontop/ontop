@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
 /**
@@ -51,12 +50,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      * Because of the optional cannot be overloaded.
      */
     Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution);
-
-    /**
-     * TODO: explain
-     */
-    Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
-            ImmutableSubstitution<? extends ImmutableTerm> other);
 
     /**
      * Returns a "similar" substitution that avoids (if possible) to substitute certain variables.
