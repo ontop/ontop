@@ -40,6 +40,8 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
     */
 
     private static String decode(String s) {
+        if (s.indexOf('\\') == -1)
+            return s;
         int length = s.length();
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
@@ -47,7 +49,7 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
             if (c == '\\') {
                 char n = s.charAt(++i);
                 if (n != '\\' && n != '}' && n != '{')
-                    sb.append(c); 
+                    sb.append(c);
                 sb.append(n);
             }
             else
@@ -57,6 +59,8 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
     }
 
     private static String encode(String s) {
+        if (s.indexOf('\\') == -1 && s.indexOf('}') == -1 && s.indexOf('{') == -1)
+            return s;
         int length = s.length();
         StringBuilder sb = new StringBuilder(length * 5 / 4);
         for (int i = 0; i < length; i++) {

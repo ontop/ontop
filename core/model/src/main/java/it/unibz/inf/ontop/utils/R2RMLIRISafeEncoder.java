@@ -101,6 +101,8 @@ public class R2RMLIRISafeEncoder {
      * be restored to their original characters (e.g., ' ').
      */
     public static String decode(String encoded) {
+        if (encoded.indexOf('%') == -1)
+            return encoded;
 
         int length = encoded.length();
         StringBuilder sb = new StringBuilder(length);
