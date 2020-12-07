@@ -1,11 +1,8 @@
 package it.unibz.inf.ontop.utils;
 
+import com.google.common.collect.ImmutableBiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
-
-import java.util.Map;
 
 public class R2RMLIRISafeEncoder {
 
@@ -39,7 +36,7 @@ public class R2RMLIRISafeEncoder {
      *
      *  NB: it is important to place "%" to be beginning if we implement the encoding by a sequence of replacements.
      */
-    public static final ImmutableMap<String, Character> TABLE = ImmutableMap.<String, Character>builder()
+    public static final ImmutableBiMap<String, Character> TABLE = ImmutableBiMap.<String, Character>builder()
             .put("%25", '%')
             .put("%20", ' ')
             .put("%21", '!')
@@ -79,16 +76,23 @@ public class R2RMLIRISafeEncoder {
             // .put("%7F", "\u007F") // DEL
             .build();
 
+        private static final ImmutableBiMap<Character, String> INVERSE = TABLE.inverse();
 
     /*
      * percent encoding for a String
      */
     public static String encode(String pe) {
-        for (Map.Entry<String, Character> e : TABLE.entrySet())
-            //if (!e.getKey().equals("%22"))
-            pe = pe.replace(e.getValue().toString(), e.getKey());
-
-        return pe;
+        int length = pe.length();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            char c = pe.charAt(i);
+            String r = INVERSE.get(c);
+            if (r == null)
+                sb.append(c);
+            else
+                sb.append(r);
+        }
+        return sb.toString();
     }
 
     /***
@@ -101,7 +105,7 @@ public class R2RMLIRISafeEncoder {
     public static String decode(String encodedURI) {
 
         int length = encodedURI.length();
-        StringBuilder strBuilder = new StringBuilder(length + 20);
+        StringBuilder strBuilder = new StringBuilder(length);
         char[] codeBuffer = new char[3];
 
         for (int i = 0; i < length; i++) {
