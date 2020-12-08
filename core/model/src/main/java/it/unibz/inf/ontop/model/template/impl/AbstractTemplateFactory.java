@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.model.template.impl;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.regex.Pattern;
 
@@ -39,38 +42,17 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
        yielding “\\”. This also applies to backslashes within column names.
     */
 
+    private static final ImmutableBiMap<Character, String> ESCAPE = ImmutableBiMap.of(
+            '\\', "\\\\",
+            '}', "\\}",
+            '{', "\\{");
+
     private static String decode(String s) {
-        if (s.indexOf('\\') == -1)
-            return s;
-        int length = s.length();
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            char c = s.charAt(i);
-            if (c == '\\') {
-                char n = s.charAt(++i);
-                if (n != '\\' && n != '}' && n != '{')
-                    sb.append(c);
-                sb.append(n);
-            }
-            else
-                sb.append(c);
-        }
-        return sb.toString();
+        return StringUtils.decode(s, '\\', 2, ESCAPE.inverse(), (code) -> {});
     }
 
     private static String encode(String s) {
-        if (s.indexOf('\\') == -1 && s.indexOf('}') == -1 && s.indexOf('{') == -1)
-            return s;
-        int length = s.length();
-        StringBuilder sb = new StringBuilder(length * 5 / 4);
-        for (int i = 0; i < length; i++) {
-            char c = s.charAt(i);
-            if (c == '\\' || c == '}' || c == '{') {
-                sb.append('\\');
-            }
-            sb.append(c);
-        }
-        return sb.toString();
+        return StringUtils.encode(s, ESCAPE);
     }
 
     protected String termToTemplateComponentString(ImmutableTerm term) {

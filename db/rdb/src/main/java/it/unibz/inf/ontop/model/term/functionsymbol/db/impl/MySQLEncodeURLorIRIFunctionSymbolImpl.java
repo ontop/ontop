@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.type.DBTermType;
-
-import java.util.regex.Pattern;
+import it.unibz.inf.ontop.utils.StringUtils;
 
 public class MySQLEncodeURLorIRIFunctionSymbolImpl extends DefaultSQLEncodeURLorIRIFunctionSymbol {
 
@@ -10,10 +10,10 @@ public class MySQLEncodeURLorIRIFunctionSymbolImpl extends DefaultSQLEncodeURLor
         super(dbStringType, preserveInternationalChars);
     }
 
-    private static final Pattern BACKSLASH = Pattern.compile("\\\\");
+    private static final ImmutableMap<Character, String> BACKSLASH = ImmutableMap.of('\\', "\\\\");
 
     @Override
     protected String encodeSQLStringConstant(String constant) {
-        return super.encodeSQLStringConstant(BACKSLASH.matcher(constant).replaceAll("\\\\\\\\"));
+        return super.encodeSQLStringConstant(StringUtils.encode(constant, BACKSLASH));
     }
 }

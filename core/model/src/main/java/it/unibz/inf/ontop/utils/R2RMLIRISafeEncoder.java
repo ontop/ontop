@@ -33,16 +33,14 @@ public class R2RMLIRISafeEncoder {
      *
      * We only implement the encoding for the range of basic latin (\u0020 - \u007F) for performance reason.
      *  Other symbols outside of `iunreserved` are mostly control symbols.
-     *
-     *  NB: it is important to place "%" to be beginning if we implement the encoding by a sequence of replacements.
      */
     public static final ImmutableBiMap<String, Character> TABLE = ImmutableBiMap.<String, Character>builder()
-            .put("%25", '%')
             .put("%20", ' ')
             .put("%21", '!')
             .put("%22", '\"')
             .put("%23", '#')
             .put("%24", '$')
+            .put("%25", '%')
             .put("%26", '&')
             .put("%27", '\'')
             .put("%28", '(')
@@ -76,66 +74,21 @@ public class R2RMLIRISafeEncoder {
             // .put("%7F", "\u007F") // DEL
             .build();
 
-    private static final ImmutableBiMap<Character, String> INVERSE = TABLE.inverse();
-
     /*
      * percent encoding for a String
      */
     public static String encode(String s) {
-        int length = s.length();
-        StringBuilder sb = new StringBuilder(length * 5 / 4);
-        for (int i = 0; i < length; i++) {
-            char c = s.charAt(i);
-            String r = INVERSE.get(c);
-            if (r == null)
-                sb.append(c);
-            else
-                sb.append(r);
-        }
-        return sb.toString();
+        return StringUtils.encode(s, TABLE.inverse());
     }
 
     /***
-     * Given a string representing an IRI, this method will return a new String
+     * Given a string representing an IRI, this method will return a String
      * in which all percent encoded characters (e.g., %20) will
      * be restored to their original characters (e.g., ' ').
      */
     public static String decode(String encoded) {
-        if (encoded.indexOf('%') == -1)
-            return encoded;
-
-        int length = encoded.length();
-        StringBuilder sb = new StringBuilder(length);
-        char[] codeBuffer = new char[3];
-
-        for (int i = 0; i < length; i++) {
-            char c = encoded.charAt(i);
-
-            if (c != '%') {
-                // base case, the character is a normal character, just append
-                sb.append(c);
-                continue;
-            }
-
-            // found a escape
-            codeBuffer[0] = '%';
-            codeBuffer[1] = encoded.charAt(++i);
-            codeBuffer[2] = encoded.charAt(++i);
-
-            // now we check if they match any of our escape codes, if
-            // they do the char to be inserted is put in codeBuffer otherwise
-            String code = String.copyValueOf(codeBuffer);
-            Character rep = TABLE.get(code);
-            if (rep != null)
-                sb.append(rep);
-            else {
-                // This was not an escape code, so we just append the characters and continue;
-                log.warn("Error decoding an encoded IRI from the query. Problematic code: {}\nProblematic IRI: {}", code, encoded);
-                sb.append(codeBuffer);
-            }
-        }
-        return sb.toString();
+        return StringUtils.decode(encoded, '%', 3, TABLE,
+                (code) -> log.warn("Error decoding an encoded IRI {} (problematic code: {}).", encoded, code));
     }
-
 
 }

@@ -43,21 +43,22 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	}
 
 	@Override
-	public String getShortForm(String originalUri) {
-		// Clean the URI string from <...> signs, if they exist.
+	public String getShortForm(String stringIri) {
+		// Clean the IRI string from <...> signs, if they exist.
 		// <http://www.example.org/library#Book> --> http://www.example.org/library#Book
-		String cleanUri = originalUri.startsWith("<") && originalUri.endsWith(">")
-				? originalUri.substring(1, originalUri.length() - 1)
-				: originalUri;
+		String fullIri = stringIri.startsWith("<") && stringIri.endsWith(">")
+				? stringIri.substring(1, stringIri.length() - 1)
+				: stringIri;
 		
 		// Check if the URI string has a matched prefix
 		for (Map.Entry<String, String> e : getOrderedMap()) {
 			String iri = e.getValue();
-			if (cleanUri.startsWith(iri)) {
-				return cleanUri.replace(iri, e.getKey()); // Replace the URI with the corresponding prefix.
+			if (fullIri.startsWith(iri)) {
+				// Replace the IRI with the corresponding prefix.
+				return e.getKey() + fullIri.substring(iri.length());
 			}
 		}
-		return originalUri; // return the original URI if no prefix definition was found
+		return stringIri; // return the original IRI if no prefix definition was found
 	}
 	
 	@Override
@@ -68,10 +69,10 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 
 		// extract the whole prefix, e.g., "ex:Book" --> "ex:"
 		String prefix = prefixedName.substring(0, index);
-		String uri = getIriDefinition(prefix)
+		String iri = getIriDefinition(prefix)
 				.orElseThrow(() -> new InvalidPrefixWritingException("The prefix name is unknown: " + prefix));
 
-		return uri + prefixedName.substring(index);
+		return iri + prefixedName.substring(index);
 	}
 	
 	@Override
