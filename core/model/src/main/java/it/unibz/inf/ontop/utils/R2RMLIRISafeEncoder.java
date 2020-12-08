@@ -35,12 +35,12 @@ public class R2RMLIRISafeEncoder {
      *  Other symbols outside of `iunreserved` are mostly control symbols.
      */
     public static final ImmutableBiMap<String, Character> TABLE = ImmutableBiMap.<String, Character>builder()
+            .put("%25", '%') // IMPORTANT: % should be first because the SQL query generated will replace it first
             .put("%20", ' ')
             .put("%21", '!')
             .put("%22", '\"')
             .put("%23", '#')
             .put("%24", '$')
-            .put("%25", '%')
             .put("%26", '&')
             .put("%27", '\'')
             .put("%28", '(')
