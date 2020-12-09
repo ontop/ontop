@@ -659,6 +659,13 @@
                 <version>${h2.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.teiid</groupId>
+                <artifactId>teiid</artifactId>
+                <classifier>jdbc</classifier>
+                <version>15.0.1</version>
+            </dependency>
+
             <!-- Optique R2RML API -->
             <dependency>
                 <groupId>eu.optique-project</groupId>
