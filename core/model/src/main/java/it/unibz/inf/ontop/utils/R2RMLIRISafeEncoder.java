@@ -39,42 +39,42 @@ public class R2RMLIRISafeEncoder {
      *
      *  NB: it is important to place "%" to be beginning if we implement the encoding by a sequence of replacements.
      */
-    public static final ImmutableMap<String, String> TABLE = ImmutableMap.<String, String>builder()
-            .put("%25", "%")
-            .put("%20", " ")
-            .put("%21", "!")
-            .put("%22", "\"") // .put("%22", "''")
-            .put("%23", "#")
-            .put("%24", "$")
-            .put("%26", "&")
-            .put("%27", "'")
-            .put("%28", "(")
-            .put("%29", ")")
-            .put("%2A", "*")
-            .put("%2B", "+")
-            .put("%2C", ",")
+    public static final ImmutableMap<String, Character> TABLE = ImmutableMap.<String, Character>builder()
+            .put("%25", '%')
+            .put("%20", ' ')
+            .put("%21", '!')
+            .put("%22", '\"')
+            .put("%23", '#')
+            .put("%24", '$')
+            .put("%26", '&')
+            .put("%27", '\'')
+            .put("%28", '(')
+            .put("%29", ')')
+            .put("%2A", '*')
+            .put("%2B", '+')
+            .put("%2C", ',')
             // "%2D", "-"  iunreserved
             // "%2E", "."  iunreserved
-            .put("%2F", "/")
+            .put("%2F", '/')
             // "0" - "9"
-            .put("%3A", ":")
-            .put("%3B", ";")
-            .put("%3C", "<")
-            .put("%3D", "=")
-            .put("%3E", ">")
-            .put("%3F", "?")
-            .put("%40", "@")
+            .put("%3A", ':')
+            .put("%3B", ';')
+            .put("%3C", '<')
+            .put("%3D", '=')
+            .put("%3E", '>')
+            .put("%3F", '?')
+            .put("%40", '@')
             // "A" - "Z"
-            .put("%5B", "[")
-            .put("%5C", "\\")
-            .put("%5D", "]")
-            .put("%5E", "^")
+            .put("%5B", '[')
+            .put("%5C", '\\')
+            .put("%5D", ']')
+            .put("%5E", '^')
             // "%5F", "_"  iunreserved
-            .put("%60", "`")
+            .put("%60", '`')
             // "a" - "z"
-            .put("%7B", "{")
-            .put("%7C", "|")
-            .put("%7D", "}")
+            .put("%7B", '{')
+            .put("%7C", '|')
+            .put("%7D", '}')
             // "%7E", "~"  iunreserved
             // .put("%7F", "\u007F") // DEL
             .build();
@@ -84,9 +84,9 @@ public class R2RMLIRISafeEncoder {
      * percent encoding for a String
      */
     public static String encode(String pe) {
-        for (Map.Entry<String, String> e : TABLE.entrySet())
+        for (Map.Entry<String, Character> e : TABLE.entrySet())
             //if (!e.getKey().equals("%22"))
-            pe = pe.replace(e.getValue(), e.getKey());
+            pe = pe.replace(e.getValue().toString(), e.getKey());
 
         return pe;
     }
@@ -125,7 +125,7 @@ public class R2RMLIRISafeEncoder {
             // now we check if they match any of our escape codes, if
             // they do the char to be inserted is put in codeBuffer otherwise
             String code = String.copyValueOf(codeBuffer);
-            String rep = TABLE.get(code);
+            Character rep = TABLE.get(code);
             if (rep != null)
                 strBuilder.append(rep);
             else {

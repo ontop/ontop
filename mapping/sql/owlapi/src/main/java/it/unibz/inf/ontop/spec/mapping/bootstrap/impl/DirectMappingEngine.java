@@ -165,7 +165,7 @@ public class DirectMappingEngine {
 			MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
 			ImmutableList<DatabaseRelationDefinition> tables = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
 			String baseIRI = baseIRI0.isEmpty()
-					? mapping.getPrefixManager().getDefaultPrefix()
+					? mapping.getPrefixManager().getDefaultIriPrefix()
 					: baseIRI0;
 
 			Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();

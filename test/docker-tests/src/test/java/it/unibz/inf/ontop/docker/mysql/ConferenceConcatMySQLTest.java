@@ -26,9 +26,9 @@ import static org.junit.Assert.assertTrue;
 
 public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "/mysql/conference/ontology3.owl";
-    static final String obdaFile = "/mysql/conference/secondmapping-test.obda";
-	static final String propertyFile = "/mysql/conference/secondmapping-test.properties";
+    private static final String owlFile = "/mysql/conference/ontology3.owl";
+    private static final String obdaFile = "/mysql/conference/secondmapping-test.obda";
+	private static final String propertyFile = "/mysql/conference/secondmapping-test.properties";
 
 	private static OntopOWLReasoner REASONER;
 	private static OntopOWLConnection CONNECTION;

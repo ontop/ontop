@@ -61,25 +61,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return (ImmutableMap<Integer, ? extends VariableOrGroundTerm>) newArgumentMap;
     }
 
-    @Override
-    public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
-            throws ConversionException {
-        ImmutableList<? extends ImmutableTerm> newArguments = apply(dataAtom.getArguments());
-
-        if (!newArguments.stream().allMatch(t -> t instanceof Variable)) {
-            throw new ConversionException("The substitution applied to a DistinctVariableOnlyDataAtom has " +
-                    " produced some non-Variable arguments " + newArguments);
-        }
-        ImmutableList<Variable> variableArguments =  (ImmutableList<Variable>) newArguments;
-
-        if (variableArguments.size() == ImmutableSet.copyOf(variableArguments).size())
-            return atomFactory.getDistinctVariableOnlyDataAtom(dataAtom.getPredicate(), variableArguments);
-        else {
-            throw new ConversionException("The substitution applied a DistinctVariableOnlyDataAtom has introduced" +
-                    " redundant variables: " + newArguments);
-        }
-    }
-
 
     /**
      *" "this o f"
@@ -289,11 +270,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public  Optional<ImmutableExpression> convertIntoBooleanExpression() {
-        return convertIntoBooleanExpression(this);
-    }
-
-    @Override
     public ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
         if (restrictingDomain.containsAll(getDomain()))
             return this;
@@ -313,38 +289,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         return simplifyValues(Optional.empty());
     }
 
-    public ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
+    private ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
         return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> variableNullability
                                 .map(n -> e.getValue().simplify(n))
                                 .orElseGet(() -> e.getValue().simplify()))));
-    }
-
-    protected Optional<ImmutableExpression> convertIntoBooleanExpression(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-
-        List<ImmutableExpression> equalities = new ArrayList<>();
-
-        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(termFactory.getStrictEquality(entry.getKey(), entry.getValue()));
-        }
-
-        switch(equalities.size()) {
-            case 0:
-                return Optional.empty();
-            case 1:
-                return Optional.of(equalities.get(0));
-            default:
-                Iterator<ImmutableExpression> equalityIterator = equalities.iterator();
-                // Non-final
-                ImmutableExpression aggregateExpression = equalityIterator.next();
-                while (equalityIterator.hasNext()) {
-                    aggregateExpression = termFactory.getConjunction(aggregateExpression, equalityIterator.next());
-                }
-                return Optional.of(aggregateExpression);
-        }
     }
 
     @Override
@@ -411,10 +362,5 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         e -> (NonVariableTerm) e.getValue()));
 
         return substitutionFactory.getSubstitution(newMap);
-    }
-
-    @Override
-    public TermFactory getTermFactory() {
-        return termFactory;
     }
 }

@@ -12,11 +12,11 @@ public class R2RMLIRISafeEncoderTest {
 
     @Test
     public void testTable() {
-        for (Map.Entry<String, String> entry : R2RMLIRISafeEncoder.TABLE.entrySet()) {
+        for (Map.Entry<String, Character> entry : R2RMLIRISafeEncoder.TABLE.entrySet()) {
             String key = entry.getKey();
             assertEquals(3, key.length());
             assertEquals(Integer.parseInt(key.substring(1, 3), 16),
-                    entry.getValue().charAt(0));
+                    entry.getValue().charValue());
         }
     }
 

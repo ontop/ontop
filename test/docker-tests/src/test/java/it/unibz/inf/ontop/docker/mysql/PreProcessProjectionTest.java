@@ -75,8 +75,5 @@ public class PreProcessProjectionTest extends AbstractVirtualModeTest {
         countResults(1, query);
     }
 
-
-
-
 }
 

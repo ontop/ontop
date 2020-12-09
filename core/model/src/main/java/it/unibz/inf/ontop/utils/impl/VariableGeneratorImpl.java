@@ -27,7 +27,7 @@ public class VariableGeneratorImpl implements VariableGenerator {
     private int count;
 
     /**
-     * TODO: please use as much as possible the assisted inject pattern
+     * TODO: please use as much as possible the assisted inject pattern
      */
     @AssistedInject
     public VariableGeneratorImpl(@Assisted Collection<Variable> knownVariables, TermFactory termFactory) {

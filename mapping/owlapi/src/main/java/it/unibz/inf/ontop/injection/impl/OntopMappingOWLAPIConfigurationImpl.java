@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
@@ -53,7 +52,7 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
     }
 
     private Optional<OWLOntology> loadOntologyFromFile() throws OWLOntologyCreationException {
-        /**
+        /*
          * File
          */
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -62,7 +61,8 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
             OWLOntologyIRIMapper iriMapper;
             try {
                 iriMapper = new XMLCatalogIRIMapper(new File(options.mappingOntologyOptions.xmlCatalogFile.get()));
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 throw new OWLOntologyCreationException(e.getMessage());
             }
             manager.setIRIMappers(ImmutableSet.of(iriMapper));
@@ -75,20 +75,17 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
         /*
          * URL
          */
-        try {
-            Optional<URL> optionalURL = options.mappingOntologyOptions.ontologyURL;
-            if (optionalURL.isPresent()) {
-                try (InputStream is = optionalURL.get().openStream()) {
-                    owlOntology = Optional.of(
-                            manager.loadOntologyFromOntologyDocument(is
-                            ));
-                }
+        Optional<URL> optionalURL = options.mappingOntologyOptions.ontologyURL;
+        if (optionalURL.isPresent()) {
+            try (InputStream is = optionalURL.get().openStream()) {
+                owlOntology = Optional.of(manager.loadOntologyFromOntologyDocument(is));
             }
-
-        } catch (MalformedURLException e ) {
-            throw new OWLOntologyCreationException("Invalid URI: " + e.getMessage());
-        } catch (IOException e) {
-            throw new OWLOntologyCreationException(e.getMessage());
+            catch (MalformedURLException e ) {
+                throw new OWLOntologyCreationException("Invalid URI: " + e.getMessage());
+            }
+            catch (IOException e) {
+                throw new OWLOntologyCreationException(e.getMessage());
+            }
         }
 
         return owlOntology;
@@ -98,7 +95,7 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
         OWLAPITranslatorOWL2QL translator = getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
         try {
             return loadInputOntology()
-                    .map(o -> translator.translateAndClassify(o));
+                    .map(translator::translateAndClassify);
         }
         catch (OWLOntologyCreationException e) {
             throw new OntologyException(e.getMessage());

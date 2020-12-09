@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -18,12 +20,12 @@ public interface DBFunctionSymbolFactory {
     /**
      * NB: a functional term using this symbol is producing a NULL or a DB string
      */
-    IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate);
+    IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> iriTemplate);
 
     /**
      * NB: a functional term using this symbol is producing a NULL or a DB string
      */
-    BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(String bnodeTemplate);
+    BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> bnodeTemplate);
 
     /**
      * Returns a fresh Bnode template

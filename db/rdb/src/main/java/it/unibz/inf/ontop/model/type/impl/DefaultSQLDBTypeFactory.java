@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -212,11 +213,13 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         return Optional.of("NaN");
     }
 
+    private static final Pattern OPTIONAL_LENGTH = Pattern.compile("\\([\\d, ]+\\)");
+
     /**
      * Can be overridden
      */
     protected String preprocessTypeName(String typeName) {
-        return typeName.replaceAll("\\([\\d, ]+\\)", "")
+        return OPTIONAL_LENGTH.matcher(typeName).replaceAll("")
                 .toUpperCase();
     }
 
@@ -225,7 +228,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Can be overridden
      */
     protected String preprocessTypeName(String typeName, int columnSize) {
-        return typeName.replaceAll("\\([\\d, ]+\\)", "")
+        return OPTIONAL_LENGTH.matcher(typeName).replaceAll("")
                 .toUpperCase();
     }
 

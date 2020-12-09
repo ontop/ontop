@@ -52,8 +52,8 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
             File ontologyFile = new File(owlFile);
             File obdaFile = new File(mappingFile);
 
-            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(results.getPPMapping());
-            writer.save(obdaFile);
+            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
+            writer.write(obdaFile, results.getPPMapping());
 
             OWLOntology onto = results.getOntology();
             onto.getOWLOntologyManager().saveOntology(onto, new FileDocumentTarget(ontologyFile));

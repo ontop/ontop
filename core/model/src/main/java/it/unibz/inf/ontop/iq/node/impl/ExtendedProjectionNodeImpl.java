@@ -24,7 +24,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private final ImmutableUnificationTools unificationTools;
     protected final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
-    private final TermFactory termFactory;
+    protected final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,

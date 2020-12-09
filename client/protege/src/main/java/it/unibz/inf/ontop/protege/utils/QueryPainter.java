@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class QueryPainter {
 	private final OBDAModel apic;
@@ -167,9 +168,8 @@ public class QueryPainter {
 	private void validate() throws Exception {
 		final String text = parent.getText().trim();
 		if (text.isEmpty() || text.length() == 1) {
-			String msg = String.format("Empty query");
 			invalid = true;
-			throw new Exception(msg);
+			throw new Exception("Empty query");
 		}
 
 		TargetQueryParser textParser = apic.createTargetQueryParser();
@@ -179,15 +179,14 @@ public class QueryPainter {
 			invalid = true;
 			throw parsingException;
 		}
-		List<IRI> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
+		ImmutableList<IRI> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
 		if (!invalidPredicates.isEmpty()) {
-			String invalidList = "";
-			for (IRI predicateIri : invalidPredicates) {
-				invalidList += "- " + predicateIri + "\n";
-			}
-			String msg = String.format("ERROR: The below list of predicates is unknown by the ontology: \n %s Note: null indicates an unknown prefix.", invalidList);
 			invalid = true;
-			throw new Exception(msg);
+			throw new Exception("ERROR: The below list of predicates is unknown by the ontology: \n "
+					+ invalidPredicates.stream()
+						.map(iri -> "- " + iri + "\n")
+						.collect(Collectors.joining())
+					+ " Note: null indicates an unknown prefix.");
 		}
 		invalid = false;
 	}
@@ -447,7 +446,7 @@ public class QueryPainter {
 
 	private ImmutableList<TargetAtom> parse(String query, PrefixManager man) {
 		try {
-            TargetQueryParser textParser = apic.createTargetQueryParser(man.getPrefixMap());
+            TargetQueryParser textParser = apic.createTargetQueryParser(man);
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;

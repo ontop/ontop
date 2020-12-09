@@ -23,15 +23,15 @@ import static org.junit.Assert.assertFalse;
 
 public class DatetimeStampSesameTest  {
 
-	String owlFile = "/mysql/northwind/northwind-dmo.owl";
-	String obdaFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
-	String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
+	private static final String owlFile = "/mysql/northwind/northwind-dmo.owl";
+	private static final String obdaFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
+	private static final String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	RepositoryConnection con;
 	Repository repository;
 
-	public DatetimeStampSesameTest(){
+	public DatetimeStampSesameTest() {
 
 		String owlFileName =  this.getClass().getResource(owlFile).toString();
 		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
@@ -44,34 +44,19 @@ public class DatetimeStampSesameTest  {
 				.enableExistentialReasoning(true)
 				.enableTestMode()
 				.build();
-		try {
-			repository = OntopRepository.defaultRepository(configuration);
-			repository.initialize();
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertFalse(false);
-		}
+
+		repository = OntopRepository.defaultRepository(configuration);
+		repository.initialize();
 	}
 	@Before
 	public void setUp() {
-		try {
-			con = repository.getConnection();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertFalse(false);
-		}
-
+		con = repository.getConnection();
 	}
 
 	@After
 	public void tearDown() {
-		try {
-			if (con != null && con.isOpen()) {
-				con.close();
-			}
-		} catch (RepositoryException e) {
-			e.printStackTrace();
+		if (con != null && con.isOpen()) {
+			con.close();
 		}
 	}
 	
@@ -97,7 +82,7 @@ public class DatetimeStampSesameTest  {
 			e.printStackTrace();
 			assertFalse(false);
 		}
-		return resultCount++;
+		return resultCount;
 	}
 
 	@Test

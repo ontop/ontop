@@ -20,9 +20,7 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -31,7 +29,6 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +36,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +48,6 @@ import java.util.List;
 
 import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Class to test that the r2rml file with the mappings give the same results of the corresponding obda file.
@@ -60,65 +55,59 @@ import static org.junit.Assert.assertTrue;
  */
 
 public class R2rmlCheckerTest {
-	private OWLConnection conn;
-
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	private static final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
+	private static final String obdaFile = "/mysql/npd/npd-v2-ql_a.obda";
+	private static final String propertyFile = "/mysql/npd/npd-v2-ql_a.properties";
+	private static final String r2rmlFile = "/mysql/npd/npd-v2-ql_a.ttl";
+
+    private final String owlFileName =  this.getClass().getResource(owlFile).toString();
+	private final String obdaFileName =  this.getClass().getResource(obdaFile).toString();
+	private final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
+	private final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+
 	private ClassifiedTBox onto;
-
-	final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
-	final String obdaFile = "/mysql/npd/npd-v2-ql_a.obda";
-	final String propertyFile = "/mysql/npd/npd-v2-ql_a.properties";
-	final String r2rmlFile = "/mysql/npd/npd-v2-ql_a.ttl";
-
-    final String owlFileName =  this.getClass().getResource(owlFile).toString();
-	final String obdaFileName =  this.getClass().getResource(obdaFile).toString();
-	final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
-	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
-
-	private List<IRI> emptyConceptsObda = new ArrayList<>();
-	private List<IRI> emptyRolesObda = new ArrayList<>();
-	private List<IRI> emptyConceptsR2rml = new ArrayList<>();
-	private List<IRI> emptyRolesR2rml = new ArrayList<>();
-
 	private OntopOWLReasoner reasonerOBDA;
 	private OntopOWLReasoner reasonerR2rml;
 
     @Before
 	public void setUp() throws Exception {
-		onto = loadOntologyFromFileAndClassify(new URL(owlFileName).getPath());
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
+		Ontology onto1 = OWLAPI_TRANSLATOR.translateAndClassify(owl);
+		onto = onto1.tbox();
 
-		loadOBDA();
-		loadR2rml();
+		log.info("Loading obda file");
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdaFileName)
+				.ontologyFile(owlFileName)
+				.propertyFile(propertyFileName)
+				.enableTestMode()
+				.build();
+		reasonerOBDA = factory.createReasoner(config);
+
+		log.info("Loading r2rml file");
+		OntopOWLFactory factory1 = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config1 = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.r2rmlMappingFile(r2rmlFileName)
+				.ontologyFile(owlFileName)
+				.propertyFile(propertyFileName)
+				.enableTestMode()
+				.build();
+		reasonerR2rml = factory1.createReasoner(config1);
 	}
 
 	@After
 	public void tearDown() {
-		try {
-			if (reasonerOBDA!=null) {
-				reasonerOBDA.dispose();
-			}
-			if (reasonerR2rml!=null) {
-				reasonerR2rml.dispose();
-			}
-		}
-		catch (Exception e) {
-			log.debug(e.getMessage());
-			assertTrue(false);
-		}
+		if (reasonerOBDA != null)
+			reasonerOBDA.dispose();
+		if (reasonerR2rml != null)
+			reasonerR2rml.dispose();
 	}
 
 	//TODO:  extract the two OBDA specifications to compare the mapping objects
-//	@Test Cannot get anymore the unfolder rules,
-//	public void testMappings() throws Exception {
-//		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
-//			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q))
-//				System.out.println("NOT IN R2RML: " + q);
-//		}
-//		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
-//			if (!reasonerOBDA.getQuestInstance().getUnfolderRules().contains(q))
-//				System.out.println("NOT IN OBDA: " + q);
-//		}
-//	}
 
 	/**
 	 * Check the number of descriptions retrieved by the obda mapping and the
@@ -127,44 +116,36 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 
-
-
 	@Test
 	public void testDescriptionsCheck() throws Exception {
 
 		try (OWLConnection obdaConnection = reasonerOBDA.getConnection();
 			 OWLConnection r2rmlConnection = reasonerR2rml.getConnection()) {
 
-			// Now we are ready for querying
 			log.debug("Comparing concepts");
 			for (OClass cl : onto.classes()) {
 				String concept = cl.getIRI().getIRIString();
-
+				log.debug("class " + concept);
 				int conceptOBDA = runSPARQLConceptsQuery("<" + concept + ">", obdaConnection);
 				int conceptR2rml = runSPARQLConceptsQuery("<" + concept + ">", r2rmlConnection);
-
 				assertEquals(conceptOBDA, conceptR2rml);
 			}
 
 			log.debug("Comparing object properties");
 			for (ObjectPropertyExpression prop : onto.objectProperties()) {
 				String role = prop.getIRI().getIRIString();
-
-				log.debug("description " + role);
+				log.debug("object property " + role);
 				int roleOBDA = runSPARQLRolesQuery("<" + role + ">", obdaConnection);
 				int roleR2rml = runSPARQLRolesQuery("<" + role + ">", r2rmlConnection);
-
 				assertEquals(roleOBDA, roleR2rml);
 			}
 
 			log.debug("Comparing data properties");
 			for (DataPropertyExpression prop : onto.dataProperties()) {
 				String role = prop.getIRI().getIRIString();
-
-				log.debug("description " + role);
+				log.debug("data property " + role);
 				int roleOBDA = runSPARQLRolesQuery("<" + role + ">", obdaConnection);
 				int roleR2rml = runSPARQLRolesQuery("<" + role + ">", r2rmlConnection);
-
 				assertEquals(roleOBDA, roleR2rml);
 			}
 		}
@@ -176,26 +157,26 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 //	@Test
-	public void testOBDAEmpties() throws Exception {
+	public void testOBDAEmpties()  {
 
-		// Now we are ready for querying
-		conn = reasonerOBDA.getConnection();
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
+		log.info(empties.toString());
+
+		List<IRI> emptyConceptsObda = new ArrayList<>();
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
-		while (iteratorC.hasNext()){
+		while (iteratorC.hasNext()) {
 			emptyConceptsObda.add(iteratorC.next());
 		}
-		log.info(empties.toString());
-		log.info("Empty concept/s: " + emptyConceptsObda);
+		log.info("Empty concepts: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
+		List<IRI> emptyRolesObda = new ArrayList<>();
 		Iterator<IRI> iteratorR = empties.iEmptyRoles();
-		while (iteratorR.hasNext()){
+		while (iteratorR.hasNext()) {
 			emptyRolesObda.add(iteratorR.next());
 		}
-		log.info("Empty role/s: " + emptyRolesObda);
+		log.info("Empty roles: " + emptyRolesObda);
 		assertEquals(46, emptyRolesObda.size());
-
 	}
 
 	/**
@@ -204,24 +185,25 @@ public class R2rmlCheckerTest {
 	 * @throws Exception
 	 */
 //	@Test
-	public void testR2rmlEmpties() throws Exception {
+	public void testR2rmlEmpties() {
 
-		// Now we are ready for querying
-		conn = reasonerR2rml.getConnection();
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
+		log.info(empties.toString());
+
+		List<IRI> emptyConceptsR2rml = new ArrayList<>();
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
-		while (iteratorC.hasNext()){
+		while (iteratorC.hasNext()) {
 			emptyConceptsR2rml.add(iteratorC.next());
 		}
-		log.info(empties.toString());
-		log.info("Empty concept/s: " + emptyConceptsR2rml);
+		log.info("Empty concepts: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
+		List<IRI> emptyRolesR2rml = new ArrayList<>();
 		Iterator<IRI> iteratorR = empties.iEmptyRoles();
-		while (iteratorR.hasNext()){
+		while (iteratorR.hasNext()) {
 			emptyRolesR2rml.add(iteratorR.next());
 		}
-		log.info("Empty role/s: " + emptyRolesR2rml);
+		log.info("Empty roles: " + emptyRolesR2rml);
 		assertEquals(46, emptyRolesR2rml.size());
 	}
 
@@ -232,19 +214,9 @@ public class R2rmlCheckerTest {
 	 */
 //	@Test
 	public void testComparesNpdQuery() throws Exception {
-		
-		// Now we are ready for querying obda
-		// npd query 1
 		int obdaResult = npdQuery(reasonerOBDA.getConnection());
-		// reasoner.dispose();
-
-
-		// Now we are ready for querying r2rml
-		// npd query 1
 		int r2rmlResult = npdQuery(reasonerR2rml.getConnection());
-		
 		assertEquals(obdaResult, r2rmlResult);
-
 	}
 
 	/**
@@ -257,38 +229,24 @@ public class R2rmlCheckerTest {
 	 */
 	@Test
 	public void testOneRole() throws Exception {
-
-		// Now we are ready for querying
 		log.debug("Comparing roles");
-
-			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#utmEW>",
-					reasonerOBDA.getConnection());
-			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#utmEW>",
-					reasonerR2rml.getConnection());
-
-			assertEquals(roleOBDA, roleR2rml);
-
-		
+		int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#utmEW>", reasonerOBDA.getConnection());
+		int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#utmEW>", reasonerR2rml.getConnection());
+		assertEquals(roleOBDA, roleR2rml);
 	}
 	
 	/**
 	 * Compare the results of r2rml and obda files over one role
 	 * Added the filter to give as results only Literals
-	 * 
 	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void testOneRoleFilterLiterals() throws Exception {
-
-		// Now we are ready for querying
 		log.debug("Comparing roles");
-
 		int roleOBDA = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerOBDA.getConnection());
 		int roleR2rml = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerR2rml.getConnection());
-
 		assertEquals(roleOBDA, roleR2rml);
-
 	}
 	
 
@@ -303,188 +261,61 @@ public class R2rmlCheckerTest {
 				+ "npdv:licenseeInterest ?interest ;"
 				+ "npdv:licenseeForLicence ?licenceURI . "
 				+ "FILTER(?date > '1979-12-31T00:00:00')	}";
-		OWLStatement st = OWLConnection.createStatement();
-		int n = 0;
-		try {
+		try (OWLStatement st = OWLConnection.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
+			int n = 0;
 			while (rs.hasNext()) {
 				n++;
 			}
 			log.debug("number of results of q1: " + n);
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			// conn.close();
-			st.close();
-
+			return n;
 		}
-		return n;
-
-	}
-
-	/**
-	 * create obda model from r2rml and prepare the reasoner
-	 * 
-	 *
-	 * @throws Exception
-	 */
-	private void loadR2rml() throws OWLOntologyCreationException {
-		log.info("Loading r2rml file");
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.r2rmlMappingFile(r2rmlFileName)
-				.ontologyFile(owlFileName)
-				.propertyFile(propertyFileName)
-				.enableTestMode()
-				.build();
-        reasonerR2rml = factory.createReasoner(config);
-	}
-
-	/**
-	 * Create obda model from obda file and prepare the reasoner
-	 * 
-	 *
-	 */
-
-	private void loadOBDA() throws Exception {
-		// Loading the OBDA data
-		log.info("Loading obda file");
-
-		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdaFileName)
-				.propertyFile(propertyFileName)
-				.ontologyFile(owlFileName)
-				.enableTestMode()
-				.build();
-		reasonerOBDA = factory.createReasoner(config);
 	}
 
 	private int runSPARQLConceptsQuery(String description,	OWLConnection conn) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		OWLStatement st = conn.createStatement();
-		int n = 0;
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
+			int n = 0;
 			while (rs.hasNext()) {
 				rs.next();
 				n++;
 			}
-			// log.info("description: " + n);
 			return n;
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			st.close();
-			// conn.close();
-
 		}
-
 	}
 
 	private int runSPARQLRolesQuery(String description, OWLConnection conn) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		OWLStatement st = conn.createStatement();
-		int n = 0;
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
+			int n = 0;
 			while (rs.hasNext()) {
-//				log.debug("result : "  + rs.getOWLObject("x"));
-//				log.debug("result : "  + rs.getOWLObject("y"));
-//				log.debug("result : "  + rs.getOWLLiteral("y"));
-				
-                final OWLBindingSet bindingSet = rs.next();
-				if(n==0){
+                OWLBindingSet bindingSet = rs.next();
+				if (n == 0) {
                     log.debug("result : "  + bindingSet.getOWLObject("x"));
 					log.debug("result : "  + bindingSet.getOWLObject("y"));
 				}
 				n++;
 			}
-			
 			return n;
-
-		} catch (Exception e) {
-			log.debug(e.toString());
-			throw e;
-
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			// conn.close();
-			st.close();
-
 		}
-
 	}
 	
 	private int runSPARQLRoleFilterQuery(String description, OWLConnection connection) throws OWLException {
 		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER(isLiteral(?y))}";
-		OWLStatement st = connection.createStatement();
-		int n = 0;
-		try {
+		try (OWLStatement st = connection.createStatement()) {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
+			int n = 0;
 			while (rs.hasNext()) {
-                final OWLBindingSet bindingSet = rs.next();
-                if(n==0){
+                OWLBindingSet bindingSet = rs.next();
+                if (n == 0) {
 					log.debug("result : "  + bindingSet.getOWLObject("x"));
 					log.debug("result : "  + bindingSet.getOWLLiteral("y"));
-				
 				}
 				n++;
 			}
-			
 			return n;
-
-		} catch (Exception e) {
-			log.debug(e.toString());
-			throw e;
-
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			// conn.close();
-			st.close();
 		}
 	}
-
-	/**
-	 * USE FOR TESTS ONLY
-	 *
-	 * @param filename
-	 * @return
-	 * @throws OWLOntologyCreationException
-	 */
-
-	public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(owl);
-		return onto.tbox();
-	}
-
 }
