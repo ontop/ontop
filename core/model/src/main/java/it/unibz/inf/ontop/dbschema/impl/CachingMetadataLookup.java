@@ -16,11 +16,11 @@ public class CachingMetadataLookup implements MetadataLookup {
 
     private final MetadataProvider provider;
     private final Map<RelationID, DatabaseRelationDefinition> map = new HashMap<>();
-    private final File dbMetadataFile;
+    //private final File dbMetadataFile;
 
-    public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; dbMetadataFile = null;}
+    public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; }
 
-    public CachingMetadataLookup(File dbMetadata) {
+    /*public CachingMetadataLookup(File dbMetadata) {
         this.dbMetadataFile = dbMetadata;
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
             .enableTestMode()
@@ -29,7 +29,7 @@ public class CachingMetadataLookup implements MetadataLookup {
         TypeFactory TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(TYPE_FACTORY);
         provider = builder.build();
-    }
+    }*/
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
@@ -63,7 +63,7 @@ public class CachingMetadataLookup implements MetadataLookup {
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }
 
-    public ImmutableMetadata loadImmutableMetadata() throws MetadataExtractionException, IOException {
+    /*public ImmutableMetadata loadImmutableMetadata() throws MetadataExtractionException, IOException {
 
         ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(dbMetadataFile);
         ImmutableList<DatabaseRelationDefinition> list = lookup.loadRelations();
@@ -73,5 +73,5 @@ public class CachingMetadataLookup implements MetadataLookup {
 
         //return new ImmutableMetadataImpl(dbMetadataFile);
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
-    }
+    }*/
 }

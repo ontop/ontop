@@ -31,7 +31,6 @@ public class OntopLoadDBMetadataTest {
         .readerFor(ImmutableMetadataImpl[].class)
         .readValue(dbMetadataFile);*/
 
-    // Other error
     ObjectMapper objectMapper = new ObjectMapper()
         .registerModule(new GuavaModule())
         .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
