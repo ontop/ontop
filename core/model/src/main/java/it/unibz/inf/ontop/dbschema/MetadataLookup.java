@@ -16,5 +16,4 @@ public interface MetadataLookup {
 
     QuotedIDFactory getQuotedIDFactory();
 
-    //File getFile();
 }

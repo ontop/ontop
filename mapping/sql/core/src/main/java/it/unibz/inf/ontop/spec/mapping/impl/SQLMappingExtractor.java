@@ -189,6 +189,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                 MetadataProvider withImplicitConstraintsMetadataProvider =
                     implicitDBConstraintExtractor.extract(constraintFile, serializedDBMetadataProvider);
 
+
                 ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, serializedDBMetadataProvider);
 
                 return new MappingAndDBParametersImpl(provMapping, withImplicitConstraintsMetadataProvider.getDBParameters());
