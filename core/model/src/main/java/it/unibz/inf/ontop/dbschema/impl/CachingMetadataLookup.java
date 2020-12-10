@@ -1,35 +1,20 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class CachingMetadataLookup implements MetadataLookup {
 
     private final MetadataProvider provider;
+    //@JsonDeserialize(keyUsing = MapKeyDeserializer.class)
     private final Map<RelationID, DatabaseRelationDefinition> map = new HashMap<>();
-    //private final File dbMetadataFile;
 
     public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; }
-
-    /*public CachingMetadataLookup(File dbMetadata) {
-        this.dbMetadataFile = dbMetadata;
-        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
-            .enableTestMode()
-            .build();
-        Injector injector = defaultConfiguration.getInjector(); //avoid defaultconfiguration
-        TypeFactory TYPE_FACTORY = injector.getInstance(TypeFactory.class);
-        OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(TYPE_FACTORY);
-        provider = builder.build();
-    }*/
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
@@ -62,16 +47,4 @@ public class CachingMetadataLookup implements MetadataLookup {
 
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }
-
-    /*public ImmutableMetadata loadImmutableMetadata() throws MetadataExtractionException, IOException {
-
-        ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(dbMetadataFile);
-        ImmutableList<DatabaseRelationDefinition> list = lookup.loadRelations();
-
-        for (DatabaseRelationDefinition relation : list)
-            provider.insertIntegrityConstraints(relation, lookup);
-
-        //return new ImmutableMetadataImpl(dbMetadataFile);
-        return new ImmutableMetadataImpl(provider.getDBParameters(), list);
-    }*/
 }

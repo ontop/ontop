@@ -21,13 +21,16 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.impl.AbstractDatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
+import it.unibz.inf.ontop.dbschema.impl.JSONRelation.JSONRelation;
 
 import java.util.Optional;
 
@@ -38,6 +41,10 @@ import java.util.Optional;
  *
  */
 
+//@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@name")
+//@JsonDeserialize(as = JSONRelation.class)
+@JsonDeserialize(as = AbstractDatabaseRelationDefinition.class)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public interface DatabaseRelationDefinition extends RelationDefinition {
 
 	RelationID getID();
