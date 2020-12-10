@@ -1,8 +1,8 @@
-package it.unibz.inf.ontop.answering.reformulation.unfolding.impl;
+package it.unibz.inf.ontop.iq.view.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.OntopViewUnfolder;
+import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import it.unibz.inf.ontop.dbschema.OntopViewDefinition;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;

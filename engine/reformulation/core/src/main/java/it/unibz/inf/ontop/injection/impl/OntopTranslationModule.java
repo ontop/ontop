@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.OntopViewUnfolder;
+import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 

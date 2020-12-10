@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.unfolding;
+package it.unibz.inf.ontop.iq.view;
 
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 
