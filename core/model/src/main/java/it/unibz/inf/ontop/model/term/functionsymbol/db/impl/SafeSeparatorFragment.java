@@ -49,27 +49,23 @@ public class SafeSeparatorFragment {
 
     @Override
     public String toString() {
-        return fragment + separator + (firstPlaceholderIndex != -1 ? "P" : "");
+        return fragment + (separator != 0 ? separator : "") + (firstPlaceholderIndex != -1 ? "P" : "");
     }
 
     public static ImmutableList<SafeSeparatorFragment> split(String s) {
         ImmutableList.Builder<SafeSeparatorFragment> builder = ImmutableList.builder();
-        int start = 0, current_start = 0, end;
-        while ((end = firstIndexOfSafeSeparator(s, current_start)) != -1) {
-            String fragment = s.substring(current_start, end);
-            int firstPlaceholderIndex = fragment.indexOf('{');
-            if (firstPlaceholderIndex >= 0) {
-                if (current_start > start)
-                    builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), -1));
-                builder.add(new SafeSeparatorFragment(s.substring(current_start, end), s.charAt(end), firstPlaceholderIndex));
-                start = end + 1;
-            }
-            current_start = end + 1;
+        int start = 0, end = firstIndexOfSafeSeparator(s, start);
+        while (end != -1) {
+            int next_end = end;
+            while ((next_end = firstIndexOfSafeSeparator(s, next_end + 1)) == end + 1)
+                end = next_end;
+
+            builder.add(new SafeSeparatorFragment(s.substring(start, end), s.charAt(end)));
+            start = end + 1;
+            end = next_end;
         }
-        if (current_start > start)
-            builder.add(new SafeSeparatorFragment(s.substring(start, current_start - 1), s.charAt(current_start - 1), -1));
-        if (current_start < s.length())
-            builder.add(new SafeSeparatorFragment(s.substring(current_start), (char) 0));
+        if (start < s.length())
+            builder.add(new SafeSeparatorFragment(s.substring(start), (char) 0));
 
         return builder.build();
     }
