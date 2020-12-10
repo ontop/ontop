@@ -11,6 +11,7 @@ import java.util.*;
 public class CachingMetadataLookup implements MetadataLookup {
 
     private final MetadataProvider provider;
+    //@JsonDeserialize(keyUsing = MapKeyDeserializer.class)
     private final Map<RelationID, DatabaseRelationDefinition> map = new HashMap<>();
 
     public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; }

@@ -185,7 +185,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
                 MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
                 DBMetadataProvider serializedDBMetadataProvider = serializedMetadataProviderFactory
-                    .getMetadataProvider(dbMetadataReader, dbMetadataProvider.getQuotedIDFactory());
+                    .getMetadataProvider(dbMetadataReader, dbMetadataProvider.getQuotedIDFactory(), dbMetadataProvider);
                 MetadataProvider withImplicitConstraintsMetadataProvider =
                     implicitDBConstraintExtractor.extract(constraintFile, serializedDBMetadataProvider);
 
