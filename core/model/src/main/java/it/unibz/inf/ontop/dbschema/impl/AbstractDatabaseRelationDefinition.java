@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -12,14 +13,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public abstract class AbstractDatabaseRelationDefinition extends AbstractRelationDefinition implements DatabaseRelationDefinition {
 
+    @JsonProperty("relations")
     private final RelationID id;
     private final ImmutableSet<RelationID> allIds;
 
+    @JsonProperty("isPrimaryKey")
     private UniqueConstraint primaryKey; // nullable
+    @JsonProperty("uniqueConstraints")
     private final List<UniqueConstraint> uniqueConstraints = new LinkedList<>();
+    @JsonProperty("otherFunctionalDependencies")
     private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
+    @JsonProperty("foreignKeys")
     private final List<ForeignKeyConstraint> foreignKeys = new ArrayList<>();
 
     AbstractDatabaseRelationDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
