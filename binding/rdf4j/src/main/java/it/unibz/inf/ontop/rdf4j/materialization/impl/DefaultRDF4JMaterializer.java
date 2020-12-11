@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.materialization.impl.DefaultOntopRDFMaterializer;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
-import it.unibz.inf.ontop.utils.RDF4JHelper;
+import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
 
 import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
@@ -254,7 +254,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
         public Statement next() throws QueryEvaluationException {
             try {
                 return RDF4JHelper.createStatement(graphResultSet.next(), salt);
-            } catch (OntopQueryAnsweringException e) {
+            } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                 throw new QueryEvaluationException(e);
             }
         }

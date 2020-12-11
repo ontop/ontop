@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 
+import it.unibz.inf.ontop.rdf4j.query.OntopCloseableStatementIteration;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -32,7 +33,6 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 		super(queryString, baseIRI, parsedQuery, ontopConnection, httpHeaders, settings);
 		// TODO: replace by something stronger (based on the parsed query)
 		this.isConstruct = SPARQLQueryUtility.isConstructQuery(queryString);
-
 		this.inputQueryFactory = inputQueryFactory;
 	}
 
@@ -48,7 +48,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 			OntopStatement stm = conn.createStatement();
 			SimpleGraphResultSet res = stm.execute(query, getHttpHeaders());
 			res.addStatementClosable(stm);
-			return new IteratingGraphQueryResult(Collections.emptyMap(), res.iterator());
+			return new IteratingGraphQueryResult(Collections.emptyMap(), new OntopCloseableStatementIteration(res.iterator()));
 		} catch (Exception e) {
 			throw new QueryEvaluationException(e);
 		}
@@ -56,7 +56,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 
 	@Override
 	public void evaluate(RDFHandler handler) throws QueryEvaluationException,
-			        RDFHandlerException {
+			RDFHandlerException {
 		try(GraphQueryResult result =  evaluate()) {
 			handler.startRDF();
 			while (result.hasNext())

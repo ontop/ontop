@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.RDFConstant;
-import it.unibz.inf.ontop.utils.RDF4JHelper;
+import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.AbstractBindingSet;

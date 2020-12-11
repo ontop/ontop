@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.utils;
+package it.unibz.inf.ontop.rdf4j.utils;
 
 import java.util.Objects;
 

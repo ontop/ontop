@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
-import static it.unibz.inf.ontop.utils.RDF4JHelper.createStatement;
+import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
 
 import com.github.jsonldjava.core.DocumentLoader;
 import com.github.jsonldjava.utils.JsonUtils;

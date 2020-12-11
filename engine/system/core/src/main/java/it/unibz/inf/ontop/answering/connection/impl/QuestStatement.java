@@ -7,13 +7,12 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.*;
+import it.unibz.inf.ontop.answering.resultset.impl.RDFFactCloseableIterator;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -228,7 +227,7 @@ public abstract class QuestStatement implements OntopStatement {
 					describeResultSet = set;
 				} else if (set != null) {
 					// 2nd and manyth times execute, but collect result into one object
-					CloseableIteration<Statement, OntopConnectionIterationException> iterator = set.iterator();
+					RDFFactCloseableIterator iterator = set.iterator();
 					while (iterator.hasNext()){
 						describeResultSet.addNewResult(iterator.next());
 					}
@@ -244,7 +243,7 @@ public abstract class QuestStatement implements OntopStatement {
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;
 				} else if (set != null) {
-					CloseableIteration<Statement, OntopConnectionIterationException> iterator = set.iterator();
+					RDFFactCloseableIterator iterator = set.iterator();
 					while (iterator.hasNext()){
 						describeResultSet.addNewResult(iterator.next());
 					}

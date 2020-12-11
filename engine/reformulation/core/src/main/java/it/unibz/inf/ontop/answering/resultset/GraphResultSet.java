@@ -1,17 +1,16 @@
 package it.unibz.inf.ontop.answering.resultset;
 
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
+import it.unibz.inf.ontop.answering.resultset.impl.RDFFactCloseableIterator;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 
-public interface GraphResultSet<X extends OntopQueryAnsweringException, Y extends QueryEvaluationException> extends IterativeOBDAResultSet<RDFFact, X> {
+public interface GraphResultSet<X extends OntopQueryAnsweringException> extends IterativeOBDAResultSet<RDFFact, X> {
 
     @Override
-    RDFFact next() throws X;
+    RDFFact next() throws X, OntopConnectionException;
 
-    CloseableIteration<Statement, Y> iterator();
+    RDFFactCloseableIterator iterator();
 
 }

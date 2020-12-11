@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.answering.resultset.impl.RDFFactCloseableIterator;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.model.term.IRIConstant;
@@ -21,7 +22,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.commons.rdf.api.IRI;
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,7 +185,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     //TODO implement a closable iterator
     @Override
-    public CloseableIteration iterator() {
+    public RDFFactCloseableIterator iterator() {
         throw new UnsupportedOperationException("iterator");
     }
 

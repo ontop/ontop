@@ -40,8 +40,8 @@ public class EmptyTupleResultSet implements TupleResultSet {
 	public EmptyTupleResultSet(ImmutableList<Variable> answerVariables,
 							   QueryLogger queryLogger) {
 		this.signature = answerVariables.stream()
-				                 .map(Variable::getName)
-				                 .collect(ImmutableCollectors.toList());
+				.map(Variable::getName)
+				.collect(ImmutableCollectors.toList());
 
 		this.queryLogger = queryLogger;
 	}

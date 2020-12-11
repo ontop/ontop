@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.repository.impl;
 
-
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
@@ -9,9 +8,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
+import it.unibz.inf.ontop.rdf4j.query.impl.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
