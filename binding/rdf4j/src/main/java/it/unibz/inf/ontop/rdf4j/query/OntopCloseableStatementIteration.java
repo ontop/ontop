@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.query;
 
-import it.unibz.inf.ontop.answering.resultset.impl.RDFFactCloseableIterator;
+import it.unibz.inf.ontop.answering.resultset.OntopCloseableIterator;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
@@ -15,12 +15,12 @@ import java.security.SecureRandom;
 
 public class OntopCloseableStatementIteration extends AbstractCloseableIteration<Statement, QueryEvaluationException> {
 
-    private final RDFFactCloseableIterator iterator;
+    private final OntopCloseableIterator<RDFFact, OntopConnectionException> iterator;
     private final ValueFactory valueFactory;
     private final SecureRandom secureRandom;
     private final byte[] salt;
 
-    public OntopCloseableStatementIteration(RDFFactCloseableIterator iterator) {
+    public OntopCloseableStatementIteration(OntopCloseableIterator<RDFFact, OntopConnectionException> iterator) {
         this.iterator = iterator;
         this.valueFactory = SimpleValueFactory.getInstance();
         this.secureRandom = new SecureRandom();

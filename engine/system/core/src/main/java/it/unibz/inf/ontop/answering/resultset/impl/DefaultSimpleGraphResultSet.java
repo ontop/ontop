@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
+import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
 import it.unibz.inf.ontop.answering.resultset.*;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.BNodeGenerator;
@@ -39,13 +41,14 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 			TupleResultSet tupleResultSet,
 			ConstructTemplate constructTemplate,
 			TermFactory termFactory,
-			org.apache.commons.rdf.api.RDF rdfFactory,
+			org.apache.commons.rdf.api.RDF rdfFactory, Statement sqlStatement,
 			boolean preloadStatements)
 			throws OntopConnectionException {
 		this.fetchSize = tupleResultSet.getFetchSize();
 		try {
 			iterator =
-					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, preloadStatements);
+					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, sqlStatement,
+							preloadStatements);
 		} catch (Exception e) {
 			throw new SailException(e.getCause());
 		}
@@ -62,7 +65,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	}
 
 	@Override
-	public RDFFactCloseableIterator iterator() {
+	public OntopCloseableIterator<RDFFact, OntopConnectionException> iterator() {
 		return iterator;
 	}
 
@@ -87,32 +90,28 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		iterator.addNewRDFFact(statement);
 	}
 
-	@Override
-	public void addStatementClosable(AutoCloseable sqlStatement) {
-		iterator.sqlStatement = sqlStatement;
-	}
-
 	private static class ResultSetIterator extends RDFFactCloseableIterator {
 		private final TupleResultSet resultSet;
 		private final ConstructTemplate constructTemplate;
 		private final TermFactory termFactory;
 		private final org.apache.commons.rdf.api.RDF rdfFactory;
-		private ImmutableMap<String, ValueExpr> extMap;
 		private final Queue<RDFFact> statementBuffer;
-		private AutoCloseable sqlStatement;
+		private final Statement sqlStatement;
 		private final boolean enablePreloadStatements;
+		private ImmutableMap<String, ValueExpr> extMap;
 
 		private ResultSetIterator(
 				TupleResultSet resultSet,
 				ConstructTemplate constructTemplate,
 				TermFactory termFactory,
-				org.apache.commons.rdf.api.RDF rdfFactory,
-                boolean enablePreloadStatements)
+				org.apache.commons.rdf.api.RDF rdfFactory, Statement sqlStatement,
+				boolean enablePreloadStatements)
 				throws OntopConnectionException, OntopResultConversionException {
 			this.resultSet = resultSet;
 			this.constructTemplate = constructTemplate;
 			this.termFactory = termFactory;
 			this.rdfFactory = rdfFactory;
+			this.sqlStatement = sqlStatement;
 			intExtMap();
 			this.statementBuffer = new LinkedList<>();
 			this.enablePreloadStatements = enablePreloadStatements;
@@ -150,11 +149,12 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		public void handleClose() throws OntopConnectionException {
 			try {
 				if (resultSet.isConnectionAlive()) {
-					// closing sql statement, automatically closes the result set as well
-					if (sqlStatement != null) {
+					// closing sql statement, automatically closes the result set as well, but should not close
+					// for Describe queries as it is used multiple times
+					if (sqlStatement != null && !enablePreloadStatements) {
 						sqlStatement.close();
-          			} else {
-            			resultSet.close();
+					} else {
+						resultSet.close();
 					}
 				}
 			} catch (Exception e) {
@@ -164,7 +164,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
 		private void addStatementFromResultSet() {
 			try {
-			 	OntopBindingSet bindingSet = resultSet.next();
+				OntopBindingSet bindingSet = resultSet.next();
 				for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
 					int size = peList.getElements().size();
 					for (int i = 0; i < size / 3; i++) {
@@ -175,7 +175,8 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 						RDFConstant objectConstant =
 								(RDFConstant) getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
 						if (subjectConstant != null && propertyConstant != null && objectConstant != null) {
-								statementBuffer.add(RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
+							statementBuffer.add(
+									RDFFact.createTripleFact(subjectConstant, propertyConstant, objectConstant));
 						}
 					}
 				}

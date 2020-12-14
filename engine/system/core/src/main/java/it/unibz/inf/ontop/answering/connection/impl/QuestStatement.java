@@ -7,11 +7,11 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.*;
-import it.unibz.inf.ontop.answering.resultset.impl.RDFFactCloseableIterator;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
@@ -227,7 +227,7 @@ public abstract class QuestStatement implements OntopStatement {
 					describeResultSet = set;
 				} else if (set != null) {
 					// 2nd and manyth times execute, but collect result into one object
-					RDFFactCloseableIterator iterator = set.iterator();
+					OntopCloseableIterator<RDFFact, OntopConnectionException> iterator = set.iterator();
 					while (iterator.hasNext()){
 						describeResultSet.addNewResult(iterator.next());
 					}
@@ -243,7 +243,7 @@ public abstract class QuestStatement implements OntopStatement {
 				if (describeResultSet == null) { // just for the first time
 					describeResultSet = set;
 				} else if (set != null) {
-					RDFFactCloseableIterator iterator = set.iterator();
+					OntopCloseableIterator<RDFFact, OntopConnectionException> iterator = set.iterator();
 					while (iterator.hasNext()){
 						describeResultSet.addNewResult(iterator.next());
 					}

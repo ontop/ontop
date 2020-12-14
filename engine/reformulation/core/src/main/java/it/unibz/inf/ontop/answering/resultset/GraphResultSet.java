@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.answering.resultset;
 
-import it.unibz.inf.ontop.answering.resultset.impl.RDFFactCloseableIterator;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
@@ -11,6 +10,6 @@ public interface GraphResultSet<X extends OntopQueryAnsweringException> extends 
     @Override
     RDFFact next() throws X, OntopConnectionException;
 
-    RDFFactCloseableIterator iterator();
+    OntopCloseableIterator<RDFFact, OntopConnectionException> iterator();
 
 }

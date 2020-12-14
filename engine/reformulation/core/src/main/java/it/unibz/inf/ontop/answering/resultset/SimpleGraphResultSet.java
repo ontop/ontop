@@ -15,5 +15,4 @@ public interface SimpleGraphResultSet extends GraphResultSet<OntopResultConversi
     @Deprecated
     void addNewResult(RDFFact statement);
 
-    void addStatementClosable(AutoCloseable sqlStatement);
 }

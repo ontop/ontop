@@ -11,8 +11,8 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.answering.resultset.OntopCloseableIterator;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
-import it.unibz.inf.ontop.answering.resultset.impl.RDFFactCloseableIterator;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.model.term.IRIConstant;
@@ -185,7 +185,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     //TODO implement a closable iterator
     @Override
-    public RDFFactCloseableIterator iterator() {
+    public OntopCloseableIterator<RDFFact, OntopConnectionException> iterator() {
         throw new UnsupportedOperationException("iterator");
     }
 
