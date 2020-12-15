@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser.impl;
+package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
@@ -20,12 +20,25 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  * #L%
  */
 
-//import com.hp.hpl.jena.iri.IRI;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 
-public class Constants {
-
-	public static final String OBDA_URI_MAPPING_PREDICATE = "http://obda.inf.unibz.it/quest/vocabulary#";
-	public static final String OBDA_QUERY_PREDICATE = "q";
+/**
+ * A utility class to render a Source Query object into its representational
+ * string.
+ */
+public class SourceQueryRenderer {
 	
-	public static final String QUERY_HEAD = OBDA_URI_MAPPING_PREDICATE + OBDA_QUERY_PREDICATE;
+	/**
+	 * Transforms the given <code>OBDAQuery</code> into a string.
+	 */
+	public static String encode(SQLPPSourceQuery input) {
+		if (input == null) {
+			return "";
+		}
+		return input.getSQL();
+	}
+	
+	private SourceQueryRenderer() {
+		// Prevent initialization
+	}
 }

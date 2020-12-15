@@ -38,9 +38,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class MySQLBackticksTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/mysql/identifiers/identifiers.owl";
-	static final String obdafile = "/mysql/identifiers/identifiers-backtick-mysql.obda";
-	static final String propertiesfile = "/mysql/identifiers/identifiers-backtick-mysql.properties";
+	private static final String owlfile = "/mysql/identifiers/identifiers.owl";
+	private static final String obdafile = "/mysql/identifiers/identifiers-backtick-mysql.obda";
+	private static final String propertiesfile = "/mysql/identifiers/identifiers-backtick-mysql.properties";
 
 	private static OntopOWLReasoner REASONER;
 	private static OntopOWLConnection CONNECTION;

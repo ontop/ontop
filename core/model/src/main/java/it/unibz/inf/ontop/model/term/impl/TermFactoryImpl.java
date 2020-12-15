@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -698,13 +699,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString) {
-		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;
-		return getRDFFunctionalTerm(lexicalTerm, iriTypeConstant);
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableTerm term) {
+		return getRDFFunctionalTerm(term, iriTypeConstant);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate,
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> iriTemplate,
 														ImmutableList<? extends ImmutableTerm> arguments) {
 		if (arguments.isEmpty())
 			throw new IllegalArgumentException("At least one argument for the IRI functional term " +
@@ -725,13 +725,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString) {
-		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;
-		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableTerm term) {
+		return getRDFFunctionalTerm(term, bnodeTypeConstant);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> bnodeTemplate,
 														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),

@@ -16,17 +16,13 @@ public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
 
 	@Test
 	public void test1() {
-
 		//read next query
 		String sparqlQuery = "SELECT ?x WHERE {?x a <http://sws.ifi.uio.no/vocab/npd-v2#Field>}" ; 
-		//read expected result
-		//int expectedResult = 14366 ;
-		int expectedResult = 98;
-		
+
 		int obtainedResult = count(sparqlQuery);
 		System.out.println(obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
-
+		//int expectedResult = 14366 ;
+		assertEquals(98, obtainedResult);
 	}
 
 }

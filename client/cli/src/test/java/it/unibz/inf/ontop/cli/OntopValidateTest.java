@@ -13,9 +13,8 @@ public class OntopValidateTest {
 
     @Test
     public void testOntopValidateCMD (){
-        String[] argv = {"validate", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("validate", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
-        "-p",  "src/test/resources/books/exampleBooks.properties" };
-        Ontop.main(argv);
+                "-p",  "src/test/resources/books/exampleBooks.properties");
     }
 }

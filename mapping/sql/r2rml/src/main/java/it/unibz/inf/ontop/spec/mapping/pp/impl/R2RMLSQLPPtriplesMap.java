@@ -64,10 +64,4 @@ public class R2RMLSQLPPtriplesMap extends AbstractSQLPPTriplesMap {
     public Optional<String> getOptionalTargetString() {
         return Optional.empty();
     }
-
-    // currently only used for R2RML conversion, so it is not necessary to keep the targetString
-    @Override
-    public SQLPPTriplesMap extractPPMappingAssertions(String newId, ImmutableList<TargetAtom> atoms) {
-        return new R2RMLSQLPPtriplesMap(newId, getSourceQuery(), atoms);
-    }
 }

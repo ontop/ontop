@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -225,8 +227,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<String, Integer, DBBooleanFunctionSymbol> notPredefinedBooleanFunctionTable;
 
-    private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
-    private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+    private final Map<ImmutableList<TemplateComponent>, IRIStringTemplateFunctionSymbol> iriTemplateMap;
+    private final Map<ImmutableList<TemplateComponent>, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
     private final Map<IRI, DBFunctionSymbol> iriStringResolverMap;
 
@@ -405,29 +407,28 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
 
     @Override
-    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
-        return iriTemplateMap
-                .computeIfAbsent(iriTemplate,
-                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> iriTemplate) {
+        return iriTemplateMap.computeIfAbsent(iriTemplate,
+                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(iriTemplate, typeFactory));
     }
 
     @Override
-    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(String bnodeTemplate) {
-        return bnodeTemplateMap
-                .computeIfAbsent(bnodeTemplate,
-                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> bnodeTemplate) {
+        return bnodeTemplateMap.computeIfAbsent(bnodeTemplate,
+                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(bnodeTemplate, typeFactory));
     }
 
     @Override
     public BnodeStringTemplateFunctionSymbol getFreshBnodeStringTemplateFunctionSymbol(int arity) {
-        String bnodeTemplate = IntStream.range(0, arity)
-                .boxed()
-                .map(i -> PLACEHOLDER)
-                .reduce(
-                        BNODE_PREFIX + counter.incrementAndGet(),
-                        (prefix, suffix) -> prefix + "/" + suffix);
+        if (arity <= 0)
+            throw new IllegalArgumentException("A positive BNode arity is expected");
 
-        return getBnodeStringTemplateFunctionSymbol(bnodeTemplate);
+        Template.Builder builder = Template.builder();
+        builder.addSeparator(BNODE_PREFIX + counter.incrementAndGet());
+        for (int i = 0; i < arity - 1; i++) // except the last one
+            builder.addColumn().addSeparator("/");
+        builder.addColumn();
+        return getBnodeStringTemplateFunctionSymbol(builder.build());
     }
 
     @Override

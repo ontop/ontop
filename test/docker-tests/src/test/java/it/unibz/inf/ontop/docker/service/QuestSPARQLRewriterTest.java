@@ -149,8 +149,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private String readQueryFile(String queryFile) {
 		String queryFileLocation = ROOT_LOCATION + queryFile;
 		URL queryFileUrl = QuestSPARQLRewriterTest.class.getResource(queryFileLocation);
-		try {
-			InputStream stream = queryFileUrl.openStream();
+		try (InputStream stream = queryFileUrl.openStream()) {
 			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
 		} catch (IOException e) { 
 			throw new RuntimeException("Cannot read input file");

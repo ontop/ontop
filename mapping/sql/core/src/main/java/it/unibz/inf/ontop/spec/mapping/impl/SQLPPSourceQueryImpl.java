@@ -22,12 +22,16 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 
+import java.util.regex.Pattern;
+
 public class SQLPPSourceQueryImpl implements SQLPPSourceQuery {
 
 	private final String sqlQuery;
 
+	private static final Pattern TRIM = Pattern.compile("(?m)^[ \t]*\r?\n");
+
 	protected SQLPPSourceQueryImpl(String sqlQuery) {
-		this.sqlQuery = sqlQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
+		this.sqlQuery = TRIM.matcher(sqlQuery).replaceAll("");
 	}
 
 	@Override

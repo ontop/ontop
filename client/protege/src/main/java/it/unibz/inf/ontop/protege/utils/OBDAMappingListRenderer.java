@@ -24,8 +24,8 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import it.unibz.inf.ontop.protege.core.SourceQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 
 import javax.swing.*;
 import javax.swing.text.Style;
@@ -370,7 +370,8 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 //		String trgQuery = map.getOptionalTargetString()
 //				.orElseGet(() -> TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager));
 
-		String trgQuery = TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager);
+		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
+		String trgQuery = targetQueryRenderer.encode(map.getTargetAtoms());
 
 		//String trgQuery = map.getOptionalTargetString();
  		trgQueryTextPane.setText(trgQuery);

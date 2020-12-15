@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
@@ -39,23 +40,20 @@ import java.util.stream.StreamSupport;
  */
 public class MutablePrefixManager extends AbstractPrefixManager {
 
-    private PrefixDocumentFormat owlmapper;
+    private final PrefixDocumentFormat owlmapper;
 
 	MutablePrefixManager(PrefixDocumentFormat owlmapper) {
 		this.owlmapper = owlmapper;
 	}
-	
+
 	@Override
-	public String getDefaultPrefix() {
-		return super.getDefaultPrefix();
+	protected Optional<String> getIriDefinition(String prefix) {
+		return Optional.ofNullable(owlmapper.getPrefix(prefix));
 	}
 
 	@Override
-	public Optional<String> getPrefix(String uri) {
-		return owlmapper.getPrefixName2PrefixMap().entrySet().stream()
-				.filter(e -> e.getValue().equals(uri))
-				.map(Map.Entry::getKey)
-				.findFirst();
+	protected ImmutableList<Map.Entry<String, String>> getOrderedMap() {
+		return orderMap(owlmapper.getPrefixName2PrefixMap());
 	}
 
 	@Override
@@ -63,33 +61,16 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 		return ImmutableMap.copyOf(owlmapper.getPrefixName2PrefixMap());
 	}
 
-	@Override
-	public String getURIDefinition(String prefix) {
-		return owlmapper.getPrefix(prefix);
-	}
-
-	@Override
 	public boolean contains(String prefix) {
 		return owlmapper.containsPrefixMapping(prefix);
 	}
 
-	void addPrefix(String name, String uri) {
+	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, uri);
 	}
 
 	public void clear() {
 		owlmapper.clear();
-	}
-
-	@Override
-	public List<String> getOrderedNamespaces() {
-		ArrayList<String> namespaceList = new ArrayList<>(getPrefixMap().values());
-		Collections.sort(namespaceList, Collections.reverseOrder());
-		return namespaceList;
-	}
-
-	void addPrefixes(ImmutableMap<String, String> prefixMap) {
-		prefixMap.forEach((key, value) -> owlmapper.setPrefix(key, value));
 	}
 
 	/**
@@ -98,20 +79,20 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	 static Optional<String> getDeclaredDefaultPrefixNamespace(OWLOntology ontology){
 		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
 				ontology,
-				ontology.getOWLOntologyManager().getOntologyFormat(ontology)
-		);
-		if(StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
+				ontology.getOWLOntologyManager().getOntologyFormat(ontology));
+
+		if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
 			.anyMatch(p ->  p.equals(""))){
-			return Optional.of(nsm.getNamespaceForPrefix(""));
+			return Optional.ofNullable(nsm.getNamespaceForPrefix(""));
 		}
 		return Optional.empty();
 	}
 
 	static Optional<String> generateDefaultPrefixNamespaceFromID(OWLOntologyID ontologyID) {
 		com.google.common.base.Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
-		return ontologyIRI.isPresent()?
-				Optional.of(getProperPrefixURI(ontologyIRI.get().toString())):
-				Optional.empty();
+		return ontologyIRI.isPresent()
+				? Optional.of(getProperPrefixURI(ontologyIRI.get().toString()))
+				: Optional.empty();
 	}
 
 	/**

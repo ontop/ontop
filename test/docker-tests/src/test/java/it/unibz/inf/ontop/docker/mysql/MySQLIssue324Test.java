@@ -45,27 +45,13 @@ public class MySQLIssue324Test extends AbstractVirtualModeTest {
     }
 
     private void runTests(String query1) throws Exception {
-
-        OWLStatement st = createStatement();
-
-
-        try {
+        try (OWLStatement st = createStatement()) {
             executeQueryAssertResults(query1, st);
-
-        } catch (Exception e) {
-            st.close();
-            e.printStackTrace();
-            assertTrue(false);
-
-
-        } finally {
-            st.close();
         }
     }
 
     private void executeQueryAssertResults(String query, OWLStatement st) throws Exception {
         TupleOWLResultSet rs = st.executeSelectQuery(query);
-
         assertTrue(rs.hasNext());
         rs.close();
     }

@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -125,9 +123,7 @@ public class OBDAModel {
     }
 
 
-    public void parseMapping(Reader mappingReader, Properties properties) throws DuplicateMappingException,
-            InvalidMappingException, MappingIOException {
-
+    public void parseMapping(Reader mappingReader, Properties properties) throws InvalidMappingException, MappingIOException {
 
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopMappingReader(mappingReader)
@@ -137,7 +133,7 @@ public class OBDAModel {
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
         SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
-        prefixManager.addPrefixes(ppMapping.getPrefixManager().getPrefixMap());
+        ppMapping.getPrefixManager().getPrefixMap().forEach((k, v) -> prefixManager.addPrefix(k,v));
         // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(
@@ -480,11 +476,11 @@ public class OBDAModel {
 
 
     public TargetQueryParser createTargetQueryParser() {
-        return targetQueryParserFactory.createParser(getMutablePrefixManager().getPrefixMap());
+        return targetQueryParserFactory.createParser(getMutablePrefixManager());
     }
 
-    public TargetQueryParser createTargetQueryParser(ImmutableMap<String, String> prefixMap) {
-        return targetQueryParserFactory.createParser(prefixMap);
+    public TargetQueryParser createTargetQueryParser(PrefixManager prefixManager) {
+        return targetQueryParserFactory.createParser(prefixManager);
     }
 
     boolean hasTripleMaps(){

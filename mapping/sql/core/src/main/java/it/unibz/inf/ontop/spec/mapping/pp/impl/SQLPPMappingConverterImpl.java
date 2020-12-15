@@ -126,16 +126,14 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> e.getValue().orElseThrow(() -> new MinorOntopInternalBugException("Impossible"))));
 
         ImmutableSubstitution<ImmutableTerm> targetRenamingPart = substitutionFactory.getSubstitution(targetMap.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable)
+                .filter(e -> e.getValue() instanceof Variable) // getVar2VarFragment (NON-INJECTIVE)
                 .filter(e -> !e.getValue().equals(e.getKey()))
                 .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
-                                e -> targetRenamingPart.apply(e.getValue()))));
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetRenamingPart.applyToTarget(target.getSubstitution());
 
         ImmutableSubstitution<ImmutableTerm> selectSubstitution = substitutionFactory.getSubstitution(
-                targetMap.entrySet().stream()
+                targetMap.entrySet().stream() // getNonVariableFragment
                         .filter(e -> !(e.getValue() instanceof Variable))
                         .collect(ImmutableCollectors.toMap()));
 
@@ -150,7 +148,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
     }
 
-    private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
         String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
         SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
         try {
