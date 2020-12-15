@@ -72,14 +72,16 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
          * builds a FOREIGN KEY constraint
          *
          * @throws IllegalArgumentException if the list of components is empty
+         * @return
          */
 
-        public void build() {
+        public ImmutableList<Attribute> build() {
             ImmutableList<Component> components = builder.build();
             if (components.isEmpty())
                 throw new IllegalArgumentException("No attributes in a foreign key");
 
             relation.addForeignKeyConstraint(new ForeignKeyConstraintImpl(name, components));
+            return null;
         }
     }
 

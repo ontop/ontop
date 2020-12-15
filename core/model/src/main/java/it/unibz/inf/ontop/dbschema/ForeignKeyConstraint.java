@@ -43,9 +43,10 @@ public interface ForeignKeyConstraint {
          * builds a FOREIGN KEY constraint
          *
          * @throws IllegalArgumentException if the list of components is empty
+         * @return
          */
 
-        void build();
+        ImmutableList<Attribute> build();
     }
 
 

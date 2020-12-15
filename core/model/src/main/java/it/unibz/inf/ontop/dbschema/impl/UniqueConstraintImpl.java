@@ -46,16 +46,17 @@ public class UniqueConstraintImpl implements UniqueConstraint {
         }
 
         @Override
-        public void build() {
+        public ImmutableList<Attribute> build() {
             ImmutableList<Attribute> attributes = builder.build();
             if (attributes.isEmpty())
                 throw new IllegalArgumentException("UC cannot have no attributes");
 
             Optional<UniqueConstraint> pk = relation.getPrimaryKey();
             if (pk.isPresent() && pk.get().getAttributes().equals(attributes))
-                return; // ignore a unique constraint with the same attributes as the primary key
+                return attributes;
 
             relation.addFunctionalDependency(new UniqueConstraintImpl(name, false, attributes));
+            return attributes;
         }
     }
 
@@ -86,12 +87,13 @@ public class UniqueConstraintImpl implements UniqueConstraint {
         }
 
         @Override
-        public void build() {
+        public ImmutableList<Attribute> build() {
             ImmutableList<Attribute> attributes = builder.build();
             if (attributes.isEmpty())
                 throw new IllegalArgumentException("PK cannot have no attributes");
 
             relation.addFunctionalDependency(new UniqueConstraintImpl(name, true, attributes));
+            return attributes;
         }
     }
 
