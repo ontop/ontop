@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
-import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
+import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.resultset.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -41,13 +41,13 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 			TupleResultSet tupleResultSet,
 			ConstructTemplate constructTemplate,
 			TermFactory termFactory,
-			org.apache.commons.rdf.api.RDF rdfFactory, Statement sqlStatement,
+			org.apache.commons.rdf.api.RDF rdfFactory, OntopStatement ontopStatement,
 			boolean preloadStatements)
 			throws OntopConnectionException {
 		this.fetchSize = tupleResultSet.getFetchSize();
 		try {
 			iterator =
-					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, sqlStatement,
+					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, ontopStatement,
 							preloadStatements);
 		} catch (Exception e) {
 			throw new SailException(e.getCause());
@@ -96,7 +96,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		private final TermFactory termFactory;
 		private final org.apache.commons.rdf.api.RDF rdfFactory;
 		private final Queue<RDFFact> statementBuffer;
-		private final Statement sqlStatement;
+		private final OntopStatement ontopStatement;
 		private final boolean enablePreloadStatements;
 		private ImmutableMap<String, ValueExpr> extMap;
 
@@ -104,14 +104,14 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 				TupleResultSet resultSet,
 				ConstructTemplate constructTemplate,
 				TermFactory termFactory,
-				org.apache.commons.rdf.api.RDF rdfFactory, Statement sqlStatement,
+				org.apache.commons.rdf.api.RDF rdfFactory, OntopStatement ontopStatement,
 				boolean enablePreloadStatements)
 				throws OntopConnectionException, OntopResultConversionException {
 			this.resultSet = resultSet;
 			this.constructTemplate = constructTemplate;
 			this.termFactory = termFactory;
 			this.rdfFactory = rdfFactory;
-			this.sqlStatement = sqlStatement;
+			this.ontopStatement = ontopStatement;
 			intExtMap();
 			this.statementBuffer = new LinkedList<>();
 			this.enablePreloadStatements = enablePreloadStatements;
@@ -151,8 +151,8 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 				if (resultSet.isConnectionAlive()) {
 					// closing sql statement, automatically closes the result set as well, but should not close
 					// for Describe queries as it is used multiple times
-					if (sqlStatement != null && !enablePreloadStatements) {
-						sqlStatement.close();
+					if (ontopStatement != null && !enablePreloadStatements) {
+						ontopStatement.close();
 					} else {
 						resultSet.close();
 					}
