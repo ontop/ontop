@@ -10,36 +10,30 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.JSONRelation.Column;
+import it.unibz.inf.ontop.dbschema.impl.JSONRelation.ForeignKey;
 import it.unibz.inf.ontop.dbschema.impl.JSONRelation.JSONRelation;
 import it.unibz.inf.ontop.dbschema.impl.JSONRelation.Relation;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class SerializedMetadataProviderImpl implements SerializedMetadataProvider {//DBMetadataProvider
+public class SerializedMetadataProviderImpl implements SerializedMetadataProvider {
 
-    private final Reader dbMetadataReader; //
     private final QuotedIDFactory quotedIDFactory;
-    private final MetadataProvider provider;
-    private final TypeFactory typeFactory;
-    private final Map<RelationID, DatabaseRelationDefinition> map;
+    private final Map<RelationID, DatabaseRelationDefinition> relationMap;
 
     @AssistedInject
     protected SerializedMetadataProviderImpl(@Assisted Reader dbMetadataReader,
                                              @Assisted QuotedIDFactory quotedIDFactory,
-                                             @Assisted MetadataProvider provider,
                                              TypeFactory typeFactory) throws MetadataExtractionException, IOException {
-        this.dbMetadataReader = dbMetadataReader;
         this.quotedIDFactory = quotedIDFactory;
-        this.provider = provider;
-        this.typeFactory = typeFactory;
-        map = extractRelationDefinitions(loadAndDeserialize(this.dbMetadataReader));
+        relationMap = extractRelationDefinitions(loadAndDeserialize(dbMetadataReader), quotedIDFactory, typeFactory);
     }
 
     /**
@@ -47,7 +41,7 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
      * @param dbMetadataReader JSON file reader
      * @return JSON metadata
      */
-    protected JSONRelation loadAndDeserialize(Reader dbMetadataReader) throws MetadataExtractionException, IOException {
+    protected static JSONRelation loadAndDeserialize(Reader dbMetadataReader) throws MetadataExtractionException, IOException {
 
         try {
             SimpleModule simpleModule = new SimpleModule().addKeyDeserializer(RelationID.class, new RelationIDKeyDeserializer());
@@ -73,98 +67,102 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
     /**
      * Extract relation definitions with the exception of FKs
      */
-    protected ImmutableMap<RelationID, DatabaseRelationDefinition> extractRelationDefinitions(JSONRelation JSONMetadata) {
+    protected static ImmutableMap<RelationID, DatabaseRelationDefinition> extractRelationDefinitions(JSONRelation jsonMetadata,
+                                                                                                     QuotedIDFactory quotedIDFactory,
+                                                                                                     TypeFactory typeFactory) throws MetadataExtractionException {
 
-        // Initialize map of relation id-s and DatabaseRelationDefinition
-        List<DatabaseRelationDefinition> myTables = new ArrayList<DatabaseRelationDefinition>();
-        Map<RelationID, DatabaseRelationDefinition> map1 = new HashMap<>();
+        ImmutableMap<RelationID, DatabaseRelationDefinition> relationMap = jsonMetadata.getRelations().stream()
+            .map(r -> extractRelationDefinition(r, quotedIDFactory, typeFactory))
+            .collect(ImmutableCollectors.toMap(
+                DatabaseRelationDefinition::getID,
+                d -> d
+                ));
 
-        // Retrieve metadata relations
-        // Create local variable which stores relation object
-        List<Relation> allRelations = JSONMetadata.getRelations();
-
-        // Return immutable list of relation IDs
-        ImmutableList<RelationID> myRelationIDs = allRelations.stream()
-            .map(x -> quotedIDFactory.createRelationID(x.getName()))
-            .collect(ImmutableCollectors.toList());
-
-        // Initialize metadata builder object
-        RelationDefinition.AttributeListBuilder attributeListBuilder = AbstractRelationDefinition.attributeListBuilder();
-        OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(typeFactory);
-
-        // Return immutable map of relation id-s and database relationd definitions
-        ImmutableMap<RelationID, DatabaseRelationDefinition> relationMap = myRelationIDs.stream()
-            .collect(ImmutableCollectors.toMap(x -> x, x -> builder.createDatabaseRelation(myRelationIDs, attributeListBuilder)));
-
-        // Unique Constraints - Name
-        // flag only one PK!!! --> Not currently done
-        relationMap.entrySet().stream()
-            .map(x -> UniqueConstraint.primaryKeyBuilder(x.getValue(), x.getValue().getUniqueConstraints().get(0).getName()))
-            .collect(ImmutableCollectors.toList());
-
-        // Columns --> Add Attributes to respective relation ID, needs to be changed
-        ImmutableList<RelationDefinition.AttributeListBuilder> columnAttributes = allRelations.stream()
-            .map(x -> x.getColumns())
-            .flatMap(Collection::stream)
-            .map(x -> attributeListBuilder.addAttribute(
-                new QuotedIDImpl(x.getName(), quotedIDFactory.getIDQuotationString()),
-                typeFactory.getDBTypeFactory().getDBTermType(x.getDatatype()),
-                x.getIsNullable()))
-            .collect(ImmutableCollectors.toList());
-
+        insertForeignKeys(jsonMetadata, relationMap, quotedIDFactory);
         return relationMap;
-
     }
 
 
     /**
+     * For each relation add individual attributes
+     */
+    protected static DatabaseRelationDefinition extractRelationDefinition(Relation parsedRelation, QuotedIDFactory quotedIDFactory, TypeFactory typeFactory) {
+
+        // Initialize database relation builder object
+        OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(typeFactory);
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+
+        // Initialize attribute builder object
+        RelationDefinition.AttributeListBuilder attributeListBuilder = AbstractRelationDefinition.attributeListBuilder();
+
+        // Add all attributes
+        for (Column attributeName: parsedRelation.getColumns()) {
+            attributeListBuilder.addAttribute(
+                quotedIDFactory.createAttributeID(attributeName.getName()),
+                dbTypeFactory.getDBTermType(attributeName.getDatatype()),
+                attributeName.getIsNullable());
+        }
+
+        // Create "key" i.e. Relation ID
+        RelationID id = quotedIDFactory.createRelationID(parsedRelation.getName());
+
+        DatabaseRelationDefinition relationDefinition = builder.createDatabaseRelation(ImmutableList.of(id), attributeListBuilder);
+
+        insertUniqueConstraints(parsedRelation, relationDefinition, quotedIDFactory);
+
+        return relationDefinition;
+    }
+
+
+    /**
+     * For each relation add unique constraints i.e. primary keys
+     */
+    protected static void insertUniqueConstraints(Relation parsedRelation, DatabaseRelationDefinition relationDefinition, QuotedIDFactory quotedIDFactory) {
+
+        // Add primary key
+        RelationID id = quotedIDFactory.createRelationID(parsedRelation.getName());
+
+        for (it.unibz.inf.ontop.dbschema.impl.JSONRelation.UniqueConstraint uc: parsedRelation.getUniqueConstraints()) {
+
+            if (uc.getIsPrimaryKey()) {
+                UniqueConstraint.primaryKeyBuilder(relationDefinition, uc.getName());
+            }
+
+            else {
+                UniqueConstraint.builder(relationDefinition, uc.getName());
+            }
+        }
+    }
+
+    /**
      * Insert the FKs
      */
-    protected void insertForeignKeys(ImmutableMap<RelationID, DatabaseRelationDefinition> relationMap, JSONRelation JSONMetadata) {
-
-        // Create local variable which stores relations
-        List<Relation> allRelations = JSONMetadata.getRelations();
-
-        // Add foreign keys
-        allRelations.stream()
-            .map(x -> x.getForeignKeys())
-            .flatMap(Collection::stream)
-            /*.map(x -> new Object() {
-                ForeignKeyConstraint.Builder fk01 = ForeignKeyConstraint.builder("", relationMap.get(x.getFrom().getRelation()), relationMap.get(x.getTo().getRelation())) ;
-                List<String> fk02 = x.getFrom().getColumns().stream().flatMap(Collection::stream);
-                Stream<List<String>> fk03 = Stream.of(x.getTo().getColumns()); })
-            .map(x -> x.fk01.add(quotedIDFactory.createAttributeID(x.fk02), quotedIDFactory.createAttributeID(x.fk03.flatMap(Collection::stream))))*/
-            .map(x -> ForeignKeyConstraint.builder("", relationMap.get(x.getFrom().getRelation()), relationMap.get(x.getTo().getRelation())))
-            //.map(builder.add(quotedIDFactory.createAttributeID(x.getFrom().getColumns().get(0)), quotedIDFactory.createAttributeID(x.getTo().getColumns().get(0))))
-                .collect(ImmutableCollectors.toList());
-
-        List<QuotedID> source = allRelations.stream()
-            .map(x -> x.getForeignKeys())
-            .flatMap(Collection::stream)
-            .map(x -> x.getFrom().getColumns())
-            .flatMap(Collection::stream)
-            .map(x -> quotedIDFactory.createAttributeID(x))
-            .collect(ImmutableCollectors.toList());
-
-        List<QuotedID> destination = allRelations.stream()
-            .map(x -> x.getForeignKeys())
-            .flatMap(Collection::stream)
-            .map(x -> x.getTo().getColumns())
-            .flatMap(Collection::stream)
-            .map(x -> quotedIDFactory.createAttributeID(x))
-            .collect(ImmutableCollectors.toList());
+    private static void insertForeignKeys(JSONRelation jsonMetadata, ImmutableMap<RelationID, DatabaseRelationDefinition> relationMap, QuotedIDFactory quotedIDFactory) throws MetadataExtractionException {
 
 
-        //for (int k = 0; k <= source.size()-1; k++) {
-        //for (ForeignKey fk: fkList)
-            //builderfk.add(source.get(k), destination.get(k));
+        for (Relation relation : jsonMetadata.getRelations()) {
+            for (ForeignKey fk : relation.getForeignKeys()) {
+                ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(fk.getName(),
+                    relationMap.get(quotedIDFactory.createRelationID(fk.getFrom().getRelation())),
+                    relationMap.get(quotedIDFactory.createRelationID(fk.getTo().getRelation())));
+                for (int i = 0; i < fk.getFrom().getColumns().size(); i++) {
 
-
+                    try {
+                        builder.add(quotedIDFactory.createAttributeID(fk.getFrom().getColumns().get(i)),
+                            quotedIDFactory.createAttributeID(fk.getTo().getColumns().get(i)));
+                    } catch (AttributeNotFoundException e) {
+                        throw new MetadataExtractionException(e);
+                    }
+                }
+                builder.build();
+            }
+        }
     }
+
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        return null;
+        return relationMap.get(id);
     }
 
     @Override
@@ -174,28 +172,17 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
 
     @Override
     public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
-        return null;
+        return ImmutableList.copyOf(relationMap.keySet());
     }
 
     @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-
+        throw new RuntimeException("To be implemented ?");
     }
 
     @Override
     public DBParameters getDBParameters() {
-        return null;
+        throw new RuntimeException("To be implemented");
     }
 
-    public MetadataProvider getProvider() { return provider; }
-
-    public Reader getDbMetadataReader() { return  dbMetadataReader; }
-
-    public Map<RelationID, DatabaseRelationDefinition> getMap() {
-        return map;
-    }
-
-    public TypeFactory getTypeFactory() {
-        return typeFactory;
-    }
 }

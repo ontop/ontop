@@ -14,8 +14,7 @@ public interface SerializedMetadataProvider extends DBMetadataProvider {
 
     interface Factory {
     SerializedMetadataProvider getMetadataProvider(Reader dbMetadataReader,
-                                                   QuotedIDFactory quotedIDFactory,
-                                                   MetadataProvider provider) throws MetadataExtractionException;
+                                                   QuotedIDFactory quotedIDFactory) throws MetadataExtractionException;
 
 }
 
