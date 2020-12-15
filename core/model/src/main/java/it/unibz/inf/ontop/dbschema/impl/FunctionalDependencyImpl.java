@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 
@@ -66,8 +67,9 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         }
 
         @Override
-        public void build() {
+        public ImmutableList<Attribute> build() {
             relation.addFunctionalDependency(new FunctionalDependencyImpl(determinants.build(), dependents.build()));
+            return null;
         }
     }
 }

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.impl.FunctionalDependencyImpl;
 
@@ -20,7 +21,7 @@ public interface FunctionalDependency {
         Builder addDependent(int dependentIndex);
         Builder addDependent(QuotedID dependentId) throws AttributeNotFoundException;
 
-        void build();
+        ImmutableList<Attribute> build();
     }
 
     static Builder defaultBuilder(DatabaseRelationDefinition relation) {
