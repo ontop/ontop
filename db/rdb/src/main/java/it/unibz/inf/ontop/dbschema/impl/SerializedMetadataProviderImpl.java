@@ -27,14 +27,18 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
 
     private final QuotedIDFactory quotedIDFactory;
     private final Map<RelationID, DatabaseRelationDefinition> relationMap;
+    private final DBParameters dbParameters;
 
     @AssistedInject
     protected SerializedMetadataProviderImpl(@Assisted Reader dbMetadataReader,
                                              @Assisted QuotedIDFactory quotedIDFactory,
                                              TypeFactory typeFactory) throws MetadataExtractionException, IOException {
         this.quotedIDFactory = quotedIDFactory;
-        relationMap = extractRelationDefinitions(loadAndDeserialize(dbMetadataReader), quotedIDFactory, typeFactory);
+        JSONRelation jsonRelation = loadAndDeserialize(dbMetadataReader);
+        relationMap = extractRelationDefinitions(jsonRelation, quotedIDFactory, typeFactory);
+        this.dbParameters = extractDBParameters(jsonRelation, quotedIDFactory, typeFactory);
     }
+
 
     /**
      * Deserializes a JSON file into a POJO.
@@ -159,6 +163,15 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
         }
     }
 
+    private static DBParameters extractDBParameters(JSONRelation jsonRelation, QuotedIDFactory quotedIDFactory, TypeFactory typeFactory) {
+        return new BasicDBParametersImpl(jsonRelation.getMetadata().getDriverName(),
+            jsonRelation.getMetadata().getDriverVersion(),
+            jsonRelation.getMetadata().getDbmsProductName(),
+            jsonRelation.getMetadata().getDbmsVersion(),
+            quotedIDFactory,
+            typeFactory.getDBTypeFactory());
+    }
+
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
@@ -182,7 +195,7 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
 
     @Override
     public DBParameters getDBParameters() {
-        throw new RuntimeException("To be implemented");
+        return dbParameters;
     }
 
 }

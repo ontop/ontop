@@ -14,6 +14,8 @@ public class JSONRelation {
 
     @JsonProperty("relations")
     private List<Relation> relations = null;
+    @JsonProperty("metadata")
+    private Metadata metadata;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -25,6 +27,16 @@ public class JSONRelation {
     @JsonProperty("relations")
     public void setRelations(List<Relation> relations) {
         this.relations = relations;
+    }
+
+    @JsonProperty("metadata")
+    public Metadata getMetadata() {
+        return metadata;
+    }
+
+    @JsonProperty("metadata")
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
     }
 
     @JsonAnyGetter
