@@ -99,7 +99,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     @Override
     public MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
                                           @Nonnull Optional<Ontology> ontology)
-            throws MappingException, MetadataExtractionException {
+        throws MappingException, MetadataExtractionException {
 
         return convertPPMapping(extractPPMapping(specInput), specInput, ontology);
     }
@@ -108,14 +108,14 @@ public class SQLMappingExtractor implements MappingExtractor {
     public MappingAndDBParameters extract(@Nonnull PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping,
                                           @Nonnull OBDASpecInput specInput,
                                           @Nonnull Optional<Ontology> ontology)
-            throws MappingException, MetadataExtractionException {
+        throws MappingException, MetadataExtractionException {
 
         return convertPPMapping((SQLPPMapping) ppMapping, specInput, ontology);
     }
 
 
     protected SQLPPMapping extractPPMapping(OBDASpecInput specInput)
-            throws MappingIOException, InvalidMappingException {
+        throws MappingIOException, InvalidMappingException {
 
         Optional<File> optionalMappingFile = specInput.getMappingFile();
         if (optionalMappingFile.isPresent())
@@ -130,7 +130,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             return mappingParser.parse(optionalMappingGraph.get());
 
         throw new IllegalArgumentException("Bad internal configuration: no mapping input provided in the OBDASpecInput!\n" +
-                " Should have been detected earlier (in case of an user mistake)");
+            " Should have been detected earlier (in case of an user mistake)");
     }
 
 
@@ -142,8 +142,8 @@ public class SQLMappingExtractor implements MappingExtractor {
     protected MappingAndDBParameters convertPPMapping(SQLPPMapping ppMapping,
                                                       OBDASpecInput specInput,
                                                       Optional<Ontology> optionalOntology)
-            throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
-            InvalidMappingSourceQueriesException, UnknownDatatypeException {
+        throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
+        InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
         MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataFile());
 

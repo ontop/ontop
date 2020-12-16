@@ -296,7 +296,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         OntopMappingSQLAllBuilderMixin() {
             B builder = (B) this;
             this.localFragmentBuilder = new StandardMappingSQLAllBuilderFragment<>(builder,
-                    this::declareMappingDefined, this::declareImplicitConstraintSetDefined,
+                this::declareMappingDefined, this::declareImplicitConstraintSetDefined,
                 this::declareDBMetadataDefined);
         }
 

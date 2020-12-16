@@ -43,7 +43,7 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
     /**
      * Deserializes a JSON file into a POJO.
      * @param dbMetadataReader JSON file reader
-     * @return JSON metadata
+     * @return JSONRelation
      */
     protected static JSONRelation loadAndDeserialize(Reader dbMetadataReader) throws MetadataExtractionException, IOException {
 
@@ -59,9 +59,7 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
                 .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
 
             // Create POJO object from JSON
-            JSONRelation JSONMetadata = objectMapper.readValue(dbMetadataReader, JSONRelation.class);
-
-            return JSONMetadata;
+            return objectMapper.readValue(dbMetadataReader, JSONRelation.class);
 
         } catch (JsonProcessingException e) {
             throw new MetadataExtractionException("problem with JSON processing.\n" + e);
@@ -70,6 +68,10 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
 
     /**
      * Extract relation definitions with the exception of FKs
+     * @param jsonMetadata Java POJO for JSON
+     * @param quotedIDFactory Quoted ID factory
+     * @param typeFactory Type factory
+     * @return ImmutableMap of Relation ID and DatabaseRelationDefinition
      */
     protected static ImmutableMap<RelationID, DatabaseRelationDefinition> extractRelationDefinitions(JSONRelation jsonMetadata,
                                                                                                      QuotedIDFactory quotedIDFactory,
@@ -80,7 +82,7 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
             .collect(ImmutableCollectors.toMap(
                 DatabaseRelationDefinition::getID,
                 d -> d
-                ));
+            ));
 
         insertForeignKeys(jsonMetadata, relationMap, quotedIDFactory);
         return relationMap;
@@ -112,7 +114,7 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
 
         DatabaseRelationDefinition relationDefinition = builder.createDatabaseRelation(ImmutableList.of(id), attributeListBuilder);
 
-        insertUniqueConstraints(parsedRelation, relationDefinition, quotedIDFactory);
+        insertUniqueConstraints(parsedRelation, relationDefinition);
 
         return relationDefinition;
     }
@@ -121,10 +123,7 @@ public class SerializedMetadataProviderImpl implements SerializedMetadataProvide
     /**
      * For each relation add unique constraints i.e. primary keys
      */
-    protected static void insertUniqueConstraints(Relation parsedRelation, DatabaseRelationDefinition relationDefinition, QuotedIDFactory quotedIDFactory) {
-
-        // Add primary key
-        RelationID id = quotedIDFactory.createRelationID(parsedRelation.getName());
+    protected static void insertUniqueConstraints(Relation parsedRelation, DatabaseRelationDefinition relationDefinition) {
 
         for (it.unibz.inf.ontop.dbschema.impl.JSONRelation.UniqueConstraint uc: parsedRelation.getUniqueConstraints()) {
 

@@ -46,9 +46,9 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
         install(sqlAlgebraFactory);
 
         Module serializedMetadataProviderFactory = buildFactory(
-                ImmutableList.of(
-                    SerializedMetadataProvider.class
-                ),
+            ImmutableList.of(
+                SerializedMetadataProvider.class
+            ),
             SerializedMetadataProvider.Factory.class);
         install(serializedMetadataProviderFactory);
 
