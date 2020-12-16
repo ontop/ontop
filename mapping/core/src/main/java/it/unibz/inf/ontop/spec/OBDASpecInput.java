@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec;
 
 import it.unibz.inf.ontop.spec.impl.OBDASpecInputImpl;
 import org.apache.commons.rdf.api.Graph;
-
 import java.io.File;
 import java.io.Reader;
 import java.util.Optional;
@@ -85,7 +84,6 @@ public interface OBDASpecInput {
     String MAPPING_KEY = "mapping";
     String CONSTRAINT_KEY = "constraint";
     String DBMETADATA_KEY = "db-metadata";
-
 
 
 }
