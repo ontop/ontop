@@ -115,6 +115,13 @@ public class IRITemplateCompatibilityTest {
                 Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("BAB").build(), 2));
     }
 
+    @Test
+    public void test16() {
+        assertTrue(areCompatible(
+                Template.builder().addSeparator("http://example.org/level").addColumn().addSeparator("/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/level0/").addColumn().build(), 1));
+    }
+
     private boolean areCompatible(ImmutableList<TemplateComponent> template1, int arity1, ImmutableList<TemplateComponent> template2, int arity2) {
         ImmutableFunctionalTerm term1 = createIRIFunctionalTerm(template1, arity1, "x");
         ImmutableFunctionalTerm term2 = createIRIFunctionalTerm(template2, arity2, "y");
