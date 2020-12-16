@@ -93,11 +93,11 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
 
-        ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.getGroundTermFragment()
+        ImmutableSubstitution<GroundTerm> blockedSubstitutionToGroundTerm = descendingSubstitution.getFragment(GroundTerm.class)
                 .reduceDomainToIntersectionWith(aggregationVariables);
 
         ImmutableSubstitution<Variable> blockedVar2VarSubstitution = extractBlockedVar2VarSubstitutionMap(
-                descendingSubstitution.getVar2VarFragment(),
+                descendingSubstitution.getFragment(Variable.class),
                 aggregationVariables);
 
         ImmutableSubstitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution
@@ -141,7 +141,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     /**
      * Blocks implicit equalities involving aggregation variables but let other entries (like renamings) go.
      */
-    private ImmutableSubstitution<Variable> extractBlockedVar2VarSubstitutionMap(Var2VarSubstitution descendingVar2Var,
+    private ImmutableSubstitution<Variable> extractBlockedVar2VarSubstitutionMap(ImmutableSubstitution<Variable> descendingVar2Var,
                                                                                  ImmutableSet<Variable> aggregationVariables) {
         // Substitution value -> substitution keys
         ImmutableMultimap<Variable, Variable> invertedMultimap = descendingVar2Var.getImmutableMap().entrySet().stream()
@@ -319,8 +319,9 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 .map(s -> s.reduceDomainToIntersectionWith(groupingVariables))
                 .collect(ImmutableCollectors.toSet());
 
+        ImmutableSubstitution<NonVariableTerm> def = substitution.getFragment(NonVariableTerm.class);
+
         if (groupingVariableDefs.isEmpty()) {
-            ImmutableSubstitution<NonVariableTerm> def = substitution.getNonVariableTermFragment();
             return def.isEmpty()
                     ? ImmutableSet.of()
                     : ImmutableSet.of(def);
@@ -328,9 +329,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         // For Aggregation functional terms, we don't look further on for child definitions
         return groupingVariableDefs.stream()
-                .map(childDef -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) childDef)
-                .map(childDef -> childDef.union((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) substitution).get())
-                .map(ImmutableSubstitution::getNonVariableTermFragment)
+                .map(childDef -> childDef.union(def).get())
                 .collect(ImmutableCollectors.toSet());
     }
 

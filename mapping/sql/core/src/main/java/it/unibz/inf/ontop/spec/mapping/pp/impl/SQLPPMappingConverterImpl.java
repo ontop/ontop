@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.TokenMgrException;
@@ -125,9 +126,10 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         ImmutableMap<Variable, ImmutableTerm> targetMap = targetPreMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> e.getValue().orElseThrow(() -> new MinorOntopInternalBugException("Impossible"))));
 
-        ImmutableSubstitution<ImmutableTerm> targetRenamingPart = substitutionFactory.getSubstitution(targetMap.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable) // getVar2VarFragment (NON-INJECTIVE)
+        Var2VarSubstitution targetRenamingPart = substitutionFactory.getVar2VarSubstitution(targetMap.entrySet().stream()
+                .filter(e -> e.getValue() instanceof Variable) // (NON-INJECTIVE)
                 .filter(e -> !e.getValue().equals(e.getKey()))
+                .map(e -> Maps.immutableEntry(e.getKey(), (Variable)e.getValue()))
                 .collect(ImmutableCollectors.toMap()));
 
         ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetRenamingPart.applyToTarget(target.getSubstitution());

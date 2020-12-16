@@ -1,10 +1,15 @@
 package it.unibz.inf.ontop.model.template.impl;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.utils.StringUtils;
+
+import java.util.regex.Pattern;
 
 public abstract class AbstractTemplateFactory implements TemplateFactory {
     protected final TermFactory termFactory;
@@ -37,18 +42,18 @@ public abstract class AbstractTemplateFactory implements TemplateFactory {
        yielding “\\”. This also applies to backslashes within column names.
     */
 
+    private static final ImmutableBiMap<Character, String> ESCAPE = ImmutableBiMap.of(
+            '\\', "\\\\",
+            '}', "\\}",
+            '{', "\\{");
+
     private static String decode(String s) {
-        return s.replace("\\{", "{")
-                .replace("\\}", "}")
-                .replace("\\\\", "\\");
+        return StringUtils.decode(s, '\\', 2, ESCAPE.inverse(), (code) -> {});
     }
 
     private static String encode(String s) {
-        return s.replace("\\", "\\\\")
-                .replace("{", "\\{")
-                .replace("}", "\\}");
+        return StringUtils.encode(s, ESCAPE);
     }
-
 
     protected String termToTemplateComponentString(ImmutableTerm term) {
         if (term instanceof Variable)

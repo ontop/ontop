@@ -17,6 +17,8 @@ import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
@@ -64,10 +66,10 @@ public class IQBasedSubstitutionPropagationExecutor<N extends QueryNode> impleme
     private IQTree propagate(IQTree subTree, ImmutableSubstitution<? extends ImmutableTerm> substitution)
             throws InvalidQueryOptimizationProposalException {
 
-        IQTree newSubTree = subTree.applyDescendingSubstitution(substitution.getVariableOrGroundTermFragment(),
+        IQTree newSubTree = subTree.applyDescendingSubstitution(substitution.getFragment(VariableOrGroundTerm.class),
                 Optional.empty());
 
-        if (substitution.getNonGroundFunctionalTermFragment().getDomain().stream()
+        if (substitution.getFragment(NonGroundFunctionalTerm.class).getDomain().stream()
                 .anyMatch(v -> newSubTree.getVariables().contains(v)))
             throw new InvalidQueryOptimizationProposalException("Non ground functional terms are not supported for propagation down " +
                     "(only for up)");

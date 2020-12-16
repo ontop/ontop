@@ -11,11 +11,14 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.stream.Collectors;
 
 @Singleton
 public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
+
+    private static final ImmutableMap<Character, String> BACKSLASH = ImmutableMap.of('\\', "\\\\");
 
     @Inject
     private MySQLSelectFromWhereSerializer(TermFactory termFactory) {
@@ -23,8 +26,7 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
             @Override
             protected String serializeStringConstant(String constant) {
                 // parent method + doubles backslashes
-                return super.serializeStringConstant(constant)
-                        .replace("\\", "\\\\");
+                return StringUtils.encode(super.serializeStringConstant(constant), BACKSLASH);
             }
         });
     }
@@ -89,7 +91,4 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                     }
                 });
     }
-
-
-
 }

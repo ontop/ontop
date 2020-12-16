@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 
+import java.util.Map;
+
 /**
  * Immutable {@code  Variable --> Variable } substitution.
  */
@@ -33,17 +35,17 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public Var2VarSubstitution getVar2VarFragment() {
-        return this;
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> applyToTarget(ImmutableSubstitution<T> otherSubstitution) {
+        ImmutableMap.Builder<Variable, T> mapBuilder = ImmutableMap.builder();
+
+        for (Map.Entry<Variable, T> otherEntry : otherSubstitution.getImmutableMap().entrySet()) {
+            T newValue = applyToTerm(otherEntry.getValue());
+            if (!otherEntry.getKey().equals(newValue))
+                mapBuilder.put(otherEntry.getKey(), newValue);
+        }
+        return substitutionFactory.getSubstitution(mapBuilder.build());
     }
 
-    @Override
-    public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
-        return substitutionFactory.getSubstitution();
-    }
-
-    private static final class NotASubstitutionException extends RuntimeException  {
-    }
 
     @Override
     public Variable get(Variable var) {

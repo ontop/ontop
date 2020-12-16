@@ -492,7 +492,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return results.getExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
                 .orElseGet(() ->
-                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getVariableOrGroundTermFragment()));
+                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getFragment(VariableOrGroundTerm.class)));
     }
 
     /**

@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.model.template;
 
-import com.google.common.base.Strings;
-
 import javax.annotation.Nullable;
 import java.util.Objects;
 
