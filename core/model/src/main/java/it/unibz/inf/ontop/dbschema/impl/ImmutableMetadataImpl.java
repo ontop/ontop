@@ -32,6 +32,7 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
         return dbParameters;
     }
 
+    @SuppressWarnings("unused")
     @JsonProperty("metadata")
     Map<String, String> getMetadataForJsonExport() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

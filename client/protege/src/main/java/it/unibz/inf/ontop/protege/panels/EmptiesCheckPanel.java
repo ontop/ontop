@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.apache.commons.rdf.api.IRI;

@@ -45,6 +45,8 @@ public interface OBDASpecInput {
         return getFile(CONSTRAINT_KEY);
     }
 
+    default Optional<File> getDBMetadataFile() { return getFile(DBMETADATA_KEY); }
+
 
     interface Builder {
 
@@ -69,6 +71,10 @@ public interface OBDASpecInput {
         default Builder addConstraintFile(File constraintFile) {
             return addFile(CONSTRAINT_KEY, constraintFile);
         }
+
+        default Builder addDBMetadataFile(File dbMetadataFile) {
+            return addFile(DBMETADATA_KEY, dbMetadataFile);
+        }
     }
 
 
@@ -78,7 +84,7 @@ public interface OBDASpecInput {
 
     String MAPPING_KEY = "mapping";
     String CONSTRAINT_KEY = "constraint";
-
+    String DBMETADATA_KEY = "db-metadata";
 
 
 }

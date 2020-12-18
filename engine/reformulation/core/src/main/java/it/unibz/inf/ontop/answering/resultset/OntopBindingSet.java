@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.answering.resultset;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 
 import javax.annotation.Nullable;
+
 import java.util.Iterator;
 
 public interface OntopBindingSet extends Iterable<OntopBinding> {
@@ -12,11 +12,9 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
     @Override
     Iterator<OntopBinding> iterator();
 
-    ImmutableList<RDFConstant> getValues();
+    OntopBinding[] getBindings();
 
-    ImmutableList<OntopBinding> getBindings();
-
-    ImmutableList<String> getBindingNames();
+    String[] getBindingNames();
 
     @Nullable
     RDFConstant getConstant(String name) throws OntopResultConversionException;

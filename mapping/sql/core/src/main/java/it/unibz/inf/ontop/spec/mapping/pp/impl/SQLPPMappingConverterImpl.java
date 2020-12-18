@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.TokenMgrException;
@@ -125,17 +126,16 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         ImmutableMap<Variable, ImmutableTerm> targetMap = targetPreMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> e.getValue().orElseThrow(() -> new MinorOntopInternalBugException("Impossible"))));
 
-        ImmutableSubstitution<ImmutableTerm> targetRenamingPart = substitutionFactory.getSubstitution(targetMap.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable)
+        Var2VarSubstitution targetRenamingPart = substitutionFactory.getVar2VarSubstitution(targetMap.entrySet().stream()
+                .filter(e -> e.getValue() instanceof Variable) // (NON-INJECTIVE)
                 .filter(e -> !e.getValue().equals(e.getKey()))
+                .map(e -> Maps.immutableEntry(e.getKey(), (Variable)e.getValue()))
                 .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<ImmutableTerm> spoSubstitution = substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
-                                e -> targetRenamingPart.apply(e.getValue()))));
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = targetRenamingPart.applyToTarget(target.getSubstitution());
 
         ImmutableSubstitution<ImmutableTerm> selectSubstitution = substitutionFactory.getSubstitution(
-                targetMap.entrySet().stream()
+                targetMap.entrySet().stream() // getNonVariableFragment
                         .filter(e -> !(e.getValue() instanceof Variable))
                         .collect(ImmutableCollectors.toMap()));
 
@@ -150,7 +150,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
     }
 
-    private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
         String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
         SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
         try {

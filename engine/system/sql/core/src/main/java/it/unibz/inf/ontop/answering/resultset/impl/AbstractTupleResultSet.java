@@ -108,6 +108,14 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
             throw buildConnectionException(e);
         }
     }
+    @Override
+    public boolean isConnectionAlive() throws OntopConnectionException {
+        try {
+            return !rs.isClosed();
+        } catch (SQLException e) {
+            throw buildConnectionException(e);
+        }
+    }
 
     protected abstract OntopBindingSet readCurrentRow() throws OntopConnectionException;
 

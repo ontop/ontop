@@ -42,9 +42,9 @@ public class QuestOWLExampleNotLatinTest {
 	 * Test with not latin Character
 	 * 
 	 */
-	final String owlFile = "/mysql/example/exampleBooksNotLatin.owl";
-	final String obdaFile = "/mysql/example/exampleBooksNotLatin.obda";
-	final String propertyFile = "/mysql/example/exampleBooksNotLatin.properties";
+	private static final String owlFile = "/mysql/example/exampleBooksNotLatin.owl";
+	private static final String obdaFile = "/mysql/example/exampleBooksNotLatin.obda";
+	private static final String propertyFile = "/mysql/example/exampleBooksNotLatin.properties";
 
     @Test
 	public void runQuery() throws Exception {

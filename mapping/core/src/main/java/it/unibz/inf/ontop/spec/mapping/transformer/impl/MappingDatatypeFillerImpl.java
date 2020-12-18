@@ -135,7 +135,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private RDFDatatype extractObjectType(ImmutableTerm objectLexicalTerm, IQTree subTree) throws UnknownDatatypeException {
 
         // Only if partially cast
-        ImmutableTerm uncastObjectLexicalTerm = uncast(objectLexicalTerm);
+        ImmutableTerm uncastObjectLexicalTerm = DBTypeConversionFunctionSymbol.uncast(objectLexicalTerm);
         Optional<TermType> optionalType = typeExtractor.extractUniqueTermType(uncastObjectLexicalTerm, subTree);
 
         if (optionalType
@@ -167,16 +167,5 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         return optionalRDFDatatype
                 .orElseGet(typeFactory::getXsdStringDatatype);
-    }
-
-    /**
-     * Uncast the term only if it is temporally cast
-     */
-    private ImmutableTerm uncast(ImmutableTerm term) {
-        return (term instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol)
-                && (((DBTypeConversionFunctionSymbol) ((ImmutableFunctionalTerm) term).getFunctionSymbol()).isTemporary())
-                ? ((ImmutableFunctionalTerm) term).getTerm(0)
-                : term;
     }
 }

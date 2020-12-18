@@ -2,10 +2,13 @@ package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.DummyVariableNullability;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
@@ -18,65 +21,108 @@ public class IRITemplateCompatibilityTest {
 
     @Test
     public void test1() {
-        assertTrue(areCompatible("http://example.org/person/{}/{}", 2,
-                "http://example.org/person/{}/2", 1));
+        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/2").build(), 1));
     }
 
     @Test
     public void test2() {
-        assertFalse(areCompatible("http://example.org/person/{}", 1,
-                "http://example.org/person/{}/2", 1));
+        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/2").build(), 1));
     }
 
     @Test
     public void test3() {
-        assertTrue(areCompatible("http://example.org/person/{}", 1,
-                "http://example.org/person/{}2", 1));
+        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("2").build(), 1));
     }
 
     @Test
     public void test4() {
-        assertFalse(areCompatible("http://example.org/car/{}", 1,
-                "http://example.org/person/{}", 1));
+        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/car/").addColumn().build(), 1,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1));
     }
 
     @Test
     public void test5() {
-        assertTrue(areCompatible("http://example.org/person/{}/address/{}", 2,
-                "http://example.org/person/{}/{}/{}", 3));
+        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/").addColumn().addSeparator("/").addColumn().build(), 3));
     }
 
     @Test
     public void test6() {
-        assertTrue(areCompatible("http://example.org/person/{}/address/{}", 2,
-                "http://example.org/person/{}/{}/45", 2));
+        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/").addColumn().addSeparator("/45").build(), 2));
     }
 
     @Test
     public void test7() {
-        assertFalse(areCompatible("http://example.org/person/{}/address/{}", 2,
-                "http://example.org/person/{}/position/{}", 2));
+        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/position/").addColumn().build(), 2));
     }
 
     @Test
     public void test8Same() {
-        assertTrue(areCompatible("http://example.org/person/{}/address/{}", 2,
-                "http://example.org/person/{}/address/{}", 2));
+        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2));
+    }
+
+    @Test
+    public void test8splitbug() {
+        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("//").build(), 1,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/ / ").addColumn().build(), 2));
     }
 
     @Test
     public void test9() {
-        assertTrue(areCompatible("http://example.org/person/{}", 1,
-                "http://example.org/person/{}{}", 2));
+        assertTrue(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().build(), 1,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addColumn().build(), 2));
     }
 
     @Test
     public void test10() {
-        assertFalse(areCompatible("http://example.org/person/{}/address/{}", 2,
-                "http://example.org/person/{}/address+{}", 2));
+        assertFalse(areCompatible(Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/person/").addColumn().addSeparator("/address+").addColumn().build(), 2));
     }
 
-    private boolean areCompatible(String template1, int arity1, String template2, int arity2) {
+    @Test
+    public void test11() {
+        assertTrue(areCompatible(Template.builder().addColumn().addColumn().build(), 2,
+                Template.builder().addColumn().build(), 1));
+    }
+
+    @Test
+    public void test12() {
+        assertFalse(areCompatible(Template.builder().addColumn().addSeparator("/").addColumn().build(), 2,
+                Template.builder().addColumn().build(), 1));
+    }
+
+    @Test
+    public void test13() {
+        assertFalse(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("A").build(), 2,
+                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("B").build(), 2));
+    }
+
+    @Test
+    public void test14() {
+        assertFalse(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("A").build(), 2,
+                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("BAB").build(), 2));
+    }
+
+    @Test
+    public void test15() {
+        assertTrue(areCompatible(Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("AB").build(), 2,
+                Template.builder().addSeparator("A").addColumn().addSeparator("/").addColumn().addSeparator("BAB").build(), 2));
+    }
+
+    @Test
+    public void test16() {
+        assertTrue(areCompatible(
+                Template.builder().addSeparator("http://example.org/level").addColumn().addSeparator("/").addColumn().build(), 2,
+                Template.builder().addSeparator("http://example.org/level0/").addColumn().build(), 1));
+    }
+
+    private boolean areCompatible(ImmutableList<TemplateComponent> template1, int arity1, ImmutableList<TemplateComponent> template2, int arity2) {
         ImmutableFunctionalTerm term1 = createIRIFunctionalTerm(template1, arity1, "x");
         ImmutableFunctionalTerm term2 = createIRIFunctionalTerm(template2, arity2, "y");
 
@@ -91,10 +137,9 @@ public class IRITemplateCompatibilityTest {
         return res1;
     }
 
-    private ImmutableFunctionalTerm createIRIFunctionalTerm(String template, int arity, String variablePrefix) {
+    private ImmutableFunctionalTerm createIRIFunctionalTerm(ImmutableList<TemplateComponent> template, int arity, String variablePrefix) {
         ImmutableList<Variable> arguments = IntStream.range(0, arity)
-                .boxed()
-                .map(i -> TERM_FACTORY.getVariable(variablePrefix + i))
+                .mapToObj(i -> TERM_FACTORY.getVariable(variablePrefix + i))
                 .collect(ImmutableCollectors.toList());
 
         return TERM_FACTORY.getIRIFunctionalTerm(template, arguments);

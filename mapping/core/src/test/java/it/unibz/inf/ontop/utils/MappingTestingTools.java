@@ -33,7 +33,6 @@ public class MappingTestingTools {
     public static final TypeFactory TYPE_FACTORY;
     public static final TargetAtomFactory TARGET_ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static final SpecificationFactory MAPPING_FACTORY;
     public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
@@ -69,7 +68,6 @@ public class MappingTestingTools {
         Injector injector = defaultConfiguration.getInjector();
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
-        MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
         MAPPING_NORMALIZER = injector.getInstance(MappingVariableNameNormalizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
@@ -87,7 +85,7 @@ public class MappingTestingTools {
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
 
-        EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
+        EMPTY_PREFIX_MANAGER = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of());
 
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
 

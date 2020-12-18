@@ -209,23 +209,14 @@ public class RDF4JGraphLoading {
 
         rdfParser.setRDFHandler(rdfHandler);
 
-        InputStream in = null;
         try {
             URL url = new URL(graphURL.toString());
-            in = url.openStream();
-            rdfParser.parse(in, graphURL.toString());
+            try (InputStream in = url.openStream()) {
+                rdfParser.parse(in, graphURL.toString());
+            }
         }
         catch (IOException e) {
             throw new SemanticIndexException(e.getMessage());
-        }
-        finally {
-            try {
-                if (in != null)
-                    in.close();
-            }
-            catch (IOException e) {
-                throw new SemanticIndexException(e.getMessage());
-            }
         }
     }
 

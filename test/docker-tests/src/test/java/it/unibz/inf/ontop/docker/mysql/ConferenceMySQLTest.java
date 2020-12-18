@@ -35,9 +35,9 @@ import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 public class ConferenceMySQLTest  {
 
-    final String owlFile = "/mysql/conference/ontology5.owl";
-    final String obdaFile = "/mysql/conference/ontology5.obda";
-	final String propertyFile = "/mysql/conference/ontology5.properties";
+    private static final String owlFile = "/mysql/conference/ontology5.owl";
+	private static final String obdaFile = "/mysql/conference/ontology5.obda";
+	private static final String propertyFile = "/mysql/conference/ontology5.properties";
 
 	private void runTests(String query) throws Exception {
 		String owlFileName =  this.getClass().getResource(owlFile).toString();
@@ -54,8 +54,6 @@ public class ConferenceMySQLTest  {
 				.build();
         OntopOWLReasoner reasoner = factory.createReasoner(config);
 	}
-
-
 
 
 	@Test(expected = IllegalConfigurationException.class)

@@ -149,9 +149,8 @@ public class CompletenessTestUtils {
 		if (baseURI == null) {
 			baseURI = url.toExternalForm();
 		}
-		InputStream in = url.openStream();
 
-		try {
+		try (InputStream in = url.openStream()) {
 			OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
@@ -185,8 +184,6 @@ public class CompletenessTestUtils {
 			} finally {
 				con.commit();
 			}
-		} finally {
-			in.close();
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
+
 import com.github.jsonldjava.core.DocumentLoader;
 import com.github.jsonldjava.utils.JsonUtils;
 import com.google.common.cache.Cache;
@@ -44,13 +46,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefinedQueryEngine {

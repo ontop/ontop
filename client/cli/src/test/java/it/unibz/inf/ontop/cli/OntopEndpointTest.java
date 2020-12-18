@@ -18,12 +18,12 @@ public class OntopEndpointTest {
 
     @BeforeClass
     public static void setupEndpoint() {
-
-        String[] argv = {"endpoint", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("endpoint", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
-                "--port=" + PORT};
-        Ontop.main(argv);
+                "-d", "src/test/resources/output/exampleBooks-metadata.json",
+                //"-v", "src/test/resources/output/exampleBooks-metadata.json",
+                "--port=" + PORT);
     }
 
 

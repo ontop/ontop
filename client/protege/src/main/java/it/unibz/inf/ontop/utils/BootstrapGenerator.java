@@ -87,7 +87,7 @@ public class BootstrapGenerator {
         }
 
         final String baseURI = (baseURI0 == null || baseURI0.isEmpty())
-            ? ppMapping.getPrefixManager().getDefaultPrefix()
+            ? ppMapping.getPrefixManager().getDefaultIriPrefix()
             : DirectMappingEngine.fixBaseURI(baseURI0);
 
         MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);

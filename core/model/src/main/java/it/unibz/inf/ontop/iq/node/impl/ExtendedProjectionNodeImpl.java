@@ -24,7 +24,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private final ImmutableUnificationTools unificationTools;
     protected final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
-    private final TermFactory termFactory;
+    protected final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
@@ -86,8 +86,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, getVariables());
 
-        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getNonFunctionalTermFragment();
-        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getGroundFunctionalTermFragment();
+        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getFragment(NonFunctionalTerm.class);
+        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getFragment(GroundFunctionalTerm.class);
 
         try {
             ConstructionNodeImpl.PropagationResults<NonFunctionalTerm> tauCPropagationResults = propagateTauC(tauC, child);
@@ -128,7 +128,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * ---------------
          */
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.getNonFunctionalTermFragment();
+        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.getFragment(NonFunctionalTerm.class);
 
         // Projected variables after propagating tauC
         ImmutableSet<Variable> vC = constructionNodeTools.computeNewProjectedVariables(tauC, projectedVariables);
@@ -149,7 +149,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * deltaC to thetaF
          * ---------------
          */
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFunctionalTermFragment();
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFragment(ImmutableFunctionalTerm.class);
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
@@ -170,7 +170,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 thetaFBar::apply,
                 thetaF, thetaFBar,
                 projectedVariables);
-        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getNonFunctionalTermFragment();
+        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getFragment(NonFunctionalTerm.class);
 
         Optional<ImmutableExpression> f = computeF(m, thetaFBar, gamma, newDeltaC);
 

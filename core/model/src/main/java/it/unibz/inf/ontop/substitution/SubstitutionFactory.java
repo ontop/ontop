@@ -24,7 +24,7 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
 
     Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
-    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap);
+    InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
 
     InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
                                                                 ImmutableSet<Variable> variables);

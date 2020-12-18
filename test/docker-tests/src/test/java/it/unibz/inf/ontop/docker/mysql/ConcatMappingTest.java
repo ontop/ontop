@@ -19,9 +19,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  */
 public class ConcatMappingTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "/mysql/northwind/mapping-northwind.owl";
-    static final String obdaFile = "/mysql/northwind/mapping-northwind.obda";
-    static final String propertiesFile = "/mysql/northwind/mapping-northwind.properties";
+    private static final String owlFile = "/mysql/northwind/mapping-northwind.owl";
+    private static final String obdaFile = "/mysql/northwind/mapping-northwind.obda";
+    private static final String propertiesFile = "/mysql/northwind/mapping-northwind.properties";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;

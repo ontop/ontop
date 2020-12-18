@@ -65,55 +65,48 @@ public class OntopMaterializeTest {
 
     @Test
     public void testOntopMaterializeNoStreamResults (){
-        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-p", "src/test/resources/books/exampleBooks.properties",
-                "-f", "turtle", "-o", "src/test/resources/output/exampleBooks.materialized.nostreaming.ttl",
-                "--no-streaming"
-        };
-        Ontop.main(argv);
+                "-f", "turtle",
+                "-o", "src/test/resources/output/exampleBooks.materialized.nostreaming.ttl",
+                "--no-streaming");
     }
 
     @Test
     public void testOntopMaterialize (){
-        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-p", "src/test/resources/books/exampleBooks.properties",
-                "-f", "turtle", "-o", "src/test/resources/output/exampleBooks.materialized.ttl",
-        };
-        Ontop.main(argv);
+                "-f", "turtle",
+                "-o", "src/test/resources/output/exampleBooks.materialized.ttl");
     }
 
     @Test
     public void testOntopMaterializeNTriples (){
-        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-p", "src/test/resources/books/exampleBooks.properties",
-                "-f", "ntriples", "-o", "src/test/resources/output/exampleBooks.materialized.nt",
-        };
-        Ontop.main(argv);
+                "-f", "ntriples",
+                "-o", "src/test/resources/output/exampleBooks.materialized.nt");
     }
 
     @Test
     public void testOntopMaterializeSeparatefiles (){
-        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-p", "src/test/resources/books/exampleBooks.properties",
-                "-f", "turtle", "-o", "src/test/resources/output/",  "--separate-files",
-        };
-        Ontop.main(argv);
+                "-f", "turtle",
+                "-o", "src/test/resources/output/",
+                "--separate-files");
     }
 
     @Test
     public void testOntopMaterializeSeparatefilesNoFormat (){
-        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-p", "src/test/resources/books/exampleBooks.properties",
-                "-o", "src/test/resources/output/",  "--separate-files",
-        };
-        Ontop.main(argv);
+                "-o", "src/test/resources/output/",
+                "--separate-files");
     }
-
-
-
 }

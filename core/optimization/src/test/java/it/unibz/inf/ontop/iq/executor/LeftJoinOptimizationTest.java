@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Ignore;
@@ -39,7 +41,7 @@ public class LeftJoinOptimizationTest {
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
 
-    private final static String URI_TEMPLATE_STR_1 ="http://example.org/ds1/{}";
+    private final static ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
 
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");

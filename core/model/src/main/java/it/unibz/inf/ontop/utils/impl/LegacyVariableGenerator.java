@@ -21,7 +21,7 @@ public class LegacyVariableGenerator implements VariableGenerator {
     private int count;
     private final Set<Variable> knownVariables;
 
-    private static String SUFFIX_PREFIX = "f";
+    private static final String SUFFIX_PREFIX = "f";
     private final TermFactory termFactory;
 
 

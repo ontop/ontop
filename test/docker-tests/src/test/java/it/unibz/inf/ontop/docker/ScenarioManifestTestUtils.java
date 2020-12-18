@@ -132,9 +132,8 @@ public class ScenarioManifestTestUtils {
 		if (baseURI == null) {
 			baseURI = url.toExternalForm();
 		}
-		InputStream in = url.openStream();
 
-		try {
+		try (InputStream in = url.openStream()) {
 			OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
@@ -168,8 +167,6 @@ public class ScenarioManifestTestUtils {
 			} finally {
 				con.commit();
 			}
-		} finally {
-			in.close();
 		}
 	}
 }

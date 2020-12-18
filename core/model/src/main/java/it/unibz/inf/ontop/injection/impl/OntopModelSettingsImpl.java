@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
@@ -72,17 +71,18 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
     }
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
-        Properties properties = new Properties();
         try (InputStream in = localClass.getResourceAsStream(fileName)) {
             if (in == null)
                 throw new RuntimeException("Configuration " + fileName + " not found.");
+            Properties properties = new Properties();
             properties.load(in);
-        } catch (IOException e1) {
+            return properties;
+        }
+        catch (IOException e1) {
             LOG.error("Error reading default OBDA properties.");
             LOG.debug(e1.getMessage(), e1);
             throw new RuntimeException("Impossible to extract configuration from " + fileName);
         }
-        return properties;
     }
 
     /**
