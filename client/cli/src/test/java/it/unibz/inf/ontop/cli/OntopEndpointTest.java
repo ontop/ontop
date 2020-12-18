@@ -21,6 +21,8 @@ public class OntopEndpointTest {
         Ontop.main("endpoint", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
+                "-d", "src/test/resources/output/exampleBooks-metadata.json",
+                //"-v", "src/test/resources/output/exampleBooks-metadata.json",
                 "--port=" + PORT);
     }
 
