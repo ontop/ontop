@@ -52,11 +52,6 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-guava</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- easy testing -->
