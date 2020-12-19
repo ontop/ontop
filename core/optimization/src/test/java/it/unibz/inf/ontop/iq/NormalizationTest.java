@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.iq;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.OptimizationTestingTools;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -2256,6 +2258,34 @@ public class NormalizationTest {
                         leftChild,
                         rightDataNode1));
 
+        normalizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
+    }
+
+    @Test
+    public void testDistinctLiftNullableUC() {
+        OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
+        DatabaseRelationDefinition table50 = builder.createRelationWithUC(50, 2, true);
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR1, ImmutableMap.of(0, A));
+        IQTree firstChild = IQ_FACTORY.createUnaryIQTree(distinctNode, dataNode1);
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(table50, ImmutableMap.of(0, A, 1, B));
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode();
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(firstChild, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                distinctNode,
+                IQ_FACTORY.createNaryIQTree(innerJoinNode,
+                        ImmutableList.of(dataNode1, dataNode2)));
         normalizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
     }
 
