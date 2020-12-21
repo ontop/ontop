@@ -2,12 +2,10 @@ package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.rdf.api.Graph;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +35,8 @@ public class OBDASpecInputImpl implements OBDASpecInput {
         if (readers.containsKey(key))
             return Optional.of(readers.get(key));
         else if (files.containsKey(key)) {
-            return Optional.of(new FileReader(files.get(key)));
+            // Eliminates BOM from the file (typically comes from Windows files)
+            return Optional.of(new InputStreamReader(new BOMInputStream(new FileInputStream(files.get(key)))));
         }
         else
             return Optional.empty();
