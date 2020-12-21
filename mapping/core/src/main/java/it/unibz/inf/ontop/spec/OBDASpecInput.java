@@ -37,7 +37,7 @@ public interface OBDASpecInput {
     //-----------------
     // Default methods
     //-----------------
-    
+
 
     default Optional<Reader> getMappingReader() throws FileNotFoundException {
         return getReader(MAPPING_KEY);
@@ -51,7 +51,7 @@ public interface OBDASpecInput {
         return getFile(CONSTRAINT_KEY);
     }
 
-    default Optional<File> getDBMetadataFile() { return getFile(DBMETADATA_KEY); }
+    default Optional<Reader> getDBMetadataReader() throws FileNotFoundException { return getReader(DBMETADATA_KEY); }
 
 
     interface Builder {
@@ -80,6 +80,10 @@ public interface OBDASpecInput {
 
         default Builder addDBMetadataFile(File dbMetadataFile) {
             return addFile(DBMETADATA_KEY, dbMetadataFile);
+        }
+
+        default Builder addDBMetadataReader(Reader dbMetadataReader) {
+            return addReader(DBMETADATA_KEY, dbMetadataReader);
         }
     }
 

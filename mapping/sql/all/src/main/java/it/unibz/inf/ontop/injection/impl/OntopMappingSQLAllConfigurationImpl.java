@@ -49,7 +49,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                 () -> options.mappingReader,
                 () -> options.mappingGraph,
                 () -> options.constraintFile,
-                () -> options.dbMetadataFile);
+                () -> options.dbMetadataFile,
+                () -> options.dbMetadataReader);
     }
 
     @Override
@@ -78,17 +79,19 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private final Optional<Graph> mappingGraph;
         private final Optional<File> constraintFile;
         private final Optional<File> dbMetadataFile;
+        private final Optional<Reader> dbMetadataReader;
         final OntopMappingSQLOptions mappingSQLOptions;
 
         OntopMappingSQLAllOptions(Optional<File> mappingFile, Optional<Reader> mappingReader,
                                   Optional<Graph> mappingGraph, Optional<File> constraintFile,
-                                  Optional<File> dbMetadataFile,
+                                  Optional<File> dbMetadataFile, Optional<Reader> dbMetadataReader,
                                   OntopMappingSQLOptions mappingSQLOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
             this.constraintFile = constraintFile;
             this.dbMetadataFile = dbMetadataFile;
+            this.dbMetadataReader = dbMetadataReader;
             this.mappingSQLOptions = mappingSQLOptions;
         }
     }
@@ -106,6 +109,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         private Optional<Graph> mappingGraph = Optional.empty();
         private Optional<File> constraintFile = Optional.empty();
         private Optional<File> dbMetadataFile = Optional.empty();
+        private Optional<Reader> dbMetadataReader = Optional.empty();
 
         private boolean useR2rml = false;
 
@@ -248,6 +252,14 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
                 }
             }
 
+        @Override
+        public B basicDBMetadataReader(@Nonnull Reader dbMetadataReader) {
+            declareDBMetadataSetDefinedCB.run();
+            this.dbMetadataReader = Optional.of(dbMetadataReader);
+            return builder;
+        }
+
+
         protected Properties generateProperties() {
             Properties p = new Properties();
 
@@ -281,7 +293,8 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         }
 
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions(OntopMappingSQLOptions mappingOptions) {
-                return new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, constraintFile, dbMetadataFile, mappingOptions);
+                return new OntopMappingSQLAllOptions(mappingFile, mappingReader, mappingGraph, constraintFile,
+                        dbMetadataFile, dbMetadataReader, mappingOptions);
         }
 
     }
@@ -353,6 +366,11 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
         @Override
         public B basicDBMetadataFile(@Nonnull String dbmetadataFilename) {
             return localFragmentBuilder.basicDBMetadataFile(dbmetadataFilename);
+        }
+
+        @Override
+        public B basicDBMetadataReader(@Nonnull Reader dbMetadataReader) {
+            return localFragmentBuilder.basicDBMetadataReader(dbMetadataReader);
         }
 
         final OntopMappingSQLAllOptions generateMappingSQLAllOptions() {

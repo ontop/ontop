@@ -42,6 +42,8 @@ public interface OntopMappingSQLAllConfiguration extends OntopMappingSQLConfigur
         B basicDBMetadataFile(@Nonnull File dbMetadataFile);
 
         B basicDBMetadataFile(@Nonnull String dbMetadataFilename);
+
+        B basicDBMetadataReader(@Nonnull Reader dbMetadataReader);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLConfiguration.Builder<B>,

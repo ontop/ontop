@@ -148,7 +148,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
-        MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataFile());
+        MappingAndDBParameters mm = convert(ppMapping, specInput);
 
         ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(mm.getMapping(), mm.getDBParameters());
 
@@ -177,13 +177,22 @@ public class SQLMappingExtractor implements MappingExtractor {
         return new MappingAndDBParametersImpl(canonizedMapping, mm.getDBParameters());
     }
 
+    private MappingAndDBParameters convert(SQLPPMapping ppMapping, OBDASpecInput specInput)
+            throws MetaMappingExpansionException, MetadataExtractionException, InvalidMappingSourceQueriesException {
+        try {
+            return convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataReader());
+        } catch (FileNotFoundException e) {
+            throw new MetadataExtractionException(e);
+        }
+    }
+
     private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
                                            Optional<File> constraintFile,
-                                           Optional<File> dbMetadataFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
+                                           Optional<Reader> optionalDbMetadataReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
-        if (dbMetadataFile.isPresent()) {
+        if (optionalDbMetadataReader.isPresent()) {
 
-            try (Reader dbMetadataReader = new FileReader(dbMetadataFile.get());
+            try (Reader dbMetadataReader = optionalDbMetadataReader.get();
                  Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
                 MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
