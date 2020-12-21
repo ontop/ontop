@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec;
 import it.unibz.inf.ontop.spec.impl.OBDASpecInputImpl;
 import org.apache.commons.rdf.api.Graph;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.util.Optional;
 
@@ -14,9 +15,18 @@ import java.util.Optional;
  */
 public interface OBDASpecInput {
 
+    /**
+     * Please consider using getReader()
+     */
+    @Deprecated
     Optional<File> getFile(String key);
 
-    Optional<Reader> getReader(String key);
+    /**
+     * The reader may have been created on the fly (e.g. from a file) or have been constructed before.
+     *
+     * In any case, the caller becomes responsible for closing the reader.
+     */
+    Optional<Reader> getReader(String key) throws FileNotFoundException;
 
     Optional<Graph> getGraph(String key);
 
@@ -27,13 +37,9 @@ public interface OBDASpecInput {
     //-----------------
     // Default methods
     //-----------------
+    
 
-
-    default Optional<File> getMappingFile() {
-        return getFile(MAPPING_KEY);
-    }
-
-    default Optional<Reader> getMappingReader() {
+    default Optional<Reader> getMappingReader() throws FileNotFoundException {
         return getReader(MAPPING_KEY);
     }
 

@@ -120,6 +120,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
+            // The parser is in charge of closing the reader
             return Optional.of(parser.parse(optionalMappingReader.get()));
         }
         Optional<Graph> optionalMappingGraph = mappingGraphSupplier.get();

@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.spec.OBDASpecInput;
 import org.apache.commons.rdf.api.Graph;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +33,14 @@ public class OBDASpecInputImpl implements OBDASpecInput {
     }
 
     @Override
-    public Optional<Reader> getReader(String key) {
-        return Optional.ofNullable(readers.get(key));
+    public Optional<Reader> getReader(String key) throws FileNotFoundException {
+        if (readers.containsKey(key))
+            return Optional.of(readers.get(key));
+        else if (files.containsKey(key)) {
+            return Optional.of(new FileReader(files.get(key)));
+        }
+        else
+            return Optional.empty();
     }
 
     @Override

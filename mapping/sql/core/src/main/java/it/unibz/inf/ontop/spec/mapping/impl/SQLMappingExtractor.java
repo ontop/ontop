@@ -29,10 +29,7 @@ import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -122,13 +119,14 @@ public class SQLMappingExtractor implements MappingExtractor {
     protected SQLPPMapping extractPPMapping(OBDASpecInput specInput)
             throws MappingIOException, InvalidMappingException {
 
-        Optional<File> optionalMappingFile = specInput.getMappingFile();
-        if (optionalMappingFile.isPresent())
-            return mappingParser.parse(optionalMappingFile.get());
-
-        Optional<Reader> optionalMappingReader = specInput.getMappingReader();
-        if (optionalMappingReader.isPresent())
-            return mappingParser.parse(optionalMappingReader.get());
+        try {
+            Optional<Reader> optionalMappingReader = specInput.getMappingReader();
+            if (optionalMappingReader.isPresent())
+                // The parser is in charge of closing the reader
+                return mappingParser.parse(optionalMappingReader.get());
+        } catch (FileNotFoundException e) {
+            throw new MappingIOException(e);
+        }
 
         Optional<Graph> optionalMappingGraph = specInput.getMappingGraph();
         if (optionalMappingGraph.isPresent())

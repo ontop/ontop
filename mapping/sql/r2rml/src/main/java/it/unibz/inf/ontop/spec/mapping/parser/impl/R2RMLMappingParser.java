@@ -65,10 +65,22 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
 
     @Override
-    public SQLPPMapping parse(Reader reader) {
-        // TODO: support this
-        throw new UnsupportedOperationException("The R2RMLMappingParser does not support" +
-                "yet the Reader interface.");
+    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, MappingIOException {
+        LinkedHashModel rdf4jGraph = new LinkedHashModel();
+        RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+        StatementCollector collector = new StatementCollector(rdf4jGraph);
+        parser.setRDFHandler(collector);
+        try (Reader r = reader) {
+            // TODO: get the base IRI in a proper way
+            parser.parse(r, "http://example.org/baseIRI/");
+            return parse(new RDF4J().asGraph(rdf4jGraph));
+        }
+        catch (IOException e) {
+            throw new MappingIOException(e);
+        }
+        catch (RDFParseException | RDFHandlerException e) {
+            throw new InvalidMappingException(e.getMessage());
+        }
     }
 
     @Override
