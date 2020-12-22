@@ -64,7 +64,6 @@ public class SQLMappingExtractor implements MappingExtractor {
      * Can be useful for eliminating self-joins
      */
     private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
-    private final TypeFactory typeFactory;
     private final SerializedMetadataProvider.Factory serializedMetadataProviderFactory;
 
     @Inject
@@ -81,7 +80,6 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 MetaMappingExpander metamappingExpander,
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 JDBCMetadataProviderFactory metadataProviderFactory,
-                                TypeFactory typeFactory,
                                 SerializedMetadataProvider.Factory serializedMetadataProviderFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -97,7 +95,6 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.metamappingExpander = metamappingExpander;
         this.metadataProviderFactory = metadataProviderFactory;
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
-        this.typeFactory = typeFactory;
         this.serializedMetadataProviderFactory = serializedMetadataProviderFactory;
     }
 

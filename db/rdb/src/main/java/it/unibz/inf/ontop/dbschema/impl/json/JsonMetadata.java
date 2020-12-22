@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -12,7 +11,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({

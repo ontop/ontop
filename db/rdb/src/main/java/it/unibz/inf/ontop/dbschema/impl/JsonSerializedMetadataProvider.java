@@ -11,10 +11,10 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import it.unibz.inf.ontop.dbschema.impl.json.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -29,8 +29,20 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
                                              @Assisted QuotedIDFactory quotedIDFactory,
                                              TypeFactory typeFactory) throws MetadataExtractionException, IOException {
         JsonMetadata jsonMetadata = loadAndDeserialize(dbMetadataReader);
-        relationMap = extractRelationDefinitions(jsonMetadata, quotedIDFactory, typeFactory);
-        dbParameters = extractDBParameters(jsonMetadata, quotedIDFactory, typeFactory);
+
+        dbParameters = new BasicDBParametersImpl(jsonMetadata.metadata.driverName,
+                jsonMetadata.metadata.driverVersion,
+                jsonMetadata.metadata.dbmsProductName,
+                jsonMetadata.metadata.dbmsVersion,
+                quotedIDFactory,
+                typeFactory.getDBTypeFactory());
+
+        relationMap = jsonMetadata.relations.stream()
+                .map(r -> r.createDatabaseTableDefinition(dbParameters))
+                .collect(ImmutableCollectors.toMap(AbstractDatabaseRelationDefinition::getID, r -> r));
+
+        for (JsonDatabaseTable r : jsonMetadata.relations)
+            r.insertIntegrityConstraints(this);
     }
 
 
@@ -54,98 +66,10 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
 
             // Create POJO object from JSON
             return objectMapper.readValue(dbMetadataReader, JsonMetadata.class);
-
         }
         catch (JsonProcessingException e) {
             throw new MetadataExtractionException("problem with JSON processing.\n" + e);
         }
-    }
-
-    /**
-     * Extract relation definitions with the exception of FKs
-     */
-    protected static ImmutableMap<RelationID, DatabaseTableDefinition> extractRelationDefinitions(JsonMetadata jsonMetadata,
-                                                                                                     QuotedIDFactory quotedIDFactory,
-                                                                                                     TypeFactory typeFactory) throws MetadataExtractionException {
-        ImmutableMap.Builder<RelationID, DatabaseTableDefinition> builder = ImmutableMap.builder();
-
-        for (JsonDatabaseTable r : jsonMetadata.relations) {
-            DatabaseTableDefinition relation = extractRelationDefinition(r, quotedIDFactory, typeFactory);
-            builder.put(relation.getID(), relation);
-        }
-        ImmutableMap<RelationID, DatabaseTableDefinition> relationMap = builder.build();
-
-        for (JsonDatabaseTable r : jsonMetadata.relations) {
-            DatabaseTableDefinition relation = relationMap.get(quotedIDFactory.createRelationID(r.name));
-            try {
-                insertUniqueConstraints(r, relation, quotedIDFactory);
-                insertForeignKeys(r, relationMap, quotedIDFactory);
-            }
-            catch (AttributeNotFoundException e) {
-                throw new MetadataExtractionException(e);
-            }
-        }
-        return relationMap;
-    }
-
-
-    /**
-     * For each relation add individual attributes
-     */
-    protected static DatabaseTableDefinition extractRelationDefinition(JsonDatabaseTable parsedRelation, QuotedIDFactory quotedIDFactory, TypeFactory typeFactory) {
-
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        RelationDefinition.AttributeListBuilder attributeListBuilder = AbstractRelationDefinition.attributeListBuilder();
-        for (JsonDatabaseTable.Column attribute: parsedRelation.columns)
-            attributeListBuilder.addAttribute(
-                    quotedIDFactory.createAttributeID(attribute.name),
-                    dbTypeFactory.getDBTermType(attribute.datatype),
-                    attribute.isNullable);
-
-        RelationID id = quotedIDFactory.createRelationID(parsedRelation.name);
-        return new DatabaseTableDefinition(ImmutableList.of(id), attributeListBuilder);
-    }
-
-
-    /**
-     * For each relation add unique constraints
-     */
-    protected static void insertUniqueConstraints(JsonDatabaseTable parsedRelation, DatabaseTableDefinition relationDefinition, QuotedIDFactory quotedIDFactory) throws AttributeNotFoundException {
-        for (JsonUniqueConstraint uc: parsedRelation.uniqueConstraints) {
-            FunctionalDependency.Builder builder = uc.isPrimaryKey
-                ? UniqueConstraint.primaryKeyBuilder(relationDefinition, uc.name)
-                : UniqueConstraint.builder(relationDefinition, uc.name);
-            for (String column : uc.determinants) {
-                builder.addDeterminant(quotedIDFactory.createAttributeID(column));
-            }
-            builder.build();
-        }
-    }
-
-    /**
-     * Insert the FKs
-     */
-    private static void insertForeignKeys(JsonDatabaseTable relation, ImmutableMap<RelationID, DatabaseTableDefinition> relationMap, QuotedIDFactory quotedIDFactory) throws MetadataExtractionException, AttributeNotFoundException {
-        for (JsonForeignKey fk : relation.foreignKeys) {
-            ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(fk.name,
-                    relationMap.get(quotedIDFactory.createRelationID(fk.from.relation)),
-                    relationMap.get(quotedIDFactory.createRelationID(fk.to.relation)));
-
-            for (int i = 0; i < fk.from.columns.size(); i++) {
-                builder.add(quotedIDFactory.createAttributeID(fk.from.columns.get(i)),
-                        quotedIDFactory.createAttributeID(fk.to.columns.get(i)));
-            }
-            builder.build();
-        }
-    }
-
-    private static DBParameters extractDBParameters(JsonMetadata jsonRelation, QuotedIDFactory quotedIDFactory, TypeFactory typeFactory) {
-        return new BasicDBParametersImpl(jsonRelation.metadata.driverName,
-                jsonRelation.metadata.driverVersion,
-                jsonRelation.metadata.dbmsProductName,
-                jsonRelation.metadata.dbmsVersion,
-                quotedIDFactory,
-                typeFactory.getDBTypeFactory());
     }
 
 
@@ -173,5 +97,4 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     public DBParameters getDBParameters() {
         return dbParameters;
     }
-
 }

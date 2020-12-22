@@ -13,7 +13,7 @@ public class DatabaseTableDefinition extends AbstractDatabaseRelationDefinition 
      * @param allIds
      * @param builder
      */
-    DatabaseTableDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
+    public DatabaseTableDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
         super(allIds, builder);
     }
 

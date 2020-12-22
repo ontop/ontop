@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
@@ -20,8 +19,7 @@ import java.util.stream.Stream;
 })
 public class JsonForeignKey {
     public String name;
-    public Part from;
-    public Part to;
+    public Part from, to;
 
     public JsonForeignKey() {
         // no-op for jackson deserialisation
@@ -33,6 +31,23 @@ public class JsonForeignKey {
                 .map(ForeignKeyConstraint.Component::getAttribute));
         this.to = new Part(fk.getReferencedRelation(), fk.getComponents().stream()
                 .map(ForeignKeyConstraint.Component::getReferencedAttribute));
+    }
+
+    public void insert(DatabaseTableDefinition relation, MetadataLookup lookup) throws MetadataExtractionException {
+
+        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, relation,
+                lookup.getRelation(lookup.getQuotedIDFactory().createRelationID(to.relation)));
+
+        try {
+            for (int i = 0; i < from.columns.size(); i++)
+                builder.add(lookup.getQuotedIDFactory().createAttributeID(from.columns.get(i)),
+                        lookup.getQuotedIDFactory().createAttributeID(to.columns.get(i)));
+        }
+        catch (AttributeNotFoundException e) {
+            throw new MetadataExtractionException(e);
+        }
+
+        builder.build();
     }
 
     private final Map<String, Object> additionalProperties = new HashMap<>();

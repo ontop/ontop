@@ -2,9 +2,12 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.AttributeImpl;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
@@ -43,6 +46,36 @@ public class JsonDatabaseTable {
                 .collect(ImmutableCollectors.toList());
         this.otherFunctionalDependencies = ImmutableList.of();
     }
+
+    public DatabaseTableDefinition createDatabaseTableDefinition(DBParameters dbParameters) {
+        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
+        QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
+        RelationDefinition.AttributeListBuilder attributeListBuilder = AbstractRelationDefinition.attributeListBuilder();
+        for (Column attribute: columns)
+            attributeListBuilder.addAttribute(
+                    idFactory.createAttributeID(attribute.name),
+                    dbTypeFactory.getDBTermType(attribute.datatype),
+                    attribute.isNullable);
+
+        RelationID id = idFactory.createRelationID(name);
+        return new DatabaseTableDefinition(ImmutableList.of(id), attributeListBuilder);
+    }
+
+    public void insertIntegrityConstraints(MetadataLookup lookup) throws MetadataExtractionException {
+        RelationID id = lookup.getQuotedIDFactory().createRelationID(name);
+        DatabaseTableDefinition relation = (DatabaseTableDefinition)lookup.getRelation(id);
+
+        for (JsonUniqueConstraint uc: uniqueConstraints)
+            uc.insert(relation, lookup.getQuotedIDFactory());
+
+        for (JsonForeignKey fk : foreignKeys) {
+            if (!fk.from.relation.equals(this.name))
+                throw new MetadataExtractionException("Table names mismatch: " + name + " != " + fk.from.relation);
+
+            fk.insert(relation, lookup);
+        }
+    }
+
 
     private final Map<String, Object> additionalProperties = new HashMap<>();
 
