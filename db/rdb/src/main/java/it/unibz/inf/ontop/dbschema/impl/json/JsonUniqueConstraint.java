@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
+import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +18,18 @@ public class JsonUniqueConstraint {
     public String name;
     public List<String> determinants;
     public Boolean isPrimaryKey;
+
+    public JsonUniqueConstraint() {
+        // no-op for jackson deserialisation
+    }
+
+    public JsonUniqueConstraint(UniqueConstraint uc) {
+        this.name = uc.getName();
+        this.isPrimaryKey = uc.isPrimaryKey();
+        this.determinants = uc.getAttributes().stream()
+                .map(a -> a.getID().getSQLRendering())
+                .collect(ImmutableCollectors.toList());
+    }
 
     private final Map<String, Object> additionalProperties = new HashMap<>();
 

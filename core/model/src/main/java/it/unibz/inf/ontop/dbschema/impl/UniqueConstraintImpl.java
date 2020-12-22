@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
@@ -153,7 +150,6 @@ public class UniqueConstraintImpl implements UniqueConstraint {
      * @return true if it is a primary key constraint (false otherwise)
      */
 
-    @JsonProperty("isPrimaryKey")
     @Override
     public boolean isPrimaryKey() {
         return isPrimaryKey;
@@ -165,20 +161,16 @@ public class UniqueConstraintImpl implements UniqueConstraint {
      * @return list of attributes
      */
 
-    @JsonProperty("determinants")
-    @JsonSerialize(contentUsing = AttributeImpl.AttributeSerializer.class)
     @Override
     public ImmutableList<Attribute> getAttributes() {
         return attributes;
     }
 
-    @JsonIgnore
     @Override
     public ImmutableSet<Attribute> getDeterminants() {
         return ImmutableSet.copyOf(attributes);
     }
 
-    @JsonIgnore
     @Override
     public ImmutableSet<Attribute> getDependents() {
         return attributes.get(0).getRelation().getAttributes().stream()
