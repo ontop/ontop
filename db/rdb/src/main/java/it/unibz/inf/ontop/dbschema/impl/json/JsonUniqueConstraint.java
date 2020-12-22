@@ -8,15 +8,15 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "relations"
+        "name",
+        "determinants",
+        "isPrimaryKey"
 })
-public class JSONRelation {
+public class JsonUniqueConstraint {
+    public String name;
+    public List<String> determinants;
+    public Boolean isPrimaryKey;
 
-    @JsonProperty("relations")
-    public List<Relation> relations;
-    @JsonProperty("metadata")
-    public Metadata metadata;
-    @JsonIgnore
     private final Map<String, Object> additionalProperties = new HashMap<>();
 
     @JsonAnyGetter
