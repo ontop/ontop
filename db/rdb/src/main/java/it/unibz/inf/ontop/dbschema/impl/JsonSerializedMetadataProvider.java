@@ -21,8 +21,8 @@ import java.io.Reader;
 
 public class JsonSerializedMetadataProvider implements SerializedMetadataProvider {
 
-    private final ImmutableMap<RelationID, DatabaseTableDefinition> relationMap;
     private final DBParameters dbParameters;
+    private final ImmutableMap<RelationID, JsonDatabaseTable> relationMap;
 
     @AssistedInject
     protected JsonSerializedMetadataProvider(@Assisted Reader dbMetadataReader,
@@ -38,11 +38,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
                 typeFactory.getDBTypeFactory());
 
         relationMap = jsonMetadata.relations.stream()
-                .map(r -> r.createDatabaseTableDefinition(dbParameters))
-                .collect(ImmutableCollectors.toMap(AbstractDatabaseRelationDefinition::getID, r -> r));
-
-        for (JsonDatabaseTable r : jsonMetadata.relations)
-            r.insertIntegrityConstraints(this);
+                .collect(ImmutableCollectors.toMap(t -> quotedIDFactory.createRelationID(t.name), t -> t));
     }
 
 
@@ -54,15 +50,10 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     protected static JsonMetadata loadAndDeserialize(Reader dbMetadataReader) throws MetadataExtractionException, IOException {
 
         try {
-            SimpleModule simpleModule = new SimpleModule().addKeyDeserializer(RelationID.class, new RelationIDKeyDeserializer());
             ObjectMapper objectMapper = new ObjectMapper()
                     .registerModule(new GuavaModule())
-                    // Handle non-string or int key
-                    .registerModule(simpleModule)
-                    // Accept arrays with single value in JSON
-                    .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
-                    // Accept empty arrays in JSON
-                    .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+                    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+                    .enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 
             // Create POJO object from JSON
             return objectMapper.readValue(dbMetadataReader, JsonMetadata.class);
@@ -72,10 +63,9 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
         }
     }
 
-
     @Override
     public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        return relationMap.get(id);
+        return relationMap.get(id).createDatabaseTableDefinition(dbParameters);
     }
 
     @Override
@@ -90,7 +80,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
 
     @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-        throw new RuntimeException("To be implemented ?");
+        relationMap.get(relation.getID()).insertIntegrityConstraints(metadataLookup);
     }
 
     @Override
