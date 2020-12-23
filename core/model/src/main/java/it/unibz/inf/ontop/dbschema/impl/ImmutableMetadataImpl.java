@@ -1,15 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Map;
 
 public class ImmutableMetadataImpl implements ImmutableMetadata {
     private final DBParameters dbParameters;
@@ -20,31 +12,14 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
         this.relations = relations;
     }
 
-    @JsonProperty("relations")
     @Override
     public ImmutableList<DatabaseRelationDefinition> getAllRelations() {
         return relations;
     }
 
-    @JsonIgnore
     @Override
     public DBParameters getDBParameters() {
         return dbParameters;
-    }
-
-    @JsonProperty("metadata")
-    Map<String, String> getMetadataForJsonExport() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        String extractionTime = dateFormat.format(Calendar.getInstance().getTime());
-
-        return ImmutableMap.<String, String>builder()
-                .put("dbmsProductName", getDBParameters().getDbmsProductName())
-                .put("dbmsVersion", getDBParameters().getDbmsVersion())
-                .put("driverName", getDBParameters().getDriverName())
-                .put("driverVersion", getDBParameters().getDriverVersion())
-                .put("quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString())
-                .put("extractionTime", extractionTime)
-                .build();
     }
 
     @Override

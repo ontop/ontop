@@ -31,6 +31,16 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String constraintFile;
 
+    @Option(type = OptionType.COMMAND, name = {"-d", "--db-metadata"}, title = "db-metadata file",
+            description = "user supplied db-metadata file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbMetadataFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-v", "--views"}, title = "views file",
+            description = "user supplied views file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String viewsFile;
+
     @Option(type = OptionType.COMMAND, name = {"--db-password"}, title = "DB password",
             description = "DB password (overrides the properties)")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)

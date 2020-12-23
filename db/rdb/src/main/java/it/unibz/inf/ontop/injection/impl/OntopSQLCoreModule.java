@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.dbschema.impl.SerializedMetadataProvider;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
@@ -43,6 +44,13 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
                 ),
                 SQLAlgebraFactory.class);
         install(sqlAlgebraFactory);
+
+        Module serializedMetadataProviderFactory = buildFactory(
+                ImmutableList.of(
+                        SerializedMetadataProvider.class
+                ),
+                SerializedMetadataProvider.Factory.class);
+        install(serializedMetadataProviderFactory);
 
         Module mdProvider = buildFactory(ImmutableList.of(DBMetadataProvider.class), JDBCMetadataProviderFactory.class);
         install(mdProvider);
