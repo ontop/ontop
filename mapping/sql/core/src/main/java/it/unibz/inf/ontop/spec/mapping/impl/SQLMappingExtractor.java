@@ -182,12 +182,9 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         try {
             if (dbMetadataFile.isPresent()) {
-                try (Reader dbMetadataReader = new FileReader(dbMetadataFile.get());
-                     Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-
-                    MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
+                try (Reader dbMetadataReader = new FileReader(dbMetadataFile.get())) {
                     DBMetadataProvider serializedDBMetadataProvider = serializedMetadataProviderFactory
-                            .getMetadataProvider(dbMetadataReader, dbMetadataProvider.getQuotedIDFactory());
+                            .getMetadataProvider(dbMetadataReader);
                     return convert(mapping, constraintFile, serializedDBMetadataProvider);
                 }
             }

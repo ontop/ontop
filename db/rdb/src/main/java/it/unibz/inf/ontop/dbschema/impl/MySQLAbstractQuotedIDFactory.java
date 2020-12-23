@@ -53,41 +53,23 @@ import java.util.Objects;
  *
  */
 
-public class MySQLQuotedIDFactory extends SQLStandardQuotedIDFactory {
+public abstract class MySQLAbstractQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
 	private static final String MY_SQL_QUOTATION_STRING = "`";
-	private final boolean caseSensitiveTableNames;
-	
-	MySQLQuotedIDFactory(boolean caseSensitiveTableNames) {
-		this.caseSensitiveTableNames = caseSensitiveTableNames;
-	}
 
-	@Override
-	public QuotedID createAttributeID(@Nonnull String s) {
+	protected QuotedID createFromString(@Nonnull String s, boolean caseSensitive) {
 		Objects.requireNonNull(s);
 
 		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, false);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitive);
 
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, false);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitive);
 
-		return new QuotedIDImpl(s, NO_QUOTATION, false);
+		return new QuotedIDImpl(s, NO_QUOTATION, caseSensitive);
 	}
 
-	@Override
-	protected QuotedID createFromString(@Nonnull String s) {
-		Objects.requireNonNull(s);
 
-		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitiveTableNames);
-
-		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedIDImpl(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitiveTableNames);
-
-		return new QuotedIDImpl(s, NO_QUOTATION, caseSensitiveTableNames);
-	}
-	
 	@Override
 	public String getIDQuotationString() {
 		return MY_SQL_QUOTATION_STRING;

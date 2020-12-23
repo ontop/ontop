@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
@@ -24,21 +24,23 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     private final DBParameters dbParameters;
     private final ImmutableMap<RelationID, JsonDatabaseTable> relationMap;
 
+
     @AssistedInject
     protected JsonSerializedMetadataProvider(@Assisted Reader dbMetadataReader,
-                                             @Assisted QuotedIDFactory quotedIDFactory,
                                              TypeFactory typeFactory) throws MetadataExtractionException, IOException {
         JsonMetadata jsonMetadata = loadAndDeserialize(dbMetadataReader);
+
+        QuotedIDFactory idFactory = jsonMetadata.metadata.createQuotedIDFactory();
 
         dbParameters = new BasicDBParametersImpl(jsonMetadata.metadata.driverName,
                 jsonMetadata.metadata.driverVersion,
                 jsonMetadata.metadata.dbmsProductName,
                 jsonMetadata.metadata.dbmsVersion,
-                quotedIDFactory,
+                idFactory,
                 typeFactory.getDBTypeFactory());
 
         relationMap = jsonMetadata.relations.stream()
-                .collect(ImmutableCollectors.toMap(t -> quotedIDFactory.createRelationID(t.name), t -> t));
+                .collect(ImmutableCollectors.toMap(t -> idFactory.createRelationID(t.name), t -> t));
     }
 
 
