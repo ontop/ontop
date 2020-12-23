@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
@@ -39,8 +41,9 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
                 idFactory,
                 typeFactory.getDBTypeFactory());
 
+        // TODO: add to all
         relationMap = jsonMetadata.relations.stream()
-                .collect(ImmutableCollectors.toMap(t -> idFactory.createRelationID(t.name), t -> t));
+                .collect(ImmutableCollectors.toMap(t -> JsonMetadata.deserializeRelationID(idFactory, t.name), t -> t));
     }
 
 

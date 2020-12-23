@@ -28,7 +28,7 @@ public class JsonDatabaseTable {
     public List<Object> otherFunctionalDependencies; // never used
     public List<JsonForeignKey> foreignKeys;
     public List<Column> columns;
-    public String name;
+    public Object name;
 
     private static final String OTHER_NAMES_KEY = "other-names";
 
@@ -37,10 +37,10 @@ public class JsonDatabaseTable {
     }
 
     public JsonDatabaseTable(DatabaseRelationDefinition relation) {
-        this.name = relation.getID().getSQLRendering();
-        ImmutableList<String> otherNames = relation.getAllIDs().stream()
+        this.name = JsonMetadata.serializeRelationID(relation.getID());
+        ImmutableList<Object> otherNames = relation.getAllIDs().stream()
                 .filter(id -> !id.equals(relation.getID()))
-                .map(RelationID::getSQLRendering)
+                .map(JsonMetadata::serializeRelationID)
                 .collect(ImmutableCollectors.toList());
         if (!otherNames.isEmpty())
             additionalProperties.put(OTHER_NAMES_KEY, otherNames);
@@ -66,18 +66,18 @@ public class JsonDatabaseTable {
                     dbTypeFactory.getDBTermType(attribute.datatype),
                     attribute.isNullable);
 
-        List<String> otherNames = (List<String>) additionalProperties.get(OTHER_NAMES_KEY);
+        List<Object> otherNames = (List<Object>) additionalProperties.get(OTHER_NAMES_KEY);
         ImmutableList<RelationID> allIDs =
                 (otherNames == null ? Stream.of(name) : Stream.concat(Stream.of(name), otherNames.stream()))
-                .map(s -> deserializeRelationID(idFactory, s))
-                .collect(ImmutableCollectors.toList());
+                        .map(s -> JsonMetadata.deserializeRelationID(dbParameters.getQuotedIDFactory(), s))
+                        .collect(ImmutableCollectors.toList());
 
         return new DatabaseTableDefinition(allIDs, attributeListBuilder);
     }
 
     public void insertIntegrityConstraints(MetadataLookup lookup) throws MetadataExtractionException {
-        RelationID id = deserializeRelationID(lookup.getQuotedIDFactory(), name);
-        DatabaseTableDefinition relation = (DatabaseTableDefinition)lookup.getRelation(id);
+        DatabaseTableDefinition relation = (DatabaseTableDefinition)lookup.getRelation(
+                JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), name));
 
         for (JsonUniqueConstraint uc: uniqueConstraints)
             uc.insert(relation, lookup.getQuotedIDFactory());
@@ -88,10 +88,6 @@ public class JsonDatabaseTable {
 
             fk.insert(relation, lookup);
         }
-    }
-
-    private static RelationID deserializeRelationID(QuotedIDFactory idFactory, String s) {
-        return idFactory.createRelationID(s.split("\\."));
     }
 
 
@@ -140,4 +136,5 @@ public class JsonDatabaseTable {
             additionalProperties.put(name, value);
         }
     }
+
 }

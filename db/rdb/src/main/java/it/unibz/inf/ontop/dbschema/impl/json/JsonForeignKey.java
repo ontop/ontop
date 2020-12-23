@@ -36,7 +36,7 @@ public class JsonForeignKey {
     public void insert(DatabaseTableDefinition relation, MetadataLookup lookup) throws MetadataExtractionException {
 
         ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, relation,
-                lookup.getRelation(lookup.getQuotedIDFactory().createRelationID(to.relation)));
+                lookup.getRelation(JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), to.relation)));
 
         try {
             for (int i = 0; i < from.columns.size(); i++)
@@ -68,7 +68,7 @@ public class JsonForeignKey {
             "columns"
     })
     public static class Part {
-        public String relation;
+        public Object relation;
         public List<String> columns;
 
         public Part() {
@@ -76,7 +76,7 @@ public class JsonForeignKey {
         }
 
         public Part(DatabaseRelationDefinition relation, Stream<Attribute> attributes) {
-            this.relation = relation.getID().getSQLRendering();
+            this.relation = JsonMetadata.serializeRelationID(relation.getID());
             this.columns = attributes
                     .map(a -> a.getID().getSQLRendering())
                     .collect(ImmutableCollectors.toList());

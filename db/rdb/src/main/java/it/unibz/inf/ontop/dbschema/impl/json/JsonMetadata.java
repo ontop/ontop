@@ -1,14 +1,22 @@
 package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableBiMap;
-import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -116,5 +124,21 @@ public class JsonMetadata {
         public void setAdditionalProperty(String name, Object value) {
             additionalProperties.put(name, value);
         }
+    }
+
+    public static Object serializeRelationID(RelationID id) {
+        if (id.getComponents().size() == 1)
+            return id.getComponents().get(0).getSQLRendering();
+        return id.getComponents().stream()
+                .map(QuotedID::getSQLRendering)
+                .collect(ImmutableCollectors.toList()).reverse();
+    }
+
+    public static RelationID deserializeRelationID(QuotedIDFactory idFactory, Object o) {
+        if (o instanceof String)
+            return idFactory.createRelationID((String)o);
+
+        ImmutableList<String> c = ImmutableList.copyOf((List<String>)o).reverse();
+        return idFactory.createRelationID(c.toArray(new String[0]));
     }
 }
