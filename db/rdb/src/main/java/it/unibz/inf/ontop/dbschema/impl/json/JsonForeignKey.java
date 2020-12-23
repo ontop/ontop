@@ -18,11 +18,16 @@ import java.util.stream.Stream;
         "to"
 })
 public class JsonForeignKey {
-    public String name;
-    public Part from, to;
+    public final String name;
+    public final Part from, to;
 
-    public JsonForeignKey() {
-        // no-op for jackson deserialisation
+    @JsonCreator
+    public JsonForeignKey(@JsonProperty("name") String name,
+                          @JsonProperty("from") Part from,
+                          @JsonProperty("to") Part to) {
+        this.name = name;
+        this.from = from;
+        this.to = to;
     }
 
     public JsonForeignKey(ForeignKeyConstraint fk) {
@@ -68,11 +73,14 @@ public class JsonForeignKey {
             "columns"
     })
     public static class Part {
-        public Object relation;
-        public List<String> columns;
+        public final Object relation;
+        public final List<String> columns;
 
-        public Part() {
-            // no-op for jackson deserialisation
+        @JsonCreator
+        public Part(@JsonProperty("relation") Object relation,
+                    @JsonProperty("columns") List<String> columns) {
+            this.relation = relation;
+            this.columns = columns;
         }
 
         public Part(DatabaseRelationDefinition relation, Stream<Attribute> attributes) {

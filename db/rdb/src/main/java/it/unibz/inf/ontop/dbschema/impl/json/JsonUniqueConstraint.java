@@ -20,12 +20,17 @@ import java.util.Map;
         "isPrimaryKey"
 })
 public class JsonUniqueConstraint {
-    public String name;
-    public List<String> determinants;
-    public Boolean isPrimaryKey;
+    public final String name;
+    public final List<String> determinants;
+    public final Boolean isPrimaryKey;
 
-    public JsonUniqueConstraint() {
-        // no-op for jackson deserialisation
+    @JsonCreator
+    public JsonUniqueConstraint(@JsonProperty("name") String name,
+                                @JsonProperty("determinants") List<String> determinants,
+                                @JsonProperty("isPrimaryKey") Boolean isPrimaryKey) {
+        this.name = name;
+        this.determinants = determinants;
+        this.isPrimaryKey = isPrimaryKey;
     }
 
     public JsonUniqueConstraint(UniqueConstraint uc) {

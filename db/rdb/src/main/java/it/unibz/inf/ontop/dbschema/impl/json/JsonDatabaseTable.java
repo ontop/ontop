@@ -24,16 +24,25 @@ import java.util.stream.Stream;
     "name"
 })
 public class JsonDatabaseTable {
-    public List<JsonUniqueConstraint> uniqueConstraints;
-    public List<Object> otherFunctionalDependencies; // never used
-    public List<JsonForeignKey> foreignKeys;
-    public List<Column> columns;
-    public Object name;
+    public final List<JsonUniqueConstraint> uniqueConstraints;
+    public final List<Object> otherFunctionalDependencies; // never used
+    public final List<JsonForeignKey> foreignKeys;
+    public final List<Column> columns;
+    public final Object name;
 
     private static final String OTHER_NAMES_KEY = "other-names";
 
-    public JsonDatabaseTable() {
-        // no-op for jackson deserialisation
+    @JsonCreator
+    public JsonDatabaseTable(@JsonProperty("uniqueConstraints") List<JsonUniqueConstraint> uniqueConstraints,
+                             @JsonProperty("otherFunctionalDependencies")  List<Object> otherFunctionalDependencies,
+                             @JsonProperty("foreignKeys")  List<JsonForeignKey> foreignKeys,
+                             @JsonProperty("columns")  List<Column> columns,
+                             @JsonProperty("name")  Object name) {
+        this.uniqueConstraints = uniqueConstraints;
+        this.otherFunctionalDependencies = otherFunctionalDependencies;
+        this.foreignKeys = foreignKeys;
+        this.columns = columns;
+        this.name = name;
     }
 
     public JsonDatabaseTable(DatabaseRelationDefinition relation) {
@@ -110,12 +119,17 @@ public class JsonDatabaseTable {
             "datatype"
     })
     public static class Column {
-        public String name;
-        public Boolean isNullable;
-        public String datatype;
+        public final String name;
+        public final Boolean isNullable;
+        public final String datatype;
 
-        public Column() {
-            // no-op for jackson deserialisation
+        @JsonCreator
+        public Column(@JsonProperty("name") String name,
+                      @JsonProperty("isNullable")  Boolean isNullable,
+                      @JsonProperty("datatype")  String datatype) {
+            this.name = name;
+            this.isNullable = isNullable;
+            this.datatype = datatype;
         }
 
         public Column(Attribute attribute) {

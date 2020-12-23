@@ -20,11 +20,14 @@ import java.util.Map;
         "relations"
 })
 public class JsonMetadata {
-    public List<JsonDatabaseTable> relations;
-    public Parameters metadata;
+    public final List<JsonDatabaseTable> relations;
+    public final Parameters metadata;
 
-    public JsonMetadata() {
-        // no-op for jackson deserialisation
+    @JsonCreator
+    public JsonMetadata(@JsonProperty("relations") List<JsonDatabaseTable> relations,
+                        @JsonProperty("metadata") Parameters metadata) {
+        this.relations = relations;
+        this.metadata = metadata;
     }
 
     public JsonMetadata(ImmutableMetadata metadata) {
@@ -58,17 +61,28 @@ public class JsonMetadata {
             "extractionTime"
     })
     public static class Parameters {
-        public String dbmsProductName;
-        public String dbmsVersion;
-        public String driverName;
-        public String driverVersion;
-        public String quotationString;
-        public String extractionTime;
+        public final String dbmsProductName;
+        public final String dbmsVersion;
+        public final String driverName;
+        public final String driverVersion;
+        public final String quotationString;
+        public final String extractionTime;
 
         private static final String ID_FACTORY_KEY = "id-factory";
 
-        public Parameters() {
-            // no-op for jackson deserialisation
+        @JsonCreator
+        public Parameters(@JsonProperty("dbmsProductName") String dbmsProductName,
+                          @JsonProperty("dbmsVersion") String dbmsVersion,
+                          @JsonProperty("driverName") String driverName,
+                          @JsonProperty("driverVersion") String driverVersion,
+                          @JsonProperty("quotationString") String quotationString,
+                          @JsonProperty("extractionTime") String extractionTime) {
+            this.dbmsProductName = dbmsProductName;
+            this.dbmsVersion = dbmsVersion;
+            this.driverName = driverName;
+            this.driverVersion = driverVersion;
+            this.quotationString = quotationString;
+            this.extractionTime = extractionTime;
         }
 
         private static final ImmutableBiMap<String, Class<? extends QuotedIDFactory>> QUOTED_ID_FACTORIES = ImmutableBiMap.<String, Class<? extends QuotedIDFactory>>builder()
