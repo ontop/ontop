@@ -426,7 +426,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .map(c -> (DistinctNode) c.getRootNode())
                     .findFirst();
 
-            if (distinctNode.isPresent() && children.stream().allMatch(IQTree::isDistinct)) {
+            if (distinctNode.isPresent() && isDistinct()) {
                 DistinctNode newParent = distinctNode.get();
 
                 ImmutableList<IQTree> newChildren = children.stream()
@@ -437,6 +437,16 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             }
             else
                 return this;
+        }
+
+        private boolean isDistinct() {
+            if (children.stream().allMatch(IQTree::isDistinct))
+                return true;
+
+            IQTree tree = iqFactory.createNaryIQTree(
+                    iqFactory.createInnerJoinNode(joiningCondition),
+                    children);
+            return tree.isDistinct();
         }
 
 

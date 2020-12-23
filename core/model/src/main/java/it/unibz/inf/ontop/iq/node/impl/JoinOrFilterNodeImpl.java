@@ -131,8 +131,9 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     }
 
     protected boolean isDistinct(IQTree tree, ImmutableList<IQTree> children) {
-        if (children.stream().allMatch(IQTree::isDistinct))
+        if (children.stream().noneMatch(child -> mayChildCauseParentBeingNonDistinct(tree, child)))
             return true;
+
 
         ImmutableSet<ImmutableSet<Variable>> constraints = tree.inferUniqueConstraints();
         if (constraints.isEmpty())
@@ -143,4 +144,17 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                 .anyMatch(c -> c.stream().noneMatch(variableNullability::isPossiblyNullable));
     }
 
+    /**
+     * Must not return false negative
+     */
+    private static boolean mayChildCauseParentBeingNonDistinct(IQTree parentTree, IQTree child) {
+        if (child.isDistinct())
+            return false;
+
+        // Useful when the unique constraint from the child is "nullable" at the child level
+        // but not at the parent level (thanks to implicit and explicit conditions)
+        VariableNullability parentVariableNullability = parentTree.getVariableNullability();
+        return child.inferUniqueConstraints().stream()
+                .noneMatch(c -> c.stream().noneMatch(parentVariableNullability::isPossiblyNullable));
+    }
 }
