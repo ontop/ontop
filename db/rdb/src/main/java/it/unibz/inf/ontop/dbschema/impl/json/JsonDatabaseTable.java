@@ -10,9 +10,8 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,27 +22,39 @@ import java.util.stream.Stream;
     "columns",
     "name"
 })
-public class JsonDatabaseTable {
-    public List<JsonUniqueConstraint> uniqueConstraints;
-    public List<Object> otherFunctionalDependencies; // never used
-    public List<JsonForeignKey> foreignKeys;
-    public List<Column> columns;
-    public Object name;
+public class JsonDatabaseTable extends JsonOpenObject {
+    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    public final List<JsonUniqueConstraint> uniqueConstraints;
+    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    public final List<JsonFunctionalDependency> otherFunctionalDependencies;
+    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    public final List<JsonForeignKey> foreignKeys;
+    public final List<Column> columns;
+    public final Object name;
+    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    public final List<Object> otherNames;
 
-    private static final String OTHER_NAMES_KEY = "other-names";
-
-    public JsonDatabaseTable() {
-        // no-op for jackson deserialisation
+    @JsonCreator
+    public JsonDatabaseTable(@JsonProperty("uniqueConstraints") List<JsonUniqueConstraint> uniqueConstraints,
+                             @JsonProperty("otherFunctionalDependencies") List<JsonFunctionalDependency> otherFunctionalDependencies,
+                             @JsonProperty("foreignKeys") List<JsonForeignKey> foreignKeys,
+                             @JsonProperty("columns") List<Column> columns,
+                             @JsonProperty("name") Object name,
+                             @JsonProperty("otherNames") List<Object> otherNames) {
+        this.uniqueConstraints = Optional.ofNullable(uniqueConstraints).orElse(ImmutableList.of());
+        this.otherFunctionalDependencies = Optional.ofNullable(otherFunctionalDependencies).orElse(ImmutableList.of());
+        this.foreignKeys =  Optional.ofNullable(foreignKeys).orElse(ImmutableList.of());
+        this.columns = columns;
+        this.name = name;
+        this.otherNames = Optional.ofNullable(otherNames).orElse(ImmutableList.of());
     }
 
     public JsonDatabaseTable(DatabaseRelationDefinition relation) {
         this.name = JsonMetadata.serializeRelationID(relation.getID());
-        ImmutableList<Object> otherNames = relation.getAllIDs().stream()
+        this.otherNames = relation.getAllIDs().stream()
                 .filter(id -> !id.equals(relation.getID()))
                 .map(JsonMetadata::serializeRelationID)
                 .collect(ImmutableCollectors.toList());
-        if (!otherNames.isEmpty())
-            additionalProperties.put(OTHER_NAMES_KEY, otherNames);
         this.columns = relation.getAttributes().stream()
                 .map(Column::new)
                 .collect(ImmutableCollectors.toList());
@@ -53,7 +64,9 @@ public class JsonDatabaseTable {
         this.uniqueConstraints = relation.getUniqueConstraints().stream()
                 .map(JsonUniqueConstraint::new)
                 .collect(ImmutableCollectors.toList());
-        this.otherFunctionalDependencies = ImmutableList.of();
+        this.otherFunctionalDependencies = relation.getOtherFunctionalDependencies().stream()
+                .map(JsonFunctionalDependency::new)
+                .collect(ImmutableCollectors.toList());
     }
 
     public DatabaseTableDefinition createDatabaseTableDefinition(DBParameters dbParameters) {
@@ -66,11 +79,9 @@ public class JsonDatabaseTable {
                     dbTypeFactory.getDBTermType(attribute.datatype),
                     attribute.isNullable);
 
-        List<Object> otherNames = (List<Object>) additionalProperties.get(OTHER_NAMES_KEY);
-        ImmutableList<RelationID> allIDs =
-                (otherNames == null ? Stream.of(name) : Stream.concat(Stream.of(name), otherNames.stream()))
-                        .map(s -> JsonMetadata.deserializeRelationID(dbParameters.getQuotedIDFactory(), s))
-                        .collect(ImmutableCollectors.toList());
+        ImmutableList<RelationID> allIDs = Stream.concat(Stream.of(name), otherNames.stream())
+                .map(s -> JsonMetadata.deserializeRelationID(dbParameters.getQuotedIDFactory(), s))
+                .collect(ImmutableCollectors.toList());
 
         return new DatabaseTableDefinition(allIDs, attributeListBuilder);
     }
@@ -82,6 +93,9 @@ public class JsonDatabaseTable {
         for (JsonUniqueConstraint uc: uniqueConstraints)
             uc.insert(relation, lookup.getQuotedIDFactory());
 
+        for (JsonFunctionalDependency fd: otherFunctionalDependencies)
+            fd.insert(relation, lookup.getQuotedIDFactory());
+
         for (JsonForeignKey fk : foreignKeys) {
             if (!fk.from.relation.equals(this.name))
                 throw new MetadataExtractionException("Table names mismatch: " + name + " != " + fk.from.relation);
@@ -90,32 +104,24 @@ public class JsonDatabaseTable {
         }
     }
 
-
-    private final Map<String, Object> additionalProperties = new HashMap<>();
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        additionalProperties.put(name, value);
-    }
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
             "name",
             "isNullable",
             "datatype"
     })
-    public static class Column {
-        public String name;
-        public Boolean isNullable;
-        public String datatype;
+    public static class Column extends JsonOpenObject {
+        public final String name;
+        public final Boolean isNullable;
+        public final String datatype;
 
-        public Column() {
-            // no-op for jackson deserialisation
+        @JsonCreator
+        public Column(@JsonProperty("name") String name,
+                      @JsonProperty("isNullable") Boolean isNullable,
+                      @JsonProperty("datatype") String datatype) {
+            this.name = name;
+            this.isNullable = isNullable;
+            this.datatype = datatype;
         }
 
         public Column(Attribute attribute) {
@@ -123,18 +129,5 @@ public class JsonDatabaseTable {
             this.isNullable = attribute.isNullable();
             this.datatype = ((AttributeImpl)attribute).getSQLTypeName();
         }
-
-        private final Map<String, Object> additionalProperties = new HashMap<>();
-
-        @JsonAnyGetter
-        public Map<String, Object> getAdditionalProperties() {
-            return additionalProperties;
-        }
-
-        @JsonAnySetter
-        public void setAdditionalProperty(String name, Object value) {
-            additionalProperties.put(name, value);
-        }
     }
-
 }

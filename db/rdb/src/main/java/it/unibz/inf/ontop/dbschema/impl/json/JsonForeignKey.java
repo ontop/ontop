@@ -4,11 +4,8 @@ import com.fasterxml.jackson.annotation.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -17,12 +14,17 @@ import java.util.stream.Stream;
         "from",
         "to"
 })
-public class JsonForeignKey {
-    public String name;
-    public Part from, to;
+public class JsonForeignKey extends JsonOpenObject  {
+    public final String name;
+    public final Part from, to;
 
-    public JsonForeignKey() {
-        // no-op for jackson deserialisation
+    @JsonCreator
+    public JsonForeignKey(@JsonProperty("name") String name,
+                          @JsonProperty("from") Part from,
+                          @JsonProperty("to") Part to) {
+        this.name = name;
+        this.from = from;
+        this.to = to;
     }
 
     public JsonForeignKey(ForeignKeyConstraint fk) {
@@ -50,48 +52,25 @@ public class JsonForeignKey {
         builder.build();
     }
 
-    private final Map<String, Object> additionalProperties = new HashMap<>();
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        additionalProperties.put(name, value);
-    }
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
             "relation",
             "columns"
     })
-    public static class Part {
-        public Object relation;
-        public List<String> columns;
+    public static class Part extends JsonOpenObject {
+        public final Object relation;
+        public final List<String> columns;
 
-        public Part() {
-            // no-op for jackson deserialisation
+        @JsonCreator
+        public Part(@JsonProperty("relation") Object relation,
+                    @JsonProperty("columns") List<String> columns) {
+            this.relation = relation;
+            this.columns = columns;
         }
 
         public Part(DatabaseRelationDefinition relation, Stream<Attribute> attributes) {
             this.relation = JsonMetadata.serializeRelationID(relation.getID());
-            this.columns = attributes
-                    .map(a -> a.getID().getSQLRendering())
-                    .collect(ImmutableCollectors.toList());
-        }
-
-        private final Map<String, Object> additionalProperties = new HashMap<>();
-
-        @JsonAnyGetter
-        public Map<String, Object> getAdditionalProperties() {
-            return additionalProperties;
-        }
-
-        @JsonAnySetter
-        public void setAdditionalProperty(String name, Object value) {
-            additionalProperties.put(name, value);
+            this.columns = JsonMetadata.serializeAttributeList(attributes);
         }
     }
 }
