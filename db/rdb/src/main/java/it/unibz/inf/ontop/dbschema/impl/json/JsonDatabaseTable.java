@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({   // Why is this "reversed order"?
@@ -29,12 +30,20 @@ public class JsonDatabaseTable {
     public List<Column> columns;
     public String name;
 
+    private static final String OTHER_NAMES_KEY = "other-names";
+
     public JsonDatabaseTable() {
         // no-op for jackson deserialisation
     }
 
     public JsonDatabaseTable(DatabaseRelationDefinition relation) {
         this.name = relation.getID().getSQLRendering();
+        ImmutableList<String> otherNames = relation.getAllIDs().stream()
+                .filter(id -> !id.equals(relation.getID()))
+                .map(RelationID::getSQLRendering)
+                .collect(ImmutableCollectors.toList());
+        if (!otherNames.isEmpty())
+            additionalProperties.put(OTHER_NAMES_KEY, otherNames);
         this.columns = relation.getAttributes().stream()
                 .map(Column::new)
                 .collect(ImmutableCollectors.toList());
@@ -57,12 +66,17 @@ public class JsonDatabaseTable {
                     dbTypeFactory.getDBTermType(attribute.datatype),
                     attribute.isNullable);
 
-        RelationID id = idFactory.createRelationID(name);
-        return new DatabaseTableDefinition(ImmutableList.of(id), attributeListBuilder);
+        List<String> otherNames = (List<String>) additionalProperties.get(OTHER_NAMES_KEY);
+        ImmutableList<RelationID> allIDs =
+                (otherNames == null ? Stream.of(name) : Stream.concat(Stream.of(name), otherNames.stream()))
+                .map(s -> deserializeRelationID(idFactory, s))
+                .collect(ImmutableCollectors.toList());
+
+        return new DatabaseTableDefinition(allIDs, attributeListBuilder);
     }
 
     public void insertIntegrityConstraints(MetadataLookup lookup) throws MetadataExtractionException {
-        RelationID id = lookup.getQuotedIDFactory().createRelationID(name);
+        RelationID id = deserializeRelationID(lookup.getQuotedIDFactory(), name);
         DatabaseTableDefinition relation = (DatabaseTableDefinition)lookup.getRelation(id);
 
         for (JsonUniqueConstraint uc: uniqueConstraints)
@@ -74,6 +88,10 @@ public class JsonDatabaseTable {
 
             fk.insert(relation, lookup);
         }
+    }
+
+    private static RelationID deserializeRelationID(QuotedIDFactory idFactory, String s) {
+        return idFactory.createRelationID(s.split("\\."));
     }
 
 

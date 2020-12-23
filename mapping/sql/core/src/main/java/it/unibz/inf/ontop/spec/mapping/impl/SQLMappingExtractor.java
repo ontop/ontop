@@ -183,15 +183,14 @@ public class SQLMappingExtractor implements MappingExtractor {
         try {
             if (dbMetadataFile.isPresent()) {
                 try (Reader dbMetadataReader = new FileReader(dbMetadataFile.get())) {
-                    DBMetadataProvider serializedDBMetadataProvider = serializedMetadataProviderFactory
-                            .getMetadataProvider(dbMetadataReader);
-                    return convert(mapping, constraintFile, serializedDBMetadataProvider);
+                    return convert(mapping, constraintFile,
+                            serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
                 }
             }
             else {
                 try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-                    MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
-                    return convert(mapping, constraintFile, dbMetadataProvider);
+                    return convert(mapping, constraintFile,
+                            metadataProviderFactory.getMetadataProvider(connection));
                 }
             }
         }
@@ -207,9 +206,9 @@ public class SQLMappingExtractor implements MappingExtractor {
         CachingMetadataLookup metadataLookup = new CachingMetadataLookup(withImplicitConstraintsMetadataProvider);
         ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
 
-        metadataLookup.extractImmutableMetadata();
+        metadataLookup.extractImmutableMetadata(); // inserts integrity constraints
 
-        return new MappingAndDBParametersImpl(provMapping, withImplicitConstraintsMetadataProvider.getDBParameters());
+        return new MappingAndDBParametersImpl(provMapping, dbMetadataProvider.getDBParameters());
     }
 
     private static class MappingAndDBParametersImpl implements MappingAndDBParameters {
