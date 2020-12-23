@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.*;
@@ -11,15 +12,14 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "relations"
 })
-public class JsonMetadata {
+public class JsonMetadata extends JsonOpenObject {
     public final List<JsonDatabaseTable> relations;
     public final Parameters metadata;
 
@@ -38,19 +38,6 @@ public class JsonMetadata {
     }
 
 
-    @JsonIgnore
-    private final Map<String, Object> additionalProperties = new HashMap<>();
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        additionalProperties.put(name, value);
-    }
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
             "dbmsProductName",
@@ -60,15 +47,15 @@ public class JsonMetadata {
             "quotationString",
             "extractionTime"
     })
-    public static class Parameters {
+    public static class Parameters extends JsonOpenObject {
         public final String dbmsProductName;
         public final String dbmsVersion;
         public final String driverName;
         public final String driverVersion;
         public final String quotationString;
         public final String extractionTime;
-
-        private static final String ID_FACTORY_KEY = "id-factory";
+        @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+        public final String idFactoryType;
 
         @JsonCreator
         public Parameters(@JsonProperty("dbmsProductName") String dbmsProductName,
@@ -76,13 +63,15 @@ public class JsonMetadata {
                           @JsonProperty("driverName") String driverName,
                           @JsonProperty("driverVersion") String driverVersion,
                           @JsonProperty("quotationString") String quotationString,
-                          @JsonProperty("extractionTime") String extractionTime) {
+                          @JsonProperty("extractionTime") String extractionTime,
+                          @JsonProperty("idFactoryType") String idFactoryType) {
             this.dbmsProductName = dbmsProductName;
             this.dbmsVersion = dbmsVersion;
             this.driverName = driverName;
             this.driverVersion = driverVersion;
             this.quotationString = quotationString;
             this.extractionTime = extractionTime;
+            this.idFactoryType = idFactoryType;
         }
 
         private static final ImmutableBiMap<String, Class<? extends QuotedIDFactory>> QUOTED_ID_FACTORIES = ImmutableBiMap.<String, Class<? extends QuotedIDFactory>>builder()
@@ -102,14 +91,12 @@ public class JsonMetadata {
             QuotedIDFactory idFactory = parameters.getQuotedIDFactory();
             quotationString = idFactory.getIDQuotationString();
             String idFactoryType = QUOTED_ID_FACTORIES.inverse().get(idFactory.getClass());
-            if (idFactoryType != null && !idFactoryType.equals("STANDARD"))
-                additionalProperties.put(ID_FACTORY_KEY, idFactoryType);
+            this.idFactoryType = (idFactoryType != null && !idFactoryType.equals("STANDARD")) ? idFactoryType : null;
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             extractionTime = dateFormat.format(Calendar.getInstance().getTime());
         }
 
         public QuotedIDFactory createQuotedIDFactory() throws MetadataExtractionException {
-            String idFactoryType = (String)additionalProperties.get(ID_FACTORY_KEY);
             try {
                 return QUOTED_ID_FACTORIES.getOrDefault(idFactoryType, SQLStandardQuotedIDFactory.class).newInstance();
             }
@@ -117,23 +104,12 @@ public class JsonMetadata {
                 throw new MetadataExtractionException(e);
             }
         }
-
-        private final Map<String, Object> additionalProperties = new HashMap<>();
-
-        @JsonAnyGetter
-        public Map<String, Object> getAdditionalProperties() {
-            return additionalProperties;
-        }
-
-        @JsonAnySetter
-        public void setAdditionalProperty(String name, Object value) {
-            additionalProperties.put(name, value);
-        }
     }
 
     public static Object serializeRelationID(RelationID id) {
         if (id.getComponents().size() == 1)
             return id.getComponents().get(0).getSQLRendering();
+
         return id.getComponents().stream()
                 .map(QuotedID::getSQLRendering)
                 .collect(ImmutableCollectors.toList()).reverse();
@@ -145,5 +121,25 @@ public class JsonMetadata {
 
         ImmutableList<String> c = ImmutableList.copyOf((List<String>)o).reverse();
         return idFactory.createRelationID(c.toArray(new String[0]));
+    }
+    
+    public static List<String> serializeAttributeList(Stream<Attribute> attributes) {
+        return attributes
+                .map(a -> a.getID().getSQLRendering())
+                .collect(ImmutableCollectors.toList());
+    }
+
+    public interface AttributeConsumer {
+        void add(QuotedID id) throws AttributeNotFoundException;
+    }
+
+    public static void deserializeAttributeList(QuotedIDFactory idFactory, List<String> ids, AttributeConsumer consumer) throws MetadataExtractionException {
+        try {
+            for (String id : ids)
+                consumer.add(idFactory.createAttributeID(id));
+        }
+        catch (AttributeNotFoundException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 }
