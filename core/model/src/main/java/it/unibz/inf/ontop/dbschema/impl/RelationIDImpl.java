@@ -1,15 +1,9 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class RelationIDImpl implements RelationID {
@@ -25,7 +19,6 @@ public class RelationIDImpl implements RelationID {
     }
 
     @Override
-    @JsonIgnore
     public ImmutableList<QuotedID> getComponents() {
         return components;
     }
@@ -34,13 +27,11 @@ public class RelationIDImpl implements RelationID {
      * Used in SQLParser for creating implicit aliases
      * @return the relation ID that has the same name but no schema name
      */
-    @JsonIgnore
     @Override
     public RelationID getTableOnlyID() {
         return new RelationIDImpl(ImmutableList.of(components.get(TABLE_INDEX)));
     }
 
-    @JsonProperty("name")
     public QuotedID getTableID() {
         return components.get(TABLE_INDEX);
     }
@@ -49,7 +40,6 @@ public class RelationIDImpl implements RelationID {
      * NOT USED!!!
      * @return null if the schema name is empty or the schema name (as is, without quotation marks)
      */
-    @JsonProperty("schema")
     public QuotedID getSchemaID() {
         return components.get(1);
     }
@@ -58,7 +48,6 @@ public class RelationIDImpl implements RelationID {
      *
      * @return SQL rendering of the name (possibly with quotation marks)
      */
-    @JsonIgnore
     @Override
     public String getSQLRendering() {
         return components.reverse().stream()
@@ -87,12 +76,5 @@ public class RelationIDImpl implements RelationID {
         }
 
         return false;
-    }
-
-    public static class RelationIDSerializer extends JsonSerializer<RelationID> {
-        @Override
-        public void serialize(RelationID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeString(value.getSQLRendering());
-        }
     }
 }

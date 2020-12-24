@@ -64,7 +64,6 @@ public class SQLMappingExtractor implements MappingExtractor {
      * Can be useful for eliminating self-joins
      */
     private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
-    private final TypeFactory typeFactory;
     private final SerializedMetadataProvider.Factory serializedMetadataProviderFactory;
 
     @Inject
@@ -81,7 +80,6 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 MetaMappingExpander metamappingExpander,
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 JDBCMetadataProviderFactory metadataProviderFactory,
-                                TypeFactory typeFactory,
                                 SerializedMetadataProvider.Factory serializedMetadataProviderFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -97,7 +95,6 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.metamappingExpander = metamappingExpander;
         this.metadataProviderFactory = metadataProviderFactory;
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
-        this.typeFactory = typeFactory;
         this.serializedMetadataProviderFactory = serializedMetadataProviderFactory;
     }
 
@@ -183,43 +180,35 @@ public class SQLMappingExtractor implements MappingExtractor {
                                            Optional<File> constraintFile,
                                            Optional<File> dbMetadataFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
-        if (dbMetadataFile.isPresent()) {
-
-            try (Reader dbMetadataReader = new FileReader(dbMetadataFile.get());
-                 Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-
-                MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
-                DBMetadataProvider serializedDBMetadataProvider = serializedMetadataProviderFactory
-                        .getMetadataProvider(dbMetadataReader, dbMetadataProvider.getQuotedIDFactory());
-                MetadataProvider withImplicitConstraintsMetadataProvider =
-                        implicitDBConstraintExtractor.extract(constraintFile, serializedDBMetadataProvider);
-
-
-                //serializedDBMetadataProvider.loadAndDeserialize();
-                ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, serializedDBMetadataProvider);
-
-                return new MappingAndDBParametersImpl(provMapping, withImplicitConstraintsMetadataProvider.getDBParameters());
-            } catch (IOException | SQLException e) {
-                throw new MetadataExtractionException(e);
+        try {
+            if (dbMetadataFile.isPresent()) {
+                try (Reader dbMetadataReader = new FileReader(dbMetadataFile.get())) {
+                    return convert(mapping, constraintFile,
+                            serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
+                }
             }
-
-        } else {
-            try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-
-                MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
-                MetadataProvider withImplicitConstraintsMetadataProvider =
-                        implicitDBConstraintExtractor.extract(constraintFile, dbMetadataProvider);
-
-                CachingMetadataLookup metadataLookup = new CachingMetadataLookup(withImplicitConstraintsMetadataProvider);
-                ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
-
-                metadataLookup.extractImmutableMetadata();
-
-                return new MappingAndDBParametersImpl(provMapping, withImplicitConstraintsMetadataProvider.getDBParameters());
-            } catch (SQLException e) {
-                throw new MetadataExtractionException(e.getMessage());
+            else {
+                try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+                    return convert(mapping, constraintFile,
+                            metadataProviderFactory.getMetadataProvider(connection));
+                }
             }
         }
+        catch (IOException | SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
+    }
+
+    private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping, Optional<File> constraintFile, MetadataProvider dbMetadataProvider) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
+        MetadataProvider withImplicitConstraintsMetadataProvider =
+                implicitDBConstraintExtractor.extract(constraintFile, dbMetadataProvider);
+
+        CachingMetadataLookup metadataLookup = new CachingMetadataLookup(withImplicitConstraintsMetadataProvider);
+        ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
+
+        metadataLookup.extractImmutableMetadata(); // inserts integrity constraints
+
+        return new MappingAndDBParametersImpl(provMapping, dbMetadataProvider.getDBParameters());
     }
 
     private static class MappingAndDBParametersImpl implements MappingAndDBParameters {
