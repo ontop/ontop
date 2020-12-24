@@ -53,6 +53,8 @@ public interface OBDASpecInput {
 
     default Optional<Reader> getDBMetadataReader() throws FileNotFoundException { return getReader(DBMETADATA_KEY); }
 
+    default Optional<Reader> getOntopViewReader() throws FileNotFoundException { return getReader(ONTOPVIEW_KEY); }
+
 
     interface Builder {
 
@@ -85,6 +87,14 @@ public interface OBDASpecInput {
         default Builder addDBMetadataReader(Reader dbMetadataReader) {
             return addReader(DBMETADATA_KEY, dbMetadataReader);
         }
+
+        default Builder addOntopViewFile(File ontopViewFile) {
+            return addFile(ONTOPVIEW_KEY, ontopViewFile);
+        }
+
+        default Builder addOntopViewReader(Reader ontopViewReader) {
+            return addReader(ONTOPVIEW_KEY, ontopViewReader);
+        }
     }
 
 
@@ -95,6 +105,7 @@ public interface OBDASpecInput {
     String MAPPING_KEY = "mapping";
     String CONSTRAINT_KEY = "constraint";
     String DBMETADATA_KEY = "db-metadata";
+    String ONTOPVIEW_KEY = "ontop-view";
 
 
 }

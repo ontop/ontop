@@ -73,7 +73,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty,
-                Optional::empty, Optional::empty);
+                Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
@@ -82,7 +82,9 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
                                         Supplier<Optional<File>> constraintFileSupplier,
                                         Supplier<Optional<File>> dbMetadataFileSupplier,
-                                        Supplier<Optional<Reader>> dbMetadataReaderSupplier)
+                                        Supplier<Optional<Reader>> dbMetadataReaderSupplier,
+                                        Supplier<Optional<File>> ontopViewFileSupplier,
+                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -92,7 +94,9 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                 mappingGraphSupplier,
                 constraintFileSupplier,
                 dbMetadataFileSupplier,
-                dbMetadataReaderSupplier
+                dbMetadataReaderSupplier,
+                ontopViewFileSupplier,
+                ontopViewReaderSupplier
         );
     }
 
