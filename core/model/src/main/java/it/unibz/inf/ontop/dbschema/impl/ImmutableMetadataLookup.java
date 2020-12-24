@@ -14,9 +14,9 @@ import java.util.function.Function;
 public class ImmutableMetadataLookup implements MetadataLookup {
 
     protected final QuotedIDFactory idFactory;
-    protected final ImmutableMap<RelationID, NamedRelationDefinition> map;
+    protected final ImmutableMap<RelationID, ? extends NamedRelationDefinition> map;
 
-    ImmutableMetadataLookup(QuotedIDFactory idFactory, ImmutableMap<RelationID, NamedRelationDefinition> map) {
+    ImmutableMetadataLookup(QuotedIDFactory idFactory, ImmutableMap<RelationID, ? extends NamedRelationDefinition> map) {
         this.idFactory = idFactory;
         this.map = map;
     }

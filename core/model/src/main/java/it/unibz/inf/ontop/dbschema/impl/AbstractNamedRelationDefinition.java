@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
@@ -29,14 +26,11 @@ public abstract class AbstractNamedRelationDefinition extends AbstractRelationDe
     }
 
 
-    @JsonProperty("name")
-    @JsonSerialize(using = RelationIDImpl.RelationIDSerializer.class)
     @Override
     public RelationID getID() {
         return id;
     }
 
-    @JsonIgnore
     @Override
     public ImmutableSet<RelationID> getAllIDs() {
         return allIds;
@@ -76,7 +70,6 @@ public abstract class AbstractNamedRelationDefinition extends AbstractRelationDe
     /**
      * @return primary key
      */
-    @JsonIgnore
     @Override
     public Optional<UniqueConstraint> getPrimaryKey() {
         return Optional.ofNullable(primaryKey);
@@ -99,7 +92,6 @@ public abstract class AbstractNamedRelationDefinition extends AbstractRelationDe
      *
      * @return list of foreign keys
      */
-    @JsonSerialize(contentUsing = ForeignKeyConstraintImpl.ForeignKeyConstraintSerializer.class)
     @Override
     public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
         return ImmutableList.copyOf(foreignKeys);

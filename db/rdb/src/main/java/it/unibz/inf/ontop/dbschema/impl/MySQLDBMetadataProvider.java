@@ -15,7 +15,9 @@ public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     @AssistedInject
     MySQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
         super(connection,
-                metadata -> new MySQLQuotedIDFactory(metadata.storesMixedCaseIdentifiers()),
+                metadata -> metadata.storesMixedCaseIdentifiers()
+                    ? new MySQLCaseSensitiveTableNamesQuotedIDFactory()
+                    : new MySQLCaseNotSensitiveTableNamesQuotedIDFactory(),
                 typeFactory,
                 "SELECT DATABASE() AS TABLE_SCHEM");
         // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
