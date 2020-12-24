@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -14,7 +14,7 @@ import java.util.function.Function;
 public interface RAOperations<T> {
 
     T create();
-    T create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables);
+    T create(NamedRelationDefinition relation, ImmutableList<Variable> variables);
 
     T withAlias(T rae, RelationID aliasId);
 

@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
@@ -29,7 +27,7 @@ public abstract class FromItemParser<T> {
 
     private int relationIndex = 0;
 
-    protected abstract T create(DatabaseRelationDefinition relation);
+    protected abstract T create(NamedRelationDefinition relation);
 
     protected abstract T translateSelectBody(SelectBody selectBody);
 
@@ -201,7 +199,7 @@ public abstract class FromItemParser<T> {
 
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
             try {
-                DatabaseRelationDefinition relation = metadata.getRelation(id);
+                NamedRelationDefinition relation = metadata.getRelation(id);
                 T rae = create(relation);
                 result = (table.getAlias() == null)
                         ? rae

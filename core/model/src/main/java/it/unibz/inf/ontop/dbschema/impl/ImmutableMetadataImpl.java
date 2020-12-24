@@ -5,15 +5,15 @@ import it.unibz.inf.ontop.dbschema.*;
 
 public class ImmutableMetadataImpl implements ImmutableMetadata {
     private final DBParameters dbParameters;
-    private final ImmutableList<DatabaseRelationDefinition> relations;
+    private final ImmutableList<NamedRelationDefinition> relations;
 
-    ImmutableMetadataImpl(DBParameters dbParameters, ImmutableList<DatabaseRelationDefinition> relations) {
+    ImmutableMetadataImpl(DBParameters dbParameters, ImmutableList<NamedRelationDefinition> relations) {
         this.dbParameters = dbParameters;
         this.relations = relations;
     }
 
     @Override
-    public ImmutableList<DatabaseRelationDefinition> getAllRelations() {
+    public ImmutableList<NamedRelationDefinition> getAllRelations() {
         return relations;
     }
 
@@ -25,12 +25,12 @@ public class ImmutableMetadataImpl implements ImmutableMetadata {
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        for (DatabaseRelationDefinition r : relations)
+        for (NamedRelationDefinition r : relations)
             bf.append(r.getAllIDs()).append("=").append(r).append("\n");
 
         // Prints all primary keys
         bf.append("\n====== constraints ==========\n");
-        for (DatabaseRelationDefinition r : relations) {
+        for (NamedRelationDefinition r : relations) {
             for (UniqueConstraint uc : r.getUniqueConstraints())
                 bf.append(uc).append(";\n");
             bf.append("\n");

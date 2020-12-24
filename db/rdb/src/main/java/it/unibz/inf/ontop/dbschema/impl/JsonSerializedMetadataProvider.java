@@ -66,7 +66,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+    public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         return relationMap.get(id).createDatabaseTableDefinition(dbParameters);
     }
 
@@ -81,7 +81,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         relationMap.get(relation.getID()).insertIntegrityConstraints(metadataLookup);
     }
 

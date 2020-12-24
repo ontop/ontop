@@ -59,7 +59,7 @@ public class DefaultSelectQueryAttributeExtractor extends FromItemParser<RAExpre
     }
 
     @Override
-    protected RAExpressionAttributes create(DatabaseRelationDefinition relation) {
+    protected RAExpressionAttributes create(NamedRelationDefinition relation) {
         return ((RAExpressionAttributesOperations)operations).create(relation, createAttributeVariables(relation));
     }
 }

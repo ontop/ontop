@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 
 import java.util.stream.Collectors;
 
-public class DatabaseTableDefinition extends AbstractDatabaseRelationDefinition {
+public class DatabaseTableDefinition extends AbstractNamedRelationDefinition {
 
     /**
      *

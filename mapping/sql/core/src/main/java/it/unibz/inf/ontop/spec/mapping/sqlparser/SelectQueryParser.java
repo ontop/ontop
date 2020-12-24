@@ -5,11 +5,8 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-
-import java.util.stream.Stream;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -138,7 +135,7 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
     }
 
     @Override
-    public RAExpression create(DatabaseRelationDefinition relation) {
+    public RAExpression create(NamedRelationDefinition relation) {
         return operations.create(relation, createAttributeVariables(relation));
     }
 

@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -26,7 +26,7 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
     }
 
     @Override
-    public RAExpressionAttributeOccurrences create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
+    public RAExpressionAttributeOccurrences create(NamedRelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableSet<RelationID> relationIds = ImmutableSet.of(relation.getID());
         return new RAExpressionAttributeOccurrences(relation.getAttributes().stream()
                 .collect(ImmutableCollectors.toMap(

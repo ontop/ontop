@@ -11,11 +11,11 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
     private final DBParameters dbParameters;
     private final ImmutableList<RelationID> relationIds;
 
-    ImmutableMetadataProvider(DBParameters dbParameters, ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
+    ImmutableMetadataProvider(DBParameters dbParameters, ImmutableMap<RelationID, NamedRelationDefinition> map) {
         super(dbParameters.getQuotedIDFactory(), map);
         this.dbParameters = dbParameters;
         this.relationIds = getRelations().stream()
-                .map(DatabaseRelationDefinition::getID)
+                .map(NamedRelationDefinition::getID)
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -26,7 +26,7 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
     public ImmutableList<RelationID> getRelationIDs()  { return relationIds; }
 
     @Override
-    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) {
         // NO-OP
     }
 }

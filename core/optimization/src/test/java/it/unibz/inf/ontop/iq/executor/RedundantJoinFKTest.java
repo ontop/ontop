@@ -26,10 +26,10 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
  */
 public class RedundantJoinFKTest {
 
-    private final static DatabaseRelationDefinition TABLE1;
-    private final static DatabaseRelationDefinition TABLE2;
-    private final static DatabaseRelationDefinition TABLE3;
-    private final static DatabaseRelationDefinition TABLE4;
+    private final static NamedRelationDefinition TABLE1;
+    private final static NamedRelationDefinition TABLE2;
+    private final static NamedRelationDefinition TABLE3;
+    private final static NamedRelationDefinition TABLE4;
     private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getRDFAnswerPredicate(2);
     private final static Variable X = TERM_FACTORY.getVariable("X");

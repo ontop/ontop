@@ -1,13 +1,9 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,22 +16,21 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralStructuralAndSemanticIQOptimizerImpl.class);
     private final UnionAndBindingLiftOptimizer bindingLiftOptimizer;
     private final JoinLikeOptimizer joinLikeOptimizer;
-    private final IQConverter iqConverter;
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
-    private final IntermediateQueryFactory iqFactory;
+    private final OntopViewUnfolder viewUnfolder;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
-                                                        IQConverter iqConverter, OrderBySimplifier orderBySimplifier,
-                                                        AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory) {
+                                                        OrderBySimplifier orderBySimplifier,
+                                                        AggregationSimplifier aggregationSimplifier,
+                                                        OntopViewUnfolder viewUnfolder) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
-        this.iqConverter = iqConverter;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
-        this.iqFactory = iqFactory;
+        this.viewUnfolder = viewUnfolder;
     }
 
     @Override
@@ -47,15 +42,26 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         if (isLogDebugEnabled)
             LOGGER.debug("New lifted query: \n" + liftedQuery.toString());
 
-        long beginningJoinLike = System.currentTimeMillis();
-        IQ queryAfterJoinLikeOptimization = joinLikeOptimizer.optimize(liftedQuery, executorRegistry);
+        IQ queryAfterJoinLikeAndViewUnfolding;
+        do {
+            long beginningJoinLike = System.currentTimeMillis();
+            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(liftedQuery, executorRegistry);
 
-        if (isLogDebugEnabled)
-            LOGGER.debug(String.format("New query after fixed point join optimization (%d ms): \n%s",
-                    System.currentTimeMillis() - beginningJoinLike,
-                    queryAfterJoinLikeOptimization.toString()));
+            if (isLogDebugEnabled)
+                LOGGER.debug(String.format("New query after fixed point join optimization (%d ms): \n%s",
+                        System.currentTimeMillis() - beginningJoinLike,
+                        queryAfterJoinLikeAndViewUnfolding.toString()));
 
-        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeOptimization);
+            IQ queryBeforeUnfolding = queryAfterJoinLikeAndViewUnfolding;
+            // Unfolds Ontop views one level at a time (hence the loop)
+            queryAfterJoinLikeAndViewUnfolding = viewUnfolder.optimize(queryBeforeUnfolding);
+
+            if (queryBeforeUnfolding.equals(queryAfterJoinLikeAndViewUnfolding))
+                break;
+
+        } while (true);
+
+        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeAndViewUnfolding);
         if (isLogDebugEnabled)
             LOGGER.debug("New query after simplifying the aggregation node: \n" + queryAfterAggregationSimplification);
         IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);

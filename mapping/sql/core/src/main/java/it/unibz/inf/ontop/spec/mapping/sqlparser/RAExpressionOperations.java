@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.RelationID;
@@ -36,7 +36,7 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
     }
 
     @Override
-    public RAExpression create(DatabaseRelationDefinition relation, ImmutableList<Variable> variables) {
+    public RAExpression create(NamedRelationDefinition relation, ImmutableList<Variable> variables) {
         return new RAExpression(
                 createExtensionalDataNodes(relation, variables),
                 ImmutableList.of(),

@@ -66,7 +66,7 @@ public class DirectMappingAxiomProducer {
 	}
 
 
-	public String getSQL(DatabaseRelationDefinition table) {
+	public String getSQL(NamedRelationDefinition table) {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
@@ -98,7 +98,7 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT %s FROM %s WHERE %s", columns, tables, conditions);
 	}
 
-	private static ImmutableList<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
+	private static ImmutableList<Attribute> getIdentifyingAttributes(NamedRelationDefinition table) {
 		Optional<UniqueConstraint> pk = table.getPrimaryKey();
 		return pk.map(UniqueConstraint::getAttributes)
 				.orElse(table.getAttributes());
@@ -106,15 +106,15 @@ public class DirectMappingAxiomProducer {
 
 	// TODO: use quotation marks here and for variables names too
 
-	private static String getTableName(DatabaseRelationDefinition relation) {
+	private static String getTableName(NamedRelationDefinition relation) {
 		return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
 	}
 	private static String getColumnAlias(Attribute attr) {
-		 return getTableName((DatabaseRelationDefinition)attr.getRelation()) + "_" + attr.getID().getName();
+		 return getTableName((NamedRelationDefinition)attr.getRelation()) + "_" + attr.getID().getName();
 	}
 	
 	private static String getQualifiedColumnName(Attribute attr) {
-		 return new QualifiedAttributeID(((DatabaseRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
+		 return new QualifiedAttributeID(((NamedRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
 	}
 
 
@@ -125,7 +125,7 @@ public class DirectMappingAxiomProducer {
      *   - a literal triple for each column in a table where the column value is non-NULL.
      *
      */
-    public ImmutableList<TargetAtom> getCQ(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+    public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table, Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 
@@ -156,7 +156,7 @@ public class DirectMappingAxiomProducer {
      *
      */
 	public ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk,
-											  Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+											  Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableTerm sub = generateTerm(fk.getRelation(),
 				getTableName(fk.getRelation()) + "_", bnodeTemplateMap);
@@ -175,7 +175,7 @@ public class DirectMappingAxiomProducer {
      *
      * @return table IRI
      */
-	private String getTableIRIString(DatabaseRelationDefinition table) {
+	private String getTableIRIString(NamedRelationDefinition table) {
 		return baseIRI + R2RMLIRISafeEncoder.encode(getTableName(table));
 	}
 
@@ -192,7 +192,7 @@ public class DirectMappingAxiomProducer {
      *   - the percent-encoded form of the column name.
      */
     private IRI getLiteralPropertyIRI(Attribute attr) {
-        return rdfFactory.createIRI(getTableIRIString((DatabaseRelationDefinition)attr.getRelation())
+        return rdfFactory.createIRI(getTableIRIString((NamedRelationDefinition)attr.getRelation())
                 + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName()));
     }
 
@@ -230,8 +230,8 @@ public class DirectMappingAxiomProducer {
      * @param bnodeTemplateMap
 	 * @return
      */
-    private ImmutableTerm generateTerm(DatabaseRelationDefinition td, String varNamePrefix,
-									   Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+    private ImmutableTerm generateTerm(NamedRelationDefinition td, String varNamePrefix,
+                                       Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 		
 		Optional<UniqueConstraint> pko = td.getPrimaryKey();
 		if (pko.isPresent()) {

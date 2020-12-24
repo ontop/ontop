@@ -68,7 +68,7 @@ public class JsonForeignKey extends JsonOpenObject  {
             this.columns = columns;
         }
 
-        public Part(DatabaseRelationDefinition relation, Stream<Attribute> attributes) {
+        public Part(NamedRelationDefinition relation, Stream<Attribute> attributes) {
             this.relation = JsonMetadata.serializeRelationID(relation.getID());
             this.columns = JsonMetadata.serializeAttributeList(attributes);
         }

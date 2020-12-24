@@ -48,7 +48,7 @@ public class NoNullValuesEnforcerTest {
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;
     private final static ExtensionalDataNode DATA_NODE_3;
-    private static final DatabaseRelationDefinition TABLE2;
+    private static final NamedRelationDefinition TABLE2;
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();

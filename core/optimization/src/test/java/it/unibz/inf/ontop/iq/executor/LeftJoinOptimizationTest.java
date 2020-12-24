@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,13 +30,13 @@ import static org.junit.Assert.assertEquals;
 
 public class LeftJoinOptimizationTest {
 
-    private final static DatabaseRelationDefinition TABLE1;
-    private final static DatabaseRelationDefinition TABLE1a;
-    private final static DatabaseRelationDefinition TABLE2;
-    private final static DatabaseRelationDefinition TABLE2a;
-    private final static DatabaseRelationDefinition TABLE3;
-    private final static DatabaseRelationDefinition TABLE4;
-    private final static DatabaseRelationDefinition TABLE5;
+    private final static NamedRelationDefinition TABLE1;
+    private final static NamedRelationDefinition TABLE1a;
+    private final static NamedRelationDefinition TABLE2;
+    private final static NamedRelationDefinition TABLE2a;
+    private final static NamedRelationDefinition TABLE3;
+    private final static NamedRelationDefinition TABLE4;
+    private final static NamedRelationDefinition TABLE5;
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);

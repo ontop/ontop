@@ -43,7 +43,7 @@ public class SQLPPMappingConverterTest extends TestCase {
 		DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
 		// Database schema
-		DatabaseRelationDefinition table1 = builder.createDatabaseRelation("Student",
+		NamedRelationDefinition table1 = builder.createDatabaseRelation("Student",
 			"id", integerDBType, false,
 			"first_name", stringDBType, false,
 			"last_name", stringDBType, false,
@@ -51,14 +51,14 @@ public class SQLPPMappingConverterTest extends TestCase {
 			"nationality", stringDBType, false);
 		UniqueConstraint.primaryKeyOf(table1.getAttribute(1));
 
-		DatabaseRelationDefinition table2 = builder.createDatabaseRelation( "Course",
+		NamedRelationDefinition table2 = builder.createDatabaseRelation( "Course",
 			"cid", stringDBType, false,
 			"title", stringDBType, false,
 			"credits", integerDBType, false,
 			"description", stringDBType, false);
 		UniqueConstraint.primaryKeyOf(table2.getAttribute(1));
 
-		DatabaseRelationDefinition table3 = builder.createDatabaseRelation("Enrollment",
+		NamedRelationDefinition table3 = builder.createDatabaseRelation("Enrollment",
 			"student_id", integerDBType, false,
 			"course_id", stringDBType, false);
 		UniqueConstraint.primaryKeyOf(table3.getAttribute(1),

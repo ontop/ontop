@@ -12,10 +12,10 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 
     private static class UniqueConstraintBuilder implements Builder {
         protected final ImmutableList.Builder<Attribute> builder = ImmutableList.builder();
-        protected final DatabaseRelationDefinition relation;
+        protected final NamedRelationDefinition relation;
         protected final String name;
 
-        private UniqueConstraintBuilder(DatabaseRelationDefinition relation, String name) {
+        private UniqueConstraintBuilder(NamedRelationDefinition relation, String name) {
             this.relation = relation;
             this.name = name;
         }
@@ -58,7 +58,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 
     private static class PrimaryKeyBuilder extends UniqueConstraintBuilder {
 
-        private PrimaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
+        private PrimaryKeyBuilder(NamedRelationDefinition relation, String name) {
             super(relation, name);
         }
 
@@ -100,7 +100,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
      * @return
      */
 
-    public static Builder builder(DatabaseRelationDefinition relation, String name) {
+    public static Builder builder(NamedRelationDefinition relation, String name) {
         return new UniqueConstraintBuilder(relation, name);
     }
 
@@ -112,7 +112,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
      * @return
      */
 
-    public static Builder primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
+    public static Builder primaryKeyBuilder(NamedRelationDefinition relation, String name) {
         return new PrimaryKeyBuilder(relation, name);
     }
 
@@ -180,7 +180,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 
     @Override
     public String toString() {
-        return "ALTER TABLE " + ((DatabaseRelationDefinition)attributes.get(0).getRelation()).getID() +
+        return "ALTER TABLE " + ((NamedRelationDefinition)attributes.get(0).getRelation()).getID() +
                 " ADD CONSTRAINT " + name + (isPrimaryKey ? " PRIMARY KEY " : " UNIQUE ") +
                 "(" +
                 attributes.stream()

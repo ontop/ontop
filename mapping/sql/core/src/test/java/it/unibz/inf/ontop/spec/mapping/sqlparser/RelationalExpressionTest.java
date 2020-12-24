@@ -31,7 +31,7 @@ public class RelationalExpressionTest {
     private RAExpressionOperations ops;
 
     private Variable x, y, u, v;
-    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_T;
+    private NamedRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_T;
     private RAExpression re1, re2;
 
     @Before
@@ -302,10 +302,10 @@ public class RelationalExpressionTest {
                 relationalExpression.getAttributes().asMap());
     }
 
-    private static QualifiedAttributeID qualified(DatabaseRelationDefinition table, int index) {
+    private static QualifiedAttributeID qualified(NamedRelationDefinition table, int index) {
         return new QualifiedAttributeID(table.getID(), table.getAttribute(index).getID());
     }
-    private static QualifiedAttributeID unqualified(DatabaseRelationDefinition table, int index) {
+    private static QualifiedAttributeID unqualified(NamedRelationDefinition table, int index) {
         return new QualifiedAttributeID(null, table.getAttribute(index).getID());
     }
 }

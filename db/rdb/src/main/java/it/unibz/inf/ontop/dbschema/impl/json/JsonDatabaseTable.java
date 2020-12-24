@@ -49,7 +49,7 @@ public class JsonDatabaseTable extends JsonOpenObject {
         this.otherNames = Optional.ofNullable(otherNames).orElse(ImmutableList.of());
     }
 
-    public JsonDatabaseTable(DatabaseRelationDefinition relation) {
+    public JsonDatabaseTable(NamedRelationDefinition relation) {
         this.name = JsonMetadata.serializeRelationID(relation.getID());
         this.otherNames = relation.getAllIDs().stream()
                 .filter(id -> !id.equals(relation.getID()))
