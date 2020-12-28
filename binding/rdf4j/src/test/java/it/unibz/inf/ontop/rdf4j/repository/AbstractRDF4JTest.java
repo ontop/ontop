@@ -42,6 +42,12 @@ public class AbstractRDF4JTest {
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath, @Nullable String propertyFile) throws SQLException, IOException {
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, propertyFile, null);
+    }
+
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile,
+                                   @Nullable String viewFile) throws SQLException, IOException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
@@ -73,6 +79,9 @@ public class AbstractRDF4JTest {
 
         if (propertyFile != null)
             builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
+
+        if (viewFile != null)
+            builder.ontopViewFile(AbstractRDF4JTest.class.getResource(viewFile).getPath());
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
