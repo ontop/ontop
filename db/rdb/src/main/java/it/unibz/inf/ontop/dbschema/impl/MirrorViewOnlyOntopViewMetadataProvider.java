@@ -39,13 +39,13 @@ import java.util.stream.Stream;
 /**
  * "Dummy" implementation
  *
- * Throw an exception if non-mirror views are present.
+ * Throws an exception if non-mirror views are present.
  *
  * Only supports level-1 mirror views.
  *
  * Ignores the constraints
  */
-public class MinorViewOnlyOntopViewMetadataProvider implements OntopViewMetadataProvider {
+public class MirrorViewOnlyOntopViewMetadataProvider implements OntopViewMetadataProvider {
 
     private final MetadataProvider parentMetadataProvider;
     private final MetadataLookup parentCacheMetadataLookup;
@@ -57,11 +57,11 @@ public class MinorViewOnlyOntopViewMetadataProvider implements OntopViewMetadata
 
 
     @AssistedInject
-    protected MinorViewOnlyOntopViewMetadataProvider(@Assisted MetadataProvider parentMetadataProvider,
-                                                     @Assisted Reader ontopViewReader,
-                                                     IntermediateQueryFactory iqFactory,
-                                                     TermFactory termFactory,
-                                                     AtomFactory atomFactory, CoreSingletons coreSingletons) throws MetadataExtractionException {
+    protected MirrorViewOnlyOntopViewMetadataProvider(@Assisted MetadataProvider parentMetadataProvider,
+                                                      @Assisted Reader ontopViewReader,
+                                                      IntermediateQueryFactory iqFactory,
+                                                      TermFactory termFactory,
+                                                      AtomFactory atomFactory, CoreSingletons coreSingletons) throws MetadataExtractionException {
         this.parentMetadataProvider = parentMetadataProvider;
         this.parentCacheMetadataLookup = new CachingMetadataLookup(parentMetadataProvider);
         this.iqFactory = iqFactory;
