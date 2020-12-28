@@ -1,6 +1,5 @@
-package it.unibz.inf.ontop.view;
+package it.unibz.inf.ontop.dbschema;
 
-import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.io.Reader;

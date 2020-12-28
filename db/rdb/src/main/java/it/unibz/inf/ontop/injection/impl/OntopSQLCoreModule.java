@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
-import it.unibz.inf.ontop.view.OntopViewMetadataProvider;
+import it.unibz.inf.ontop.dbschema.OntopViewMetadataProvider;
 
 public class OntopSQLCoreModule extends OntopAbstractModule {
 

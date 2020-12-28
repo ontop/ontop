@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
-import it.unibz.inf.ontop.view.OntopViewMetadataProvider;
+import it.unibz.inf.ontop.dbschema.OntopViewMetadataProvider;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;

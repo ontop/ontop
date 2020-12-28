@@ -42,10 +42,10 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         if (isLogDebugEnabled)
             LOGGER.debug("New lifted query: \n" + liftedQuery.toString());
 
-        IQ queryAfterJoinLikeAndViewUnfolding;
+        IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
             long beginningJoinLike = System.currentTimeMillis();
-            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(liftedQuery, executorRegistry);
+            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding, executorRegistry);
 
             if (isLogDebugEnabled)
                 LOGGER.debug(String.format("New query after fixed point join optimization (%d ms): \n%s",
