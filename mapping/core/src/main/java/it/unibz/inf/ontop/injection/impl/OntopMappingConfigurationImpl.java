@@ -122,9 +122,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         dbMetadataReaderSupplier.get()
                 .ifPresent(specInputBuilder::addDBMetadataReader);
         ontopViewFileSupplier.get()
-                .ifPresent(specInputBuilder::addDBMetadataFile);
+                .ifPresent(specInputBuilder::addOntopViewFile);
         ontopViewReaderSupplier.get()
-                .ifPresent(specInputBuilder::addDBMetadataReader);
+                .ifPresent(specInputBuilder::addOntopViewReader);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
