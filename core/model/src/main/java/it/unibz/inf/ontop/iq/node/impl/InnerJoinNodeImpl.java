@@ -184,7 +184,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     /**
-     * TODO: refactor
+     * TODO: refactor
      */
     @Override
     public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator,
@@ -429,15 +429,15 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
-        VariableNullability childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children)
+        VariableNullability extendedChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children)
                 .extendToExternalVariables(constraint.getVariableStream());
 
         try {
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                    getOptionalFilterCondition(), ImmutableSet.of(), childrenVariableNullability);
+                    getOptionalFilterCondition(), ImmutableSet.of(), extendedChildrenVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
-                    conditionSimplificationResults, childrenVariableNullability);
+                    conditionSimplificationResults, extendedChildrenVariableNullability);
 
             //TODO: propagate different constraints to different children
 

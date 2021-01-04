@@ -122,19 +122,16 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return propagateDownCondition(child, Optional.of(constraint));
-    }
-
-    private IQTree propagateDownCondition(IQTree child, Optional<ImmutableExpression> initialConstraint) {
         try {
-            VariableNullability childVariableNullability = child.getVariableNullability();
+            VariableNullability extendedChildVariableNullability = child.getVariableNullability()
+                    .extendToExternalVariables(constraint.getVariableStream());
 
             // TODO: also consider the constraint for simplifying the condition
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier
-                    .simplifyCondition(getFilterCondition(), childVariableNullability);
+                    .simplifyCondition(getFilterCondition(), extendedChildVariableNullability);
 
-            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(initialConstraint,
-                    conditionSimplificationResults, childVariableNullability);
+            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
+                    conditionSimplificationResults, extendedChildVariableNullability);
 
             IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
                     .filter(s -> !s.isEmpty())
