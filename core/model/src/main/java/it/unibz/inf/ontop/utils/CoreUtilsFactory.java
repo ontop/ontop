@@ -24,12 +24,12 @@ public interface CoreUtilsFactory {
     /**
      * Variables are considered as separately nullable
      */
-    VariableNullability createDummyVariableNullability(Stream<Variable> variables);
+    VariableNullability createSimplifiedVariableNullability(Stream<Variable> variables);
 
     /**
      * All the variables of the expression are treated as separately nullable
      */
-    VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm);
+    VariableNullability createSimplifiedVariableNullability(ImmutableFunctionalTerm functionalTerm);
 
     VariableNullability createEmptyVariableNullability(ImmutableSet<Variable> scope);
 

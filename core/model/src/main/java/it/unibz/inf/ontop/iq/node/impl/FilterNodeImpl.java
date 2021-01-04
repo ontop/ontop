@@ -255,14 +255,18 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         ImmutableSet<Variable> newlyProjectedVariables = constructionNodeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
 
-        VariableNullability dummyVariableNullability = coreUtilsFactory.createDummyVariableNullability(
+        VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 newlyProjectedVariables.stream());
 
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, dummyVariableNullability);
+            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, simplifiedFutureChildVariableNullability);
+
+            VariableNullability extendedVariableNullability = constraint
+                    .map(c -> simplifiedFutureChildVariableNullability.extendToExternalVariables(c.getVariableStream()))
+                    .orElse(simplifiedFutureChildVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
-                    expressionAndSubstitution, dummyVariableNullability);
+                    expressionAndSubstitution, extendedVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
                     ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)

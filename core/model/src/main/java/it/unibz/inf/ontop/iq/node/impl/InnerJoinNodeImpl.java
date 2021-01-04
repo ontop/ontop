@@ -199,7 +199,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
                 .map(descendingSubstitution::applyToBooleanExpression);
 
-        VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getDummyVariableNullability(
+        VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
 
         VariableNullability extendedVariableNullability = constraint

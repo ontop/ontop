@@ -72,7 +72,7 @@ public class JoinOrFilterVariableNullabilityTools {
         return coreUtilsFactory.createVariableNullability(newNullableGroups, scope);
     }
 
-    public VariableNullability getDummyVariableNullability(ImmutableSet<Variable> variables) {
-        return coreUtilsFactory.createDummyVariableNullability(variables.stream());
+    public VariableNullability getSimplifiedVariableNullability(ImmutableSet<Variable> variables) {
+        return coreUtilsFactory.createSimplifiedVariableNullability(variables.stream());
     }
 }

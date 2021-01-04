@@ -127,7 +127,7 @@ public class IRITemplateCompatibilityTest {
 
         ImmutableExpression condition1 = TERM_FACTORY.getStrictEquality(term1, term2);
         ImmutableExpression condition2 = TERM_FACTORY.getStrictEquality(term2, term1);
-        VariableNullability variableNullability = CORE_UTILS_FACTORY.createDummyVariableNullability(condition1);
+        VariableNullability variableNullability = CORE_UTILS_FACTORY.createSimplifiedVariableNullability(condition1);
 
         boolean res1 = !condition1.evaluate2VL(variableNullability).isEffectiveFalse();
         boolean res2 = !condition2.evaluate2VL(variableNullability).isEffectiveFalse();
