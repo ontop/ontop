@@ -66,7 +66,12 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     @Override
     public IQ generateSourceQuery(IQ query) {
+        // TODO: introduce an option for avoiding post-processing from the configuration
+        return generateSourceQuery(query, false);
+    }
 
+    @Override
+    public IQ generateSourceQuery(IQ query, boolean avoidPostProcessing) {
         if (query.getTree().isDeclaredAsEmpty())
             return query;
 
@@ -78,7 +83,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         if (IS_DEBUG_ENABLED)
             log.debug("After lifting the post-processable function symbols :\n" + liftedIQ);
 
-        PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(liftedIQ);
+        PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(liftedIQ, avoidPostProcessing);
 
         IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator());
         // Late detection of emptiness
