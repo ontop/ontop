@@ -35,9 +35,27 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.avoidPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(
-                f -> f.canBePostProcessed() && (!(f.getFunctionSymbol() instanceof DBFunctionSymbol)));
+                PostProcessingProjectionSplitterImpl::hasFunctionalToBePostProcessed);
         this.proPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(ImmutableFunctionalTerm::canBePostProcessed);
         this.distinctNormalizer = distinctNormalizer;
+    }
+
+    private static boolean hasFunctionalToBePostProcessed(ImmutableFunctionalTerm functionalTerm) {
+        if (!functionalTerm.canBePostProcessed())
+            return false;
+
+        if (!(functionalTerm.getFunctionSymbol() instanceof DBFunctionSymbol))
+            return true;
+
+        return functionalTerm.getTerms().stream()
+                .anyMatch(PostProcessingProjectionSplitterImpl::hasToBePostProcessed);
+    }
+
+    private static boolean hasToBePostProcessed(ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm)
+            return hasFunctionalToBePostProcessed((ImmutableFunctionalTerm) term);
+
+        return !term.isNull() && (!(term instanceof DBConstant)) && (!(term instanceof Variable));
     }
 
     @Override
