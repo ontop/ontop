@@ -59,11 +59,18 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                           ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
                                                           Optional<ImmutableExpression> constraint) throws EmptyTreeException {
 
-        VariableNullability dummyVariableNullability = coreUtilsFactory.createDummyVariableNullability(
-                child.getVariables().stream());
+        Optional<ImmutableExpression> descendingConstraint;
+        if (constraint.isPresent()) {
+            ImmutableExpression initialConstraint = constraint.get();
 
-        Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
-                constraint, dummyVariableNullability);
+            VariableNullability extendedVariableNullability = child.getVariableNullability()
+                    .extendToExternalVariables(initialConstraint.getVariableStream());
+
+            descendingConstraint = computeChildConstraint(tauFPropagationResults.theta, initialConstraint,
+                    extendedVariableNullability);
+        }
+        else
+            descendingConstraint = Optional.empty();
 
         return Optional.of(tauFPropagationResults.delta)
                 .filter(delta -> !delta.isEmpty())
@@ -240,8 +247,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
         try {
-            Optional<ImmutableExpression> childConstraint = computeChildConstraint(getSubstitution(), Optional.of(constraint),
-                    child.getVariableNullability());
+            Optional<ImmutableExpression> childConstraint = computeChildConstraint(getSubstitution(), constraint,
+                    child.getVariableNullability().extendToExternalVariables(constraint.getVariableStream()));
             IQTree newChild = childConstraint
                     .map(child::propagateDownConstraint)
                     .orElse(child);
@@ -253,21 +260,17 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
     private Optional<ImmutableExpression> computeChildConstraint(ImmutableSubstitution<? extends ImmutableTerm> theta,
-                                                                 Optional<ImmutableExpression> initialConstraint,
-                                                                 VariableNullability childVariableNullability)
+                                                                 ImmutableExpression initialConstraint,
+                                                                 VariableNullability variableNullabilityForConstraint)
             throws EmptyTreeException {
 
-        Optional<ImmutableExpression.Evaluation> descendingConstraintResults = initialConstraint
-                .map(theta::applyToBooleanExpression)
-                .map(exp -> exp.evaluate(childVariableNullability));
+        ImmutableExpression.Evaluation descendingConstraintResults = theta.applyToBooleanExpression(initialConstraint)
+                .evaluate(variableNullabilityForConstraint);
 
-        if (descendingConstraintResults
-                .filter(ImmutableExpression.Evaluation::isEffectiveFalse)
-                .isPresent())
+        if (descendingConstraintResults.isEffectiveFalse())
             throw new EmptyTreeException();
 
-        return descendingConstraintResults
-                .flatMap(ImmutableExpression.Evaluation::getExpression);
+        return descendingConstraintResults.getExpression();
     }
 
     /**

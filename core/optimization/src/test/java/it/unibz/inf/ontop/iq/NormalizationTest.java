@@ -2360,14 +2360,14 @@ public class NormalizationTest {
         UnaryIQTree leftChild1 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(unionVariables,
                         SUBSTITUTION_FACTORY.getSubstitution(
-                                X, TERM_FACTORY.getIRIFunctionalTerm(template1, ImmutableList.of(A)))),
+                                X, TERM_FACTORY.getIRIFunctionalTerm(template1, ImmutableList.of(A)).getTerm(0))),
                 leftDataNode1);
 
         ExtensionalDataNode leftDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2, ImmutableMap.of(0, B, 1, D));
         UnaryIQTree leftChild2 = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createConstructionNode(unionVariables,
                         SUBSTITUTION_FACTORY.getSubstitution(
-                                X, TERM_FACTORY.getIRIFunctionalTerm(template2, ImmutableList.of(B)))),
+                                X, TERM_FACTORY.getIRIFunctionalTerm(template2, ImmutableList.of(B)).getTerm(0))),
                 leftDataNode2);
 
         NaryIQTree unionTree = IQ_FACTORY.createNaryIQTree(
@@ -2380,8 +2380,8 @@ public class NormalizationTest {
                 IQ_FACTORY.createLeftJoinNode(),
                 unionTree, rightDataNode);
 
-        ImmutableFunctionalTerm rightXDef = TERM_FACTORY.getIRIFunctionalTerm(template1, ImmutableList.of(C));
-        ImmutableFunctionalTerm zDef = TERM_FACTORY.getIRIFunctionalTerm(template2, ImmutableList.of(D));
+        ImmutableTerm rightXDef = TERM_FACTORY.getIRIFunctionalTerm(template1, ImmutableList.of(C)).getTerm(0);
+        ImmutableTerm zDef = TERM_FACTORY.getIRIFunctionalTerm(template2, ImmutableList.of(D)).getTerm(0);
 
         UnaryIQTree filterTree = IQ_FACTORY.createUnaryIQTree(
                 IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(X,
