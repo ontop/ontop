@@ -9,6 +9,8 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
 
     boolean isDistinctPostProcessingEnabled();
 
+    boolean isPostProcessingAvoided();
+
     boolean isQueryLoggingEnabled();
     boolean isQueryTemplateExtractionEnabled();
     boolean isSparqlQueryIncludedIntoQueryLog();
@@ -31,6 +33,7 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
 
     String EXISTENTIAL_REASONING = "ontop.existentialReasoning";
     String DISTINCT_RESULTSET = "ontop.distinctResultSet";
+    String AVOID_POST_PROCESSING = "ontop.avoidPostProcessing";
     String QUERY_CACHE_MAX_SIZE = "ontop.cache.query.size";
     String QUERY_LOGGING = "ontop.queryLogging";
     // Needed for logging

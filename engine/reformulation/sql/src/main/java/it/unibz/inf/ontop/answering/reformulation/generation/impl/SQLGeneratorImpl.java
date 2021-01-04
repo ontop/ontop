@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
@@ -39,6 +40,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final TermTypeTermLifter rdfTypeLifter;
     private final PostProcessableFunctionLifter functionLifter;
     private final IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator;
+    private final OntopReformulationSQLSettings settings;
     private final DialectExtraNormalizer extraNormalizer;
     private final BooleanExpressionPushDownTransformer pushDownTransformer;
 
@@ -50,7 +52,8 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                              PostProcessingProjectionSplitter projectionSplitter,
                              TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
                              IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
-                             DialectExtraNormalizer extraNormalizer, BooleanExpressionPushDownTransformer pushDownTransformer)
+                             DialectExtraNormalizer extraNormalizer, BooleanExpressionPushDownTransformer pushDownTransformer,
+                             OntopReformulationSQLSettings settings)
     {
         this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
@@ -62,12 +65,12 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         this.projectionSplitter = projectionSplitter;
         this.rdfTypeLifter = rdfTypeLifter;
         this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;
+        this.settings = settings;
     }
 
     @Override
     public IQ generateSourceQuery(IQ query) {
-        // TODO: introduce an option for avoiding post-processing from the configuration
-        return generateSourceQuery(query, false);
+        return generateSourceQuery(query, settings.isPostProcessingAvoided());
     }
 
     @Override
