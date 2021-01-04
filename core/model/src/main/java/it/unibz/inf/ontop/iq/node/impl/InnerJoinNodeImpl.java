@@ -184,7 +184,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     /**
-     * TODO: refactor
+     * TODO: refactor
      */
     @Override
     public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator,
@@ -199,16 +199,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
                 .map(descendingSubstitution::applyToBooleanExpression);
 
-
-        VariableNullability dummyVariableNullability = variableNullabilityTools.getDummyVariableNullability(
+        VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+
+        VariableNullability extendedVariableNullability = constraint
+                .map(c -> simplifiedChildFutureVariableNullability.extendToExternalVariables(c.getVariableStream()))
+                .orElse(simplifiedChildFutureVariableNullability);
 
         try {
             ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
-                    unoptimizedExpression, ImmutableSet.of(), dummyVariableNullability);
+                    unoptimizedExpression, ImmutableSet.of(), simplifiedChildFutureVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
-                    expressionAndSubstitution, dummyVariableNullability);
+                    expressionAndSubstitution, extendedVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
                     ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
@@ -307,11 +310,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .findFirst()
                 .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children, variableGenerator))
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
-        return propagateDownCondition(Optional.of(constraint), children);
     }
 
     @Override
@@ -429,20 +427,17 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
 
-    private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
-        VariableNullability childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children);
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
+        VariableNullability extendedChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children)
+                .extendToExternalVariables(constraint.getVariableStream());
 
         try {
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                    getOptionalFilterCondition(), ImmutableSet.of(), childrenVariableNullability);
+                    getOptionalFilterCondition(), ImmutableSet.of(), extendedChildrenVariableNullability);
 
-            // TODO: find a way to avoid creating dummy objects
-            // NB: if some variables are not nullable at the join level, they may be at the child level
-            VariableNullability dummyVariableNullability = variableNullabilityTools
-                    .getDummyVariableNullability(getProjectedVariables(children));
-
-            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(initialConstraint,
-                    conditionSimplificationResults, dummyVariableNullability);
+            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
+                    conditionSimplificationResults, extendedChildrenVariableNullability);
 
             //TODO: propagate different constraints to different children
 

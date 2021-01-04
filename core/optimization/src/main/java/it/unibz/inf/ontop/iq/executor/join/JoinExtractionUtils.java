@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.iq.*;
@@ -46,7 +45,7 @@ public class JoinExtractionUtils {
             ImmutableExpression expression = foldedExpression.get();
 
             ImmutableExpression.Evaluation evaluationResult = expression.evaluate(
-                    coreUtilsFactory.createDummyVariableNullability(expression));
+                    coreUtilsFactory.createSimplifiedVariableNullability(expression));
 
             if (evaluationResult.isEffectiveFalse()) {
                 throw new UnsatisfiableExpressionException();
