@@ -20,19 +20,7 @@ import java.util.Locale;
  *
  * It expands the tests from {@link BindTest}.
  */
-public class BindWithFunctionsTest extends AbstractOWLAPITest {
-
-    @BeforeClass
-	public static void setUp() throws Exception {
-    	initOBDA("/test/bind/sparqlBindWithFns-create-h2.sql",
-                "/test/bind/sparqlBindWithFunctions.obda",
-                "/test/bind/sparqlBind.owl");
-	}
-
-	@AfterClass
-	public static void tearDown() throws Exception {
-        release();
-	}
+public abstract class AbstractBindWithFunctionsTest extends AbstractOWLAPITest {
 
 
 	/*
