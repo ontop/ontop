@@ -30,17 +30,17 @@ public class JsonDatabaseTable extends JsonOpenObject {
     @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
     public final List<JsonForeignKey> foreignKeys;
     public final List<Column> columns;
-    public final Object name;
+    public final List<String> name;
     @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
-    public final List<Object> otherNames;
+    public final List<List<String>> otherNames;
 
     @JsonCreator
     public JsonDatabaseTable(@JsonProperty("uniqueConstraints") List<JsonUniqueConstraint> uniqueConstraints,
                              @JsonProperty("otherFunctionalDependencies") List<JsonFunctionalDependency> otherFunctionalDependencies,
                              @JsonProperty("foreignKeys") List<JsonForeignKey> foreignKeys,
                              @JsonProperty("columns") List<Column> columns,
-                             @JsonProperty("name") Object name,
-                             @JsonProperty("otherNames") List<Object> otherNames) {
+                             @JsonProperty("name") List<String> name,
+                             @JsonProperty("otherNames") List<List<String>> otherNames) {
         this.uniqueConstraints = Optional.ofNullable(uniqueConstraints).orElse(ImmutableList.of());
         this.otherFunctionalDependencies = Optional.ofNullable(otherFunctionalDependencies).orElse(ImmutableList.of());
         this.foreignKeys =  Optional.ofNullable(foreignKeys).orElse(ImmutableList.of());

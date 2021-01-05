@@ -8,21 +8,21 @@
     "foreignKeys" : [ {
       "name" : "fk_written_book2",
       "from" : {
-        "relation" : "\"tb_emerge_authors\"",
+        "relation" : [ "\"tb_emerge_authors\"" ],
         "columns" : [ "\"bk_code\"" ]
       },
       "to" : {
-        "relation" : "\"tb_books\"",
+        "relation" : [ "\"tb_books\"" ],
         "columns" : [ "\"bk_code\"" ]
       }
     }, {
       "name" : "fk_emerge_writes_book",
       "from" : {
-        "relation" : "\"tb_emerge_authors\"",
+        "relation" : [ "\"tb_emerge_authors\"" ],
         "columns" : [ "\"wr_id\"" ]
       },
       "to" : {
-        "relation" : "\"tb_on_prob_wr\"",
+        "relation" : [ "\"tb_on_prob_wr\"" ],
         "columns" : [ "\"wr_code\"" ]
       }
     } ],
@@ -35,7 +35,7 @@
       "isNullable" : false,
       "datatype" : "INTEGER"
     } ],
-    "name" : "\"tb_emerge_authors\"",
+    "name" : [ "\"tb_emerge_authors\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_emerge_authors\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_emerge_authors\"" ] ]
   }, {
     "uniqueConstraints" : [ {
@@ -46,21 +46,21 @@
     "foreignKeys" : [ {
       "name" : "fk_book_has_edition",
       "from" : {
-        "relation" : "\"tb_edition\"",
+        "relation" : [ "\"tb_edition\"" ],
         "columns" : [ "\"bk_id\"" ]
       },
       "to" : {
-        "relation" : "\"tb_books\"",
+        "relation" : [ "\"tb_books\"" ],
         "columns" : [ "\"bk_code\"" ]
       }
     }, {
       "name" : "fk_edition_has_editor",
       "from" : {
-        "relation" : "\"tb_edition\"",
+        "relation" : [ "\"tb_edition\"" ],
         "columns" : [ "\"editor\"" ]
       },
       "to" : {
-        "relation" : "\"tb_editor\"",
+        "relation" : [ "\"tb_editor\"" ],
         "columns" : [ "\"ed_code\"" ]
       }
     } ],
@@ -89,7 +89,7 @@
       "isNullable" : false,
       "datatype" : "INTEGER"
     } ],
-    "name" : "\"tb_edition\"",
+    "name" : [ "\"tb_edition\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_edition\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_edition\"" ] ]
   }, {
     "uniqueConstraints" : [ {
@@ -106,7 +106,7 @@
       "isNullable" : false,
       "datatype" : "VARCHAR(100)"
     } ],
-    "name" : "\"tb_on_prob_wr\"",
+    "name" : [ "\"tb_on_prob_wr\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_on_prob_wr\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_on_prob_wr\"" ] ]
   }, {
     "uniqueConstraints" : [ {
@@ -123,7 +123,7 @@
       "isNullable" : false,
       "datatype" : "VARCHAR(100)"
     } ],
-    "name" : "\"tb_editor\"",
+    "name" : [ "\"tb_editor\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_editor\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_editor\"" ] ]
   }, {
     "uniqueConstraints" : [ {
@@ -140,7 +140,7 @@
       "isNullable" : false,
       "datatype" : "VARCHAR(100)"
     } ],
-    "name" : "\"tb_affiliated_writers\"",
+    "name" : [ "\"tb_affiliated_writers\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_affiliated_writers\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_affiliated_writers\"" ] ]
   }, {
     "uniqueConstraints" : [ {
@@ -151,21 +151,21 @@
     "foreignKeys" : [ {
       "name" : "fk_affiliated_writes_book",
       "from" : {
-        "relation" : "\"tb_authors\"",
+        "relation" : [ "\"tb_authors\"" ],
         "columns" : [ "\"wr_id\"" ]
       },
       "to" : {
-        "relation" : "\"tb_affiliated_writers\"",
+        "relation" : [ "\"tb_affiliated_writers\"" ],
         "columns" : [ "\"wr_code\"" ]
       }
     }, {
       "name" : "fk_written_books",
       "from" : {
-        "relation" : "\"tb_authors\"",
+        "relation" : [ "\"tb_authors\"" ],
         "columns" : [ "\"bk_code\"" ]
       },
       "to" : {
-        "relation" : "\"tb_books\"",
+        "relation" : [ "\"tb_books\"" ],
         "columns" : [ "\"bk_code\"" ]
       }
     } ],
@@ -178,7 +178,7 @@
       "isNullable" : false,
       "datatype" : "INTEGER"
     } ],
-    "name" : "\"tb_authors\"",
+    "name" : [ "\"tb_authors\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_authors\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_authors\"" ] ]
   }, {
     "uniqueConstraints" : [ {
@@ -199,7 +199,7 @@
       "isNullable" : false,
       "datatype" : "CHAR(1)"
     } ],
-    "name" : "\"tb_books\"",
+    "name" : [ "\"tb_books\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_books\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_books\"" ] ]
   }, {
     "uniqueConstraints" : [ {
@@ -210,11 +210,11 @@
     "foreignKeys" : [ {
       "name" : "fk_bk_gen",
       "from" : {
-        "relation" : "\"tb_bk_gen\"",
+        "relation" : [ "\"tb_bk_gen\"" ],
         "columns" : [ "\"id_bk\"" ]
       },
       "to" : {
-        "relation" : "\"tb_books\"",
+        "relation" : [ "\"tb_books\"" ],
         "columns" : [ "\"bk_code\"" ]
       }
     } ],
@@ -227,7 +227,7 @@
       "isNullable" : false,
       "datatype" : "VARCHAR(100)"
     } ],
-    "name" : "\"tb_bk_gen\"",
+    "name" : [ "\"tb_bk_gen\"" ],
     "otherNames" : [ [ "\"PUBLIC\"", "\"tb_bk_gen\"" ], [ "\"BOOKS\"", "\"PUBLIC\"", "\"tb_bk_gen\"" ] ]
   } ],
   "metadata" : {
@@ -236,6 +236,6 @@
     "driverName" : "H2 JDBC Driver",
     "driverVersion" : "1.4.196 (2017-06-10)",
     "quotationString" : "\"",
-    "extractionTime" : "2020-12-23T21:10:13"
+    "extractionTime" : "2021-01-05T18:42:49"
   }
 }

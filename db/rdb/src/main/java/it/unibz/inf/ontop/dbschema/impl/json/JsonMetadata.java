@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.*;
@@ -112,11 +111,8 @@ public class JsonMetadata extends JsonOpenObject {
                 .collect(ImmutableCollectors.toList()).reverse();
     }
 
-    public static RelationID deserializeRelationID(QuotedIDFactory idFactory, Object o) {
-        if (o instanceof String)
-            return idFactory.createRelationID((String)o);
-
-        ImmutableList<String> c = ImmutableList.copyOf((List<String>)o).reverse();
+    public static RelationID deserializeRelationID(QuotedIDFactory idFactory, List<String> o) {
+        ImmutableList<String> c = ImmutableList.copyOf(o).reverse();
         return idFactory.createRelationID(c.toArray(new String[0]));
     }
     
