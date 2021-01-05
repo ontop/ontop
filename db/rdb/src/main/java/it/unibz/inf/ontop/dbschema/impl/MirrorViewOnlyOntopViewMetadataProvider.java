@@ -109,10 +109,10 @@ public class MirrorViewOnlyOntopViewMetadataProvider implements OntopViewMetadat
             if (!view.columns.isEmpty())
                 throw new MetadataExtractionException("only mirror views are supported at the moment");
 
-            // TODO: find a robust solution
-            RelationID relationId = quotedIDFactory.createRelationID(view.name.split("\\."));
+            RelationID relationId = quotedIDFactory.createRelationID(view.name.toArray(new String[0]));
 
-            NamedRelationDefinition parentDefinition = parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(view.baseRelation));
+            NamedRelationDefinition parentDefinition = parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
+                    view.baseRelation.toArray(new String[0])));
 
             AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, parentDefinition.getAtomPredicate());
 
@@ -205,13 +205,13 @@ public class MirrorViewOnlyOntopViewMetadataProvider implements OntopViewMetadat
         @Nonnull
         public final DummyColumns columns;
         @Nonnull
-        public final String name;
+        public final List<String> name;
         @Nonnull
-        public final String baseRelation;
+        public final List<String> baseRelation;
 
         @JsonCreator
-        public DummyJsonBasicView(@JsonProperty("columns") DummyColumns columns, @JsonProperty("name") String name,
-                                  @JsonProperty("baseRelation") String baseRelation) {
+        public DummyJsonBasicView(@JsonProperty("columns") DummyColumns columns, @JsonProperty("name") List<String> name,
+                                  @JsonProperty("baseRelation") List<String> baseRelation) {
             this.columns = columns;
             this.name = name;
             this.baseRelation = baseRelation;

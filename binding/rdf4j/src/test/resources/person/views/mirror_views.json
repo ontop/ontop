@@ -1,8 +1,8 @@
 {
   "relations": [
     {
-      "name": "\"hr\".\"persons\"",
-      "baseRelation": "\"person\"",
+      "name": ["\"hr\"", "\"persons\""],
+      "baseRelation": ["\"person\""],
       "columns": {
         "added": [
         ],
