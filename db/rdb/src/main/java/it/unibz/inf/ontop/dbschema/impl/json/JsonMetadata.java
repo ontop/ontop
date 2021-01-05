@@ -106,10 +106,7 @@ public class JsonMetadata extends JsonOpenObject {
         }
     }
 
-    public static Object serializeRelationID(RelationID id) {
-        if (id.getComponents().size() == 1)
-            return id.getComponents().get(0).getSQLRendering();
-
+    public static ImmutableList<String> serializeRelationID(RelationID id) {
         return id.getComponents().stream()
                 .map(QuotedID::getSQLRendering)
                 .collect(ImmutableCollectors.toList()).reverse();
