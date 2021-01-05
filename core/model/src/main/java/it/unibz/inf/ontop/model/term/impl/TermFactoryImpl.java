@@ -349,7 +349,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm) {
-		return coreUtilsFactory.createDummyVariableNullability(functionalTerm);
+		return coreUtilsFactory.createSimplifiedVariableNullability(functionalTerm);
     }
 
     @Override

@@ -1,14 +1,13 @@
 package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.iq.node.DummyVariableNullability;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
@@ -128,7 +127,7 @@ public class IRITemplateCompatibilityTest {
 
         ImmutableExpression condition1 = TERM_FACTORY.getStrictEquality(term1, term2);
         ImmutableExpression condition2 = TERM_FACTORY.getStrictEquality(term2, term1);
-        DummyVariableNullability variableNullability = CORE_UTILS_FACTORY.createDummyVariableNullability(condition1);
+        VariableNullability variableNullability = CORE_UTILS_FACTORY.createSimplifiedVariableNullability(condition1);
 
         boolean res1 = !condition1.evaluate2VL(variableNullability).isEffectiveFalse();
         boolean res2 = !condition2.evaluate2VL(variableNullability).isEffectiveFalse();

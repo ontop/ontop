@@ -280,7 +280,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNotNullUri1() {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(generateURI1(X));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNotNull(X));
@@ -290,7 +290,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNotNullUri2() {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(generateURI2(X, Y));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
@@ -304,7 +304,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 generateURI2(TERM_FACTORY.getDBStringConstant("toto"), X));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNotNull(X));
@@ -315,7 +315,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 generateURI1(TERM_FACTORY.getDBStringConstant("toto")));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertFalse(optionalExpression.isPresent());
         assertSame(ImmutableExpression.Evaluation.BooleanValue.TRUE, result.getValue().get());
@@ -326,7 +326,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 generateURI1(TERM_FACTORY.getDBIsNull(X)));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
 
         /*
@@ -348,7 +348,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNullUri1() {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(generateURI1(X));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNull(X));
@@ -358,7 +358,7 @@ public class ExpressionEvaluatorTest {
     public void testIsNullUri2() {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(generateURI2(X, Y));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertEquals(optionalExpression.get(),
                 TERM_FACTORY.getDisjunction(
@@ -371,7 +371,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(
                 generateURI2(TERM_FACTORY.getDBStringConstant("toto"), X));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNull(X));
@@ -382,7 +382,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(
                 generateURI1(TERM_FACTORY.getDBStringConstant("toto")));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertFalse(optionalExpression.isPresent());
         assertTrue(result.isEffectiveFalse());
@@ -394,7 +394,7 @@ public class ExpressionEvaluatorTest {
                 TERM_FACTORY.getIfElseNull(
                     TERM_FACTORY.getStrictEquality(TRUE, TRUE), Y));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(TERM_FACTORY.getDBIsNotNull(Y), optionalExpression.get());
@@ -406,7 +406,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 TERM_FACTORY.getIfElseNull(equality, Y));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(TERM_FACTORY.getConjunction(
@@ -422,7 +422,7 @@ public class ExpressionEvaluatorTest {
                 TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getStrictEquality(TRUE, FALSE), Y));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
-                CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
+                CORE_UTILS_FACTORY.createSimplifiedVariableNullability(initialExpression));
         assertFalse(result.getExpression().isPresent());
         assertTrue(result.isEffectiveFalse());
     }
