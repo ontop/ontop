@@ -58,11 +58,11 @@ public class JsonForeignKey extends JsonOpenObject  {
             "columns"
     })
     public static class Part extends JsonOpenObject {
-        public final Object relation;
+        public final List<String> relation;
         public final List<String> columns;
 
         @JsonCreator
-        public Part(@JsonProperty("relation") Object relation,
+        public Part(@JsonProperty("relation") List<String> relation,
                     @JsonProperty("columns") List<String> columns) {
             this.relation = relation;
             this.columns = columns;
