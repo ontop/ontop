@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.sqlparser;
+package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -8,14 +8,14 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import org.junit.Before;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
+import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.Assert.*;
 
 /**

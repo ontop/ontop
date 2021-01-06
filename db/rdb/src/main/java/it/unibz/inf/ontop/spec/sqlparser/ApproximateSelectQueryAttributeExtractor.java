@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.sqlparser;
+package it.unibz.inf.ontop.spec.sqlparser;
 
 /*
  * #%L
@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

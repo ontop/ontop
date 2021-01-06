@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.spec.mapping.sqlparser;
+package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
+import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 

@@ -1,11 +1,11 @@
-package it.unibz.inf.ontop.spec.mapping.sqlparser;
+package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;

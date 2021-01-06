@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
+import it.unibz.inf.ontop.spec.sqlparser.RAExpression;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;

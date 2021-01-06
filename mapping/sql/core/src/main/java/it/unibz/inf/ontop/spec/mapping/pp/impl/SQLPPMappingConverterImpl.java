@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -13,14 +12,13 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.*;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.sqlparser.*;
+import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -40,7 +38,6 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 
 /**
