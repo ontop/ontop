@@ -1,15 +1,14 @@
-package it.unibz.inf.ontop.spec.mapping.sqlparser;
+package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
+import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SelectQueryAttributeExtractorTest {
@@ -86,7 +85,7 @@ public class SelectQueryAttributeExtractorTest {
                 idfac.createAttributeID("rotorID")), res);
     }
 
-    @Test(expected = it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException.class) // issue 366
+    @Test(expected = UnsupportedSelectQueryException.class) // issue 366
     public void test_distinct_union() throws Exception {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         builder.createDatabaseRelation("LinkData", "zpolrotorid", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
