@@ -67,8 +67,8 @@ public class DB2BootstrapTest {
         File ontologyFile = new File(owlOutputFile);
         File obdaFile = new File(obdaOutputFile);
 
-        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(results.getPPMapping());
-        writer.save(obdaFile);
+        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
+        writer.write(obdaFile, results.getPPMapping());
 
         OWLOntology onto = results.getOntology();
         onto.getOWLOntologyManager().saveOntology(onto, new FileDocumentTarget(ontologyFile));

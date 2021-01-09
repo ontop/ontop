@@ -11,6 +11,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,7 +33,15 @@ public class AbstractRDF4JTest {
     private static RepositoryConnection REPO_CONNECTION;
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath) throws SQLException, IOException {
+        initOBDA(dbScriptRelativePath, obdaRelativePath, null);
+    }
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath) throws SQLException, IOException {
+        initOBDA(dbScriptRelativePath, obdaRelativePath, null, null);
+    }
 
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile) throws SQLException, IOException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
@@ -52,16 +61,23 @@ public class AbstractRDF4JTest {
         st.executeUpdate(bf.toString());
         SQL_CONNECTION.commit();
 
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractRDF4JTest.class.getResource(obdaRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
-                .enableTestMode()
-                .build();
+                .enableTestMode();
+
+        if (ontologyRelativePath != null)
+            builder.ontologyFile(AbstractRDF4JTest.class.getResource(ontologyRelativePath).getPath());
+
+        if (propertyFile != null)
+            builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
+
+        OntopSQLOWLAPIConfiguration config = builder.build();
 
         OntopRepository repo = OntopRepository.defaultRepository(config);
-        repo.initialize();
+        repo.init();
         /*
          * Prepare the data connection for querying.
          */
@@ -69,6 +85,16 @@ public class AbstractRDF4JTest {
     }
 
     protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
+        initR2RML(dbScriptRelativePath, r2rmlRelativePath, null, null);
+    }
+
+    protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath,
+                                    @Nullable String ontologyRelativePath) throws SQLException, IOException {
+        initR2RML(dbScriptRelativePath, r2rmlRelativePath, ontologyRelativePath, null);
+    }
+
+    protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath,
+                                    @Nullable String ontologyRelativePath, @Nullable String propertyFile) throws SQLException, IOException {
 
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
@@ -89,13 +115,20 @@ public class AbstractRDF4JTest {
         st.executeUpdate(bf.toString());
         SQL_CONNECTION.commit();
 
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .r2rmlMappingFile(AbstractRDF4JTest.class.getResource(r2rmlRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)
-                .enableTestMode()
-                .build();
+                .enableTestMode();
+
+        if (ontologyRelativePath != null)
+            builder.ontologyFile(AbstractRDF4JTest.class.getResource(ontologyRelativePath).getPath());
+
+        if (propertyFile != null)
+            builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
+
+        OntopSQLOWLAPIConfiguration config = builder.build();
 
         OntopRepository repo = OntopRepository.defaultRepository(config);
         repo.init();
@@ -130,6 +163,18 @@ public class AbstractRDF4JTest {
 
     protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues,
                                       BindingSet bindings) {
+        ImmutableList<String> vValues = runQuery(queryString, bindings);
+        assertEquals(expectedVValues, vValues);
+    }
+
+    protected ImmutableList<String> runQuery(String queryString) {
+        return runQuery(queryString, new MapBindingSet());
+    }
+
+    /**
+     * Extracts the values of the variable ?v
+     */
+    protected ImmutableList<String> runQuery(String queryString, BindingSet bindings) {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
         bindings.getBindingNames()
                 .forEach(n -> query.setBinding(n, bindings.getValue(n)));
@@ -146,7 +191,7 @@ public class AbstractRDF4JTest {
         }
         result.close();
 
-        assertEquals(expectedVValues, vValueBuilder.build());
+        return vValueBuilder.build();
     }
 
     protected void runGraphQueryAndCompare(String queryString, ImmutableSet<Statement> expectedGraph) {

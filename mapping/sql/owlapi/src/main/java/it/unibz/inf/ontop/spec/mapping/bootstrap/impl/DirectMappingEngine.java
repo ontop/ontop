@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
@@ -163,12 +163,12 @@ public class DirectMappingEngine {
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
 			MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
-			ImmutableList<DatabaseRelationDefinition> tables = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
+			ImmutableList<NamedRelationDefinition> tables = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
 			String baseIRI = baseIRI0.isEmpty()
-					? mapping.getPrefixManager().getDefaultPrefix()
+					? mapping.getPrefixManager().getDefaultIriPrefix()
 					: baseIRI0;
 
-			Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+			Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
 			AtomicInteger currentMappingIndex = new AtomicInteger(mapping.getTripleMaps().size() + 1);
 
 			ImmutableList<SQLPPTriplesMap> mappings = Stream.concat(
@@ -200,10 +200,10 @@ public class DirectMappingEngine {
 	 *  @param bnodeTemplateMap
 	 * @return a List of OBDAMappingAxiom-s
 	 */
-	public ImmutableList<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table,
-											String baseIRI,
-											Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
-											AtomicInteger mappingIndex) {
+	public ImmutableList<SQLPPTriplesMap> getMapping(NamedRelationDefinition table,
+                                                     String baseIRI,
+                                                     Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
+                                                     AtomicInteger mappingIndex) {
 
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseIRI, termFactory, targetAtomFactory,
 				rdfFactory, dbFunctionSymbolFactory, typeFactory);

@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -215,11 +216,8 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 
 	private String readQueryString() throws IOException {
-		InputStream stream = new URL(queryFileURL).openStream();
-		try {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-		} finally {
-			stream.close();
+		try (InputStream stream = new URL(queryFileURL).openStream()) {
+			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		}
 	}
 
@@ -241,14 +239,11 @@ public abstract class QuestDatatypeParent extends TestCase {
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 //			parser.setValueFactory(dataRep.getValueFactory());
-			Set<Statement> result = new LinkedHashSet<Statement>();
+			Set<Statement> result = new LinkedHashSet<>();
 			parser.setRDFHandler(new StatementCollector(result));
 
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
+			try (InputStream in = new URL(resultFileURL).openStream()) {
 				parser.parse(in, resultFileURL);
-			} finally {
-				in.close();
 			}
 			return result;
 		} else {

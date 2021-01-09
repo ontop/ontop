@@ -9,14 +9,14 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 
 public interface OWLBindingSet extends Iterable<OWLBinding> {
 
     @Override
     Iterator<OWLBinding> iterator();
 
-    List<String> getBindingNames() throws OWLException;
+    Set<String> getBindingNames() throws OWLException;
 
     OWLBinding getBinding(String bindingName) throws OWLException;
 

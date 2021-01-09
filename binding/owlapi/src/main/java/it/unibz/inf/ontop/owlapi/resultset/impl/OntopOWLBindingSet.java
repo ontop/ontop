@@ -12,28 +12,33 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import org.semanticweb.owlapi.model.*;
 
 import javax.annotation.Nonnull;
+
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class OntopOWLBindingSet implements OWLBindingSet {
 
     private final OntopBindingSet ontopBindingSet;
     private final OWLAPIIndividualTranslator translator;
+    private final byte[] salt;
 
-    public OntopOWLBindingSet(OntopBindingSet ontopBindingSet) {
+    public OntopOWLBindingSet(OntopBindingSet ontopBindingSet, byte[] salt) {
         this.ontopBindingSet = ontopBindingSet;
+        this.salt = salt;
         this.translator = new OWLAPIIndividualTranslator();
     }
 
     @Override
     @Nonnull
     public Iterator<OWLBinding> iterator() {
-        return Iterators.transform(ontopBindingSet.iterator(), OntopOWLBinding::new);
+        return Iterators.transform(ontopBindingSet.iterator(), ontopBinding -> new OntopOWLBinding(ontopBinding, salt));
     }
 
     @Override
-    public List<String> getBindingNames() {
-        return ontopBindingSet.getBindingNames();
+    public Set<String> getBindingNames() {
+        return Arrays.stream(ontopBindingSet.getBindingNames()).collect(Collectors.toSet());
     }
 
     @Override
@@ -42,7 +47,7 @@ public class OntopOWLBindingSet implements OWLBindingSet {
         if (ontopBinding == null) {
             return null;
         } else {
-            return new OntopOWLBinding(ontopBinding);
+            return new OntopOWLBinding(ontopBinding, salt);
         }
     }
 
@@ -107,7 +112,7 @@ public class OntopOWLBindingSet implements OWLBindingSet {
 
     private OWLPropertyAssertionObject translate(Constant c) {
         if (c instanceof ObjectConstant)
-            return translator.translate((ObjectConstant) c);
+            return translator.translate((ObjectConstant) c, salt);
         else
             return translator.translate((RDFLiteralConstant) c);
     }

@@ -261,7 +261,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> childDefs = child.getPossibleVariableDefinitions();
 
         if (childDefs.isEmpty()) {
-            ImmutableSubstitution<NonVariableTerm> def = substitution.getNonVariableTermFragment();
+            ImmutableSubstitution<NonVariableTerm> def = substitution.getFragment(NonVariableTerm.class);
             return def.isEmpty()
                     ? ImmutableSet.of()
                     : ImmutableSet.of(def);
@@ -270,7 +270,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return childDefs.stream()
                 .map(childDef -> childDef.composeWith(substitution))
                 .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
-                .map(ImmutableSubstitution::getNonVariableTermFragment)
+                .map(s -> s.getFragment(NonVariableTerm.class))
                 .collect(ImmutableCollectors.toSet());
     }
 

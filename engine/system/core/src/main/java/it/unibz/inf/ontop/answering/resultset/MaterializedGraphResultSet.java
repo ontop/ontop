@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.resultset;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import org.apache.commons.rdf.api.IRI;
 

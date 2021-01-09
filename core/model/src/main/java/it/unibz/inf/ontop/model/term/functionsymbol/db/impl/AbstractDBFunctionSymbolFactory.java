@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -22,7 +24,7 @@ import java.util.stream.Stream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
-    private static final String BNODE_PREFIX = "_:ontop-bnode-";
+    private static final String BNODE_PREFIX = "ontop-bnode-";
     private static final String PLACEHOLDER = "{}";
 
     /**
@@ -50,6 +52,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBBooleanFunctionSymbol containsFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol encodeForURIFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol strBeforeFunctionSymbol;
     // Created in init()
@@ -224,8 +228,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<String, Integer, DBBooleanFunctionSymbol> notPredefinedBooleanFunctionTable;
 
-    private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
-    private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+    private final Map<ImmutableList<TemplateComponent>, IRIStringTemplateFunctionSymbol> iriTemplateMap;
+    private final Map<ImmutableList<TemplateComponent>, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
     private final Map<IRI, DBFunctionSymbol> iriStringResolverMap;
 
@@ -327,7 +331,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         nonStrictDatetimeEqOperator = createNonStrictDatetimeEquality();
         nonStrictDateEqOperator = createNonStrictDateEquality();
         nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
-        r2rmlIRISafeEncodeFunctionSymbol = createR2RMLIRISafeEncode();
+        r2rmlIRISafeEncodeFunctionSymbol = createEncodeURLorIRI(true);
+        encodeForURIFunctionSymbol = createEncodeURLorIRI(false);
         strAfterFunctionSymbol = createStrAfterFunctionSymbol();
         containsFunctionSymbol = createContainsFunctionSymbol();
         strBeforeFunctionSymbol = createStrBeforeFunctionSymbol();
@@ -403,29 +408,28 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
 
     @Override
-    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
-        return iriTemplateMap
-                .computeIfAbsent(iriTemplate,
-                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> iriTemplate) {
+        return iriTemplateMap.computeIfAbsent(iriTemplate,
+                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(iriTemplate, typeFactory));
     }
 
     @Override
-    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(String bnodeTemplate) {
-        return bnodeTemplateMap
-                .computeIfAbsent(bnodeTemplate,
-                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<TemplateComponent> bnodeTemplate) {
+        return bnodeTemplateMap.computeIfAbsent(bnodeTemplate,
+                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(bnodeTemplate, typeFactory));
     }
 
     @Override
     public BnodeStringTemplateFunctionSymbol getFreshBnodeStringTemplateFunctionSymbol(int arity) {
-        String bnodeTemplate = IntStream.range(0, arity)
-                .boxed()
-                .map(i -> PLACEHOLDER)
-                .reduce(
-                        BNODE_PREFIX + counter.incrementAndGet(),
-                        (prefix, suffix) -> prefix + "/" + suffix);
+        if (arity <= 0)
+            throw new IllegalArgumentException("A positive BNode arity is expected");
 
-        return getBnodeStringTemplateFunctionSymbol(bnodeTemplate);
+        Template.Builder builder = Template.builder();
+        builder.addSeparator(BNODE_PREFIX + counter.incrementAndGet());
+        for (int i = 0; i < arity - 1; i++) // except the last one
+            builder.addColumn().addSeparator("/");
+        builder.addColumn();
+        return getBnodeStringTemplateFunctionSymbol(builder.build());
     }
 
     @Override
@@ -657,6 +661,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBFunctionSymbol getR2RMLIRISafeEncode() {
         return r2rmlIRISafeEncodeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBEncodeForURI() {
+        return encodeForURIFunctionSymbol;
     }
 
     @Override
@@ -1165,7 +1174,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBNotFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType);
 
-    protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
+    protected abstract DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars);
 
     protected abstract DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType);
     protected abstract DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType);

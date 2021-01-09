@@ -106,14 +106,14 @@ public class ImmutableHomomorphismTest {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
-        DatabaseRelationDefinition A = builder.createDatabaseRelation("ADDRESS",
+        NamedRelationDefinition A = builder.createDatabaseRelation("ADDRESS",
             "id", stringDBType, false,
             "address", stringDBType, false);
-        DatabaseRelationDefinition S = builder.createDatabaseRelation("STAFF",
+        NamedRelationDefinition S = builder.createDatabaseRelation("STAFF",
             "id", stringDBType, false,
             "address_id", stringDBType, false,
             "store_id", stringDBType, false);
-        DatabaseRelationDefinition T = builder.createDatabaseRelation( "STORE",
+        NamedRelationDefinition T = builder.createDatabaseRelation( "STORE",
             "id", stringDBType, false,
             "staff_id", stringDBType, false,
             "address_id", stringDBType, false);

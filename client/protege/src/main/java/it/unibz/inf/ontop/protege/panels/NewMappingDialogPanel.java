@@ -33,13 +33,11 @@ import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import it.unibz.inf.ontop.protege.core.SourceQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -626,8 +624,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
+		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
 		ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
-		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
+		String trgQuery = targetQueryRenderer.encode(targetQuery);
 		txtTargetQuery.setText(trgQuery);
 	}
 }

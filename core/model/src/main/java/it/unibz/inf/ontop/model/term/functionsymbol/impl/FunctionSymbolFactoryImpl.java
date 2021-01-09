@@ -175,7 +175,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new LcaseSPARQLFunctionSymbolImpl(xsdString),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_ENCODE_FOR_URI", XPathFunction.ENCODE_FOR_URI,
                         xsdString, xsdString, true,
-                        TermFactory::getR2RMLIRISafeEncodeFunctionalTerm),
+                        TermFactory::getDBEncodeForURI),
                 new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),

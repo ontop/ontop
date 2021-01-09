@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.answering.resultset;
 
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 
 public interface SimpleGraphResultSet extends GraphResultSet<OntopResultConversionException> {
 
@@ -11,7 +12,7 @@ public interface SimpleGraphResultSet extends GraphResultSet<OntopResultConversi
     /**
      * TODO: remove this hack
      */
-	@Deprecated
-    void addNewResult(RDFFact assertion);
+    @Deprecated
+    void addNewResult(RDFFact statement);
 
 }

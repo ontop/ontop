@@ -38,6 +38,10 @@ public interface OntopMappingSQLAllConfiguration extends OntopMappingSQLConfigur
         B basicImplicitConstraintFile(@Nonnull File constraintFile);
 
         B basicImplicitConstraintFile(@Nonnull String constraintFilename);
+
+        B basicDBMetadataFile(@Nonnull File dbMetadataFile);
+
+        B basicDBMetadataFile(@Nonnull String dbMetadataFilename);
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLConfiguration.Builder<B>,

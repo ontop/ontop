@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -156,8 +158,7 @@ public class SubstitutionTest {
         Variable b = TERM_FACTORY.getVariable("b");
         Variable c = TERM_FACTORY.getVariable("c");
 
-        String template = "http://example.org/{}/{}";
-
+        ImmutableList<TemplateComponent> template = Template.of("http://example.org/", 0, "/", 1);
 
         ImmutableList<ImmutableTerm> firstArguments = ImmutableList.of(x, x);
 
@@ -176,8 +177,7 @@ public class SubstitutionTest {
         Variable b = TERM_FACTORY.getVariable("b");
         Variable c = TERM_FACTORY.getVariable("c");
 
-        String template = "http://example.org/{}/{}";
-
+        ImmutableList<TemplateComponent> template = Template.of("http://example.org/", 0, "/", 1);
 
         ImmutableList<ImmutableTerm> firstArguments = ImmutableList.of(x, x);
 

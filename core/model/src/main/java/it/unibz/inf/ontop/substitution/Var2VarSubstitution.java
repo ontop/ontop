@@ -19,15 +19,11 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      */
     <T extends ImmutableTerm> T applyToTerm(T term);
 
-    /**
-     * Applies the substitution to the domain and co-domain terns
-     *
-     * Returns Optional.empty() if the results is not a substitution (incompatible entries)
-     */
-    <T extends ImmutableTerm>
-    Optional<ImmutableSubstitution<T>> applyToSubstitution(ImmutableSubstitution<T> substitution);
-
-    Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g);
-
     NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
+
+    /**
+     * Applies the current substitution to the "target" part of another substitution
+     */
+    <T extends ImmutableTerm> ImmutableSubstitution<T> applyToTarget(ImmutableSubstitution<T> otherSubstitution);
+
 }

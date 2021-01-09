@@ -13,9 +13,11 @@ public class OntopGraphOWLResultSet implements GraphOWLResultSet {
 
     private final GraphResultSet graphResultSet;
     private final OWLAPIIndividualTranslator translator;
+    private final byte[] salt;
 
-    public OntopGraphOWLResultSet(GraphResultSet graphResultSet) {
+    public OntopGraphOWLResultSet(GraphResultSet graphResultSet, byte[] salt) {
         this.graphResultSet = graphResultSet;
+        this.salt = salt;
         this.translator = new OWLAPIIndividualTranslator();
     }
 
@@ -31,8 +33,8 @@ public class OntopGraphOWLResultSet implements GraphOWLResultSet {
     @Override
     public OWLAxiom next() throws OWLException {
         try {
-            return translator.translate(graphResultSet.next());
-        } catch (OntopQueryAnsweringException e) {
+            return translator.translate(graphResultSet.next(), salt);
+        } catch (OntopQueryAnsweringException | OntopConnectionException e) {
             throw new OntopOWLException(e);
         }
     }

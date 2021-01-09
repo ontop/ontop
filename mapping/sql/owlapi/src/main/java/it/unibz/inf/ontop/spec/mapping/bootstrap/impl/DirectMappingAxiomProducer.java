@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -64,7 +66,7 @@ public class DirectMappingAxiomProducer {
 	}
 
 
-	public String getSQL(DatabaseRelationDefinition table) {
+	public String getSQL(NamedRelationDefinition table) {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
@@ -96,7 +98,7 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT %s FROM %s WHERE %s", columns, tables, conditions);
 	}
 
-	private static ImmutableList<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
+	private static ImmutableList<Attribute> getIdentifyingAttributes(NamedRelationDefinition table) {
 		Optional<UniqueConstraint> pk = table.getPrimaryKey();
 		return pk.map(UniqueConstraint::getAttributes)
 				.orElse(table.getAttributes());
@@ -104,12 +106,15 @@ public class DirectMappingAxiomProducer {
 
 	// TODO: use quotation marks here and for variables names too
 
+	private static String getTableName(NamedRelationDefinition relation) {
+		return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
+	}
 	private static String getColumnAlias(Attribute attr) {
-		 return ((DatabaseRelationDefinition)attr.getRelation()).getID().getTableID().getName() + "_" + attr.getID().getName();
+		 return getTableName((NamedRelationDefinition)attr.getRelation()) + "_" + attr.getID().getName();
 	}
 	
 	private static String getQualifiedColumnName(Attribute attr) {
-		 return new QualifiedAttributeID(((DatabaseRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
+		 return new QualifiedAttributeID(((NamedRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
 	}
 
 
@@ -120,7 +125,7 @@ public class DirectMappingAxiomProducer {
      *   - a literal triple for each column in a table where the column value is non-NULL.
      *
      */
-    public ImmutableList<TargetAtom> getCQ(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+    public ImmutableList<TargetAtom> getCQ(NamedRelationDefinition table, Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 
@@ -151,12 +156,12 @@ public class DirectMappingAxiomProducer {
      *
      */
 	public ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk,
-											  Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+											  Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableTerm sub = generateTerm(fk.getRelation(),
-				fk.getRelation().getID().getTableID().getName() + "_", bnodeTemplateMap);
+				getTableName(fk.getRelation()) + "_", bnodeTemplateMap);
 		ImmutableTerm obj = generateTerm(fk.getReferencedRelation(),
-				fk.getReferencedRelation().getID().getTableID().getName() + "_", bnodeTemplateMap);
+				getTableName(fk.getReferencedRelation()) + "_", bnodeTemplateMap);
 
 		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
 		return ImmutableList.of(atom);
@@ -170,8 +175,8 @@ public class DirectMappingAxiomProducer {
      *
      * @return table IRI
      */
-	private String getTableIRIString(DatabaseRelationDefinition table) {
-		return baseIRI + R2RMLIRISafeEncoder.encode(table.getID().getTableID().getName());
+	private String getTableIRIString(NamedRelationDefinition table) {
+		return baseIRI + R2RMLIRISafeEncoder.encode(getTableName(table));
 	}
 
     /**
@@ -187,7 +192,7 @@ public class DirectMappingAxiomProducer {
      *   - the percent-encoded form of the column name.
      */
     private IRI getLiteralPropertyIRI(Attribute attr) {
-        return rdfFactory.createIRI(getTableIRIString((DatabaseRelationDefinition)attr.getRelation())
+        return rdfFactory.createIRI(getTableIRIString((NamedRelationDefinition)attr.getRelation())
                 + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName()));
     }
 
@@ -225,22 +230,31 @@ public class DirectMappingAxiomProducer {
      * @param bnodeTemplateMap
 	 * @return
      */
-    private ImmutableTerm generateTerm(DatabaseRelationDefinition td, String varNamePrefix,
-									   Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+    private ImmutableTerm generateTerm(NamedRelationDefinition td, String varNamePrefix,
+                                       Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 		
 		Optional<UniqueConstraint> pko = td.getPrimaryKey();
 		if (pko.isPresent()) {
 			UniqueConstraint pk = pko.get();
-			String template = getTableIRIString(td) + "/"
-					+ pk.getAttributes().stream()
-						.map(a -> R2RMLIRISafeEncoder.encode(a.getID().getName()) + "={}")
-						.collect(Collectors.joining(";"));
+
+			Template.Builder builder = Template.builder();
+
+			// TODO: IMPROVE
+			builder.addSeparator(getTableIRIString(td) + "/" +
+							R2RMLIRISafeEncoder.encode(pk.getAttributes().get(0).getID().getName()) + "=");
+			builder.addColumn();
+
+			for (int i = 1; i < pk.getAttributes().size(); i++) {
+				builder.addSeparator(
+						";" + R2RMLIRISafeEncoder.encode(pk.getAttributes().get(i).getID().getName()) + "=");
+				builder.addColumn();
+			}
 
 			ImmutableList<Variable> arguments = pk.getAttributes().stream()
 					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
 					.collect(ImmutableCollectors.toList());
 
-			return termFactory.getIRIFunctionalTerm(template, arguments);
+			return termFactory.getIRIFunctionalTerm(builder.build(), arguments);
 		}
 		else {
 			ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()

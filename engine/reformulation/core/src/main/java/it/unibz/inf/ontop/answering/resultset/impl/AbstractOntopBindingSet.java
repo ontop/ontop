@@ -1,61 +1,52 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.RDFConstant;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.UUID;
 
-import static java.util.stream.Collectors.joining;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.UUID;
 
 public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
-    //LinkedHashMap to preserve variable ordering
-    private final LinkedHashMap<String, OntopBinding> bindingMap;
+    private final OntopBinding[] bindings;
 
     // LAZY
     @Nullable
     private String uuid;
 
-    AbstractOntopBindingSet(LinkedHashMap<String, OntopBinding> bindingMap) {
-        this.bindingMap = bindingMap;
+    AbstractOntopBindingSet(OntopBinding[] bindings) {
+        this.bindings = bindings;
     }
 
     @Override
     @Nonnull
     public Iterator<OntopBinding> iterator() {
-        return getBindings().iterator();
+        return Arrays.stream(getBindings()).iterator();
     }
 
     @Override
-    public ImmutableList<OntopBinding> getBindings() {
-        return bindingMap.values().stream()
-                .collect(ImmutableCollectors.toList());
+    public OntopBinding[] getBindings() {
+        return bindings;
     }
 
     @Override
-    public ImmutableList<RDFConstant> getValues() {
-        return bindingMap.values().stream()
-                .map(OntopBinding::getValue)
-                .collect(ImmutableCollectors.toList());
-    }
-
-    @Override
-    public ImmutableList<String> getBindingNames() {
-        return bindingMap.keySet().stream()
-                .collect(ImmutableCollectors.toList());
+    public String[] getBindingNames() {
+        String[] bindingNames = new String[bindings.length];
+        for (int i = 0; i < bindings.length; i++) {
+            bindingNames[i] = bindings[i].getName();
+        }
+        return bindingNames;
     }
 
     @Nullable
     @Override
     public RDFConstant getConstant(String name) {
-        OntopBinding binding = bindingMap.get(name);
+        OntopBinding binding = getBinding(name);
         return (binding == null)
                 ? null
                 : binding.getValue();
@@ -63,14 +54,18 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
     @Override
     public String toString() {
-        return getBindings().stream()
-                .map(OntopBinding::toString)
-                .collect(joining(",", "[", "]"));
+        StringBuilder builder = new StringBuilder();
+        builder.append("[").append(bindings[0].toString());
+        for (int i = 1; i < bindings.length; i++){
+            builder.append(bindings[i].toString()).append(",");
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
     @Override
     public boolean hasBinding(String bindingName) {
-        return bindingMap.containsKey(bindingName);
+        return indexOf(bindingName) >= 0;
     }
 
     @Override
@@ -83,6 +78,25 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     @Override
     @Nullable
     public OntopBinding getBinding(String name) {
-        return bindingMap.get(name);
+        int index = indexOf(name);
+        if (index < 0){
+            return null;
+        }
+        return bindings[index];
+    }
+
+    /**
+     * Finds the index of the binding name. If none match, -1 is returned.
+     *
+     * @param bindingName is the binding's name
+     * @return the index of the binding inside the array
+     */
+    private int indexOf(String bindingName){
+        for (int i = 0; i < bindings.length; i++){
+            if (bindings[i].getName().equals(bindingName)){
+                return i;
+            }
+        }
+        return -1;
     }
 }

@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
+import javax.annotation.Nonnull;
+
 /**
  * Database identifier used for schema names, table names and aliases
  * <p>
@@ -39,6 +41,7 @@ public interface QuotedID {
 	 * @return identifier without quotation marks (for comparison etc.)
 	 */
 
+	@Nonnull
 	String getName();
 
 	/**
@@ -47,5 +50,6 @@ public interface QuotedID {
 	 * @return identifier possibly in quotes
 	 */
 
+	@Nonnull
 	String getSQLRendering();
 }

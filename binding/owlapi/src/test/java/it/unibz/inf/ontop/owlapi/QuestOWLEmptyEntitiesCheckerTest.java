@@ -56,11 +56,11 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	private OWLConnection conn;
 	private Connection connection;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	private ClassifiedTBox onto;
 
-	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
-	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
+	private static final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
+	private static final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
 
 	// final String owlFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";

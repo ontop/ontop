@@ -23,7 +23,7 @@ public interface FunctionalDependency {
         void build();
     }
 
-    static Builder defaultBuilder(DatabaseRelationDefinition relation) {
+    static Builder defaultBuilder(NamedRelationDefinition relation) {
         return FunctionalDependencyImpl.builder(relation);
     }
 }

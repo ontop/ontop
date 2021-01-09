@@ -126,8 +126,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 							  OntopSystemConfiguration configuration) throws IOException, OBDASpecificationException {
 		// output
 		File out = new File(filePath);
-		Writer writer = null;
-		try {
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8"))) {
 			String outfile = out.getAbsolutePath();
 			System.out.println(outfile);
 
@@ -140,7 +139,6 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			);
 			MaterializationGraphQuery graphQuery = materializer.materialize();
 
-			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8"));
 			RDFHandler handler = handlerConstructor.apply(writer);
 			graphQuery.evaluate(handler);
 
@@ -148,9 +146,6 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			assertEquals(expectedVocabularySize, graphQuery.getSelectedVocabulary().size());
 
 		} finally {
-			if (writer != null)
-				writer.close();
-
 			if (out.exists())
 				out.delete();
 		}
@@ -161,10 +156,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 		File out = new File(filePath);
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
-		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out));
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
-		try {
-
+		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(out)), "UTF-8"))) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology ontology = manager.createOntology(IRI.create(out));
 			manager = ontology.getOWLOntologyManager();
@@ -188,7 +180,6 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			}
 		}
 		finally {
-			output.close();
 			if (out.exists()) {
 				out.delete();
 			}

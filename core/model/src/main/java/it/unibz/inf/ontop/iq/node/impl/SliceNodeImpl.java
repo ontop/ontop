@@ -84,7 +84,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                     .filter(l -> l <= 1)
                     .isPresent())
             // Distinct can be eliminated
-            return normalizeForOptimization(((UnaryIQTree) child).getChild(), variableGenerator, currentIQProperties);
+            return normalizeForOptimization(((UnaryIQTree) newChild).getChild(), variableGenerator, currentIQProperties);
         else
             return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }

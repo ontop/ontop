@@ -1,4 +1,0 @@
-SELECT ?instancia ?comment  WHERE {
-	VALUES ?instancia { <http://www.basecia.es/ontologia#CuentaContableActivos> } .
-	?instancia <http://www.w3.org/2000/01/rdf-schema#comment> ?comment .
-}

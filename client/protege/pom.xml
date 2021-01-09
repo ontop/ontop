@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>ontop-client</artifactId>
@@ -152,11 +153,27 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-mapping-r2rml</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-mapping-sql-all</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-impl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -324,6 +341,12 @@
             <artifactId>protege-editor-core</artifactId>
             <version>${protege.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.semarglproject</groupId>
+                    <artifactId>semargl-rdfa</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>edu.stanford.protege</groupId>
@@ -510,6 +533,20 @@
         </dependency>
 
         <dependency>
+            <groupId>com.moandjiezana.toml</groupId>
+            <artifactId>toml4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-nquads</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>failureaccess</artifactId>
             <version>1.0.1</version>
@@ -581,11 +618,14 @@
                         <Bundle-Description>${project.description}</Bundle-Description>
                         <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
                         <Implementation-Version>${project.version}</Implementation-Version>
-                        <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties</Update-Url>
+                        <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties
+                        </Update-Url>
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
-                        <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*;-split-package:=merge-last</Import-Package>
+                        <Import-Package>
+                            !javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*;-split-package:=merge-last
+                        </Import-Package>
 
                         <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                             or protege wont load it -->

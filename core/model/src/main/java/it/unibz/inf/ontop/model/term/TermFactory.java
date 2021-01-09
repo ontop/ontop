@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -280,7 +281,7 @@ public interface TermFactory {
 	 *            the name of the variable.
 	 * @return the variable object.
 	 */
-	public Variable getVariable(String name);
+	Variable getVariable(String name);
 
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
 
@@ -291,14 +292,14 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**
-	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 * @param term is a variable or a cast variable
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableTerm term);
 
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
 
 	/**
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
@@ -306,13 +307,13 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
 												 ImmutableList<DBConstant> arguments);
 
-	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
-												   ImmutableList<? extends ImmutableTerm> arguments);
-
 	/**
-	 * NB: a fresh Bnode template is created
+	 * @param term is a variable or a cast variable
 	 */
-	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> terms);
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableTerm term);
+
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> bnodeTemplate,
+												   ImmutableList<? extends ImmutableTerm> arguments);
 
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
@@ -398,6 +399,11 @@ public interface TermFactory {
 
 
 	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);
+
+	/**
+	 * NB: encodes international characters (i.e. not safe for IRIs in general)
+	 */
+	ImmutableFunctionalTerm getDBEncodeForURI(ImmutableTerm term);
 
 	/**
 	 * At least two terms are expected

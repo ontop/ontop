@@ -20,20 +20,10 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import junit.framework.TestCase;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLObject;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Properties;
-
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
+import com.google.common.collect.ImmutableList;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -43,87 +33,32 @@ import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class SimpleMappingVirtualABoxTest extends TestCase {
+public class SimpleMappingVirtualABoxTest extends AbstractOWLAPITest {
 
-	private Connection conn;
-
-	final String owlfile = "src/test/resources/test/simplemapping.owl";
-	final String obdafile = "src/test/resources/test/simplemapping.obda";
-
-	private static final String url = "jdbc:h2:mem:questjunitdb";
-	private static final String username = "sa";
-	private static final String password = "";
-
-	@Override
-	public void setUp() throws Exception {
-		conn = DriverManager.getConnection(url, username, password);
-		executeFromFile(conn, "src/test/resources/test/simplemapping-create-h2.sql");
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/test/simplemapping-create-h2.sql",
+				"/test/simplemapping.obda",
+				"/test/simplemapping.owl");
 	}
 
-	@Override
-	public void tearDown() throws Exception {
-		executeFromFile(conn, "src/test/resources/test/simplemapping-drop-h2.sql");
-		conn.close();
+	@AfterClass
+	public static void tearDown() throws Exception {
+		release();
 	}
 
-	private void runTests(Properties p) throws Exception {
-
-		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.ontologyFile(owlfile)
-				.properties(p)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.enableTestMode()
-				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
-
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
-
-		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
-		try {
-			
-			/*
-			 * Enable this if you want to test performance, it will run several cycles
-			 */
-//			long start = System.currentTimeMillis();
-//			for (int i = 0; i < 3000; i++) {
-//				QuestOntopOWLStatement sto = (QuestQuestOWLStatement)st;
-//				String q = sto.getExecutableQuery(bf.insert(7, ' ').toString());
-//			}
-//			long end = System.currentTimeMillis();
-//			long elapsed = end-start;
-//			log.info("Elapsed time: {}", elapsed);
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLObject ind1 = bindingSet.getOWLObject("x");
-			OWLObject ind2 = bindingSet.getOWLObject("y");
-			OWLObject val = bindingSet.getOWLObject("z");
-			assertEquals("<http://example.org/uri1>", ToStringRenderer.getInstance().getRendering(ind1));
-			assertEquals("<http://example.org/uri1>", ToStringRenderer.getInstance().getRendering(ind2));
-			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
-		}
-		finally {
-			try {
-				st.close();
-			}
-			finally {
-				conn.close();
-				reasoner.dispose();
-			}
-		}
-	}
-
+	@Test
 	public void testViEqSig() throws Exception {
-		Properties p = new Properties();
-		// p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
+		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> " +
+				"SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 
-		runTests(p);
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://example.org/uri1>"));
+
+		checkReturnedValues(query, "y", ImmutableList.of(
+				"<http://example.org/uri1>"));
+
+		checkReturnedValues(query, "z", ImmutableList.of(
+				"\"value1\"^^xsd:string"));
 	}
 }

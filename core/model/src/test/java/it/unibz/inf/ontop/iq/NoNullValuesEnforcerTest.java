@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -47,7 +48,7 @@ public class NoNullValuesEnforcerTest {
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;
     private final static ExtensionalDataNode DATA_NODE_3;
-    private static final DatabaseRelationDefinition TABLE2;
+    private static final NamedRelationDefinition TABLE2;
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
@@ -178,7 +179,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}",
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0),
                                 ImmutableList.of(TERM_FACTORY.getDBCoalesce(A, B)))));
 
 
@@ -212,7 +213,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}",
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0),
                                 ImmutableList.of(TERM_FACTORY.getImmutableFunctionalTerm(
                                         TERM_FACTORY.getDBFunctionSymbolFactory()
                                                 .getRegularDBFunctionSymbol("NULLIF", 2),
@@ -225,7 +226,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}", ImmutableList.of(A))));
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0), ImmutableList.of(A))));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode,
                 IQ_FACTORY.createUnaryIQTree(

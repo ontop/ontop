@@ -24,10 +24,10 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class FunctionalDependencyTest {
 
-    private final static DatabaseRelationDefinition TABLE1;
-    private final static DatabaseRelationDefinition TABLE2;
-    private final static DatabaseRelationDefinition TABLE3;
-    private final static DatabaseRelationDefinition TABLE4;
+    private final static NamedRelationDefinition TABLE1;
+    private final static NamedRelationDefinition TABLE2;
+    private final static NamedRelationDefinition TABLE3;
+    private final static NamedRelationDefinition TABLE4;
 
     private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getRDFAnswerPredicate(2);

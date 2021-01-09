@@ -121,48 +121,18 @@ public class EmptyEntitiesTest {
 
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
-			st.close();
-			// conn.close();
-
 		}
-
 	}
 
 	private boolean runSPARQLRolesQuery(String description) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
-			// conn.close();
-			st.close();
-
 		}
-
 	}
 
 	/**

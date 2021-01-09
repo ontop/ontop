@@ -299,9 +299,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     substitutionFactory.getSubstitution(idVariable, termFactory.getDBIntegerConstant(position));
 
             ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
-                    .flatMap(s -> s.unionHeterogeneous(positionSubstitution))
-                    .map(s -> (ImmutableSubstitution<ImmutableTerm>)
-                            s.reduceDomainToIntersectionWith(projectedVariablesBeforeRenaming))
+                    .flatMap(s -> s.union(positionSubstitution))
+                    .map(s -> s.reduceDomainToIntersectionWith(projectedVariablesBeforeRenaming))
                     .orElse(positionSubstitution);
 
 

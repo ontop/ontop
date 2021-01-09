@@ -125,7 +125,7 @@
         <license.roots>src/main/java,src/test/java</license.roots>
 
         <rdf4j.version>3.3.0</rdf4j.version>
-        <owlapi.version>4.5.9</owlapi.version>
+        <owlapi.version>4.5.19</owlapi.version>
         <logback.version>1.2.3</logback.version>
         <antlr4.version>4.8-1</antlr4.version>
         <airline.version>2.8.0</airline.version>
@@ -143,14 +143,7 @@
         <guice.version>4.1.0</guice.version>
         <sesame.version>2.7.16</sesame.version>
         <h2.version>1.4.196</h2.version>
-
-        <docker.url>localhost</docker.url>
-        <docker.db2.password>obda-pwd</docker.db2.password>
-        <docker.mssql.password>Mssql1.0</docker.mssql.password>
-        <docker.mysql.password>mysql</docker.mysql.password>
-        <docker.oracle.password>oracle</docker.oracle.password>
-        <docker.pgsql.password>postgres2</docker.pgsql.password>
-        <docker.denodo.password>admin</docker.denodo.password>
+        <toml4j.version>0.7.2</toml4j.version>
     </properties>
 
     <build>
@@ -342,7 +335,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.13</version>
+                <version>4.13.1</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -653,18 +646,13 @@
                 <version>2.5</version>
             </dependency>
 
-            <!-- JDBC Drivers -->
+            <dependency>
+                <groupId>com.moandjiezana.toml</groupId>
+                <artifactId>toml4j</artifactId>
+                <version>${toml4j.version}</version>
+            </dependency>
 
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>42.2.14.jre7</version>
-            </dependency>
-            <dependency>
-                <groupId>com.ibm</groupId>
-                <artifactId>db2jcc4.jar</artifactId>
-                <version>10.1.4</version>
-            </dependency>
+            <!-- JDBC Drivers -->
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
@@ -685,43 +673,6 @@
                 <groupId>org.locationtech.proj4j</groupId>
                 <artifactId>proj4j</artifactId>
                 <version>1.1.1</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.microsoft.sqlserver</groupId>
-                <artifactId>sqljdbc4</artifactId>
-                <version>4.0.2206.100</version>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle.jdbc</groupId>
-                <artifactId>ojdbc8</artifactId>
-                <version>12.2.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>8.0.21</version>
-            </dependency>
-
-            <dependency>
-                <groupId>monetdb</groupId>
-                <artifactId>monetdb-jdbc</artifactId>
-                <version>11.19.15</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hsqldb</groupId>
-                <artifactId>hsqldb</artifactId>
-                <version>2.5.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sap.db.jdbc.Driver</groupId>
-                <artifactId>hana</artifactId>
-                <version>1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.dremio.jdbc</groupId>
-                <artifactId>dremio-jdbc</artifactId>
-                <version>1.4.4</version>
             </dependency>
 
             <!-- Optique R2RML API -->
@@ -789,6 +740,12 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-guava</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
@@ -877,6 +834,13 @@
                 <artifactId>junit-jupiter-api</artifactId>
                 <version>5.6.2</version>
             </dependency>
+
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.11</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

@@ -612,8 +612,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
-        return new DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new DefaultSQLEncodeURLorIRIFunctionSymbol(dbStringType, preserveInternationalChars);
     }
 
     @Override
