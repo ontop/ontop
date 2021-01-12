@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
@@ -36,17 +37,14 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         try {
             return super.getRelation(id0);
         }
-        catch (MetadataExtractionException e) {
-            if (e.getMessage().startsWith("Cannot find relation id: ")) {
-                try (Statement st = connection.createStatement()) {
-                    st.execute("SELECT * FROM " + id0.getSQLRendering() + " WHERE 1 = 0");
-                }
-                catch (SQLException ex) {
-                    throw new MetadataExtractionException(ex);
-                }
-                return super.getRelation(id0);
+        catch (RelationNotFoundInMetadataException e) {
+            try (Statement st = connection.createStatement()) {
+                st.execute("SELECT * FROM " + id0.getSQLRendering() + " WHERE 1 = 0");
             }
-            throw e;
+            catch (SQLException ex) {
+                throw new MetadataExtractionException(ex);
+            }
+            return super.getRelation(id0);
         }
     }
 
