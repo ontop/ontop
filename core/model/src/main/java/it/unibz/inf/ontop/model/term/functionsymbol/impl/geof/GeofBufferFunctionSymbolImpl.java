@@ -1,17 +1,16 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.vocabulary.UOM;
 import org.apache.commons.rdf.api.IRI;
-//import org.apache.sis.referencing.CRS;
-//import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.annotation.Nonnull;
 
@@ -45,15 +44,28 @@ public class GeofBufferFunctionSymbolImpl extends AbstractGeofWKTFunctionSymbolI
 
         // ST_AsTexT(ST_BUFFER(geom, distance))
         if (inputUnit == DEGREE && distanceUnit == METRE) {
-            final double EARTH_MEAN_RADIUS_METER = 6370986;
-            final double ratio = 180 / PI / EARTH_MEAN_RADIUS_METER;
-            DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
-            ImmutableFunctionalTerm distanceInDegree = termFactory.getImmutableFunctionalTerm(times, distance, ratioConstant);
-            // TODO termFactory.getDBAsText might be redundant. Similarly in other cases
-            return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distanceInDegree)).simplify();
+            if (dbTypeFactory.supportsDBGeographyType()) {
+                // see <https://postgis.net/workshops/postgis-intro/geography.html>
+                // TODO termFactory.getDBAsText might be redundant. Similarly in other cases
+                return termFactory.getDBAsText(
+                        termFactory.getDBBuffer(
+                                termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBGeographyType(), geom),
+                                distance))
+                        .simplify();
+            } else {
+                // Less accurate
+                final double EARTH_MEAN_RADIUS_METER = 6370986;
+                final double ratio = 180 / PI / EARTH_MEAN_RADIUS_METER;
+                DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());
+                ImmutableFunctionalTerm distanceInDegree = termFactory.getImmutableFunctionalTerm(times, distance, ratioConstant);
+                return termFactory.getDBAsText(
+                        termFactory.getDBBuffer(geom, distanceInDegree))
+                        .simplify();
+            }
+
         } else if (inputUnit == DEGREE && distanceUnit == DEGREE) {
             // ST_BUFFER
-            return  termFactory.getDBAsText(termFactory.getDBBuffer(geom, distance)).simplify();
+            return termFactory.getDBAsText(termFactory.getDBBuffer(geom, distance)).simplify();
         } else if (inputUnit == DEGREE && distanceUnit == RADIAN) {
             final double ratio = 180 / PI;
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(ratio), dbTypeFactory.getDBDoubleType());

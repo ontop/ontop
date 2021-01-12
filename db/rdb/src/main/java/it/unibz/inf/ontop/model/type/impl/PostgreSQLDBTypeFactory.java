@@ -31,7 +31,11 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
-    ;
+
+    protected static final String GEOMETRY_STR = "GEOMETRY";
+    protected static final String GEOGRAPHY_STR = "GEOGRAPHY";
+
+
 
     @AssistedInject
     protected PostgreSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -85,6 +89,13 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TIMETZ_STR, timeTzType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
+
+        /*
+         * POSTGIS types
+         */
+        map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
+        map.put(GEOGRAPHY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOGRAPHY_STR, rootAncestry, xsdString));
+
         return map;
     }
 
@@ -92,6 +103,22 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        /*
+         * POSTGIS types
+         */
+        map.put(DefaultTypeCode.GEOGRAPHY, GEOGRAPHY_STR);
+        map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);
+
         return ImmutableMap.copyOf(map);
+    }
+
+    @Override
+    public boolean supportsDBGeometryType() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDBGeographyType() {
+        return true;
     }
 }
