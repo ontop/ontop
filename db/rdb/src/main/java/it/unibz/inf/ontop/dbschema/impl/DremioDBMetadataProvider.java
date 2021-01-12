@@ -33,13 +33,21 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
-        try (Statement st = connection.createStatement()) {
-            st.execute("SELECT * FROM " + id0.getSQLRendering() + " WHERE 1 = 0");
+        try {
+            return super.getRelation(id0);
         }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
+        catch (MetadataExtractionException e) {
+            if (e.getMessage().startsWith("Cannot find relation id: ")) {
+                try (Statement st = connection.createStatement()) {
+                    st.execute("SELECT * FROM " + id0.getSQLRendering() + " WHERE 1 = 0");
+                }
+                catch (SQLException ex) {
+                    throw new MetadataExtractionException(ex);
+                }
+                return super.getRelation(id0);
+            }
+            throw e;
         }
-        return super.getRelation(id0);
     }
 
     @Override
