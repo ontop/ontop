@@ -14,18 +14,5 @@ public interface DeprecatedConstants {
     String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
 
     @Deprecated
-    String CLASSIC = "classic";
-    @Deprecated
-    String VIRTUAL = "virtual";
-
-    // DBtype
-    @Deprecated
-    String SEMANTIC_INDEX = "semantic";
-    @Deprecated
-    String UNIVERSAL = "universal";
-    @Deprecated
-    String DIRECT = "direct";
-
-    @Deprecated
     String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";
 }

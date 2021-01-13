@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
-public class NewMappingDialogPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
+public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 4351696247473906680L;
 
@@ -496,14 +496,12 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					try {
 						TableModel oldmodel = tblQueryResult.getModel();
 
-						if ((oldmodel != null) && (oldmodel instanceof ResultSetTableModel)) {
+						if (oldmodel instanceof ResultSetTableModel) {
 							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-//						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-						Connection c = ConnectionTools.getConnection(dataSource);
-
-//						String driver = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+                        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+                        Connection c = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword());
 
 						Statement st = c.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
 						st.setMaxRows(100);
@@ -595,10 +593,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		}
 	}
 
-	@Override
-	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-		dataSource = newSource;
-	}
 
 	public void setID(String id) {
 		this.txtMappingID.setText(id);

@@ -20,33 +20,20 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import java.io.Serializable;
-import java.net.URI;
-
-public interface OBDAMappingListener extends Serializable {
+public interface OBDAMappingListener {
 	
 	/**
 	 * Called when a mapping has been inserted into the currently selected data source.
 	 */
-	public void mappingInserted(URI srcid);
+	void mappingInserted();
 	
 	/**
 	 * Called when a mapping has been deleted into the currently selected data source.
 	 */
-	public void mappingDeleted(URI srcid);
+	void mappingDeleted();
 		
 	/**
 	 * Called when a mapping has been updated into the currently selected datasource.
 	 */
-	public void mappingUpdated();
-
-	/**
-	 * Called when the current data sources has changed.
-	 */
-	public void currentSourceChanged(URI oldsrcid, URI newsrcid);
-	
-	/**
-	 * Called when all mappings were removed, for all datasources.
-	 */
-	public void allMappingsRemoved();
+	void mappingUpdated();
 }

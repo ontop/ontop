@@ -83,9 +83,8 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 		if (focusedSource == null)
 			return 0;
 
-		List<SQLPPTriplesMap> mappings = obdaModel.getMapping(focusedSource);
 		int filteredCount = 0;
-		for (SQLPPTriplesMap mapping : mappings) {
+		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
 			boolean passedAllFilters = true;
 			for (TreeModelFilter<SQLPPTriplesMap> filter : filters) {
 				passedAllFilters = passedAllFilters && filter.match(mapping);
@@ -98,9 +97,8 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 
 	@Override
 	public Object getElementAt(int index) {
-		List<SQLPPTriplesMap> mappings = obdaModel.getMapping(focusedSource);
 		int filteredCount = -1;
-		for (SQLPPTriplesMap mapping : mappings) {
+		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
 			boolean passedAllFilters = true;
 			for (TreeModelFilter<SQLPPTriplesMap> filter : filters) {
 				passedAllFilters = passedAllFilters && filter.match(mapping);
@@ -116,27 +114,17 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void mappingInserted(URI srcid) {
+	public void mappingInserted() {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void mappingDeleted(URI srcid) {
+	public void mappingDeleted() {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
 	public void mappingUpdated() {
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
-
-	@Override
-	public void currentSourceChanged(URI oldsrcid, URI newsrcid) {
-		// NO-OP
-	}
-
-	@Override
-	public void allMappingsRemoved() {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 }

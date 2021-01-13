@@ -22,13 +22,5 @@ package it.unibz.inf.ontop.protege.core;
 
 public interface OBDAModelListener {
 
-	void datasourceAdded(OBDADataSource source);
-
-	void datasourceDeleted(OBDADataSource source);
-
-	void datasourceUpdated(String oldname, OBDADataSource currendata);
-
-	void alldatasourcesDeleted();
-
 	void datasourceParametersUpdated();
 }

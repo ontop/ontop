@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 
 public interface DatasourceSelectorListener
 {
-	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource);
+	void datasourceChanged(OBDADataSource newSource);
 }

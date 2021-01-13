@@ -39,11 +39,11 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	private static final long serialVersionUID = 1790921396564256165L;
 
-	OBDAModelManager controller = null;
+	OBDAModelManager controller;
 
 	OBDAModel obdaModel;
 
-	MappingManagerPanel mappingPanel = null;
+	MappingManagerPanel mappingPanel;
 
 	@Override
 	protected void disposeOWLView() {
@@ -66,7 +66,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
 			@Override
-			public void selectionChanged() throws Exception {
+			public void selectionChanged() {
 				OWLEntity entity = editor.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
 				if (entity == null)
 					return;
@@ -82,8 +82,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 				}
 			}
 		});
-		if (obdaModel.getSources().size() > 0) {
-			mappingPanel.datasourceChanged(mappingPanel.getSelectedSource(), obdaModel.getSources().get(0));
+		if (obdaModel.getSource() != null) {
+			mappingPanel.datasourceChanged(obdaModel.getSource());
 		}
 
 		mappingPanel.setBorder(new TitledBorder("Mapping manager"));
@@ -91,7 +91,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		setLayout(new BorderLayout());
 		//add(mappingPanel, BorderLayout.NORTH);
         add(mappingPanel, BorderLayout.CENTER);
-
 	}
 
 	@Override
@@ -99,7 +98,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		obdaModel = controller.getActiveOBDAModel();
 
 		// mappingPanel.setOntologyVocabulary(obdaModel.getCurrentVocabulary());
-		mappingPanel.datasourceChanged(mappingPanel.getSelectedSource(), obdaModel.getSources().get(0));
+		mappingPanel.datasourceChanged(obdaModel.getSource());
 	}
 
 	@Override

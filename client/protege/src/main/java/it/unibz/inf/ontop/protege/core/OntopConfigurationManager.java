@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.annotation.Nonnull;
@@ -44,13 +42,13 @@ public class OntopConfigurationManager {
     Properties snapshotProperties() {
         Properties properties = settings.clone();
         properties.putAll(userSettings.clone());
-        properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
+        properties.putAll(obdaModel.getDatasource().asProperties());
         return properties;
     }
 
     Properties snapshotUserProperties() {
         Properties properties = userSettings.clone();
-        properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
+        properties.putAll(obdaModel.getDatasource().asProperties());
         return properties;
     }
 
@@ -92,17 +90,16 @@ public class OntopConfigurationManager {
         loadDataSource(obdaModel, userSettings);
     }
 
-    void resetProperties(DisposableProperties settings){
+    void resetProperties(DisposableProperties settings) {
         this.settings.clear();
         this.settings.putAll(settings);
         this.userSettings.clear();
 
         OBDADataSource dataSource = obdaModel.getDatasource();
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "");
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "");
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "");
-
+        dataSource.setURL("");
+        dataSource.setUsername("");
+        dataSource.setPassword("");
+        dataSource.setDriver("");
     }
 
     /**
@@ -116,14 +113,9 @@ public class OntopConfigurationManager {
     private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {
         OBDADataSource dataSource = obdaModel.getDatasource();
 
-        properties.getOptionalProperty(JDBC_URL)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, v));
-        properties.getOptionalProperty(JDBC_USER)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, v));
-        properties.getOptionalProperty(JDBC_PASSWORD)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, v));
-        properties.getOptionalProperty(JDBC_DRIVER)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, v));
-
+        properties.getOptionalProperty(JDBC_URL).ifPresent(dataSource::setURL);
+        properties.getOptionalProperty(JDBC_USER).ifPresent(dataSource::setUsername);
+        properties.getOptionalProperty(JDBC_PASSWORD).ifPresent(dataSource::setPassword);
+        properties.getOptionalProperty(JDBC_DRIVER).ifPresent(dataSource::setDriver);
     }
 }

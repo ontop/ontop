@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -75,7 +74,6 @@ public class OBDAModel {
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
 
-    private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
@@ -106,12 +104,8 @@ public class OBDAModel {
 
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
-        source = initDataSource();
+        source = new OBDADataSource();
         currentMutableVocabulary = new MutableOntologyVocabularyImpl();
-    }
-
-    private static OBDADataSource initDataSource() {
-        return DS_FACTORY.getJDBCDataSource("","","","");
     }
 
     public SQLPPMapping generatePPMapping() {
@@ -145,15 +139,12 @@ public class OBDAModel {
         return prefixManager;
     }
 
-    public ImmutableList<SQLPPTriplesMap> getMapping(URI sourceUri) {
-        if (sourceUri.equals(getSourceId()))
-            return ImmutableList.copyOf(triplesMapMap.values());
-        else
-            return ImmutableList.of();
+    public ImmutableList<SQLPPTriplesMap> getMapping() {
+        return ImmutableList.copyOf(triplesMapMap.values());
     }
 
-    public ImmutableList<OBDADataSource> getSources() {
-        return ImmutableList.of(source);
+    public OBDADataSource getSource() {
+        return source;
     }
 
     public SQLPPTriplesMap getTriplesMap(String mappingId) {
@@ -299,10 +290,6 @@ public class OBDAModel {
             return formerTriplesMap;
     }
 
-    private URI getSourceId() {
-        return source.getSourceID();
-    }
-
     public void addSourceListener(OBDAModelListener listener) {
         if (sourceListeners.contains(listener)) {
             return;
@@ -337,18 +324,6 @@ public class OBDAModel {
 
 
     @Deprecated
-    public void addTriplesMap(URI sourceID, SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
-            throws DuplicateMappingException {
-        String mapId = triplesMap.getId();
-
-        if (triplesMapMap.containsKey(mapId))
-            throw new DuplicateMappingException("ID " + mapId);
-        triplesMapMap.put(mapId, triplesMap);
-
-        if (!disableFiringMappingInsertedEvent)
-            fireMappingInserted(sourceID);
-    }
-
     public void addTriplesMap(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
         String mapId = triplesMap.getId();
@@ -358,13 +333,12 @@ public class OBDAModel {
         triplesMapMap.put(mapId, triplesMap);
 
         if (!disableFiringMappingInsertedEvent)
-            fireMappingInserted(source.getSourceID());
+            fireMappingInserted();
     }
 
-
-    public void removeTriplesMap(URI dataSourceURI, String mappingId) {
+    public void removeTriplesMap(String mappingId) {
         if (triplesMapMap.remove(mappingId) != null)
-            fireMappingDeleted(dataSourceURI);
+            fireMappingDeleted();
     }
 
     public void updateMappingsSourceQuery(String triplesMapId, SQLPPSourceQuery sourceQuery) {
@@ -420,17 +394,17 @@ public class OBDAModel {
     /**
      * Announces to the listeners that a mapping was deleted.
      */
-    private void fireMappingDeleted(URI srcuri) {
+    private void fireMappingDeleted() {
         for (OBDAMappingListener listener : mappingListeners) {
-            listener.mappingDeleted(srcuri);
+            listener.mappingDeleted();
         }
     }
     /**
      * Announces to the listeners that a mapping was inserted.
      */
-    private void fireMappingInserted(URI srcuri) {
+    private void fireMappingInserted() {
         for (OBDAMappingListener listener : mappingListeners) {
-            listener.mappingInserted(srcuri);
+            listener.mappingInserted();
         }
     }
 

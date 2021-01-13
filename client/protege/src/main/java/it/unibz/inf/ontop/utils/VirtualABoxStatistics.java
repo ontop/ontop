@@ -21,11 +21,11 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,7 +156,9 @@ public class VirtualABoxStatistics {
 
 		try {
             String sql = String.format("select COUNT(*) %s", getSelectionString(query));
-			Connection c = ConnectionTools.getConnection(source);
+			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+
+			Connection c = man.getConnection(source.getURL(), source.getUsername(), source.getPassword());
 			st = c.createStatement();
 
 			rs = st.executeQuery(sql);

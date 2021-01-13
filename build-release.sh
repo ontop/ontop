@@ -107,7 +107,7 @@ echo " Cleaning                                "
 echo "-----------------------------------------"
 echo ""
 
-mvn clean -q
+./mvnw clean -q
 
 echo ""
 echo "========================================="
@@ -116,7 +116,7 @@ echo "-----------------------------------------"
 echo ""
 
 
-mvn install -DskipTests -q || exit 1
+./mvnw install -DskipTests -q || exit 1
 
 echo "[INFO] Compilation completed"
 
@@ -130,7 +130,7 @@ echo "-----------------------------------------"
 echo ""
 
 cd ${BUILD_ROOT}/client/protege/
-mvn bundle:bundle -DskipTests  || exit 1
+../../mvnw bundle:bundle -DskipTests  || exit 1
 
 rm -fr ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}
 mkdir -p ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}
@@ -224,7 +224,7 @@ echo " Building Ontop CLI distribution package     "
 echo "-----------------------------------------"
 echo ""
 
-mvn assembly:single
+../../mvnw assembly:single
 rm -fr ${ONTOP_CLI}
 mkdir -p ${ONTOP_CLI}
 echo "[INFO] Copying files..."

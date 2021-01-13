@@ -35,11 +35,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
-public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
+public class SQLQueryPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 7600557919206933923L;
 
-	private Logger log = LoggerFactory.getLogger(SQLQueryPanel.class);
+	private final Logger log = LoggerFactory.getLogger(SQLQueryPanel.class);
 
 	private OBDADataSource selectedSource;
 
@@ -195,12 +195,6 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 	}
 
 	@Override
-	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-		this.selectedSource = newSource;
-		releaseResultset();
-	}
-
-	@Override
 	public void finalize() {
 		releaseResultset();
 	}
@@ -256,7 +250,9 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-						Connection c = ConnectionTools.getConnection(selectedSource);
+                        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+
+                        Connection c = man.getConnection(selectedSource.getURL(), selectedSource.getUsername(), selectedSource.getPassword());
 						Statement s = c.createStatement();
 						s.setMaxRows(100);
 						result = s.executeQuery(txtSqlQuery.getText());

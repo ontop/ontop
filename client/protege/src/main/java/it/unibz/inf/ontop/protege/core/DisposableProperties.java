@@ -49,18 +49,11 @@ public class DisposableProperties extends Properties implements Disposable {
 	}
 
 	public List<String> getReformulationPlatformPreferencesKeys(){
-		ArrayList<String> keys = new ArrayList<String>();
-//		keys.add(REFORMULATION_TECHNIQUE);
+		ArrayList<String> keys = new ArrayList<>();
 		keys.add(ABOX_MODE);
 		keys.add(DBTYPE);
-//		keys.add(DATA_LOCATION);
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
-//		keys.add(OPTIMIZE_EQUIVALENCES);
-//		keys.add(QUERY_ONTOLOGY_ANNOTATIONS);
-//		keys.add(OPTIMIZE_TBOX_SIGMA);
-//		keys.add(CREATE_TEST_MAPPINGS);
-
 		return keys;
 	}
 

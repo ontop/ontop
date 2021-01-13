@@ -53,7 +53,6 @@ public class OBDAModelManager implements Disposable {
 	private final OWLEditorKit owlEditorKit;
 
 	private final OWLOntologyManager mmgr;
-	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
 
 	private QueryController queryController;
@@ -75,10 +74,6 @@ public class OBDAModelManager implements Disposable {
 	 */
 	private final OWLModelManagerListener modelManagerListener = new OBDAPluginOWLModelManagerListener();
 
-	private final ProtegeQueryControllerListener qlistener = new ProtegeQueryControllerListener();
-	private final ProtegeMappingControllerListener mlistener = new ProtegeMappingControllerListener();
-	private final ProtegeDatasourcesControllerListener dlistener = new ProtegeDatasourcesControllerListener();
-
 	/***
 	 * This flag is used to avoid triggering a "Ontology Changed" event when new
 	 * mappings/sources/queries are inserted into the model not by the user, but
@@ -88,8 +83,6 @@ public class OBDAModelManager implements Disposable {
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
-	private final AtomFactory atomFactory;
-	private final TargetAtomFactory targetAtomFactory;
 
 	public OBDAModelManager(EditorKit editorKit) {
 
@@ -104,12 +97,10 @@ public class OBDAModelManager implements Disposable {
 				.jdbcPassword("")
 				.build().getInjector();
 
-		SpecificationFactory specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
 		SQLPPMappingFactory ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
-		atomFactory = defaultInjector.getInstance(AtomFactory.class);
-		termFactory = defaultInjector.getInstance(TermFactory.class);
+		AtomFactory atomFactory = defaultInjector.getInstance(AtomFactory.class);
+		TermFactory termFactory = defaultInjector.getInstance(TermFactory.class);
 		typeFactory = defaultInjector.getInstance(TypeFactory.class);
-		targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		rdfFactory = defaultInjector.getInstance(RDF.class);
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
@@ -138,12 +129,13 @@ public class OBDAModelManager implements Disposable {
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(ppMappingFactory, prefixFormat, atomFactory, termFactory,
 				typeFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory, sourceQueryFactory);
-		obdaModel.addSourceListener(dlistener);
-		obdaModel.addMappingsListener(mlistener);
-		queryController.addListener(qlistener);
 
-		// Printing the version information to the console
-		//	System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
+		ProtegeDatasourcesControllerListener dlistener = new ProtegeDatasourcesControllerListener();
+		obdaModel.addSourceListener(dlistener);
+		ProtegeMappingControllerListener mlistener = new ProtegeMappingControllerListener();
+		obdaModel.addMappingsListener(mlistener);
+		ProtegeQueryControllerListener qlistener = new ProtegeQueryControllerListener();
+		queryController.addListener(qlistener);
 
 		DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
 		configurationManager = new OntopConfigurationManager(obdaModel, settings);
@@ -758,29 +750,6 @@ public class OBDAModelManager implements Disposable {
 	 */
 
 	private class ProtegeDatasourcesControllerListener implements OBDAModelListener {
-
-		private static final long serialVersionUID = -1633463551656406417L;
-
-		@Override
-		public void datasourceUpdated(String oldname, OBDADataSource currendata) {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void datasourceDeleted(OBDADataSource source) {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void datasourceAdded(OBDADataSource source) {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void alldatasourcesDeleted() {
-			triggerOntologyChanged();
-		}
-
 		@Override
 		public void datasourceParametersUpdated() {
 			triggerOntologyChanged();
@@ -788,26 +757,13 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private class ProtegeMappingControllerListener implements OBDAMappingListener {
-
-		private static final long serialVersionUID = -5794145688669702879L;
-
 		@Override
-		public void allMappingsRemoved() {
+		public void mappingDeleted() {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void currentSourceChanged(URI oldsrcuri, URI newsrcuri) {
-			// Do nothing!
-		}
-
-		@Override
-		public void mappingDeleted(URI srcuri ) {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void mappingInserted(URI srcuri ) {
+		public void mappingInserted() {
 			triggerOntologyChanged();
 		}
 

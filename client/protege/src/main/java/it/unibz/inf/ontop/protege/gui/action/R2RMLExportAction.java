@@ -68,8 +68,7 @@ public class R2RMLExportAction extends ProtegeAction {
 
         try {
 		final OWLWorkspace workspace = editorKit.getWorkspace();
-            if (obdaModel.getSources().isEmpty())
-            {
+            if (obdaModel.getSource() == null) {
                 JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
             }
             else {

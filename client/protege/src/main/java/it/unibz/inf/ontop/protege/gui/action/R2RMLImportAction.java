@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
-import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
@@ -77,7 +76,7 @@ public class R2RMLImportAction extends ProtegeAction {
 
 		final OWLWorkspace workspace = editorKit.getWorkspace();
 
-		if (obdaModelController.getSources().isEmpty()) {
+		if (obdaModelController.getSource() == null) {
 			JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
 		} else {
 			String message = "The imported mappings will be appended to the existing data source. Continue?";
@@ -146,13 +145,11 @@ public class R2RMLImportAction extends ProtegeAction {
 			/**
 			 * Uses the predefined data source for creating the OBDAModel.
 			 */
-			OBDADataSource dataSource = obdaModelController.getSources().get(0);
-
+			OBDADataSource dataSource = obdaModelController.getSource();
 			OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-					.properties(DataSource2PropertiesConvertor.convert(dataSource))
+					.properties(dataSource.asProperties())
 					.r2rmlMappingFile(file)
 					.build();
-
 
 			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
 			OWLOntologyManager manager = modelManager.getOWLOntologyManager();

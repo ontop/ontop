@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.protege.gui.treemodels.MappingPredicateTreeModelFilter
 import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
@@ -42,12 +41,11 @@ import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.awt.event.*;
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
+public class MappingManagerPanel extends JPanel {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
@@ -502,7 +500,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
                 OntopSQLCredentialConfiguration config = OntopSQLCredentialConfiguration.defaultBuilder()
-                        .properties(DataSource2PropertiesConvertor.convert(selectedSource))
+                        .properties(selectedSource.asProperties())
                         .build();
                 validator = new SQLSourceQueryValidator(config.getSettings(), o.getSourceQuery());
                 long timestart = System.nanoTime();
@@ -596,36 +594,33 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			return;
 		}
 		OBDAModel controller = apic;
-		URI current_srcuri = selectedSource.getSourceID();
 
-		for (int i = 0; i < currentSelection.length; i++) {
-			SQLPPTriplesMap mapping = (SQLPPTriplesMap) currentSelection[i];
+        for (Object o : currentSelection) {
+            SQLPPTriplesMap mapping = (SQLPPTriplesMap) o;
+            String id = mapping.getId();
+            // Computing the next available ID
+            int new_index = -1;
+            for (int index = 0; index < 999999999; index++) {
+                if (controller.indexOf(id + "(" + index + ")") == -1) {
+                    new_index = index;
+                    break;
+                }
+            }
+            String newId = id + "(" + new_index + ")";
 
-			String id = mapping.getId();
+            // inserting the new mapping
+            try {
 
-			// Computing the next available ID
-			int new_index = -1;
-			for (int index = 0; index < 999999999; index++) {
-				if (controller.indexOf(id + "(" + index + ")") == -1) {
-					new_index = index;
-					break;
-				}
-			}
-			String newId = id + "(" + new_index + ")";
-
-			// inserting the new mapping
-			try {
-
-				SQLPPTriplesMap oldmapping = controller.getTriplesMap(id);
-				SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, oldmapping.getSourceQuery(),
+                SQLPPTriplesMap oldmapping = controller.getTriplesMap(id);
+                SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, oldmapping.getSourceQuery(),
                         oldmapping.getTargetAtoms());
-				controller.addTriplesMap(current_srcuri, newmapping, false);
+                controller.addTriplesMap(newmapping, false);
 
-			} catch (DuplicateMappingException e) {
-				JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
-				return;
-			}
-		}
+            } catch (DuplicateMappingException e) {
+                JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
+                return;
+            }
+        }
 
 	}// GEN-LAST:event_duplicateMappingButtonActionPerformed
 
@@ -641,22 +636,17 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		int confirm = JOptionPane.showConfirmDialog(
 				this,
 				"Proceed deleting " + indexes.length + " mappings?", "Conform",
-				JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if (confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
 
 		// The manager panel can handle multiple deletions.
-		Object[] values = mappingList.getSelectedValues();
-
-		OBDAModel controller = apic;
-		URI srcuri = selectedSource.getSourceID();
-
-		for (int i = 0; i < values.length; i++) {
-			SQLPPTriplesMap mapping = (SQLPPTriplesMap) values[i];
-			if (mapping!=null)
-			controller.removeTriplesMap(srcuri, mapping.getId());
-		}
+        for (Object value : mappingList.getSelectedValues()) {
+            SQLPPTriplesMap mapping = (SQLPPTriplesMap) value;
+            if (mapping != null)
+                apic.removeTriplesMap(mapping.getId());
+        }
 		mappingList.clearSelection();
 	}
 
@@ -756,8 +746,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		model.addFilters(filters);
 	}
 
-	@Override
-	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
+	public void datasourceChanged(OBDADataSource newSource) {
 
 		if (newSource == null) {
 			return;
@@ -770,6 +759,4 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 		mappingList.revalidate();
 	}
-
-
 }
