@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -131,9 +132,9 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
                 return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
             }
-            throw new MetadataExtractionException(relations.isEmpty()
-                    ? "Cannot find relation id: " + id
-                    : "Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
+            throw relations.isEmpty()
+                    ? new RelationNotFoundInMetadataException(id)
+                    : new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
