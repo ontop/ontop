@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public interface PostProcessingProjectionSplitter {
 
-    PostProcessingSplit split(IQ iq);
+    PostProcessingSplit split(IQ iq, boolean avoidPostProcessing);
 
     interface PostProcessingSplit {
         ConstructionNode getPostProcessingConstructionNode();

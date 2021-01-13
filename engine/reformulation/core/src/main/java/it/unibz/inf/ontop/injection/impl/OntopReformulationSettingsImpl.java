@@ -46,6 +46,11 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
+    public boolean isPostProcessingAvoided() {
+        return getRequiredBoolean(AVOID_POST_PROCESSING);
+    }
+
+    @Override
     public boolean isQueryLoggingEnabled() {
         return getRequiredBoolean(QUERY_LOGGING);
     }

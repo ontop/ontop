@@ -241,7 +241,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
             constraintFile.ifPresent(configurationBuilder::basicImplicitConstraintFile);
 
-            dbMetadataFile.ifPresent(configurationBuilder::basicDBMetadataFile);
+            dbMetadataFile.ifPresent(configurationBuilder::dbMetadataFile);
 
             repository = OntopRepository.defaultRepository(configurationBuilder.build());
 

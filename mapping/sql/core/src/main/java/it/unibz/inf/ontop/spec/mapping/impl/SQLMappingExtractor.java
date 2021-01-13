@@ -5,12 +5,11 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
-import it.unibz.inf.ontop.dbschema.impl.SerializedMetadataProvider;
+import it.unibz.inf.ontop.dbschema.SerializedMetadataProvider;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
@@ -26,13 +25,11 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
+import it.unibz.inf.ontop.dbschema.OntopViewMetadataProvider;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -51,6 +48,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final JDBCMetadataProviderFactory metadataProviderFactory;
+    private final OntopViewMetadataProvider.Factory viewMetadataProviderFactory;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     private final SQLMappingParser mappingParser;
@@ -80,7 +78,8 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 MetaMappingExpander metamappingExpander,
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 JDBCMetadataProviderFactory metadataProviderFactory,
-                                SerializedMetadataProvider.Factory serializedMetadataProviderFactory) {
+                                SerializedMetadataProvider.Factory serializedMetadataProviderFactory,
+                                OntopViewMetadataProvider.Factory viewMetadataProviderFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.mappingParser = mappingParser;
@@ -92,6 +91,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = iqFactory;
+        this.viewMetadataProviderFactory = viewMetadataProviderFactory;
         this.metamappingExpander = metamappingExpander;
         this.metadataProviderFactory = metadataProviderFactory;
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
@@ -119,13 +119,14 @@ public class SQLMappingExtractor implements MappingExtractor {
     protected SQLPPMapping extractPPMapping(OBDASpecInput specInput)
             throws MappingIOException, InvalidMappingException {
 
-        Optional<File> optionalMappingFile = specInput.getMappingFile();
-        if (optionalMappingFile.isPresent())
-            return mappingParser.parse(optionalMappingFile.get());
-
-        Optional<Reader> optionalMappingReader = specInput.getMappingReader();
-        if (optionalMappingReader.isPresent())
-            return mappingParser.parse(optionalMappingReader.get());
+        try {
+            Optional<Reader> optionalMappingReader = specInput.getMappingReader();
+            if (optionalMappingReader.isPresent())
+                // The parser is in charge of closing the reader
+                return mappingParser.parse(optionalMappingReader.get());
+        } catch (FileNotFoundException e) {
+            throw new MappingIOException(e);
+        }
 
         Optional<Graph> optionalMappingGraph = specInput.getMappingGraph();
         if (optionalMappingGraph.isPresent())
@@ -147,7 +148,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
-        MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataFile());
+        MappingAndDBParameters mm = convert(ppMapping, specInput);
 
         ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(mm.getMapping(), mm.getDBParameters());
 
@@ -176,20 +177,31 @@ public class SQLMappingExtractor implements MappingExtractor {
         return new MappingAndDBParametersImpl(canonizedMapping, mm.getDBParameters());
     }
 
+    private MappingAndDBParameters convert(SQLPPMapping ppMapping, OBDASpecInput specInput)
+            throws MetaMappingExpansionException, MetadataExtractionException, InvalidMappingSourceQueriesException {
+        try {
+            return convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), specInput.getDBMetadataReader(),
+                    specInput.getOntopViewReader());
+        } catch (FileNotFoundException e) {
+            throw new MetadataExtractionException(e);
+        }
+    }
+
     private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
                                            Optional<File> constraintFile,
-                                           Optional<File> dbMetadataFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
+                                           Optional<Reader> optionalDbMetadataReader, 
+                                           Optional<Reader> ontopViewReader) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
         try {
-            if (dbMetadataFile.isPresent()) {
-                try (Reader dbMetadataReader = new FileReader(dbMetadataFile.get())) {
-                    return convert(mapping, constraintFile,
+            if (optionalDbMetadataReader.isPresent()) {
+                try (Reader dbMetadataReader = optionalDbMetadataReader.get()) {
+                    return convert(mapping, constraintFile, ontopViewReader,
                             serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
                 }
             }
             else {
                 try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-                    return convert(mapping, constraintFile,
+                    return convert(mapping, constraintFile, ontopViewReader,
                             metadataProviderFactory.getMetadataProvider(connection));
                 }
             }
@@ -199,16 +211,30 @@ public class SQLMappingExtractor implements MappingExtractor {
         }
     }
 
-    private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping, Optional<File> constraintFile, MetadataProvider dbMetadataProvider) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
+    private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping, Optional<File> constraintFile, 
+                                           Optional<Reader> ontopViewReader, MetadataProvider dbMetadataProvider) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
+        
+        MetadataProvider metadataProvider;
+        if (ontopViewReader.isPresent()) {
+            try(Reader viewReader = ontopViewReader.get()) {
+                metadataProvider = viewMetadataProviderFactory.getMetadataProvider(dbMetadataProvider, viewReader);
+            }
+            catch (IOException e) {
+                throw new MetadataExtractionException(e);
+            }
+        }
+        else
+            metadataProvider = dbMetadataProvider;
+        
         MetadataProvider withImplicitConstraintsMetadataProvider =
-                implicitDBConstraintExtractor.extract(constraintFile, dbMetadataProvider);
+                implicitDBConstraintExtractor.extract(constraintFile, metadataProvider);
 
         CachingMetadataLookup metadataLookup = new CachingMetadataLookup(withImplicitConstraintsMetadataProvider);
         ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
 
         metadataLookup.extractImmutableMetadata(); // inserts integrity constraints
 
-        return new MappingAndDBParametersImpl(provMapping, dbMetadataProvider.getDBParameters());
+        return new MappingAndDBParametersImpl(provMapping, metadataProvider.getDBParameters());
     }
 
     private static class MappingAndDBParametersImpl implements MappingAndDBParameters {
