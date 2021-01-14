@@ -129,7 +129,6 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
         for (JsonBasicView view : views) {
 
-            // TODO: use an array
             RelationID relationId = quotedIDFactory.createRelationID(view.name.toArray(new String[0]));
 
             NamedRelationDefinition parentDefinition = parentCacheMetadataLookup.getRelation(quotedIDFactory.createRelationID(
@@ -154,12 +153,9 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         return mapBuilder.build();
     }
 
-    private IQ createBasicIQ(RelationID relationId, NamedRelationDefinition parentDefinition, JsonBasicView view) {
+    private IQ createBasicIQ(RelationID relationId, NamedRelationDefinition parentDefinition, JsonBasicView view) throws MetadataExtractionException {
 
-        // TODO: fix the Stream
-
-        ImmutableSet<Variable> addedVariables = Stream.of(view.columns.added)
-                .flatMap(List::stream)
+        ImmutableSet<Variable> addedVariables = view.columns.added.stream()
                 .map(a -> a.name)
                 .map(this::normalizeAttributeName)
                 .map(termFactory::getVariable)
@@ -184,13 +180,14 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                 .normalizeForOptimization();
     }
 
-    private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, List<String> hidden, NamedRelationDefinition parentDefinition) {
+    private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, List<String> hidden,
+                                                             NamedRelationDefinition parentDefinition) {
         ImmutableList<String> hiddenColumnNames = hidden.stream()
                 .map(this::normalizeAttributeName)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<Variable> inheritedVariableStream = parentDefinition.getAttributes().stream()
-                .map(a -> a.getID().getSQLRendering().replace("\"", ""))
+                .map(a -> a.getID().getName())
                 .filter(n -> !hiddenColumnNames.contains(n))
                 .map(termFactory::getVariable)
                 .filter(v -> !addedVariables.contains(v))
@@ -208,7 +205,6 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     private AtomPredicate createTemporaryPredicate(RelationID relationId, int arity) {
         return new OntopViewMetadataProviderImpl.TemporaryViewPredicate(
-                // TODO: update with array
                 relationId.getSQLRendering(),
                 // No precise base DB type for the temporary predicate
                 IntStream.range(0, arity)
@@ -235,7 +231,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     private ConstructionNode createConstructionNode(ImmutableList<Variable> projectedVariables,
                                                     JsonBasicView view,
                                                     NamedRelationDefinition parentDefinition,
-                                                    ImmutableMap<Integer, Variable> parentArgumentMap) {
+                                                    ImmutableMap<Integer, Variable> parentArgumentMap) throws MetadataExtractionException {
 
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
@@ -243,31 +239,26 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                         e -> new QualifiedAttributeID(null, parentDefinition.getAttributes().get(e.getKey()).getID()),
                         Map.Entry::getValue));
 
-        // TODO: fix the Stream
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = Stream.of(view.columns.added)
-                .flatMap(List::stream)
-                .collect(ImmutableCollectors.toMap(
-                        a -> termFactory.getVariable(normalizeAttributeName(a.name)),
-                        a -> {
-                            try {
-                                return extractExpression(a.expression, parentAttributeMap, view);
-                            } catch (JSQLParserException e) {
-                                e.printStackTrace(); // More meaningful exception needed
-                            }
-                            return null;
-                        }
-                ));
+
+        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        for (AddColumns a : view.columns.added) {
+            Variable v = termFactory.getVariable(normalizeAttributeName(a.name));
+            try {
+                ImmutableTerm value = extractExpression(a.expression, parentAttributeMap);
+                substitutionMapBuilder.put(v, value);
+            } catch (JSQLParserException e) {
+                throw new MetadataExtractionException("Unsupported expression for " + a.name + " in " + view.name + ":\n" + e);
+            }
+        }
 
         return iqFactory.createConstructionNode(
                 ImmutableSet.copyOf(projectedVariables),
-                substitutionFactory.getSubstitution(substitutionMap));
+                substitutionFactory.getSubstitution(substitutionMapBuilder.build()));
     }
 
     private ImmutableTerm extractExpression(String partialExpression,
-                                            ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
-                                            JsonBasicView view) throws JSQLParserException {
-        String[] relation = view.baseRelation.toArray(new String[0]);
-        String sqlQuery = "SELECT " + partialExpression + " FROM " + relation[0].replace("\"", "").toUpperCase();
+                                            ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap) throws JSQLParserException {
+        String sqlQuery = "SELECT " + partialExpression + " FROM fakeTable" ;
         ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
         Statement statement = CCJSqlParserUtil.parse(sqlQuery);
         SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
@@ -277,7 +268,6 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq) throws MetadataExtractionException {
         RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
-        // TODO: implement it
         IQTree iqTree = iq.getTree();
         for (Variable v : iqTree.getVariables()) {
             builder.addAttribute(new QuotedIDImpl(v.getName(), quotedIdFactory.getIDQuotationString()),
@@ -363,8 +353,8 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         public final List<String> hidden;
 
         @JsonCreator
-        public Columns(@JsonProperty("added") List<AddColumns> added,//List<Object> added,
-                       @JsonProperty("hidden") List<String> hidden) {//List<Object> hidden) {
+        public Columns(@JsonProperty("added") List<AddColumns> added,
+                       @JsonProperty("hidden") List<String> hidden) {
             this.added = added;
             this.hidden = hidden;
         }
