@@ -10,14 +10,14 @@ import java.util.*;
 public class DriverTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -7588371899390500462L;
     
-    private List<DriverInfo> drivers = new ArrayList<>();
-    private Set<String> foundDrivers = new HashSet<>();
+    private final List<DriverInfo> drivers;
+    private final Set<String> foundDrivers = new HashSet<>();
     private ServiceTracker jdbcRegistryTracker;
     
 	public enum Column {
 		DESCRIPTION("Description"), STATUS("Status");
 		
-		private String name;
+		private final String name;
 		
 		Column(String name) {
 			this.name = name;

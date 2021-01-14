@@ -20,29 +20,25 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableList;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CustomTraversalPolicy extends FocusTraversalPolicy {
-	List<Component> order;
+	private final ImmutableList<Component> order;
 
-	public CustomTraversalPolicy(List<Component> order) {
-		this.order = new ArrayList<>(order.size());
-		this.order.addAll(order);
-	}
-	
-	public void setComponent(Component element, int index) {
-		order.set(index, element);
+	public CustomTraversalPolicy(ImmutableList<Component> order) {
+		this.order = order;
 	}
 
+	@Override
 	public Component getComponentAfter(Container focusCycleRoot, Component aComponent) {
 		int idx = (order.indexOf(aComponent) + 1) % order.size();
 		return order.get(idx);
 	}
 
+	@Override
 	public Component getComponentBefore(Container focusCycleRoot, Component aComponent) {
 		int idx = order.indexOf(aComponent) - 1;
 		if (idx < 0) {
@@ -51,14 +47,17 @@ public class CustomTraversalPolicy extends FocusTraversalPolicy {
 		return order.get(idx);
 	}
 
+	@Override
 	public Component getDefaultComponent(Container focusCycleRoot) {
 		return order.get(0);
 	}
 
+	@Override
 	public Component getLastComponent(Container focusCycleRoot) {
-		return Iterables.getLast(order);
+		return order.get(order.size() - 1);
 	}
 
+	@Override
 	public Component getFirstComponent(Container focusCycleRoot) {
 		return order.get(0);
 	}

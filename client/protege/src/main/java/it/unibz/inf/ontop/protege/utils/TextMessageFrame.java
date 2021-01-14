@@ -31,7 +31,6 @@ public class TextMessageFrame extends javax.swing.JDialog {
 	 * Creates new form ShowSQLQueryPanel 
 	 */
     public TextMessageFrame(String title) {
-    	super();
         initComponents();
         setTitle(title);
     }
@@ -44,10 +43,7 @@ public class TextMessageFrame extends javax.swing.JDialog {
     	jLabel1.setText(time);
     }
     
-    public void updateBoderTitel(String newTitle){
-    	jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(newTitle));
-    }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is

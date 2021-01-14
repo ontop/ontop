@@ -44,7 +44,7 @@ public class TargetQueryValidator  {
 				.orElseThrow(() -> new NoPredicateIRIInTargetAtomException(targetAtom));
 	}
 
-	public static boolean isValid(IRI iri, MutableOntologyVocabulary vocabulary) {
+	private static boolean isValid(IRI iri, MutableOntologyVocabulary vocabulary) {
 
         return vocabulary.classes().contains(iri)
                 || vocabulary.objectProperties().contains(iri)

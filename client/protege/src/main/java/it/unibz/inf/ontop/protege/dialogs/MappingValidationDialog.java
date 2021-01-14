@@ -27,8 +27,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JButton;
@@ -43,36 +41,29 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-
 public class MappingValidationDialog extends JDialog {
 
-	private static final long		serialVersionUID	= -3099215805478663834L;
-	private JDialog					myself				= null;
-	private DefaultStyledDocument	doc					= null;
-	private int						index				= 0;
+	private static final long serialVersionUID = -3099215805478663834L;
+	
+	private final DefaultStyledDocument	doc;
+	private int	index = 0;
 
-	public Style					VALID				= null;
-	public Style					CRITICAL_ERROR		= null;
-	public Style					NONCRITICAL_ERROR	= null;
-	public Style					NORMAL				= null;
+	public Style VALID;
+	public Style CRITICAL_ERROR;
+	public Style NONCRITICAL_ERROR;
+	public Style NORMAL;
 
-	public boolean					closed				= false;
+	public boolean	closed = false;
 
-	public MappingValidationDialog(JTree tree) {
-
-		super();
+	public MappingValidationDialog() {
 		DialogUtils.installEscapeCloseOperation(this);
-		myself = this;
 		doc = new DefaultStyledDocument();
 		createStyles();
 		createContent();
-		this.setModal(true);
-//		DialogUtils.centerDialogWRTParent(tree.getParent(), this);
+		setModal(true);
 	}
 
 	private void createStyles() {
-
 		StyleContext context = new StyleContext();
 		VALID = context.getStyle(StyleContext.DEFAULT_STYLE);
 		StyleConstants.setFontFamily(VALID, "Arial");
@@ -99,8 +90,8 @@ public class MappingValidationDialog extends JDialog {
 	}
 
 	private void createContent() {
-		this.setTitle("Validate Mapping...");
-		this.setSize(new Dimension(500, 360));
+		setTitle("Validate Mapping...");
+		setSize(new Dimension(500, 360));
 		Container panel = this.getContentPane();
 		panel.setLayout(new BorderLayout());
 		JTextPane area = new JTextPane();
@@ -116,17 +107,15 @@ public class MappingValidationDialog extends JDialog {
 		JButton button = new JButton();
 		button.setText("OK");
 		button.setBounds(120, 290, 60, 25);
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				closed = true;
-				myself.dispose();
-			}
+		button.addActionListener(a -> {
+			closed = true;
+			MappingValidationDialog.this.dispose();
 		});
 		button.requestFocus();
 
 		panel.add(areaScrollPane, BorderLayout.CENTER);
 		panel.add(button, BorderLayout.SOUTH);
-		this.setResizable(true);
+		setResizable(true);
 	}
 
 	/***
@@ -135,30 +124,23 @@ public class MappingValidationDialog extends JDialog {
 	 *
 	 * @param text
 	 * @param style
-	 * @throws InvocationTargetException
-	 * @throws InterruptedException
 	 */
 	public void addText(final String text, final Style style) {
-    try {
-      SwingUtilities.invokeAndWait(new Runnable() {
-        public void run() {
-          try {
-            doc.insertString(index, text, style);
-            index = index + text.length();
-            invalidate();
-            repaint();
-          }
-          catch (BadLocationException e) {
-            e.printStackTrace();
-          }
-        }
-      });
-    }
-    catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    catch (InvocationTargetException e) {
-      e.printStackTrace();
-    }
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				try {
+					doc.insertString(index, text, style);
+					index = index + text.length();
+					invalidate();
+					repaint();
+				}
+				catch (BadLocationException e) {
+					e.printStackTrace();
+				}
+			});
+		}
+		catch (InterruptedException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
 	}
 }

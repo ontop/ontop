@@ -33,18 +33,16 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
-	private OBDAModel obdaModel;
-	private URI focusedSource;
-	private List<TreeModelFilter<SQLPPTriplesMap>> filters;
+	private final OBDAModel obdaModel;
+	private final List<TreeModelFilter<SQLPPTriplesMap>> filters;
 
 	public SynchronizedMappingListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		obdaModel.addMappingsListener(this);
-		filters = new LinkedList<TreeModelFilter<SQLPPTriplesMap>>();
+		filters = new LinkedList<>();
 	}
 
-	public void setFocusedSource(URI source) {
-		focusedSource = source;
+	public void setFocusedSource() {
 		fireContentsChanged(this, 0, getSize());
 	}
 
@@ -80,9 +78,6 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 
 	@Override
 	public int getSize() {
-		if (focusedSource == null)
-			return 0;
-
 		int filteredCount = 0;
 		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
 			boolean passedAllFilters = true;

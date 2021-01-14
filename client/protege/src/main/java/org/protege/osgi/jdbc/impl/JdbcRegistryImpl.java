@@ -12,7 +12,7 @@ import java.util.List;
 
 public class JdbcRegistryImpl implements JdbcRegistry {
 
-	private List<Driver> drivers = new ArrayList<>();
+	private final List<Driver> drivers = new ArrayList<>();
 
 	public void addJdbcDriver(String className, URL location)
 			throws RegistryException {

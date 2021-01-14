@@ -9,9 +9,9 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 public class OSGiJdbcDriver implements Driver {
-	private int majorVersion;
-	private int minorVersion;
-	private JdbcRegistry registry;
+	private final int majorVersion;
+	private final int minorVersion;
+	private final JdbcRegistry registry;
 	
 	public OSGiJdbcDriver(BundleContext context, JdbcRegistry registry) {
 		String versionString = (String) context.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);

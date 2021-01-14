@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.panels;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
@@ -32,11 +31,9 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.protege.core.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
@@ -56,34 +53,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
 public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 4351696247473906680L;
 
-	/** Fields */
-	private OBDAModel obdaModel;
-	private OBDADataSource dataSource;
-	private JDialog parent;
+	private final OBDAModel obdaModel;
+	private final JDialog parent;
 
-	private PrefixManager prefixManager;
-
-	/** Logger */
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource) {
+	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
 		this.parent = parent;
-		this.dataSource = dataSource;
-
-		prefixManager = obdaModel.getMutablePrefixManager();
 
 		initComponents();
 
@@ -99,7 +87,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
 
 		cmdInsertMapping.setEnabled(false);
-		QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery);
+		TargetQueryPainter painter = new TargetQueryPainter(obdaModel, txtTargetQuery);
 		painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
 
 		cmdInsertMapping.addActionListener(this::cmdInsertMappingActionPerformed);
@@ -113,34 +101,20 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		txtMappingID.addKeyListener(new CTRLEnterKeyListener());
 
 		cmdTestQuery.setFocusable(true);
-		Vector<Component> order = new Vector<Component>(7);
-		order.add(this.txtMappingID);
-		order.add(this.txtTargetQuery);
-		order.add(this.txtSourceQuery);
-		order.add(this.cmdTestQuery);
-		order.add(this.cmdInsertMapping);
-		order.add(this.cmdCancel);
-		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
+
+		setFocusTraversalPolicy(new CustomTraversalPolicy(ImmutableList.of(
+				txtMappingID,
+				txtTargetQuery,
+				txtSourceQuery,
+				cmdTestQuery,
+				cmdInsertMapping,
+				cmdCancel)));
 	}
 
-	private class TABKeyListener implements KeyListener {
-		@Override
-		public void keyTyped(KeyEvent e) {
-			typedOrPressed(e);
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			// if (e.getKeyCode() == KeyEvent.VK_TAB) {
-			// e.getComponent().transferFocus();
-			// e.consume();
-			// }
-		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			typedOrPressed(e);
-		}
+	private static class TABKeyListener implements KeyListener {
+		@Override public void keyTyped(KeyEvent e) { typedOrPressed(e); }
+		@Override public void keyReleased(KeyEvent e) { /* NO-OP */ }
+		@Override public void keyPressed(KeyEvent e) { typedOrPressed(e); }
 
 		private void typedOrPressed(KeyEvent e) {
 			if (e.getKeyCode() == KeyEvent.VK_TAB) {
@@ -156,34 +130,29 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	}
 
 	private class CTRLEnterKeyListener implements KeyListener {
-		@Override
-		public void keyTyped(KeyEvent e) {
-			// NO-OP
-		}
+		@Override public void keyTyped(KeyEvent e) {/* NO-OP */ }
+		@Override public void keyReleased(KeyEvent e) { /* NO-OP */ }
 
 		@Override
 		public void keyPressed(KeyEvent e) {
 			if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
 				cmdInsertMappingActionPerformed(null);
-			} else if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_T)) {
+			}
+			else if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_T)) {
 				cmdTestQueryActionPerformed(null);
 			}
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
 		}
 	}
 
 	private void insertMapping(String target, String source) {
-		ImmutableList<TargetAtom> targetQuery = parse(target);
-		if (targetQuery != null) {
+		try {
+			TargetQueryParser textParser = obdaModel.createTargetQueryParser();
+			ImmutableList<TargetAtom> targetQuery = textParser.parse(target);
+
 			// List of invalid predicates that are found by the validator.
 			List<IRI> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModel.getCurrentVocabulary());
 			if (invalidPredicates.isEmpty()) {
 				try {
-					OBDAModel mapcon = obdaModel;
-
 					SQLPPSourceQuery body = obdaModel.getSourceQueryFactory().createSourceQuery(source.trim());
 
 					String newId = txtMappingID.getText().trim();
@@ -192,15 +161,16 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 					if (mapping == null) {
 						// Case when we are creating a new mapping
 						OntopNativeSQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, body, targetQuery);
-						mapcon.addTriplesMap(newmapping, false);
-					} else {
-						// Case when we are updating an existing mapping
-                        mapcon.updateMappingId(mapping.getId(), newId);
-                        mapcon.updateMappingsSourceQuery(newId, body);
-                        mapcon.updateTargetQueryMapping(newId, targetQuery);
-
+						obdaModel.addTriplesMap(newmapping, false);
 					}
-				} catch (DuplicateMappingException e) {
+					else {
+						// Case when we are updating an existing mapping
+						obdaModel.updateMappingId(mapping.getId(), newId);
+						obdaModel.updateMappingsSourceQuery(newId, body);
+						obdaModel.updateTargetQueryMapping(newId, targetQuery);
+					}
+				}
+				catch (DuplicateMappingException e) {
 					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
 					return;
 				}
@@ -214,6 +184,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 				}
 				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
 			}
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage());
 		}
 	}
 
@@ -426,12 +399,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 	private void releaseResultset() {
 		TableModel model = tblQueryResult.getModel();
-		if (model == null)
-			return;
-		if (!(model instanceof IncrementalResultSetTableModel))
-			return;
-		IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel) model;
-		imodel.close();
+		if (model instanceof IncrementalResultSetTableModel) {
+			IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel) model;
+			imodel.close();
+		}
 	}
 
 	private void cmdTestQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
@@ -452,9 +423,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 				ResultSetTableModel model = new ResultSetTableModel(set);
 				tblQueryResult.setModel(model);
 				scrQueryResult.getParent().revalidate();
-
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			log.error(e.getMessage());
 		}
 	}// GEN-LAST:event_jButtonTestActionPerformed
@@ -491,29 +462,29 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		}
 
 		public void run() {
-			thread = new Thread() {
-				public void run() {
-					try {
-						TableModel oldmodel = tblQueryResult.getModel();
+			thread = new Thread(() -> {
+				try {
+					TableModel oldmodel = tblQueryResult.getModel();
 
-						if (oldmodel instanceof ResultSetTableModel) {
-							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
-							rstm.close();
-						}
-                        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-                        Connection c = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword());
-
-						Statement st = c.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
-						st.setMaxRows(100);
-						result = st.executeQuery(txtSourceQuery.getText().trim());
-						latch.countDown();
-					} catch (Exception e) {
-						latch.countDown();
-						DialogUtils.showQuickErrorDialog(getRootPane(), e);
-						errorShown = true;
+					if (oldmodel instanceof ResultSetTableModel) {
+						ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
+						rstm.close();
 					}
+					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+					OBDADataSource dataSource = obdaModel.getSource();
+					Connection c = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword());
+
+					Statement st = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+					st.setMaxRows(100);
+					result = st.executeQuery(txtSourceQuery.getText().trim());
+					latch.countDown();
 				}
-			};
+				catch (Exception e) {
+					latch.countDown();
+					DialogUtils.showQuickErrorDialog(getRootPane(), e);
+					errorShown = true;
+				}
+			});
 			thread.start();
 		}
 
@@ -582,17 +553,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 	private SQLPPTriplesMap mapping;
 
-	private ImmutableList<TargetAtom> parse(String query) {
-        TargetQueryParser textParser = obdaModel.createTargetQueryParser();
-		try {
-			return textParser.parse(query);
-		} catch (TargetQueryParserException e) {
-			return null;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
 
 	public void setID(String id) {
 		this.txtMappingID.setText(id);
@@ -615,10 +575,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		txtMappingID.setText(mapping.getId());
 
 		SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
-		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
+		String srcQuery = sourceQuery.getSQL();
 		txtSourceQuery.setText(srcQuery);
 
-		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
+		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(obdaModel.getMutablePrefixManager());
 		ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
 		String trgQuery = targetQueryRenderer.encode(targetQuery);
 		txtTargetQuery.setText(trgQuery);

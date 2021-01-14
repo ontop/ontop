@@ -158,25 +158,22 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 	private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {
 		releaseResultset();
 		try {
-			if (selectedSource == null) {
-				JOptionPane.showMessageDialog(this, "Please select data source first", "Error", JOptionPane.ERROR_MESSAGE);
-			} else {
-				OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", getRootPane());
-				CountDownLatch latch = new CountDownLatch(1);
-				ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
-				progMonitor.addProgressListener(action);
-				progMonitor.start();
-				action.run();
-				latch.await();
-				progMonitor.stop();
-				ResultSet set = action.getResult();
-				if (set != null) {
-					ResultSetTableModel model = new ResultSetTableModel(set);
-					tblQueryResult.setModel(model);
-					set.close();
-				}
+			OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", getRootPane());
+			CountDownLatch latch = new CountDownLatch(1);
+			ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
+			progMonitor.addProgressListener(action);
+			progMonitor.start();
+			action.run();
+			latch.await();
+			progMonitor.stop();
+			ResultSet set = action.getResult();
+			if (set != null) {
+				ResultSetTableModel model = new ResultSetTableModel(set);
+				tblQueryResult.setModel(model);
+				set.close();
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			log.error("Error while executing query.", e);
 		}
@@ -212,10 +209,10 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 
 	private class ExecuteSQLQueryAction implements OBDAProgressListener {
 
-		CountDownLatch latch = null;
-		Thread thread = null;
-		ResultSet result = null;
-		Statement statement = null;
+		private final CountDownLatch latch;
+		private Thread thread = null;
+		private ResultSet result = null;
+		private Statement statement = null;
 		private boolean isCancelled = false;
 		private boolean errorShown = false;
 
@@ -246,18 +243,18 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 					try {
 						TableModel oldmodel = tblQueryResult.getModel();
 
-						if ((oldmodel != null) && (oldmodel instanceof ResultSetTableModel)) {
+						if (oldmodel instanceof ResultSetTableModel) {
 							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
 							rstm.close();
 						}
                         JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-
                         Connection c = man.getConnection(selectedSource.getURL(), selectedSource.getUsername(), selectedSource.getPassword());
 						Statement s = c.createStatement();
 						s.setMaxRows(100);
 						result = s.executeQuery(txtSqlQuery.getText());
 						latch.countDown();
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 						latch.countDown();
 						errorShown = true;
 

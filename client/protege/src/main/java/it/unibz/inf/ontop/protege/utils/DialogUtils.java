@@ -46,50 +46,26 @@ public class DialogUtils {
 		}
 	}
 
-	
-
-	
 	public static synchronized void showQuickErrorDialog(Component parent, Exception e, String message) {
 		QuickErrorDialog box = new QuickErrorDialog(parent, e, message);
 		SwingUtilities.invokeLater(box);
-		
 	}
 
 	public static void centerDialogWRTParent(Component parent, Component dialog) {
-		int x = 0;
-		int y = 0;
-
-		// Find out our parent
 		Container myParent = (Container) parent;
 		Point topLeft = myParent.getLocationOnScreen();
 		Dimension parentSize = myParent.getSize();
 		Dimension mySize = dialog.getSize();
 
-		if (parentSize.width > mySize.width) {
-			x = ((parentSize.width - mySize.width) / 2) + topLeft.x;
-		} else {
-			x = topLeft.x;
-		}
-		if (parentSize.height > mySize.height) {
-			y = ((parentSize.height - mySize.height) / 2) + topLeft.y;
-		} else {
-			y = topLeft.y;
-		}
+		int x = (parentSize.width > mySize.width)
+				? ((parentSize.width - mySize.width) / 2) + topLeft.x
+				: topLeft.x;
+
+		int y = (parentSize.height > mySize.height)
+				? ((parentSize.height - mySize.height) / 2) + topLeft.y
+				: topLeft.y;
+
 		dialog.setLocation(x, y);
-	}
-
-	public static JDialog createDialogForPanel(JDialog parent, JPanel panel) {
-		JDialog newdialog = new JDialog(parent);
-		newdialog.getContentPane().add(panel, java.awt.BorderLayout.CENTER);
-		newdialog.pack();
-		return newdialog;
-	}
-
-	public static JDialog createDialogForPanel(JFrame parent, JPanel panel) {
-		JDialog newdialog = new JDialog(parent);
-		newdialog.getContentPane().add(panel, java.awt.BorderLayout.CENTER);
-		newdialog.pack();
-		return newdialog;
 	}
 
 	private static final KeyStroke escapeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);

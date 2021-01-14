@@ -76,9 +76,6 @@ public class R2RMLImportAction extends ProtegeAction {
 
 		final OWLWorkspace workspace = editorKit.getWorkspace();
 
-		if (obdaModelController.getSource() == null) {
-			JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
-		} else {
 			String message = "The imported mappings will be appended to the existing data source. Continue?";
 			int response = JOptionPane.showConfirmDialog(workspace, message,
 					"Confirmation", JOptionPane.YES_NO_OPTION);
@@ -116,9 +113,10 @@ public class R2RMLImportAction extends ProtegeAction {
 								JOptionPane.showMessageDialog(workspace,
 										"R2RML Import completed.", "Done",
 										JOptionPane.INFORMATION_MESSAGE);
-							}catch (Exception e) {
+							}
+							catch (Exception e) {
 								JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
-								log.error("Error during R2RML import. \n", e.getMessage());
+								log.error("Error during R2RML import: {}\n", e.getMessage());
 								e.printStackTrace();
 							}
 						}
@@ -128,7 +126,6 @@ public class R2RMLImportAction extends ProtegeAction {
 
 				}
 
-			}
 		}
 	}
 

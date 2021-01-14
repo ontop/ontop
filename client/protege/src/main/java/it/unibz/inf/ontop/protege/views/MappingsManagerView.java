@@ -82,23 +82,17 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 				}
 			}
 		});
-		if (obdaModel.getSource() != null) {
-			mappingPanel.datasourceChanged(obdaModel.getSource());
-		}
+		mappingPanel.datasourceChanged();
 
 		mappingPanel.setBorder(new TitledBorder("Mapping manager"));
-
 		setLayout(new BorderLayout());
-		//add(mappingPanel, BorderLayout.NORTH);
         add(mappingPanel, BorderLayout.CENTER);
 	}
 
 	@Override
 	public void activeOntologyChanged() {
 		obdaModel = controller.getActiveOBDAModel();
-
-		// mappingPanel.setOntologyVocabulary(obdaModel.getCurrentVocabulary());
-		mappingPanel.datasourceChanged(obdaModel.getSource());
+		mappingPanel.datasourceChanged();
 	}
 
 	@Override

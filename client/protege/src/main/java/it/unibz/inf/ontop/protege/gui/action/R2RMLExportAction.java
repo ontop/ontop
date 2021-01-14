@@ -67,60 +67,51 @@ public class R2RMLExportAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent arg0) {
 
         try {
-		final OWLWorkspace workspace = editorKit.getWorkspace();
-            if (obdaModel.getSource() == null) {
-                JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
-            }
-            else {
-                // Get the path of the file of the active OWL model
-                OWLOntology activeOntology = modelManager.getActiveOntology();
-                IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
+		    final OWLWorkspace workspace = editorKit.getWorkspace();
+            // Get the path of the file of the active OWL model
+            OWLOntology activeOntology = modelManager.getActiveOntology();
+            IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
 
-                File ontologyDir = new File(documentIRI.toURI().getPath());
+            File ontologyDir = new File(documentIRI.toURI().getPath());
 
-                final JFileChooser fc = new JFileChooser(ontologyDir);
-                final String shortForm = documentIRI.getShortForm();
-                int i = shortForm.lastIndexOf(".");
-                String ontologyName = (i < 1)?
-                        shortForm:
-                        shortForm.substring(0, i);
-                fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
-                //fc.setSelectedFile(new File(sourceID + "-mapping.ttl"));
+            final JFileChooser fc = new JFileChooser(ontologyDir);
+            final String shortForm = documentIRI.getShortForm();
+            int i = shortForm.lastIndexOf(".");
+            String ontologyName = (i < 1)?
+                    shortForm:
+                    shortForm.substring(0, i);
+            fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
 
-                int approve = fc.showSaveDialog(workspace);
+            int approve = fc.showSaveDialog(workspace);
+            if(approve == JFileChooser.APPROVE_OPTION) {
 
-                if(approve == JFileChooser.APPROVE_OPTION) {
-
-
-                    final File file = fc.getSelectedFile();
-
-                    Thread th = new Thread("R2RML Export Action Thread"){
-                        @Override
-                        public void run() {
-                            try {
-                                OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-                                        "Exporting the mapping to R2RML...", workspace);
-                                R2RMLExportThread t = new R2RMLExportThread();
-                                monitor.addProgressListener(t);
-                                monitor.start();
-                                t.run(file);
-                                monitor.stop();
-                                JOptionPane.showMessageDialog(workspace,
-                                        "R2RML Export completed.", "Done",
-                                        JOptionPane.INFORMATION_MESSAGE);
-                            } catch (Exception e) {
-                                JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
-                                log.error("Error during R2RML export: {}\n", e.getMessage());
-                                e.printStackTrace();
-                            }
+                final File file = fc.getSelectedFile();
+                Thread th = new Thread("R2RML Export Action Thread"){
+                    @Override
+                    public void run() {
+                        try {
+                            OBDAProgressMonitor monitor = new OBDAProgressMonitor(
+                                    "Exporting the mapping to R2RML...", workspace);
+                            R2RMLExportThread t = new R2RMLExportThread();
+                            monitor.addProgressListener(t);
+                            monitor.start();
+                            t.run(file);
+                            monitor.stop();
+                            JOptionPane.showMessageDialog(workspace,
+                                    "R2RML Export completed.", "Done",
+                                    JOptionPane.INFORMATION_MESSAGE);
                         }
-                    };
-                    th.start();
-
-
-                }
+                        catch (Exception e) {
+                            JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
+                            log.error("Error during R2RML export: {}\n", e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                th.start();
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             JOptionPane.showMessageDialog(getWorkspace(), "An error occurred. For more info, see the logs.");
             log.error("Error during R2RML export. \n");
             ex.printStackTrace();

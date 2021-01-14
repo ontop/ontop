@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.util.HashMap;
+import java.util.Map;
 
 public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDAProgressListener {
 
@@ -54,26 +54,21 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDA
     	lblSummaryValue.setText(message); 	
     	
     	/* Fill the triples summary table */
-    	final HashMap<String, HashMap<String, Integer>> data = statistics.getStatistics();
-    	for (String datasourceName : data.keySet() ) {
+    	Map<String, Integer> mappingStat = statistics.getStatistics();
+        int row = mappingStat.size();
+        int col = 2;
+        String[] columnNames = {"Mapping ID", "Number of Triples"};
 
-    		HashMap<String, Integer> mappingStat = data.get(datasourceName);
+        Object[][] rowData = new Object[row][col];
 
-    		final int row = mappingStat.size();
-    		final int col = 2;
-    		final String[] columnNames = {"Mapping ID", "Number of Triples"};
-
-    		Object[][] rowData = new Object[row][col];
-
-    		int index = 0;
-    		for (String mappingId : mappingStat.keySet()){
-    			rowData[index][0] = mappingId;
-    			rowData[index][1] = mappingStat.get(mappingId);
-    			index++;
-    		}
-    		JTable tblTriplesCount = createStatisticTable(rowData, columnNames);
-			tabDataSources.add(datasourceName, new JScrollPane(tblTriplesCount));
-    	}
+        int index = 0;
+        for (Map.Entry<String, Integer> e : mappingStat.entrySet()){
+            rowData[index][0] = e.getKey();
+            rowData[index][1] = e.getValue();
+            index++;
+        }
+        JTable tblTriplesCount = createStatisticTable(rowData, columnNames);
+        tabDataSources.add("Data Source: ", new JScrollPane(tblTriplesCount));
     }
     
     private JTable createStatisticTable(Object[][] rowData, String[] columnNames) {
@@ -139,11 +134,12 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDA
     private javax.swing.JPanel pnlSummary;
     private javax.swing.JPanel pnlTriplesSummary;
     private javax.swing.JTabbedPane tabDataSources;
+    // End of variables declaration//GEN-END:variables
+
 
     @Override
     public void actionCanceled() {
         bCancel = true;
-
     }
 
     @Override
@@ -155,5 +151,4 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDA
     public boolean isErrorShown() {
         return this.errorShown;
     }
-    // End of variables declaration//GEN-END:variables
 }

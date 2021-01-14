@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.protege.core.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 
 import javax.swing.*;
@@ -35,12 +34,12 @@ import java.awt.*;
 
 public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 
-	private PrefixManager prefixManager;
+	private final PrefixManager prefixManager;
 
-	private JTextPane mapTextPane;
-	private JTextPane trgQueryTextPane;
-	private JTextPane srcQueryTextPane;
-	private JPanel renderingComponent;
+	private final JTextPane mapTextPane;
+	private final JTextPane trgQueryTextPane;
+	private final JTextPane srcQueryTextPane;
+	private final JPanel renderingComponent;
 
 	private int preferredWidth;
 	private int minTextHeight;
@@ -64,19 +63,19 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 
 	private Style background;
 	private Style alignment;
-	private JPanel trgQueryPanel;
-	private JPanel srcQueryPanel;
-	private JPanel mapPanel;
-	private JPanel mainPanel;
-	private QueryPainter painter;
-	private SQLQueryPainter sqlpainter;
+	private final JPanel trgQueryPanel;
+	private final JPanel srcQueryPanel;
+	private final JPanel mapPanel;
+	private final JPanel mainPanel;
+	private final TargetQueryPainter painter;
+	private final SQLQueryPainter sqlpainter;
 
 	public OBDAMappingListRenderer(OBDAModel obdaModel) {
 
 		prefixManager = obdaModel.getMutablePrefixManager();
 
 		trgQueryTextPane = new JTextPane();
-		painter = new QueryPainter(obdaModel, trgQueryTextPane);
+		painter = new TargetQueryPainter(obdaModel, trgQueryTextPane);
 
 		trgQueryTextPane.setMargin(new Insets(4, 4, 4, 4));
 
@@ -182,8 +181,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 
 		int[] widths = trgQueryTextPane.getFontMetrics(plainFont).getWidths();
 		int sum = 0;
-		for (int i = 0; i < widths.length; i++) {
-			int j = widths[i];
+		for (int j : widths) {
 			sum += j;
 		}
 		plainFontWidth = sum / widths.length;
@@ -231,7 +229,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 			 */
 			String[] split = trgQuery.split(" ");
 			int currentWidth = 0;
-			StringBuffer currentLine = new StringBuffer();
+			StringBuilder currentLine = new StringBuilder();
 			int linesTarget = 1;
 			FontMetrics m = trgQueryTextPane.getFontMetrics(plainFont);
 			for (String splitst : split) {
@@ -256,7 +254,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 			}
 
 			String srcQuery = srcQueryTextPane.getText();
-			int linesSource = (int) (srcQuery.length() / maxChars) + 1;
+			int linesSource = srcQuery.length() / maxChars + 1;
 
 			textTargetHeight = m.getHeight() * linesTarget; // target
 			textSourceHeight = minTextHeight * linesSource; // source
@@ -312,8 +310,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 		preferredWidth = list.getParent().getParent().getWidth();
 
 		minTextHeight = this.plainFontHeight + 6;
-		Component c = prepareRenderer(value, isSelected);
-		return c;
+		return prepareRenderer(value, isSelected);
 	}
 
 	private Component prepareRenderer(SQLPPTriplesMap value, boolean isSelected) {
@@ -350,14 +347,10 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 			srcQueryPanel.setBackground(Color.yellow);
 			mapTextPane.setBackground(Color.green);
 			mapPanel.setBackground(Color.BLACK);
+		}
+		painter.recolorQuery();
+		sqlpainter.recolorQuery();
 
-		}
-		try {
-			painter.recolorQuery();
-			sqlpainter.recolorQuery();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		trgQueryTextPane.setBorder(null);
 		renderingComponent.revalidate();
 		return renderingComponent;
@@ -377,7 +370,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
  		trgQueryTextPane.setText(trgQuery);
 
  		SQLPPSourceQuery sourceQuery = map.getSourceQuery();
-		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
+		String srcQuery = sourceQuery.getSQL();
 		srcQueryTextPane.setText(srcQuery);
 
 		mapTextPane.setText(map.getId());

@@ -4,9 +4,9 @@ import java.io.File;
 
 public class DriverInfo {
 
-    private String description;
-    private String className;
-    private File   driverLocation;
+    private final String description;
+    private final String className;
+    private final File   driverLocation;
     
     public DriverInfo(String description, String className, File driverLocation) {
         this.description = description;

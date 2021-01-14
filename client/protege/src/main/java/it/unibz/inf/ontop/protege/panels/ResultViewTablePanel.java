@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import java.awt.*;
 import java.io.File;
 
 public class ResultViewTablePanel extends javax.swing.JPanel {
@@ -35,7 +34,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = -8494558136315031084L;
 
 	private OBDADataQueryAction countAllTuplesAction;
-	private QueryInterfacePanel querypanel;
+	private final QueryInterfacePanel querypanel;
 	private OBDASaveQueryResultToFileAction saveToFileAction;
 
 	/**
@@ -134,7 +133,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		int response = fileChooser.showSaveDialog(this);
 		if (response == JFileChooser.APPROVE_OPTION) {
 			File targetFile = fileChooser.getSelectedFile();
-			final String fileLocation = targetFile.getPath();
+			String fileLocation = targetFile.getPath();
 			if (canWrite(targetFile)) {
 				Thread thread = new Thread(() -> getOBDASaveQueryToFileAction().run(fileLocation));
 				thread.start();
@@ -147,22 +146,14 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	 * Return true if the target file doesn't exist yet or the user allows overwriting.
 	 */
 	private boolean canWrite(File outputFile) {
-		boolean fileIsValid = false;
 		if (outputFile.exists()) {
 			int result = JOptionPane.showConfirmDialog(
 					this, "File exists, overwrite?",
 					"Warning", JOptionPane.YES_NO_CANCEL_OPTION);
-			switch (result) {
-			case JOptionPane.YES_OPTION:
-				fileIsValid = true;
-				break;
-			default:
-				fileIsValid = false;
-			}
-		} else {
-			fileIsValid = true;
+
+			return result == JOptionPane.YES_OPTION;
 		}
-		return fileIsValid;
+		return true;
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -180,7 +171,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
 	public void setTableModel(final TableModel newmodel) {
-		Runnable updateModel = () -> {
+		SwingUtilities.invokeLater(() -> {
 			tblQueryResult.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 			ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult);
 			ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult.getTableHeader());
@@ -199,8 +190,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 
 			tblQueryResult.invalidate();
 			tblQueryResult.repaint();
-		};
-		SwingUtilities.invokeLater(updateModel);
+		});
 
 		// Write a hint in the comment panel for user information
 		writeHintMessage();
@@ -208,10 +198,9 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 
 	// TODO Change the implementation of checking the table model after refactoring the code.
 	private void writeHintMessage() {
-		String msg = "--";
-        if (querypanel.isFetchAllSelect() || querypanel.canGetMoreTuples()) {
-			msg = "Try to continue scrolling down the table to retrieve more results.";
-		}
+		String msg = (querypanel.isFetchAllSelect() || querypanel.canGetMoreTuples())
+			? "Try to continue scrolling down the table to retrieve more results."
+        	: "--";
 		lblComment.setText(msg);
 	}
 

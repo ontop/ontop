@@ -25,5 +25,5 @@ public interface SavedQueriesPanelListener {
 	 * The parameters new_group and new_id were added to initialize the
 	 * SaveQueryPanel with this values.
 	 */
-	public void selectedQueryChanged(String new_group, String new_query, String new_id);
+	void selectedQueryChanged(String new_group, String new_query, String new_id);
 }

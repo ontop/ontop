@@ -53,6 +53,8 @@ public class TurtleSyntaxParserTest {
 
 	private final TargetQueryParser parser;
 
+	private static final IRI DEFAULT_DATATYPE = RDFS.LITERAL;
+
 	public TurtleSyntaxParserTest() {
 		PrefixManager prefixManager = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#",
@@ -282,7 +284,7 @@ public class TurtleSyntaxParserTest {
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
-						getVariable("fname")), RDFS.LITERAL))), result);
+						getVariable("fname")), DEFAULT_DATATYPE))), result);
 	}
 
 	@Test
@@ -295,7 +297,7 @@ public class TurtleSyntaxParserTest {
 						getVariable("id")),
 				getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 				getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
-						getVariable("\"fname\"")), RDFS.LITERAL))), result);
+						getVariable("\"fname\"")), DEFAULT_DATATYPE))), result);
 	}
 
 	@Test
@@ -505,7 +507,7 @@ public class TurtleSyntaxParserTest {
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
-								getVariable("fname")), RDFS.LITERAL))), result);
+								getVariable("fname")), DEFAULT_DATATYPE))), result);
 	}
 
 	@Test
@@ -525,14 +527,14 @@ public class TurtleSyntaxParserTest {
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
-								getVariable("fname")), RDFS.LITERAL)),
+								getVariable("fname")), DEFAULT_DATATYPE)),
 
 				getTripleTargetAtom(
 						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
-								getVariable("age")), RDFS.LITERAL))), result);
+								getVariable("age")), DEFAULT_DATATYPE))), result);
 	}
 
 	@Test
@@ -559,14 +561,14 @@ public class TurtleSyntaxParserTest {
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#firstName"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
-								getVariable("fname")), RDFS.LITERAL)),
+								getVariable("fname")), DEFAULT_DATATYPE)),
 
 				getTripleTargetAtom(
 						getIRIFunctionalTerm(Template.of("http://obda.inf.unibz.it/testcase#Person-", 0),
 								getVariable("id")),
 						getConstantIRI("http://obda.inf.unibz.it/testcase#age"),
 						getRDFLiteralFunctionalTerm(TERM_FACTORY.getPartiallyDefinedToStringCast(
-								getVariable("age")), RDFS.LITERAL))), result);
+								getVariable("age")), DEFAULT_DATATYPE))), result);
 	}
 
 	@Test

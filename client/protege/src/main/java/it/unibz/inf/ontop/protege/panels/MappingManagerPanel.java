@@ -53,13 +53,11 @@ public class MappingManagerPanel extends JPanel {
 
 	private SQLSourceQueryValidator validator;
 
-	private OBDAModel apic;
-
-	private OBDADataSource selectedSource;
+	private final OBDAModel apic;
 
 	private boolean canceled;
 
-	private JTree mappingsTree;
+	private final JTree mappingsTree;
 
 	private JMenuItem menuValidateBody;
 
@@ -128,12 +126,25 @@ public class MappingManagerPanel extends JPanel {
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Copy selected mappings");
 
-		setOBDAModel(apic); // TODO Bad code! Change this later!
-	}
+        this.apic = apic;
+        ListModel model = new SynchronizedMappingListModel(apic);
 
-    public OBDADataSource getSelectedSource() {
-        return selectedSource;
-    }
+        model.addListDataListener(new ListDataListener() {
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+                fieldMappings.setText(String.valueOf(mappingList.getModel().getSize()));
+            }
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+                fieldMappings.setText(String.valueOf(mappingList.getModel().getSize()));
+            }
+            @Override
+            public void contentsChanged(ListDataEvent e) {
+                fieldMappings.setText(String.valueOf(mappingList.getModel().getSize()));
+            }
+        });
+        mappingList.setModel(model);
+	}
 
 	/**
 	 * A listener to trigger the context menu of the mapping list.
@@ -155,28 +166,6 @@ public class MappingManagerPanel extends JPanel {
 				menuMappings.show(e.getComponent(), e.getX(), e.getY());
 			}
 		}
-	}
-
-	public void setOBDAModel(OBDAModel omodel) {
-
-		this.apic = omodel;
-		ListModel model = new SynchronizedMappingListModel(omodel);
-
-		model.addListDataListener(new ListDataListener() {
-			@Override
-			public void intervalRemoved(ListDataEvent e) {
-				fieldMappings.setText(String.valueOf(mappingList.getModel().getSize()));
-			}
-			@Override
-			public void intervalAdded(ListDataEvent e) {
-				fieldMappings.setText(String.valueOf(mappingList.getModel().getSize()));
-			}
-			@Override
-			public void contentsChanged(ListDataEvent e) {
-				fieldMappings.setText(String.valueOf(mappingList.getModel().getSize()));
-			}
-		});
-		mappingList.setModel(model);
 	}
 
 	private void addMenu() {
@@ -218,7 +207,7 @@ public class MappingManagerPanel extends JPanel {
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -484,7 +473,7 @@ public class MappingManagerPanel extends JPanel {
 	}// GEN-LAST:event_sendFilters
 
 	private void menuValidateBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateBodyActionPerformed
-		final MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
+		final MappingValidationDialog outputField = new MappingValidationDialog();
 
 		outputField.setLocationRelativeTo(getParent());
 		Runnable action = () -> {
@@ -500,7 +489,7 @@ public class MappingManagerPanel extends JPanel {
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
                 OntopSQLCredentialConfiguration config = OntopSQLCredentialConfiguration.defaultBuilder()
-                        .properties(selectedSource.asProperties())
+                        .properties(apic.getDatasource().asProperties())
                         .build();
                 validator = new SQLSourceQueryValidator(config.getSettings(), o.getSourceQuery());
                 long timestart = System.nanoTime();
@@ -566,7 +555,7 @@ public class MappingManagerPanel extends JPanel {
 		}
 		final String sqlQuery = mapping.getSourceQuery().toString();
 
-		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(selectedSource, sqlQuery);
+		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(apic.getDatasource(), sqlQuery);
 
 		JDialog dlgQueryResult = new JDialog();
 		DialogUtils.installEscapeCloseOperation(dlgQueryResult);
@@ -593,7 +582,6 @@ public class MappingManagerPanel extends JPanel {
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
-		OBDAModel controller = apic;
 
         for (Object o : currentSelection) {
             SQLPPTriplesMap mapping = (SQLPPTriplesMap) o;
@@ -601,7 +589,7 @@ public class MappingManagerPanel extends JPanel {
             // Computing the next available ID
             int new_index = -1;
             for (int index = 0; index < 999999999; index++) {
-                if (controller.indexOf(id + "(" + index + ")") == -1) {
+                if (apic.indexOf(id + "(" + index + ")") == -1) {
                     new_index = index;
                     break;
                 }
@@ -610,13 +598,12 @@ public class MappingManagerPanel extends JPanel {
 
             // inserting the new mapping
             try {
-
-                SQLPPTriplesMap oldmapping = controller.getTriplesMap(id);
+                SQLPPTriplesMap oldmapping = apic.getTriplesMap(id);
                 SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, oldmapping.getSourceQuery(),
                         oldmapping.getTargetAtoms());
-                controller.addTriplesMap(newmapping, false);
-
-            } catch (DuplicateMappingException e) {
+                apic.addTriplesMap(newmapping, false);
+            }
+            catch (DuplicateMappingException e) {
                 JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
                 return;
             }
@@ -651,27 +638,23 @@ public class MappingManagerPanel extends JPanel {
 	}
 
 	private void cmdAddMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addMappingButtonActionPerformed
-		if (selectedSource != null) {
-			addMapping();
-		} else {
-			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-        }
+	    addMapping();
 	}// GEN-LAST:event_addMappingButtonActionPerformed
 
-	private void addMapping() {
-		String id = IDGenerator.getNextUniqueID("MAPID-");
+    private void addMapping() {
+        String id = IDGenerator.getNextUniqueID("MAPID-");
 
-		JDialog dialog = new JDialog();
-		dialog.setTitle("New Mapping");
-		dialog.setModal(true);
+        JDialog dialog = new JDialog();
+        dialog.setTitle("New Mapping");
+        dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource);
-		panel.setID(id);
-		dialog.setContentPane(panel);
-		dialog.setSize(600, 500);
-		dialog.setLocationRelativeTo(this);
-		dialog.setVisible(true);
-	}
+        NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog);
+        panel.setID(id);
+        dialog.setContentPane(panel);
+        dialog.setSize(600, 500);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
 
 	public void setFilter(String filter) {
 		txtFilter.setText(filter);
@@ -746,16 +729,10 @@ public class MappingManagerPanel extends JPanel {
 		model.addFilters(filters);
 	}
 
-	public void datasourceChanged(OBDADataSource newSource) {
-
-		if (newSource == null) {
-			return;
-		}
-		this.selectedSource = newSource;
-
+	public void datasourceChanged() {
 		// Update the mapping tree.
 		SynchronizedMappingListModel model = (SynchronizedMappingListModel) mappingList.getModel();
-		model.setFocusedSource(newSource.getSourceID());
+		model.setFocusedSource();
 
 		mappingList.revalidate();
 	}

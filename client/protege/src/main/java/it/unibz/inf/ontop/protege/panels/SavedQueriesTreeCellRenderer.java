@@ -33,16 +33,17 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 public class SavedQueriesTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	private static final long serialVersionUID = 1404770661541936062L;
-	Icon saved_query_icon = null;
-	Icon query_group_icon = null;
-	Icon root_node_icon = null;
-	final String PATH_SAVEDQUERY_ICON = "images/query_icon.png";
-	final String PATH_QUERYGROUP_ICON = "images/group_icon.png";
+	private final Icon saved_query_icon;
+	private final Icon query_group_icon;
+	private final Icon root_node_icon;
+	static private final String PATH_SAVEDQUERY_ICON = "images/query_icon.png";
+	static private final String PATH_QUERYGROUP_ICON = "images/group_icon.png";
+	static private final String PATH_ROOT_NODE_ICON = "images/metadata.gif";
 
 	public SavedQueriesTreeCellRenderer() {
 		saved_query_icon = IconLoader.getImageIcon(PATH_SAVEDQUERY_ICON);
 		query_group_icon = IconLoader.getImageIcon(PATH_QUERYGROUP_ICON);
-		root_node_icon = IconLoader.getImageIcon("images/metadata.gif");
+		root_node_icon = IconLoader.getImageIcon(PATH_ROOT_NODE_ICON);
 	}
 
 	public Component getTreeCellRendererComponent(JTree tree, Object value,

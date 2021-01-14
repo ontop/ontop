@@ -33,6 +33,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.Dialog.ModalityType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -42,11 +44,11 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
 	private static final long serialVersionUID = 6920100822784727963L;
 	
-	private Vector<SavedQueriesPanelListener> listeners = new Vector<SavedQueriesPanelListener>();
+	private final List<SavedQueriesPanelListener> listeners = new ArrayList<>();
 	
-	private QueryControllerTreeModel queryControllerModel = new QueryControllerTreeModel();
+	private final QueryControllerTreeModel queryControllerModel = new QueryControllerTreeModel();
 
-	private QueryController queryController;
+	private final QueryController queryController;
 		
 	private QueryTreeElement currentId;
 	private QueryTreeElement previousId;
@@ -67,20 +69,6 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 		queryControllerModel.reload();
 	}
 
-	public void changeQueryController(QueryController newQueryController) {
-		// Reset and load the current tree model
-		queryControllerModel.reset();
-		queryControllerModel.synchronize(queryController.getElements());
-		queryControllerModel.reload();
-
-		if (queryController != null) {
-			queryController.removeAllListeners();
-		}
-		queryController = newQueryController;
-		queryController.addListener(queryControllerModel);
-		queryController.addListener(this);
-	}
-
 	public void addQueryManagerListener(SavedQueriesPanelListener listener) {
 		if (listener == null) {
 			return;
@@ -95,9 +83,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 		if (listener == null) {
 			return;
 		}
-		if (listeners.contains(listener)) {
-			listeners.remove(listener);
-		}
+		listeners.remove(listener);
 	}
 
 	/**
@@ -206,12 +192,10 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
     }// </editor-fold>//GEN-END:initComponents
     
     private void selectQueryNode(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_selectQueryNode
-    	String currentQuery = "";
-    	
     	DefaultMutableTreeNode node = (DefaultMutableTreeNode) evt.getPath().getLastPathComponent();
         if (node instanceof QueryTreeElement) {
             QueryTreeElement queryElement = (QueryTreeElement)node;
-            currentQuery = queryElement.getQuery();
+			String currentQuery = queryElement.getQuery();
             currentId = queryElement;
             
             TreeNode parent = queryElement.getParent();
@@ -225,12 +209,10 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
         else if (node instanceof QueryGroupTreeElement) {
             QueryGroupTreeElement groupElement = (QueryGroupTreeElement)node;
             currentId = null;
-            currentQuery = null;
             fireQueryChanged(groupElement.toString(), "", "");
         }
         else if (node == null) {
             currentId = null;
-            currentQuery = null;
         }
     }//GEN-LAST:event_selectQueryNode
 
@@ -268,7 +250,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 			return;
 
 		if (JOptionPane.showConfirmDialog(this, "This will delete the selected query. \n Continue? ", "Delete confirmation",
-				JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION) == JOptionPane.CANCEL_OPTION) {
+				JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.CANCEL_OPTION) {
 			return;
 		}
 
@@ -337,7 +319,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 	public void elementChanged(QueryControllerQuery query, QueryControllerGroup group) {
 		String queryId = query.getID();
 		String groupId = group.getID();
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getElementQuery(queryId, groupId);
+		DefaultMutableTreeNode node = queryControllerModel.getElementQuery(queryId, groupId);
 				
 		// Select the modified node in the JTree
 		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));

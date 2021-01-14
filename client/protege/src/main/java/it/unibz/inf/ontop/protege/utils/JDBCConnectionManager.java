@@ -43,7 +43,7 @@ public class JDBCConnectionManager {
 	private Map<String, Object> properties = new HashMap<>();
 	private Connection connection = null;
 
-	private static Logger log = LoggerFactory.getLogger(JDBCConnectionManager.class);
+	private static final Logger log = LoggerFactory.getLogger(JDBCConnectionManager.class);
 
 	/**
 	 * Private constructor.
@@ -63,11 +63,6 @@ public class JDBCConnectionManager {
 			instance = new JDBCConnectionManager();
 		}
 		return instance;
-	}
-
-	public Connection createConnection(OntopSQLCredentialSettings settings) throws SQLException {
-		return createConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
-				settings.getJdbcPassword());
 	}
 
 	/**

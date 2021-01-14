@@ -74,7 +74,6 @@ public class OBDAModel {
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
 
-    private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -85,13 +84,12 @@ public class OBDAModel {
 
     public OBDAModel(SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
-                     AtomFactory atomFactory, TermFactory termFactory,
+                     TermFactory termFactory,
                      TypeFactory typeFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
                      RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory,
                      SQLPPSourceQueryFactory sourceQueryFactory) {
         this.ppMappingFactory = ppMappingFactory;
-        this.atomFactory = atomFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
@@ -152,9 +150,6 @@ public class OBDAModel {
     }
 
     public void addPrefix(String prefix, String uri) {
-        /**
-         * The OBDA is still referencing this object
-         */
         prefixManager.addPrefix(prefix, uri);
     }
 
@@ -245,10 +240,7 @@ public class OBDAModel {
 
         ImmutableList<TargetAtom> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicateIRI, counter);
 
-        if (counter.get() > initialCount && newTargetAtoms.isEmpty()) {
-            return false;
-        }
-        return true;
+        return counter.get() <= initialCount || !newTargetAtoms.isEmpty();
     }
 
     private ImmutableList<TargetAtom> getNewTargetAtoms(SQLPPTriplesMap formerTriplesMap, IRI removedPredicateIRI, AtomicInteger counter) {
@@ -426,20 +418,8 @@ public class OBDAModel {
                 LinkedHashMap::new);
     }
 
-    public AtomFactory getAtomFactory() {
-        return atomFactory;
-    }
-
-    public TermFactory getTermFactory() {
-        return termFactory;
-    }
-
     public TypeFactory getTypeFactory() {
         return typeFactory;
-    }
-
-    public TargetAtomFactory getTargetAtomFactory() {
-        return targetAtomFactory;
     }
 
     public RDF getRdfFactory() {
@@ -451,10 +431,6 @@ public class OBDAModel {
 
     public TargetQueryParser createTargetQueryParser() {
         return targetQueryParserFactory.createParser(getMutablePrefixManager());
-    }
-
-    public TargetQueryParser createTargetQueryParser(PrefixManager prefixManager) {
-        return targetQueryParserFactory.createParser(prefixManager);
     }
 
     boolean hasTripleMaps(){

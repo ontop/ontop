@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -66,14 +67,13 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
 
         setNewDatasource(model);
 
-        List<Component> order = new ArrayList<>(7);
-        order.add(pnlDataSourceParameters);
-        order.add(txtJdbcUrl);
-        order.add(txtDatabaseUsername);
-        order.add(txtDatabasePassword);
-        order.add(txtJdbcDriver);
-        order.add(cmdTestConnection);
-        this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
+        this.setFocusTraversalPolicy(new CustomTraversalPolicy(ImmutableList.of(
+                pnlDataSourceParameters,
+                txtJdbcUrl,
+                txtDatabaseUsername,
+                txtDatabasePassword,
+                txtJdbcDriver,
+                cmdTestConnection)));
     }
 
     private void handleTimer() {

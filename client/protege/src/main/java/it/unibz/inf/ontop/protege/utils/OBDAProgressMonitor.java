@@ -61,7 +61,7 @@ public class OBDAProgressMonitor {
 		SwingUtilities.invokeLater(action);
 	}
 
-	private class Closer implements Runnable{
+	private class Closer implements Runnable {
 		public void run(){
 			parent.setVisible(false);
 			parent.dispose();

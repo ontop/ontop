@@ -26,15 +26,11 @@ public class ProgressPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 8447122293962076783L;
 	
-	private OBDAProgressMonitor monitor = null;
+	private final OBDAProgressMonitor monitor;
  
 	/** 
 	 * Creates new form ProgressPanel
 	 */	
-	public ProgressPanel(OBDAProgressMonitor monitor){
-		this(monitor, "Operation in progress...");
-	}
-	
     public ProgressPanel(OBDAProgressMonitor monitor, String msg) {
         this.monitor = monitor;
 

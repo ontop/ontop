@@ -22,5 +22,5 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 public interface OBDASaveQueryResultToFileAction {
 
-	public void run(String fileLocation);
+	void run(String fileLocation);
 }

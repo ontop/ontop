@@ -98,7 +98,6 @@ public class OBDAModelManager implements Disposable {
 				.build().getInjector();
 
 		SQLPPMappingFactory ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
-		AtomFactory atomFactory = defaultInjector.getInstance(AtomFactory.class);
 		TermFactory termFactory = defaultInjector.getInstance(TermFactory.class);
 		typeFactory = defaultInjector.getInstance(TypeFactory.class);
 		rdfFactory = defaultInjector.getInstance(RDF.class);
@@ -127,7 +126,7 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
-		obdaModel = new OBDAModel(ppMappingFactory, prefixFormat, atomFactory, termFactory,
+		obdaModel = new OBDAModel(ppMappingFactory, prefixFormat, termFactory,
 				typeFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory, sourceQueryFactory);
 
 		ProtegeDatasourcesControllerListener dlistener = new ProtegeDatasourcesControllerListener();

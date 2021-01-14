@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.protege.core.impl.DeprecatedConstants.*;
-
 /**
  * Mutable
  */
@@ -45,8 +43,16 @@ public class DisposableProperties extends Properties implements Disposable {
 
 	@Override
     public void dispose() {
-
 	}
+
+	@Deprecated
+	public static final String	DBTYPE	= "org.obda.owlreformulationplatform.dbtype";
+	@Deprecated
+	public static final String  OBTAIN_FROM_ONTOLOGY = "org.obda.owlreformulationplatform.obtainFromOntology";
+	@Deprecated
+	public static final String  OBTAIN_FROM_MAPPINGS = "org.obda.owlreformulationplatform.obtainFromMappings";
+	@Deprecated
+	public static final String	ABOX_MODE = "org.obda.owlreformulationplatform.aboxmode";
 
 	public List<String> getReformulationPlatformPreferencesKeys(){
 		ArrayList<String> keys = new ArrayList<>();

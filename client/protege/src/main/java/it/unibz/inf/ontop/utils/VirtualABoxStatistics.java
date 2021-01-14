@@ -45,9 +45,9 @@ public class VirtualABoxStatistics {
 
 	private final OBDAModel obdaModel;
 
-	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<>();
+	private final HashMap<String, Integer> statistics = new HashMap<>();
 
-	private Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
+	private final Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
 
 	public VirtualABoxStatistics(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
@@ -58,35 +58,8 @@ public class VirtualABoxStatistics {
 	 * 
 	 * @return The complete statistics.
 	 */
-	public HashMap<String, HashMap<String, Integer>> getStatistics() {
+	public HashMap<String, Integer> getStatistics() {
 		return statistics;
-	}
-
-	/**
-	 * Returns the triples counts from all the mappings that associate to a
-	 * certain data source.
-	 * 
-	 * @param datasourceId
-	 *            The data source identifier.
-	 * @return A data statistics.
-	 */
-	public HashMap<String, Integer> getStatistics(String datasourceId) {
-		return statistics.get(datasourceId);
-	}
-
-	/**
-	 * Returns one triple count from a particular mapping.
-	 * 
-	 * @param datasourceId
-	 *            The data source identifier.
-	 * @param mappingId
-	 *            The mapping identifier.
-	 * @return The number of triples.
-	 */
-	public int getStatistics(String datasourceId, String mappingId) {
-		final HashMap<String, Integer> mappingStat = getStatistics(datasourceId);
-
-		return mappingStat.get(mappingId);
 	}
 
 	/**
@@ -94,14 +67,11 @@ public class VirtualABoxStatistics {
 	 */
 	public int getTotalTriples() throws Exception {
 		int total = 0;
-		for (HashMap<String, Integer> mappingStat : statistics.values()) {
-			for (Integer triplesCount : mappingStat.values()) {
-				int triples = triplesCount;
-				if (triples == -1) {
-					throw new Exception("An error was occurred in the counting process.");
-				}
-				total = total + triples;
+		for (Integer triplesCount : statistics.values()) {
+			if (triplesCount == -1) {
+				throw new Exception("An error was occurred in the counting process.");
 			}
+			total = total + triplesCount;
 		}
 		return total;
 	}
@@ -109,16 +79,12 @@ public class VirtualABoxStatistics {
 	@Override
 	public String toString() {
 		String str = "";
-		for (String datasourceId : statistics.keySet()) {
-			str += "Data Source Name: " + datasourceId + "\n";
-			str += "Mappings: \n";
-			HashMap<String, Integer> mappingStat = statistics.get(datasourceId);
-			for (String mappingId : mappingStat.keySet()) {
-				int count = mappingStat.get(mappingId);
-				str += String.format("- %s produces %s %s.\n", mappingId, count, (count == 1 ? "triple" : "triples"));
-			}
-			str += "\n";
+		str += "Mappings: \n";
+		for (String mappingId : statistics.keySet()) {
+			int count = statistics.get(mappingId);
+			str += String.format("- %s produces %s %s.\n", mappingId, count, (count == 1 ? "triple" : "triples"));
 		}
+		str += "\n";
 		return str;
 	}
 
@@ -126,11 +92,9 @@ public class VirtualABoxStatistics {
 		OBDADataSource source = obdaModel.getDatasource();
 		List<SQLPPTriplesMap> mappingList = obdaModel.generatePPMapping().getTripleMaps();
 
-
-		HashMap<String, Integer> mappingStat = new HashMap<>();
 		for (SQLPPTriplesMap mapping : mappingList) {
 			String mappingId = mapping.getId();
-			int triplesCount = 0;
+			int triplesCount;
 			try {
 				SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
 				int tuples = getTuplesCount(sourceQuery, source);
@@ -139,44 +103,27 @@ public class VirtualABoxStatistics {
 				int atoms = targetQuery.size();
 
 				triplesCount = tuples * atoms;
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				triplesCount = -1; // fails to count
 				log.error("Exception while computing mapping statistics", e);
 			}
-			mappingStat.put(mappingId, triplesCount);
+			statistics.put(mappingId, triplesCount);
 		}
-		statistics.put(source.getSourceID().toString(), mappingStat);
 	}
 
-	private int getTuplesCount(SQLPPSourceQuery query, OBDADataSource source)
-			throws Exception {
-		Statement st = null;
-		ResultSet rs = null;
-		int count = -1;
+	private int getTuplesCount(SQLPPSourceQuery query, OBDADataSource source) throws Exception {
+		int count = 0;
 
-		try {
+		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+
+		try (Connection c = man.getConnection(source.getURL(), source.getUsername(), source.getPassword());
+			 Statement st = c.createStatement()) {
             String sql = String.format("select COUNT(*) %s", getSelectionString(query));
-			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 
-			Connection c = man.getConnection(source.getURL(), source.getUsername(), source.getPassword());
-			st = c.createStatement();
-
-			rs = st.executeQuery(sql);
-
-			count = 0;
+			ResultSet rs = st.executeQuery(sql);
 			while (rs.next()) {
 				count = rs.getInt(1);
-			}
-		} finally {
-			try {
-				rs.close();
-			} catch (Exception e) {
-				// NO-OP
-			}
-			try {
-				st.close();
-			} catch (Exception e) {
-				// NO-OP
 			}
 		}
 		return count;

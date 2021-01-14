@@ -18,9 +18,9 @@ import java.util.List;
 public class PreferencesPanel extends OWLPreferencesPanel {
     private static final long serialVersionUID = 2892884854196959326L;
 
-    public static final String PREFERENCES_SET="org.protege.osgi.jdbc.prefs";
-    public static final String DRIVER_PREFERENCES_KEY="driver.list";
-    public static final String DEFAULT_DRIVER_DIR="driver.dir";
+    public static final String PREFERENCES_SET = "org.protege.osgi.jdbc.prefs";
+    public static final String DRIVER_PREFERENCES_KEY = "driver.list";
+    public static final String DEFAULT_DRIVER_DIR = "driver.dir";
     
     private JTable table;
     private DriverTableModel driverTableModel;
@@ -100,7 +100,7 @@ public class PreferencesPanel extends OWLPreferencesPanel {
         return panel;
     }
 
-    public void handleAdd(ActionEvent e) {
+    private void handleAdd(ActionEvent e) {
         final EditorPanel editor = new EditorPanel(jdbcRegistryTracker);
         DriverInfo info = editor.askUserForDriverInfo();
         if (info != null) {
@@ -108,16 +108,15 @@ public class PreferencesPanel extends OWLPreferencesPanel {
         }
     }
 
-    public void handleRemove(ActionEvent e) {
-        int[] rows = table.getSelectedRows();
+    private void handleRemove(ActionEvent e) {
         List<Integer> rowList = new ArrayList<>();
-        for (int row : rows) {
+        for (int row : table.getSelectedRows()) {
             rowList.add(row);
         }
         driverTableModel.removeDrivers(rowList);
     }
 
-    public void handleEdit(ActionEvent e) {
+    private void handleEdit(ActionEvent e) {
         int row = table.getSelectedRow();
         DriverInfo existing = driverTableModel.getDrivers().get(row);
         EditorPanel editor = new EditorPanel(jdbcRegistryTracker,
@@ -127,5 +126,4 @@ public class PreferencesPanel extends OWLPreferencesPanel {
         DriverInfo info = editor.askUserForDriverInfo();
         driverTableModel.replaceDriver(row, info);
     }
-
 }

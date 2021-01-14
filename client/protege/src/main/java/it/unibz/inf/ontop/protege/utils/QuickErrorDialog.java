@@ -17,19 +17,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class QuickErrorDialog implements Runnable{
-	Component parent;
-	Exception e;
-	String message;
+public class QuickErrorDialog implements Runnable {
+	private final Component parent;
+	private final Exception e;
+	private final String message;
 	
 	QuickErrorDialog(Component parent, Exception e, String message){
-		super();
 		this.parent = parent;
 		this.e = e;
 		this.message = message;
 	}
 	
-	public void run(){
+	public void run() {
 		// create and configure a text area - fill it with exception text.
 		final JTextArea textArea = new JTextArea();
 		textArea.setBackground(Color.WHITE);
@@ -44,8 +43,8 @@ public class QuickErrorDialog implements Runnable{
 		writer.write("###################################################\n\n");
 
 		StackTraceElement[] elemnts = e.getStackTrace();
-		for (int i = 0; i < elemnts.length; i++) {
-			writer.write("\tat " + elemnts[i].toString() + "\n");
+		for (StackTraceElement elemnt : elemnts) {
+			writer.write("\tat " + elemnt.toString() + "\n");
 		}
 
 		textArea.setText(writer.toString());

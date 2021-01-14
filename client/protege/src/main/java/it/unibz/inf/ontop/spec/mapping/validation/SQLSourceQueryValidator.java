@@ -32,15 +32,11 @@ import java.sql.Statement;
 public class SQLSourceQueryValidator {
 
 	private final OntopSQLCredentialSettings settings;
-	private SQLPPSourceQuery sourceQuery = null;
+	private final SQLPPSourceQuery sourceQuery;
 
 	private Exception reason = null;
 
-	private JDBCConnectionManager modelfactory = null;
-
 	private Statement st;
-
-	private Connection c;
 
 	public SQLSourceQueryValidator(OntopSQLCredentialSettings settings, SQLPPSourceQuery q) {
 		this.settings = settings;
@@ -48,28 +44,23 @@ public class SQLSourceQueryValidator {
 	}
 
 	public boolean validate() {
-		ResultSet set = null;
 		try {
-			modelfactory = JDBCConnectionManager.getJDBCConnectionManager();
-			c = modelfactory.getConnection(settings);
+			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+			Connection c = man.getConnection(settings);
 			st = c.createStatement();
-			set = st.executeQuery(sourceQuery.toString());
-			return true;
-		} catch (SQLException e) {
-			reason = e;
-			return false;
-		} catch (Exception e) {
-			reason = e;
-			return false;
-		} finally {
-			try {
-				set.close();
-			} catch (Exception e) {
-				// NO-OP
+			try (ResultSet rs = st.executeQuery(sourceQuery.toString())) {
+				return true;
 			}
+		}
+		catch (Exception e) {
+			reason = e;
+			return false;
+		}
+		finally {
 			try {
 				st.close();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				// NO-OP
 			}
 		}

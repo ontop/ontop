@@ -31,31 +31,21 @@ import java.awt.*;
 public class QuestConfigPanel extends javax.swing.JPanel {
 
     private static final long serialVersionUID = 602382682995021070L;
-    private DisposableProperties preference;
+    private final DisposableProperties preference;
 
     /**
      * The constructor.
      */
-    public QuestConfigPanel(final DisposableProperties preference) {
+    public QuestConfigPanel(DisposableProperties preference) {
         this.preference = preference;
         initComponents();
-        setSelections(preference);
-        this.setMaximumSize(new Dimension(1024,768));
-        this.setMinimumSize(new Dimension(1024,768));
+        setMaximumSize(new Dimension(1024,768));
+        setMinimumSize(new Dimension(1024,768));
+
+        chkRewrite.setSelected(preference.getBoolean(OntopReformulationSettings.EXISTENTIAL_REASONING));
+        chkAnnotations.setSelected(preference.getBoolean(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS));
+        chkSameAs.setSelected(preference.getBoolean(OntopOBDASettings.SAME_AS));
     }
-
-    private void setSelections(final DisposableProperties preference) {
-
-        boolean bChecked = preference.getBoolean(OntopReformulationSettings.EXISTENTIAL_REASONING);
-        chkRewrite.setSelected(bChecked);
-        
-        bChecked = preference.getBoolean(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS);
-        chkAnnotations.setSelected(bChecked);
-
-        bChecked = preference.getBoolean(OntopOBDASettings.SAME_AS);
-        chkSameAs.setSelected(bChecked);
-    }
-
 
 
     /** This method is called from within the constructor to
@@ -177,17 +167,14 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
         preference.put(OntopReformulationSettings.EXISTENTIAL_REASONING, String.valueOf(chkRewrite.isSelected()));
-
     }//GEN-LAST:event_chkRewriteActionPerformed
 
     private void chkAnnotationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAnnotationsActionPerformed
         preference.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, String.valueOf(chkAnnotations.isSelected()));
-
     }//GEN-LAST:event_chkAnnotationsActionPerformed
 
     private void chkSameAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSameAsActionPerformed
         preference.put(OntopOBDASettings.SAME_AS, String.valueOf(chkSameAs.isSelected()));
-
     }//GEN-LAST:event_chkSameAsActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

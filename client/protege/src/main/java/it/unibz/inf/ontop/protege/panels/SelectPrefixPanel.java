@@ -27,17 +27,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Vector;
 
 public class SelectPrefixPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = -8277829841902027620L;
 
-	private Map<String, String> prefixMap = null;
-	private JDialog parent = null;
-	private JTextPane querypane = null;
-	private Vector<JCheckBox> checkboxes = null;
+	private final Map<String, String> prefixMap;
+	private JDialog parent;
+	private final JTextPane querypane;
+	private final ArrayList<JCheckBox> checkboxes = new ArrayList<>();
 
 	/** 
 	 * Creates new form SelectPrefixDialog 
@@ -48,41 +48,19 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		querypane = parent;
 		
 		initComponents();
-		drawCheckBoxes();
-	}
 
-	public void show() {
-		parent = new JDialog();
-		parent.setModal(true);
-		parent.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		parent.setContentPane(this);
-		parent.setLocationRelativeTo(querypane);
-		parent.pack();
-		jButtonAccept.requestFocus();
-
-		DialogUtils.installEscapeCloseOperation(parent);
-		DialogUtils.centerDialogWRTParent(querypane, parent);
-		parent.setVisible(true);
-	}
-
-	private boolean isBasePrefix(String prefix) {
-		return prefix.equals(":");
-	}
-
-	private void drawCheckBoxes() {
-		checkboxes = new Vector<JCheckBox>();
 		int gridYIndex = 1;
 		for (String key : prefixMap.keySet()) {
 			if (!key.equals("version")) {
 				jCheckBox1 = new JCheckBox();
 				jCheckBox1.setText(key);
 				jCheckBox1.setPreferredSize(new Dimension(444, 18));
-				jCheckBox1.setFont(new java.awt.Font("Tahoma", 1, 11));
+				jCheckBox1.setFont(new Font("Tahoma", 1, 11));
 				jCheckBox1.setPreferredSize(new Dimension(75, 15));
-				java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-				gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-				gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-				gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+				GridBagConstraints gridBagConstraints = new GridBagConstraints();
+				gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+				gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+				gridBagConstraints.insets = new Insets(3, 3, 3, 3);
 				gridBagConstraints.gridx = 0;
 				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : gridYIndex;
 				gridBagConstraints.weightx = 0.0;
@@ -91,10 +69,10 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				jLabel1 = new JLabel();
 				jLabel1.setText("<" + prefixMap.get(key) + ">");
 				jLabel1.setPreferredSize(new Dimension(350, 15));
-				gridBagConstraints = new java.awt.GridBagConstraints();
-				gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-				gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-				gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+				gridBagConstraints = new GridBagConstraints();
+				gridBagConstraints.fill = GridBagConstraints.BOTH;
+				gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+				gridBagConstraints.insets = new Insets(3, 3, 3, 3);
 				gridBagConstraints.gridx = 1;
 				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : gridYIndex;
 				gridBagConstraints.weightx = 1.0;
@@ -112,10 +90,10 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 			}
 		}
 
-		java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+		GridBagConstraints gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = gridYIndex + 1;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.weighty = 1.0;
 		jPanel2.add(jPanel3, gridBagConstraints);
@@ -149,6 +127,25 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		jPanel3.setPreferredSize(new Dimension(1, 1));
 	}
 
+	@Override
+	public void show() {
+		parent = new JDialog();
+		parent.setModal(true);
+		parent.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		parent.setContentPane(this);
+		parent.setLocationRelativeTo(querypane);
+		parent.pack();
+		jButtonAccept.requestFocus();
+
+		DialogUtils.installEscapeCloseOperation(parent);
+		DialogUtils.centerDialogWRTParent(querypane, parent);
+		parent.setVisible(true);
+	}
+
+	private boolean isBasePrefix(String prefix) {
+		return prefix.equals(":");
+	}
+
 	private void selectAll() {
 		for (JCheckBox box : checkboxes) {
 			box.setSelected(true);
@@ -162,7 +159,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	}
 
 	private void accept() {
-		StringBuffer directive = new StringBuffer();
+		StringBuilder directive = new StringBuilder();
 		for (JCheckBox checkbox : checkboxes) {
 			if (checkbox.isSelected()) {
 				String prefix = checkbox.getText();
