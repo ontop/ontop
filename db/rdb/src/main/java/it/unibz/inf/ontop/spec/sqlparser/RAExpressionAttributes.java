@@ -24,7 +24,7 @@ public class RAExpressionAttributes  {
      * @param attributes  an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
      * @param occurrences an {@link RAExpressionAttributeOccurrences}>>
      */
-    RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
+    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
                            RAExpressionAttributeOccurrences occurrences) {
         this.attributes = attributes;
         this.occurrences = occurrences;
