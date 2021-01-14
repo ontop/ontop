@@ -49,7 +49,7 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 	}
 
 	@Override
-	protected void initialiseOWLView() throws Exception {
+	protected void initialiseOWLView()  {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
 		obdaController.addListener(this);
 

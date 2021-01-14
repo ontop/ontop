@@ -36,9 +36,9 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	private static final Logger log = LoggerFactory.getLogger(DatasourcesManagerView.class);
 
-	DatasourceParameterEditorPanel editor;
+	private DatasourceParameterEditorPanel editor;
 
-	OBDAModelManager obdaModelManager = null;
+	private OBDAModelManager obdaModelManager;
 
 	@Override
 	protected void disposeOWLView() {
@@ -46,16 +46,13 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 	}
 
 	@Override
-	protected void initialiseOWLView() throws Exception {
+	protected void initialiseOWLView()  {
 		
 		obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
 		obdaModelManager.addListener(this);
 
-        //OWLModelManager owlModelManager = getOWLEditorKit().getOWLModelManager();
-
         setLayout(new BorderLayout());
 
-		//editor = new DatasourceParameterEditorPanel(obdaModelManager.getActiveOBDAModel(), owlModelManager);
 		editor = new DatasourceParameterEditorPanel(getOWLEditorKit());
 		add(editor, BorderLayout.NORTH);
 

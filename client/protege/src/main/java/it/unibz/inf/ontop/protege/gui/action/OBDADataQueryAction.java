@@ -41,10 +41,10 @@ import java.util.concurrent.CountDownLatch;
 public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	// The string shown to the user in the dialog during execution of action
-	String msg;
+	private final String msg;
 
 	// The result object
-	T result;
+	private T result;
 
 	// Translated SQL query
 	private String sqlQuery;
@@ -53,22 +53,21 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private long time;
 
 	private boolean queryExecError = false;
-	private OntopOWLStatement statement = null;
-	private CountDownLatch latch = null;
-	private Thread thread = null;
-	private String queryString = null;
+	private OntopOWLStatement statement;
+	private CountDownLatch latch;
+	private String queryString;
 
 	private boolean isCanceled = false;
 	private boolean actionStarted = false;
 	private OntopProtegeReasoner reasoner;
-	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
+	private final Component rootView;
 
-	private static String QUEST_START_MESSAGE = "Ontop reasoner must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
+	private static final String QUEST_START_MESSAGE = "Ontop reasoner must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
 
 
-	public OBDADataQueryAction(String msg, Component rootView){ // Davide> DAG's hack protegeQueryTabFreezeBug
+	public OBDADataQueryAction(String msg, Component rootView){
 		this.msg = msg;
 		this.rootView = rootView;
 	}
@@ -99,7 +98,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		this.queryExecError = false;
 		OBDAProgressMonitor monitor = null;
 		try {
-			monitor = new OBDAProgressMonitor(this.msg, getEditorKit().getWorkspace());
+			monitor = new OBDAProgressMonitor(msg, getEditorKit().getWorkspace());
 			monitor.start();
 			latch = new CountDownLatch(1);
 			OWLEditorKit kit = this.getEditorKit();
@@ -116,16 +115,15 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 					handleSQLTranslation(sqlQuery);
 					handleResult(result);
 				}
-			} else /* reasoner not OntopProtegeReasoner */ {
-				JOptionPane.showMessageDialog(
-						rootView,
-						QUEST_START_MESSAGE);
 			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(
-					rootView,
-					e);
-		} finally {
+			else /* reasoner not OntopProtegeReasoner */ {
+				JOptionPane.showMessageDialog(rootView, QUEST_START_MESSAGE);
+			}
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(rootView, e);
+		}
+		finally {
 			latch.countDown();
 			monitor.stop();
 		}
@@ -138,15 +136,16 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	public abstract int getNumberOfRows();
 
-
 	public abstract boolean isRunning();
 
 
 	private void runAction() {
-		thread = new Thread(() -> {
+		// FIXME
+		// sqlQuery = sqlExecutableQuery.getSQL();
+		Thread thread = new Thread(() -> {
 			try {
 				statement = reasoner.getStatement();
-				if(statement == null)
+				if (statement == null)
 					throw new NullPointerException("QuestQueryAction received a null QuestOWLStatement object from the reasoner");
 
 				final IQ sqlExecutableQuery = statement.getExecutableQuery(queryString);
@@ -156,8 +155,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 				actionStarted = true;
 				result = executeQuery(statement, queryString);
 				latch.countDown();
-			} catch (Exception e) {
-				if(!isCancelled()){
+			}
+			catch (Exception e) {
+				if (!isCancelled()) {
 					latch.countDown();
 					queryExecError = true;
 					log.error(e.getMessage(), e);
@@ -176,25 +176,24 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	 *
 	 */
 	private class Canceller extends Thread {
-		private CountDownLatch old_latch;
-		private OWLConnection old_conn;
-		private OntopOWLStatement old_stmt;
+		private final CountDownLatch old_latch;
+		private final OWLConnection old_conn;
+		private final OntopOWLStatement old_stmt;
 
 		Canceller() throws OntopConnectionException {
-			super();
 			this.old_latch = latch;
 			this.old_stmt = statement;
 			this.old_conn = reasoner.replaceConnection();
 		}
 
-
-		public void run(){
+		public void run() {
 			try {
-				this.old_stmt.cancel();
-				this.old_stmt.close();
-				this.old_conn.close();
-				this.old_latch.countDown();
-			} catch (Exception e) {
+				old_stmt.cancel();
+				old_stmt.close();
+				old_conn.close();
+				old_latch.countDown();
+			}
+			catch (Exception e) {
 				this.old_latch.countDown();
 				DialogUtils.showQuickErrorDialog(rootView, e, "Error cancelling query.");
 			}
@@ -202,16 +201,18 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	}
 
 	public void actionCanceled() {
-		this.isCanceled = true;
-		if(!actionStarted)
+		isCanceled = true;
+		if (!actionStarted)
 			throw new Error("Query execution has not been started, and cannot be cancelled.");
 		try {
 			Canceller canceller = new Canceller();
 			canceller.start();
-		} catch (OntopConnectionException e) {
+		}
+		catch (OntopConnectionException e) {
 			DialogUtils.showQuickErrorDialog(rootView, e, "Error creating new database connection.");
-		} finally {
-			this.actionStarted = false;
+		}
+		finally {
+			actionStarted = false;
 		}
 	}
 

@@ -31,7 +31,6 @@ public class QueryManagerViewsList extends ArrayList<QueryManagerView> implement
 
 	private static final long serialVersionUID = 2986737849606126197L;
 
-	public void dispose() throws Exception {
-		// NO-OP
-	}
+	@Override
+	public void dispose() {/* NO-OP */ }
 }

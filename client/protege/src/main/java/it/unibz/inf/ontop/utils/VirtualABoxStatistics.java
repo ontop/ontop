@@ -130,7 +130,7 @@ public class VirtualABoxStatistics {
 	}
 
 	private String getSelectionString(SQLPPSourceQuery query) throws Exception {
-		final String originalSql = query.toString();
+		String originalSql = query.getSQL();
 
 		String sql = originalSql.toLowerCase(); // make it lower case to help identify a string.
 		Matcher m = Pattern.compile("[\\n\\s\\t]*from[\\n\\s\\t]*").matcher(sql);

@@ -34,8 +34,7 @@ public class SQLSourceQueryValidator {
 	private final OntopSQLCredentialSettings settings;
 	private final SQLPPSourceQuery sourceQuery;
 
-	private Exception reason = null;
-
+	private Exception reason;
 	private Statement st;
 
 	public SQLSourceQueryValidator(OntopSQLCredentialSettings settings, SQLPPSourceQuery q) {
@@ -48,7 +47,7 @@ public class SQLSourceQueryValidator {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 			Connection c = man.getConnection(settings);
 			st = c.createStatement();
-			try (ResultSet rs = st.executeQuery(sourceQuery.toString())) {
+			try (ResultSet rs = st.executeQuery(sourceQuery.getSQL())) {
 				return true;
 			}
 		}
