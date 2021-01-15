@@ -68,7 +68,12 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        return relationMap.get(id).createDatabaseTableDefinition(dbParameters);
+        JsonDatabaseTable jsonTable = relationMap.get(id);
+        if (jsonTable == null)
+            throw new IllegalArgumentException("The relation " + id.getSQLRendering()
+                    + " is unknown to the JsonSerializedMetadataProvider");
+
+        return jsonTable.createDatabaseTableDefinition(dbParameters);
     }
 
     @Override
