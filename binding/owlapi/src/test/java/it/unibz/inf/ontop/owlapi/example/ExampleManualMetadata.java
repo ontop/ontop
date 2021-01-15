@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -78,7 +79,8 @@ public class ExampleManualMetadata {
 
 	private static MetadataProvider getMeta(){
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-		OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(defaultConfiguration.getTypeFactory());
+		OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(defaultConfiguration.getInjector()
+				.getInstance(CoreSingletons.class));
 
 		defMeasTable(builder);
 		defMessTable(builder);
