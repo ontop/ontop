@@ -6,10 +6,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -54,6 +51,7 @@ public class OptimizationTestingTools {
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;
+    public static final CoreSingletons CORE_SINGLETONS;
 
     public static final Variable X;
     public static final Variable Y;
@@ -119,6 +117,7 @@ public class OptimizationTestingTools {
         PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
+        CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
@@ -177,12 +176,12 @@ public class OptimizationTestingTools {
     }
 
     public static OfflineMetadataProviderBuilder3 createMetadataProviderBuilder() {
-        return new OfflineMetadataProviderBuilder3(TYPE_FACTORY);
+        return new OfflineMetadataProviderBuilder3(CORE_SINGLETONS);
     }
 
     public static class OfflineMetadataProviderBuilder3 extends OfflineMetadataProviderBuilder {
 
-        public OfflineMetadataProviderBuilder3(TypeFactory typeFactory) { super(typeFactory); }
+        public OfflineMetadataProviderBuilder3(CoreSingletons coreSingletons) { super(coreSingletons); }
 
         public NamedRelationDefinition createRelation(String tableName, int arity, DBTermType termType, boolean canBeNull) {
             QuotedIDFactory idFactory = getQuotedIDFactory();

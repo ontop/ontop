@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -41,6 +41,7 @@ public class OntopModelTestingTools {
     public static final IQConverter IQ_CONVERTER;
     public static final RDF RDF_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
+    public static final CoreSingletons CORE_SINGLETONS;
 
 
     static {
@@ -61,10 +62,11 @@ public class OntopModelTestingTools {
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
+        CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
     }
 
     public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
-        return new OfflineMetadataProviderBuilder(TYPE_FACTORY);
+        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS);
     }
 
     public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<VariableOrGroundTerm> arguments) {

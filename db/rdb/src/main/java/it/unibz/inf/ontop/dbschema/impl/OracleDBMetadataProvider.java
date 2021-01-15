@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
@@ -19,8 +20,8 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     private final RelationID sysDualId;
 
     @AssistedInject
-    protected OracleDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, metadata -> new SQLStandardQuotedIDFactory(), typeFactory,
+    protected OracleDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        super(connection, metadata -> new SQLStandardQuotedIDFactory(), coreSingletons,
                 "SELECT user as TABLE_SCHEM FROM dual");
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm

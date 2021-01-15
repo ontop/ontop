@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
@@ -13,12 +14,12 @@ import java.sql.SQLException;
 public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @AssistedInject
-    MySQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
+    MySQLDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection,
                 metadata -> metadata.storesMixedCaseIdentifiers()
                     ? new MySQLCaseSensitiveTableNamesQuotedIDFactory()
                     : new MySQLCaseNotSensitiveTableNamesQuotedIDFactory(),
-                typeFactory,
+                coreSingletons,
                 "SELECT DATABASE() AS TABLE_SCHEM");
         // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
     }
