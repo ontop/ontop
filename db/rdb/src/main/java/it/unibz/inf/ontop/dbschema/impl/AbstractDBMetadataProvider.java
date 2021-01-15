@@ -134,7 +134,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
             }
             throw relations.isEmpty()
-                    ? new RelationNotFoundInMetadataException(id)
+                    ? new RelationNotFoundInMetadataException(id, getRelationIDs())
                     : new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {

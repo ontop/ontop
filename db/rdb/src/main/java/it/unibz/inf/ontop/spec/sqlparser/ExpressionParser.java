@@ -214,7 +214,7 @@ public class ExpressionParser {
             if (str.startsWith("0x"))
                 value = Long.parseLong(str.substring(2), 16);
             else if (str.toUpperCase().startsWith("X'")) // MySQL syntax
-                value =Long.parseLong(str.substring(2, str.length() - 1), 16);
+                value = Long.parseLong(str.substring(2, str.length() - 1), 16);
             else
                 throw new UnsupportedOperationException("Invalid HEX" + str);
 
@@ -431,7 +431,9 @@ public class ExpressionParser {
                 else if (column.equals(idfac.createAttributeID("false")))
                     result = termFactory.getDBBooleanConstant(false);
                 else
-                    throw new InvalidSelectQueryRuntimeException("Unable to find attribute name ", expression);
+                    throw new InvalidSelectQueryRuntimeException("Unable to find attribute "
+                            + expression
+                            + " (available attributes are " + attributes.asMap().keySet() + ")", expression);
             }
             else {
                 // if it is an attribute name (qualified or not)

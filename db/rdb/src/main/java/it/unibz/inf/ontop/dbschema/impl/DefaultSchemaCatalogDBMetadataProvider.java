@@ -34,6 +34,10 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
+        if (defaultSchema == null)
+            throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
+        if (defaultCatalog == null)
+            throw new MetadataExtractionException("Unable to obtain the default catalog: make sure the connection URL is complete");
     }
 
     @Override

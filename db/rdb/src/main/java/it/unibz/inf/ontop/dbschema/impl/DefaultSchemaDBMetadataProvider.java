@@ -27,11 +27,12 @@ public abstract class DefaultSchemaDBMetadataProvider extends AbstractDBMetadata
             rs.next();
             RelationID id = rawIdFactory.createRelationID(rs.getString("TABLE_SCHEM"), "DUMMY");
             defaultSchema = id.getComponents().get(SCHEMA_INDEX);
-
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
+        if (defaultSchema == null)
+            throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
     }
 
     @Override
