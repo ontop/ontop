@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider {
 
     private final MetadataProvider parentMetadataProvider;
-    private final MetadataLookup parentCacheMetadataLookup;
+    private final CachingMetadataLookupWithDependencies parentCacheMetadataLookup;
     private final QuotedIDFactory quotedIdFactory;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
@@ -30,7 +30,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
                                             @Assisted Reader ontopViewReader) throws MetadataExtractionException {
         this.parentMetadataProvider = parentMetadataProvider;
-        this.parentCacheMetadataLookup = new CachingMetadataLookup(parentMetadataProvider);
+        this.parentCacheMetadataLookup = new CachingMetadataLookupWithDependencies(parentMetadataProvider);
         this.quotedIdFactory = parentMetadataProvider.getQuotedIDFactory();
 
         try (Reader viewReader = ontopViewReader) {
@@ -68,7 +68,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     @Override
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         if (jsonMap.containsKey(id))
-            return jsonMap.get(id).createViewDefinition(getDBParameters(), parentCacheMetadataLookup);
+            return jsonMap.get(id).createViewDefinition(getDBParameters(), parentCacheMetadataLookup.getCachingMetadataLookup(id));
         return parentCacheMetadataLookup.getRelation(id);
     }
 
@@ -88,11 +88,22 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     @Override
     public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         RelationID id = relation.getID();
-
-        if (jsonMap.containsKey(id))
-            jsonMap.get(id).insertIntegrityConstraints(metadataLookup);
-        else
-            parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookup);
+        JsonView jsonView = jsonMap.get(id);
+        if (jsonView != null) {
+            for (RelationID baseId : parentCacheMetadataLookup.getBaseRelations(id)) {
+                boolean complete = parentCacheMetadataLookup.completeRelation(baseId);
+                if (!complete)
+                    parentMetadataProvider.insertIntegrityConstraints(
+                            parentCacheMetadataLookup.getRelation(baseId),
+                            metadataLookup);
+            }
+            jsonView.insertIntegrityConstraints(metadataLookup);
+        }
+        else {
+            boolean complete = parentCacheMetadataLookup.completeRelation(id);
+            if (!complete)
+                parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookup);
+        }
     }
 
     @Override
