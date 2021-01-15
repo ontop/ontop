@@ -14,11 +14,8 @@ public class JsonViews extends JsonOpenObject {
     @Nonnull
     public final List<? extends JsonView> relations;
 
-    /**
-     * TODO: allow all sorts of JSONView
-     */
     @JsonCreator
-    public JsonViews(@JsonProperty("relations") List<JsonBasicView> relations) {
+    public JsonViews(@JsonProperty("relations") List<JsonView> relations) {
         this.relations = relations;
     }
 }

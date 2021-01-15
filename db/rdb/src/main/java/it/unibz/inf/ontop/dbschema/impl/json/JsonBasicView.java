@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -48,6 +49,7 @@ import java.util.stream.Stream;
 @JsonPropertyOrder({
         "relations"
 })
+@JsonDeserialize(as = JsonBasicView.class)
 public class JsonBasicView extends JsonView {
     @Nonnull
     public final Columns columns;
