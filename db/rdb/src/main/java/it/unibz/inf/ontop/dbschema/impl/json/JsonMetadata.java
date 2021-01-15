@@ -112,8 +112,7 @@ public class JsonMetadata extends JsonOpenObject {
     }
 
     public static RelationID deserializeRelationID(QuotedIDFactory idFactory, List<String> o) {
-        ImmutableList<String> c = ImmutableList.copyOf(o).reverse();
-        return idFactory.createRelationID(c.toArray(new String[0]));
+        return idFactory.createRelationID(o.toArray(new String[0]));
     }
     
     public static List<String> serializeAttributeList(Stream<Attribute> attributes) {
