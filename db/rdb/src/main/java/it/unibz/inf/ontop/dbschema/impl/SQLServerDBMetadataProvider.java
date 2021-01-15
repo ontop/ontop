@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
@@ -12,8 +13,8 @@ import java.sql.Connection;
 public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvider {
 
     @AssistedInject
-    SQLServerDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, metadata -> new SQLServerQuotedIDFactory(), typeFactory,
+    SQLServerDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        super(connection, metadata -> new SQLServerQuotedIDFactory(), coreSingletons,
                 "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM");
         // https://msdn.microsoft.com/en-us/library/ms175068.aspx
         // https://docs.microsoft.com/en-us/sql/t-sql/functions/schema-name-transact-sql

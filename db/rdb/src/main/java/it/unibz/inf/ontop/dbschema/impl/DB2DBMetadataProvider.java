@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
@@ -14,8 +15,8 @@ import java.sql.SQLException;
 public class DB2DBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @AssistedInject
-    DB2DBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, metadata -> new SQLStandardQuotedIDFactory(), typeFactory,
+    DB2DBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        super(connection, metadata -> new SQLStandardQuotedIDFactory(), coreSingletons,
                 "select CURRENT SCHEMA AS TABLE_SCHEM from SYSIBM.SYSDUMMY1");
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0005881.html
         // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000720.html
