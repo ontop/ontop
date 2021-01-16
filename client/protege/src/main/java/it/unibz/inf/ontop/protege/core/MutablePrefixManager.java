@@ -72,41 +72,4 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	public void clear() {
 		owlmapper.clear();
 	}
-
-	/**
-	 *  Returns the namespace declared in the ontology for the default prefix.
-	*/
-	 static Optional<String> getDeclaredDefaultPrefixNamespace(OWLOntology ontology){
-		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
-				ontology,
-				ontology.getOWLOntologyManager().getOntologyFormat(ontology));
-
-		if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
-			.anyMatch(p ->  p.equals(""))){
-			return Optional.ofNullable(nsm.getNamespaceForPrefix(""));
-		}
-		return Optional.empty();
-	}
-
-	static Optional<String> generateDefaultPrefixNamespaceFromID(OWLOntologyID ontologyID) {
-		com.google.common.base.Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
-		return ontologyIRI.isPresent()
-				? Optional.of(getProperPrefixURI(ontologyIRI.get().toString()))
-				: Optional.empty();
-	}
-
-	/**
-	 * A utility method to ensure a proper naming for prefix URIs
-	 */
-	private static String getProperPrefixURI(String prefixUri) {
-		if (!prefixUri.endsWith("#")) {
-			if (!prefixUri.endsWith("/")) {
-				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
-				if (!prefixUri.endsWith(defaultSeparator))  {
-					prefixUri += defaultSeparator;
-				}
-			}
-		}
-		return prefixUri;
-	}
 }

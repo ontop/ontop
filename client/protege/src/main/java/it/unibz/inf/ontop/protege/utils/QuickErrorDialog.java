@@ -22,7 +22,7 @@ public class QuickErrorDialog implements Runnable {
 	private final Exception e;
 	private final String message;
 	
-	QuickErrorDialog(Component parent, Exception e, String message){
+	QuickErrorDialog(Component parent, Exception e, String message) {
 		this.parent = parent;
 		this.e = e;
 		this.message = message;

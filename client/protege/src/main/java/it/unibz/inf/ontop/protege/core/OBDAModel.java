@@ -23,7 +23,9 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
+import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.semanticweb.owlapi.model.OWLOntologyID;
 
 import java.io.Reader;
 import java.net.URI;
@@ -442,8 +444,7 @@ public class OBDAModel {
     }
 
     void setExplicitDefaultPrefixNamespace(String ns) {
-        this.explicitDefaultPrefixNamespace = Optional.of(ns);
+        explicitDefaultPrefixNamespace = Optional.of(ns);
         addPrefix(PrefixManager.DEFAULT_PREFIX, ns);
     }
-
 }

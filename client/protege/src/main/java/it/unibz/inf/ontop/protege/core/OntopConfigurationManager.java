@@ -58,18 +58,15 @@ public class OntopConfigurationManager {
     }
 
     public void loadNewConfiguration(String owlName) throws IOException {
-        String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
-        File implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
+        File implicitDBConstraintFile = new File(URI.create(owlName + DBPREFS_EXT));
         if (implicitDBConstraintFile.exists())
             this.implicitDBConstraintFile = implicitDBConstraintFile;
 
-        String dbMetadataFilePath = owlName + DBMETADATA_EXT;
-        File dbMetadataFile = new File(URI.create(dbMetadataFilePath));
+        File dbMetadataFile = new File(URI.create(owlName + DBMETADATA_EXT));
         if(dbMetadataFile.exists())
             this.dbMetadataFile = dbMetadataFile;
 
-        String propertyFilePath = owlName + PROPERTY_EXT;
-        File propertyFile = new File(URI.create(propertyFilePath));
+        File propertyFile = new File(URI.create(owlName + PROPERTY_EXT));
         if (propertyFile.exists()) {
             userSettings.load(new FileReader(propertyFile));
             loadDataSource(obdaModel, userSettings);
