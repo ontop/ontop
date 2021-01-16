@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
@@ -9,23 +10,29 @@ import java.util.Map;
 import java.util.Set;
 
 public class CachingMetadataLookupWithDependencies extends CachingMetadataLookup {
-    private final Map<RelationID, Set<RelationID>> baseRelations = new HashMap<>();
-    private final Set<RelationID> completeRelations = new HashSet<>(); // with integrity constraints
+    // maps a relation ID to the set of IDs of its bases (relations cannot be put in a set)
+    private final Map<RelationID, Set<RelationID>> baseRelationIds = new HashMap<>();
 
     public CachingMetadataLookupWithDependencies(MetadataProvider provider) {
         super(provider);
     }
 
-    public Set<RelationID> getBaseRelations(RelationID id) { return baseRelations.get(id); }
+    public ImmutableList<NamedRelationDefinition> getBaseRelations(RelationID id) throws MetadataExtractionException {
+        ImmutableList.Builder<NamedRelationDefinition> builder = ImmutableList.builder();
+        for (RelationID baseId : baseRelationIds.get(id))
+            builder.add(getRelation(baseId));
+        return builder.build();
+    }
 
-    public MetadataLookup getCachingMetadataLookup(RelationID dependantRelationId) {
+    public MetadataLookup getCachingMetadataLookupFor(RelationID id) {
         return new MetadataLookup() {
+            private final Set<RelationID> bases = baseRelationIds.computeIfAbsent(id, i -> new HashSet<>());
+
             @Override
-            public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-                NamedRelationDefinition relation = CachingMetadataLookupWithDependencies.this.getRelation(id);
-                Set<RelationID> base = baseRelations.computeIfAbsent(dependantRelationId, i -> new HashSet<>());
-                base.add(relation.getID());
-                return relation;
+            public NamedRelationDefinition getRelation(RelationID baseId) throws MetadataExtractionException {
+                NamedRelationDefinition base = CachingMetadataLookupWithDependencies.this.getRelation(baseId);
+                bases.add(base.getID());
+                return base;
             }
 
             @Override
@@ -33,9 +40,5 @@ public class CachingMetadataLookupWithDependencies extends CachingMetadataLookup
                 return CachingMetadataLookupWithDependencies.this.getQuotedIDFactory();
             }
         };
-    }
-
-    public boolean completeRelation(RelationID id) {
-        return completeRelations.add(id);
     }
 }
