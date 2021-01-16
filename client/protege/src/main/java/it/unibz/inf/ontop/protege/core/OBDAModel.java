@@ -126,7 +126,7 @@ public class OBDAModel {
 
         SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
         ppMapping.getPrefixManager().getPrefixMap().forEach((k, v) -> prefixManager.addPrefix(k,v));
-        // New map
+
         triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(
                         SQLPPTriplesMap::getId,

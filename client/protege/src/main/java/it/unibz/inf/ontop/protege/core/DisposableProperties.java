@@ -22,46 +22,21 @@ package it.unibz.inf.ontop.protege.core;
 
 import org.protege.editor.core.Disposable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
-/**
- * Mutable
- */
 public class DisposableProperties extends Properties implements Disposable {
 
-	private static final long	serialVersionUID	= -1699795366967423089L;
+	private static final long serialVersionUID = -1699795366967423089L;
 
-	public DisposableProperties() {
-	}
+	public DisposableProperties() { }
 
-	public DisposableProperties(Properties properties) {
+	private DisposableProperties(Properties properties) {
 		putAll(properties);
 	}
 
 	@Override
-    public void dispose() {
-	}
-
-	@Deprecated
-	public static final String	DBTYPE	= "org.obda.owlreformulationplatform.dbtype";
-	@Deprecated
-	public static final String  OBTAIN_FROM_ONTOLOGY = "org.obda.owlreformulationplatform.obtainFromOntology";
-	@Deprecated
-	public static final String  OBTAIN_FROM_MAPPINGS = "org.obda.owlreformulationplatform.obtainFromMappings";
-	@Deprecated
-	public static final String	ABOX_MODE = "org.obda.owlreformulationplatform.aboxmode";
-
-	public List<String> getReformulationPlatformPreferencesKeys(){
-		ArrayList<String> keys = new ArrayList<>();
-		keys.add(ABOX_MODE);
-		keys.add(DBTYPE);
-		keys.add(OBTAIN_FROM_ONTOLOGY);
-		keys.add(OBTAIN_FROM_MAPPINGS);
-		return keys;
-	}
+    public void dispose() { /* NO-OP */ }
 
 	@Override
 	public DisposableProperties clone() {

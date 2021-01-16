@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
@@ -44,16 +43,16 @@ public class R2RMLExportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
 
-	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
-	private OWLModelManager modelManager= null;
+	private OWLEditorKit editorKit;
+	private OBDAModel obdaModel;
+	private OWLModelManager modelManager;
 	
 	private final Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 	
 	@Override
 	public void initialise()  {
-		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(SQLPPMappingImpl.class.getName())).getActiveOBDAModel();
+		editorKit = (OWLEditorKit)getEditorKit();
+		obdaModel = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getActiveOBDAModel();
 		modelManager = editorKit.getOWLModelManager();
 	}
 

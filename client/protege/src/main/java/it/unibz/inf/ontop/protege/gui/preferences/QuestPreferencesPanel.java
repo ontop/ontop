@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.gui.preferences;
 
 
 import it.unibz.inf.ontop.protege.core.DisposableProperties;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import it.unibz.inf.ontop.protege.panels.QuestConfigPanel;
 
@@ -29,24 +30,20 @@ import java.awt.*;
 
 public class QuestPreferencesPanel extends OWLPreferencesPanel {
 
-	private static final long	serialVersionUID	= 2017399622537704497L;
-
-    @Override
-	public void applyChanges() {
-		// Do nothing.
-	}
+	private static final long serialVersionUID = 2017399622537704497L;
 
 	@Override
-	public void initialise() throws Exception {
-		DisposableProperties preference = (DisposableProperties)getEditorKit().get(DisposableProperties.class.getName());
-		
+	public void initialise() {
+		DisposableProperties preferences = OBDAEditorKitSynchronizerPlugin.getProperties(getEditorKit());
+        QuestConfigPanel configPanel = new QuestConfigPanel(preferences);
+
 		this.setLayout(new BorderLayout());
-        QuestConfigPanel configPanel = new QuestConfigPanel(preference);
-		this.add(configPanel,BorderLayout.CENTER);
+		this.add(configPanel, BorderLayout.CENTER);
 	}
 
 	@Override
-	public void dispose() throws Exception {
-		// Do nothing.
-	}
+	public void applyChanges() { /* NO-OP */ }
+
+	@Override
+	public void dispose() { /* NO-OP */ }
 }

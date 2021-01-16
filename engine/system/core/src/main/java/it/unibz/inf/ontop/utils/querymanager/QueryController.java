@@ -34,13 +34,13 @@ public class QueryController implements Serializable {
 	private static final long serialVersionUID = 6456175226053526128L;
 	
 	private List<QueryControllerEntity> entities;
-	private List<QueryControllerListener> listeners;
+	private final List<QueryControllerListener> listeners;
 	
 	private boolean eventDisabled;
 
 	public QueryController() {
-		entities = new ArrayList<QueryControllerEntity>();
-		listeners = new ArrayList<QueryControllerListener>();
+		entities = new ArrayList<>();
+		listeners = new ArrayList<>();
 	}
 
 	public void addListener(QueryControllerListener listener) {
@@ -88,7 +88,7 @@ public class QueryController implements Serializable {
 	 * Returns all the groups added
 	 */
 	public List<QueryControllerGroup> getGroups() {
-		List<QueryControllerGroup> groups = new ArrayList<QueryControllerGroup>();
+		List<QueryControllerGroup> groups = new ArrayList<>();
 		for (QueryControllerEntity element : entities) {
 			if (element instanceof QueryControllerGroup) {
 				groups.add((QueryControllerGroup) element);

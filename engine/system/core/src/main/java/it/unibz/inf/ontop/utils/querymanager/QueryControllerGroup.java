@@ -22,16 +22,13 @@ package it.unibz.inf.ontop.utils.querymanager;
 
 import java.util.Vector;
 
-public class QueryControllerGroup extends QueryControllerEntity {
+public class QueryControllerGroup implements QueryControllerEntity {
 
-	private static final long serialVersionUID = -2932318255139254847L;
-	
-	private Vector<QueryControllerQuery> queries = null;
+	private final Vector<QueryControllerQuery> queries =  new Vector<>();
 	private String group_id = "";
 
 	public QueryControllerGroup(String group_id) {
-		this.setID(group_id);
-		queries = new Vector<QueryControllerQuery>();
+		this.group_id = group_id;
 	}
 
 	public void setID(String group_id) {

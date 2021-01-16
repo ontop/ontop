@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -51,11 +51,9 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	protected void initialiseOWLView() {
-		
-		// Retrieve the editor kit.
-		OWLEditorKit editor = getOWLEditorKit();
+		OWLEditorKit editorKit = getOWLEditorKit();
 
-		controller = (OBDAModelManager) editor.get(SQLPPMappingImpl.class.getName());
+		controller = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 		controller.addListener(this);
 
 		obdaModel = controller.getActiveOBDAModel();
@@ -63,8 +61,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		// Init the Mapping Manager panel.
 		mappingPanel = new MappingManagerPanel(obdaModel);
 
-		editor.getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
-			OWLEntity entity = editor.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
+		editorKit.getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
+			OWLEntity entity = editorKit.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
 			if (entity == null)
 				return;
 			if (!entity.isTopEntity()) {

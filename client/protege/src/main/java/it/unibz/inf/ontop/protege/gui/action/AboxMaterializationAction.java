@@ -7,12 +7,12 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
@@ -55,14 +55,14 @@ public class AboxMaterializationAction extends ProtegeAction {
     private String lineSeparator;
     private OBDAModelManager obdaModelManager;
 
-    private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
+    private final Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
 
     @Override
     public void initialise() {
         OWLEditorKit editorKit = (OWLEditorKit) getEditorKit();
         workspace = editorKit.getWorkspace();
         modelManager = editorKit.getOWLModelManager();
-        obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
+        obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
         lineSeparator = System.getProperty("line.separator");
     }
 

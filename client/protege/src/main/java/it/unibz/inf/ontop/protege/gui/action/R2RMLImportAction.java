@@ -21,16 +21,12 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -56,13 +52,12 @@ public class R2RMLImportAction extends ProtegeAction {
 	private OBDAModel obdaModelController = null;
 	private OWLModelManager modelManager;
 
-	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
+	private final Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
 
 	@Override
 	public void initialise() {
 		editorKit = (OWLEditorKit) getEditorKit();
-		obdaModelController = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class
-				.getName())).getActiveOBDAModel();
+		obdaModelController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit).getActiveOBDAModel();
 		modelManager = editorKit.getOWLWorkspace().getOWLModelManager();
 	}
 

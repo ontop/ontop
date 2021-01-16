@@ -30,13 +30,12 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private OntopOWLConnection owlConnection;
     private final OWLAPITranslatorOWL2QL owlapiTranslator;
 
-
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
         super(rootOntology, configuration, BufferingMode.BUFFERING);
-        this.owlapiTranslator = configuration.getOWLAPITranslator();
+        owlapiTranslator = configuration.getOWLAPITranslator();
 
         reasoner = factory.createReasoner(rootOntology, configuration);
-        this.configurationManager = configuration.getOntopConfigurationManager();
+        configurationManager = configuration.getOntopConfigurationManager();
         owlConnection = reasoner.getConnection();
     }
 
@@ -65,13 +64,11 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
         super.flush();
         try {
             reasoner = factory.createReasoner(configurationManager.buildOntopSQLOWLAPIConfiguration(getRootOntology()));
-        } catch (OWLOntologyCreationException e) {
+        }
+        catch (OWLOntologyCreationException e) {
             e.printStackTrace();
         }
-
-
     }
-
 
     @Override
     public void interrupt() {
@@ -106,7 +103,6 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     @Override
     public boolean isConsistent() {
         return true;
-
     }
 
 

@@ -31,13 +31,12 @@ import java.awt.*;
 public class QuestConfigPanel extends javax.swing.JPanel {
 
     private static final long serialVersionUID = 602382682995021070L;
+
     private final DisposableProperties preference;
 
-    /**
-     * The constructor.
-     */
     public QuestConfigPanel(DisposableProperties preference) {
         this.preference = preference;
+
         initComponents();
         setMaximumSize(new Dimension(1024,768));
         setMinimumSize(new Dimension(1024,768));

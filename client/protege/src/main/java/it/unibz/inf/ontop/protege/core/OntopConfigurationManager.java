@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -20,11 +21,14 @@ import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.*;
  */
 public class OntopConfigurationManager {
 
-    private final OBDAModel obdaModel;
-    private final DisposableProperties settings;
-    private final DisposableProperties userSettings;
+    public static final String PROPERTY_EXT = ".properties"; // The default property file extension.
+    public static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
+    public static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
-    // Nullable
+    private final OBDAModel obdaModel;
+    private final Properties settings = new Properties();
+    private final Properties userSettings = new Properties();
+
     @Nullable
     private File implicitDBConstraintFile;
 
@@ -33,21 +37,56 @@ public class OntopConfigurationManager {
 
     OntopConfigurationManager(@Nonnull OBDAModel obdaModel, @Nonnull DisposableProperties internalSettings) {
         this.obdaModel = obdaModel;
-        this.settings = internalSettings;
+        this.settings.putAll(internalSettings);
         this.implicitDBConstraintFile = null;
         this.dbMetadataFile = null;
-        this.userSettings = new DisposableProperties();
+    }
+
+    public void reset(DisposableProperties settings) {
+        this.implicitDBConstraintFile = null;
+        this.dbMetadataFile = null;
+
+        this.settings.clear();
+        this.settings.putAll(settings);
+        this.userSettings.clear();
+
+        OBDADataSource dataSource = obdaModel.getDatasource();
+        dataSource.setURL("");
+        dataSource.setUsername("");
+        dataSource.setPassword("");
+        dataSource.setDriver("");
+    }
+
+    public void loadNewConfiguration(String owlName) throws IOException {
+        String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
+        File implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
+        if (implicitDBConstraintFile.exists())
+            this.implicitDBConstraintFile = implicitDBConstraintFile;
+
+        String dbMetadataFilePath = owlName + DBMETADATA_EXT;
+        File dbMetadataFile = new File(URI.create(dbMetadataFilePath));
+        if(dbMetadataFile.exists())
+            this.dbMetadataFile = dbMetadataFile;
+
+        String propertyFilePath = owlName + PROPERTY_EXT;
+        File propertyFile = new File(URI.create(propertyFilePath));
+        if (propertyFile.exists()) {
+            userSettings.load(new FileReader(propertyFile));
+            loadDataSource(obdaModel, userSettings);
+        }
     }
 
     Properties snapshotProperties() {
-        Properties properties = settings.clone();
-        properties.putAll(userSettings.clone());
+        Properties properties = new Properties();
+        properties.putAll(settings);
+        properties.putAll(userSettings);
         properties.putAll(obdaModel.getDatasource().asProperties());
         return properties;
     }
 
     Properties snapshotUserProperties() {
-        Properties properties = userSettings.clone();
+        Properties properties = new Properties();
+        properties.putAll(userSettings);
         properties.putAll(obdaModel.getDatasource().asProperties());
         return properties;
     }
@@ -69,53 +108,27 @@ public class OntopConfigurationManager {
         return builder.build();
     }
 
-    void setImplicitDBConstraintFile(File implicitDBConstraintFile) {
-        this.implicitDBConstraintFile = implicitDBConstraintFile;
-    }
-
-    void clearImplicitDBConstraintFile() {
-        this.implicitDBConstraintFile = null;
-    }
-
-    void setDBMetadataFile(File dbMetadataFile) {
-        this.dbMetadataFile = dbMetadataFile;
-    }
-
-    void clearDBMetadataFile() { this.dbMetadataFile = null; }
     /**
      * Loads the properties in the global settings and in data source.
      */
-    public void loadPropertyFile(File propertyFile) throws IOException {
-        userSettings.load(new FileReader(propertyFile));
-        loadDataSource(obdaModel, userSettings);
-    }
-
-    void resetProperties(DisposableProperties settings) {
-        this.settings.clear();
-        this.settings.putAll(settings);
-        this.userSettings.clear();
-
-        OBDADataSource dataSource = obdaModel.getDatasource();
-        dataSource.setURL("");
-        dataSource.setUsername("");
-        dataSource.setPassword("");
-        dataSource.setDriver("");
-    }
-
-    /**
-     * Loads the properties in the global settings and in data source.
-     */
-    public void loadProperties(Properties properties) throws IOException {
+    public void loadProperties(Properties properties) {
         userSettings.putAll(properties);
         loadDataSource(obdaModel, userSettings);
     }
 
-    private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {
+    private static void loadDataSource(OBDAModel obdaModel, Properties properties) {
         OBDADataSource dataSource = obdaModel.getDatasource();
 
-        properties.getOptionalProperty(JDBC_URL).ifPresent(dataSource::setURL);
-        properties.getOptionalProperty(JDBC_USER).ifPresent(dataSource::setUsername);
-        properties.getOptionalProperty(JDBC_PASSWORD).ifPresent(dataSource::setPassword);
-        properties.getOptionalProperty(JDBC_DRIVER).ifPresent(dataSource::setDriver);
+        Optional.ofNullable(properties.getProperty(JDBC_URL))
+                .ifPresent(dataSource::setURL);
+
+        Optional.ofNullable(properties.getProperty(JDBC_USER))
+                .ifPresent(dataSource::setUsername);
+
+        Optional.ofNullable(properties.getProperty(JDBC_PASSWORD))
+                .ifPresent(dataSource::setPassword);
+
+        Optional.ofNullable(properties.getProperty(JDBC_DRIVER))
+                .ifPresent(dataSource::setDriver);
     }
 }

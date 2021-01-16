@@ -20,13 +20,9 @@ package it.unibz.inf.ontop.utils.querymanager;
  * #L%
  */
 
-import java.io.Serializable;
+public interface QueryControllerEntity {
 
-public abstract class QueryControllerEntity implements Serializable {
+	String getNodeName();
 
-	private static final long serialVersionUID = -5241238894055210463L;
-
-	public abstract String getNodeName();
-
-	public abstract String getID();
+	String getID();
 }

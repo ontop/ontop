@@ -23,11 +23,11 @@ package it.unibz.inf.ontop.protege.panels;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
@@ -37,8 +37,6 @@ import java.awt.event.ItemListener;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
 
@@ -55,7 +53,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
      */
     public DatasourceParameterEditorPanel(OWLEditorKit owlEditorKit) {
 
-        OBDAModelManager obdaModelManager = (OBDAModelManager) owlEditorKit.get(SQLPPMappingImpl.class.getName());
+        OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(owlEditorKit);
         OBDAModel model = obdaModelManager.getActiveOBDAModel();
 
         timer = new Timer(200, e -> handleTimer());

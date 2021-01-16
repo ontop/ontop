@@ -20,11 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.utils.BootstrapGenerator;
@@ -43,7 +39,7 @@ public class BootstrapAction extends ProtegeAction {
 
 	private static final long serialVersionUID = 8671527155950905524L;
 
-	private OWLEditorKit editorKit = null;
+	private OWLEditorKit editorKit;
 	private OWLWorkspace workspace;
 	private OWLModelManager owlManager;
 	private OBDAModelManager modelManager;
@@ -56,7 +52,7 @@ public class BootstrapAction extends ProtegeAction {
 		editorKit = (OWLEditorKit) getEditorKit();
 		workspace = editorKit.getWorkspace();
 		owlManager = editorKit.getOWLModelManager();
-		modelManager = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName()));
+		modelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 	}
 
 	@Override
@@ -148,7 +144,7 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		public void run(String baseUri) throws Exception {
-			OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
+			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 			new BootstrapGenerator(obdaModelManager, baseUri, owlManager);
 		}
 

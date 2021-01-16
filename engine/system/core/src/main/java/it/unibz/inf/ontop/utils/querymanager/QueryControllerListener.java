@@ -20,19 +20,17 @@ package it.unibz.inf.ontop.utils.querymanager;
  * #L%
  */
 
-import java.io.Serializable;
+public interface QueryControllerListener  {
 
-public interface QueryControllerListener extends Serializable {
+	void elementAdded(QueryControllerEntity element);
 
-	public void elementAdded(QueryControllerEntity element);
+	void elementAdded(QueryControllerQuery query, QueryControllerGroup group);
 
-	public void elementAdded(QueryControllerQuery query, QueryControllerGroup group);
+	void elementRemoved(QueryControllerEntity element);
 
-	public void elementRemoved(QueryControllerEntity element);
+	void elementRemoved(QueryControllerQuery query, QueryControllerGroup group);
 
-	public void elementRemoved(QueryControllerQuery query, QueryControllerGroup group);
+	void elementChanged(QueryControllerQuery query);
 
-	public void elementChanged(QueryControllerQuery query);
-
-	public void elementChanged(QueryControllerQuery query, QueryControllerGroup group);
+	void elementChanged(QueryControllerQuery query, QueryControllerGroup group);
 }

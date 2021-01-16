@@ -255,7 +255,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		try {
 			OntopConnection conn = queryEngine.getConnection();
 			return new DefaultOntopOWLConnection(conn, inputQueryFactory);
-		} catch (OntopConnectionException e) {
+		}
+		catch (OntopConnectionException e) {
 			// TODO: find a better exception?
 			throw new ReasonerInternalException(e);
 		}

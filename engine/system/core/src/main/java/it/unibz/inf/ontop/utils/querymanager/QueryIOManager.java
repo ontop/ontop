@@ -45,7 +45,7 @@ public class QueryIOManager {
 
     private static final String COMMENT_SYMBOL = ";";
 
-    private QueryController queryController;
+    private final QueryController queryController;
 
     /**
      * Create an IO manager for saving/loading the user-defined queries
@@ -183,11 +183,11 @@ public class QueryIOManager {
            throw new IOException("Query ID is missing");
         }
         
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         String line = reader.readLine();
         while (!(line==null||line.contains(QUERY_ITEM)||line.contains(QUERY_GROUP)||line.contains(END_COLLECTION_SYMBOL))) {
             reader.mark(100000);
-            buffer.append(line + "\n");
+            buffer.append(line).append("\n");
             line = reader.readLine();
         }
         reader.reset();
@@ -197,7 +197,7 @@ public class QueryIOManager {
     }
 
     private void writeQueryGroup(QueryControllerGroup group, BufferedWriter writer) throws IOException {
-        writer.append(String.format(QUERY_GROUP_TAG, group.getID()) + " ");
+        writer.append(String.format(QUERY_GROUP_TAG, group.getID())).append(" ");
         writer.append(START_COLLECTION_SYMBOL + "\n");
         
         boolean needLineBreak = false;
@@ -213,7 +213,7 @@ public class QueryIOManager {
     }
 
     private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
-        writer.append(String.format(QUERY_ITEM_TAG, query.getID()) + "\n");
+        writer.append(String.format(QUERY_ITEM_TAG, query.getID())).append("\n");
         writer.append(query.getQuery().trim() + "\n");
     }
 

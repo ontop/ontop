@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -20,7 +19,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.querymanager.*;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.Disposable;
-import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -46,9 +44,6 @@ public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
-	private static final String PROPERTY_EXT = ".properties"; // The default property file extension.
-	private static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
-	private static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
 	private final OWLEditorKit owlEditorKit;
 
@@ -84,8 +79,7 @@ public class OBDAModelManager implements Disposable {
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
 
-	public OBDAModelManager(EditorKit editorKit) {
-
+	public OBDAModelManager(OWLEditorKit editorKit) {
 		/*
 		 * TODO: avoid this use
 		 */
@@ -108,13 +102,10 @@ public class OBDAModelManager implements Disposable {
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
-		if (!(editorKit instanceof OWLEditorKit)) {
-			throw new IllegalArgumentException("The OBDA Plugin only works with OWLEditorKit instances.");
-		}
-		this.owlEditorKit = (OWLEditorKit) editorKit;
+		this.owlEditorKit = editorKit;
 		OWLModelManager modelManager = owlEditorKit.getModelManager();
 		mmgr = modelManager.getOWLOntologyManager();
-		OWLModelManager owlmmgr = (OWLModelManager) editorKit.getModelManager();
+		OWLModelManager owlmmgr = editorKit.getModelManager();
 		owlmmgr.addListener(modelManagerListener);
 
 		obdaManagerListeners = new ArrayList<>();
@@ -136,7 +127,7 @@ public class OBDAModelManager implements Disposable {
 		ProtegeQueryControllerListener qlistener = new ProtegeQueryControllerListener();
 		queryController.addListener(qlistener);
 
-		DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
+		DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
 		configurationManager = new OntopConfigurationManager(obdaModel, settings);
 	}
 
@@ -164,7 +155,7 @@ public class OBDAModelManager implements Disposable {
 			Map<OWLEntity, OWLEntity> renamings = new HashMap<>();
 			Set<OWLEntity> removals = new HashSet<>();
 
-			for (int idx = 0; changes.size() > idx; idx++) {
+			for (int idx = 0; idx < changes.size() ; idx++) {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
 					log.debug("Ontology ID changed");
@@ -466,15 +457,11 @@ public class OBDAModelManager implements Disposable {
 			OWLOntology ontology = mmgr.getActiveOntology();
 			PrefixDocumentFormat owlPrefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
 
-			// Resets the OBDA and loads the vocabulary and the prefixes
 			obdaModel.reset(owlPrefixManager);
 			loadVocabularyAndDefaultPrefix(obdaModel, mmgr.getOntologies(), ontology);
 
-			configurationManager.clearImplicitDBConstraintFile();
-			configurationManager.clearDBMetadataFile();
-			DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
-			configurationManager.resetProperties(settings.clone());
-
+			DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
+			configurationManager.reset(settings);
 
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
@@ -490,7 +477,6 @@ public class OBDAModelManager implements Disposable {
 			loadingData = true; // flag on
 			try {
 				IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
-
 				if (!UIUtil.isLocalFile(documentIRI.toURI())) {
 					return;
 				}
@@ -500,44 +486,23 @@ public class OBDAModelManager implements Disposable {
 				String owlName = owlDocumentIriString.substring(0,i);
 
 				String obdaDocumentIri = owlName + OBDA_EXT;
-				String queryDocumentIri = owlName + QUERY_EXT;
-				String propertyFilePath = owlName + PROPERTY_EXT;
-				String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
-				String dbMetadataFilePath = owlName + DBMETADATA_EXT;
-
 				File obdaFile = new File(URI.create(obdaDocumentIri));
-				File queryFile = new File(URI.create(queryDocumentIri));
-				File propertyFile = new File(URI.create(propertyFilePath));
-				File implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
-				File dbMetadataFile = new File(URI.create(dbMetadataFilePath));
-
-				if (implicitDBConstraintFile.exists())
-					configurationManager.setImplicitDBConstraintFile(implicitDBConstraintFile);
-
-				if(dbMetadataFile.exists())
-					configurationManager.setDBMetadataFile(dbMetadataFile);
-
-				/*cd
-				 * Loads the properties (and the data source)
-				 */
-				if (propertyFile.exists()) {
-					configurationManager.loadPropertyFile(propertyFile);
-				}
-
 				if (obdaFile.exists()) {
+					configurationManager.loadNewConfiguration(owlName);
+
 					try (Reader mappingReader = new FileReader(obdaFile)) {
 						OldSyntaxMappingConverter converter = new OldSyntaxMappingConverter(mappingReader, obdaFile.getName());
 						java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
 
-						if (optionalDataSourceProperties.isPresent()) {
-							configurationManager.loadProperties(optionalDataSourceProperties.get());
-						}
+						optionalDataSourceProperties.ifPresent(configurationManager::loadProperties);
 						obdaModel.parseMapping(new StringReader(converter.getRestOfFile()), configurationManager.snapshotProperties());
 					}
 					catch (Exception ex) {
 						throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
 					}
 
+					String queryDocumentIri = owlName + QUERY_EXT;
+					File queryFile = new File(URI.create(queryDocumentIri));
 					try {
 						// Load the saved queries
 						QueryIOManager queryIO = new QueryIOManager(queryController);
@@ -583,11 +548,9 @@ public class OBDAModelManager implements Disposable {
 				IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
 				String owlDocumentIriString = documentIRI.toString();
 
-				if(!UIUtil.isLocalFile(documentIRI.toURI())){
+				if (!UIUtil.isLocalFile(documentIRI.toURI())) {
 					return;
 				}
-
-				//String owlName = Files.getNameWithoutExtension(owlDocumentIriString);
 
 				int i = owlDocumentIriString.lastIndexOf(".");
 				String owlName = owlDocumentIriString.substring(0,i);
@@ -597,12 +560,13 @@ public class OBDAModelManager implements Disposable {
 
 				// Save the mapping
 				File obdaFile = new File(URI.create(obdaDocumentIri));
-				if(obdaModel.hasTripleMaps()) {
+				if (obdaModel.hasTripleMaps()) {
 					SQLPPMapping ppMapping = obdaModel.generatePPMapping();
 					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
 					writer.write(obdaFile, ppMapping);
 					log.info("mapping file saved to {}", obdaFile);
-				} else {
+				}
+				else {
 					Files.deleteIfExists(obdaFile.toPath());
 				}
 
@@ -614,25 +578,24 @@ public class OBDAModelManager implements Disposable {
 					log.info("query file saved to {}", queryFile);
 				}
 
-				String propertyFilePath = owlName + PROPERTY_EXT;
+				String propertyFilePath = owlName + OntopConfigurationManager.PROPERTY_EXT;
 				File propertyFile = new File(URI.create(propertyFilePath));
 				Properties properties = configurationManager.snapshotUserProperties();
 				// Generate a property file iff there is at least one property that is not "jdbc.name"
 				if (properties.entrySet().stream()
-						.anyMatch(
-								e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
+						.anyMatch(e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
 										!e.getValue().equals(""))
 				){
-					FileOutputStream outputStream = new FileOutputStream(propertyFile);
-					properties.store(outputStream, null);
-					outputStream.flush();
-					outputStream.close();
+					try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
+						properties.store(outputStream, null);
+					}
 					log.info("Property file saved to {}", propertyFilePath);
-				}else {
+				}
+				else {
 					Files.deleteIfExists(propertyFile.toPath());
 				}
-
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				log.error(e.getMessage());
 				Exception newException = new Exception(
 						"Error saving the OBDA file. Closing Protege now can result in losing changes in your data sources or mappings. Please resolve the issue that prevents saving in the current location, or do \"Save as..\" to save in an alternative location. \n\nThe error message was: \n"
@@ -669,7 +632,8 @@ public class OBDAModelManager implements Disposable {
 		java.util.Optional<String> ns = MutablePrefixManager.getDeclaredDefaultPrefixNamespace(ontology);
 		if(ns.isPresent()) {
 			obdaModel.setExplicitDefaultPrefixNamespace(ns.get());
-		} else{
+		}
+		else {
 			MutablePrefixManager.generateDefaultPrefixNamespaceFromID(ontology.getOntologyID()).ifPresent(
 					id -> obdaModel.addPrefix(
 							MutablePrefixManager.DEFAULT_PREFIX,
@@ -732,15 +696,11 @@ public class OBDAModelManager implements Disposable {
 	@Override
 	public void dispose() {
 		try {
-			owlEditorKit.getModelManager().removeListener(getModelManagerListener());
+			owlEditorKit.getModelManager().removeListener(modelManagerListener);
 			connectionManager.dispose();
 		} catch (Exception e) {
 			log.warn(e.getMessage());
 		}
-	}
-
-	protected OWLModelManagerListener getModelManagerListener() {
-		return modelManagerListener;
 	}
 
 	/*
@@ -771,8 +731,6 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private class ProtegeQueryControllerListener implements QueryControllerListener {
-
-		private static final long serialVersionUID = 4536639410306364312L;
 
 		@Override
 		public void elementAdded(QueryControllerEntity element) {

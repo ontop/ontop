@@ -20,11 +20,9 @@ package it.unibz.inf.ontop.utils.querymanager;
  * #L%
  */
 
-public class QueryControllerQuery extends QueryControllerEntity{
+public class QueryControllerQuery implements QueryControllerEntity {
 
-	private static final long serialVersionUID = 3885574857162247553L;
-	
-	private String id = "";
+	private final String id;
 	private String query = "";
 	
 	public QueryControllerQuery(String id) {
@@ -44,7 +42,7 @@ public class QueryControllerQuery extends QueryControllerEntity{
 	}
 
 	public String getNodeName() {
-		return id + ": " + query.toString();
+		return id + ": " + query;
 	}
 	
 	public String toString() {
