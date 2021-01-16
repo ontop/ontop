@@ -23,15 +23,9 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
-import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyID;
-import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
 import java.util.*;
-import java.util.stream.StreamSupport;
 
 
 /**
@@ -67,9 +61,5 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 
 	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, uri);
-	}
-
-	public void clear() {
-		owlmapper.clear();
 	}
 }
