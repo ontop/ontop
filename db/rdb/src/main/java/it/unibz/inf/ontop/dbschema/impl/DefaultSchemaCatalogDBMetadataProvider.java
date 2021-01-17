@@ -38,7 +38,7 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
     DefaultSchemaCatalogDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider,
                                            CoreSingletons coreSingletons) throws MetadataExtractionException {
         this(connection, idFactoryProvider, coreSingletons,
-                c -> new String[] { connection.getCatalog(), connection.getSchema(), "DUMMY" });
+                c -> new String[] { c.getCatalog(), c.getSchema(), "DUMMY" });
     }
 
     DefaultSchemaCatalogDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider,

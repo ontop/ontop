@@ -15,6 +15,7 @@ public class JTDSDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvid
     JTDSDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new SQLServerQuotedIDFactory(), coreSingletons,
                 "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM");
+        // jTDS driver does not properly implement .getSchema() - it throws an exception (unimplemented method)
         // https://msdn.microsoft.com/en-us/library/ms175068.aspx
         // https://docs.microsoft.com/en-us/sql/t-sql/functions/schema-name-transact-sql
         // https://docs.microsoft.com/en-us/sql/t-sql/functions/db-name-transact-sql
