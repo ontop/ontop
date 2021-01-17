@@ -16,10 +16,7 @@ public class DB2DBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @AssistedInject
     DB2DBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
-        super(connection, metadata -> new SQLStandardQuotedIDFactory(), coreSingletons,
-                "select CURRENT SCHEMA AS TABLE_SCHEM from SYSIBM.SYSDUMMY1");
-        // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0005881.html
-        // https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000720.html
+        super(connection, metadata -> new SQLStandardQuotedIDFactory(), coreSingletons);
     }
 
     private static final ImmutableSet<String> IGNORED_SCHEMAS = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
@@ -30,7 +27,12 @@ public class DB2DBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     /*
-    // Alternative solution for DB2 to print column names
+      Alternative solution for retrieving the schema
+                "select CURRENT SCHEMA AS TABLE_SCHEM from SYSIBM.SYSDUMMY1");
+         https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0005881.html
+         https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000720.html
+
+     Alternative solution for obtaining column names
         String sqlQuery = String.format("SELECT colname, typename \n FROM SysCat.Columns \n" +
                 "WHERE tabname = '%s' AND tabschema = '%s'", tableName, tableSchema);
 

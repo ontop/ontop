@@ -28,6 +28,10 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
     }
 
+    protected interface DefaultRelationIdComponentsFactory {
+        String[] getDefaultRelationIdComponents(Connection c) throws SQLException;
+    }
+
     AbstractDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider,
                                CoreSingletons coreSingletons) throws MetadataExtractionException {
         try {
@@ -41,8 +45,6 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     metadata.getDatabaseProductVersion(),
                     idFactory,
                     coreSingletons);
-            if (!this.getClass().getCanonicalName().contains("H2"))
-                System.out.println("CATALOG/SCHEMA: " + connection.getCatalog() + " / " + connection.getSchema());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);

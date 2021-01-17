@@ -25,6 +25,12 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     @AssistedInject
     DremioDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new DremioQuotedIDFactory(), coreSingletons);
+        try {
+            System.out.println("DREMIO CATALOG/SCHEMA: " + connection.getCatalog() + " / " + connection.getSchema());
+        }
+        catch (SQLException e) {
+            // NO-OP
+        }
     }
 
     @Override

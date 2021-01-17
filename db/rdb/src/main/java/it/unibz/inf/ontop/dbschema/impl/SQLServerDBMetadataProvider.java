@@ -14,11 +14,7 @@ public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataP
 
     @AssistedInject
     SQLServerDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
-        super(connection, metadata -> new SQLServerQuotedIDFactory(), coreSingletons,
-                "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM");
-        // https://msdn.microsoft.com/en-us/library/ms175068.aspx
-        // https://docs.microsoft.com/en-us/sql/t-sql/functions/schema-name-transact-sql
-        // https://docs.microsoft.com/en-us/sql/t-sql/functions/db-name-transact-sql
+        super(connection, metadata -> new SQLServerQuotedIDFactory(), coreSingletons);
     }
 
     private static final ImmutableSet<String> IGNORED_SCHEMAS = ImmutableSet.of("sys", "INFORMATION_SCHEMA");
@@ -28,7 +24,13 @@ public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataP
         return IGNORED_SCHEMAS.contains(getRelationSchema(id));
     }
 
-    /*       return "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
+    /*
+                "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM");
+        https://msdn.microsoft.com/en-us/library/ms175068.aspx
+        https://docs.microsoft.com/en-us/sql/t-sql/functions/schema-name-transact-sql
+        https://docs.microsoft.com/en-us/sql/t-sql/functions/db-name-transact-sql
+
+          return "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
 					"FROM INFORMATION_SCHEMA.TABLES " +
 					"WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
     */

@@ -21,11 +21,23 @@ public abstract class DefaultSchemaDBMetadataProvider extends AbstractDBMetadata
     private final QuotedID defaultSchema;
 
     DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, CoreSingletons coreSingletons, String sql) throws MetadataExtractionException {
+        this(connection, idFactoryProvider, coreSingletons, c -> {
+            try (Statement stmt = c.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                rs.next();
+                return new String[] { rs.getString("TABLE_SCHEM"), "DUMMY" };
+            }
+        });
+    }
+
+    DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        this(connection, idFactoryProvider, coreSingletons, c -> new String[] { c.getSchema(), "DUMMY"});
+    }
+
+    DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, CoreSingletons coreSingletons, DefaultRelationIdComponentsFactory defaultsFactory) throws MetadataExtractionException {
         super(connection, idFactoryProvider, coreSingletons);
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            rs.next();
-            RelationID id = rawIdFactory.createRelationID(rs.getString("TABLE_SCHEM"), "DUMMY");
+        try {
+            RelationID id = rawIdFactory.createRelationID(defaultsFactory.getDefaultRelationIdComponents(connection));
             defaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
         catch (SQLException e) {
