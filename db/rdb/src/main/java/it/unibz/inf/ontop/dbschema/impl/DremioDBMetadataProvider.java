@@ -27,6 +27,11 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         super(connection, metadata -> new DremioQuotedIDFactory(), coreSingletons);
         try {
             System.out.println("DREMIO CATALOG/SCHEMA: " + connection.getCatalog() + " / " + connection.getSchema());
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA()")) {
+                rs.next();
+                System.out.println("DREMIO SCHEMA: " + rs.getString("TABLE_SCHEM"));
+            }
         }
         catch (SQLException e) {
             // NO-OP
