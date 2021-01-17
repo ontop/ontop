@@ -15,31 +15,47 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider {
 
     private final MetadataProvider parentMetadataProvider;
-    private final MetadataLookup parentCacheMetadataLookup;
-    private final QuotedIDFactory quotedIdFactory;
+    private final CachingMetadataLookupWithDependencies parentCacheMetadataLookup;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
-
 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
                                             @Assisted Reader ontopViewReader) throws MetadataExtractionException {
-        this.parentMetadataProvider = parentMetadataProvider;
-        this.parentCacheMetadataLookup = new CachingMetadataLookup(parentMetadataProvider);
-        this.quotedIdFactory = parentMetadataProvider.getQuotedIDFactory();
+        this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
+            private final Set<RelationID> completeRelations = new HashSet<>();
+
+            /**
+             * inserts integrity constraints only ONCE for each relation
+             */
+            @Override
+            public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+                boolean complete = completeRelations.add(relation.getID());
+                if (!complete)
+                    provider.insertIntegrityConstraints(relation, metadataLookup);
+            }
+        };
+        this.parentCacheMetadataLookup = new CachingMetadataLookupWithDependencies(parentMetadataProvider);
 
         try (Reader viewReader = ontopViewReader) {
             JsonViews jsonViews = loadAndDeserialize(viewReader);
+            QuotedIDFactory quotedIdFactory = parentMetadataProvider.getQuotedIDFactory();
             this.jsonMap = jsonViews.relations.stream()
-                    // TODO: consider using deserializeRelationID
-                    .collect(ImmutableCollectors.toMap(t -> quotedIdFactory.createRelationID(t.name.toArray(new String[0])), t -> t));
-
-        } catch (IOException e) {
+                    .collect(ImmutableCollectors.toMap(
+                            t -> JsonMetadata.deserializeRelationID(quotedIdFactory, t.name),
+                            t -> t));
+        }
+        catch (JsonProcessingException e) { // subsumed by IOException (redundant)
+            throw new MetadataExtractionException("problem with JSON processing.\n" + e);
+        }
+        catch (IOException e) {
             throw new MetadataExtractionException(e);
         }
     }
@@ -47,34 +63,14 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     /**
      * Deserializes a JSON file into a POJO.
      */
-    protected static JsonViews loadAndDeserialize(Reader viewReader) throws MetadataExtractionException {
+    protected static JsonViews loadAndDeserialize(Reader viewReader) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper()
+                .registerModule(new GuavaModule())
+                .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+                .enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 
-        try {
-            ObjectMapper objectMapper = new ObjectMapper()
-                    .registerModule(new GuavaModule())
-                    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                    .enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
-
-            // Create POJO object from JSON
-            return objectMapper.readValue(viewReader, JsonViews.class);
-        }
-        catch (JsonProcessingException e) {
-            throw new MetadataExtractionException("problem with JSON processing.\n" + e);
-        } catch (IOException e) {
-            throw new MetadataExtractionException(e);
-        }
-    }
-
-    @Override
-    public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        if (jsonMap.containsKey(id))
-            return jsonMap.get(id).createViewDefinition(getDBParameters(), parentCacheMetadataLookup);
-        return parentCacheMetadataLookup.getRelation(id);
-    }
-
-    @Override
-    public QuotedIDFactory getQuotedIDFactory() {
-        return quotedIdFactory;
+        // Create POJO object from JSON
+        return objectMapper.readValue(viewReader, JsonViews.class);
     }
 
     @Override
@@ -86,18 +82,35 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-        RelationID id = relation.getID();
+    public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+        JsonView jsonView = jsonMap.get(id);
+        if (jsonView != null)
+            return jsonView.createViewDefinition(getDBParameters(), parentCacheMetadataLookup.getCachingMetadataLookupFor(id));
 
-        if (jsonMap.containsKey(id))
-            jsonMap.get(id).insertIntegrityConstraints(metadataLookup);
-        else
+        return parentCacheMetadataLookup.getRelation(id);
+    }
+
+    @Override
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+        JsonView jsonView = jsonMap.get(relation.getID());
+        if (jsonView != null) {
+            for (NamedRelationDefinition baseRelation : parentCacheMetadataLookup.getBaseRelations(relation.getID()))
+                parentMetadataProvider.insertIntegrityConstraints(baseRelation, metadataLookup);
+
+            jsonView.insertIntegrityConstraints(metadataLookup);
+        }
+        else {
             parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookup);
+        }
+    }
+
+    @Override
+    public QuotedIDFactory getQuotedIDFactory() {
+        return parentMetadataProvider.getQuotedIDFactory();
     }
 
     @Override
     public DBParameters getDBParameters() {
         return parentMetadataProvider.getDBParameters();
     }
-
 }
