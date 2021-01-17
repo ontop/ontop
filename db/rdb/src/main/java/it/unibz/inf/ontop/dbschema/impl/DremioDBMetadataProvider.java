@@ -27,17 +27,16 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     DremioDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new DremioQuotedIDFactory(), coreSingletons);
 
-        String[] localDefaultSchemaComponents;
+        String[] localDefaultSchemaComponents = null;
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA AS TABLE_SCHEM")) {
             rs.next();
             localDefaultSchemaComponents = rs.getString("TABLE_SCHEM").split("\\.");
         }
         catch (SQLException e) {
-            localDefaultSchemaComponents = null;
+            /* NO-OP */
         }
         defaultSchemaComponents = localDefaultSchemaComponents;
-        System.out.println("DREMIO DEFAULT SCHEMA: " + Arrays.toString(defaultSchemaComponents));
     }
 
     @Override
@@ -45,10 +44,9 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         if (id.getComponents().size() > 1 || defaultSchemaComponents == null)
             return id;
 
-        String[] components = Arrays.copyOf(defaultSchemaComponents, defaultSchemaComponents.length + 1);
-        components[defaultSchemaComponents.length] = id.getComponents().get(TABLE_INDEX).getName();
-        System.out.println("EXPAND: " + Arrays.toString(components));
-        return rawIdFactory.createRelationID(components);
+        return createRelationID(
+                defaultSchemaComponents,
+                id.getComponents().get(TABLE_INDEX).getName());
     }
 
     @Override
@@ -59,20 +57,14 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     }
 
     private boolean hasDefaultSchema(RelationID id) {
-        if (defaultSchemaComponents == null)
+        if (defaultSchemaComponents == null
+                || id.getComponents().size() != defaultSchemaComponents.length + 1)
             return false;
-
-        if (id.getComponents().size() != defaultSchemaComponents.length + 1)
-            return false;
-
-        System.out.println("COMPARE: " + id.getComponents() + " v " + Arrays.toString(defaultSchemaComponents));
 
         for (int i = id.getComponents().size() - 1; i > 0; i--)
             if (!id.getComponents().get(i).getName()
                     .equals(defaultSchemaComponents[defaultSchemaComponents.length - i]))
                 return false;
-
-        System.out.println("TRUE");
 
         return true;
     }
@@ -95,9 +87,14 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
-        String[] schemaComponents = rs.getString(schemaNameColumn).split("\\.");
+        return createRelationID(
+                rs.getString(schemaNameColumn).split("\\."),
+                rs.getString(tableNameColumn));
+    }
+
+    private RelationID createRelationID(String[] schemaComponents, String tableName) {
         String[] components = Arrays.copyOf(schemaComponents, schemaComponents.length + 1);
-        components[schemaComponents.length] = rs.getString(tableNameColumn);
+        components[schemaComponents.length] = tableName;
         return rawIdFactory.createRelationID(components);
     }
 
@@ -115,5 +112,4 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
     protected String getRelationName(RelationID id) {
         return id.getComponents().get(TABLE_INDEX).getName();
     }
-
 }
