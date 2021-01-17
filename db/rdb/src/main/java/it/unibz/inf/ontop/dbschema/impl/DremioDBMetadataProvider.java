@@ -22,28 +22,56 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
 public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
+    private final String[] defaultSchemaComponents;
+
     @AssistedInject
     DremioDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new DremioQuotedIDFactory(), coreSingletons);
-        try {
-            System.out.println("DREMIO CATALOG/SCHEMA: " + connection.getCatalog() + " / " + connection.getSchema());
-            try (Statement stmt = connection.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA AS TABLE_SCHEM")) {
-                rs.next();
-                System.out.println("DREMIO SCHEMA: " + rs.getString("TABLE_SCHEM"));
-            }
+
+        String[] localDefaultSchemaComponents;
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA AS TABLE_SCHEM")) {
+            rs.next();
+            localDefaultSchemaComponents = rs.getString("TABLE_SCHEM").split("\\.");
         }
         catch (SQLException e) {
-            System.out.println("DREMIO EXCEPTION: " + e);
-            // NO-OP
+            localDefaultSchemaComponents = null;
         }
+        defaultSchemaComponents = localDefaultSchemaComponents;
+        System.out.println("DREMIO DEFAULT SCHEMA: " + Arrays.toString(defaultSchemaComponents));
     }
 
     @Override
-    protected RelationID getCanonicalRelationId(RelationID id) { return id; }
+    protected RelationID getCanonicalRelationId(RelationID id) {
+        if (id.getComponents().size() > 0 || defaultSchemaComponents == null)
+            return id;
+
+        String[] components = Arrays.copyOf(defaultSchemaComponents, defaultSchemaComponents.length + 1);
+        components[defaultSchemaComponents.length] = id.getComponents().get(TABLE_INDEX).getName();
+        return rawIdFactory.createRelationID(components);
+    }
 
     @Override
-    protected ImmutableList<RelationID> getAllIDs(RelationID id) { return ImmutableList.of(id); }
+    protected ImmutableList<RelationID> getAllIDs(RelationID id) {
+        return hasDefaultSchema(id)
+                ? ImmutableList.of(id.getTableOnlyID(), id)
+                : ImmutableList.of(id);
+    }
+
+    private boolean hasDefaultSchema(RelationID id) {
+        if (defaultSchemaComponents == null)
+            return false;
+
+        if (id.getComponents().size() != defaultSchemaComponents.length)
+            return false;
+
+        for (int i = 1; i < id.getComponents().size(); i++)
+            if (!id.getComponents().get(i).getName()
+                    .equals(defaultSchemaComponents[defaultSchemaComponents.length - 1 - i]))
+                return false;
+
+        return true;
+    }
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
