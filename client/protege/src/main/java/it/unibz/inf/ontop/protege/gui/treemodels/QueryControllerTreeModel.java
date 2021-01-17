@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerListener;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.querymanager.QueryControllerListener;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 
 import java.util.Enumeration;
 import java.util.List;
