@@ -55,10 +55,6 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 		return ImmutableMap.copyOf(owlmapper.getPrefixName2PrefixMap());
 	}
 
-	public boolean contains(String prefix) {
-		return owlmapper.containsPrefixMapping(prefix);
-	}
-
 	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, uri);
 	}

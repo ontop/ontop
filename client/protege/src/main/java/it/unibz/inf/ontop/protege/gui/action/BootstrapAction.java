@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Map;
 
 public class BootstrapAction extends ProtegeAction {
 
@@ -91,14 +92,16 @@ public class BootstrapAction extends ProtegeAction {
 				this.baseUri = base_uri.getText().trim();
 				if (baseUri.contains("#")) {
 					JOptionPane.showMessageDialog(workspace,
-							"Base Uri cannot contain the character '#'");
+							"Base URI cannot contain the character '#'");
 					throw new RuntimeException("Base URI " + baseUri
 							+ " contains '#' character!");
-				} else {
+				}
+				else {
 					String bootstrapPrefix = "g:";
 					MutablePrefixManager prefixManager = currentModel.getMutablePrefixManager();
-					while(prefixManager.contains(bootstrapPrefix)){
-						bootstrapPrefix = "g"+bootstrapPrefix;
+					Map<String, String> map = prefixManager.getPrefixMap();
+					while (map.containsKey(bootstrapPrefix)) {
+						bootstrapPrefix = "g" + bootstrapPrefix;
 					}
 					currentModel.addPrefix(bootstrapPrefix, baseUri);
 					Thread th = new Thread("Bootstrapper Action Thread"){
@@ -131,7 +134,6 @@ public class BootstrapAction extends ProtegeAction {
 					};
 					th.start();
 				}
-
 			}
 		}
 	}

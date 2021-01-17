@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.core;
 
 import org.protege.editor.core.Disposable;
 
-import java.util.Optional;
 import java.util.Properties;
 
 public class DisposableProperties extends Properties implements Disposable {
@@ -31,23 +30,10 @@ public class DisposableProperties extends Properties implements Disposable {
 
 	public DisposableProperties() { }
 
-	private DisposableProperties(Properties properties) {
-		putAll(properties);
-	}
-
 	@Override
     public void dispose() { /* NO-OP */ }
 
-	@Override
-	public DisposableProperties clone() {
-		return new DisposableProperties(this);
-	}
-
 	public boolean getBoolean(String key) {
 		return Boolean.parseBoolean(getProperty(key));
-	}
-
-	public Optional<String> getOptionalProperty(String key) {
-		return Optional.ofNullable(getProperty(key));
 	}
 }

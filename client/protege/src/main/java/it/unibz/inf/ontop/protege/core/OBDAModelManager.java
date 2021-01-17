@@ -322,7 +322,7 @@ public class OBDAModelManager implements Disposable {
 		PrefixDocumentFormat owlPrefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
 		obdaModel.reset(owlPrefixManager);
 
-		for (OWLOntology onto : owlModelManager.getOntologies()) {
+		for (OWLOntology onto : owlModelManager.getActiveOntologies()) {
 			for (OWLEntity entity : onto.getSignature())
 				processEntity(entity, MutableOntologyVocabularyCategory::declare);
 		}

@@ -25,100 +25,71 @@ import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 
 import java.net.URI;
-import java.util.Enumeration;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 
 public class OBDADataSource {
 
 	private final URI id;
-	private final Properties parameters;
+	private String driver = "", url = "", username = "", password = "";
 
-	/**
-	 * Creates a new DataSource object
-	 */
 	public OBDADataSource() {
 		this.id = URI.create(UUID.randomUUID().toString());
-		parameters = new Properties();
-		parameters.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, "");
-		parameters.setProperty(OntopSQLCoreSettings.JDBC_URL, "");
-		parameters.setProperty(OntopSQLCredentialSettings.JDBC_PASSWORD, "");
-		parameters.setProperty(OntopSQLCredentialSettings.JDBC_USER, "");
 	}
 
 	public String getDriver() {
-		return parameters.getProperty(OntopSQLCoreSettings.JDBC_DRIVER);
+		return driver;
 	}
 
 	public String getUsername() {
-		return parameters.getProperty(OntopSQLCredentialSettings.JDBC_USER);
+		return username;
 	}
 
 	public String getPassword() {
-		return parameters.getProperty(OntopSQLCredentialSettings.JDBC_PASSWORD);
+		return password;
 	}
 
 	public String getURL() {
-		return parameters.getProperty(OntopSQLCoreSettings.JDBC_URL);
+		return url;
 	}
 
 	public void setUsername(String username) {
-		parameters.setProperty(OntopSQLCredentialSettings.JDBC_USER, username);
+		Objects.requireNonNull(username);
+		this.username = username;
 	}
 
 	public void setPassword(String password) {
-		parameters.setProperty(OntopSQLCredentialSettings.JDBC_PASSWORD, password);
+		Objects.requireNonNull(password);
+		this.password = password;
 	}
 
 	public void setDriver(String driver) {
-		parameters.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, driver);
+		Objects.requireNonNull(driver);
+		this.driver = driver;
 	}
 
 	public void setURL(String url) {
-		parameters.setProperty(OntopSQLCoreSettings.JDBC_URL, url);
+		Objects.requireNonNull(url);
+		this.url = url;
 	}
 
-	/**
-	 * These properties are compatible with OBDAProperties' keys.
-	 */
 	public Properties asProperties() {
 		Properties p = new Properties();
-		p.put(OntopSQLCoreSettings.JDBC_NAME, getSourceID().toString());
-		p.put(OntopSQLCoreSettings.JDBC_URL, getURL());
-		p.put(OntopSQLCredentialSettings.JDBC_USER, getUsername());
-		p.put(OntopSQLCredentialSettings.JDBC_PASSWORD, getPassword());
-		p.put(OntopSQLCoreSettings.JDBC_DRIVER, getDriver());
+		p.put(OntopSQLCoreSettings.JDBC_NAME, id.toString());
+		p.put(OntopSQLCoreSettings.JDBC_URL, url);
+		p.put(OntopSQLCredentialSettings.JDBC_USER, username);
+		p.put(OntopSQLCredentialSettings.JDBC_PASSWORD, password);
+		p.put(OntopSQLCoreSettings.JDBC_DRIVER, driver);
 		return p;
-	}
-
-
-	public URI getSourceID() {
-		return id;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder buff = new StringBuilder();
-		buff.append("DatasourceURI=").append(id.toString()).append("\n");
-		Enumeration<Object> keys = parameters.keys();
-		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
-			buff.append("\n").append(key).append("=").append(parameters.getProperty(key));
-		}
-		return buff.toString();
-	}
-
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof OBDADataSource)) {
-			return false;
-		}
-		OBDADataSource d2 = (OBDADataSource) o;
-		return d2.id.equals(this.id);
+		return "DatasourceURI=" + id + "\n" +
+				OntopSQLCoreSettings.JDBC_URL + "=" + url + "\n" +
+				OntopSQLCoreSettings.JDBC_DRIVER + "=" + driver + "\n" +
+				OntopSQLCredentialSettings.JDBC_USER + "=" + username + "\n" +
+				OntopSQLCredentialSettings.JDBC_PASSWORD + "=" + password + "\n";
 	}
 }
