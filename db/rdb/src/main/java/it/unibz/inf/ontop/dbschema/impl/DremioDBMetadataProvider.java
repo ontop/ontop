@@ -28,7 +28,7 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         try {
             System.out.println("DREMIO CATALOG/SCHEMA: " + connection.getCatalog() + " / " + connection.getSchema());
             try (Statement stmt = connection.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA() AS TABLE_SCHEM")) {
+                 ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA AS TABLE_SCHEM")) {
                 rs.next();
                 System.out.println("DREMIO SCHEMA: " + rs.getString("TABLE_SCHEM"));
             }
