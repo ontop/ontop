@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -43,11 +42,12 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
-        if (id.getComponents().size() > 0 || defaultSchemaComponents == null)
+        if (id.getComponents().size() > 1 || defaultSchemaComponents == null)
             return id;
 
         String[] components = Arrays.copyOf(defaultSchemaComponents, defaultSchemaComponents.length + 1);
         components[defaultSchemaComponents.length] = id.getComponents().get(TABLE_INDEX).getName();
+        System.out.println("EXPAND: " + Arrays.toString(components));
         return rawIdFactory.createRelationID(components);
     }
 
@@ -62,13 +62,17 @@ public class DremioDBMetadataProvider extends AbstractDBMetadataProvider {
         if (defaultSchemaComponents == null)
             return false;
 
-        if (id.getComponents().size() != defaultSchemaComponents.length)
+        if (id.getComponents().size() != defaultSchemaComponents.length + 1)
             return false;
 
-        for (int i = 1; i < id.getComponents().size(); i++)
+        System.out.println("COMPARE: " + id.getComponents() + " v " + Arrays.toString(defaultSchemaComponents));
+
+        for (int i = id.getComponents().size() - 1; i > 0; i--)
             if (!id.getComponents().get(i).getName()
-                    .equals(defaultSchemaComponents[defaultSchemaComponents.length - 1 - i]))
+                    .equals(defaultSchemaComponents[defaultSchemaComponents.length - i]))
                 return false;
+
+        System.out.println("TRUE");
 
         return true;
     }
