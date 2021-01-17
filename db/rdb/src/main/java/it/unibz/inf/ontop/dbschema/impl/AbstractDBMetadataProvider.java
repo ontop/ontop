@@ -41,7 +41,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     metadata.getDatabaseProductVersion(),
                     idFactory,
                     coreSingletons);
-            System.out.println("CATALOG/SCHEMA: " + connection.getCatalog() + " / " + connection.getSchema());
+            if (!this.getClass().getCanonicalName().contains("H2"))
+                System.out.println("CATALOG/SCHEMA: " + connection.getCatalog() + " / " + connection.getSchema());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
