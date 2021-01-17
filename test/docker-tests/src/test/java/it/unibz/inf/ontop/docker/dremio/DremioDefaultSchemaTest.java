@@ -14,9 +14,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class DremioDefaultSchemaTest extends AbstractLeftJoinProfTest {
     private static final String owlFileName = "/redundant_join/redundant_join_fk_test.owl";
-    private static final String obdaFileName = "/dremio/redundant_join/redundant_join_fk_test.obda";
+    private static final String obdaFileName = "/dremio/default_schema/redundant_join_fk_test.obda";
     private static final String propertyFileName = "/dremio/default_schema/redundant_join_fk_test.properties";
-    private static final String constraintFileName = "/dremio/redundant_join/keys.lst";
+    private static final String constraintFileName = "/dremio/default_schema/keys.lst";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;
