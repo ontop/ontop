@@ -109,4 +109,20 @@ public class DremioDefaultSchemaTest extends AbstractLeftJoinProfTest {
         super.testGroupConcat6();
     }
 
+    /**
+     * Deactivated due to the following.
+     * A condition like:
+     * `CAST(CAST(<columnName> AS VARCHAR) AS BIGINT) = 3`
+     * will generate a query over the source (i.e. Postgres) that contains:
+     * `CAST(<columnName> AS VARCHAR(65536)) = 3`
+     * And Postgres (rightfully) throws the exception:
+     * ERROR: operator does not exist: character varying = integer
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testProperties() throws Exception {
+        super.testProperties();
+    }
+
 }
