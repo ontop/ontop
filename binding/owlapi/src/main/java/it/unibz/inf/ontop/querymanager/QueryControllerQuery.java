@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.utils.querymanager;
+package it.unibz.inf.ontop.querymanager;
 
 /*
  * #%L
@@ -20,19 +20,34 @@ package it.unibz.inf.ontop.utils.querymanager;
  * #L%
  */
 
-import java.io.Serializable;
+public class QueryControllerQuery extends QueryControllerEntity{
 
-public interface QueryControllerListener extends Serializable {
+	private static final long serialVersionUID = 3885574857162247553L;
+	
+	private String id = "";
+	private String query = "";
+	
+	public QueryControllerQuery(String id) {
+		this.id = id;
+	}
+	
+	public String getID() {
+		return id;
+	}
 
-	public void elementAdded(QueryControllerEntity element);
+	public void setQuery(String query) {
+		this.query = query;
+	}
 
-	public void elementAdded(QueryControllerQuery query, QueryControllerGroup group);
+	public String getQuery() {
+		return query;
+	}
 
-	public void elementRemoved(QueryControllerEntity element);
-
-	public void elementRemoved(QueryControllerQuery query, QueryControllerGroup group);
-
-	public void elementChanged(QueryControllerQuery query);
-
-	public void elementChanged(QueryControllerQuery query, QueryControllerGroup group);
+	public String getNodeName() {
+		return id + ": " + query.toString();
+	}
+	
+	public String toString() {
+		return getNodeName();
+	}
 }

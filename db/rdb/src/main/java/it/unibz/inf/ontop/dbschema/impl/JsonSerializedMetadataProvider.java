@@ -10,6 +10,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import it.unibz.inf.ontop.dbschema.impl.json.*;
@@ -26,7 +27,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
 
     @AssistedInject
     protected JsonSerializedMetadataProvider(@Assisted Reader dbMetadataReader,
-                                             TypeFactory typeFactory) throws MetadataExtractionException, IOException {
+                                             CoreSingletons coreSingletons) throws MetadataExtractionException, IOException {
         JsonMetadata jsonMetadata = loadAndDeserialize(dbMetadataReader);
 
         QuotedIDFactory idFactory = jsonMetadata.metadata.createQuotedIDFactory();
@@ -36,7 +37,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
                 jsonMetadata.metadata.dbmsProductName,
                 jsonMetadata.metadata.dbmsVersion,
                 idFactory,
-                typeFactory.getDBTypeFactory());
+                coreSingletons);
 
         // TODO: add to all
         relationMap = jsonMetadata.relations.stream()
@@ -67,7 +68,12 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
 
     @Override
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        return relationMap.get(id).createDatabaseTableDefinition(dbParameters);
+        JsonDatabaseTable jsonTable = relationMap.get(id);
+        if (jsonTable == null)
+            throw new IllegalArgumentException("The relation " + id.getSQLRendering()
+                    + " is unknown to the JsonSerializedMetadataProvider");
+
+        return jsonTable.createDatabaseTableDefinition(dbParameters);
     }
 
     @Override
@@ -82,7 +88,12 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
 
     @Override
     public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-        relationMap.get(relation.getID()).insertIntegrityConstraints(metadataLookup);
+        JsonDatabaseTable jsonTable = relationMap.get(relation.getID());
+        if (jsonTable == null)
+            throw new IllegalArgumentException("The relation " + relation.getID().getSQLRendering()
+                    + " is unknown to the JsonSerializedMetadataProvider");
+
+        jsonTable.insertIntegrityConstraints(metadataLookup);
     }
 
     @Override

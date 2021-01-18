@@ -36,6 +36,7 @@ public class MappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
+    public static final CoreSingletons CORE_SINGLETONS;
 
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
@@ -84,6 +85,7 @@ public class MappingTestingTools {
         RDF_FACTORY = injector.getInstance(RDF.class);
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
+        CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
 
         EMPTY_PREFIX_MANAGER = SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of());
 
@@ -105,12 +107,12 @@ public class MappingTestingTools {
     }
 
     public static OfflineMetadataProviderBuilder2 createMetadataProviderBuilder() {
-        return new OfflineMetadataProviderBuilder2(TYPE_FACTORY);
+        return new OfflineMetadataProviderBuilder2(CORE_SINGLETONS);
     }
 
     public static class OfflineMetadataProviderBuilder2 extends OfflineMetadataProviderBuilder {
 
-        public OfflineMetadataProviderBuilder2(TypeFactory typeFactory) { super(typeFactory); }
+        public OfflineMetadataProviderBuilder2(CoreSingletons coreSingletons) { super(coreSingletons); }
 
         private NamedRelationDefinition createRelationPredicate(int tableNumber, int arity) {
             QuotedIDFactory idFactory = getQuotedIDFactory();

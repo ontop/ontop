@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.utils.querymanager;
+package it.unibz.inf.ontop.querymanager;
 
 /*
  * #%L
@@ -19,11 +19,6 @@ package it.unibz.inf.ontop.utils.querymanager;
  * limitations under the License.
  * #L%
  */
-
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 
 import java.io.BufferedWriter;
 import java.io.File;

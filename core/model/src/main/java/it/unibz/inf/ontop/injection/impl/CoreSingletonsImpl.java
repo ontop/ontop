@@ -32,6 +32,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final ImmutableUnificationTools unificationTools;
     private final OntopModelSettings settings;
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
+    private final QueryTransformerFactory queryTransformerFactory;
 
     @Inject
     private CoreSingletonsImpl(TermFactory termFactory, TypeFactory typeFactory,
@@ -40,7 +41,9 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
                                UniqueTermTypeExtractor uniqueTermTypeExtractor,
                                IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
-                               OntopModelSettings settings, ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer) {
+                               OntopModelSettings settings,
+                               ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
+                               QueryTransformerFactory queryTransformerFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
@@ -53,6 +56,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.unificationTools = unificationTools;
         this.settings = settings;
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
+        this.queryTransformerFactory = queryTransformerFactory;
     }
 
     @Override
@@ -97,7 +101,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
 
     @Override
     public QueryTransformerFactory getQueryTransformerFactory() {
-        throw new RuntimeException("TODO: remove it");
+        return queryTransformerFactory;
     }
 
     @Override

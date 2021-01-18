@@ -13,6 +13,9 @@ public interface SQLMappingParser extends MappingParser<SQLPPTriplesMap> {
 
     SQLPPMapping parse(File file) throws InvalidMappingException, MappingIOException;
 
+    /**
+     * Must close the reader
+     */
     SQLPPMapping parse(Reader reader) throws InvalidMappingException, MappingIOException;
 
     SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException;

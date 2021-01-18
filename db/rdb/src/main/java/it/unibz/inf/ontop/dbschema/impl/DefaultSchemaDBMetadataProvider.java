@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
@@ -19,18 +20,31 @@ public abstract class DefaultSchemaDBMetadataProvider extends AbstractDBMetadata
 
     private final QuotedID defaultSchema;
 
-    DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, TypeFactory typeFactory, String sql) throws MetadataExtractionException {
-        super(connection, idFactoryProvider, typeFactory);
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            rs.next();
-            RelationID id = rawIdFactory.createRelationID(rs.getString("TABLE_SCHEM"), "DUMMY");
-            defaultSchema = id.getComponents().get(SCHEMA_INDEX);
+    DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, CoreSingletons coreSingletons, String sql) throws MetadataExtractionException {
+        this(connection, idFactoryProvider, coreSingletons, c -> {
+            try (Statement stmt = c.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                rs.next();
+                return new String[] { rs.getString("TABLE_SCHEM"), "DUMMY" };
+            }
+        });
+    }
 
+    DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        this(connection, idFactoryProvider, coreSingletons, c -> new String[] { c.getSchema(), "DUMMY"});
+    }
+
+    DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, CoreSingletons coreSingletons, DefaultRelationIdComponentsFactory defaultsFactory) throws MetadataExtractionException {
+        super(connection, idFactoryProvider, coreSingletons);
+        try {
+            RelationID id = rawIdFactory.createRelationID(defaultsFactory.getDefaultRelationIdComponents(connection));
+            defaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
+        if (defaultSchema == null)
+            throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
     }
 
     @Override

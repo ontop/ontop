@@ -58,6 +58,6 @@ public class SQLMappingTestingTools {
     }
 
     public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
-        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS.getTypeFactory());
+        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS);
     }
 }

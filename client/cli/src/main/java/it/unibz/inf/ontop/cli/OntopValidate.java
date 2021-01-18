@@ -50,15 +50,11 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         else
             builder.nativeOntopMappingFile(mappingFile);
 
-        if (!Files.exists(Paths.get(dbMetadataFile))) {
-            System.out.format("ERROR: The DBMetadata file %s does not exist\n", dbMetadataFile);
-            System.exit(1);
-        }
+        if (dbMetadataFile != null)
+            builder.dbMetadataFile(dbMetadataFile);
 
-        if (!Files.exists(Paths.get(viewsFile))) {
-            System.out.format("ERROR: The Views file %s does not exist\n", viewsFile);
-            System.exit(1);
-        }
+        if (ontopViewFile != null)
+            builder.ontopViewFile(ontopViewFile);
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 

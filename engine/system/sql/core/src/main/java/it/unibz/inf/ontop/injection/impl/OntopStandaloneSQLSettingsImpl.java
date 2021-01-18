@@ -34,6 +34,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean isPostProcessingAvoided() {
+        return systemSettings.isPostProcessingAvoided();
+    }
+
+    @Override
     public boolean isQueryLoggingEnabled() {
         return getRequiredBoolean(QUERY_LOGGING);
     }
