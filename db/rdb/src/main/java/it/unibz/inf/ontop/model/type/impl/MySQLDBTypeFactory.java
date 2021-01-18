@@ -73,12 +73,12 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
 
         // NB: TIMESTAMP also exists
-        // TODO: check if lexical values can be considered as unique
+        // TODO: check if lexical values can be considered as unique
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype());
 
         // TODO: shall we treat BIT as a number? Then, we would have to serialize it differently (e.g. b'011111')
-        // TODO: check if lexical values can be considered as unique
+        // TODO: check if lexical values can be considered as unique
         DBTermType defaultBitType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BIT_STR, rootAncestry, false);
 
         // Special cases that are interpreted as booleans
