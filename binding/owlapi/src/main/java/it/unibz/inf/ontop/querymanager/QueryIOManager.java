@@ -53,25 +53,12 @@ public class QueryIOManager {
     /**
      * The save/write operation.
      * 
-     * @param fileLocation
-     *          The target file location to which the queries are saved.
-     * @throws IOException
-     */
-    public void save(String fileLocation) throws IOException {
-        save(new File(fileLocation));
-    }
-
-    /**
-     * The save/write operation.
-     * 
      * @param file
      *          The target file object to which the queries are saved.
      * @throws IOException
      */
     public void save(File file) throws IOException {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             boolean needLineBreakForGroup = false;
             boolean needLineBreakForItem = false;
             for (QueryControllerEntity entity : queryController.getElements()) {
@@ -90,24 +77,11 @@ public class QueryIOManager {
                     needLineBreakForGroup = true;
                 }
             }
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IOException(String.format("Error while saving the queries to file located at %s.\n" +
                     "Make sure you have the write permission at the location specified.", file.getAbsolutePath()));
         }
-    }
-    
-
-    /**
-     * The load/write operation
-     * 
-     * @param fileLocation
-     *          The target file location from which the saved queries are loaded.
-     * @throws IOException
-     */
-    public void load(String fileLocation) throws IOException {
-        load(new File(fileLocation));
     }
 
     /**
@@ -129,27 +103,29 @@ public class QueryIOManager {
         // Clean the controller first before loading
         queryController.reset();
         
-        LineNumberReader reader = new LineNumberReader(new FileReader(file));
-        String line = "";
-        while ((line = reader.readLine()) != null) {
-        	try {
-	            if (isCommentLine(line) || line.isEmpty()) {
-	                continue; // skip comment lines and empty lines
-	            }
-	            if (line.contains(QUERY_GROUP)) {
-	                // The group ID is enclosed by a double-quotes sign
-	                String groupId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
-	                readQueryGroup(reader, groupId);
-	            } else if (line.contains(QUERY_ITEM)) {
-	                // The query ID is enclosed by a double-quotes sign
-	                String queryId = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
-	                readQueryContent(reader, "", queryId);
-	            } else {
-	            	throw new IOException("Unknown syntax: " + line);
-	            }
-        	} catch (Exception e) {
-        		throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()), e);
-        	}
+        try (LineNumberReader reader = new LineNumberReader(new FileReader(file))) {
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                try {
+                    if (isCommentLine(line) || line.isEmpty()) {
+                        continue; // skip comment lines and empty lines
+                    }
+                    if (line.contains(QUERY_GROUP)) {
+                        // The group ID is enclosed by a double-quotes sign
+                        String groupId = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
+                        readQueryGroup(reader, groupId);
+                    } else if (line.contains(QUERY_ITEM)) {
+                        // The query ID is enclosed by a double-quotes sign
+                        String queryId = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
+                        readQueryContent(reader, "", queryId);
+                    } else {
+                        throw new IOException("Unknown syntax: " + line);
+                    }
+                }
+                catch (Exception e) {
+                    throw new IOException(String.format("Invalid syntax at line: %s", reader.getLineNumber()), e);
+                }
+            }
         }
     }
 
@@ -209,7 +185,7 @@ public class QueryIOManager {
 
     private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
         writer.append(String.format(QUERY_ITEM_TAG, query.getID())).append("\n");
-        writer.append(query.getQuery().trim() + "\n");
+        writer.append(query.getQuery().trim()).append("\n");
     }
 
     private void addQueryItem(String queryText, String queryId, String groupId) {

@@ -20,18 +20,15 @@ package it.unibz.inf.ontop.querymanager;
  * #L%
  */
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QueryControllerGroup implements QueryControllerEntity {
 
-	private final Vector<QueryControllerQuery> queries =  new Vector<>();
-	private String group_id = "";
+	private final List<QueryControllerQuery> queries =  new ArrayList<>();
+	private final String group_id;
 
-	public QueryControllerGroup(String group_id) {
-		this.group_id = group_id;
-	}
-
-	public void setID(String group_id) {
+	QueryControllerGroup(String group_id) {
 		this.group_id = group_id;
 	}
 
@@ -41,76 +38,22 @@ public class QueryControllerGroup implements QueryControllerEntity {
 	}
 
 	/**
-	 * Search a query in case it is found, it is removed and returns the object
-	 * query else returns null.
-	 */
-	public QueryControllerQuery removeQuery(String query_id) {
-		for (QueryControllerQuery query : queries) {
-			if (query.getID().equals(query_id)) {
-				queries.remove(query);
-				return query;
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Return all queries of the vector QueryControllerQuery.
 	 */
-	public Vector<QueryControllerQuery> getQueries() {
+	public List<QueryControllerQuery> getQueries() {
 		return queries;
 	}
 
-	/**
-	 * Search a query with the given id and returns the object query else
-	 * returns null.
-	 */
-	public QueryControllerQuery getQuery(String id) {
-		for (QueryControllerQuery query : queries) {
-			if (query.getID().equals(id)) {
-				return query;
-			}
-		}
-		return null;
-	}
 
-	/**
-	 * Adds a new query into QueryControllerQuery's vector.
-	 */
-	public void addQuery(QueryControllerQuery query) {
+	void addQuery(QueryControllerQuery query) {
 		queries.add(query);
-
 	}
 
-	/**
-	 * Removes a query with the given id into QueryControllerQuery's vector.
-	 */
-	public void removeQuery(QueryControllerQuery query) {
-		queries.remove(query);
-	}
-
-	/**
-	 * Updates the existing query.
-	 */
-	public void updateQuery(QueryControllerQuery query) {
-		int position = getElementPosition(query.getID());
+	void updateQuery(int position, QueryControllerQuery query) {
 		queries.set(position, query);
 	}
 
-	public int getElementPosition(String id) {
-		int index = -1;
-		for (int i = 0; i < queries.size(); i++) {
-			QueryControllerEntity element = queries.get(i);
-			QueryControllerQuery query = (QueryControllerQuery) element;
-			if (query.getID().equals(id)) {
-				index = i;
-			}
-		}
-		return index;
-	}
-
-	@Override
-	public String getNodeName() {
-		return null;
+	void removeQuery(int position) {
+		queries.remove(position);
 	}
 }

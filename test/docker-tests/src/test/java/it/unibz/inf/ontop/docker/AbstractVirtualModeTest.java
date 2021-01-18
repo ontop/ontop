@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -295,7 +296,7 @@ public abstract class AbstractVirtualModeTest {
         try (OWLStatement st = createStatement()) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
-            qman.load(queryFileName);
+            qman.load(new File(queryFileName));
 
             for (QueryControllerGroup group : qc.getGroups()) {
                 for (QueryControllerQuery query : group.getQueries()) {

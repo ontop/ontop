@@ -20,6 +20,7 @@ import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class CanonicalIRIUniversityTest {
         try (OntopOWLStatement st = conn.createStatement()) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
-            qman.load(sparqlFile);
+            qman.load(new File(sparqlFile));
 
             for (QueryControllerGroup group : qc.getGroups()) {
                 for (QueryControllerQuery query : group.getQueries()) {

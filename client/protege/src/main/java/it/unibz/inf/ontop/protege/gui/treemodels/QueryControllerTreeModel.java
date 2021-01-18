@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -51,7 +50,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 				if (queryEntity instanceof QueryControllerGroup) {
 					QueryControllerGroup group = (QueryControllerGroup) queryEntity;
 					QueryGroupTreeElement queryGroupEle = new QueryGroupTreeElement(group.getID());
-					Vector<QueryControllerQuery> queries = group.getQueries();
+					List<QueryControllerQuery> queries = group.getQueries();
 					for (QueryControllerQuery query : queries) {
 						QueryTreeElement queryTreeEle = new QueryTreeElement(query.getID(), query.getQuery());
 						insertNodeInto(queryTreeEle, queryGroupEle, queryGroupEle.getChildCount());

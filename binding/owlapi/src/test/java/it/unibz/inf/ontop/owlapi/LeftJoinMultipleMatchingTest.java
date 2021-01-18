@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -77,7 +78,7 @@ public class LeftJoinMultipleMatchingTest {
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
-        qman.load("src/test/resources/ljoptional/rais-ontology.q");
+        qman.load(new File("src/test/resources/ljoptional/rais-ontology.q"));
 
         for (QueryControllerGroup group : qc.getGroups()) {
             for (QueryControllerQuery query : group.getQueries()) {

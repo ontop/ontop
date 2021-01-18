@@ -15,6 +15,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 import static org.junit.Assert.assertFalse;
 
 public class DatetimeStampTest {
@@ -55,7 +57,7 @@ public class DatetimeStampTest {
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
-        qman.load("src/test/resources/northwind/northwind.q");
+        qman.load(new File("src/test/resources/northwind/northwind.q"));
 
         for (QueryControllerGroup group : qc.getGroups()) {
             for (QueryControllerQuery query : group.getQueries()) {

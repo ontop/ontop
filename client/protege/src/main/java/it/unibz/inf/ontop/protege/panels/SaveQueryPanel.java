@@ -196,43 +196,38 @@ public class SaveQueryPanel extends JPanel {
 
 	private void cmdCreateNewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAcceptActionPerformed
 		String id = txtQueryID.getText();
-		String group = (String) cmbQueryGroup.getSelectedItem();
-
 		if (id.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "The query ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		final int index = queryController.getElementPosition(id);
+		int index = queryController.getElementPosition(id);
 		if (index != -1) {
 			JOptionPane.showMessageDialog(this, "The query or group ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		if (group.equals(NOGROUP)) { // no group selected
+        String groupId = (String) cmbQueryGroup.getSelectedItem();
+		if (groupId.equals(NOGROUP)) { // no group selected
 			queryController.addQuery(query, id);
 		}
-		else if (group.equals(NEWGROUP)) { // create a new group
-			group = txtGroupName.getText().trim();
-			if (group.isEmpty()) {
+		else if (groupId.equals(NEWGROUP)) { // create a new group
+			String newGroupId = txtGroupName.getText().trim();
+			if (newGroupId.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "The group ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			//query and group ID have not yet been added to the queryController elements, but we need to prevent the use of the same name for both
-			if (id.equals(group)){
+			if (id.equals(newGroupId)) {
                 JOptionPane.showMessageDialog(this, "The group ID can't have the same name as the query ID!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-			try {
-				queryController.createGroup(group);
-				queryController.addQuery(query, id, group);
-			}
-			catch (Exception e) {
-                OptionPaneUtils.showPrettyMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
+			if (queryController.getElementPosition(newGroupId) != -1) {
+                OptionPaneUtils.showPrettyMessageDialog(this, "The group with this ID already exists", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            queryController.addQuery(query, id, newGroupId);
 		}
 		else { // a group selected
-			queryController.addQuery(query, id, group);
+			queryController.addQuery(query, id, groupId);
 		}
 		parent.dispose();
 	}// GEN-LAST:event_buttonAcceptActionPerformed

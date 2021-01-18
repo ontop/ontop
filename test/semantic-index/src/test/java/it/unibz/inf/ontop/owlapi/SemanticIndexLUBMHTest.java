@@ -188,7 +188,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
-            qman.load("src/test/resources/test/treewitness/LUBM-ex-20.q");
+            qman.load(new File("src/test/resources/test/treewitness/LUBM-ex-20.q"));
 
             for (QueryControllerEntity e : qc.getElements()) {
                 if (!(e instanceof QueryControllerQuery)) {

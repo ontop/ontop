@@ -257,11 +257,8 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) selected_path.getLastPathComponent();
 		if (node instanceof TreeElement) {
 			TreeElement element = (TreeElement) node;
-			QueryController qc = this.queryController;
-			if (node instanceof QueryTreeElement) {
-				qc.removeQuery(element.getID());
-			} else if (node instanceof QueryGroupTreeElement) {
-				qc.removeGroup(element.getID());
+			if (node instanceof QueryTreeElement || node instanceof QueryGroupTreeElement) {
+				queryController.removeElement(element.getID());
 			}
 		}
 		

@@ -21,8 +21,5 @@ package it.unibz.inf.ontop.querymanager;
  */
 
 public interface QueryControllerEntity {
-
-	String getNodeName();
-
 	String getID();
 }
