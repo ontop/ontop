@@ -20,7 +20,8 @@ public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
                     ? new MySQLCaseSensitiveTableNamesQuotedIDFactory()
                     : new MySQLCaseNotSensitiveTableNamesQuotedIDFactory(),
                 coreSingletons,
-                "SELECT DATABASE() AS TABLE_SCHEM");
+                c -> new String[] { c.getCatalog(), "DUMMY" });
+        //        "SELECT DATABASE() AS TABLE_SCHEM");
         // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
     }
 

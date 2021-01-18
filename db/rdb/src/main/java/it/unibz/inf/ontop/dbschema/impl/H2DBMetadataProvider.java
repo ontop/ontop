@@ -13,7 +13,8 @@ public class H2DBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvider
     @AssistedInject
     H2DBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
         super(connection, metadata -> new SQLStandardQuotedIDFactory(), coreSingletons,
-                "SELECT DATABASE() AS TABLE_CAT, SCHEMA() AS TABLE_SCHEM");
+               "SELECT DATABASE() AS TABLE_CAT, SCHEMA() AS TABLE_SCHEM");
         // http://www.h2database.com/html/functions.html#current_schema
+        // the .getSchema() does work for OntopExtractDBMetadataTest
     }
 }

@@ -23,11 +23,29 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
 
     DefaultSchemaCatalogDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider,
                                            CoreSingletons coreSingletons, String sql) throws MetadataExtractionException {
+        this(connection, idFactoryProvider, coreSingletons, c -> {
+            try (Statement stmt = c.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                rs.next();
+                return new String[] {
+                        rs.getString("TABLE_CAT"),
+                        rs.getString("TABLE_SCHEM"),
+                        "DUMMY" };
+            }
+        });
+    }
+
+    DefaultSchemaCatalogDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider,
+                                           CoreSingletons coreSingletons) throws MetadataExtractionException {
+        this(connection, idFactoryProvider, coreSingletons,
+                c -> new String[] { c.getCatalog(), c.getSchema(), "DUMMY" });
+    }
+
+    DefaultSchemaCatalogDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider,
+                                           CoreSingletons coreSingletons, DefaultRelationIdComponentsFactory defaultsFactory) throws MetadataExtractionException {
         super(connection, idFactoryProvider, coreSingletons);
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            rs.next();
-            RelationID id = rawIdFactory.createRelationID(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), "DUMMY");
+        try {
+            RelationID id = rawIdFactory.createRelationID(defaultsFactory.getDefaultRelationIdComponents(connection));
             defaultCatalog = id.getComponents().get(CATALOG_INDEX);
             defaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
@@ -39,6 +57,7 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
         if (defaultCatalog == null)
             throw new MetadataExtractionException("Unable to obtain the default catalog: make sure the connection URL is complete");
     }
+
 
     @Override
     protected RelationID getCanonicalRelationId(RelationID id) {
