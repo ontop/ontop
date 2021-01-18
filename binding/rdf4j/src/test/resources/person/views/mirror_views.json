@@ -1,0 +1,24 @@
+{
+  "relations": [
+    {
+      "name": ["\"hr\"", "\"persons\""],
+      "baseRelation": ["\"person\""],
+      "columns": {
+        "added": [
+        ],
+        "hidden": [
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}

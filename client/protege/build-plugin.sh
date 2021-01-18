@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Builds the Protege plugin for debug purposes
-# Source: http://github.com/ontop/ontop/wiki/ObdalibPluginDebug
+# Source: https://ontop-vkg.org/dev/debug-protege.html
 
 #Protege version
 pVersion="5.5.0"

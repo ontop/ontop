@@ -261,6 +261,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             configBuilder.nativeOntopMappingFile(mappingFile);
         }
 
+        if (dbMetadataFile != null)
+            configBuilder.dbMetadataFile(dbMetadataFile);
+
+        if (ontopViewFile != null)
+            configBuilder.ontopViewFile(ontopViewFile);
+
         Properties properties = OntopModelConfigurationImpl.extractProperties(
                 OntopModelConfigurationImpl.extractPropertyFile(propertiesFile));
 

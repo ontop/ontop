@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,12 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
     }
 
-    AbstractDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, TypeFactory typeFactory) throws MetadataExtractionException {
+    protected interface DefaultRelationIdComponentsFactory {
+        String[] getDefaultRelationIdComponents(Connection c) throws SQLException;
+    }
+
+    AbstractDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider,
+                               CoreSingletons coreSingletons) throws MetadataExtractionException {
         try {
             this.connection = connection;
             this.metadata = connection.getMetaData();
@@ -39,7 +44,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     metadata.getDatabaseProductName(),
                     metadata.getDatabaseProductVersion(),
                     idFactory,
-                    typeFactory.getDBTypeFactory());
+                    coreSingletons);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -133,7 +138,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
             }
             throw relations.isEmpty()
-                    ? new RelationNotFoundInMetadataException(id)
+                    ? new RelationNotFoundInMetadataException(id, getRelationIDs())
                     : new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {

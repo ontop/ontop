@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.querymanager.*;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
 import it.unibz.inf.ontop.protege.gui.treemodels.TreeElement;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.utils.querymanager.*;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

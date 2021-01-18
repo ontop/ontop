@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.querymanager.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.querymanager.*;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -600,7 +599,7 @@ public class OBDAModelManager implements Disposable {
 					prefixUri += defaultSeparator;
 				}
 			}
-			obdaModel.addPrefix(PrefixManager.DEFAULT_PREFIX, prefixUri);
+			obdaModel.addPrefix(it.unibz.inf.ontop.spec.mapping.PrefixManager.DEFAULT_PREFIX, prefixUri);
 		}
 	}
 

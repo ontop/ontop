@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec;
 import it.unibz.inf.ontop.spec.impl.OBDASpecInputImpl;
 import org.apache.commons.rdf.api.Graph;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.util.Optional;
 
@@ -14,9 +15,18 @@ import java.util.Optional;
  */
 public interface OBDASpecInput {
 
+    /**
+     * Please consider using getReader()
+     */
+    @Deprecated
     Optional<File> getFile(String key);
 
-    Optional<Reader> getReader(String key);
+    /**
+     * The reader may have been created on the fly (e.g. from a file) or have been constructed before.
+     *
+     * In any case, the caller becomes responsible for closing the reader.
+     */
+    Optional<Reader> getReader(String key) throws FileNotFoundException;
 
     Optional<Graph> getGraph(String key);
 
@@ -29,11 +39,7 @@ public interface OBDASpecInput {
     //-----------------
 
 
-    default Optional<File> getMappingFile() {
-        return getFile(MAPPING_KEY);
-    }
-
-    default Optional<Reader> getMappingReader() {
+    default Optional<Reader> getMappingReader() throws FileNotFoundException {
         return getReader(MAPPING_KEY);
     }
 
@@ -45,7 +51,9 @@ public interface OBDASpecInput {
         return getFile(CONSTRAINT_KEY);
     }
 
-    default Optional<File> getDBMetadataFile() { return getFile(DBMETADATA_KEY); }
+    default Optional<Reader> getDBMetadataReader() throws FileNotFoundException { return getReader(DBMETADATA_KEY); }
+
+    default Optional<Reader> getOntopViewReader() throws FileNotFoundException { return getReader(ONTOPVIEW_KEY); }
 
 
     interface Builder {
@@ -75,6 +83,18 @@ public interface OBDASpecInput {
         default Builder addDBMetadataFile(File dbMetadataFile) {
             return addFile(DBMETADATA_KEY, dbMetadataFile);
         }
+
+        default Builder addDBMetadataReader(Reader dbMetadataReader) {
+            return addReader(DBMETADATA_KEY, dbMetadataReader);
+        }
+
+        default Builder addOntopViewFile(File ontopViewFile) {
+            return addFile(ONTOPVIEW_KEY, ontopViewFile);
+        }
+
+        default Builder addOntopViewReader(Reader ontopViewReader) {
+            return addReader(ONTOPVIEW_KEY, ontopViewReader);
+        }
     }
 
 
@@ -85,6 +105,7 @@ public interface OBDASpecInput {
     String MAPPING_KEY = "mapping";
     String CONSTRAINT_KEY = "constraint";
     String DBMETADATA_KEY = "db-metadata";
+    String ONTOPVIEW_KEY = "ontop-view";
 
 
 }

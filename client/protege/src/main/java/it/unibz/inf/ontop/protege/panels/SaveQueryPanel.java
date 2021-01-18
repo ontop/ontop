@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 
 import javax.swing.*;
 import java.awt.*;

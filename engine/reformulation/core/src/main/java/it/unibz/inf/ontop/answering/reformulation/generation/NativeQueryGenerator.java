@@ -11,4 +11,6 @@ import it.unibz.inf.ontop.iq.IQ;
 public interface NativeQueryGenerator {
 
 	IQ generateSourceQuery(IQ query);
+
+	IQ generateSourceQuery(IQ query, boolean avoidPostProcessing);
 }

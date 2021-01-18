@@ -98,7 +98,7 @@ public class OntopConfigurationManager {
                 .ifPresent(builder::basicImplicitConstraintFile);
 
         Optional.ofNullable(dbMetadataFile)
-                .ifPresent(builder::basicDBMetadataFile);
+                .ifPresent(builder::dbMetadataFile);
 
         builder.ontology(currentOntology);
 

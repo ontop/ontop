@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.MetadataLookup;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.function.Function;
@@ -25,7 +26,7 @@ public class ImmutableMetadataLookup implements MetadataLookup {
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         NamedRelationDefinition relation = map.get(id);
         if (relation == null)
-            throw new MetadataExtractionException("Relation " + id + " not found");
+            throw new RelationNotFoundInMetadataException(id, map.keySet());
 
         return relation;
     }

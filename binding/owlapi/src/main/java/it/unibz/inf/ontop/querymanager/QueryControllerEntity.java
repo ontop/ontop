@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.utils.querymanager;
+package it.unibz.inf.ontop.querymanager;
 
 /*
  * #%L
@@ -20,32 +20,9 @@ package it.unibz.inf.ontop.utils.querymanager;
  * #L%
  */
 
-public class QueryControllerQuery implements QueryControllerEntity {
+public interface QueryControllerEntity {
 
-	private final String id;
-	private String query = "";
-	
-	public QueryControllerQuery(String id) {
-		this.id = id;
-	}
-	
-	public String getID() {
-		return id;
-	}
+	String getNodeName();
 
-	public void setQuery(String query) {
-		this.query = query;
-	}
-
-	public String getQuery() {
-		return query;
-	}
-
-	public String getNodeName() {
-		return id + ": " + query;
-	}
-	
-	public String toString() {
-		return getNodeName();
-	}
+	String getID();
 }
