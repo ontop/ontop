@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>ontop-core</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
@@ -21,8 +20,8 @@
             <artifactId>commons-rdf-rdf4j</artifactId>
         </dependency>
         <!--<dependency>-->
-        <!--<groupId>org.antlr</groupId>-->
-        <!--<artifactId>antlr</artifactId>-->
+            <!--<groupId>org.antlr</groupId>-->
+            <!--<artifactId>antlr</artifactId>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -48,32 +48,11 @@
 			<scope>test</scope>
 			<version>${project.version}</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.h2database</groupId>-->
-<!--			<artifactId>h2</artifactId>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>mysql</groupId>-->
-<!--			<artifactId>mysql-connector-java</artifactId>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>org.orbisgis</groupId>-->
-<!--			<artifactId>h2gis</artifactId>-->
-<!--			<version>1.5.0</version>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
-
 		<dependency>
 			<groupId>org.orbisgis</groupId>
 			<artifactId>h2gis-ext</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-queryparser-sparql</artifactId>
