@@ -14,7 +14,6 @@ public class OredaObdaJoinTest extends AbstractVirtualModeTest {
     private static final String owlFile = "/mssql/oreda/oreda_bootstrapped_ontology.owl";
     private static final String obdaFile = "/mssql/oreda/oreda_bootstrapped_mapping.obda";
     private static final String propertyFile = "/mssql/oreda/oreda_bootstrapped_mapping.properties";
-    private static final String queriesFile = "/mssql/oreda/oreda.q";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;
@@ -37,8 +36,17 @@ public class OredaObdaJoinTest extends AbstractVirtualModeTest {
     }
 
     @Test
-    public void testObda() throws Exception {
-        runQueries(queriesFile);
+    public void testValueDate() throws Exception {
+        runQuery("PREFIX : <http://www.optique-project.eu/resource/Oreda/oreda/item_data/>\n" +
+                "select *\n" +
+                "{?x :value_date ?y}");
+    }
+
+    @Test
+    public void testValueInventory() throws Exception {
+        runQuery("PREFIX : <http://www.optique-project.eu/resource/Oreda/oreda/inv_spec/>\n" +
+                "select *\n" +
+                "{?x :ref-inventory ?y}");
     }
 }
 

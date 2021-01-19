@@ -86,73 +86,66 @@ public class DatetimeStampSesameTest  {
 	}
 
 	@Test
-	public void testOrdersDate() {
+	public void testRequiredDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>" +
+				"select * {?x :RequiredDate ?y}";
 
-		//read next query
-		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/> select * {?x :RequiredDate ?y}" ;
-		//read expected result
-		int expectedResult = 830;
-		
 		int obtainedResult = runQuery(sparqlQuery);
-		log.debug("results "+obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
-
-		//read next query
-		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/> select * {?x :ShippedDate ?y}" ;
-		//read expected result
-		expectedResult = 809;
-
-		obtainedResult = runQuery(sparqlQuery);
 		log.debug("results " + obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
+		assertEquals(830, obtainedResult);
+	}
+	
+	@Test
+	public void testShippedDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>" +
+				"select * {?x :ShippedDate ?y}" ;
 
+		int obtainedResult = runQuery(sparqlQuery);
+		log.debug("results " + obtainedResult);
+		assertEquals(809, obtainedResult);
 	}
 
 	@Test
-	public void testEmployeesDate() {
-
-		//read next query
-		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :HireDate ?y}" ;
-		//read expected result
-		int expectedResult = 9;
+	public void testHireDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
+				"select * {?x :HireDate ?y}";
 
 		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results " + obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
+		assertEquals(9, obtainedResult);
+	}
 
-		//read next query
-		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :BirthDate ?y}" ;
-		//read expected result
-		expectedResult = 9;
+	@Test
+	public void testBirthDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>" +
+				"select * {?x :BirthDate ?y}" ;
 
-		obtainedResult = runQuery(sparqlQuery);
+		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results "+obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
+		assertEquals(9, obtainedResult);
 
 	}
 
 	@Ignore("The current SQL generator does not support xsd:base64Binary")
 	@Test
-	public void testBinary() {
-
-		//read next query
-		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :Photo ?y}" ;
-		//read expected result
-		int expectedResult = 9;
+	public void testPhoto() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>" +
+				"select * {?x :Photo ?y}";
 
 		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results " + obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
+		assertEquals(9, obtainedResult);
+	}
 
-		//read next query
-		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/> select * {?x :Picture ?y}" ;
-		//read expected result
-		expectedResult = 8;
+	@Ignore("The current SQL generator does not support xsd:base64Binary")
+	@Test
+	public void testBinary() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/>" +
+				"select * {?x :Picture ?y}" ;
 
-		obtainedResult = runQuery(sparqlQuery);
+		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results "+obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
-
+		assertEquals(8, obtainedResult);
 	}
 
 }
