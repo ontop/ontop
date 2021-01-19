@@ -376,7 +376,6 @@ public class OBDAModelManager implements Disposable {
 					queryIO.load(queryFile);
 				}
 				catch (Exception ex) {
-					queryController.reset();
 					throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
 				}
 			}

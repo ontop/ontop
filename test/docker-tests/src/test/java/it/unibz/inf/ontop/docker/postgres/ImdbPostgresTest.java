@@ -21,6 +21,7 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
     private static final String owlFile = "/pgsql/imdb/movieontology.owl";
     private static final String obdaFile = "/pgsql/imdb/movieontology.obda";
     private static final String propertyFile = "/pgsql/imdb/movieontology.properties";
+    private static final String queriesFile = "/pgsql/imdb/movieontology.q";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;
@@ -44,7 +45,7 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
 
     @Test
     public void testIMDBSeries() throws Exception {
-        runQueries("src/test/resources/imdb/movieontology.q");
+        runQueries(queriesFile);
     }
 
     @Test

@@ -88,6 +88,9 @@ public class QueryIOManager {
      * @throws IOException
      */
     public void load(File file) throws IOException {
+        // Clean the controller first before loading
+        queryController.reset();
+
         if (!file.exists()) {
             return; // NO-OP: Users may not have the saved file
         }
@@ -95,9 +98,6 @@ public class QueryIOManager {
             throw new IOException(String.format("Error while reading the file located at %s.\n" +
                     "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
         }
-        
-        // Clean the controller first before loading
-        queryController.reset();
         
         try (LineNumberReader reader = new LineNumberReader(new FileReader(file))) {
             String line = "";

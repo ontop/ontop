@@ -164,7 +164,7 @@ public class QueryController {
 		return entities;
 	}
 
-	public void reset() {
+	void reset() {
         entities.clear();
 	}
 }

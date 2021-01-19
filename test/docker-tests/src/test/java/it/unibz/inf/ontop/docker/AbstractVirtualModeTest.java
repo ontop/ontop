@@ -79,7 +79,7 @@ public abstract class AbstractVirtualModeTest {
     protected static OntopOWLReasoner createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) throws OWLOntologyCreationException {
         owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
         r2rmlFile =  AbstractBindTestWithFunctions.class.getResource(r2rmlFile).toString();
-        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
+        propertiesFile = AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -296,13 +296,14 @@ public abstract class AbstractVirtualModeTest {
         try (OWLStatement st = createStatement()) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
+            queryFileName = AbstractBindTestWithFunctions.class.getResource(queryFileName).toString();
             qman.load(new File(queryFileName));
 
             for (QueryControllerGroup group : qc.getGroups()) {
                 for (QueryControllerQuery query : group.getQueries()) {
-
                     log.debug("Executing query: {}", query.getID());
                     log.debug("Query: \n{}", query.getQuery());
+                    System.out.println("Query: " + query.getQuery());
 
                     long start = System.nanoTime();
                     try (TupleOWLResultSet res = st.executeSelectQuery(query.getQuery())) {
