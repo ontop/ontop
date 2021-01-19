@@ -57,7 +57,9 @@ public class R2rmlJoinTest {
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
+        System.out.println("OREDA BEFORE READING THE FILE");
         qman.load(new File("src/test/resources/oreda/oreda.q"));
+        System.out.println("OREDA AFTER READING THE FILE");
 
         for (QueryControllerGroup group : qc.getGroups()) {
             for (QueryControllerQuery query : group.getQueries()) {

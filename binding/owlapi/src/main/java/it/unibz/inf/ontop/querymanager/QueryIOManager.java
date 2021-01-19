@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.stream.Collectors;
 
 public class QueryIOManager {
 
@@ -58,30 +59,25 @@ public class QueryIOManager {
      * @throws IOException
      */
     public void save(File file) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            boolean needLineBreakForGroup = false;
-            boolean needLineBreakForItem = false;
-            for (QueryControllerEntity entity : queryController.getElements()) {
-                if (entity instanceof QueryControllerGroup) {
-                    if (needLineBreakForGroup) {
-                        writer.write("\n");
-                    }
-                    writeQueryGroup((QueryControllerGroup) entity, writer);
-                    needLineBreakForGroup = true;
-                } else if (entity instanceof QueryControllerQuery) {
-                    if (needLineBreakForItem) {
-                        writer.write("\n");
-                    }
-                    writeQueryItem((QueryControllerQuery) entity, writer);
-                    needLineBreakForItem = true;
-                    needLineBreakForGroup = true;
-                }
-            }
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.append(queryController.getElements().stream()
+                    .map(QueryIOManager::writeEntity)
+                    .collect(Collectors.joining("\n")));
         }
         catch (IOException e) {
             throw new IOException(String.format("Error while saving the queries to file located at %s.\n" +
                     "Make sure you have the write permission at the location specified.", file.getAbsolutePath()));
         }
+    }
+
+    private static String writeEntity(QueryControllerEntity entity) {
+        if (entity instanceof QueryControllerGroup) {
+            return writeQueryGroup((QueryControllerGroup) entity);
+        }
+        else if (entity instanceof QueryControllerQuery) {
+            return writeQueryItem((QueryControllerQuery) entity);
+        }
+        throw new IllegalArgumentException("Unexpected type");
     }
 
     /**
@@ -164,36 +160,24 @@ public class QueryIOManager {
         reader.reset();
         
         String queryText = buffer.toString();
-        addQueryItem(queryText, queryId, groupId);
-    }
-
-    private void writeQueryGroup(QueryControllerGroup group, BufferedWriter writer) throws IOException {
-        writer.append(String.format(QUERY_GROUP_TAG, group.getID())).append(" ");
-        writer.append(START_COLLECTION_SYMBOL + "\n");
-        
-        boolean needLineBreak = false;
-        for (QueryControllerQuery query : group.getQueries()) {
-            if (needLineBreak) {
-                writer.write("\n");
-            }
-            writeQueryItem(query, writer);
-            needLineBreak = true;
-        }
-        writer.append(END_COLLECTION_SYMBOL);
-        writer.append("\n");
-    }
-
-    private void writeQueryItem(QueryControllerQuery query, BufferedWriter writer) throws IOException {
-        writer.append(String.format(QUERY_ITEM_TAG, query.getID())).append("\n");
-        writer.append(query.getQuery().trim()).append("\n");
-    }
-
-    private void addQueryItem(String queryText, String queryId, String groupId) {
         if (!groupId.isEmpty()) {
             queryController.addQuery(queryText, queryId, groupId);
         } else {
             queryController.addQuery(queryText, queryId);
         }
+    }
+
+    private static String writeQueryGroup(QueryControllerGroup group) {
+        return String.format(QUERY_GROUP_TAG, group.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
+                + group.getQueries().stream()
+                    .map(QueryIOManager::writeQueryItem)
+                    .collect(Collectors.joining("\n"))
+                + END_COLLECTION_SYMBOL + "\n";
+    }
+
+    private static String writeQueryItem(QueryControllerQuery query) {
+        return String.format(QUERY_ITEM_TAG, query.getID()) + "\n"
+                + query.getQuery().trim() + "\n";
     }
 
     private boolean isCommentLine(String line) {
