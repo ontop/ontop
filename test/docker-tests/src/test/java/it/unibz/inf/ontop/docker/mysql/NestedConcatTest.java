@@ -39,14 +39,11 @@ public class NestedConcatTest extends AbstractVirtualModeTest {
 
     @Test
     public void testConcat() throws Exception {
-        String sparqlQuery =
-                "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
-                            "SELECT ?per ?yS ?yE\n" +
-                            "WHERE{\n" +
-                            "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
-                            "}\n" +
-                            "LIMIT 1";
-
-        runQuery(sparqlQuery);
+        countResults(1, "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
+                "SELECT ?per ?yS ?yE\n" +
+                "WHERE{\n" +
+                "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
+                "}\n" +
+                "LIMIT 1");
     }
 }

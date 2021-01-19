@@ -39,42 +39,42 @@ public class DatetimestampObdaTest extends AbstractVirtualModeTest  {
 
     @Test
     public void testRequiredDate() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>\n" +
+        countResults(830, "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>\n" +
                 "select *\n" +
                 "{?x :RequiredDate ?y}");
     }
 
     @Test
     public void testShippedDate() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>\n" +
+        countResults(809, "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>\n" +
                 "select *\n" +
                 " {?x :ShippedDate ?y}");
     }
 
     @Test
     public void testHireDate() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
+        countResults(9, "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
                 "select *\n" +
                 "{?x :HireDate ?y}");
     }
 
     @Test
     public void testBirthDate() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
+        countResults(9, "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
                 "select *\n" +
                 "{?x :BirthDate ?y}");
     }
 
     @Test
     public void testPicture() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/>\n" +
+        countResults(8, "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/>\n" +
                 "select *\n" +
                 "{?x :Picture ?y}");
     }
 
     @Test
     public void testPhoto() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
+        countResults(9, "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
                 "select *\n" +
                 "{?x :Photo ?y}");
     }

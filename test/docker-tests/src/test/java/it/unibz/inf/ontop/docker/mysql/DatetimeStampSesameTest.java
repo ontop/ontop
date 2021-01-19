@@ -94,7 +94,7 @@ public class DatetimeStampSesameTest  {
 		log.debug("results " + obtainedResult);
 		assertEquals(830, obtainedResult);
 	}
-	
+
 	@Test
 	public void testShippedDate() {
 		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>" +

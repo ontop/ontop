@@ -37,14 +37,14 @@ public class OredaR2rmlJoinTest extends AbstractVirtualModeTest {
 
     @Test
     public void testValueDate() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/Oreda/oreda/item_data/>\n" +
+        countResults(0, "PREFIX : <http://www.optique-project.eu/resource/Oreda/oreda/item_data/>\n" +
                 "select *\n" +
                 "{?x :value_date ?y}");
     }
 
     @Test
     public void testValueInventory() throws Exception {
-        runQuery("PREFIX : <http://www.optique-project.eu/resource/Oreda/oreda/inv_spec/>\n" +
+        countResults(0, "PREFIX : <http://www.optique-project.eu/resource/Oreda/oreda/inv_spec/>\n" +
                 "select *\n" +
                 "{?x :ref-inventory ?y}");
     }

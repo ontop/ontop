@@ -1,14 +1,26 @@
 package it.unibz.inf.ontop.docker.postgres;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
+import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import it.unibz.inf.ontop.querymanager.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+
+import java.io.File;
+import java.net.URI;
+import java.util.Optional;
+
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Test case for the IMDB database see wiki Example_MovieOntology
@@ -45,12 +57,41 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
 
     @Test
     public void testIMDBSeries() throws Exception {
-        runQueries(queriesFile);
+        QueryController qc = new QueryController();
+        QueryIOManager qman = new QueryIOManager(qc);
+        String queryFileName = ImdbPostgresTest.class.getResource(queriesFile).toString();
+        qman.load(new File(new URI(queryFileName)));
+
+        for (QueryControllerEntity entity : qc.getElements()) {
+            if (entity instanceof QueryControllerGroup) {
+                for (QueryControllerQuery query : ((QueryControllerGroup)entity).getQueries()) {
+                    runQuery(query);
+                }
+            }
+            else if (entity instanceof QueryControllerQuery) {
+                runQuery((QueryControllerQuery)entity);
+            }
+            throw new IllegalArgumentException("Unexpected entity type");
+        }
     }
 
-    @Test
-    public void testOneQuery() throws Exception {
+    private void runQuery(QueryControllerQuery qcq) throws Exception {
+        String query = qcq.getQuery();
+        System.out.println("QUERY FROM QC: " + query);
+        try (OntopOWLStatement st = createStatement()) {
+            int count = 0;
+            try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+                while (rs.hasNext()) {
+                    OWLBindingSet bindingSet = rs.next();
+                    count++;
+                }
+            }
+            System.out.println("Query " + query + " total result: " + count);
+            assertNotEquals(0, count);
+        }
+    }
 
+    /*
         String query = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
                 "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
                 "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
@@ -62,8 +103,11 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "   $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "   $z a mo:Love .\n" +
                 "}\n";
+     */
 
 
+    @Test
+    public void testOneQuery() throws Exception {
         String query2 = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
                 "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
                 "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
@@ -74,7 +118,6 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
 
-        // TODO: double-check: was 15175
         countResults(15173, query2);
     }
 
@@ -89,7 +132,6 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "WHERE { \n" +
                 "   $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
-
 
         countResults(7738, query);
     }
