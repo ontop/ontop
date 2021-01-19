@@ -39,10 +39,10 @@ import java.util.Properties;
  */
 public class OWLConstructDescribeTest {
 
-	OntopOWLReasoner reasoner = null;
-	OWLConnection conn = null;
-	OWLStatement st = null;
-	String owlFile = "src/test/resources/describeConstruct.owl";
+	private OntopOWLReasoner reasoner;
+	private OWLConnection conn;
+	private OWLStatement st;
+	private static final String owlFile = "src/test/resources/describeConstruct.owl";
 	
 	@Before
 	public void setUp() throws Exception {

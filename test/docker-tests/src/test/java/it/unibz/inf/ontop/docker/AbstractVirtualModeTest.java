@@ -14,10 +14,7 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
-import it.unibz.inf.ontop.querymanager.QueryIOManager;
+import it.unibz.inf.ontop.querymanager.*;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -292,34 +289,43 @@ public abstract class AbstractVirtualModeTest {
     }
 
     protected void runQueries(String queryFileName) throws Exception {
-
         try (OWLStatement st = createStatement()) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
             queryFileName = AbstractBindTestWithFunctions.class.getResource(queryFileName).toString();
             qman.load(new File(queryFileName));
 
-            for (QueryControllerGroup group : qc.getGroups()) {
-                for (QueryControllerQuery query : group.getQueries()) {
-                    log.debug("Executing query: {}", query.getID());
-                    log.debug("Query: \n{}", query.getQuery());
-                    System.out.println("Query: " + query.getQuery());
-
-                    long start = System.nanoTime();
-                    try (TupleOWLResultSet res = st.executeSelectQuery(query.getQuery())) {
-                        long end = System.nanoTime();
-                        long time = (end - start) / 1000;
-
-                        int count = 0;
-                        while (res.hasNext()) {
-                            count += 1;
-                        }
-                        log.debug("Total result: {}", count);
-                        assertNotEquals(0, count);
-                        log.debug("Elapsed time: {} ms", time);
+            for (QueryControllerEntity entity : qc.getElements()) {
+                if (entity instanceof QueryControllerGroup) {
+                    for (QueryControllerQuery query : ((QueryControllerGroup)entity).getQueries()) {
+                        runQuery(st, query);
                     }
                 }
+                else if (entity instanceof QueryControllerQuery) {
+                    runQuery(st, (QueryControllerQuery)entity);
+                }
+                throw new IllegalArgumentException("Unexpected entity type");
             }
+        }
+    }
+
+    private void runQuery(OWLStatement st, QueryControllerQuery query) throws Exception {
+        log.debug("Executing query: {}", query.getID());
+        log.debug("Query: \n{}", query.getQuery());
+        System.out.println("QUERY FORM QC: " + query.getQuery());
+
+        long start = System.nanoTime();
+        try (TupleOWLResultSet res = st.executeSelectQuery(query.getQuery())) {
+            long end = System.nanoTime();
+            long time = (end - start) / 1000;
+
+            int count = 0;
+            while (res.hasNext()) {
+                count += 1;
+            }
+            log.debug("Total result: {}", count);
+            assertNotEquals(0, count);
+            log.debug("Elapsed time: {} ms", time);
         }
     }
 
