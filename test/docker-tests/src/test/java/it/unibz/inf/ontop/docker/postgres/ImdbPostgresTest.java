@@ -71,7 +71,8 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
             else if (entity instanceof QueryControllerQuery) {
                 runQuery((QueryControllerQuery)entity);
             }
-            throw new IllegalArgumentException("Unexpected entity type");
+            else
+                throw new IllegalArgumentException("Unexpected entity type");
         }
     }
 
