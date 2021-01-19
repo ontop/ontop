@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.rdf4j.predefined.InvalidBindingSetException;
 import it.unibz.inf.ontop.rdf4j.predefined.PredefinedQuery;
 import it.unibz.inf.ontop.rdf4j.predefined.parsing.PredefinedQueryConfigEntry;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
