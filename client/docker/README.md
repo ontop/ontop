@@ -23,7 +23,7 @@ Here is a list of environment variables that directly correspond to arguments of
 - `ONTOP_PORTAL_FILE` (optional). Corresponds to the argument `--portal`.
 - `ONTOP_DEV_MODE` (optional). Corresponds to the argument `--dev`.
 - `ONTOP_LAZY_INIT` (optional). Corresponds to the argument `--lazy`.
-
+- `ONTOP_DEBUG` (optional). Uses debug for logback.
 
 ## Tutorial
 

@@ -58,13 +58,6 @@
 
         <!-- dependencies available from Protege: end -->
 
-        <!-- not sure if this is really needed -->
-        <!--        <dependency>-->
-        <!--            <groupId>com.google.errorprone</groupId>-->
-        <!--            <artifactId>error_prone_annotations</artifactId>-->
-        <!--&lt;!&ndash;            <version>2.0.15</version>&ndash;&gt;-->
-        <!--        </dependency>-->
-
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
@@ -74,7 +67,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <!--            <version>3.4</version>-->
         </dependency>
 
         <dependency>
@@ -563,6 +555,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>failureaccess</artifactId>
             <version>1.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.locationtech.proj4j</groupId>
+            <artifactId>proj4j</artifactId>
         </dependency>
 
         <dependency>

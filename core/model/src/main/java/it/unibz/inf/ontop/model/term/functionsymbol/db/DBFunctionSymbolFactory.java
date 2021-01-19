@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -292,4 +293,38 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);
+
+    // Topological functions
+    DBBooleanFunctionSymbol getDBSTWithin();
+    DBBooleanFunctionSymbol getDBSTEquals();
+    DBBooleanFunctionSymbol getDBSTIntersects();
+    DBBooleanFunctionSymbol getDBSTOverlaps();
+    DBBooleanFunctionSymbol getDBSTContains();
+    DBBooleanFunctionSymbol getDBSTCrosses();
+    DBBooleanFunctionSymbol getDBSTDisjoint();
+    DBBooleanFunctionSymbol getDBSTTouches();
+    DBBooleanFunctionSymbol getDBSTCoveredBy();
+    DBBooleanFunctionSymbol getDBSTCovers();
+    DBBooleanFunctionSymbol getDBSTContainsProperly();
+
+    // Non-topological and form functions
+    DBFunctionSymbol getDBSTDistance();
+    DBFunctionSymbol getDBSTDistanceSphere();
+    DBFunctionSymbol getDBSTDistanceSpheroid();
+    DBFunctionSymbol getDBSTTransform();
+    DBFunctionSymbol getDBSTSetSRID();
+    FunctionSymbol getDBAsText();
+    FunctionSymbol getDBSTFlipCoordinates();
+    FunctionSymbol getDBBuffer();
+    FunctionSymbol getDBIntersection();
+    FunctionSymbol getDBBoundary();
+    FunctionSymbol getDBSymDifference();
+    FunctionSymbol getDBUnion();
+    FunctionSymbol getDBEnvelope();
+    FunctionSymbol getDBConvexHull();
+    FunctionSymbol getDBDifference();
+    DBBooleanFunctionSymbol getDBRelate();
+    FunctionSymbol getDBRelateMatrix();
+    FunctionSymbol getDBGetSRID();
+
 }

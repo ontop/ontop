@@ -73,6 +73,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.locationtech.proj4j</groupId>
+            <artifactId>proj4j</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
