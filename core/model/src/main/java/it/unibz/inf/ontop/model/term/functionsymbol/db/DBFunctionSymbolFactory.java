@@ -294,6 +294,7 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);
 
+    // Topological functions
     DBBooleanFunctionSymbol getDBSTWithin();
     DBBooleanFunctionSymbol getDBSTEquals();
     DBBooleanFunctionSymbol getDBSTIntersects();
@@ -306,28 +307,18 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBSTCovers();
     DBBooleanFunctionSymbol getDBSTContainsProperly();
 
+    // Non-topological and form functions
     DBFunctionSymbol getDBSTDistance();
-
     DBFunctionSymbol getDBSTDistanceSphere();
-
     DBFunctionSymbol getDBSTDistanceSpheroid();
-
     DBFunctionSymbol getDBSTTransform();
-
     DBFunctionSymbol getDBSTSetSRID();
-
     FunctionSymbol getDBAsText();
-
     FunctionSymbol getDBSTFlipCoordinates();
-
     FunctionSymbol getDBBuffer();
-
     FunctionSymbol getDBIntersection();
-
     FunctionSymbol getDBBoundary();
-
     FunctionSymbol getDBSymDifference();
-
     FunctionSymbol getDBUnion();
     FunctionSymbol getDBEnvelope();
     FunctionSymbol getDBConvexHull();
@@ -336,10 +327,4 @@ public interface DBFunctionSymbolFactory {
     FunctionSymbol getDBRelateMatrix();
     FunctionSymbol getDBGetSRID();
 
-    //DBFunctionSymbol getDBDimension();
-    //DBFunctionSymbol getDBCoordinateDimension();
-    //DBFunctionSymbol getDBSpatialDimension();
-    //DBBooleanFunctionSymbol getDBIsEmpty();
-    //DBBooleanFunctionSymbol getDBIsSimple();
-    //FunctionSymbol getDBHasSerialization();
 }

@@ -535,6 +535,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
+    // Topological functions
     @Override
     public DBBooleanFunctionSymbol getDBSTWithin() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
@@ -588,6 +589,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
+    // Non-topological and common form functions
     @Override
     public DBFunctionSymbol getDBSTDistance() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
@@ -672,36 +674,6 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     public DBBooleanFunctionSymbol getDBRelateMatrix() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
-
-    /*@Override
-    public DBFunctionSymbol getDBDimension() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
-
-    @Override
-    public DBFunctionSymbol getDBCoordinateDimension() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
-
-    *//*@Override
-    public DBFunctionSymbol getDBSpatialDimension() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }*//*
-
-    @Override
-    public DBBooleanFunctionSymbol getDBIsSimple() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBIsEmpty() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
-*/
-    /*@Override
-    public DBFunctionSymbol getDBHasSerialization() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }*/
 
     @Override
     public DBFunctionSymbol getDBGetSRID() {

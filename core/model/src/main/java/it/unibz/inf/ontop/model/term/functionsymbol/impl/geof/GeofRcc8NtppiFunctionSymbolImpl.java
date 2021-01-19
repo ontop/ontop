@@ -8,15 +8,14 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class GeofRcc8NtppiFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofRcc8NtppiFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImplUsingRelate {
 
     public GeofRcc8NtppiFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_RCC8_NTPPI", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
-    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        final String matrix_pattern = "TTTFFTFFT";
-        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1),termFactory.getDBStringConstant(matrix_pattern));
+    protected String getMatrixPatternString() {
+        return "TTTFFTFFT";
     }
 }

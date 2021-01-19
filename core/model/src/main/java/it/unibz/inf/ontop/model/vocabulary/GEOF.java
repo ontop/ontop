@@ -89,14 +89,6 @@ public class GEOF {
     // Relate with string result
     public static final IRI RELATEM;
 
-    // Properties
-    public static final IRI DIMENSION;
-    public static final IRI COORDINATEDIMENSION;
-    //public static final IRI SPATIALDIMENSION;
-    public static final IRI ISEMPTY;
-    public static final IRI ISSIMPLE;
-    //public static final IRI HASSERIALIZATION;
-
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
 
@@ -178,19 +170,6 @@ public class GEOF {
 
         // geof:relate --> String result
         RELATEM = factory.createIRI(PREFIX + "relate");
-
-        // Properties
-        DIMENSION = factory.createIRI(PREFIX_PROP + "dimension");
-
-        COORDINATEDIMENSION = factory.createIRI(PREFIX_PROP + "coordinateDimension");
-
-        //SPATIALDIMENSION = factory.createIRI(PREFIX_PROP + "spatialDimension");
-
-        ISSIMPLE = factory.createIRI(PREFIX_PROP + "isSimple");
-
-        ISEMPTY = factory.createIRI(PREFIX_PROP + "isEmpty");
-
-        //HASSERIALIZATION = factory.createIRI(PREFIX_PROP + "hasSerialization");
 
     }
 }

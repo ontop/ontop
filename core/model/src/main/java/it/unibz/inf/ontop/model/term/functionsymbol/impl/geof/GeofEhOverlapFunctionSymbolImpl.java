@@ -8,15 +8,14 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-public class GeofEhOverlapFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImpl {
+public class GeofEhOverlapFunctionSymbolImpl  extends AbstractGeofBooleanFunctionSymbolImplUsingRelate {
 
     public GeofEhOverlapFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, RDFDatatype xsdBooleanType) {
         super("GEOF_EH_OVERLAP", functionIRI, ImmutableList.of(wktLiteralType, wktLiteralType), xsdBooleanType);
     }
 
     @Override
-    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        final String matrix_pattern = "T*T***T**";
-        return termFactory.getDBRelate(subLexicalTerms.get(0), subLexicalTerms.get(1), termFactory.getDBStringConstant(matrix_pattern)).simplify();
+    protected String getMatrixPatternString() {
+        return "T*T***T**";
     }
 }
