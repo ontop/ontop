@@ -25,7 +25,7 @@ select *
 
 ]]
 
-QueryGroup="Base64Stamp"] @collection [[
+[QueryGroup="Base64Stamp"] @collection [[
 
 [QueryItem="Picture"]
 PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/>

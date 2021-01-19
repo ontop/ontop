@@ -324,6 +324,7 @@ public abstract class AbstractVirtualModeTest {
                 while (rs.hasNext()) {
                     OWLBindingSet bindingSet = rs.next();
                     log.debug(bindingSet.toString());
+                    System.out.println(bindingSet);
                     count += 1;
                 }
             }
