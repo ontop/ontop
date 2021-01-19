@@ -289,56 +289,46 @@ public abstract class AbstractVirtualModeTest {
     }
 
     protected void runQueries(String queryFileName) throws Exception {
-        try (OWLStatement st = createStatement()) {
-            QueryController qc = new QueryController();
-            QueryIOManager qman = new QueryIOManager(qc);
-            queryFileName = AbstractBindTestWithFunctions.class.getResource(queryFileName).toString();
-            qman.load(new File(queryFileName));
+        QueryController qc = new QueryController();
+        QueryIOManager qman = new QueryIOManager(qc);
+        queryFileName = AbstractBindTestWithFunctions.class.getResource(queryFileName).toString();
+        qman.load(new File(queryFileName));
 
-            for (QueryControllerEntity entity : qc.getElements()) {
-                if (entity instanceof QueryControllerGroup) {
-                    for (QueryControllerQuery query : ((QueryControllerGroup)entity).getQueries()) {
-                        runQuery(st, query);
-                    }
+        for (QueryControllerEntity entity : qc.getElements()) {
+            if (entity instanceof QueryControllerGroup) {
+                for (QueryControllerQuery query : ((QueryControllerGroup)entity).getQueries()) {
+                    runQuery(query);
                 }
-                else if (entity instanceof QueryControllerQuery) {
-                    runQuery(st, (QueryControllerQuery)entity);
-                }
-                throw new IllegalArgumentException("Unexpected entity type");
             }
+            else if (entity instanceof QueryControllerQuery) {
+                runQuery((QueryControllerQuery)entity);
+            }
+            throw new IllegalArgumentException("Unexpected entity type");
         }
     }
 
-    private void runQuery(OWLStatement st, QueryControllerQuery query) throws Exception {
+    private void runQuery(QueryControllerQuery query) throws Exception {
         log.debug("Executing query: {}", query.getID());
         log.debug("Query: \n{}", query.getQuery());
         System.out.println("QUERY FORM QC: " + query.getQuery());
 
-        long start = System.nanoTime();
-        try (TupleOWLResultSet res = st.executeSelectQuery(query.getQuery())) {
-            long end = System.nanoTime();
-            long time = (end - start) / 1000;
-
-            int count = 0;
-            while (res.hasNext()) {
-                count += 1;
-            }
-            log.debug("Total result: {}", count);
-            assertNotEquals(0, count);
-            log.debug("Elapsed time: {} ms", time);
-        }
+        runQuery(query.getQuery());
     }
 
     protected void runQuery(String query) throws Exception {
         try (OntopOWLStatement st = createStatement()) {
             long t1 = System.nanoTime();
+            int count = 0;
             try (TupleOWLResultSet rs = st.executeSelectQuery(query)) {
                 while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
+                    OWLBindingSet bindingSet = rs.next();
                     log.debug(bindingSet.toString());
+                    count += 1;
                 }
             }
             long t2 = System.nanoTime();
+            log.debug("Total result: {}", count);
+            assertNotEquals(0, count);
 
             /*
              * Print the query summary
@@ -360,7 +350,7 @@ public abstract class AbstractVirtualModeTest {
             log.info(sqlQuery);
             log.info("Query Execution Time:");
             log.info("=====================");
-            log.info((t2 - t1)/1000 + "ms");
+            log.info("Elapsed time: {} ms", (t2 - t1)/1000);
         }
     }
 

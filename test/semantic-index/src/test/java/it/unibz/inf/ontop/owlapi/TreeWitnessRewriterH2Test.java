@@ -46,6 +46,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -73,14 +74,14 @@ public class TreeWitnessRewriterH2Test{
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	List<TestQuery> testQueries = new LinkedList<TestQuery>();
+	private final List<TestQuery> testQueries = new LinkedList<>();
 
-	final String testCase = "twr-predicate";
-	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
-	final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
-	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
+	private static final String testCase = "twr-predicate";
+	private static final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl";
+	private static final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
+	private static final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
 
 	private static final String url = "jdbc:h2:mem:questjunitdb";
 	private static final String username = "sa";
@@ -122,17 +123,30 @@ public class TreeWitnessRewriterH2Test{
 											// ORDER BY
 	};
 
-	public class TestQuery {
-		public String id = "";
-		public String query = "";
-		public int distinctTuples = -1;
+	public static class TestQuery {
+		public final String id;
+		public final String query;
+		public final int distinctTuples;
+
+		TestQuery(String id, String query, int distinctTuples) {
+			this.id = id;
+			this.query = query;
+			this.distinctTuples = distinctTuples;
+		}
 	}
 
-	public class Result {
-		public String id = "";
-		public String query = "";
-		public int distinctTuples = -1;
-		public long timeelapsed = -1;
+	public static class Result {
+		public final String id;
+		public final String query;
+		public final int distinctTuples;
+		public final long timeelapsed;
+
+		Result(String id, String query, int distinctTuples, long timeelapsed) {
+			this.id = id;
+			this.query = query;
+			this.distinctTuples = distinctTuples;
+			this.timeelapsed = timeelapsed;
+		}
 	}
 
 	@Before
@@ -140,8 +154,6 @@ public class TreeWitnessRewriterH2Test{
 		/*
 		 * Initializing and H2 database with the stock exchange data
 		 */
-		// String driver = "org.h2.Driver";
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -161,10 +173,8 @@ public class TreeWitnessRewriterH2Test{
 
 	@After
 	public void tearDown() throws Exception {
-
-			dropTables();
-			conn.close();
-		
+		dropTables();
+		conn.close();
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -196,19 +206,13 @@ public class TreeWitnessRewriterH2Test{
 		qman.load(new File(qfile));
 
 		int counter = 0;
-		// for (QueryControllerGroup group : qcontroller.getGroups()) {
 		for (QueryControllerEntity entity : qcontroller.getElements()) {
-			if (!(entity instanceof QueryControllerQuery))
-				continue;
-			QueryControllerQuery query = (QueryControllerQuery) entity;
-			TestQuery tq = new TestQuery();
-			tq.id = query.getID();
-			tq.query = query.getQuery();
-			tq.distinctTuples = answer[counter];
-			testQueries.add(tq);
-			counter += 1;
+			if (entity instanceof QueryControllerQuery) {
+				QueryControllerQuery query = (QueryControllerQuery) entity;
+				testQueries.add(new TestQuery(query.getID(), query.getQuery(), answer[counter]));
+				counter++;
+			}
 		}
-		// }
 	}
 
 	private void runTests(Properties p) throws Exception {
@@ -232,7 +236,7 @@ public class TreeWitnessRewriterH2Test{
 		OWLConnection owlConnection = reasoner.getConnection();
 		OWLStatement st = owlConnection.createStatement();
 
-		List<Result> summaries = new LinkedList<TreeWitnessRewriterH2Test.Result>();
+		List<Result> summaries = new ArrayList<>();
 
 		boolean fail = false;
 
@@ -242,40 +246,34 @@ public class TreeWitnessRewriterH2Test{
 			String query = tq.query;
 			log.debug("Query: {}", query);
 
-			qc += 1;
+			qc++;
 
 			int count = 0;
 			long start = System.currentTimeMillis();
-			long end = 0;
+			long end;
 			try {
-
 				if (query.toLowerCase().contains("select")) {
 					TupleOWLResultSet rs = st.executeSelectQuery(query);
-
-					end = System.currentTimeMillis();
 					while (rs.hasNext()) {
 						count += 1;
 					}
-				} else {
+				}
+				else {
 					GraphOWLResultSet rs = st.executeGraphQuery(query);
 					while (rs.hasNext()) {
 						rs.next();
 						count++;
 					}
 				}
-			} catch (Exception e) {
+				end = System.currentTimeMillis();
+			}
+			catch (Exception e) {
 				fail = true;
 				log.debug(e.getMessage(), e);
 				end = System.currentTimeMillis();
 				count = -1;
 			}
-
-			Result summary = new Result();
-			summary.id = tq.id;
-			summary.query = query;
-			summary.timeelapsed = end - start;
-			summary.distinctTuples = count;
-			summaries.add(summary);
+			summaries.add(new Result(tq.id, query, count, end - start));
 		}
 
 		/* Closing resources */
@@ -305,12 +303,10 @@ public class TreeWitnessRewriterH2Test{
 
     @Test
 	public void testViEqSig() throws Exception {
-
 		prepareTestQueries(tuples);
 		Properties p  = new Properties();
 		p.setProperty(OntopReformulationSettings.EXISTENTIAL_REASONING, "true");
 
 		runTests(p);
 	}
-
 }

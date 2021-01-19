@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.docker.mysql;
 
+
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -10,19 +11,20 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+public class DatetimestampObdaTest extends AbstractVirtualModeTest  {
 
-public class NestedConcatTest extends AbstractVirtualModeTest {
+    private static final String owlFile = "/mysql/northwind/northwind-dmo.owl";
+    private static final String obdaFile = "/mysql/northwind/mapping-northwind-dmo.obda";
+    private static final String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
+    private static final String queriesFile = "/mysql/northwind/northwind.q";
 
-    private static final String owlfile = "/mysql/nestedconcat/test.owl";
-    private static final String obdafile = "/mysql/nestedconcat/test.obda";
-    private static final String propertyfile = "/mysql/nestedconcat/test.properties";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;
 
     @BeforeClass
     public static void before() throws OWLOntologyCreationException {
-        REASONER = createReasoner(owlfile, obdafile, propertyfile);
+        REASONER = createReasoner(owlFile, obdaFile, propertyFile);
         CONNECTION = REASONER.getConnection();
     }
 
@@ -38,15 +40,8 @@ public class NestedConcatTest extends AbstractVirtualModeTest {
     }
 
     @Test
-    public void testConcat() throws Exception {
-        String sparqlQuery =
-                "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
-                            "SELECT ?per ?yS ?yE\n" +
-                            "WHERE{\n" +
-                            "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
-                            "}\n" +
-                            "LIMIT 1";
-
-        runQuery(sparqlQuery);
+    public void testObda() throws Exception {
+        runQueries(queriesFile);
     }
 }
+

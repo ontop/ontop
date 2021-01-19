@@ -92,6 +92,7 @@ public class QueryIOManager {
         queryController.reset();
 
         if (!file.exists()) {
+            System.out.println("FILE DOES NOT EXIST: " + file.getAbsolutePath());
             return; // NO-OP: Users may not have the saved file
         }
         if (!file.canRead()) {
