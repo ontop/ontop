@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URI;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -43,9 +44,9 @@ public abstract class AbstractVirtualModeTest {
     }
 
     private static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile, Optional<String> optionalImplicitConstraintsFile) throws OWLOntologyCreationException {
-        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
-        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
-        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
+        owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
+        obdaFile =  AbstractVirtualModeTest.class.getResource(obdaFile).toString();
+        propertiesFile =  AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = createConfig(owlFile, obdaFile, propertiesFile, optionalImplicitConstraintsFile);
@@ -60,7 +61,7 @@ public abstract class AbstractVirtualModeTest {
                     .ontologyFile(owlFile)
                     .propertyFile(propertiesFile)
                     .basicImplicitConstraintFile(
-                            AbstractBindTestWithFunctions.class.getResource(optionalImplicitConstraintsFile.get()).toString())
+                            AbstractVirtualModeTest.class.getResource(optionalImplicitConstraintsFile.get()).toString())
                     .enableTestMode()
                     .build();
         }
@@ -74,9 +75,9 @@ public abstract class AbstractVirtualModeTest {
     }
 
     protected static OntopOWLReasoner createR2RMLReasoner(String owlFile, String r2rmlFile, String propertiesFile) throws OWLOntologyCreationException {
-        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
-        r2rmlFile =  AbstractBindTestWithFunctions.class.getResource(r2rmlFile).toString();
-        propertiesFile = AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
+        owlFile = AbstractVirtualModeTest.class.getResource(owlFile).toString();
+        r2rmlFile =  AbstractVirtualModeTest.class.getResource(r2rmlFile).toString();
+        propertiesFile = AbstractVirtualModeTest.class.getResource(propertiesFile).toString();
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -291,8 +292,8 @@ public abstract class AbstractVirtualModeTest {
     protected void runQueries(String queryFileName) throws Exception {
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
-        queryFileName = AbstractBindTestWithFunctions.class.getResource(queryFileName).toString();
-        qman.load(new File(queryFileName));
+        queryFileName = AbstractVirtualModeTest.class.getResource(queryFileName).toString();
+        qman.load(new File(new URI(queryFileName)));
 
         for (QueryControllerEntity entity : qc.getElements()) {
             if (entity instanceof QueryControllerGroup) {
@@ -350,7 +351,7 @@ public abstract class AbstractVirtualModeTest {
             log.info(sqlQuery);
             log.info("Query Execution Time:");
             log.info("=====================");
-            log.info("Elapsed time: {} ms", (t2 - t1)/1000);
+            log.info("Elapsed time: {} ms", (t2 - t1)/1_000_000);
         }
     }
 
