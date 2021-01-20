@@ -329,7 +329,7 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
 
     @Test
     public void testFindMovieEditors() throws Exception {
-        countResults(3, "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
+        countResults(1, "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
                 "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
                 "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
