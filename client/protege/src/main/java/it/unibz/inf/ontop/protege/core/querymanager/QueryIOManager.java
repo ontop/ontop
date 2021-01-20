@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.querymanager;
+package it.unibz.inf.ontop.protege.core.querymanager;
 
 /*
  * #%L
@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.querymanager;
  * #L%
  */
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.querymanager;
+package it.unibz.inf.ontop.protege.core.querymanager;
 
 /*
  * #%L

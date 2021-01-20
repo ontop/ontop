@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.protege.core.querymanager.QueryController;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.swing.*;

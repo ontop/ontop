@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.querymanager.*;
+import it.unibz.inf.ontop.protege.core.querymanager.*;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
@@ -35,7 +35,6 @@ import javax.swing.tree.TreePath;
 import java.awt.Dialog.ModalityType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * This class represents the display of stored queries using a tree structure.

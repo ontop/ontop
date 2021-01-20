@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.querymanager;
+package it.unibz.inf.ontop.protege.core.querymanager;
 
 /*
  * #%L
@@ -20,17 +20,21 @@ package it.unibz.inf.ontop.querymanager;
  * #L%
  */
 
-public interface QueryControllerListener  {
+public class QueryControllerQuery implements QueryControllerEntity {
+	private final String id;
+	private final String query;
 
-	void elementAdded(QueryControllerEntity element);
+	QueryControllerQuery(String id, String query) {
+		this.id = id;
+		this.query = query;
+	}
 
-	void elementAdded(QueryControllerQuery query, QueryControllerGroup group);
+	@Override
+	public String getID() {
+		return id;
+	}
 
-	void elementRemoved(QueryControllerEntity element);
-
-	void elementRemoved(QueryControllerQuery query, QueryControllerGroup group);
-
-	void elementChanged(QueryControllerQuery query);
-
-	void elementChanged(QueryControllerQuery query, QueryControllerGroup group);
+	public String getQuery() {
+		return query;
+	}
 }

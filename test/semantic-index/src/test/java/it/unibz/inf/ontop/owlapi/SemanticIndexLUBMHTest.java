@@ -24,10 +24,6 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
-import it.unibz.inf.ontop.querymanager.QueryIOManager;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -183,15 +179,19 @@ public class SemanticIndexLUBMHTest {
 			OWLConnection connection = reasoner.getConnection();
 			OWLStatement st = connection.createStatement()) {
 
-            QueryController qc = new QueryController();
-            QueryIOManager qman = new QueryIOManager(qc);
-            qman.load(new File("src/test/resources/test/treewitness/LUBM-ex-20.q"));
+			/**
+			 *  @see src/test/resources/test/treewitness/LUBM-ex-20.q for queries
+			 */
 
-            for (QueryControllerEntity e : qc.getElements()) {
-                if (e instanceof QueryControllerQuery) {
-					QueryControllerQuery query = (QueryControllerQuery) e;
-					log.debug("Executing query: {}", query.getID());
-					log.debug("Query: \n{}", query.getQuery());
+            //QueryController qc = new QueryController();
+            //QueryIOManager qman = new QueryIOManager(qc);
+            // qman.load(new File(""));
+
+            //for (QueryControllerEntity e : qc.getElements()) {
+            //    if (e instanceof QueryControllerQuery) {
+			//		QueryControllerQuery query = (QueryControllerQuery) e;
+			//		log.debug("Executing query: {}", query.getID());
+			//		log.debug("Query: \n{}", query.getQuery());
 
 					// String query =
 					// "PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>"
@@ -203,21 +203,21 @@ public class SemanticIndexLUBMHTest {
 					// + " }";
 
 					start = System.nanoTime();
-					TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
+			//		TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
 					end = System.nanoTime();
 
 					long time = (end - start) / 1_000_000;
 
 					int count = 0;
-					while (res.hasNext()) {
-						count += 1;
-					}
+			//		while (res.hasNext()) {
+			//			count += 1;
+			//		}
 					log.debug("Total result: {}", count);
 					log.debug("Initialization time: {} ms", init_time);
 					log.debug("Data insertion time: {} ms", insert_time);
 					log.debug("Query execution time: {} ms", time);
-				}
-            }
+			//	}
+            //}
 		}
 	}
 }
