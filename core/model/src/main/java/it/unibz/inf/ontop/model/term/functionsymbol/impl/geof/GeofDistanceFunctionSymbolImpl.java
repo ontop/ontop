@@ -13,12 +13,10 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.DEGREE;
+import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.METRE;
+import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.RADIAN;
 import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoUtils.EARTH_MEAN_RADIUS_METER;
-
-//import org.apache.sis.referencing.*;
-//import org.apache.sis.referencing.CRS;
-//import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,8 +24,6 @@ import java.util.stream.Collectors;
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
     FunctionSymbolFactory functionSymbolFactory;
-    //public static final String defaultEPSG = "http://www.opengis.net/def/crs/EPSG/0/4326";
-    public static final String defaultEllipsoid = "WGS 84";
 
     public GeofDistanceFunctionSymbolImpl(@Nonnull IRI functionIRI, RDFDatatype wktLiteralType, ObjectRDFType iriType, RDFDatatype xsdDoubleType, FunctionSymbolFactoryImpl functionSymbolFactory) {
         super("GEOF_DISTANCE", functionIRI,
@@ -59,8 +55,7 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         ImmutableTerm geom0 = wktLiteralValues.get(0).getGeometry();
         ImmutableTerm geom1 = wktLiteralValues.get(1).getGeometry();
 
-        //String ellipsoidString = getEllipsoidString(srid0);
-        DistanceUnit inputUnit = GeoUtils.getUnitFromSRID(srid0.getIRIString());// DistanceUnit.fromIRI(srid0);
+        DistanceUnit inputUnit = GeoUtils.getUnitFromSRID(srid0.getIRIString());
         DistanceUnit outputUnit = DistanceUnit.findByIRI(((DBConstant) subLexicalTerms.get(2)).getValue());
 
         DBFunctionSymbolFactory dbFunctionSymbolFactory = termFactory.getDBFunctionSymbolFactory();
@@ -93,32 +88,5 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         }
 
     }
-
-//    private String getEllipsoidString(String srid0) {
-//        // Given the SRID - retrieve the respective ellipsoid
-//        String ellipsoidString;
-//        String SRIDcode;
-//
-//        // Check whether it is the default CRS
-//        if (srid0.contains("CRS84")) {
-//            //SRIDcode = "CRS:84";
-//            ellipsoidString = defaultEllipsoid;
-//        } else {
-//            //Other EPSG codes
-//            SRIDcode = "EPSG:" + srid0.substring(srid0.length()-4);
-//            try {
-//                ellipsoidString = getEllipsoid(SRIDcode);
-//            } catch (Exception e) {
-//                throw new IllegalArgumentException("Unsupported or invalid SRID provided");
-//            }
-//        }
-//        return ellipsoidString;
-//    }
-
-//    private String getEllipsoid(String v) throws Exception{
-//        // Retrieve coordinate reference system and respective ellipsoid
-//        CoordinateReferenceSystem source = CRS.forCode(v);
-//        return source.getName().getCode();
-//    }
 
 }
