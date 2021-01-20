@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.owlapi.resultset.utils.OWLResultSetWriter;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
@@ -50,10 +49,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -546,7 +542,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         public void run() {
             Thread thread = new Thread(() -> {
                 try {
-                    OWLResultSetWriter.writeCSV(rawData, writer);
+                    writeCSV(rawData, writer);
                     latch.countDown();
                 }
                 catch (Exception e) {
@@ -591,5 +587,25 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     @Override
     public void activeOntologyChanged() {
         queryEditorPanel.setOBDAModel(obdaController.getActiveOBDAModel());
+    }
+
+    private static void writeCSV(List<String[]> tabularData, Writer writer) throws IOException {
+
+        // Print the CSV content
+        for (String[] rows : tabularData) {
+            StringBuilder line = new StringBuilder();
+            boolean needComma = false;
+            for (String row : rows) {
+                if (needComma) {
+                    line.append(",");
+                }
+                line.append(row);
+                needComma = true;
+            }
+            line.append("\n");
+            writer.write(line.toString());
+            writer.flush();
+        }
+        writer.close();
     }
 }

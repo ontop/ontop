@@ -13,12 +13,13 @@ public class OntopOWLBinding implements OWLBinding {
 
     private final OntopBinding ontopBinding;
 
-    private static OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
+    private final OWLAPIIndividualTranslator translator;
     private final byte[] salt;
 
 
-    public OntopOWLBinding(OntopBinding ontopBinding, byte[] salt){
+    public OntopOWLBinding(OntopBinding ontopBinding, OWLAPIIndividualTranslator translator, byte[] salt){
         this.ontopBinding = ontopBinding;
+        this.translator = translator;
         this.salt = salt;
     }
 

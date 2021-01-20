@@ -105,7 +105,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		private final Iterator<ObjectPropertyExpression> objectRoleIterator;
 		private final Iterator<DataPropertyExpression> dataRoleIterator;
 
-		private Logger log = LoggerFactory.getLogger(EmptyEntitiesIterator.class);
+		private final Logger log = LoggerFactory.getLogger(EmptyEntitiesIterator.class);
 
 		/** iterator for classes  of the ontologies */
 		public EmptyEntitiesIterator(Iterator<OClass> classIterator, OWLConnection questConn) {

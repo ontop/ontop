@@ -49,8 +49,8 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
+			<groupId>org.orbisgis</groupId>
+			<artifactId>h2gis-ext</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

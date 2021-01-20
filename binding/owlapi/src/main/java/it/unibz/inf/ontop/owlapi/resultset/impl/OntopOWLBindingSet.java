@@ -33,7 +33,8 @@ public class OntopOWLBindingSet implements OWLBindingSet {
     @Override
     @Nonnull
     public Iterator<OWLBinding> iterator() {
-        return Iterators.transform(ontopBindingSet.iterator(), ontopBinding -> new OntopOWLBinding(ontopBinding, salt));
+        return Iterators.transform(ontopBindingSet.iterator(),
+                ontopBinding -> new OntopOWLBinding(ontopBinding, translator, salt));
     }
 
     @Override
@@ -43,12 +44,11 @@ public class OntopOWLBindingSet implements OWLBindingSet {
 
     @Override
     public OWLBinding getBinding(String bindingName) {
-        final OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
-        if (ontopBinding == null) {
-            return null;
-        } else {
-            return new OntopOWLBinding(ontopBinding, salt);
+        OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
+        if (ontopBinding != null) {
+            return new OntopOWLBinding(ontopBinding, translator, salt);
         }
+        return null;
     }
 
     @Override

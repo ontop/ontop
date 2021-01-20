@@ -562,4 +562,38 @@ public interface TermFactory {
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
 
 	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
+
+	// Topological functions
+	ImmutableTerm getDBSTWithin(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTContains(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCrosses(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTDisjoint(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTEquals(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTIntersects(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTOverlaps(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTTouches(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCoveredBy(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCovers(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTContainsProperly(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	// Non-topological and common form functions
+	ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid);
+	ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1);
+	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
+	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBIntersection(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBBoundary(ImmutableTerm arg1);
+	ImmutableTerm getDBConvexHull(ImmutableTerm arg1);
+	ImmutableTerm getDBDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBEnvelope(ImmutableTerm arg1);
+	ImmutableTerm getDBSymDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
+	ImmutableTerm getDBRelateMatrix(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBGetSRID(ImmutableTerm arg1);
+	ImmutableTerm getDBAsText(ImmutableTerm arg1);
+	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+
 }

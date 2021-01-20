@@ -70,7 +70,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         BOOLEAN,
         DATE,
         TIME,
-        DATETIMESTAMP
+        DATETIMESTAMP,
+        GEOMETRY,
+        GEOGRAPHY
     }
 
     // MUTABLE
@@ -143,7 +145,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
-                    new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
+                    new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype())
+                )
                 .collect(Collectors.toMap(
                         DBTermType::getName,
                         t -> t));
@@ -270,6 +273,26 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     @Override
     public DBTermType getDBDoubleType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.DOUBLE));
+    }
+
+    @Override
+    public DBTermType getDBGeometryType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.GEOMETRY));
+    }
+
+    @Override
+    public DBTermType getDBGeographyType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.GEOGRAPHY));
+    }
+
+    @Override
+    public boolean supportsDBGeometryType() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsDBGeographyType() {
+        return false;
     }
 
     @Override
