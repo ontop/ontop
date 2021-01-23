@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.executor;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -30,7 +31,8 @@ public class FunctionalDependencyTest {
     private final static NamedRelationDefinition TABLE2;
     private final static NamedRelationDefinition TABLE3;
     private final static NamedRelationDefinition TABLE4;
-    private final static NamedRelationDefinition TABLE10;
+    private final static NamedRelationDefinition TABLE11;
+    private final static NamedRelationDefinition TABLE15;
 
     private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getRDFAnswerPredicate(2);
@@ -135,20 +137,43 @@ public class FunctionalDependencyTest {
                 .build();
 
         /*
-         * Table 10: Like table 1, except that the non-PK columns are nullable
+         * Table 11: Like table 1, except that the non-PK columns are nullable
          */
-        TABLE10 = builder.createDatabaseRelation("table10",
+        TABLE11 = builder.createDatabaseRelation("table10",
                 "col1", integerDBType, false,
                 "col2", integerDBType, true,
                 "col3", integerDBType, true,
                 "col4", integerDBType, true,
                 "col5", integerDBType, true);
-        UniqueConstraint.primaryKeyOf(TABLE10.getAttribute(1));
-        FunctionalDependency.defaultBuilder(TABLE10)
+        UniqueConstraint.primaryKeyOf(TABLE11.getAttribute(1));
+        FunctionalDependency.defaultBuilder(TABLE11)
                 .addDeterminant(2)
                 .addDependent(3)
                 .addDependent(4)
                 .build();
+
+        /*
+         * Table 15: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
+         */
+        TABLE15 = builder.createDatabaseRelation("table4",
+                "col1", integerDBType, false,
+                "col2", integerDBType, true,
+                "col3", integerDBType, true,
+                "col4", integerDBType, true,
+                "col5", integerDBType, true,
+                "col6", integerDBType, true);
+        UniqueConstraint.primaryKeyOf(TABLE15.getAttribute(1));
+        FunctionalDependency.defaultBuilder(TABLE15)
+                .addDeterminant(3)
+                .addDependent(4)
+                .build();
+        FunctionalDependency.defaultBuilder(TABLE15)
+                .addDeterminant(2)
+                .addDependent(3)
+                .addDependent(4)
+                .addDependent(5)
+                .build();
+
     }
 
     @Test
@@ -427,7 +452,7 @@ public class FunctionalDependencyTest {
      * Second column nullable
      */
     @Test
-    public void testRedundantSelfJoin7T10() {
+    public void testRedundantSelfJoin7T11() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -440,19 +465,19 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE10,
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
                 ImmutableMap.of(0, X, 1, A, 4, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE10,
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
                 ImmutableMap.of(1, A, 3, Z));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE10,
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
                 ImmutableMap.of(1, F, 2, G));
         queryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE10,
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
                 ImmutableMap.of(1, F, 2, M));
         queryBuilder.addChild(joinNode, dataNode4);
 
@@ -467,11 +492,11 @@ public class FunctionalDependencyTest {
                         TERM_FACTORY.getDBIsNotNull(A), TERM_FACTORY.getDBIsNotNull(F)));
         expectedQueryBuilder.addChild(topConstructionNode, newJoinNode);
 
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(TABLE10,
+        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
                 ImmutableMap.of(0, X, 1, A, 3, Z, 4, Y));
         expectedQueryBuilder.addChild(newJoinNode, dataNode5);
 
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(TABLE10,
+        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
                 ImmutableMap.of(1, F));
         expectedQueryBuilder.addChild(newJoinNode, dataNode6);
 
@@ -1058,6 +1083,297 @@ public class FunctionalDependencyTest {
         expectedBuilder.init(projectionAtom, dataNode4);
 
         optimizeAndCompare(query, expectedBuilder.build());
+    }
+
+    @Test
+    public void testRedundantSelfJoin10() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, X, 1, A, 2, X));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(1, A, 2, TWO, 4, Y));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                joinTree)));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, TWO, 1, A, 2, TWO));
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(1, A, 4, Y));
+
+        NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode3, dataNode4));
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TWO));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        newConstructionNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createDistinctNode(),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y)),
+                                        newJoinTree))));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testRedundantSelfJoin11() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, X, 1, A, 2, X, 4, Z));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(1, A, 2, TWO, 4, Y));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                joinTree)));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, TWO, 1, A, 2, TWO, 4, Z));
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(1, A, 4, Y));
+
+        NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode3, dataNode4));
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TWO));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        newConstructionNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createDistinctNode(),
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y, Z)),
+                                        newJoinTree))));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testRedundantSelfJoin12() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, X, 1, A, 2, X));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(1, A, 2, TWO));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_1, X);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                joinTree)));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, TWO, 1, A, 2, TWO));
+
+        UnaryIQTree filterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A)),
+                dataNode3);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TWO));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(
+                newConstructionNode,
+                filterTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testRedundantSelfJoin13() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, X, 1, A, 2, X, 4, Y));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(1, A, 2, TWO, 4, Y));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                joinTree)));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, TWO, 1, A, 2, TWO, 4, Y));
+
+        UnaryIQTree filterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(
+                        TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getDBIsNotNull(A),
+                                TERM_FACTORY.getDBIsNotNull(Y))),
+                dataNode3);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TWO));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(
+                newConstructionNode,
+                filterTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testRedundantSelfJoin14() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, X, 1, A, 2, Y));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(1, A));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                joinTree)));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
+                ImmutableMap.of(0, X, 1, A, 2, Y));
+
+        UnaryIQTree filterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A)),
+                dataNode3);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                filterTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testRedundantSelfJoin15() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE15,
+                ImmutableMap.of( 1, A, 2, B, 4, Y));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE15,
+                ImmutableMap.of(0, X, 1, A, 2, B));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                joinTree)));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE15,
+                ImmutableMap.of(0, X, 1, A, 2, B, 4, Y));
+
+        UnaryIQTree filterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getDBIsNotNull(A),
+                        TERM_FACTORY.getDBIsNotNull(B))),
+                dataNode3);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                filterTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testRedundantSelfJoin16() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE15,
+                ImmutableMap.of( 1, A, 2, B, 4, Y, 5, Z));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE15,
+                ImmutableMap.of(0, X, 1, A, 2, B));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                joinTree)));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE15,
+                ImmutableMap.of(1, A, 2, B, 4, Y, 5, Z));
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE15,
+                ImmutableMap.of(0, X, 1, A));
+
+        IQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBIsNotNull(B)),
+                ImmutableList.of(dataNode3, dataNode4));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createDistinctNode(),
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                newJoinTree)));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
     }
 
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
