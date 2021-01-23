@@ -228,10 +228,6 @@ public class FunctionalDependencyTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
-    /**
-     * TODO: update
-     */
-    @Ignore("TODO: re-enable it after re-allowing binding lift above distincts")
     @Test
     public void testRedundantSelfJoin3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
@@ -246,10 +242,12 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, Z, B, C));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1, ImmutableMap.of(1, A, 2, Z));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, F, G));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                        TABLE1, ImmutableMap.of(0, X, 1, A, 2, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -258,13 +256,10 @@ public class FunctionalDependencyTest {
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, Y));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, distinctNode);
 
-        ConstructionNode otherConstructionNode = IQ_FACTORY.createConstructionNode(newRootNode.getChildVariables());
-        expectedQueryBuilder.addChild(distinctNode, otherConstructionNode);
-
-        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, B, G));
-        expectedQueryBuilder.addChild(otherConstructionNode, dataNode3);
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1, ImmutableMap.of(0, X, 2, Y));
+        expectedQueryBuilder.addChild(newRootNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -913,10 +908,6 @@ public class FunctionalDependencyTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
-    /**
-     * TODO: update
-     */
-    @Ignore("TODO: remove the redundant join")
     @Test
     public void testRedundantSelfJoin3_T3()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
@@ -931,21 +922,21 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, B, C, D, E));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3, ImmutableMap.of(0, X, 1, A, 3, C));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE3, ImmutableList.of(F, A, Y, C, H, I));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3, ImmutableMap.of(1, A, 2, Y, 3, C));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        expectedQueryBuilder.init(projectionAtom, distinctNode);
-        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3, ImmutableMap.of(0, X, 2, Y));
 
-        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, Y, C, D, E));
-
-        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
+        expectedQueryBuilder.init(projectionAtom, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
