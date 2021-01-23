@@ -79,6 +79,11 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
         }
 
         @Override
+        protected boolean canEliminateNodes() {
+            return true;
+        }
+
+        @Override
         protected boolean hasConstraint(ExtensionalDataNode node) {
             return !node.getRelationDefinition().getUniqueConstraints().isEmpty();
         }
@@ -97,22 +102,22 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
 
             NormalizationBeforeUnification normalization = normalizeDataNodes(dataNodes, constraint);
 
-            ImmutableMultiset<? extends VariableOrGroundTerm> variableOccurences = dataNodes.stream()
+            ImmutableMultiset<Variable> variableOccurrences = dataNodes.stream()
                     .flatMap(n -> n.getArgumentMap().values().stream())
+                    .filter(d -> d instanceof Variable)
+                    .map(d -> (Variable) d)
                     .collect(ImmutableCollectors.toMultiset());
 
             ImmutableSet<ImmutableExpression> expressions = Stream.concat(
-                    variableOccurences.entrySet().stream()
-                            // Co-occuring terms
+                    variableOccurrences.entrySet().stream()
+                            // Co-occurring terms
                             .filter(e -> e.getCount() > 1)
                             .map(Multiset.Entry::getElement)
-                            .filter(d -> d instanceof Variable)
-                            .map(d -> (Variable) d)
                             .map(termFactory::getDBIsNotNull),
                     normalization.equalities.stream())
                     .collect(ImmutableCollectors.toSet());
 
-            return unifyDataNodes(normalization.dataNodes.stream())
+            return unifyDataNodes(normalization.dataNodes.stream(), ExtensionalDataNode::getArgumentMap)
                     .map(u -> new DeterminantGroupEvaluation(
                             expressions,
                             ImmutableList.of(

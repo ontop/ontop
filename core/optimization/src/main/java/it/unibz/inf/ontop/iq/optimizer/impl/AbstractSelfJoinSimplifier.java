@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency> {
@@ -92,7 +93,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .flatMap(s -> s.extensionalDataNodes.stream())
                 .collect(ImmutableCollectors.toList());
 
-        if (optimizedExtensionalDataNodes.size() == extensionalChildrenWithConstraint.map(AbstractCollection::size)
+        if (canEliminateNodes() && optimizedExtensionalDataNodes.size() == extensionalChildrenWithConstraint.map(AbstractCollection::size)
                 .orElse(0)) {
             return Optional.empty();
         }
@@ -114,6 +115,8 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
         return Optional.of(buildNewTree(newChildren, newExpression, unifier, projectedVariables));
     }
+
+    protected abstract boolean canEliminateNodes();
 
     protected abstract boolean hasConstraint(ExtensionalDataNode node);
 
@@ -257,14 +260,16 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                                                                      Collection<ExtensionalDataNode> dataNodes,
                                                                                      C constraint);
 
-    protected Optional<ImmutableUnificationTools.ArgumentMapUnification> unifyDataNodes(Stream<ExtensionalDataNode> dataNodes) {
+    protected Optional<ImmutableUnificationTools.ArgumentMapUnification> unifyDataNodes(
+            Stream<ExtensionalDataNode> dataNodes,
+            Function<ExtensionalDataNode, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> argumentMapSelector) {
          return dataNodes
                 .reduce(null,
                         (o, n) -> o == null
                                 ? Optional.of(new ImmutableUnificationTools.ArgumentMapUnification(
-                                n.getArgumentMap(),
+                                argumentMapSelector.apply(n),
                                 substitutionFactory.getSubstitution()))
-                                : o.flatMap(u -> unify(u, n.getArgumentMap())),
+                                : o.flatMap(u -> unify(u, argumentMapSelector.apply(n))),
                         (m1, m2) -> {
                             throw new MinorOntopInternalBugException("Was not expected to be runned in //");
                         });

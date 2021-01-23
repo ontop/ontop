@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
@@ -16,13 +14,13 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -36,7 +34,8 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
-        this.transformer = new ArgumentTransferJoinTransformer(coreSingletons);
+        SelfJoinFDSimplifier simplifier = new SelfJoinFDSimplifier(coreSingletons);
+        this.transformer = new ArgumentTransferJoinTransformer(simplifier, coreSingletons);
         this.iqFactory = coreSingletons.getIQFactory();
     }
 
@@ -44,277 +43,166 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
     public IQ optimize(IQ query) {
         IQTree initialTree = query.getTree();
         IQTree newTree = transformer.transform(initialTree);
-        return (newTree.equals(initialTree))
+        return (newTree == initialTree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree)
                 .normalizeForOptimization();
     }
 
-
     protected static class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected ArgumentTransferJoinTransformer(CoreSingletons coreSingletons) {
+        private final SelfJoinFDSimplifier simplifier;
+
+        protected ArgumentTransferJoinTransformer(SelfJoinFDSimplifier simplifier, CoreSingletons coreSingletons) {
             super(coreSingletons);
+            this.simplifier = simplifier;
         }
 
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            // Recursive
-            ImmutableList<IQTree> newChildren = children.stream()
-                    .map(t -> t.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            return simplifier.transformInnerJoin(rootNode, children, tree.getVariables())
+                    .orElse(tree);
+        }
+    }
 
-            ImmutableSet<Integer> dataNodeWithFdIndexes = IntStream.range(0, newChildren.size())
-                    .filter(i -> {
-                        IQTree child = newChildren.get((i));
-                        return (child instanceof ExtensionalDataNode)
-                                && !((ExtensionalDataNode) child).getRelationDefinition()
-                                .getOtherFunctionalDependencies().isEmpty();
-                    })
-                    .boxed()
+    protected static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
+
+        protected SelfJoinFDSimplifier(CoreSingletons coreSingletons) {
+            super(coreSingletons);
+        }
+
+        @Override
+        protected boolean canEliminateNodes() {
+            return false;
+        }
+
+        @Override
+        protected boolean hasConstraint(ExtensionalDataNode node) {
+            return !node.getRelationDefinition().getOtherFunctionalDependencies().isEmpty();
+        }
+
+        @Override
+        protected Stream<FunctionalDependency> extractConstraints(RelationDefinition relationDefinition) {
+            return relationDefinition.getOtherFunctionalDependencies().stream();
+        }
+
+        @Override
+        protected Optional<DeterminantGroupEvaluation> evaluateDeterminantGroup(
+                ImmutableList<VariableOrGroundTerm> determinants, Collection<ExtensionalDataNode> dataNodes,
+                FunctionalDependency constraint) {
+
+            if (dataNodes.size() < 2)
+                throw new IllegalArgumentException("At least two nodes");
+
+            NormalizationBeforeUnification normalization = normalizeDataNodes(dataNodes, constraint);
+
+            ExtensionalDataNode targetDataNode = selectTargetDataNode(normalization.dataNodes, constraint);
+
+            ImmutableSet<Integer> dependentIndexes = constraint.getDependents().stream()
+                    .map(a -> a.getIndex() - 1)
                     .collect(ImmutableCollectors.toSet());
 
-            Optional<ImmutableList<IQTree>> result = tryToTransfer(children, dataNodeWithFdIndexes);
+            ImmutableSet<ImmutableExpression> expressions = extractExpressions(dataNodes, normalization.equalities, dependentIndexes);
 
-            if (!result.isPresent())
-                return children.equals(newChildren)
-                        ? tree
-                        : iqFactory.createNaryIQTree(rootNode, newChildren);
-
-           throw new RuntimeException("TODO: continue");
+            return unifyDataNodes(normalization.dataNodes.stream(), n -> extractDependentArgumentMap(n, dependentIndexes))
+                    .map(u -> convertIntoDeterminantGroupEvaluation(u, targetDataNode,
+                            ImmutableList.copyOf(normalization.dataNodes),
+                            expressions, dependentIndexes));
         }
 
-        protected Optional<ImmutableList<IQTree>> tryToTransfer(ImmutableList<IQTree> children,
-                                                                 ImmutableSet<Integer> dataNodeWithFdIndexes) {
-            if (dataNodeWithFdIndexes.size() < 2)
-                return Optional.empty();
+        /**
+         * Selects as target the node with largest number of external arguments.
+         *
+         * Why? Partially arbitrary, but such a target is more likely that it cannot be eliminated by the optimization
+         * based on the same terms.
+         */
+        protected ExtensionalDataNode selectTargetDataNode(Collection<ExtensionalDataNode> dataNodes, FunctionalDependency constraint) {
+            ImmutableSet<Attribute> dependentAttributes = constraint.getDependents();
+            ImmutableSet<Attribute> determinantAttributes = constraint.getDeterminants();
 
-            ImmutableMap<RelationDefinition, Collection<ExtensionalDataNode>> nodeMap = dataNodeWithFdIndexes.stream()
-                    .map(children::get)
-                    .map(c -> (ExtensionalDataNode) c)
-                    .collect(ImmutableCollectors.toMultimap(
-                            ExtensionalDataNode::getRelationDefinition,
-                            c -> c)).asMap();
+            RelationDefinition relationDefinition = dataNodes.iterator().next().getRelationDefinition();
 
-            ImmutableMap<RelationDefinition, Optional<IQTree>> simplificationMap = nodeMap.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> tryToTransfer(e.getKey(), e.getValue())));
+            ImmutableList<Integer> externalArgumentIndexes = relationDefinition.getAttributes().stream()
+                    .filter(a -> !dependentAttributes.contains(a))
+                    .filter(a -> !determinantAttributes.contains(a))
+                    .map(a -> a.getIndex() - 1)
+                    .collect(ImmutableCollectors.toList());
 
-            if (simplificationMap.values().stream()
-                    .noneMatch(Optional::isPresent))
-                return Optional.empty();
-
-            return Optional.of(
-                    simplificationMap.entrySet().stream()
-                    .flatMap(e -> e.getValue()
-                            .map(Stream::of)
-                            .orElseGet(() -> nodeMap.get(e.getKey()).stream()
-                                    .map(n -> (IQTree) n)))
-                    .collect(ImmutableCollectors.toList()));
-
-        }
-
-        private Optional<IQTree> tryToTransfer(RelationDefinition relationDefinition, Collection<ExtensionalDataNode> nodes) {
-            TransferState state = new TransferState(relationDefinition, ImmutableList.copyOf(nodes));
-            TransferState finalState = relationDefinition.getOtherFunctionalDependencies().stream()
-                    .reduce(state, TransferState::update, (s1, s2) -> {
-                        throw new MinorOntopInternalBugException("Not expect to run in //");
-                    });
-
-            return finalState.convert(nodes);
-        }
-
-        protected class TransferState {
-            protected final RelationDefinition relationDefinition;
-            protected final ImmutableList<ExtensionalDataNode> nodes;
-
-            protected TransferState(RelationDefinition relationDefinition, ImmutableList<ExtensionalDataNode> nodes) {
-                this.relationDefinition = relationDefinition;
-                this.nodes = nodes;
-            }
-
-            public TransferState update(FunctionalDependency functionalDependency) {
-                if (nodes.size() < 2)
-                    return this;
-
-                ImmutableMap<Optional<ImmutableList<VariableOrGroundTerm>>, Collection<ExtensionalDataNode>>
-                        nodeByDeterminantMap = nodes.stream()
-                        .collect(ImmutableCollectors.toMultimap(
-                                n -> extractDeterminantKey(n, functionalDependency.getDeterminants()),
-                                n -> n
-                        )).asMap();
-
-                ImmutableMap<Optional<ImmutableList<VariableOrGroundTerm>>, Optional<TransferState>> groupsAfterTransfer = nodeByDeterminantMap.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> tryToTransfer(ImmutableList.copyOf(e.getValue()), functionalDependency)));
-
-                Optional<TransferState> mergedSubTransferState = groupsAfterTransfer.values().stream()
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .reduce(TransferState::merge);
-
-                return mergedSubTransferState
-                        // Appends nodes from other groups
-                        .map(s -> s.appendNodes(groupsAfterTransfer.entrySet().stream()
-                                .filter(e -> !e.getValue().isPresent())
-                                .flatMap(e -> nodeByDeterminantMap.get(e.getKey()).stream())))
-                        // Merges with the local construction node
-                        .map(this::mergeWithChild)
-                        .orElse(this);
-            }
-
-
-            private Optional<ImmutableList<VariableOrGroundTerm>> extractDeterminantKey(ExtensionalDataNode node,
-                                                                                        ImmutableSet<Attribute> determinants) {
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = node.getArgumentMap();
-
-                ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = determinants.stream()
-                        .map(a -> a.getIndex() - 1)
-                        .map(i -> Optional.ofNullable(argumentMap.get(i)))
-                        .collect(ImmutableCollectors.toList());
-
-                if (arguments.stream().anyMatch(a -> !a.isPresent()))
-                    return Optional.empty();
-
-                return Optional.of(arguments.stream()
-                        .map(Optional::get)
-                        .collect(ImmutableCollectors.toList()));
-            }
-
-            private Optional<TransferState> tryToTransfer(ImmutableList<ExtensionalDataNode> sameDeterminantKeyNodes,
-                                                            FunctionalDependency functionalDependency) {
-                ImmutableSet<Attribute> dependentAttributes = functionalDependency.getDependents();
-                ImmutableSet<Attribute> determinantAttributes = functionalDependency.getDeterminants();
-
-                ImmutableList<Integer> externalArgumentIndexes = relationDefinition.getAttributes().stream()
-                        .filter(a -> !dependentAttributes.contains(a))
-                        .filter(a -> !determinantAttributes.contains(a))
-                        .map(a -> a.getIndex() - 1)
-                        .collect(ImmutableCollectors.toList());
-
-                ImmutableMap<Integer, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> nodeExternalArgumentMap =
-                        IntStream.range(0, nodes.size())
-                                .boxed()
-                                .collect(ImmutableCollectors.toMap(
-                                    i -> i,
-                                    i -> nodes.get(i).getArgumentMap().entrySet().stream()
+            ImmutableMap<ExtensionalDataNode, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> nodeExternalArgumentMap =
+                    dataNodes.stream()
+                            .collect(ImmutableCollectors.toMap(
+                                    n -> n,
+                                    n -> n.getArgumentMap().entrySet().stream()
                                             .filter(e -> externalArgumentIndexes.contains(e.getKey()))
                                             .collect(ImmutableCollectors.toMap())));
 
-                TransferState initialSubState = new TransferState(relationDefinition, sameDeterminantKeyNodes);
-                TransferState finalState = IntStream.range(0, sameDeterminantKeyNodes.size())
-                        .boxed()
-                        .reduce(initialSubState, (s, i) -> s.simplifyNode(i, functionalDependency, nodeExternalArgumentMap),
-                                (s1, s2) -> {
-                                    throw new MinorOntopInternalBugException("Merge in // should have been disabled");
-                                });
-                return Optional.of(finalState)
-                        .filter(s -> !s.equals(initialSubState));
-            }
+            return dataNodes.stream()
+                    .max(Comparator.comparingInt(n -> nodeExternalArgumentMap.get(n).values().size()))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Non empty collection expected"));
 
-            /**
-             * Tries to transfer the dependent arguments to another node
-             *
-             * Preserves positions
-             *
-             * Returns itself if it cannot simplify the focus node
-             */
-            private TransferState simplifyNode(int index, FunctionalDependency functionalDependency,
-                                                 ImmutableMap<Integer, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> nodeExternalArgumentMap) {
-                ExtensionalDataNode focusNode = nodes.get(index);
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = focusNode.getArgumentMap();
+        }
 
-                ImmutableSet<Attribute> dependents = functionalDependency.getDependents();
+        private static ImmutableMap<Integer, ? extends VariableOrGroundTerm> extractDependentArgumentMap(
+                ExtensionalDataNode node, ImmutableSet<Integer> dependentIndexes) {
+            return node.getArgumentMap().entrySet().stream()
+                    .filter(e -> dependentIndexes.contains(e.getKey()))
+                    .collect(ImmutableCollectors.toMap());
+        }
 
-                ImmutableList<Integer> sourceDependentIndexes = dependents.stream()
-                        .map(a -> a.getIndex() - 1)
-                        .filter(argumentMap::containsKey)
-                        .collect(ImmutableCollectors.toList());
+        private DeterminantGroupEvaluation convertIntoDeterminantGroupEvaluation(
+                ImmutableUnificationTools.ArgumentMapUnification argumentMapUnification, ExtensionalDataNode targetDataNode,
+                ImmutableList<ExtensionalDataNode> dataNodes, ImmutableSet<ImmutableExpression> expressions, ImmutableSet<Integer> dependentIndexes) {
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = targetDataNode.getArgumentMap();
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newTargetArgumentMap = Sets.union(
+                        argumentMapUnification.argumentMap.keySet(), targetArgumentMap.keySet()).stream()
+                    // For better readability
+                    .sorted()
+                    .collect(ImmutableCollectors.toMap(
+                            i -> i,
+                            i -> Optional.ofNullable((VariableOrGroundTerm) argumentMapUnification.argumentMap.get(i))
+                                    .orElseGet(() -> targetArgumentMap.get(i))));
 
-                if (sourceDependentIndexes.isEmpty())
-                    return this;
+            // Here we only consider the first occurrence of the node! Important for not wrongly introducing implicit equalities
+            int targetIndex = dataNodes.indexOf(targetDataNode);
 
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> localExternalArgumentMap = nodeExternalArgumentMap.get(index);
+            ImmutableList<ExtensionalDataNode> newNodes = IntStream.range(0, dataNodes.size())
+                    .boxed()
+                    .map(i -> i == targetIndex
+                            ? iqFactory.createExtensionalDataNode(targetDataNode.getRelationDefinition(), newTargetArgumentMap)
+                            : removeDependentArguments(dataNodes.get(i), dependentIndexes))
+                    .collect(ImmutableCollectors.toList());
 
-                OptionalInt otherIndex = IntStream.range(0, nodes.size())
-                        .filter(j -> j != index)
-                        .filter(j -> isSuitableForTransfer(sourceDependentIndexes.size(), localExternalArgumentMap,
-                                nodes.get(j), nodeExternalArgumentMap.get(j), dependents))
-                        .findFirst();
+            return new DeterminantGroupEvaluation(expressions, newNodes, argumentMapUnification.substitution);
+        }
 
-                if (!otherIndex.isPresent())
-                    return this;
+        private ExtensionalDataNode removeDependentArguments(ExtensionalDataNode extensionalDataNode,
+                                                             ImmutableSet<Integer> dependentIndexes) {
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = extensionalDataNode.getArgumentMap().entrySet().stream()
+                    .filter(e -> !dependentIndexes.contains(e.getKey()))
+                    .collect(ImmutableCollectors.toMap());
 
-                return transferDependentArguments(index, sourceDependentIndexes, argumentMap, otherIndex.getAsInt());
-            }
+            return iqFactory.createExtensionalDataNode(extensionalDataNode.getRelationDefinition(), newArgumentMap);
+        }
 
-            /**
-             * TODO: further explain
-             */
-            protected boolean isSuitableForTransfer(int sourceDependentArgCount,
-                                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> sourceExternalArgumentMap,
-                                                  ExtensionalDataNode candidateNode,
-                                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> candidateExternalArgumentMap,
-                                                  ImmutableSet<Attribute> dependents) {
-                // First criteria: must contains all the external arguments of the source
-                if (!sourceExternalArgumentMap.entrySet().stream()
-                        .allMatch(e -> Optional.ofNullable(candidateExternalArgumentMap.get(e.getKey()))
-                                .filter(v -> v.equals(e.getValue()))
-                                .isPresent()))
-                    return false;
+        private ImmutableSet<ImmutableExpression> extractExpressions(Collection<ExtensionalDataNode> dataNodes,
+                                                                     ImmutableSet<ImmutableExpression> equalities,
+                                                                     ImmutableSet<Integer> dependentIndexes) {
+            ImmutableMultiset<Variable> dependentVariableOccurrences = dataNodes.stream()
+                    .flatMap(n -> n.getArgumentMap().entrySet().stream())
+                    .filter(e -> !dependentIndexes.contains(e.getKey()))
+                    .map(Map.Entry::getValue)
+                    .filter(d -> d instanceof Variable)
+                    .map(d -> (Variable) d)
+                    .collect(ImmutableCollectors.toMultiset());
 
-                // If it contains additional external arguments, then it is suitable (more constrained)
-                if(!sourceExternalArgumentMap.keySet()
-                        .containsAll(candidateExternalArgumentMap.keySet()))
-                    return true;
-
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> candidateArgumentMap = candidateNode.getArgumentMap();
-
-                long candidateDependentArgCount = dependents.stream()
-                        .map(a -> a.getIndex() - 1)
-                        .filter(candidateArgumentMap::containsKey)
-                        .count();
-
-                // Last criteria for avoiding loops (i.e. transferring back and forth) between nodes having the same external arguments
-                return candidateDependentArgCount >= sourceDependentArgCount;
-            }
-
-            private TransferState transferDependentArguments(int sourceIndex, ImmutableList<Integer> sourceDependentIndexes,
-                                                             ImmutableMap<Integer, ? extends VariableOrGroundTerm> sourceArgumentMap,
-                                                             int targetIndex) {
-                ImmutableMap<Integer, ? extends VariableOrGroundTerm> newSourceArgumentMap = sourceArgumentMap.entrySet().stream()
-                        .filter(e -> !sourceDependentIndexes.contains(e.getKey()))
-                        .collect(ImmutableCollectors.toMap());
-
-                ExtensionalDataNode formerSource = nodes.get(sourceIndex);
-                ExtensionalDataNode newSource = iqFactory.createExtensionalDataNode(formerSource.getRelationDefinition(),
-                        newSourceArgumentMap);
-
-                // TODO: unify
-                throw new RuntimeException("TODO: continue implementing the transfer");
-            }
-
-            private TransferState merge(TransferState other) {
-                throw new RuntimeException("TODO: implement merge");
-            }
-
-            private TransferState appendNodes(Stream<ExtensionalDataNode> otherNodes) {
-                throw new RuntimeException("TODO: implement appendNodes");
-            }
-
-            private TransferState mergeWithChild(TransferState s) {
-                throw new RuntimeException("TODO: merge with child");
-            }
-
-
-            public Optional<IQTree> convert(Collection<ExtensionalDataNode> initialNodes) {
-                if (nodes.equals(initialNodes))
-                    return Optional.empty();
-
-                throw new RuntimeException("TODO: continue");
-            }
+            return Stream.concat(
+                    dependentVariableOccurrences.entrySet().stream()
+                            // Co-occurring variables
+                            .filter(e -> e.getCount() > 1)
+                            .map(Multiset.Entry::getElement)
+                            .map(termFactory::getDBIsNotNull),
+                    equalities.stream())
+                    .collect(ImmutableCollectors.toSet());
         }
     }
 

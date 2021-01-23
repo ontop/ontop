@@ -579,7 +579,7 @@ public class FunctionalDependencyTest {
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(TABLE1,
-                ImmutableMap.of(1, A, 3, Z, 4, TWO));
+                ImmutableMap.of(1, A, 4, TWO));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -733,7 +733,9 @@ public class FunctionalDependencyTest {
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         expectedQueryBuilder.addChild(joinNode, dataNode1);
-        expectedQueryBuilder.addChild(joinNode, dataNode2);
+        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(
+                0, Y, 1, A
+        )));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
