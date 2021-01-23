@@ -66,7 +66,8 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                     .map(t -> t.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());
 
-            return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables());
+            return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables())
+                    .orElse(tree);
         }
     }
 
@@ -75,6 +76,11 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
         @Inject
         protected SelfJoinUCSimplifier(CoreSingletons coreSingletons) {
             super(coreSingletons);
+        }
+
+        @Override
+        protected boolean hasConstraint(ExtensionalDataNode node) {
+            return !node.getRelationDefinition().getUniqueConstraints().isEmpty();
         }
 
         @Override
