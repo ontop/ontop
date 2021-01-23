@@ -1020,11 +1020,9 @@ public class FunctionalDependencyTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
-    /**
-     * TODO: optimize the redundant self-lj (no variable on the right is used)
-     */
+    @Ignore("TODO: optimize the redundant self-lj (no variable on the right is used")
     @Test
-    public void testLJNonRedundantSelfLeftJoin1() throws EmptyQueryException {
+    public void testLJRedundantSelfLeftJoin1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -1052,17 +1050,12 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
-        expectedBuilder.init(projectionAtom, distinctNode);
-        expectedBuilder.addChild(distinctNode, leftJoinNode);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(
                 0, X, 3, Z, 4, Y
         ));
 
-        expectedBuilder.addChild(leftJoinNode, dataNode4, LEFT);
-
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of());
-        expectedBuilder.addChild(leftJoinNode, dataNode5, RIGHT);
+        expectedBuilder.init(projectionAtom, dataNode4);
 
         optimizeAndCompare(query, expectedBuilder.build());
     }
