@@ -47,7 +47,7 @@ public abstract class AbstractDiscardedVariablesTransformer extends DefaultNonRe
                 .map(c -> Sets.difference(discardedVariables, c.getVariables()).immutableCopy())
                 .orElse(discardedVariables);
 
-        // Only "interaction" between child: their common variables
+        // Only "interaction" between child: their common variables
         ImmutableList<ImmutableSet<Variable>> discardedVariablesPerChild = IntStream.range(0, children.size())
                 .boxed()
                 .map(i -> extractDiscardedVariablesForInnerJoinChild(i, children, discardedVariablesAfterJoiningCondition))
