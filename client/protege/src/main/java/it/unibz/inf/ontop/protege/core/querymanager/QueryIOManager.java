@@ -59,7 +59,7 @@ public class QueryIOManager {
      */
     public void save(File file) throws IOException {
         try (FileWriter writer = new FileWriter(file)) {
-            writer.append(queryController.getElements().stream()
+            writer.append(queryController.getGroups().stream()
                     .map(QueryIOManager::writeEntity)
                     .collect(Collectors.joining("\n")));
         }
@@ -69,15 +69,22 @@ public class QueryIOManager {
         }
     }
 
-    private static String writeEntity(QueryControllerEntity entity) {
-        if (entity instanceof QueryControllerGroup) {
-            return writeQueryGroup((QueryControllerGroup) entity);
-        }
-        else if (entity instanceof QueryControllerQuery) {
-            return writeQueryItem((QueryControllerQuery) entity);
-        }
-        throw new IllegalArgumentException("Unexpected type");
+    private static String writeEntity(QueryController.Group group) {
+        if (!group.isDegenerate())
+            return String.format(QUERY_GROUP_TAG, group.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
+                + group.getQueries().stream()
+                .map(QueryIOManager::writeQuery)
+                .collect(Collectors.joining("\n"))
+                + END_COLLECTION_SYMBOL + "\n";
+        else
+            return writeQuery(group.getQueries().iterator().next());
     }
+
+    private static String writeQuery(QueryController.Query query) {
+        return String.format(QUERY_ITEM_TAG, query.getID()) + "\n"
+                + query.getQuery().trim() + "\n";
+    }
+
 
     /**
      * The load/write operation
@@ -147,7 +154,7 @@ public class QueryIOManager {
 
     private void readQueryContent(LineNumberReader reader, String groupId, String queryId) throws IOException {
         if (queryId.isEmpty()) {
-           throw new IOException("Query ID is missing");
+           throw new IOException("QueryNode ID is missing");
         }
         
         StringBuilder buffer = new StringBuilder();
@@ -161,23 +168,15 @@ public class QueryIOManager {
         
         String queryText = buffer.toString();
         if (!groupId.isEmpty()) {
-            queryController.addQuery(queryText, queryId, groupId);
-        } else {
-            queryController.addQuery(queryText, queryId);
+            QueryController.Group group = queryController.getGroup(groupId);
+            if (group == null)
+                group = queryController.addGroup(groupId);
+
+            queryController.addQuery(group, queryId, queryText);
         }
-    }
-
-    private static String writeQueryGroup(QueryControllerGroup group) {
-        return String.format(QUERY_GROUP_TAG, group.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
-                + group.getQueries().stream()
-                    .map(QueryIOManager::writeQueryItem)
-                    .collect(Collectors.joining("\n"))
-                + END_COLLECTION_SYMBOL + "\n";
-    }
-
-    private static String writeQueryItem(QueryControllerQuery query) {
-        return String.format(QUERY_ITEM_TAG, query.getID()) + "\n"
-                + query.getQuery().trim() + "\n";
+        else {
+            queryController.addQuery(queryId, queryText);
+        }
     }
 
     private boolean isCommentLine(String line) {

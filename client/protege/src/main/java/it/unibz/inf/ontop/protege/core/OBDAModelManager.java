@@ -371,12 +371,11 @@ public class OBDAModelManager implements Disposable {
 
 				File queryFile = new File(URI.create(owlName + QUERY_EXT));
 				try {
-					// Load the saved queries
 					QueryIOManager queryIO = new QueryIOManager(queryController);
 					queryIO.load(queryFile);
 				}
 				catch (Exception ex) {
-					throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
+					throw new Exception("Exception occurred while loading query document: " + queryFile + "\n\n" + ex.getMessage());
 				}
 			}
 			else {
@@ -424,7 +423,7 @@ public class OBDAModelManager implements Disposable {
 				Files.deleteIfExists(obdaFile.toPath());
 			}
 
-			if (!queryController.getElements().isEmpty()) {
+			if (!queryController.getGroups().isEmpty()) {
 				File queryFile = new File(URI.create(owlName + QUERY_EXT));
 				QueryIOManager queryIO = new QueryIOManager(queryController);
 				queryIO.save(queryFile);
@@ -554,35 +553,29 @@ public class OBDAModelManager implements Disposable {
 		public void mappingUpdated() {  triggerOntologyChanged(); }
 	}
 
-	private class ProtegeQueryControllerListener implements QueryControllerListener {
-
+	private class ProtegeQueryControllerListener implements QueryController.EventListener {
 		@Override
-		public void elementAdded(QueryControllerEntity element) {
+		public void added(QueryController.Group group) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void elementAdded(QueryControllerQuery query, QueryControllerGroup group) {
+		public void added(QueryController.Query query) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void elementRemoved(QueryControllerEntity element) {
+		public void removed(QueryController.Group group) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void elementRemoved(QueryControllerQuery query, QueryControllerGroup group) {
+		public void removed(QueryController.Query query) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void elementChanged(QueryControllerQuery query) {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void elementChanged(QueryControllerQuery query, QueryControllerGroup group) {
+		public void changed(QueryController.Query query) {
 			triggerOntologyChanged();
 		}
 	}

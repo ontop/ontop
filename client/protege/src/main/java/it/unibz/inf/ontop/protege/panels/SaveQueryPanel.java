@@ -23,13 +23,11 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
 import it.unibz.inf.ontop.protege.core.querymanager.QueryController;
-import it.unibz.inf.ontop.protege.core.querymanager.QueryControllerGroup;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 public class SaveQueryPanel extends JPanel {
 
@@ -55,10 +53,10 @@ public class SaveQueryPanel extends JPanel {
 
         cmbQueryGroup.removeAllItems();
         cmbQueryGroup.insertItemAt(NOGROUP, cmbQueryGroup.getItemCount());
-        List<QueryControllerGroup> groups = this.queryController.getGroups();
 
-        for (QueryControllerGroup queryGroup : groups) {
-            cmbQueryGroup.insertItemAt(queryGroup.getID(), cmbQueryGroup.getItemCount());
+        for (QueryController.Group group : queryController.getGroups()) {
+            if (!group.isDegenerate())
+                cmbQueryGroup.insertItemAt(group.getID(), cmbQueryGroup.getItemCount());
         }
         cmbQueryGroup.insertItemAt(NEWGROUP, cmbQueryGroup.getItemCount());
         cmbQueryGroup.addItemListener(e -> {
@@ -195,40 +193,27 @@ public class SaveQueryPanel extends JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
 	private void cmdCreateNewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAcceptActionPerformed
-		String id = txtQueryID.getText();
-		if (id.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "The query ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		int index = queryController.getElementPosition(id);
-		if (index != -1) {
-			JOptionPane.showMessageDialog(this, "The query or group ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-
-        String groupId = (String) cmbQueryGroup.getSelectedItem();
-		if (groupId.equals(NOGROUP)) { // no group selected
-			queryController.addQuery(query, id);
-		}
-		else if (groupId.equals(NEWGROUP)) { // create a new group
-			String newGroupId = txtGroupName.getText().trim();
-			if (newGroupId.isEmpty()) {
-				JOptionPane.showMessageDialog(this, "The group ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			if (id.equals(newGroupId)) {
-                JOptionPane.showMessageDialog(this, "The group ID can't have the same name as the query ID!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+		try {
+            String id = txtQueryID.getText();
+            String groupId = (String) cmbQueryGroup.getSelectedItem();
+            if (groupId.equals(NOGROUP)) {
+                queryController.addQuery(id, query);
             }
-			if (queryController.getElementPosition(newGroupId) != -1) {
-                OptionPaneUtils.showPrettyMessageDialog(this, "The group with this ID already exists", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+            else {
+                QueryController.Group group;
+                if (groupId.equals(NEWGROUP)) {
+                    String newGroupId = txtGroupName.getText().trim();
+                    group = queryController.addGroup(newGroupId);
+                }
+                else {
+                    group = queryController.getGroup(groupId);
+                }
+                queryController.addQuery(group, id, query);
             }
-            queryController.addQuery(query, id, newGroupId);
-		}
-		else { // a group selected
-			queryController.addQuery(query, id, groupId);
-		}
+        }
+		catch (IllegalArgumentException e) {
+            OptionPaneUtils.showPrettyMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
 		parent.dispose();
 	}// GEN-LAST:event_buttonAcceptActionPerformed
 

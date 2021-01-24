@@ -20,151 +20,162 @@ package it.unibz.inf.ontop.protege.core.querymanager;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class represents the controller for the query manager
  */
 public class QueryController {
 
-	private final List<QueryControllerEntity> entities = new ArrayList<>();
-	private final List<QueryControllerListener> listeners = new ArrayList<>();
+	private final List<EventListener> listeners = new ArrayList<>();
 	
-	public void addListener(QueryControllerListener listener) {
+	public void addListener(EventListener listener) {
 		if (listeners.contains(listener)) {
 			return;
 		}
 		listeners.add(listener);
 	}
 
-	/**
-	 * Returns all the groups added
-	 */
-	public List<QueryControllerGroup> getGroups() {
-		List<QueryControllerGroup> groups = new ArrayList<>();
-		for (QueryControllerEntity element : entities) {
-			if (element instanceof QueryControllerGroup) {
-				groups.add((QueryControllerGroup) element);
-			}
+	private final Map<String, Group> groups = new LinkedHashMap<>();
+
+	public class Query {
+		private final Group group;
+		private final String id;
+		private String query;
+
+		private Query(Group group, String id, String query) {
+			if (id.isEmpty())
+				throw new IllegalArgumentException("The query ID can't be blank!");
+
+			this.group = group;
+			this.id = id;
+			this.query = query;
+			if (!group.isDegenerate && id.equals(group.id))
+				throw new IllegalArgumentException("The group ID can't be the same as the query ID!");
+
+			if (group.queries.containsKey(id))
+				throw new IllegalArgumentException("The query ID already exists!");
+
+			group.queries.put(id, this);
 		}
-		return groups;
+
+		public Group getGroup() { return group; }
+		public String getID() { return id; }
+		public String getQuery() { return query; }
+
+		public void setQuery(String query) {
+			this.query = query;
+			QueryController.this.listeners.forEach(l -> l.changed(this));
+		}
 	}
-	
 
-	/**
-	 * Creates a new query and adds it to the vector QueryControllerEntity.
-	 *
-	 * @param queryStr
-	 *         The new query string, replacing any existing string.
-	 * @param queryId
-	 *         The query id associated to the string.
-	 */
-	public void addQuery(String queryStr, String queryId) {
-		QueryControllerQuery query = new QueryControllerQuery(queryId, queryStr);
+	public class Group {
+		private final String id;
+		private boolean isDegenerate; // a single query whose ID is the group ID
+		private final Map<String, Query> queries = new LinkedHashMap<>();
 
-		int position = getElementPosition(queryId);
-		if (position == -1) { // add to the collection for a new query.
-			entities.add(query);
-			listeners.forEach(l -> l.elementAdded(query));
+		private Group(String id) {
+			if (id.isEmpty())
+				throw new IllegalArgumentException("The group ID can't be blank!");
+
+			this.id = id;
+			this.isDegenerate = false;
+			QueryController.this.groups.put(id, this);
+		}
+
+		private Group(String id, String query) {
+			this(id);
+			this.isDegenerate = true;
+			Query q = new Query(this, id, query);
+		}
+
+		public String getID() { return id; }
+		public Query getQuery(String queryId) { return queries.get(queryId); }
+		public Collection<Query> getQueries() { return queries.values(); }
+		public boolean isDegenerate() { return isDegenerate; }
+	}
+
+	public interface EventListener  {
+		void added(Group group);
+		void added(Query query);
+		void removed(Group group);
+		void removed(Query query);
+		void changed(Query query);
+	}
+
+
+
+	public void addQuery(Group group, String queryId, String query) {
+		if (group.isDegenerate())
+			throw new IllegalArgumentException("Internal error: a query is added to a degenerate group");
+
+		Query q = new Query(group, queryId, query);
+		listeners.forEach(l -> l.added(q));
+	}
+
+	public void addQuery(String queryId, String query) {
+		if (groups.containsKey(queryId))
+			throw new IllegalArgumentException("The query with ID " + queryId + " already exists");
+
+		Query q = new Group(queryId, query).getQueries().iterator().next();
+		listeners.forEach(l -> l.added(q));
+	}
+
+	public Group addGroup(String groupId) {
+		if (groups.containsKey(groupId))
+			throw new IllegalArgumentException("The group with ID " + groupId + " already exists");
+
+		Group g = new Group(groupId);
+		listeners.forEach(l -> l.added(g));
+		return g;
+	}
+
+	public Group getGroup(String groupId) {
+		return groups.get(groupId);
+	}
+
+	public Query getQuery(String queryId) {
+		Group g = groups.get(queryId);
+		if (g == null || !g.isDegenerate())
+			throw new IllegalArgumentException("Query " + queryId + " not found");
+
+		return g.getQueries().iterator().next();
+	}
+
+	public void removeQuery(String groupId, String queryId) {
+		Query q;
+		if (groupId == null) {
+			Group group = groups.remove(queryId);
+			if (group == null)
+				throw new IllegalArgumentException("Cannot find query: " + queryId);
+
+			q = group.getQueries().iterator().next();
 		}
 		else {
-			entities.set(position, query);
-			listeners.forEach(l -> l.elementChanged(query));
+			Group group = groups.computeIfAbsent(groupId, id -> {
+				throw new IllegalArgumentException("Cannot find group: " + groupId);
+			});
+			if (group.isDegenerate())
+				throw new IllegalArgumentException();
+
+			q = group.queries.remove(queryId);
+			if (q == null)
+				throw new IllegalArgumentException("Cannot find query: " + queryId);
 		}
+		listeners.forEach(l -> l.removed(q));
 	}
 
-	/**
-	 * Creates a new query in the group or updates the existing query
-	 * Creates a group if necessary
-	 */
-	public void addQuery(String queryStr, String queryId, String groupId) {
-		QueryControllerQuery query = new QueryControllerQuery(queryId, queryStr);
+	public void removeGroup(String groupId) {
+		Group g = groups.remove(groupId);
+		if (g == null)
+			throw new IllegalArgumentException("Cannot find group: " + groupId);
 
-		int index = getElementPosition(groupId);
-		QueryControllerGroup group;
-		if (index != -1) {
-			group = (QueryControllerGroup) entities.get(index);
-		}
-		else {
-		    group = new QueryControllerGroup(groupId);
-            entities.add(group);
-			listeners.forEach(l -> l.elementAdded(group));
-		}
-
-		int position = getElementPosition(queryId);
-		if (position == -1) {
-			group.addQuery(query);
-			listeners.forEach(l -> l.elementAdded(query, group));
-		}
-		else {
-			int i = 0;
-			for (QueryControllerQuery q : group.getQueries()) {
-				if (q.getID().equals(queryId)) {
-					group.updateQuery(i, query);
-					listeners.forEach(l -> l.elementChanged(query, group));
-					return;
-				}
-				i++;
-			}
-		}
+		listeners.forEach(l -> l.removed(g));
 	}
 
-	/**
-	 * Removes a query from the vector QueryControllerEntity
-	 */
-	public void removeElement(String id) {
-		for (int i = 0; i < entities.size(); i++) {
-			QueryControllerEntity element = entities.get(i);
-			if (element.getID().equals(id)) {
-				entities.remove(i);
-				listeners.forEach(l -> l.elementRemoved(element));
-				return;
-			}
-			else if (element instanceof QueryControllerGroup) {
-				QueryControllerGroup group = (QueryControllerGroup) element;
-				int position = 0;
-				for (QueryControllerQuery query : group.getQueries()) {
-					if (query.getID().equals(id)) {
-						group.removeQuery(position);
-						listeners.forEach(l -> l.elementRemoved(query, group));
-						return;
-					}
-					position++;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Returns the index of the element in the list.
-	 * If it's is a query and the query is found inside a query group,
-	 * then the position of the group is returned instead.
-	 */
-	public int getElementPosition(String id) {
-		for (int i = 0; i < entities.size(); i++) {
-			QueryControllerEntity element = entities.get(i);
-			if (element.getID().equals(id)) {
-				return i;
-			}
-
-			if (element instanceof QueryControllerGroup) {
-				QueryControllerGroup group = (QueryControllerGroup) element;
-				for (QueryControllerQuery query : group.getQueries()) {
-					if (query.getID().equals(id)) {
-						return i;
-					}
-				}
-			}
-		}
-		return -1;
-	}
-
-	public List<QueryControllerEntity> getElements() {
-		return entities;
-	}
+	public Collection<Group> getGroups() { return groups.values(); }
 
 	void reset() {
-        entities.clear();
+        groups.clear();
 	}
 }

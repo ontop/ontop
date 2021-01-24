@@ -44,8 +44,7 @@ import java.awt.event.KeyListener;
  * Creates a new panel to execute queries. Remember to execute the
  * setResultsPanel function to indicate where to display the results.
  */
-public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelListener,
-		TableModelListener {
+public class QueryInterfacePanel extends JPanel implements TableModelListener {
 
 	/**
 	 * Variable currentGroup is the group's id to which belongs the selected
@@ -304,7 +303,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
 	private void getSPARQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLSQLExpansionActionPerformed
 		Thread queryRunnerThread = new Thread(() -> {
-			OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
+			OBDADataQueryAction<?> action = retrieveUCQUnfoldingAction;
 			action.run(queryTextPane.getText());
 		});
 		queryRunnerThread.start();
@@ -356,14 +355,16 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}// GEN-LAST:event_buttonExecuteActionPerformed
 
 	private synchronized void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
-		final String query = queryTextPane.getText();
+		QueryController.Query query;
 		if (!currentId.isEmpty()) {
 			if (!currentGroup.isEmpty()) {
-				qc.addQuery(query, currentId, currentGroup);
+				QueryController.Group group = qc.getGroup(currentGroup);
+				query = group.getQuery(currentId);
 			}
 			else {
-				qc.addQuery(query, currentId);
+				query = qc.getQuery(currentId);
 			}
+			query.setQuery(queryTextPane.getText());
 		}
 		else {
 			JOptionPane.showMessageDialog(QueryInterfacePanel.this,
@@ -374,11 +375,11 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}// GEN-LAST:event_buttonSaveActionPerformed
 
 
-	public void selectedQueryChanged(String new_group, String new_query, String new_id) {
-			SwingUtilities.invokeLater(() -> queryTextPane.setText(new_query));
-			currentGroup = new_group;
-			currentId = new_id;
-		}
+	public void selectedQueryChanged(String new_group, String new_id, String new_query) {
+		SwingUtilities.invokeLater(() -> queryTextPane.setText(new_query));
+		currentGroup = new_group;
+		currentId = new_id;
+	}
 
 	public void setExecuteSelectAction(OBDADataQueryAction<TupleOWLResultSet> executeUCQAction) {
 		this.executeSelectAction = executeUCQAction;
@@ -405,14 +406,10 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		this.retrieveUCQUnfoldingAction = retrieveUCQUnfoldingAction;
 	}
 
-	public OBDADataQueryAction<?> getRetrieveUCQUnfoldingAction() {
-		return retrieveUCQUnfoldingAction;
-	}
-
 
 	//get and update the info box with  the actual time in seconds of the execution of the query
 	public void updateStatus(long result) {
-		if(result != - 1) {
+		if (result != - 1) {
 			Double time = execTime / 1000;
 			String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, result);
 			SwingUtilities.invokeLater(() -> {
@@ -423,44 +420,21 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}
 
 	//set the boolean result in the info box of the ask query
-	private class AskQueryInfoSetter implements Runnable {
-		String title;
-		BooleanOWLResultSet result;
-
-		AskQueryInfoSetter(String title, BooleanOWLResultSet result){
-			this.title = title;
-			this.result = result;
-		}
-		@Override
-		public void run()
-		{
-			Double time = execTime / 1000;
-			String s = String.format("Execution time: %s sec - ", time);
-			String answer;
+	//show the result for ask query
+	public  void showBooleanActionResultInTextInfo(String title, BooleanOWLResultSet result) {
+		Double time = execTime / 1000;
+		String s = String.format("Execution time: %s sec - ", time);
+		SwingUtilities.invokeLater(() -> {
 			try {
-				if (result.getValue()) {
-                    answer = "true";
-                    lblExecutionInfo.setBackground(Color.GREEN);
-                }
-                else {
-                    answer = "false";
-                    lblExecutionInfo.setBackground(Color.RED);
-                }
+				boolean value = result.getValue();
+				lblExecutionInfo.setBackground(value ? Color.GREEN : Color.RED);
 				lblExecutionInfo.setOpaque(true);
-				lblExecutionInfo.setText(s + title + " "+ answer);
+				lblExecutionInfo.setText(s + title + " " + value);
 			}
 			catch (OWLException e) {
 				JOptionPane.showMessageDialog(QueryInterfacePanel.this, e);
 			}
-		}
-	}
-
-	//show the result for ask query
-
-	public  void showBooleanActionResultInTextInfo(String title, BooleanOWLResultSet result) throws OWLException {
-
-		AskQueryInfoSetter alter_result_panel = new AskQueryInfoSetter(title, result);
-		SwingUtilities.invokeLater(alter_result_panel);
+		});
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

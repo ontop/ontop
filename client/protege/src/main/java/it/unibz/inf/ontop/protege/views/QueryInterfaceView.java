@@ -390,17 +390,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 
 
-    private class UCQExpansionPanel implements Runnable{
-        final String title;
-        final String result;
-        final OBDADataQueryAction<?> action;
-        UCQExpansionPanel(String title, String result, OBDADataQueryAction<?> action){
-            this.title = title;
-            this.result = result;
-            this.action = action;
+    private void showActionResultInTextPanel(String title, String result) {
+        if (result == null) {
+            return;
         }
-        @Override
-        public void run(){
+        OBDADataQueryAction<?> action = queryEditorPanel.getRetrieveUCQExpansionAction();
+        SwingUtilities.invokeLater(() -> {
             TextMessageFrame panel = new TextMessageFrame(title);
             JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
             DialogUtils.centerDialogWRTParent(protegeFrame, panel);
@@ -409,16 +404,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
             panel.setTimeProcessingMessage(String.format("Amount of processing time: %s sec", action.getExecutionTime()/1000));
             panel.setVisible(true);
-        }
-    }
-
-    private void showActionResultInTextPanel(String title, String result) {
-        if (result == null) {
-            return;
-        }
-        OBDADataQueryAction<?> action = queryEditorPanel.getRetrieveUCQExpansionAction();
-        UCQExpansionPanel alter_result_panel = new UCQExpansionPanel(title, result, action);
-        SwingUtilities.invokeLater(alter_result_panel);
+        });
     }
 
 
@@ -492,8 +478,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     }
 
     @Override
-    public synchronized void selectedQueryChanged(String new_group, String new_query, String new_id) {
-        this.queryEditorPanel.selectedQueryChanged(new_group, new_query, new_id);
+    public synchronized void selectedQueryChanged(String groupId, String queryId, String query) {
+        queryEditorPanel.selectedQueryChanged(groupId, queryId, query);
     }
 
     /**

@@ -21,9 +21,5 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 public interface SavedQueriesPanelListener {
-	/**
-	 * The parameters new_group and new_id were added to initialize the
-	 * SaveQueryPanel with this values.
-	 */
-	void selectedQueryChanged(String new_group, String new_query, String new_id);
+	void selectedQueryChanged(String groupId, String queryId, String query);
 }
