@@ -41,8 +41,10 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -55,13 +57,25 @@ public class JsonBasicView extends JsonView {
     public final Columns columns;
     @Nonnull
     public final List<String> baseRelation;
+    @Nonnull
+    public final UniqueConstraints uniqueConstraints;
+    @Nonnull
+    public final OtherFunctionalDependencies otherFunctionalDependencies;
+    @Nonnull
+    public final ForeignKeys foreignKeys;
 
     @JsonCreator
     public JsonBasicView(@JsonProperty("columns") Columns columns, @JsonProperty("name") List<String> name,
-                         @JsonProperty("baseRelation") List<String> baseRelation) {
+                         @JsonProperty("baseRelation") List<String> baseRelation,
+                         @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
+                         @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
+                         @JsonProperty("foreignKeys") ForeignKeys foreignKeys) {
         super(name);
         this.columns = columns;
         this.baseRelation = baseRelation;
+        this.uniqueConstraints = uniqueConstraints;
+        this.otherFunctionalDependencies = otherFunctionalDependencies;
+        this.foreignKeys = foreignKeys;
     }
 
     @Override
@@ -92,8 +106,19 @@ public class JsonBasicView extends JsonView {
      * TODO: implement it
      */
     @Override
-    public void insertIntegrityConstraints(MetadataLookup metadataLookup) {
+    public void insertIntegrityConstraints(MetadataLookup metadataLookup) throws MetadataExtractionException {
 
+        RelationID relationID = JsonMetadata.deserializeRelationID(metadataLookup.getQuotedIDFactory(), baseRelation);
+
+        for (AddUniqueConstraints uc : uniqueConstraints.added)
+            insertUniqueConstraints(metadataLookup.getRelation(relationID), metadataLookup.getQuotedIDFactory(), uc);
+
+        for (AddFunctionalDependency fd : otherFunctionalDependencies.added)
+            insertFunctionalDependencies(metadataLookup.getRelation(relationID), metadataLookup.getQuotedIDFactory(), fd);
+
+        for (AddForeignKey fk : foreignKeys.added) {
+            insertForeignKeys(metadataLookup.getRelation(relationID), metadataLookup, fk);
+        }
     }
 
 
@@ -251,6 +276,39 @@ public class JsonBasicView extends JsonView {
         return builder;
     }
 
+    private void insertUniqueConstraints(NamedRelationDefinition relation, QuotedIDFactory idFactory, AddUniqueConstraints addUniqueConstraints) throws MetadataExtractionException {
+        FunctionalDependency.Builder builder = addUniqueConstraints.isPrimaryKey
+                ? UniqueConstraint.primaryKeyBuilder(relation, addUniqueConstraints.name)
+                : UniqueConstraint.builder(relation, addUniqueConstraints.name);
+
+        JsonMetadata.deserializeAttributeList(idFactory, addUniqueConstraints.determinants, builder::addDeterminant);
+        builder.build();
+    }
+
+    private void insertFunctionalDependencies(NamedRelationDefinition relation, QuotedIDFactory idFactory, AddFunctionalDependency addFunctionalDependency) throws MetadataExtractionException {
+        FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
+        JsonMetadata.deserializeAttributeList(idFactory, addFunctionalDependency.determinants, builder::addDeterminant);
+        JsonMetadata.deserializeAttributeList(idFactory, addFunctionalDependency.dependents, builder::addDependent);
+        builder.build();
+    }
+
+    public void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
+
+        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation,
+                lookup.getRelation(JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), addForeignKey.to.relation)));
+
+        try {
+            for (int i = 0; i < addForeignKey.to.columns.size(); i++)
+                builder.add(lookup.getQuotedIDFactory().createAttributeID(addForeignKey.from),
+                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.to.columns.get(i)));
+        }
+        catch (AttributeNotFoundException e) {
+            throw new MetadataExtractionException(e);
+        }
+
+        builder.build();
+    }
+
     @JsonPropertyOrder({
             "added",
             "hidden"
@@ -285,6 +343,137 @@ public class JsonBasicView extends JsonView {
                           @JsonProperty("expression") String expression) {
             this.name = name;
             this.expression = expression;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "added"//,
+            //"hidden"
+    })
+    private static class UniqueConstraints extends JsonOpenObject {
+        @Nonnull
+        public final List<AddUniqueConstraints> added;
+        /*@Nonnull
+        public final List<String> hidden;*/
+
+        @JsonCreator
+        public UniqueConstraints(@JsonProperty("added") List<AddUniqueConstraints> added/*,
+                       @JsonProperty("hidden") List<String> hidden*/) {
+            this.added = added;
+            //this.hidden = hidden;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "name",
+            "determinants",
+            "isPrimaryKey"
+    })
+    private static class AddUniqueConstraints extends JsonOpenObject {
+        @Nonnull
+        public final String name;
+        @Nonnull
+        public final List<String> determinants;
+        @Nonnull
+        public final Boolean isPrimaryKey;
+
+
+        @JsonCreator
+        public AddUniqueConstraints(@JsonProperty("name") String name,
+                                    @JsonProperty("determinants") List<String> determinants,
+                                    @JsonProperty("isPrimaryKey") Boolean isPrimaryKey) {
+            this.name = name;
+            this.determinants = determinants;
+            this.isPrimaryKey = isPrimaryKey;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "added"//,
+            //"hidden"
+    })
+    private static class OtherFunctionalDependencies extends JsonOpenObject {
+        @Nonnull
+        public final List<AddFunctionalDependency> added;
+        /*@Nonnull
+        public final List<String> hidden;*/
+
+        @JsonCreator
+        public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added/*,
+                                           @JsonProperty("hidden") List<String> hidden*/) {
+            this.added = added;
+            //this.hidden = hidden;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "determinants",
+            "dependents"
+    })
+    private static class AddFunctionalDependency extends JsonOpenObject {
+        @Nonnull
+        public final List<String> determinants;
+        @Nonnull
+        public final List<String> dependents;
+
+        public AddFunctionalDependency(@JsonProperty("determinants") List<String> determinants,
+                                       @JsonProperty("dependents") List<String> dependents) {
+            this.determinants = determinants;
+            this.dependents = dependents;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "added"//,
+            //"hidden"
+    })
+    private static class ForeignKeys extends JsonOpenObject {
+        @Nonnull
+        public final List<AddForeignKey> added;
+        /*@Nonnull
+        public final List<String> hidden;*/
+
+        @JsonCreator
+        public ForeignKeys(@JsonProperty("added") List<AddForeignKey> added) {
+            this.added = added;
+            //this.hidden = hidden;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "determinants",
+            "dependents"
+    })
+    private static class AddForeignKey extends JsonOpenObject {
+        @Nonnull
+        public final String name;
+        @Nonnull
+        public final String from;
+        @Nonnull
+        public final ForeignKeyPart to;
+
+        public AddForeignKey(@JsonProperty("name") String name,
+                             @JsonProperty("from") String from,
+                             @JsonProperty("to") ForeignKeyPart to) {
+            this.name = name;
+            this.from = from;
+            this.to = to;
+        }
+    }
+
+    @JsonPropertyOrder({
+            "relation",
+            "columns"
+    })
+    public static class ForeignKeyPart extends JsonOpenObject {
+        public final List<String> relation;
+        public final List<String> columns;
+
+        @JsonCreator
+        public ForeignKeyPart(@JsonProperty("relation") List<String> relation,
+                              @JsonProperty("columns") List<String> columns) {
+            this.relation = relation;
+            this.columns = columns;
         }
     }
 }
