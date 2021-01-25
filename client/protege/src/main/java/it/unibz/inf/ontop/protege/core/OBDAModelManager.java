@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.protege.core.querymanager.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -52,7 +51,7 @@ public class OBDAModelManager implements Disposable {
 
 	private final OBDAModel obdaModel;
 
-	private QueryController queryController;
+	private QueryManager queryController;
 
 	private final List<OBDAModelManagerListener> obdaManagerListeners = new ArrayList<>();
 
@@ -121,7 +120,7 @@ public class OBDAModelManager implements Disposable {
 		ProtegeMappingControllerListener mlistener = new ProtegeMappingControllerListener();
 		obdaModel.addMappingsListener(mlistener);
 
-		queryController = new QueryController();
+		queryController = new QueryManager();
 		ProtegeQueryControllerListener qlistener = new ProtegeQueryControllerListener();
 		queryController.addListener(qlistener);
 
@@ -262,9 +261,9 @@ public class OBDAModelManager implements Disposable {
 		return obdaModel;
 	}
 
-	public QueryController getQueryController() {
+	public QueryManager getQueryController() {
 		if (queryController == null) {
-			queryController = new QueryController();
+			queryController = new QueryManager();
 		}
 		return queryController;
 	}
@@ -369,13 +368,14 @@ public class OBDAModelManager implements Disposable {
 					throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
 				}
 
-				File queryFile = new File(URI.create(owlName + QUERY_EXT));
-				try {
-					QueryIOManager queryIO = new QueryIOManager(queryController);
-					queryIO.load(queryFile);
-				}
-				catch (Exception ex) {
-					throw new Exception("Exception occurred while loading query document: " + queryFile + "\n\n" + ex.getMessage());
+				File queriesFile = new File(URI.create(owlName + QUERY_EXT));
+				if (queriesFile.exists()) {
+					try (FileReader reader = new FileReader(queriesFile)) {
+						queryController.load(reader);
+					}
+					catch (Exception ex) {
+						throw new Exception("Exception occurred while loading query document: " + queriesFile + "\n\n" + ex.getMessage());
+					}
 				}
 			}
 			else {
@@ -423,11 +423,19 @@ public class OBDAModelManager implements Disposable {
 				Files.deleteIfExists(obdaFile.toPath());
 			}
 
+			File queriesFile = new File(URI.create(owlName + QUERY_EXT));
 			if (!queryController.getGroups().isEmpty()) {
-				File queryFile = new File(URI.create(owlName + QUERY_EXT));
-				QueryIOManager queryIO = new QueryIOManager(queryController);
-				queryIO.save(queryFile);
-				log.info("query file saved to {}", queryFile);
+				try (FileWriter writer = new FileWriter(queriesFile)) {
+					writer.write(queryController.renderQueries());
+				}
+				catch (IOException e) {
+					throw new IOException(String.format("Error while saving the queries to file located at %s.\n" +
+							"Make sure you have the write permission at the location specified.", queriesFile.getAbsolutePath()));
+				}
+				log.info("query file saved to {}", queriesFile);
+			}
+			else {
+				Files.deleteIfExists(queriesFile.toPath());
 			}
 
 			File propertyFile = new File(URI.create(owlName + OntopConfigurationManager.PROPERTY_EXT));
@@ -553,29 +561,29 @@ public class OBDAModelManager implements Disposable {
 		public void mappingUpdated() {  triggerOntologyChanged(); }
 	}
 
-	private class ProtegeQueryControllerListener implements QueryController.EventListener {
+	private class ProtegeQueryControllerListener implements QueryManager.EventListener {
 		@Override
-		public void added(QueryController.Group group) {
+		public void added(QueryManager.Group group) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void added(QueryController.Query query) {
+		public void added(QueryManager.Query query) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void removed(QueryController.Group group) {
+		public void removed(QueryManager.Group group) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void removed(QueryController.Query query) {
+		public void removed(QueryManager.Query query) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void changed(QueryController.Query query) {
+		public void changed(QueryManager.Query query) {
 			triggerOntologyChanged();
 		}
 	}

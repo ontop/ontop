@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.querymanager.*;
+import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * This class represents the display of stored queries using a tree structure.
  */
-public class SavedQueriesPanel extends JPanel implements QueryController.EventListener {
+public class SavedQueriesPanel extends JPanel implements QueryManager.EventListener {
 
 	private static final long serialVersionUID = 6920100822784727963L;
 
@@ -53,7 +53,7 @@ public class SavedQueriesPanel extends JPanel implements QueryController.EventLi
 	
 	private final QueryControllerTreeModel queryControllerModel = new QueryControllerTreeModel();
 
-	private final QueryController queryController;
+	private final QueryManager queryController;
 		
 	private QueryControllerTreeModel.QueryNode currentId;
 	private QueryControllerTreeModel.QueryNode previousId;
@@ -61,7 +61,7 @@ public class SavedQueriesPanel extends JPanel implements QueryController.EventLi
 	/** 
 	 * Creates new form SavedQueriesPanel 
 	 */
-	public SavedQueriesPanel(QueryController queryController) {
+	public SavedQueriesPanel(QueryManager queryController) {
 
         this.saved_query_icon = IconLoader.getImageIcon(PATH_SAVEDQUERY_ICON);
         this.query_group_icon = IconLoader.getImageIcon(PATH_QUERYGROUP_ICON);
@@ -79,20 +79,13 @@ public class SavedQueriesPanel extends JPanel implements QueryController.EventLi
 	}
 
 	public void addQueryManagerListener(SavedQueriesPanelListener listener) {
-		if (listener == null) {
-			return;
-		}
-		if (listeners.contains(listener)) {
-			return;
-		}
-		listeners.add(listener);
+		if (listener != null && !listeners.contains(listener))
+		    listeners.add(listener);
 	}
 
 	public void removeQueryManagerListener(SavedQueriesPanelListener listener) {
-		if (listener == null) {
-			return;
-		}
-		listeners.remove(listener);
+		if (listener != null)
+		    listeners.remove(listener);
 	}
 
     private class SavedQueriesTreeCellRenderer extends DefaultTreeCellRenderer {
@@ -297,7 +290,7 @@ public class SavedQueriesPanel extends JPanel implements QueryController.EventLi
     // End of variables declaration//GEN-END:variables
 
     @Override
-	public void added(QueryController.Group group) {
+	public void added(QueryManager.Group group) {
 		DefaultMutableTreeNode node = queryControllerModel.getGroupNode(group);
 		// Select the new node in the JTree
 		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
@@ -305,7 +298,7 @@ public class SavedQueriesPanel extends JPanel implements QueryController.EventLi
 	}
 
 	@Override
-	public void added(QueryController.Query query) {
+	public void added(QueryManager.Query query) {
 		DefaultMutableTreeNode node = queryControllerModel.getQueryNode(query);
 		// Select the new node in the JTree
 		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
@@ -313,17 +306,17 @@ public class SavedQueriesPanel extends JPanel implements QueryController.EventLi
 	}
 
 	@Override
-	public void removed(QueryController.Query query) {
+	public void removed(QueryManager.Query query) {
         listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
     }
 
 	@Override
-	public void removed(QueryController.Group group) {
+	public void removed(QueryManager.Group group) {
         listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
     }
 
 	@Override
-	public void changed(QueryController.Query query) {
+	public void changed(QueryManager.Query query) {
 		DefaultMutableTreeNode node = queryControllerModel.getQueryNode(query);
 		// Select the modified node in the JTree
 		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));

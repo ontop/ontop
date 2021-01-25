@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.core.querymanager.QueryController;
+import it.unibz.inf.ontop.protege.core.QueryManager;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.swing.*;
@@ -46,10 +46,6 @@ import java.awt.event.KeyListener;
  */
 public class QueryInterfacePanel extends JPanel implements TableModelListener {
 
-	/**
-	 * Variable currentGroup is the group's id to which belongs the selected
-	 * query Variable currentId is the query's id that is selected
-	 */
 	private static final long serialVersionUID = -5902798157183352944L;
 
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
@@ -60,18 +56,17 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 
 	private OBDAModel apic;
 
-	private final QueryController qc;
+	private final QueryManager qc;
 
 	private double execTime = 0;
 	private int fetchSizeCache = 100;
 
-	private String currentGroup = "";  // default value
-	private String currentId = "";  // default value
+	private String groupId, queryId;
 
 	/**
 	 * Creates new form QueryInterfacePanel
 	 */
-	public QueryInterfacePanel(OBDAModel apic, QueryController qc) {
+	public QueryInterfacePanel(OBDAModel apic, QueryManager qc) {
 		this.qc = qc;
 		this.apic = apic;
 
@@ -83,18 +78,15 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		queryTextPane.setDocument(styledDocument);
 		queryTextPane.setBackground(Color.WHITE);
 		queryTextPane.setCaretColor(Color.BLACK);
-		queryTextPane.addKeyListener(new CTRLEnterKeyListener());
-	}
-
-	private class CTRLEnterKeyListener implements KeyListener {
-		@Override public void keyTyped(KeyEvent e) { }
-		@Override public void keyReleased(KeyEvent e) { }
-		@Override
-		public void keyPressed(KeyEvent e) {
-			if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
-				cmdExecuteQueryActionPerformed(null);
+		queryTextPane.addKeyListener(new KeyListener() {
+			@Override public void keyTyped(KeyEvent e) { }
+			@Override public void keyReleased(KeyEvent e) { }
+			@Override public void keyPressed(KeyEvent e) {
+				if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
+					cmdExecuteQueryActionPerformed(null);
+				}
 			}
-		}
+		});
 	}
 
 	public void setOBDAModel(OBDAModel api) {
@@ -280,32 +272,28 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
     }// </editor-fold>//GEN-END:initComponents
 
     private synchronized void chkShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowAllActionPerformed
-    	Runnable runner = () -> {
+    	SwingUtilities.invokeLater(() -> {
 			if (chkShowAll.isSelected()) {
 				fetchSizeCache = getFetchSize();
-				txtFetchSize.setText(0+"");
+				txtFetchSize.setText("0");
 				txtFetchSize.setEditable(false);
-			} else {
-				txtFetchSize.setText(fetchSizeCache+"");
+			}
+			else {
+				txtFetchSize.setText(fetchSizeCache + "");
 				txtFetchSize.setEditable(true);
 			}
-		};
-    	SwingUtilities.invokeLater(runner);
+		});
     }//GEN-LAST:event_chkShowAllActionPerformed
 
 	private void getSPARQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLExpansionActionPerformed
-		Thread queryRunnerThread = new Thread(() -> {
-			OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQExpansionAction();
-			action.run(queryTextPane.getText());
-		});
+		Thread queryRunnerThread = new Thread(() ->
+				retrieveUCQExpansionAction.run(queryTextPane.getText()));
 		queryRunnerThread.start();
 	}// GEN-LAST:event_getSPARQLExpansionActionPerformed
 
 	private void getSPARQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLSQLExpansionActionPerformed
-		Thread queryRunnerThread = new Thread(() -> {
-			OBDADataQueryAction<?> action = retrieveUCQUnfoldingAction;
-			action.run(queryTextPane.getText());
-		});
+		Thread queryRunnerThread = new Thread(() ->
+				retrieveUCQUnfoldingAction.run(queryTextPane.getText()));
 		queryRunnerThread.start();
 	}// GEN-LAST:event_getSPARQLSQLExpansionActionPerformed
 
@@ -355,15 +343,8 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}// GEN-LAST:event_buttonExecuteActionPerformed
 
 	private synchronized void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
-		QueryController.Query query;
-		if (!currentId.isEmpty()) {
-			if (!currentGroup.isEmpty()) {
-				QueryController.Group group = qc.getGroup(currentGroup);
-				query = group.getQuery(currentId);
-			}
-			else {
-				query = qc.getQuery(currentId);
-			}
+		if (queryId != null) {
+			QueryManager.Query query = qc.getQuery(groupId, queryId);
 			query.setQuery(queryTextPane.getText());
 		}
 		else {
@@ -375,10 +356,10 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}// GEN-LAST:event_buttonSaveActionPerformed
 
 
-	public void selectedQueryChanged(String new_group, String new_id, String new_query) {
-		SwingUtilities.invokeLater(() -> queryTextPane.setText(new_query));
-		currentGroup = new_group;
-		currentId = new_id;
+	public void selectedQueryChanged(String groupId, String queryId, String query) {
+		SwingUtilities.invokeLater(() -> queryTextPane.setText(query));
+		this.groupId = groupId;
+		this.queryId = queryId;
 	}
 
 	public void setExecuteSelectAction(OBDADataQueryAction<TupleOWLResultSet> executeUCQAction) {

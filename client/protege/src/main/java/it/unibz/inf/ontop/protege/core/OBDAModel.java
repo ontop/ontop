@@ -73,8 +73,8 @@ public class OBDAModel {
     // Mutable and replaced after reset: contains the namespace associated with the prefix ":" if explicitly declared in the ontology
     private Optional<String> explicitDefaultPrefixNamespace = Optional.empty();
 
-    private final List<OBDAModelListener> sourceListeners;
-    private final List<OBDAMappingListener> mappingListeners;
+    private final List<OBDAModelListener> sourceListeners = new ArrayList<>();
+    private final List<OBDAMappingListener> mappingListeners = new ArrayList<>();
 
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
@@ -102,8 +102,6 @@ public class OBDAModel {
         this.sourceQueryFactory = sourceQueryFactory;
         this.triplesMapMap = new LinkedHashMap<>();
 
-        this.sourceListeners = new ArrayList<>();
-        this.mappingListeners = new ArrayList<>();
         source = new OBDADataSource();
         currentMutableVocabulary = new MutableOntologyVocabularyImpl();
     }

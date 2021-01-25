@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
-import it.unibz.inf.ontop.protege.core.querymanager.QueryController;
+import it.unibz.inf.ontop.protege.core.QueryManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,12 +39,12 @@ public class SaveQueryPanel extends JPanel {
 	private final JDialog parent;
 	private final String query;
 	
-	private final QueryController queryController;
+	private final QueryManager queryController;
 
 	/**
 	 * Default constructor
 	 */
-	public SaveQueryPanel(String query, JDialog parent, QueryController queryController) {
+	public SaveQueryPanel(String query, JDialog parent, QueryManager queryController) {
 		this.query = query;
 		this.parent = parent;
 		this.queryController = queryController;
@@ -54,7 +54,7 @@ public class SaveQueryPanel extends JPanel {
         cmbQueryGroup.removeAllItems();
         cmbQueryGroup.insertItemAt(NOGROUP, cmbQueryGroup.getItemCount());
 
-        for (QueryController.Group group : queryController.getGroups()) {
+        for (QueryManager.Group group : queryController.getGroups()) {
             if (!group.isDegenerate())
                 cmbQueryGroup.insertItemAt(group.getID(), cmbQueryGroup.getItemCount());
         }
@@ -200,7 +200,7 @@ public class SaveQueryPanel extends JPanel {
                 queryController.addQuery(id, query);
             }
             else {
-                QueryController.Group group;
+                QueryManager.Group group;
                 if (groupId.equals(NEWGROUP)) {
                     String newGroupId = txtGroupName.getText().trim();
                     group = queryController.addGroup(newGroupId);

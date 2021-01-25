@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.querymanager.*;
+import it.unibz.inf.ontop.protege.core.QueryManager;
 
 import java.util.Enumeration;
 
@@ -29,7 +29,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
-public class QueryControllerTreeModel extends DefaultTreeModel implements QueryController.EventListener {
+public class QueryControllerTreeModel extends DefaultTreeModel implements QueryManager.EventListener {
 
 	private static final long serialVersionUID = -5182895959682699380L;
 
@@ -89,18 +89,18 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	/**
 	 * Takes all the existing nodes and constructs the tree.
 	 */
-	public void synchronize(QueryController qc) {
-		for (QueryController.Group group : qc.getGroups()) {
+	public void synchronize(QueryManager qc) {
+		for (QueryManager.Group group : qc.getGroups()) {
 			if (!group.isDegenerate()) {
 				GroupNode groupNode = new GroupNode(group.getID());
-				for (QueryController.Query query : group.getQueries()) {
+				for (QueryManager.Query query : group.getQueries()) {
 					QueryNode queryNode = new QueryNode(group.getID(), query.getID(), query.getQuery());
 					insertNodeInto(queryNode, groupNode, groupNode.getChildCount());
 				}
 				insertNodeInto(groupNode, (DefaultMutableTreeNode) root, root.getChildCount());
 			}
 			else {
-				QueryController.Query query = group.getQueries().iterator().next();
+				QueryManager.Query query = group.getQueries().iterator().next();
 				QueryNode queryNode = new QueryNode(null, query.getID(), query.getQuery());
 				insertNodeInto(queryNode, (DefaultMutableTreeNode) root, root.getChildCount());
 			}
@@ -111,14 +111,14 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	 * Inserts a new node group or query into the Tree
 	 */
 	@Override
-	public void added(QueryController.Group group) {
+	public void added(QueryManager.Group group) {
 		GroupNode groupNode = new GroupNode(group.getID());
 		insertNodeInto(groupNode, (MutableTreeNode) root, root.getChildCount());
 		nodeStructureChanged(root);
 	}
 
 	@Override
-	public void added(QueryController.Query query) {
+	public void added(QueryManager.Query query) {
 		MutableTreeNode parent = (query.getGroup().isDegenerate())
 			? (MutableTreeNode)root
 			: getGroupNode(query.getGroup());
@@ -132,7 +132,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	 * Removes a TreeNode group or query from the Tree
 	 */
 	@Override
-	public void removed(QueryController.Group group) {
+	public void removed(QueryManager.Group group) {
 		GroupNode groupNode = getGroupNode(group);
 		removeNodeFromParent(groupNode);
 		nodeStructureChanged(root);
@@ -142,20 +142,20 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 	 * * Removes a TreeNode query from a group into the tree
 	 */
 	@Override
-	public void removed(QueryController.Query query) {
+	public void removed(QueryManager.Query query) {
 		QueryNode queryNode = getQueryNode(query);
 		removeNodeFromParent(queryNode);
 		nodeStructureChanged(root);
 	}
 
 	@Override
-	public void changed(QueryController.Query query) {
+	public void changed(QueryManager.Query query) {
 		QueryNode queryNode = getQueryNode(query);
 		queryNode.setQuery(query.getQuery());
 		nodeChanged(queryNode);
 	}
 
-	public QueryNode getQueryNode(QueryController.Query query) {
+	public QueryNode getQueryNode(QueryManager.Query query) {
 		if (!query.getGroup().isDegenerate()) {
 			GroupNode groupNode = getGroupNode(query.getGroup());
 			return getQueryNode(groupNode, query.getID());
@@ -164,7 +164,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryC
 			return getQueryNode(root, query.getID());
 	}
 
-	public GroupNode getGroupNode(QueryController.Group group) {
+	public GroupNode getGroupNode(QueryManager.Group group) {
 		String groupId = group.getID();
 		Enumeration<? extends TreeNode> parent = root.children();
 		while (parent.hasMoreElements()) {
