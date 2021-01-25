@@ -44,14 +44,24 @@
         ]
       },
       "foreignKeys": {
-        "added": [{
-          "name": "status_id_fkey",
-          "from": "\"status\"",
-          "to": {
-            "columns": ["\"status_id\""],
-            "relation": ["\"statuses\""]
+        "added": [
+          {
+            "name": "status_id_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"statuses\""]
+            }
+          },
+          {
+            "name": "unavailable_table_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"unavailable_table\""]
+            }
           }
-        }]
+        ]
       },
       "type": "BasicViewDefinition"
     }

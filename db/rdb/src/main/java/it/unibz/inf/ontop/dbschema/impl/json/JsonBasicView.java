@@ -39,12 +39,12 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -63,6 +63,8 @@ public class JsonBasicView extends JsonView {
     public final OtherFunctionalDependencies otherFunctionalDependencies;
     @Nonnull
     public final ForeignKeys foreignKeys;
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonBasicView.class);
 
     @JsonCreator
     public JsonBasicView(@JsonProperty("columns") Columns columns, @JsonProperty("name") List<String> name,
@@ -102,22 +104,21 @@ public class JsonBasicView extends JsonView {
                 dbParameters.getCoreSingletons());
     }
 
-    /**
-     * TODO: implement it
-     */
     @Override
     public void insertIntegrityConstraints(MetadataLookup metadataLookup) throws MetadataExtractionException {
 
-        RelationID relationID = JsonMetadata.deserializeRelationID(metadataLookup.getQuotedIDFactory(), baseRelation);
+        QuotedIDFactory idFactory = metadataLookup.getQuotedIDFactory();
+        RelationID relationID = JsonMetadata.deserializeRelationID(idFactory, name);
+        NamedRelationDefinition relation = metadataLookup.getRelation(relationID);
 
         for (AddUniqueConstraints uc : uniqueConstraints.added)
-            insertUniqueConstraints(metadataLookup.getRelation(relationID), metadataLookup.getQuotedIDFactory(), uc);
+            insertUniqueConstraints(relation, idFactory, uc);
 
         for (AddFunctionalDependency fd : otherFunctionalDependencies.added)
-            insertFunctionalDependencies(metadataLookup.getRelation(relationID), metadataLookup.getQuotedIDFactory(), fd);
+            insertFunctionalDependencies(relation, idFactory, fd);
 
         for (AddForeignKey fk : foreignKeys.added) {
-            insertForeignKeys(metadataLookup.getRelation(relationID), metadataLookup, fk);
+            insertForeignKeys(relation, metadataLookup, fk);
         }
     }
 
@@ -276,6 +277,9 @@ public class JsonBasicView extends JsonView {
         return builder;
     }
 
+    /**
+     * TODO: infer unique constraints from the parent
+     */
     private void insertUniqueConstraints(NamedRelationDefinition relation, QuotedIDFactory idFactory, AddUniqueConstraints addUniqueConstraints) throws MetadataExtractionException {
         FunctionalDependency.Builder builder = addUniqueConstraints.isPrimaryKey
                 ? UniqueConstraint.primaryKeyBuilder(relation, addUniqueConstraints.name)
@@ -285,6 +289,9 @@ public class JsonBasicView extends JsonView {
         builder.build();
     }
 
+    /**
+     * TODO: infer unique constraints from the parent
+     */
     private void insertFunctionalDependencies(NamedRelationDefinition relation, QuotedIDFactory idFactory, AddFunctionalDependency addFunctionalDependency) throws MetadataExtractionException {
         FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
         JsonMetadata.deserializeAttributeList(idFactory, addFunctionalDependency.determinants, builder::addDeterminant);
@@ -294,13 +301,24 @@ public class JsonBasicView extends JsonView {
 
     public void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
 
-        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation,
-                lookup.getRelation(JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), addForeignKey.to.relation)));
+        RelationID targetRelationId = JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), addForeignKey.to.relation);
+        NamedRelationDefinition targetRelation;
+        try {
+            targetRelation = lookup.getRelation(targetRelationId);
+        }
+        // If the target relation has not
+        catch (MetadataExtractionException e) {
+            LOGGER.info("Cannot find relation {} for FK {}", targetRelationId, addForeignKey.name);
+            return ;
+        }
+
+        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation, targetRelation);
 
         try {
-            for (int i = 0; i < addForeignKey.to.columns.size(); i++)
-                builder.add(lookup.getQuotedIDFactory().createAttributeID(addForeignKey.from),
-                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.to.columns.get(i)));
+            for (String column : addForeignKey.to.columns)
+                builder.add(
+                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.from),
+                        lookup.getQuotedIDFactory().createAttributeID(column));
         }
         catch (AttributeNotFoundException e) {
             throw new MetadataExtractionException(e);
