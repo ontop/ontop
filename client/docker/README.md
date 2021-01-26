@@ -19,6 +19,8 @@ Here is a list of environment variables that directly correspond to arguments of
 - `ONTOP_DB_URL_FILE` (optional). Loads the DB url from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-url`. Introduced in 4.1.0.
 - `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
 - `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
+- `ONTOP_DB_METADATA_FILE` (optional). Corresponds to the argument `--db-metadata`. From 4.1.
+- `ONTOP_VIEW_FILE` (optional). Corresponds to the argument `--ontop-views`. From 4.1.
 - `ONTOP_CORS_ALLOWED_ORIGINS` (optional). Corresponds to the argument `--cors-allowed-origins`.
 - `ONTOP_PORTAL_FILE` (optional). Corresponds to the argument `--portal`.
 - `ONTOP_DEV_MODE` (optional). Corresponds to the argument `--dev`.
