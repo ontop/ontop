@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.MetadataLookup;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.OntopViewDefinition;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
@@ -30,7 +31,9 @@ public abstract class JsonView extends JsonOpenObject {
     public abstract OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
 
-    public abstract void insertIntegrityConstraints(MetadataLookup metadataLookup) throws MetadataExtractionException;
+    public abstract void insertIntegrityConstraints(NamedRelationDefinition relation,
+                                                    ImmutableList<NamedRelationDefinition> baseRelations,
+                                                    MetadataLookup metadataLookup) throws MetadataExtractionException;
 
 
     protected static class TemporaryViewPredicate extends AtomPredicateImpl {

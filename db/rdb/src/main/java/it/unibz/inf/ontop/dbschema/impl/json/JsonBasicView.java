@@ -105,20 +105,20 @@ public class JsonBasicView extends JsonView {
     }
 
     @Override
-    public void insertIntegrityConstraints(MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation,
+                                           ImmutableList<NamedRelationDefinition> baseRelations,
+                                           MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
 
-        QuotedIDFactory idFactory = metadataLookup.getQuotedIDFactory();
-        RelationID relationID = JsonMetadata.deserializeRelationID(idFactory, name);
-        NamedRelationDefinition relation = metadataLookup.getRelation(relationID);
+        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
         for (AddUniqueConstraints uc : uniqueConstraints.added)
-            insertUniqueConstraints(relation, idFactory, uc);
+            insertUniqueConstraints(relation, idFactory, uc, baseRelations);
 
         for (AddFunctionalDependency fd : otherFunctionalDependencies.added)
-            insertFunctionalDependencies(relation, idFactory, fd);
+            insertFunctionalDependencies(relation, idFactory, fd, baseRelations);
 
         for (AddForeignKey fk : foreignKeys.added) {
-            insertForeignKeys(relation, metadataLookup, fk);
+            insertForeignKeys(relation, metadataLookupForFK, fk);
         }
     }
 
@@ -280,7 +280,10 @@ public class JsonBasicView extends JsonView {
     /**
      * TODO: infer unique constraints from the parent
      */
-    private void insertUniqueConstraints(NamedRelationDefinition relation, QuotedIDFactory idFactory, AddUniqueConstraints addUniqueConstraints) throws MetadataExtractionException {
+    private void insertUniqueConstraints(NamedRelationDefinition relation,
+                                         QuotedIDFactory idFactory,
+                                         AddUniqueConstraints addUniqueConstraints,
+                                         ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
         FunctionalDependency.Builder builder = addUniqueConstraints.isPrimaryKey
                 ? UniqueConstraint.primaryKeyBuilder(relation, addUniqueConstraints.name)
                 : UniqueConstraint.builder(relation, addUniqueConstraints.name);
@@ -292,7 +295,9 @@ public class JsonBasicView extends JsonView {
     /**
      * TODO: infer unique constraints from the parent
      */
-    private void insertFunctionalDependencies(NamedRelationDefinition relation, QuotedIDFactory idFactory, AddFunctionalDependency addFunctionalDependency) throws MetadataExtractionException {
+    private void insertFunctionalDependencies(NamedRelationDefinition relation, QuotedIDFactory idFactory,
+                                              AddFunctionalDependency addFunctionalDependency,
+                                              ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
         FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
         JsonMetadata.deserializeAttributeList(idFactory, addFunctionalDependency.determinants, builder::addDeterminant);
         JsonMetadata.deserializeAttributeList(idFactory, addFunctionalDependency.dependents, builder::addDependent);

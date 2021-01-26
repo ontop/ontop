@@ -91,16 +91,19 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
         JsonView jsonView = jsonMap.get(relation.getID());
         if (jsonView != null) {
-            for (NamedRelationDefinition baseRelation : parentCacheMetadataLookup.getBaseRelations(relation.getID()))
-                parentMetadataProvider.insertIntegrityConstraints(baseRelation, metadataLookup);
 
-            jsonView.insertIntegrityConstraints(metadataLookup);
+            ImmutableList<NamedRelationDefinition> baseRelations = parentCacheMetadataLookup.getBaseRelations(relation.getID());
+            for (NamedRelationDefinition baseRelation : baseRelations)
+                parentMetadataProvider.insertIntegrityConstraints(baseRelation, metadataLookupForFK);
+
+
+            jsonView.insertIntegrityConstraints(relation, baseRelations, metadataLookupForFK);
         }
         else {
-            parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookup);
+            parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);
         }
     }
 
