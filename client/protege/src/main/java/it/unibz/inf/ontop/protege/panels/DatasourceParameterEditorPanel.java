@@ -24,7 +24,6 @@ package it.unibz.inf.ontop.protege.panels;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.*;
@@ -38,34 +37,31 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
+public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements OBDADataSource.Listener {
 
     private static final long serialVersionUID = 3506358479342412849L;
 
-    private OBDAModel obdaModel;
-
-    private final ComboBoxItemListener comboListener;
-
+    private final OBDADataSource datasource;
     private final Timer timer;
+
+    private boolean notify = false;
 
     /**
      * Creates new form DatasourceParameterEditorPanel
      */
-    public DatasourceParameterEditorPanel(OWLEditorKit owlEditorKit) {
-
-        OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(owlEditorKit);
-        OBDAModel model = obdaModelManager.getActiveOBDAModel();
+    public DatasourceParameterEditorPanel(OBDADataSource datasource) {
+        this.datasource = datasource;
 
         timer = new Timer(200, e -> handleTimer());
 
         initComponents();
 
-        this.comboListener = new ComboBoxItemListener();
-        txtJdbcDriver.addItemListener(comboListener);
+        txtJdbcDriver.addItemListener(e -> {
+            if (notify)
+                fieldChangeHandler(null);
+        });
 
-        setNewDatasource(model);
-
-        this.setFocusTraversalPolicy(new CustomTraversalPolicy(ImmutableList.of(
+        setFocusTraversalPolicy(new CustomTraversalPolicy(ImmutableList.of(
                 pnlDataSourceParameters,
                 txtJdbcUrl,
                 txtDatabaseUsername,
@@ -76,42 +72,61 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
 
     private void handleTimer() {
         timer.stop();
-        updateSourceValues();
-    }
 
-
-    private class ComboBoxItemListener implements ItemListener {
-
-        private boolean notify = false;
-
-        @Override
-        public void itemStateChanged(ItemEvent e) {
-            if (notify) {
-                fieldChangeHandler(null);
-            }
+        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+        try {
+            man.closeConnection();
+        }
+        catch (SQLException e) {
+            // do nothing
         }
 
-        public void setNotify(boolean notify) {
-            this.notify = notify;
+        String username = txtDatabaseUsername.getText();
+        datasource.setUsername(username);
+        String password = new String(txtDatabasePassword.getPassword());
+        datasource.setPassword(password);
+        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
+        datasource.setDriver(driver);
+        String url = txtJdbcUrl.getText();
+        datasource.setURL(url);
+
+        if (url.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning:<br/>URL ends with a space, which can cause connection problems");
+        }
+        else if (driver.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning:<br/>driver class ends with a space, which can cause connection problems");
+        }
+        else if (password.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning:<br/>password ends with a space, which can cause connection problems");
+        }
+        else if (username.endsWith(" ")) {
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Warning:<br/>username ends with a space, which can cause connection problems");
+        }
+        else {
+            lblConnectionStatus.setText("");
         }
     }
 
-    public void setNewDatasource(OBDAModel model) {
-        obdaModel = model;
-        resetTextFields();
 
-        // Selects the first data source if it exists
-        currentDatasourceChange();
-    }
-
-
-    private void resetTextFields() {
-        txtJdbcUrl.setText("");
-        txtDatabasePassword.setText("");
-        txtDatabaseUsername.setText("");
-        comboListener.setNotify(false);
-        txtJdbcDriver.setSelectedIndex(0);
-        comboListener.setNotify(true);
+    @Override
+    public void changed() {
+        notify = false;
+        String driverClass = datasource.getDriver();
+        if (driverClass == null || driverClass.isEmpty()) {
+            txtJdbcDriver.setSelectedIndex(0);
+        }
+        else {
+            txtJdbcDriver.setSelectedItem(driverClass);
+        }
+        txtDatabaseUsername.setText(datasource.getUsername());
+        txtDatabasePassword.setText(datasource.getPassword());
+        txtJdbcUrl.setText(datasource.getURL());
+        lblConnectionStatus.setText("");
+        notify = true;
     }
 
 
@@ -358,7 +373,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
         lblConnectionStatus.setText("Establishing connection...");
         lblConnectionStatus.setForeground(Color.BLACK);
 
-        OBDADataSource datasource = obdaModel.getDatasource();
         String driver  = datasource.getDriver();
         if (driver.isEmpty()) {
             lblConnectionStatus.setForeground(Color.RED);
@@ -370,7 +384,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
                 try {
                     try {
                         connm.closeConnection();
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         // NO-OP
                     }
 
@@ -400,43 +415,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
         timer.restart();
     }// GEN-LAST:event_fieldChangeHandler
 
-    private void updateSourceValues() {
-        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-        try {
-            man.closeConnection();
-        } catch (SQLException e) {
-            // do nothing
-        }
-
-        OBDADataSource currentDataSource = obdaModel.getDatasource();
-        String username = txtDatabaseUsername.getText();
-        currentDataSource.setUsername(username);
-        String password = new String(txtDatabasePassword.getPassword());
-        currentDataSource.setPassword(password);
-        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
-        currentDataSource.setDriver(driver);
-        String url = txtJdbcUrl.getText();
-        currentDataSource.setURL(url);
-
-        if (url.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>URL ends with a space, which can cause connection problems");
-        } else if (driver.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>driver class ends with a space, which can cause connection problems");
-        } else if (password.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>password ends with a space, which can cause connection problems");
-        } else if (username.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>username ends with a space, which can cause connection problems");
-        } else {
-            lblConnectionStatus.setText("");
-        }
-
-        obdaModel.fireSourceParametersUpdated();
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdTestConnection;
     private javax.swing.JLabel lblConnectionStatus;
@@ -452,22 +430,4 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel {
     private javax.swing.JTextField txtJdbcUrl;
     // End of variables declaration//GEN-END:variables
 
-    private void currentDatasourceChange() {
-        OBDADataSource source = obdaModel.getDatasource();
-
-        comboListener.setNotify(false);
-        String driverClass = source.getDriver();
-        if (driverClass == null || driverClass.isEmpty()) {
-            txtJdbcDriver.setSelectedIndex(0);
-        }
-        else {
-            txtJdbcDriver.setSelectedItem(driverClass);
-        }
-        txtDatabaseUsername.setText(source.getUsername());
-        txtDatabasePassword.setText(source.getPassword());
-        txtJdbcUrl.setText(source.getURL());
-        lblConnectionStatus.setText("");
-
-        comboListener.setNotify(true);
-    }
 }

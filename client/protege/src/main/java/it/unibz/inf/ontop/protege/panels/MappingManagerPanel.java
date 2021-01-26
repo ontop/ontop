@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialConfiguration;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
@@ -53,7 +54,7 @@ public class MappingManagerPanel extends JPanel {
 
 	private SQLSourceQueryValidator validator;
 
-	private final OBDAModel apic;
+	private final OBDAModelManager obdaModelManager;
 
 	private boolean canceled;
 
@@ -66,10 +67,9 @@ public class MappingManagerPanel extends JPanel {
 	/**
 	 * Creates a new panel.
 	 *
-	 * @param apic
-	 *            The API controller object.
+	 * @param obdaModelManager
 	 */
-	public MappingManagerPanel(OBDAModel apic) {
+	public MappingManagerPanel(OBDAModelManager obdaModelManager) {
 
 		mappingsTree = new JTree();
 
@@ -77,7 +77,7 @@ public class MappingManagerPanel extends JPanel {
 		addMenu();
 
 		// Setting up the mappings tree
-		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic));
+		mappingList.setCellRenderer(new OBDAMappingListRenderer(obdaModelManager));
 		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		mappingList.addMouseListener(new PopupListener());
@@ -126,8 +126,8 @@ public class MappingManagerPanel extends JPanel {
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Copy selected mappings");
 
-        this.apic = apic;
-        ListModel model = new SynchronizedMappingListModel(apic);
+        this.obdaModelManager = obdaModelManager;
+        ListModel model = new SynchronizedMappingListModel(obdaModelManager.getActiveOBDAModel());
 
         model.addListDataListener(new ListDataListener() {
             @Override
@@ -207,7 +207,7 @@ public class MappingManagerPanel extends JPanel {
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, dialog);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -489,7 +489,7 @@ public class MappingManagerPanel extends JPanel {
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
                 OntopSQLCredentialConfiguration config = OntopSQLCredentialConfiguration.defaultBuilder()
-                        .properties(apic.getDatasource().asProperties())
+                        .properties(obdaModelManager.getDatasource().asProperties())
                         .build();
                 validator = new SQLSourceQueryValidator(config.getSettings(), o.getSourceQuery());
                 long timestart = System.nanoTime();
@@ -555,7 +555,7 @@ public class MappingManagerPanel extends JPanel {
 		}
 		final String sqlQuery = mapping.getSourceQuery().toString();
 
-		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(apic.getDatasource(), sqlQuery);
+		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(obdaModelManager.getDatasource(), sqlQuery);
 
 		JDialog dlgQueryResult = new JDialog();
 		DialogUtils.installEscapeCloseOperation(dlgQueryResult);
@@ -582,6 +582,8 @@ public class MappingManagerPanel extends JPanel {
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
+
+		OBDAModel apic = obdaModelManager.getActiveOBDAModel();
 
         for (Object o : currentSelection) {
             SQLPPTriplesMap mapping = (SQLPPTriplesMap) o;
@@ -632,7 +634,7 @@ public class MappingManagerPanel extends JPanel {
         for (Object value : mappingList.getSelectedValues()) {
             SQLPPTriplesMap mapping = (SQLPPTriplesMap) value;
             if (mapping != null)
-                apic.removeTriplesMap(mapping.getId());
+                obdaModelManager.getActiveOBDAModel().removeTriplesMap(mapping.getId());
         }
 		mappingList.clearSelection();
 	}
@@ -648,7 +650,7 @@ public class MappingManagerPanel extends JPanel {
         dialog.setTitle("New Mapping");
         dialog.setModal(true);
 
-        NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog);
+        NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, dialog);
         panel.setID(id);
         dialog.setContentPane(panel);
         dialog.setSize(600, 500);

@@ -22,19 +22,20 @@ package it.unibz.inf.ontop.protege.utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OBDAProgressMonitor {
 
-	private JDialog parent = new JDialog();
+	private final JDialog parent = new JDialog();
 	
 	private boolean	bCancel = false;
 	private boolean bFinish = false;
 	
-	private String msg = null;
+	private final String msg;
 	private final Component workspace;
 
-	private Vector<OBDAProgressListener> listeners = new Vector<OBDAProgressListener>();
+	private final List<OBDAProgressListener> listeners = new ArrayList<>();
 	
 	public OBDAProgressMonitor(String msg, Component workspace) {
 		this.msg = msg;
@@ -42,13 +43,8 @@ public class OBDAProgressMonitor {
 	}
 	
 	public void start() {	
-		Runnable action = new Runnable() {
-
-			@Override
-			public void run() {
-				if (bFinish) {
-					return;
-				}
+		SwingUtilities.invokeLater(() -> {
+			if (!bFinish) {
 				ProgressPanel panel = new ProgressPanel(OBDAProgressMonitor.this, msg);
 				parent.setModal(true);
 				parent.setContentPane(panel);
@@ -57,12 +53,12 @@ public class OBDAProgressMonitor {
 				parent.setLocationRelativeTo(workspace);
 				parent.setVisible(true);
 			}
-		};
-		SwingUtilities.invokeLater(action);
+		});
 	}
 
 	private class Closer implements Runnable {
-		public void run(){
+		@Override
+		public void run() {
 			parent.setVisible(false);
 			parent.dispose();
 		}
@@ -78,7 +74,7 @@ public class OBDAProgressMonitor {
 		bFinish = false;
 		bCancel = true;
 		SwingUtilities.invokeLater(new Closer());
-		
+
 		for (OBDAProgressListener pl : listeners) {
 			pl.actionCanceled();
 		}

@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.views;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -40,8 +39,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	private OBDAModelManager controller;
 
-	private OBDAModel obdaModel;
-
 	private MappingManagerPanel mappingPanel;
 
 	@Override
@@ -56,10 +53,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		controller = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 		controller.addListener(this);
 
-		obdaModel = controller.getActiveOBDAModel();
-		
 		// Init the Mapping Manager panel.
-		mappingPanel = new MappingManagerPanel(obdaModel);
+		mappingPanel = new MappingManagerPanel(controller);
 
 		editorKit.getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
 			OWLEntity entity = editorKit.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
@@ -85,7 +80,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	public void activeOntologyChanged() {
-		obdaModel = controller.getActiveOBDAModel();
 		mappingPanel.datasourceChanged();
 	}
 

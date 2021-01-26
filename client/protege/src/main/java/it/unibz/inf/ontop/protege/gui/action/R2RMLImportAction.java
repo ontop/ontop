@@ -48,16 +48,16 @@ public class R2RMLImportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
 
-	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModelController = null;
-	private OWLModelManager modelManager;
+	private static final Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
 
-	private final Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
+	private OWLEditorKit editorKit;
+	private OBDAModelManager obdaModelManager;
+	private OWLModelManager modelManager;
 
 	@Override
 	public void initialise() {
 		editorKit = (OWLEditorKit) getEditorKit();
-		obdaModelController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit).getActiveOBDAModel();
+		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 		modelManager = editorKit.getOWLWorkspace().getOWLModelManager();
 	}
 
@@ -68,9 +68,8 @@ public class R2RMLImportAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-
-		final OWLWorkspace workspace = editorKit.getWorkspace();
-
+		OWLWorkspace workspace = editorKit.getWorkspace();
+		try {
 			String message = "The imported mappings will be appended to the existing data source. Continue?";
 			int response = JOptionPane.showConfirmDialog(workspace, message,
 					"Confirmation", JOptionPane.YES_NO_OPTION);
@@ -83,53 +82,41 @@ public class R2RMLImportAction extends ProtegeAction {
 				final JFileChooser fc = new JFileChooser(ontologyDir);
 
 				fc.showOpenDialog(workspace);
-				File file = null;
-				try {
-
-					file = (fc.getSelectedFile());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				if (file != null) {
-
-
-					File finalFile = file;
-					Thread th = new Thread("R2RML Import Thread"){
-						@Override
-						public void run() {
-							try {
-								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-										"Importing R2RML mapping ...", workspace);
-								R2RMLImportThread t = new R2RMLImportThread();
-								monitor.addProgressListener(t);
-								monitor.start();
-								t.run(finalFile);
-								monitor.stop();
-								JOptionPane.showMessageDialog(workspace,
-										"R2RML Import completed.", "Done",
-										JOptionPane.INFORMATION_MESSAGE);
-							}
-							catch (Exception e) {
-								JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
-								log.error("Error during R2RML import: {}\n", e.getMessage());
-								e.printStackTrace();
-							}
+				File file = fc.getSelectedFile();
+				Thread th = new Thread("R2RML Import Thread") {
+					@Override
+					public void run() {
+						try {
+							OBDAProgressMonitor monitor = new OBDAProgressMonitor(
+									"Importing R2RML mapping ...", workspace);
+							R2RMLImportThread t = new R2RMLImportThread();
+							monitor.addProgressListener(t);
+							monitor.start();
+							t.run(file);
+							monitor.stop();
+							JOptionPane.showMessageDialog(workspace,
+									"R2RML Import completed.", "Done",
+									JOptionPane.INFORMATION_MESSAGE);
 						}
-					};
-					th.start();
-
-
-				}
-
+						catch (Exception e) {
+							JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
+							log.error("Error during R2RML import: {}\n", e.getMessage());
+							e.printStackTrace();
+						}
+					}
+				};
+				th.start();
+			}
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
+			log.error("Error during R2RML import: {}\n", e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
+	// TODO: NOT A THREAD
 	private class R2RMLImportThread implements OBDAProgressListener {
-
-		@Override
-		public void actionCanceled() throws Exception {
-
-		}
 
 		public void run(File file)
 				throws Exception {
@@ -137,7 +124,7 @@ public class R2RMLImportAction extends ProtegeAction {
 			/**
 			 * Uses the predefined data source for creating the OBDAModel.
 			 */
-			OBDADataSource dataSource = obdaModelController.getSource();
+			OBDADataSource dataSource = obdaModelManager.getDatasource();
 			OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
 					.properties(dataSource.asProperties())
 					.r2rmlMappingFile(file)
@@ -150,13 +137,13 @@ public class R2RMLImportAction extends ProtegeAction {
 			 * TODO: improve this inefficient method (batch processing, not one by one)
 			 */
 			ImmutableList<SQLPPTriplesMap> tripleMaps = parsedModel.getTripleMaps();
-			tripleMaps.forEach(tm -> registerTripleMap(tm));
+			tripleMaps.forEach(this::registerTripleMap);
 
 			ImmutableList<AddAxiom> addAxioms = MappingOntologyUtils.extractDeclarationAxioms(
 					manager,
 					tripleMaps.stream()
 							.flatMap(tm -> tm.getTargetAtoms().stream()),
-					obdaModelController.getTypeFactory(),
+					obdaModelManager.getTypeFactory(),
 					false
 			).stream()
 					.map(ax -> new AddAxiom(
@@ -167,14 +154,17 @@ public class R2RMLImportAction extends ProtegeAction {
 		}
 
 		private void registerTripleMap(SQLPPTriplesMap tm) {
-			try{
-				obdaModelController.addTriplesMap(tm, false);
+			try {
+				obdaModelManager.getActiveOBDAModel().addTriplesMap(tm, false);
 			}
 			catch (DuplicateMappingException dm) {
 				JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 				throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
 			}
 		}
+
+		@Override
+		public void actionCanceled() throws Exception {  }
 
 		@Override
 		public boolean isCancelled() {

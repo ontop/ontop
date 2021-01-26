@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
@@ -43,14 +44,14 @@ import java.util.regex.Pattern;
  */
 public class VirtualABoxStatistics {
 
-	private final OBDAModel obdaModel;
+	private final OBDAModelManager obdaModelManager;
 
 	private final HashMap<String, Integer> statistics = new HashMap<>();
 
 	private final Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
 
-	public VirtualABoxStatistics(OBDAModel obdaModel) {
-		this.obdaModel = obdaModel;
+	public VirtualABoxStatistics(OBDAModelManager obdaModelManager) {
+		this.obdaModelManager = obdaModelManager;
 	}
 
 	/**
@@ -89,8 +90,8 @@ public class VirtualABoxStatistics {
 	}
 
 	public void refresh() {
-		OBDADataSource source = obdaModel.getDatasource();
-		List<SQLPPTriplesMap> mappingList = obdaModel.generatePPMapping().getTripleMaps();
+		OBDADataSource source = obdaModelManager.getDatasource();
+		List<SQLPPTriplesMap> mappingList = obdaModelManager.getActiveOBDAModel().generatePPMapping().getTripleMaps();
 
 		for (SQLPPTriplesMap mapping : mappingList) {
 			String mappingId = mapping.getId();

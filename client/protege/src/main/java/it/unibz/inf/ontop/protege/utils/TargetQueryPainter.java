@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 
 public class TargetQueryPainter {
 	private final OBDAModel apic;
+	private final OBDAModelManager obdaModelManager;
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
@@ -72,8 +74,9 @@ public class TargetQueryPainter {
 
 	private final List<ValidatorListener> validatorListeners = new LinkedList<>();
 
-	public TargetQueryPainter(OBDAModel apic, JTextPane parent) {
-		this.apic = apic;
+	public TargetQueryPainter(OBDAModelManager obdaModelManager, JTextPane parent) {
+		this.obdaModelManager = obdaModelManager;
+		this.apic = obdaModelManager.getActiveOBDAModel();
 		this.parent = parent;
 		this.doc = parent.getStyledDocument();
 
@@ -164,7 +167,7 @@ public class TargetQueryPainter {
 			TargetQueryParser textParser = apic.createTargetQueryParser();
 			ImmutableList<TargetAtom> query = textParser.parse(text);
 
-			ImmutableList<IRI> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
+			ImmutableList<IRI> invalidPredicates = TargetQueryValidator.validate(query, obdaModelManager.getCurrentVocabulary());
 			if (!invalidPredicates.isEmpty()) {
 				throw new Exception("ERROR: The below list of predicates is unknown by the ontology: \n "
 						+ invalidPredicates.stream()
@@ -248,7 +251,7 @@ public class TargetQueryPainter {
 		highlight(",", black);
 		highlight(":", black);
 
-		MutableOntologyVocabulary vocabulary = apic.getCurrentVocabulary();
+		MutableOntologyVocabulary vocabulary = obdaModelManager.getCurrentVocabulary();
 		PrefixManager man = apic.getMutablePrefixManager();
 		for (TargetAtom atom : current_query) {
 			ImmutableList<ImmutableTerm> substitutedTerms = atom.getSubstitutedTerms();

@@ -25,7 +25,7 @@ public class OntopConfigurationManager {
     public static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
     public static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
-    private final OBDAModel obdaModel;
+    private final OBDAModelManager obdaModelManager;
     private final Properties settings = new Properties();
     private final Properties userSettings = new Properties();
 
@@ -35,8 +35,8 @@ public class OntopConfigurationManager {
     @Nullable
     private File dbMetadataFile;
 
-    OntopConfigurationManager(@Nonnull OBDAModel obdaModel, @Nonnull DisposableProperties internalSettings) {
-        this.obdaModel = obdaModel;
+    OntopConfigurationManager(@Nonnull OBDAModelManager obdaModelManager, @Nonnull DisposableProperties internalSettings) {
+        this.obdaModelManager = obdaModelManager;
         this.settings.putAll(internalSettings);
         this.implicitDBConstraintFile = null;
         this.dbMetadataFile = null;
@@ -50,11 +50,7 @@ public class OntopConfigurationManager {
         this.settings.putAll(settings);
         this.userSettings.clear();
 
-        OBDADataSource dataSource = obdaModel.getDatasource();
-        dataSource.setURL("");
-        dataSource.setUsername("");
-        dataSource.setPassword("");
-        dataSource.setDriver("");
+        obdaModelManager.getDatasource().reset();
     }
 
     public void loadNewConfiguration(String owlName) throws IOException {
@@ -69,7 +65,7 @@ public class OntopConfigurationManager {
         File propertyFile = new File(URI.create(owlName + PROPERTY_EXT));
         if (propertyFile.exists()) {
             userSettings.load(new FileReader(propertyFile));
-            loadDataSource(obdaModel, userSettings);
+            loadDataSource(obdaModelManager.getDatasource(), userSettings);
         }
     }
 
@@ -77,14 +73,14 @@ public class OntopConfigurationManager {
         Properties properties = new Properties();
         properties.putAll(settings);
         properties.putAll(userSettings);
-        properties.putAll(obdaModel.getDatasource().asProperties());
+        properties.putAll(obdaModelManager.getDatasource().asProperties());
         return properties;
     }
 
     Properties snapshotUserProperties() {
         Properties properties = new Properties();
         properties.putAll(userSettings);
-        properties.putAll(obdaModel.getDatasource().asProperties());
+        properties.putAll(obdaModelManager.getDatasource().asProperties());
         return properties;
     }
 
@@ -92,7 +88,7 @@ public class OntopConfigurationManager {
 
         OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .properties(snapshotProperties())
-                .ppMapping(obdaModel.generatePPMapping());
+                .ppMapping(obdaModelManager.getActiveOBDAModel().generatePPMapping());
 
         Optional.ofNullable(implicitDBConstraintFile)
                 .ifPresent(builder::basicImplicitConstraintFile);
@@ -110,22 +106,22 @@ public class OntopConfigurationManager {
      */
     public void loadProperties(Properties properties) {
         userSettings.putAll(properties);
-        loadDataSource(obdaModel, userSettings);
+        loadDataSource(obdaModelManager.getDatasource(), userSettings);
     }
 
-    private static void loadDataSource(OBDAModel obdaModel, Properties properties) {
-        OBDADataSource dataSource = obdaModel.getDatasource();
-
-        Optional.ofNullable(properties.getProperty(JDBC_URL))
-                .ifPresent(dataSource::setURL);
-
+    private static void loadDataSource(OBDADataSource datasource, Properties properties) {
         Optional.ofNullable(properties.getProperty(JDBC_USER))
-                .ifPresent(dataSource::setUsername);
+                .ifPresent(datasource::setUsername);
 
         Optional.ofNullable(properties.getProperty(JDBC_PASSWORD))
-                .ifPresent(dataSource::setPassword);
+                .ifPresent(datasource::setPassword);
 
         Optional.ofNullable(properties.getProperty(JDBC_DRIVER))
-                .ifPresent(dataSource::setDriver);
+                .ifPresent(datasource::setDriver);
+
+        Optional.ofNullable(properties.getProperty(JDBC_URL))
+                .ifPresent(datasource::setURL);
+
+        datasource.fireChanged();
     }
 }

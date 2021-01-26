@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.panels.OBDAModelStatisticsPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -31,7 +31,6 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ABoxStatisticsAction extends ProtegeAction {
 
@@ -41,8 +40,8 @@ public class ABoxStatisticsAction extends ProtegeAction {
 		
 	@Override
 	public void initialise() throws Exception {
-		OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getActiveOBDAModel();
-		statistics = new VirtualABoxStatistics(obdaModel);
+		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+		statistics = new VirtualABoxStatistics(obdaModelManager);
 	}
 
 	@Override
@@ -52,7 +51,6 @@ public class ABoxStatisticsAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-
 		JDialog dialog = new JDialog();
 		dialog.setModal(true);
 		dialog.setSize(520, 400);
@@ -62,9 +60,8 @@ public class ABoxStatisticsAction extends ProtegeAction {
 		OBDAModelStatisticsPanel pnlStatistics = new OBDAModelStatisticsPanel();
 
 		Thread th = new Thread("OBDAModelStatistics Thread") {
+			@Override
 			public void run() {
-
-
 				OBDAProgressMonitor monitor = new OBDAProgressMonitor("Create statistics...", getWorkspace());
 				monitor.addProgressListener(pnlStatistics);
 				monitor.start();
@@ -76,13 +73,22 @@ public class ABoxStatisticsAction extends ProtegeAction {
 				if(!pnlStatistics.isCancelled() && !pnlStatistics.isErrorShown()) {
 					dialog.setVisible(true);
 				}
-
 			}
 		};
 		th.start();
 
+		JPanel pnlCommandButton = new JPanel();
+		pnlCommandButton.setLayout(new FlowLayout());
 
-		JPanel pnlCommandButton = createButtonPanel(dialog); 
+		JButton cmdCloseInformation = new JButton();
+		cmdCloseInformation.setText("Close Information");
+		cmdCloseInformation.addActionListener(evt -> {
+			dialog.setVisible(false);
+			dialog.removeAll();
+			dialog.dispose();
+		});
+		pnlCommandButton.add(cmdCloseInformation);
+
 		dialog.setLayout(new BorderLayout());
 		dialog.add(pnlStatistics, BorderLayout.CENTER);
 		dialog.add(pnlCommandButton, BorderLayout.SOUTH);
@@ -90,25 +96,5 @@ public class ABoxStatisticsAction extends ProtegeAction {
 		DialogUtils.installEscapeCloseOperation(dialog);
 		
 		dialog.pack();
-
-		
-	}
-	
-	private JPanel createButtonPanel(final JDialog parent) {
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout());
-		
-		JButton cmdCloseInformation = new JButton();
-		cmdCloseInformation.setText("Close Information");
-		cmdCloseInformation.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                parent.setVisible(false);
-                parent.removeAll();
-                parent.dispose();
-            }
-        });		
-		panel.add(cmdCloseInformation);
-		
-		return panel;
 	}
 }

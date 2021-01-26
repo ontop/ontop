@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 
-public class DatasourcesManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
+public class DatasourcesManagerView extends AbstractOWLViewComponent {
 
 	private static final long serialVersionUID = -4515710047558710080L;
 
@@ -38,28 +38,25 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	private DatasourceParameterEditorPanel editor;
 
-	private OBDAModelManager obdaModelManager;
-
-	@Override
-	protected void disposeOWLView() {
-		obdaModelManager.removeListener(this);
-	}
+	private OBDADataSource datasource;
 
 	@Override
 	protected void initialiseOWLView()  {
-		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
-		obdaModelManager.addListener(this);
+		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
+		datasource = obdaModelManager.getDatasource();
 
-        setLayout(new BorderLayout());
-
-		editor = new DatasourceParameterEditorPanel(getOWLEditorKit());
+		editor = new DatasourceParameterEditorPanel(datasource);
+		setLayout(new BorderLayout());
 		add(editor, BorderLayout.NORTH);
+
+		datasource.addListener(editor);
+		datasource.fireChanged();
 
 		log.debug("Datasource browser initialized");
 	}
 
 	@Override
-	public void activeOntologyChanged() {
-		editor.setNewDatasource(obdaModelManager.getActiveOBDAModel());
+	protected void disposeOWLView() {
+		datasource.removeListener(editor);
 	}
 }

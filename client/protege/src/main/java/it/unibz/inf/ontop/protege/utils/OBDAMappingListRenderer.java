@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -70,12 +71,12 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 	private final TargetQueryPainter painter;
 	private final SQLQueryPainter sqlpainter;
 
-	public OBDAMappingListRenderer(OBDAModel obdaModel) {
+	public OBDAMappingListRenderer(OBDAModelManager obdaModelManager) {
 
-		prefixManager = obdaModel.getMutablePrefixManager();
+		prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
 
 		trgQueryTextPane = new JTextPane();
-		painter = new TargetQueryPainter(obdaModel, trgQueryTextPane);
+		painter = new TargetQueryPainter(obdaModelManager, trgQueryTextPane);
 
 		trgQueryTextPane.setMargin(new Insets(4, 4, 4, 4));
 

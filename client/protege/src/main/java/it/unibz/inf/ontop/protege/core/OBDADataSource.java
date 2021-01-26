@@ -25,17 +25,29 @@ import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 
 import java.net.URI;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 public class OBDADataSource {
 
 	private final URI id;
 	private String driver = "", url = "", username = "", password = "";
 
+	private final List<Listener> listeners = new ArrayList<>();
+
+	public interface Listener {
+		void changed();
+	}
+
 	public OBDADataSource() {
 		this.id = URI.create(UUID.randomUUID().toString());
+	}
+
+	public void addListener(Listener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(Listener listener) {
+		listeners.remove(listener);
 	}
 
 	public String getDriver() {
@@ -52,6 +64,18 @@ public class OBDADataSource {
 
 	public String getURL() {
 		return url;
+	}
+
+	public void reset() {
+		driver = "";
+		url = "";
+		username = "";
+		password = "";
+		fireChanged();
+	}
+
+	public void fireChanged() {
+		listeners.forEach(Listener::changed);
 	}
 
 	public void setUsername(String username) {

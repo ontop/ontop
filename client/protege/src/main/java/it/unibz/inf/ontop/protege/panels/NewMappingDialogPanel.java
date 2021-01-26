@@ -21,12 +21,9 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
@@ -60,6 +57,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	private final OBDAModel obdaModel;
+	private final OBDAModelManager obdaModelManager;
 	private final JDialog parent;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -67,11 +65,12 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent) {
+	public NewMappingDialogPanel(OBDAModelManager obdaModelManager, JDialog parent) {
+		this.obdaModel = obdaModelManager.getActiveOBDAModel();
+		this.obdaModelManager = obdaModelManager;
+		this.parent = parent;
 
 		DialogUtils.installEscapeCloseOperation(parent);
-		this.obdaModel = obdaModel;
-		this.parent = parent;
 
 		initComponents();
 
@@ -87,7 +86,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
 
 		cmdInsertMapping.setEnabled(false);
-		TargetQueryPainter painter = new TargetQueryPainter(obdaModel, txtTargetQuery);
+		TargetQueryPainter painter = new TargetQueryPainter(obdaModelManager, txtTargetQuery);
 		painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
 
 		cmdInsertMapping.addActionListener(this::cmdInsertMappingActionPerformed);
@@ -150,7 +149,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 			ImmutableList<TargetAtom> targetQuery = textParser.parse(target);
 
 			// List of invalid predicates that are found by the validator.
-			List<IRI> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModel.getCurrentVocabulary());
+			List<IRI> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModelManager.getCurrentVocabulary());
 			if (invalidPredicates.isEmpty()) {
 				try {
 					SQLPPSourceQuery body = obdaModel.getSourceQueryFactory().createSourceQuery(source.trim());
@@ -471,7 +470,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 						rstm.close();
 					}
 					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-					OBDADataSource dataSource = obdaModel.getSource();
+					OBDADataSource dataSource = obdaModelManager.getDatasource();
 					Connection c = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword());
 
 					Statement st = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);

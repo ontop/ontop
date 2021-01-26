@@ -44,6 +44,11 @@ import java.util.stream.StreamSupport;
 
 public class OBDAModelManager implements Disposable {
 
+	// Mutable
+	private final OBDADataSource source;
+	// Mutable and replaced after reset
+	private MutableOntologyVocabulary currentMutableVocabulary = new MutableOntologyVocabularyImpl();
+
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
 
@@ -113,10 +118,8 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(ppMappingFactory, prefixFormat, termFactory,
-				typeFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory, sourceQueryFactory);
+				targetAtomFactory, substitutionFactory, targetQueryParserFactory, sourceQueryFactory);
 
-		ProtegeDatasourcesControllerListener dlistener = new ProtegeDatasourcesControllerListener();
-		obdaModel.addSourceListener(dlistener);
 		ProtegeMappingControllerListener mlistener = new ProtegeMappingControllerListener();
 		obdaModel.addMappingsListener(mlistener);
 
@@ -124,8 +127,11 @@ public class OBDAModelManager implements Disposable {
 		ProtegeQueryControllerListener qlistener = new ProtegeQueryControllerListener();
 		queryController.addListener(qlistener);
 
+		source = new OBDADataSource();
+		source.addListener(this::triggerOntologyChanged);
+
 		DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
-		configurationManager = new OntopConfigurationManager(obdaModel, settings);
+		configurationManager = new OntopConfigurationManager(this, settings);
 	}
 
 	public OntopConfigurationManager getConfigurationManager() {
@@ -134,6 +140,14 @@ public class OBDAModelManager implements Disposable {
 
 	public TypeFactory getTypeFactory() {
 		return typeFactory;
+	}
+
+	public RDF getRdfFactory() {
+		return rdfFactory;
+	}
+
+	public OBDADataSource getDatasource() {
+		return source;
 	}
 
 
@@ -224,23 +238,21 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private void processEntity(OWLEntity entity, BiConsumer<MutableOntologyVocabularyCategory, org.apache.commons.rdf.api.IRI> consumer) {
-		MutableOntologyVocabulary vocabulary = obdaModel.getCurrentVocabulary();
-
 		if (entity instanceof OWLClass) {
 			OWLClass oc = (OWLClass) entity;
-			consumer.accept(vocabulary.classes(), getIRI(oc));
+			consumer.accept(currentMutableVocabulary.classes(), getIRI(oc));
 		}
 		else if (entity instanceof OWLObjectProperty) {
 			OWLObjectProperty or = (OWLObjectProperty) entity;
-			consumer.accept(vocabulary.objectProperties(), getIRI(or));
+			consumer.accept(currentMutableVocabulary.objectProperties(), getIRI(or));
 		}
 		else if (entity instanceof OWLDataProperty) {
 			OWLDataProperty op = (OWLDataProperty) entity;
-			consumer.accept(vocabulary.dataProperties(), getIRI(op));
+			consumer.accept(currentMutableVocabulary.dataProperties(), getIRI(op));
 		}
-		else if (entity instanceof  OWLAnnotationProperty ){
+		else if (entity instanceof  OWLAnnotationProperty) {
 			OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
-			consumer.accept(vocabulary.annotationProperties(), getIRI(ap));
+			consumer.accept(currentMutableVocabulary.annotationProperties(), getIRI(ap));
 		}
 	}
 
@@ -267,6 +279,8 @@ public class OBDAModelManager implements Disposable {
 		}
 		return queryController;
 	}
+
+	public MutableOntologyVocabulary getCurrentVocabulary() { return currentMutableVocabulary; }
 
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
@@ -319,6 +333,7 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat owlPrefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
 		obdaModel.reset(owlPrefixManager);
+		currentMutableVocabulary = new MutableOntologyVocabularyImpl();
 
 		for (OWLOntology onto : owlModelManager.getActiveOntologies()) {
 			for (OWLEntity entity : onto.getSignature())
@@ -384,7 +399,7 @@ public class OBDAModelManager implements Disposable {
 			// adding type information to the mapping predicates
 			for (SQLPPTriplesMap mapping : obdaModel.generatePPMapping().getTripleMaps()) {
 				ImmutableList<TargetAtom> tq = mapping.getTargetAtoms();
-				ImmutableList<org.apache.commons.rdf.api.IRI> invalidIRIs = TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary());
+				ImmutableList<org.apache.commons.rdf.api.IRI> invalidIRIs = TargetQueryValidator.validate(tq, currentMutableVocabulary);
 				if (!invalidIRIs.isEmpty()) {
 					throw new Exception("Found an invalid target query: \n" +
 							"  mappingId:\t" + mapping.getId() + "\n" +
@@ -539,12 +554,6 @@ public class OBDAModelManager implements Disposable {
 	 * the OWL ontology model when OBDA model changes.
 	 */
 
-	private class ProtegeDatasourcesControllerListener implements OBDAModelListener {
-		@Override
-		public void datasourceParametersUpdated() {
-			triggerOntologyChanged();
-		}
-	}
 
 	private class ProtegeMappingControllerListener implements OBDAMappingListener {
 		@Override

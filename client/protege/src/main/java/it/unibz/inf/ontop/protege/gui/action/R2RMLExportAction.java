@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
@@ -43,16 +43,16 @@ public class R2RMLExportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
 
-	private OWLEditorKit editorKit;
-	private OBDAModel obdaModel;
+    private static final Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
+
+    private OWLEditorKit editorKit;
+	private OBDAModelManager obdaModelManager;
 	private OWLModelManager modelManager;
-	
-	private final Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 	
 	@Override
 	public void initialise()  {
 		editorKit = (OWLEditorKit)getEditorKit();
-		obdaModel = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getActiveOBDAModel();
+		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
 		modelManager = editorKit.getOWLModelManager();
 	}
 
@@ -61,20 +61,20 @@ public class R2RMLExportAction extends ProtegeAction {
 		// Does nothing!
 	}
 
-        // Assumes initialise() has been run and has set modelManager to active OWLModelManager
+	// Assumes initialise() has been run and has set modelManager to active OWLModelManager
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
         try {
-		    final OWLWorkspace workspace = editorKit.getWorkspace();
+		    OWLWorkspace workspace = editorKit.getWorkspace();
             // Get the path of the file of the active OWL model
             OWLOntology activeOntology = modelManager.getActiveOntology();
             IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
 
             File ontologyDir = new File(documentIRI.toURI().getPath());
 
-            final JFileChooser fc = new JFileChooser(ontologyDir);
-            final String shortForm = documentIRI.getShortForm();
+            JFileChooser fc = new JFileChooser(ontologyDir);
+            String shortForm = documentIRI.getShortForm();
             int i = shortForm.lastIndexOf(".");
             String ontologyName = (i < 1)?
                     shortForm:
@@ -82,10 +82,9 @@ public class R2RMLExportAction extends ProtegeAction {
             fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
 
             int approve = fc.showSaveDialog(workspace);
-            if(approve == JFileChooser.APPROVE_OPTION) {
-
-                final File file = fc.getSelectedFile();
-                Thread th = new Thread("R2RML Export Action Thread"){
+            if (approve == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                Thread th = new Thread("R2RML Export Action Thread") {
                     @Override
                     public void run() {
                         try {
@@ -115,20 +114,18 @@ public class R2RMLExportAction extends ProtegeAction {
             log.error("Error during R2RML export. \n");
             ex.printStackTrace();
         }
-
 	}
 
+	// TODO: NOT A THREAD!
     private class R2RMLExportThread implements OBDAProgressListener {
 
-        @Override
-        public void actionCanceled() {
-
-        }
-
         public void run(File file) throws IOException {
-            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModel.getRdfFactory());
-            writer.write(file, obdaModel.generatePPMapping());
+            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModelManager.getRdfFactory());
+            writer.write(file, obdaModelManager.getActiveOBDAModel().generatePPMapping());
         }
+
+        @Override
+        public void actionCanceled() {  }
 
         @Override
         public boolean isCancelled() {
@@ -139,6 +136,5 @@ public class R2RMLExportAction extends ProtegeAction {
         public boolean isErrorShown() {
             return false;
         }
-
     }
 }

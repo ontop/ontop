@@ -87,7 +87,7 @@ public class BootstrapAction extends ProtegeAction {
 
 		if (res == JOptionPane.OK_OPTION) {
 
-			OBDADataSource currentSource = currentModel.getDatasource();
+			OBDADataSource currentSource = modelManager.getDatasource();
 			if (currentSource != null) {
 				this.baseUri = base_uri.getText().trim();
 				if (baseUri.contains("#")) {

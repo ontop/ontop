@@ -23,12 +23,9 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
-import org.semanticweb.owlapi.model.OWLOntologyID;
 
 import java.io.Reader;
-import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -63,47 +60,33 @@ import java.util.stream.Collectors;
 public class OBDAModel {
 
     private final SQLPPMappingFactory ppMappingFactory;
-    private Map<String, SQLPPTriplesMap> triplesMapMap;
-    // Mutable
-    private final OBDADataSource source;
+    private Map<String, SQLPPTriplesMap> triplesMapMap = new LinkedHashMap<>();
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
-    // Mutable and replaced after reset
-    private MutableOntologyVocabulary currentMutableVocabulary;
     // Mutable and replaced after reset: contains the namespace associated with the prefix ":" if explicitly declared in the ontology
     private Optional<String> explicitDefaultPrefixNamespace = Optional.empty();
 
-    private final List<OBDAModelListener> sourceListeners = new ArrayList<>();
     private final List<OBDAMappingListener> mappingListeners = new ArrayList<>();
 
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final TypeFactory typeFactory;
-    private final RDF rdfFactory;
     private final TargetQueryParserFactory targetQueryParserFactory;
     private final SQLPPSourceQueryFactory sourceQueryFactory;
 
     public OBDAModel(SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
                      TermFactory termFactory,
-                     TypeFactory typeFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
-                     RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory,
+                     TargetQueryParserFactory targetQueryParserFactory,
                      SQLPPSourceQueryFactory sourceQueryFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.substitutionFactory = substitutionFactory;
-        this.rdfFactory = rdfFactory;
         this.targetQueryParserFactory = targetQueryParserFactory;
         this.sourceQueryFactory = sourceQueryFactory;
-        this.triplesMapMap = new LinkedHashMap<>();
-
-        source = new OBDADataSource();
-        currentMutableVocabulary = new MutableOntologyVocabularyImpl();
     }
 
     public SQLPPMapping generatePPMapping() {
@@ -141,10 +124,6 @@ public class OBDAModel {
         return ImmutableList.copyOf(triplesMapMap.values());
     }
 
-    public OBDADataSource getSource() {
-        return source;
-    }
-
     public SQLPPTriplesMap getTriplesMap(String mappingId) {
         return triplesMapMap.get(mappingId);
     }
@@ -154,7 +133,7 @@ public class OBDAModel {
     }
 
 
-    public int changePredicateIri(IRI removedPredicateIri, IRI newPredicatIri) {
+    public void changePredicateIri(IRI removedPredicateIri, IRI newPredicatIri) {
         AtomicInteger counter = new AtomicInteger();
 
         triplesMapMap = triplesMapMap.entrySet().stream()
@@ -162,7 +141,7 @@ public class OBDAModel {
                         Map.Entry::getKey,
                         e -> changePredicateIri(e.getValue(), removedPredicateIri, newPredicatIri, counter)));
 
-        return counter.get();
+        counter.get();
     }
 
     private SQLPPTriplesMap changePredicateIri(SQLPPTriplesMap formerTriplesMap,
@@ -206,18 +185,12 @@ public class OBDAModel {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(formerTriplesMap.getId(),
                     formerTriplesMap.getSourceQuery(), newTargetAtoms);
 
-            fireMappingUpdated();
+            mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
             return newTriplesMap;
         }
         else
             return formerTriplesMap;
 
-    }
-
-    private void fireMappingUpdated() {
-        for (OBDAMappingListener listener : mappingListeners) {
-            listener.mappingUpdated();
-        }
     }
 
     public void deletePredicateIRI(IRI removedPredicateIRI) {
@@ -230,8 +203,7 @@ public class OBDAModel {
                 //.map(Optional::get)
                 .collect(collectTriplesMaps(SQLPPTriplesMap::getId, Function.identity()));
 
-        fireMappingUpdated();
-
+        mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
     }
 
     private boolean mustBePreserved(SQLPPTriplesMap formerTriplesMap, IRI removedPredicateIRI,
@@ -282,12 +254,6 @@ public class OBDAModel {
             return formerTriplesMap;
     }
 
-    public void addSourceListener(OBDAModelListener listener) {
-        if (sourceListeners.contains(listener)) {
-            return;
-        }
-        sourceListeners.add(listener);
-    }
 
     public void addMappingsListener(OBDAMappingListener mlistener) {
         if (mappingListeners.contains(mlistener))
@@ -296,26 +262,15 @@ public class OBDAModel {
     }
 
     /**
-     * TODO: make it private
-     */
-    public void fireSourceParametersUpdated() {
-        for (OBDAModelListener listener : sourceListeners) {
-            listener.datasourceParametersUpdated();
-        }
-    }
-
-    /**
      *
      */
     public void reset(PrefixDocumentFormat owlPrefixMapper) {
         triplesMapMap.clear();
         prefixManager = new MutablePrefixManager(owlPrefixMapper);
-        currentMutableVocabulary = new MutableOntologyVocabularyImpl();
         explicitDefaultPrefixNamespace = Optional.empty();
     }
 
 
-    @Deprecated
     public void addTriplesMap(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
         String mapId = triplesMap.getId();
@@ -325,12 +280,12 @@ public class OBDAModel {
         triplesMapMap.put(mapId, triplesMap);
 
         if (!disableFiringMappingInsertedEvent)
-            fireMappingInserted();
+            mappingListeners.forEach(OBDAMappingListener::mappingInserted);
     }
 
     public void removeTriplesMap(String mappingId) {
         if (triplesMapMap.remove(mappingId) != null)
-            fireMappingDeleted();
+            mappingListeners.forEach(OBDAMappingListener::mappingDeleted);
     }
 
     public void updateMappingsSourceQuery(String triplesMapId, SQLPPSourceQuery sourceQuery) {
@@ -340,7 +295,7 @@ public class OBDAModel {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(triplesMapId, sourceQuery,
                     formerTriplesMap.getTargetAtoms());
             triplesMapMap.put(triplesMapId, newTriplesMap);
-            fireMappingUpdated();
+            mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
         }
     }
 
@@ -351,7 +306,7 @@ public class OBDAModel {
             SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(id, formerTriplesMap.getSourceQuery(),
                     targetQuery);
             triplesMapMap.put(id, newTriplesMap);
-            fireMappingUpdated();
+            mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
         }
     }
 
@@ -365,7 +320,7 @@ public class OBDAModel {
                         formerTriplesMap.getTargetAtoms());
                 addTriplesMap(newTriplesMap, false);
                 triplesMapMap.remove(formerMappingId);
-                fireMappingUpdated();
+                mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
             }
         }
     }
@@ -383,29 +338,6 @@ public class OBDAModel {
         return -1;
     }
 
-    /**
-     * Announces to the listeners that a mapping was deleted.
-     */
-    private void fireMappingDeleted() {
-        for (OBDAMappingListener listener : mappingListeners) {
-            listener.mappingDeleted();
-        }
-    }
-    /**
-     * Announces to the listeners that a mapping was inserted.
-     */
-    private void fireMappingInserted() {
-        for (OBDAMappingListener listener : mappingListeners) {
-            listener.mappingInserted();
-        }
-    }
-
-    public OBDADataSource getDatasource() {
-        return source;
-    }
-
-    public MutableOntologyVocabulary getCurrentVocabulary() { return currentMutableVocabulary; }
-
     private static <I> Collector<I, ?, LinkedHashMap<String, SQLPPTriplesMap>> collectTriplesMaps(
             java.util.function.Function<I, String> keyFunction,
             java.util.function.Function<I, SQLPPTriplesMap> mapFunction) {
@@ -416,14 +348,6 @@ public class OBDAModel {
                     throw new IllegalStateException(String.format("Duplicate key %s", u));
                 },
                 LinkedHashMap::new);
-    }
-
-    public TypeFactory getTypeFactory() {
-        return typeFactory;
-    }
-
-    public RDF getRdfFactory() {
-        return rdfFactory;
     }
 
     public SQLPPSourceQueryFactory getSourceQueryFactory() { return sourceQueryFactory; }
