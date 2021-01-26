@@ -119,7 +119,7 @@ public class OntopMaterializerTest {
 		graph = termFactory.getConstantIRI(graphIRI);
     }
 
-	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
+	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder<?>> createAndInitConfiguration() {
 		return OntopStandaloneSQLConfiguration.defaultBuilder()
 				.jdbcUrl(url)
 				.jdbcUser(username)

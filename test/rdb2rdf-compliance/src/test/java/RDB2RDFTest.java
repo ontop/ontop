@@ -307,13 +307,13 @@ public class RDB2RDFTest {
 		return repo;
 	}
 
-	Builder<? extends Builder> createStandardConfigurationBuilder() {
+	Builder<? extends Builder<?>> createStandardConfigurationBuilder() {
 		  return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				 .properties(PROPERTIES)
 				  .enableDefaultDatatypeInference(true);
 	}
 
-	Builder<? extends Builder> createInMemoryBuilder() {
+	Builder<? extends Builder<?>> createInMemoryBuilder() {
 		return createStandardConfigurationBuilder()
 				.jdbcName("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis())
 				.jdbcUrl(JDBC_URL)
