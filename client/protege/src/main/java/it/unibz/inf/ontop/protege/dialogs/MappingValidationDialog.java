@@ -33,7 +33,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -48,22 +47,16 @@ public class MappingValidationDialog extends JDialog {
 	private final DefaultStyledDocument	doc;
 	private int	index = 0;
 
-	public Style VALID;
-	public Style CRITICAL_ERROR;
-	public Style NONCRITICAL_ERROR;
-	public Style NORMAL;
+	public final Style VALID;
+	public final Style CRITICAL_ERROR;
+	public final Style NORMAL;
 
-	public boolean	closed = false;
+	public boolean closed = false;
 
 	public MappingValidationDialog() {
 		DialogUtils.installEscapeCloseOperation(this);
 		doc = new DefaultStyledDocument();
-		createStyles();
-		createContent();
-		setModal(true);
-	}
 
-	private void createStyles() {
 		StyleContext context = new StyleContext();
 		VALID = context.getStyle(StyleContext.DEFAULT_STYLE);
 		StyleConstants.setFontFamily(VALID, "Arial");
@@ -76,20 +69,13 @@ public class MappingValidationDialog extends JDialog {
 		StyleConstants.setFontSize(CRITICAL_ERROR, 12);
 		StyleConstants.setForeground(CRITICAL_ERROR, Color.RED);
 
-		StyleContext context2 = new StyleContext();
-		NONCRITICAL_ERROR = context2.getStyle(StyleContext.DEFAULT_STYLE);
-		StyleConstants.setFontFamily(NONCRITICAL_ERROR, "Arial");
-		StyleConstants.setFontSize(NONCRITICAL_ERROR, 12);
-		StyleConstants.setForeground(NONCRITICAL_ERROR, Color.BLACK);
-
 		StyleContext context3 = new StyleContext();
 		NORMAL = context3.getStyle(StyleContext.DEFAULT_STYLE);
-		StyleConstants.setFontFamily(NONCRITICAL_ERROR, "Arial");
-		StyleConstants.setFontSize(NONCRITICAL_ERROR, 11);
-		StyleConstants.setForeground(NONCRITICAL_ERROR, Color.BLACK);
-	}
+		StyleConstants.setFontFamily(NORMAL, "Arial");
+		StyleConstants.setFontSize(NORMAL, 11);
+		StyleConstants.setForeground(NORMAL, Color.BLACK);
 
-	private void createContent() {
+
 		setTitle("Validate Mapping...");
 		setSize(new Dimension(500, 360));
 		Container panel = this.getContentPane();
@@ -109,28 +95,29 @@ public class MappingValidationDialog extends JDialog {
 		button.setBounds(120, 290, 60, 25);
 		button.addActionListener(a -> {
 			closed = true;
-			MappingValidationDialog.this.dispose();
+			this.dispose();
 		});
 		button.requestFocus();
 
 		panel.add(areaScrollPane, BorderLayout.CENTER);
 		panel.add(button, BorderLayout.SOUTH);
 		setResizable(true);
+		setModal(true);
 	}
 
 	/***
-	 * Adds the text synchronously. Do not call from the Event thread. Use a
-	 * working thread.
+	 * Adds the text synchronously.
+	 * Do not call from the Event thread. Use a working thread.
 	 *
 	 * @param text
 	 * @param style
 	 */
-	public void addText(final String text, final Style style) {
+	public void addText(String text, Style style) {
 		try {
 			SwingUtilities.invokeAndWait(() -> {
 				try {
 					doc.insertString(index, text, style);
-					index = index + text.length();
+					index += text.length();
 					invalidate();
 					repaint();
 				}

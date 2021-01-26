@@ -71,7 +71,6 @@ public class OBDADataSource {
 		url = "";
 		username = "";
 		password = "";
-		fireChanged();
 	}
 
 	public void fireChanged() {

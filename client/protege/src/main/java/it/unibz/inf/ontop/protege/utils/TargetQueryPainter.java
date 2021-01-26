@@ -22,13 +22,10 @@ package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import org.apache.commons.rdf.api.IRI;
@@ -167,7 +164,7 @@ public class TargetQueryPainter {
 			TargetQueryParser textParser = apic.createTargetQueryParser();
 			ImmutableList<TargetAtom> query = textParser.parse(text);
 
-			ImmutableList<IRI> invalidPredicates = TargetQueryValidator.validate(query, obdaModelManager.getCurrentVocabulary());
+			ImmutableList<IRI> invalidPredicates = obdaModelManager.getCurrentVocabulary().validate(query);
 			if (!invalidPredicates.isEmpty()) {
 				throw new Exception("ERROR: The below list of predicates is unknown by the ontology: \n "
 						+ invalidPredicates.stream()
@@ -251,41 +248,41 @@ public class TargetQueryPainter {
 		highlight(",", black);
 		highlight(":", black);
 
-		MutableOntologyVocabulary vocabulary = obdaModelManager.getCurrentVocabulary();
-		PrefixManager man = apic.getMutablePrefixManager();
+		OntologySignature vocabulary = obdaModelManager.getCurrentVocabulary();
+		PrefixManager prefixManager = apic.getMutablePrefixManager();
 		for (TargetAtom atom : current_query) {
 			ImmutableList<ImmutableTerm> substitutedTerms = atom.getSubstitutedTerms();
 			RDFAtomPredicate atomPredicate = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
 
 			ImmutableTerm term1 = atomPredicate.getSubject(substitutedTerms);
 			if (term1 instanceof IRIConstant) {
-				String rendered = man.getShortForm(((IRIConstant) term1).getIRI().toString());
+				String rendered = prefixManager.getShortForm(((IRIConstant) term1).getIRI().toString());
 				highlight(rendered, individual);
 			}
 
 			ImmutableTerm term2 = atomPredicate.getProperty(substitutedTerms);
 			if (term2 instanceof IRIConstant) {
 				IRI predicateIri = ((IRIConstant)term2).getIRI();
-				String shortIRIForm = man.getShortForm(predicateIri.toString());
+				String shortIRIForm = prefixManager.getShortForm(predicateIri.toString());
 				if (shortIRIForm.equals("rdf:type")) {
 					ImmutableTerm term3 = atomPredicate.getObject(substitutedTerms);
 					if (term3 instanceof IRIConstant) {
 						IRI classIri = ((IRIConstant) term3).getIRI();
-						if (vocabulary.classes().contains(classIri))
-							highlight(man.getShortForm(classIri.toString()), clazz);
+						if (vocabulary.containsClass(classIri))
+							highlight(prefixManager.getShortForm(classIri.toString()), clazz);
 					}
 				}
 				else {
-					if (vocabulary.objectProperties().contains(predicateIri))
+					if (vocabulary.containsObjectProperty(predicateIri))
 						highlight(shortIRIForm, objectProp);
-					else if (vocabulary.dataProperties().contains(predicateIri))
+					else if (vocabulary.containsDataProperty(predicateIri))
 						highlight(shortIRIForm, dataProp);
-					else if (vocabulary.annotationProperties().contains(predicateIri))
+					else if (vocabulary.containsAnnotationProperty(predicateIri))
 						highlight(shortIRIForm, annotProp);
 
 					ImmutableTerm term3 = atomPredicate.getObject(substitutedTerms);
 					if (term3 instanceof IRIConstant) {
-						String rendered = man.getShortForm(((IRIConstant) term3).getIRI().toString());
+						String rendered = prefixManager.getShortForm(((IRIConstant) term3).getIRI().toString());
 						highlight(rendered, individual);
 					}
 				}

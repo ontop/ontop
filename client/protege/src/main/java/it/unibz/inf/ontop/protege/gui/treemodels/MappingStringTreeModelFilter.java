@@ -39,8 +39,8 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<SQLPPTriplesMa
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {
 			// Check in the Mapping ID
-			final String mappingId = object.getId();
-			isMatch = MappingIDTreeModelFilter.match(keyword.trim(), mappingId);
+			String mappingId = object.getId();
+			isMatch = mappingId.contains(keyword.trim());
 			if (isMatch) {
 				break; // end loop if a match is found!
 			}
@@ -54,8 +54,8 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<SQLPPTriplesMa
 			}
 
 			// Check in the Mapping Source Query
-			final SQLPPSourceQuery query = object.getSourceQuery();
-			isMatch = MappingSQLStringTreeModelFilter.match(keyword.trim(), query.toString());
+			SQLPPSourceQuery query = object.getSourceQuery();
+			isMatch = query.getSQL().contains(keyword.trim());
 			if (isMatch) {
 				break; // end loop if a match is found!
 			}

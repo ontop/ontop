@@ -25,21 +25,19 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 
 import javax.swing.*;
-import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
+public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriplesMap> implements FilteredModel, OBDAMappingListener {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
 	private final OBDAModel obdaModel;
-	private final List<TreeModelFilter<SQLPPTriplesMap>> filters;
+	private final List<TreeModelFilter<SQLPPTriplesMap>> filters = new LinkedList<>();
 
 	public SynchronizedMappingListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		obdaModel.addMappingsListener(this);
-		filters = new LinkedList<>();
 	}
 
 	public void setFocusedSource() {
@@ -53,8 +51,8 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void addFilters(List<TreeModelFilter<SQLPPTriplesMap>> filters) {
-		this.filters.addAll(filters);
+	public void addFilters(List<TreeModelFilter<SQLPPTriplesMap>> addFilters) {
+		filters.addAll(addFilters);
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
@@ -65,14 +63,14 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void removeFilter(List<TreeModelFilter<SQLPPTriplesMap>> filters) {
-		this.filters.removeAll(filters);
+	public void removeFilter(List<TreeModelFilter<SQLPPTriplesMap>> removeFilters) {
+		filters.removeAll(removeFilters);
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
 	public void removeAllFilters() {
-		this.filters.clear();
+		filters.clear();
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
@@ -80,27 +78,18 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	public int getSize() {
 		int filteredCount = 0;
 		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
-			boolean passedAllFilters = true;
-			for (TreeModelFilter<SQLPPTriplesMap> filter : filters) {
-				passedAllFilters = passedAllFilters && filter.match(mapping);
-			}
-			if (passedAllFilters)
-				filteredCount += 1;
+			if (filters.stream().allMatch(f -> f.match(mapping)))
+				filteredCount++;
 		}
 		return filteredCount;
 	}
 
 	@Override
-	public Object getElementAt(int index) {
+	public SQLPPTriplesMap getElementAt(int index) {
 		int filteredCount = -1;
 		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
-			boolean passedAllFilters = true;
-			for (TreeModelFilter<SQLPPTriplesMap> filter : filters) {
-				passedAllFilters = passedAllFilters && filter.match(mapping);
-			}
-			if (passedAllFilters) {
-				filteredCount += 1;
-			}
+			if (filters.stream().allMatch(f -> f.match(mapping)))
+				filteredCount++;
 
 			if (filteredCount == index)
 				return mapping;

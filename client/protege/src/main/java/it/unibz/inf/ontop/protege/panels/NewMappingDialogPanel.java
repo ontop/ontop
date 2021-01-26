@@ -149,7 +149,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 			ImmutableList<TargetAtom> targetQuery = textParser.parse(target);
 
 			// List of invalid predicates that are found by the validator.
-			List<IRI> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModelManager.getCurrentVocabulary());
+			List<IRI> invalidPredicates = obdaModelManager.getCurrentVocabulary().validate(targetQuery);
 			if (invalidPredicates.isEmpty()) {
 				try {
 					SQLPPSourceQuery body = obdaModel.getSourceQueryFactory().createSourceQuery(source.trim());
@@ -164,9 +164,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 					}
 					else {
 						// Case when we are updating an existing mapping
-						obdaModel.updateMappingId(mapping.getId(), newId);
-						obdaModel.updateMappingsSourceQuery(newId, body);
-						obdaModel.updateTargetQueryMapping(newId, targetQuery);
+						obdaModel.updateMapping(mapping.getId(), newId, body, targetQuery);
 					}
 				}
 				catch (DuplicateMappingException e) {

@@ -34,28 +34,28 @@ public interface FilteredModel {
 	 * @param filter
 	 *            Adds a new filter
 	 */
-	public void addFilter(TreeModelFilter<SQLPPTriplesMap> filter);
+	void addFilter(TreeModelFilter<SQLPPTriplesMap> filter);
 
 	/**
 	 * @param filters
 	 *            Adds a list of filters
 	 */
-	public void addFilters(List<TreeModelFilter<SQLPPTriplesMap>> filters);
+	void addFilters(List<TreeModelFilter<SQLPPTriplesMap>> filters);
 
 	/**
 	 * @param filter
 	 *            Remove a filter of the list of filters
 	 */
-	public void removeFilter(TreeModelFilter<SQLPPTriplesMap> filter);
+	void removeFilter(TreeModelFilter<SQLPPTriplesMap> filter);
 
 	/**
 	 * @param filters
 	 *            Remove a list of filters
 	 */
-	public void removeFilter(List<TreeModelFilter<SQLPPTriplesMap>> filters);
+	void removeFilter(List<TreeModelFilter<SQLPPTriplesMap>> filters);
 
 	/**
 	 * Remove all the current filters
 	 */
-	public void removeAllFilters();
+	void removeAllFilters();
 }

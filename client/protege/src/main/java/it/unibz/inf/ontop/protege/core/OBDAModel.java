@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -22,7 +21,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 import java.io.Reader;
@@ -133,20 +131,17 @@ public class OBDAModel {
     }
 
 
-    public void changePredicateIri(IRI removedPredicateIri, IRI newPredicatIri) {
+    public void renamePredicateInMapping(IRI removedPredicateIri, IRI newPredicatIri) {
         AtomicInteger counter = new AtomicInteger();
-
         triplesMapMap = triplesMapMap.entrySet().stream()
                 .collect(collectTriplesMaps(
                         Map.Entry::getKey,
-                        e -> changePredicateIri(e.getValue(), removedPredicateIri, newPredicatIri, counter)));
-
-        counter.get();
+                        e -> renamePredicateInMapping(e.getValue(), removedPredicateIri, newPredicatIri, counter)));
     }
 
-    private SQLPPTriplesMap changePredicateIri(SQLPPTriplesMap formerTriplesMap,
-                                               IRI removedIRI, IRI newIRI,
-                                               AtomicInteger counter) {
+    private SQLPPTriplesMap renamePredicateInMapping(SQLPPTriplesMap formerTriplesMap,
+                                                     IRI removedIRI, IRI newIRI,
+                                                     AtomicInteger counter) {
         int formerCount = counter.get();
 
         ImmutableList<TargetAtom> newTargetAtoms = formerTriplesMap.getTargetAtoms().stream()
@@ -190,10 +185,9 @@ public class OBDAModel {
         }
         else
             return formerTriplesMap;
-
     }
 
-    public void deletePredicateIRI(IRI removedPredicateIRI) {
+    public void removePredicateFromMapping(IRI removedPredicateIRI) {
 
         triplesMapMap = triplesMapMap.values().stream()
                 .filter(m -> mustBePreserved(m, removedPredicateIRI, new AtomicInteger()))
@@ -256,9 +250,8 @@ public class OBDAModel {
 
 
     public void addMappingsListener(OBDAMappingListener mlistener) {
-        if (mappingListeners.contains(mlistener))
-            return;
-        mappingListeners.add(mlistener);
+        if (!mappingListeners.contains(mlistener))
+            mappingListeners.add(mlistener);
     }
 
     /**
@@ -271,8 +264,7 @@ public class OBDAModel {
     }
 
 
-    public void addTriplesMap(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent)
-            throws DuplicateMappingException {
+    public void addTriplesMap(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent) throws DuplicateMappingException {
         String mapId = triplesMap.getId();
 
         if (triplesMapMap.containsKey(mapId))
@@ -288,40 +280,14 @@ public class OBDAModel {
             mappingListeners.forEach(OBDAMappingListener::mappingDeleted);
     }
 
-    public void updateMappingsSourceQuery(String triplesMapId, SQLPPSourceQuery sourceQuery) {
-        SQLPPTriplesMap formerTriplesMap = getTriplesMap(triplesMapId);
-
+    public void updateMapping(String formerMappingId, String newMappingId, SQLPPSourceQuery sourceQuery, ImmutableList<TargetAtom> targetQuery) throws DuplicateMappingException {
+        // if the id are the same no need to update the mapping
+        SQLPPTriplesMap formerTriplesMap = getTriplesMap(formerMappingId);
         if (formerTriplesMap != null) {
-            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(triplesMapId, sourceQuery,
-                    formerTriplesMap.getTargetAtoms());
-            triplesMapMap.put(triplesMapId, newTriplesMap);
+            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(newMappingId, sourceQuery, targetQuery);
+            addTriplesMap(newTriplesMap, false);
+            triplesMapMap.remove(formerMappingId);
             mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
-        }
-    }
-
-    public void updateTargetQueryMapping(String id, ImmutableList<TargetAtom> targetQuery) {
-        SQLPPTriplesMap formerTriplesMap = getTriplesMap(id);
-
-        if (formerTriplesMap != null) {
-            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(id, formerTriplesMap.getSourceQuery(),
-                    targetQuery);
-            triplesMapMap.put(id, newTriplesMap);
-            mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
-        }
-    }
-
-    public void updateMappingId(String formerMappingId, String newMappingId) throws DuplicateMappingException {
-        //if the id are the same no need to update the mapping
-        if(!formerMappingId.equals(newMappingId)) {
-            SQLPPTriplesMap formerTriplesMap = getTriplesMap(formerMappingId);
-
-            if (formerTriplesMap != null) {
-                SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(newMappingId, formerTriplesMap.getSourceQuery(),
-                        formerTriplesMap.getTargetAtoms());
-                addTriplesMap(newTriplesMap, false);
-                triplesMapMap.remove(formerMappingId);
-                mappingListeners.forEach(OBDAMappingListener::mappingUpdated);
-            }
         }
     }
 

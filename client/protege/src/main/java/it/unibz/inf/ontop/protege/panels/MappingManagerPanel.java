@@ -22,15 +22,11 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialConfiguration;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
-import it.unibz.inf.ontop.protege.gui.treemodels.MappingPredicateTreeModelFilter;
-import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
-import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
+import it.unibz.inf.ontop.protege.gui.treemodels.*;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -50,49 +46,54 @@ public class MappingManagerPanel extends JPanel {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
-	private Thread validatorThread;
-
 	private SQLSourceQueryValidator validator;
 
 	private final OBDAModelManager obdaModelManager;
 
 	private boolean canceled;
 
-	private final JTree mappingsTree;
-
-	private JMenuItem menuValidateBody;
-
-	private JMenuItem menuExecuteBody;
-
-	/**
+    /**
 	 * Creates a new panel.
 	 *
 	 * @param obdaModelManager
 	 */
 	public MappingManagerPanel(OBDAModelManager obdaModelManager) {
 
-		mappingsTree = new JTree();
-
 		initComponents();
-		addMenu();
 
-		// Setting up the mappings tree
+        JMenuItem add = new JMenuItem();
+        add.setText("Create mapping...");
+        add.addActionListener(this::cmdAddMappingActionPerformed);
+        menuMappings.add(add);
+
+        JMenuItem delete = new JMenuItem();
+        delete.setText("Remove mapping(s)...");
+        delete.addActionListener(this::cmdRemoveMappingActionPerformed);
+        menuMappings.add(delete);
+
+        JMenuItem editMapping = new JMenuItem();
+        editMapping.setText("Edit mapping...");
+        editMapping.addActionListener(e -> editMapping());
+        menuMappings.add(editMapping);
+
+        menuMappings.addSeparator();
+
+        JMenuItem menuValidateBody = new JMenuItem();
+        menuValidateBody.setText("Validate SQL");
+        menuValidateBody.addActionListener(this::menuValidateBodyActionPerformed);
+        menuMappings.add(menuValidateBody);
+
+        JMenuItem menuExecuteBody = new JMenuItem();
+        menuExecuteBody.setText("Execute SQL");
+        menuExecuteBody.addActionListener(this::menuExecuteBodyActionPerformed);
+        menuMappings.add(menuExecuteBody);
+
+        // Setting up the mappings tree
 		mappingList.setCellRenderer(new OBDAMappingListRenderer(obdaModelManager));
 		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		mappingList.addMouseListener(new PopupListener());
 
-        mappingList.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                // Do nothing
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                // Do nothing
-            }
-
+        mappingList.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
@@ -115,11 +116,19 @@ public class MappingManagerPanel extends JPanel {
 		mappingList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				int count = e.getClickCount();
-				if (count == 2) {
+				if (e.getClickCount() == 2)
 					editMapping();
-				}
 			}
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger())
+                    menuMappings.show(e.getComponent(), e.getX(), e.getY());
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger())
+                    menuMappings.show(e.getComponent(), e.getX(), e.getY());
+            }
 		});
 
 		cmdAddMapping.setToolTipText("Create a new mapping");
@@ -127,8 +136,7 @@ public class MappingManagerPanel extends JPanel {
 		cmdDuplicateMapping.setToolTipText("Copy selected mappings");
 
         this.obdaModelManager = obdaModelManager;
-        ListModel model = new SynchronizedMappingListModel(obdaModelManager.getActiveOBDAModel());
-
+        SynchronizedMappingListModel model = new SynchronizedMappingListModel(obdaModelManager.getActiveOBDAModel());
         model.addListDataListener(new ListDataListener() {
             @Override
             public void intervalRemoved(ListDataEvent e) {
@@ -146,58 +154,7 @@ public class MappingManagerPanel extends JPanel {
         mappingList.setModel(model);
 	}
 
-	/**
-	 * A listener to trigger the context menu of the mapping list.
-	 */
-	class PopupListener extends MouseAdapter {
-
-		@Override
-		public void mousePressed(MouseEvent e) {
-			maybeShowPopup(e);
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			maybeShowPopup(e);
-		}
-
-		private void maybeShowPopup(MouseEvent e) {
-			if (e.isPopupTrigger()) {
-				menuMappings.show(e.getComponent(), e.getX(), e.getY());
-			}
-		}
-	}
-
-	private void addMenu() {
-		JMenuItem add = new JMenuItem();
-		add.setText("Create mapping...");
-		add.addActionListener((ActionEvent e) -> addMapping());
-		menuMappings.add(add);
-
-		JMenuItem delete = new JMenuItem();
-		delete.setText("Remove mapping(s)...");
-		delete.addActionListener((ActionEvent e) -> removeMapping());
-		menuMappings.add(delete);
-
-		JMenuItem editMapping = new JMenuItem();
-		editMapping.setText("Edit mapping...");
-		editMapping.addActionListener((ActionEvent e) -> editMapping());
-		menuMappings.add(editMapping);
-
-		menuMappings.addSeparator();
-
-		menuValidateBody = new JMenuItem();
-		menuValidateBody.setText("Validate SQL");
-		menuValidateBody.addActionListener(this::menuValidateBodyActionPerformed);
-		menuMappings.add(menuValidateBody);
-
-		menuExecuteBody = new JMenuItem();
-		menuExecuteBody.setText("Execute SQL");
-		menuExecuteBody.addActionListener(this::menuExecuteBodyActionPerformed);
-		menuMappings.add(menuExecuteBody);
-	}
-
-	public void editMapping() {
+    public void editMapping() {
 		SQLPPTriplesMap mapping = mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
@@ -426,26 +383,28 @@ public class MappingManagerPanel extends JPanel {
 	 * the current search string.
 	 */
 	private void processFilterAction() {
-		if (!(chkFilter.isSelected())) {
+		if (!chkFilter.isSelected()) {
 			applyFilters(new ArrayList<>());
 		}
-		if (chkFilter.isSelected()) {
+		else {
 			if (txtFilter.getText().isEmpty()) {
 				chkFilter.setSelected(false);
 				applyFilters(new ArrayList<>());
-				return;
 			}
-			try {
+			else {
+                try {
 
-			    List<TreeModelFilter<SQLPPTriplesMap>> filters = parseSearchString(txtFilter.getText());
-				if (filters == null) {
-					throw new Exception("Impossible to parse search string");
-				}
-				applyFilters(filters);
-			} catch (Exception e) {
-				LoggerFactory.getLogger(this.getClass()).debug(e.getMessage(), e);
-				JOptionPane.showMessageDialog(this, e.getMessage());
-			}
+                    List<TreeModelFilter<SQLPPTriplesMap>> filters = parseSearchString(txtFilter.getText());
+                    if (filters == null) {
+                        throw new Exception("Impossible to parse search string");
+                    }
+                    applyFilters(filters);
+                }
+                catch (Exception e) {
+                    LoggerFactory.getLogger(this.getClass()).debug(e.getMessage(), e);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }
+            }
 		}
 	}
 
@@ -461,11 +420,11 @@ public class MappingManagerPanel extends JPanel {
 	 * Action for key's entered in the search text box.
 	 */
 	private void sendFilters(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_sendFilters
-		int key = evt.getKeyCode();
-		if (key == java.awt.event.KeyEvent.VK_ENTER) {
+		if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
 			if (!chkFilter.isSelected()) {
 				chkFilter.setSelected(true);
-			} else {
+			}
+			else {
 				processFilterAction();
 			}
 		}
@@ -473,25 +432,24 @@ public class MappingManagerPanel extends JPanel {
 	}// GEN-LAST:event_sendFilters
 
 	private void menuValidateBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateBodyActionPerformed
-		final MappingValidationDialog outputField = new MappingValidationDialog();
-
+		MappingValidationDialog outputField = new MappingValidationDialog();
 		outputField.setLocationRelativeTo(getParent());
-		Runnable action = () -> {
+
+		Thread validatorThread = new Thread(() -> {
             canceled = false;
-            final List path = mappingList.getSelectedValuesList();
-            if (path == null) {
+            List<SQLPPTriplesMap> path = mappingList.getSelectedValuesList();
+            if (path.isEmpty()) {
                 JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
                 return;
             }
             outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
-            for (int i = 0; i < path.size(); i++) {
-                SQLPPTriplesMap o = (SQLPPTriplesMap) path.get(i);
-                String id = o.getId();
+            for (SQLPPTriplesMap mapping : path) {
+                String id = mapping.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
                 OntopSQLCredentialConfiguration config = OntopSQLCredentialConfiguration.defaultBuilder()
                         .properties(obdaModelManager.getDatasource().asProperties())
                         .build();
-                validator = new SQLSourceQueryValidator(config.getSettings(), o.getSourceQuery());
+                validator = new SQLSourceQueryValidator(config.getSettings(), mapping.getSourceQuery());
                 long timestart = System.nanoTime();
 
                 if (canceled) {
@@ -502,7 +460,8 @@ public class MappingManagerPanel extends JPanel {
                     String output = " valid  \n";
                     outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
                     outputField.addText(output, outputField.VALID);
-                } else {
+                }
+                else {
                     long timestop = System.nanoTime();
                     String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
                     outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
@@ -514,8 +473,7 @@ public class MappingManagerPanel extends JPanel {
                 }
             }
             outputField.setVisible(true);
-        };
-		validatorThread = new Thread(action);
+        });
 		validatorThread.start();
 
 		Thread cancelThread = new Thread(() -> {
@@ -536,7 +494,7 @@ public class MappingManagerPanel extends JPanel {
                 }
                 try {
                     canceled = true;
-                    if(validator !=null) {
+                    if (validator !=null) {
                         validator.cancelValidation();
                     }
                 } catch (SQLException e) {
@@ -553,7 +511,7 @@ public class MappingManagerPanel extends JPanel {
 		if (mapping == null) {
 			return;
 		}
-		final String sqlQuery = mapping.getSourceQuery().toString();
+		String sqlQuery = mapping.getSourceQuery().getSQL();
 
 		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(obdaModelManager.getDatasource(), sqlQuery);
 
@@ -567,42 +525,35 @@ public class MappingManagerPanel extends JPanel {
 	}// GEN-LAST:event_menuExecuteBodyActionPerformed
 
 	private void cmdDuplicateMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_duplicateMappingButtonActionPerformed
-		Object[] currentSelection = mappingList.getSelectedValues();
-		if (currentSelection == null) {
+		List<SQLPPTriplesMap> selection = mappingList.getSelectedValuesList();
+		if (selection.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "No mappings have been selected", "ERROR", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+
 		int confirm = JOptionPane.showConfirmDialog(
 				this,
-				"This will create copies of the selected mappings. \nNumber of mappings selected = "
-				+ currentSelection.length + "\nContinue? ",
-				"Copy confirmation",
+				"This will create a copy of the selected " +  selection.size() + " mapping" + (selection.size() == 1 ? "" : "s") + ".\nContinue?",
+				"Copy Confirmation",
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
 
 		OBDAModel apic = obdaModelManager.getActiveOBDAModel();
-
-        for (Object o : currentSelection) {
-            SQLPPTriplesMap mapping = (SQLPPTriplesMap) o;
+        for (SQLPPTriplesMap mapping : selection) {
             String id = mapping.getId();
             // Computing the next available ID
-            int new_index = -1;
+            String newId = id;
             for (int index = 0; index < 999999999; index++) {
-                if (apic.indexOf(id + "(" + index + ")") == -1) {
-                    new_index = index;
+                newId = id + "(" + index + ")";
+                if (apic.indexOf(newId) == -1)
                     break;
-                }
             }
-            String newId = id + "(" + new_index + ")";
 
-            // inserting the new mapping
+            SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, mapping.getSourceQuery(),
+                    mapping.getTargetAtoms());
             try {
-                SQLPPTriplesMap oldmapping = apic.getTriplesMap(id);
-                SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, oldmapping.getSourceQuery(),
-                        oldmapping.getTargetAtoms());
                 apic.addTriplesMap(newmapping, false);
             }
             catch (DuplicateMappingException e) {
@@ -610,7 +561,6 @@ public class MappingManagerPanel extends JPanel {
                 return;
             }
         }
-
 	}// GEN-LAST:event_duplicateMappingButtonActionPerformed
 
 	private void cmdRemoveMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeMappingButtonActionPerformed
@@ -618,23 +568,24 @@ public class MappingManagerPanel extends JPanel {
 	}// GEN-LAST:event_removeMappingButtonActionPerformed
 
 	private void removeMapping() {
-		int[] indexes = mappingList.getSelectedIndices();
-		if (indexes == null) {
+		List<SQLPPTriplesMap> selection = mappingList.getSelectedValuesList();
+		if (selection.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No mappings have been selected", "ERROR", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+
 		int confirm = JOptionPane.showConfirmDialog(
 				this,
-				"Proceed deleting " + indexes.length + " mappings?", "Conform",
+				"Proceed deleting " + selection.size() + " mapping" + (selection.size() == 1 ? "" : "s") + "?",
+                "Delete Confirmation",
                 JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-		if (confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
+		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
 
 		// The manager panel can handle multiple deletions.
-        for (Object value : mappingList.getSelectedValues()) {
-            SQLPPTriplesMap mapping = (SQLPPTriplesMap) value;
-            if (mapping != null)
-                obdaModelManager.getActiveOBDAModel().removeTriplesMap(mapping.getId());
+        for (SQLPPTriplesMap mapping : selection) {
+            obdaModelManager.getActiveOBDAModel().removeTriplesMap(mapping.getId());
         }
 		mappingList.clearSelection();
 	}
@@ -694,13 +645,10 @@ public class MappingManagerPanel extends JPanel {
 	private List<TreeModelFilter<SQLPPTriplesMap>> parseSearchString(String textToParse) throws Exception {
 
 		List<TreeModelFilter<SQLPPTriplesMap>> listOfFilters = new ArrayList<>();
-
-        final String PRED = "pred:";
-
         if (textToParse != null) {
-                final MappingPredicateTreeModelFilter filter = new MappingPredicateTreeModelFilter();
-                filter.addStringFilter(textToParse);
-                listOfFilters.add(filter);
+            MappingBasedTreeModelFilter filter = new MappingBasedTreeModelFilter();
+            filter.addStringFilter(textToParse);
+            listOfFilters.add(filter);
         }
         // TODO(xiao):
         //  We may need to import other functionality (but probably never used) from the old ANTLR file:
