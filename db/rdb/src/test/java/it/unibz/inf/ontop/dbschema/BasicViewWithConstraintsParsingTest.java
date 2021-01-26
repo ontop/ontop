@@ -1,9 +1,8 @@
-package it.unibz.inf.ontop.rdf4j.repository;
+package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -12,18 +11,20 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
-public class BasicViewPersonConstraintTest extends AbstractRDF4JTest {
-    private static final String VIEW_FILE = "src/test/resources/person/views/basic_views_with_constraints.json";
+public class BasicViewWithConstraintsParsingTest {
+    private static final String VIEW_FILE = "src/test/resources/person/basic_views_with_constraints.json";
     private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_constraints.db-extract.json";
 
     ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions(VIEW_FILE, DBMETADATA_FILE);
 
-    public BasicViewPersonConstraintTest() throws MetadataExtractionException, FileNotFoundException {
+    public BasicViewWithConstraintsParsingTest() throws MetadataExtractionException, FileNotFoundException {
     }
 
     /**
@@ -39,14 +40,14 @@ public class BasicViewPersonConstraintTest extends AbstractRDF4JTest {
                 .flatMap(Collection::stream)
                 .map(v -> v.getName())
                 .collect(Collectors.toList());
-
+        
         assertEquals(ImmutableList.of("status", "id"), constraints);
     }
 
     /**
      * The dependent of the FD is correctly added by a viewfile
      */
-    @Test // Add "locality" as being functionally dependent on "country"
+    @Test
     public void testPersonAddFunctionalDependencyDependent() throws Exception {
         Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
         List<ExtensionalDataNode> extensionalDataNodeList = (List<ExtensionalDataNode>)(List<?>) firstView.get().getIQ().getTree().getChildren();

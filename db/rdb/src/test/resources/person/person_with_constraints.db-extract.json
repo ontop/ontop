@@ -1,0 +1,59 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C",
+      "determinants" : [ "\"id\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"fullName\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"status\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"country\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"locality\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    } ],
+    "name" : ["\"person\""]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_S",
+      "determinants" : [ "\"status\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"status_id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"description\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    } ],
+    "name" : ["\"statuses\""]
+  } ],
+  "metadata" : {
+    "dbmsProductName" : "H2",
+    "dbmsVersion" : "1.4.199 (2019-03-13)",
+    "driverName" : "H2 JDBC Driver",
+    "driverVersion" : "1.4.199 (2019-03-13)",
+    "quotationString" : "\"",
+    "extractionTime" : "2020-11-12T17:24:30"
+  }
+}

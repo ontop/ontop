@@ -365,20 +365,20 @@ public class JsonBasicView extends JsonView {
     }
 
     @JsonPropertyOrder({
-            "added"//,
-            //"hidden"
+            "added",
+            "hidden"
     })
     private static class UniqueConstraints extends JsonOpenObject {
         @Nonnull
         public final List<AddUniqueConstraints> added;
-        /*@Nonnull
-        public final List<String> hidden;*/
+        @Nonnull
+        public final List<String> hidden;
 
         @JsonCreator
-        public UniqueConstraints(@JsonProperty("added") List<AddUniqueConstraints> added/*,
-                       @JsonProperty("hidden") List<String> hidden*/) {
+        public UniqueConstraints(@JsonProperty("added") List<AddUniqueConstraints> added,
+                       @JsonProperty("hidden") List<String> hidden) {
             this.added = added;
-            //this.hidden = hidden;
+            this.hidden = hidden;
         }
     }
 
@@ -407,20 +407,20 @@ public class JsonBasicView extends JsonView {
     }
 
     @JsonPropertyOrder({
-            "added"//,
-            //"hidden"
+            "added",
+            "hidden"
     })
     private static class OtherFunctionalDependencies extends JsonOpenObject {
         @Nonnull
         public final List<AddFunctionalDependency> added;
-        /*@Nonnull
-        public final List<String> hidden;*/
+        @Nonnull
+        public final List<String> hidden;
 
         @JsonCreator
-        public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added/*,
-                                           @JsonProperty("hidden") List<String> hidden*/) {
+        public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added,
+                                           @JsonProperty("hidden") List<String> hidden) {
             this.added = added;
-            //this.hidden = hidden;
+            this.hidden = hidden;
         }
     }
 
@@ -442,19 +442,20 @@ public class JsonBasicView extends JsonView {
     }
 
     @JsonPropertyOrder({
-            "added"//,
-            //"hidden"
+            "added",
+            "hidden"
     })
     private static class ForeignKeys extends JsonOpenObject {
         @Nonnull
         public final List<AddForeignKey> added;
-        /*@Nonnull
-        public final List<String> hidden;*/
+        @Nonnull
+        public final List<AddForeignKey> hidden;
 
         @JsonCreator
-        public ForeignKeys(@JsonProperty("added") List<AddForeignKey> added) {
+        public ForeignKeys(@JsonProperty("added") List<AddForeignKey> added,
+                           @JsonProperty("hidden") List<AddForeignKey> hidden) {
             this.added = added;
-            //this.hidden = hidden;
+            this.hidden = hidden;
         }
     }
 
