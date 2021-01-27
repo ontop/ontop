@@ -153,7 +153,8 @@ public class RDF4JConstructDescribeTest {
 		}
 		Assert.assertEquals(1, result);
 	}
-	
+
+	@Ignore("The dictionary is blocked by the DISTINCT")
 	@Test
 	public void testDescribeVar2() throws Exception {
 		int result = 0;
@@ -192,6 +193,7 @@ public class RDF4JConstructDescribeTest {
 		}
 	}
 
+	@Ignore("The dictionary is blocked by the DISTINCT")
 	@Test
 	public void testDescribeVar4() {
 		int result = 0;

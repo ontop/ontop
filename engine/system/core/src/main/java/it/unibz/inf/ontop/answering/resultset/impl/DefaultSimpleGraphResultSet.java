@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
+public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 	private final ResultSetIterator iterator;
 
@@ -72,22 +72,6 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	@Override
 	public void close() throws OntopConnectionException {
 		iterator.close();
-	}
-
-	/**
-	 * The method to actually process the current result set Row. Construct a list of assertions from
-	 * the current result set row. In case of describe it is called to process and store all the
-	 * results from a resultset. In case of construct it is called upon next, to process the only
-	 * current result set.
-	 */
-	@Override
-	public int getFetchSize() {
-		return fetchSize;
-	}
-
-	@Override
-	public void addNewResult(RDFFact statement) {
-		iterator.addNewRDFFact(statement);
 	}
 
 	private static class ResultSetIterator extends RDFFactCloseableIterator {

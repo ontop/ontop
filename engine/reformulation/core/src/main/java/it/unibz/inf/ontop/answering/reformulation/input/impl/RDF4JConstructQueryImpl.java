@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JConstructQuery;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -12,7 +12,7 @@ import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import java.util.Optional;
 
 
-class RDF4JConstructQueryImpl extends RegularRDF4JInputImpl<SimpleGraphResultSet> implements RDF4JConstructQuery {
+class RDF4JConstructQueryImpl extends RegularRDF4JInputImpl<GraphResultSet> implements RDF4JConstructQuery {
     private final ConstructTemplate template;
 
     RDF4JConstructQueryImpl(String queryString, ParsedQuery parsedQuery, BindingSet bindings) {

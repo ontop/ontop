@@ -2,8 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JDescribeQuery;
-import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -16,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<SimpleGraphResultSet> implements RDF4JDescribeQuery {
+class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> implements RDF4JDescribeQuery {
 
     private final ParsedQuery originalParsedQuery;
 
@@ -29,7 +28,7 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<SimpleGraphResultSet> i
     }
 
     @Override
-    public RDF4JInputQuery<SimpleGraphResultSet> newBindings(BindingSet newBindings) {
+    public RDF4JDescribeQuery newBindings(BindingSet newBindings) {
         return new RDF4JDescribeQueryImpl(originalParsedQuery, getInputString(), newBindings);
     }
 
@@ -102,11 +101,16 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<SimpleGraphResultSet> i
 
     private static ParsedTupleQuery createSelectQuery(TupleExpr initialSubQuery, ProjectionElem describeProjectionElem, String p1,
                                                String o1, String s2, String p2) {
-        Join newTree = new Join(
-                initialSubQuery,
+        Join joinTree = new Join(
+                transformSubQuery(initialSubQuery, describeProjectionElem),
                 createSPPOUnion(describeProjectionElem, p1, o1, s2, p2));
 
-        return new ParsedTupleQuery(newTree);
+        return new ParsedTupleQuery(joinTree);
+    }
+
+    private static TupleExpr transformSubQuery(TupleExpr initialSubQuery, ProjectionElem describeProjectionElem) {
+        return new Distinct(
+                new Projection(initialSubQuery, new ProjectionElemList(describeProjectionElem)));
     }
 
     /**
@@ -115,7 +119,7 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<SimpleGraphResultSet> i
     private static TupleExpr createSPPOUnion(ProjectionElem describeProjectionElem, String p1,
                                   String o1, String s2, String p2) {
         Var describeVariable = new Var(describeProjectionElem.getTargetName());
-        StatementPattern leftStatement = new StatementPattern(describeVariable, new Var(p1), new Var(p2));
+        StatementPattern leftStatement = new StatementPattern(describeVariable, new Var(p1), new Var(o1));
         StatementPattern rightStatement = new StatementPattern(new Var(s2), new Var(p2), describeVariable);
 
         Projection left = new Projection(leftStatement,

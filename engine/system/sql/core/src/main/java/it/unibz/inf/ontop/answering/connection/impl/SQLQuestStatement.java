@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.impl.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
@@ -43,11 +43,10 @@ public class SQLQuestStatement extends QuestStatement {
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
-                             InputQueryFactory inputQueryFactory,
                              TermFactory termFactory,
                              RDF rdfFactory, SubstitutionFactory substitutionFactory,
                              OntopSystemSQLSettings settings) {
-        super(queryProcessor, inputQueryFactory);
+        super(queryProcessor);
         this.sqlStatement = sqlStatement;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
@@ -203,8 +202,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected SimpleGraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, boolean collectResults,
-                                                     QueryLogger queryLogger)
+    public GraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         TupleResultSet tuples;
         try {
@@ -225,7 +223,7 @@ public class SQLQuestStatement extends QuestStatement {
             queryLogger.declareResultSetUnblockedAndSerialize();
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
-        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory, this, collectResults);
+        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory, this, false);
     }
 
     private NativeNode extractNativeNode(IQ executableQuery) throws EmptyQueryException {
