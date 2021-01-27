@@ -418,4 +418,28 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
 
         runGraphQueryAndCompare(query, expectedValues, bindings);
     }
+
+    @Test
+    public void testExternalBindingGraph3() {
+        String query = "# CONSTRUCT or DESCRIBE query.\n" +
+                "CONSTRUCT WHERE {\n" +
+                " ?s ?p ?o .\n" +
+                "}\n" +
+                "LIMIT 10";
+
+        ValueFactory valueFactory = SimpleValueFactory.getInstance();
+        Literal label = valueFactory.createLiteral("testdata", "en");
+
+        ImmutableSet<Statement> expectedValues = ImmutableSet.of(
+                valueFactory.createStatement(
+                        valueFactory.createIRI("http://example.org/Individual1"),
+                        RDFS.LABEL,
+                        label));
+
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("p", RDFS.LABEL);
+        bindings.addBinding("o", label);
+
+        runGraphQueryAndCompare(query, expectedValues, bindings);
+    }
 }
