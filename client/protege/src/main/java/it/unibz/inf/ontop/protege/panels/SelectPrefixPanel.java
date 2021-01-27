@@ -43,7 +43,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	 * Creates new form SelectPrefixDialog 
 	 */
 	public SelectPrefixPanel(PrefixManager manager, JTextPane parent) {
-		super();
 		prefixMap = manager.getPrefixMap();
 		querypane = parent;
 		

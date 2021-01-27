@@ -69,7 +69,7 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 		panel.removeQueryManagerListener(listener);
 	}
 
-	public void registerInEditorKit() {
+	private void registerInEditorKit() {
 		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if (queryManagerViews == null) {
 			queryManagerViews = new QueryManagerViewsList();

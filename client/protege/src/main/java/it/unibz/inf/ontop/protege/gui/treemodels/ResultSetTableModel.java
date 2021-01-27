@@ -26,21 +26,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 public class ResultSetTableModel implements TableModel {
 
-
-	ResultSet set; // The ResultSet to interpret
-
-	ResultSetMetaData metadata; // Additional information about the results
-
-	int numcols; // How many rows and columns in the table
-
-	Vector<Vector<String>> results = null;
-
-	Vector<TableModelListener> listener = null;
-
+	private final List<List<String>> results = new ArrayList<>();
+	private final List<String> columns = new ArrayList<>();
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
@@ -49,59 +42,26 @@ public class ResultSetTableModel implements TableModel {
 	 * ResultSetTableModel
 	 */
 	public ResultSetTableModel(ResultSet set) throws SQLException {
-		this.set = set; // Save the results
-		metadata = set.getMetaData(); // Get metadata on them
-		numcols = metadata.getColumnCount(); // How many columns?
-		listener = new Vector<TableModelListener>();
-
-		results = new Vector<Vector<String>>();
-		int i=1;
-		while(set.next()){
-			Vector<String> aux = new Vector<String>();
-			for(int j=1;j<=numcols;j++){
-				String s = "";
-				Object ob = set.getObject(j);
-				if(ob == null){
-					s = "null";
-				}else{
-					s = ob.toString();
-				}
-				aux.add(s);
+		ResultSetMetaData metadata = set.getMetaData();
+		int numcols = metadata.getColumnCount();
+		for (int i = 1; i <= numcols; i++) {
+			columns.add(metadata.getColumnLabel(i));
+		}
+		while (set.next()) {
+			List<String> row = new ArrayList<>();
+			for(int i = 1; i <= numcols; i++) {
+				Object ob = set.getObject(i);
+				String s = (ob == null) ? "null" : ob.toString();
+				row.add(s);
 			}
-			results.add(aux);
-			i++;
+			results.add(row);
 		}
-
-	}
-
-	/**
-	 * Call this when done with the table model. It closes the ResultSet and the
-	 * Statement object used to create it.
-	 */
-	public void close() {
-		try {
-			Statement statement = set.getStatement();
-			if (statement!=null && !statement.isClosed())
-				statement.close();
-			// Normally not necessary (according to the JDBC standard)
-			if (set!=null && !set.isClosed())
-				set.close();
-		} catch (SQLException e) {
-			// NO-OP
-		}
-
-	}
-
-	/** Automatically close when we're garbage collected */
-	@Override
-	protected void finalize() {
-		close();
 	}
 
 	// These two TableModel methods return the size of the table
 	@Override
 	public int getColumnCount() {
-		return numcols;
+		return columns.size();
 	}
 
 	@Override
@@ -112,19 +72,14 @@ public class ResultSetTableModel implements TableModel {
 	// This TableModel method returns columns names from the ResultSetMetaData
 	@Override
 	public String getColumnName(int column) {
-		try {
-			return metadata.getColumnLabel(column + 1);
-		} catch (SQLException e) {
-			e.printStackTrace(System.err);
-			return e.toString();
-		}
+		return columns.get(column);
 	}
 
 	// This TableModel method specifies the data type for each column.
 	// We could map SQL types to Java types, but for this example, we'll just
 	// convert all the returned data to strings.
 	@Override
-	public Class getColumnClass(int column) {
+	public Class<?> getColumnClass(int column) {
 		return String.class;
 	}
 
@@ -137,7 +92,7 @@ public class ResultSetTableModel implements TableModel {
 	 */
 	@Override
 	public Object getValueAt(int row, int column) {
-		Vector<String> aux = results.get(row);
+		List<String> aux = results.get(row);
 		return aux.get(column);
 	}
 
@@ -154,13 +109,9 @@ public class ResultSetTableModel implements TableModel {
 
 	@Override
 	public void addTableModelListener(TableModelListener l) {
-		listener.add(l);
 	}
 
 	@Override
 	public void removeTableModelListener(TableModelListener l) {
-		listener.remove(l);
 	}
-
-	
 }

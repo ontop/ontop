@@ -49,16 +49,16 @@ public class OWLResultSetTableModel implements TableModel {
 	private boolean stopFetching = false;
 
 	// The thread where the rows are fetched
-	Thread rowFetcher;
+	private Thread rowFetcher;
 
 	// Tabular data for exporting result
 	private List<String[]> tabularData;
 	// List data for presenting result to table GUI
-	private List<String[]> resultsTable;
+	private final List<String[]> resultsTable;
 
-	private List<TableModelListener> listeners;
+	private final List<TableModelListener> listeners;
 
-	private PrefixManager prefixman;
+	private final PrefixManager prefixman;
 
 
 	/**
@@ -92,7 +92,7 @@ public class OWLResultSetTableModel implements TableModel {
 	 * another message has not already been shown. 
 	 * 
 	 */
-	private class RowFetcherError implements Runnable{
+	private class RowFetcherError implements Runnable {
 		private Exception e;
 		RowFetcherError(Exception e){
 			this.e = e;
@@ -108,20 +108,17 @@ public class OWLResultSetTableModel implements TableModel {
 	}
 	
 	private void fetchRowsAsync() throws OWLException{
-		rowFetcher = new Thread(){
-			@Override
-            public void run() {
-				try {
-					fetchRows(fetchSizeLimit);
-				} catch (Exception e){
-					SwingUtilities.invokeLater(new RowFetcherError(e));
-					e.printStackTrace();
-				} finally {
-					isFetching = false;
-				}
-
+		rowFetcher = new Thread(() -> {
+			try {
+				fetchRows(fetchSizeLimit);
+			} catch (Exception e){
+				SwingUtilities.invokeLater(new RowFetcherError(e));
+				e.printStackTrace();
+			} finally {
+				isFetching = false;
 			}
-		};
+
+		});
 		rowFetcher.start();
 	}
 

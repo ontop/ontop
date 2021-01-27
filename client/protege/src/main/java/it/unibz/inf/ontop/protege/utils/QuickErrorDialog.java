@@ -27,7 +27,8 @@ public class QuickErrorDialog implements Runnable {
 		this.e = e;
 		this.message = message;
 	}
-	
+
+	@Override
 	public void run() {
 		// create and configure a text area - fill it with exception text.
 		final JTextArea textArea = new JTextArea();

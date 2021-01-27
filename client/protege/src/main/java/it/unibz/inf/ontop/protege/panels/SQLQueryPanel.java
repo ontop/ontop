@@ -28,32 +28,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.table.TableModel;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
-public class SQLQueryPanel extends javax.swing.JPanel {
+public class SQLQueryPanel extends JPanel {
 
 	private static final long serialVersionUID = 7600557919206933923L;
 
 	private final Logger log = LoggerFactory.getLogger(SQLQueryPanel.class);
 
-	private OBDADataSource selectedSource;
+	private final OBDADataSource selectedSource;
 
 	/**
 	 * Creates new form SQLQueryPanel
 	 */
-	public SQLQueryPanel() {
-		initComponents();
-	}
-
 	public SQLQueryPanel(OBDADataSource ds, String query) {
+		selectedSource = ds;
+
 		initComponents();
 		txtSqlQuery.setText(query);
-		selectedSource = ds;
 		cmdExecuteActionPerformed(null);
 	}
 
@@ -156,7 +152,6 @@ public class SQLQueryPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
 	private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {
-		releaseResultset();
 		try {
 			OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", getRootPane());
 			CountDownLatch latch = new CountDownLatch(1);
@@ -166,11 +161,16 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 			action.run();
 			latch.await();
 			progMonitor.stop();
-			ResultSet set = action.getResult();
-			if (set != null) {
-				ResultSetTableModel model = new ResultSetTableModel(set);
-				tblQueryResult.setModel(model);
-				set.close();
+			try (ResultSet set = action.getResult()) {
+				if (set != null) {
+					ResultSetTableModel model = new ResultSetTableModel(set);
+					tblQueryResult.setModel(model);
+				}
+			}
+			finally {
+				if (action.statement != null && !action.statement.isClosed()) {
+					action.statement.close();
+				}
 			}
 		}
 		catch (Exception e) {
@@ -179,22 +179,6 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 		}
 	}
 
-	private void releaseResultset() {
-		TableModel model = tblQueryResult.getModel();
-		if (model == null) {
-			return;
-		}
-		if (!(model instanceof ResultSetTableModel)) {
-			return;
-		}
-		ResultSetTableModel imodel = (ResultSetTableModel) model;
-		imodel.close();
-	}
-
-	@Override
-	public void finalize() {
-		releaseResultset();
-	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExecute;
@@ -222,7 +206,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 
 		@Override
 		public void actionCanceled() throws SQLException {
-			this.isCancelled = true;
+			isCancelled = true;
 			if (thread != null) {
 				thread.interrupt();
 			}
@@ -238,44 +222,35 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 		}
 
 		public void run() {
-			thread = new Thread() {
-				public void run() {
-					try {
-						TableModel oldmodel = tblQueryResult.getModel();
-
-						if (oldmodel instanceof ResultSetTableModel) {
-							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
-							rstm.close();
-						}
-                        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-                        Connection c = man.getConnection(selectedSource.getURL(), selectedSource.getUsername(), selectedSource.getPassword());
-						Statement s = c.createStatement();
-						s.setMaxRows(100);
-						result = s.executeQuery(txtSqlQuery.getText());
-						latch.countDown();
-					}
-					catch (Exception e) {
-						latch.countDown();
-						errorShown = true;
-
-						OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-
-						log.error("Error while executing query.", e);
-					}
+			thread = new Thread(() -> {
+				try {
+					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+					Connection c = man.getConnection(selectedSource.getURL(), selectedSource.getUsername(), selectedSource.getPassword());
+					statement = c.createStatement();
+					statement.setMaxRows(100);
+					result = statement.executeQuery(txtSqlQuery.getText());
+					latch.countDown();
 				}
-			};
+				catch (Exception e) {
+					latch.countDown();
+					errorShown = true;
+
+					OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+					log.error("Error while executing query.", e);
+				}
+			});
 			thread.start();
 		}
 
 		@Override
 		public boolean isCancelled() {
-			return this.isCancelled;
+			return isCancelled;
 		}
 
 		@Override
 		public boolean isErrorShown() {
-			return this.errorShown;
+			return errorShown;
 		}
-
 	}
 }

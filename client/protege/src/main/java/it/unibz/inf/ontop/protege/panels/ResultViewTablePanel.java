@@ -23,17 +23,16 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.gui.action.OBDASaveQueryResultToFileAction;
-import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.io.File;
 
-public class ResultViewTablePanel extends javax.swing.JPanel {
+public class ResultViewTablePanel extends JPanel {
 
 	private static final long serialVersionUID = -8494558136315031084L;
 
-	private OBDADataQueryAction countAllTuplesAction;
+	private OBDADataQueryAction<Long> countAllTuplesAction;
 	private final QueryInterfacePanel querypanel;
 	private OBDASaveQueryResultToFileAction saveToFileAction;
 
@@ -135,7 +134,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 			File targetFile = fileChooser.getSelectedFile();
 			String fileLocation = targetFile.getPath();
 			if (canWrite(targetFile)) {
-				Thread thread = new Thread(() -> getOBDASaveQueryToFileAction().run(fileLocation));
+				Thread thread = new Thread(() -> saveToFileAction.run(fileLocation));
 				thread.start();
 			}
 		}
@@ -179,10 +178,6 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 			TableModel oldmodel = tblQueryResult.getModel();
 			if (oldmodel != null) {
 				oldmodel.removeTableModelListener(tblQueryResult);
-				if (oldmodel instanceof IncrementalResultSetTableModel) {
-					IncrementalResultSetTableModel incm = (IncrementalResultSetTableModel) oldmodel;
-					incm.close();
-				}
 			}
 			tblQueryResult.setModel(newmodel);
 
@@ -211,7 +206,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		countAll.addActionListener(e -> {
 			Thread thread = new Thread(() -> {
 				String query = querypanel.getQuery();
-				getCountAllTuplesActionForUCQ().run(query);
+				countAllTuplesAction.run(query);
 			});
 			thread.start();
 		});
@@ -219,20 +214,12 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		tblQueryResult.setComponentPopupMenu(menu);
 	}
 
-	public OBDADataQueryAction getCountAllTuplesActionForUCQ() {
-		return countAllTuplesAction;
-	}
-
-	public void setCountAllTuplesActionForUCQ(OBDADataQueryAction countAllTuples) {
+	public void setCountAllTuplesActionForUCQ(OBDADataQueryAction<Long> countAllTuples) {
 		this.countAllTuplesAction = countAllTuples;
 	}
 
 	public void setOBDASaveQueryToFileAction(OBDASaveQueryResultToFileAction action){
 		this.saveToFileAction = action;
-	}
-
-	public OBDASaveQueryResultToFileAction getOBDASaveQueryToFileAction(){
-		return saveToFileAction;
 	}
 
 	public void setSQLTranslation(String sql){

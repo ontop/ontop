@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -37,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.table.TableModel;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -394,18 +392,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
         getAccessibleContext().setAccessibleName("Mapping editor");
     }// </editor-fold>//GEN-END:initComponents
 
-	private void releaseResultset() {
-		TableModel model = tblQueryResult.getModel();
-		if (model instanceof IncrementalResultSetTableModel) {
-			IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel) model;
-			imodel.close();
-		}
-	}
-
 	private void cmdTestQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
-		// Cleaning the existing table and releasing resources
-		releaseResultset();
-
 		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", this);
 		CountDownLatch latch = new CountDownLatch(1);
 		ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
@@ -415,11 +402,17 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 			action.run();
 			latch.await();
 			progMonitor.stop();
-			ResultSet set = action.getResult();
-			if (set != null) {
-				ResultSetTableModel model = new ResultSetTableModel(set);
-				tblQueryResult.setModel(model);
-				scrQueryResult.getParent().revalidate();
+			try (ResultSet set = action.result) {
+				if (set != null) {
+					ResultSetTableModel model = new ResultSetTableModel(set);
+					tblQueryResult.setModel(model);
+					scrQueryResult.getParent().revalidate();
+				}
+			}
+			finally {
+				if (action.statement != null && !action.statement.isClosed()) {
+					action.statement.close();
+				}
 			}
 		}
 		catch (Exception e) {
@@ -429,10 +422,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 	private class ExecuteSQLQueryAction implements OBDAProgressListener {
 
-		CountDownLatch latch = null;
-		Thread thread = null;
-		ResultSet result = null;
-		Statement statement = null;
+		private final CountDownLatch latch;
+		private Thread thread = null;
+		private ResultSet result;
+		private Statement statement = null;
 		private boolean isCancelled = false;
 		private boolean errorShown = false;
 
@@ -454,26 +447,16 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 			latch.countDown();
 		}
 
-		public ResultSet getResult() {
-			return result;
-		}
-
 		public void run() {
 			thread = new Thread(() -> {
 				try {
-					TableModel oldmodel = tblQueryResult.getModel();
-
-					if (oldmodel instanceof ResultSetTableModel) {
-						ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
-						rstm.close();
-					}
 					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 					OBDADataSource dataSource = obdaModelManager.getDatasource();
 					Connection c = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword());
 
-					Statement st = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-					st.setMaxRows(100);
-					result = st.executeQuery(txtSourceQuery.getText().trim());
+					statement = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+					statement.setMaxRows(100);
+					result = statement.executeQuery(txtSourceQuery.getText().trim());
 					latch.countDown();
 				}
 				catch (Exception e) {
@@ -497,11 +480,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	}
 
 	private void cmdInsertMappingActionPerformed(ActionEvent e) {// GEN-FIRST:event_cmdInsertMappingActionPerformed
-
-		releaseResultset();
-
-		final String targetQueryString = txtTargetQuery.getText();
-		final String sourceQueryString = txtSourceQuery.getText();
+		String targetQueryString = txtTargetQuery.getText();
+		String sourceQueryString = txtSourceQuery.getText();
 
 		if (txtMappingID.getText().trim().length() == 0) {
 			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
@@ -521,7 +501,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdCancelActionPerformed
 		parent.setVisible(false);
 		parent.dispose();
-		releaseResultset();
 	}// GEN-LAST:event_cmdCancelActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -553,11 +532,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 	public void setID(String id) {
 		this.txtMappingID.setText(id);
-	}
-
-	@Override
-	public void finalize() {
-		releaseResultset();
 	}
 
 	/***

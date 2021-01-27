@@ -172,10 +172,6 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 
 	}
 
-	public void setPreferredWidth(int preferredWidth) {
-		this.preferredWidth = preferredWidth;
-	}
-
 	private void setupFont() {
 		plainFont = new Font("Lucida Grande", Font.PLAIN, 14);
 		plainFontHeight = trgQueryTextPane.getFontMetrics(plainFont).getHeight();
