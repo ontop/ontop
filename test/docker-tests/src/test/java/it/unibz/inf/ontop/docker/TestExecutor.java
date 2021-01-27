@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.docker;
 
 
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
@@ -36,6 +35,8 @@ public class TestExecutor {
     private final String resultFileURL;
     private final Repository dataRep;
     private final Logger logger;
+    private static final String ASK_KEYWORD = "ask";
+    private static final String SELECT_KEYWORD = "select";
 
     public TestExecutor(String name, String queryFileURL, String resultFileURL, Repository dataRep, Logger logger) {
         this.name = name;
@@ -50,9 +51,9 @@ public class TestExecutor {
             String queryString = readQueryString();
 
             // NB: the query may be wrong (on purpose) so we cannot use the RDF4J parser
-            if (SPARQLQueryUtility.isSelectQuery(queryString)) {
+            if (isSelectQuery(queryString)) {
                 executeSelectQuery(con, queryString);
-            } else if (SPARQLQueryUtility.isAskQuery(queryString)) {
+            } else if (isAskQuery(queryString)) {
                 executeAskQuery(con, queryString);
             } else {
                 throw new IllegalArgumentException("Only ASK and SELECT SPARQL queries are supported\n Query: "
@@ -227,5 +228,13 @@ public class TestExecutor {
         } else {
             throw new RuntimeException("Unable to determine file type of results file");
         }
+    }
+
+    public static boolean isAskQuery(String query) {
+        return query.toLowerCase().contains(ASK_KEYWORD);
+    }
+
+    public static boolean isSelectQuery(String query) {
+        return query.toLowerCase().contains(SELECT_KEYWORD);
     }
 }
