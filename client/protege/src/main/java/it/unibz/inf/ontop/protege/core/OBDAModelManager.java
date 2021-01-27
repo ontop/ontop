@@ -114,8 +114,7 @@ public class OBDAModelManager implements Disposable {
 		OWLOntologyManager mmgr = modelManager.getOWLOntologyManager();
 		mmgr.addOntologyChangeListener(new OntologyRefactoringListener());
 
-		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
-		obdaModel = new OBDAModel(ppMappingFactory, prefixFormat, termFactory,
+		obdaModel = new OBDAModel(modelManager.getActiveOntology(), ppMappingFactory, termFactory,
 				targetAtomFactory, substitutionFactory, targetQueryParserFactory, sourceQueryFactory);
 
 		obdaModel.addMappingsListener(new ProtegeMappingControllerListener());
@@ -166,10 +165,7 @@ public class OBDAModelManager implements Disposable {
 					OWLOntologyID newID = ((SetOntologyID) change).getNewOntologyID();
 					log.debug("Ontology ID changed\nOld ID: {}\nNew ID: {}", ((SetOntologyID) change).getOriginalOntologyID(), newID);
 
-					// if the OBDA model does not have an explicit namespace associated to the default prefix (":")
-					if (!obdaModel.getExplicitDefaultPrefixNamespace().isPresent()) {
-						generateDefaultPrefixNamespaceIfPossible(newID);
-					}
+					obdaModel.getMutablePrefixManager().updateOntologyID(newID);
 				}
 				else if (change instanceof RemoveAxiom) {
 					OWLAxiom axiom = change.getAxiom();
@@ -273,16 +269,8 @@ public class OBDAModelManager implements Disposable {
 
 		lastKnownOntologyId = id;
 
-		obdaModel.reset(PrefixUtilities.getPrefixOWLOntologyFormat(ontology));
+		obdaModel.reset(ontology);
 		currentMutableVocabulary.setOntology(ontology);
-
-		Optional<String> ns = getDeclaredDefaultPrefixNamespace(ontology);
-		if (ns.isPresent()) {
-			obdaModel.setExplicitDefaultPrefixNamespace(ns.get());
-		}
-		else {
-			generateDefaultPrefixNamespaceIfPossible(ontology.getOntologyID());
-		}
 
 		DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
 		configurationManager.reset(settings);
@@ -333,7 +321,7 @@ public class OBDAModelManager implements Disposable {
 				log.warn("No OBDA model was loaded because no .obda file exists in the same location as the .owl file");
 			}
 			// adding type information to the mapping predicates
-			for (SQLPPTriplesMap mapping : obdaModel.generatePPMapping().getTripleMaps()) {
+			for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
 				ImmutableList<TargetAtom> tq = mapping.getTargetAtoms();
 				ImmutableList<org.apache.commons.rdf.api.IRI> invalidIRIs = currentMutableVocabulary.validate(tq);
 				if (!invalidIRIs.isEmpty()) {
@@ -364,10 +352,9 @@ public class OBDAModelManager implements Disposable {
 				return;
 
 			File obdaFile = new File(URI.create(owlName + OBDA_EXT));
-			if (obdaModel.hasTripleMaps()) {
-				SQLPPMapping ppMapping = obdaModel.generatePPMapping();
+			if (!obdaModel.getMapping().isEmpty()) {
 				OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
-				writer.write(obdaFile, ppMapping);
+				writer.write(obdaFile, obdaModel.generatePPMapping());
 				log.info("mapping file saved to {}", obdaFile);
 			}
 			else {
@@ -534,33 +521,6 @@ public class OBDAModelManager implements Disposable {
 	}
 
 
-	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
-		com.google.common.base.Optional<org.semanticweb.owlapi.model.IRI> ontologyIRI = ontologyID.getOntologyIRI();
-		if (ontologyIRI.isPresent()) {
-			String prefixUri = ontologyIRI.get().toString();
-			if (!prefixUri.endsWith("#") && !prefixUri.endsWith("/")) {
-				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
-				if (!prefixUri.endsWith(defaultSeparator))  {
-					prefixUri += defaultSeparator;
-				}
-			}
-			obdaModel.addPrefix(it.unibz.inf.ontop.spec.mapping.PrefixManager.DEFAULT_PREFIX, prefixUri);
-		}
-	}
 
-	/**
-	 *  Returns the namespace declared in the ontology for the default prefix.
-	 */
-	private static Optional<String> getDeclaredDefaultPrefixNamespace(OWLOntology ontology) {
-		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
-				ontology,
-				ontology.getOWLOntologyManager().getOntologyFormat(ontology));
-
-		if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
-				.anyMatch(p ->  p.equals(""))) {
-			return Optional.ofNullable(nsm.getNamespaceForPrefix(""));
-		}
-		return Optional.empty();
-	}
 
 }

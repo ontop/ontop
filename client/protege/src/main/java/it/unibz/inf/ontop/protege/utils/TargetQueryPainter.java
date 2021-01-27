@@ -161,9 +161,7 @@ public class TargetQueryPainter {
 				throw new Exception("Empty query");
 			}
 
-			TargetQueryParser textParser = apic.createTargetQueryParser();
-			ImmutableList<TargetAtom> query = textParser.parse(text);
-
+			ImmutableList<TargetAtom> query = apic.parseTargetQuery(text);
 			ImmutableList<IRI> invalidPredicates = obdaModelManager.getCurrentVocabulary().validate(query);
 			if (!invalidPredicates.isEmpty()) {
 				throw new Exception("ERROR: The below list of predicates is unknown by the ontology: \n "
@@ -229,8 +227,7 @@ public class TargetQueryPainter {
 		ImmutableList<TargetAtom> current_query;
 		try {
 			String input = doc.getText(0, doc.getLength());
-            TargetQueryParser textParser = apic.createTargetQueryParser();
-			current_query = textParser.parse(input);
+			current_query = apic.parseTargetQuery(input);
 		}
 		catch (Exception e) {
 			return;

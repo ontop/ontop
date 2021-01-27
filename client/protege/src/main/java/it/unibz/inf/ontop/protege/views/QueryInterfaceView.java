@@ -37,7 +37,6 @@ import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -64,8 +63,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     private OWLOntologyChangeListener ontologyListener;
 
     private OBDAModelManager obdaController;
-
-    private PrefixManager prefixManager;
 
     private OWLResultSetTableModel tableModel;
 
@@ -94,8 +91,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     protected void initialiseOWLView() {
         obdaController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
         obdaController.addListener(this);
-
-        prefixManager = obdaController.getActiveOBDAModel().getMutablePrefixManager();
 
         queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
         queryEditorPanel.setPreferredSize(new Dimension(400, 250));
@@ -275,9 +270,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
                     @Override
                     public void handleResult(GraphOWLResultSet result) throws OWLException{
-                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
-                        populateResultUsingVisitor(result, owlVisitor);
-                        showGraphResultInTextPanel(owlVisitor);
+                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(obdaController.getActiveOBDAModel().getMutablePrefixManager());
+                        if (result != null) {
+                            while (result.hasNext()) {
+                                result.next().accept(owlVisitor);
+                            }
+                            result.close();
+                        }
+                        showGraphResultInTextPanel(owlVisitor.getString());
                     }
 
                     @Override
@@ -430,7 +430,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     private synchronized void createTableModelFromResultSet(TupleOWLResultSet result) throws OWLException {
         if (result == null)
             throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
-        tableModel = new OWLResultSetTableModel(result, prefixManager,
+        tableModel = new OWLResultSetTableModel(result, obdaController.getActiveOBDAModel().getMutablePrefixManager(),
                 queryEditorPanel.isShortURISelect(),
                 queryEditorPanel.isFetchAllSelect(),
                 queryEditorPanel.getFetchSize());
@@ -451,29 +451,19 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     }
 
 
-    private synchronized void showGraphResultInTextPanel(OWLAxiomToTurtleVisitor visitor) {
+    private synchronized void showGraphResultInTextPanel(String s) {
         try {
             SwingUtilities.invokeLater(() -> {
                 TextMessageFrame panel = new TextMessageFrame("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result");
                 JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
                 DialogUtils.centerDialogWRTParent(protegeFrame, panel);
                 DialogUtils.installEscapeCloseOperation(panel);
-                panel.setTextMessage(visitor.getString());
+                panel.setTextMessage(s);
                 panel.setVisible(true);
             });
         }
         catch (Exception e) {
             DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
-        }
-
-    }
-
-    private void populateResultUsingVisitor(GraphOWLResultSet resultSet, OWLAxiomToTurtleVisitor visitor) throws OWLException {
-        if (resultSet != null) {
-            while (resultSet.hasNext()) {
-                resultSet.next().accept(visitor);
-            }
-            resultSet.close();
         }
     }
 

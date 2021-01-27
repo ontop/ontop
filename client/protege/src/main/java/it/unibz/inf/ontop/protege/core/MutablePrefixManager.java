@@ -22,10 +22,17 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
+import org.protege.editor.owl.model.entity.EntityCreationPreferences;
+import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
+import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 
 /**
@@ -36,9 +43,51 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 
     private final PrefixDocumentFormat owlmapper;
 
-	MutablePrefixManager(PrefixDocumentFormat owlmapper) {
-		this.owlmapper = owlmapper;
+	private final boolean hasExplicitDefaultPrefixNamespace;
+
+	public MutablePrefixManager(OWLOntology ontology) {
+		this.owlmapper = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
+
+		if (ontology != null) {
+			OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
+					ontology,
+					ontology.getOWLOntologyManager().getOntologyFormat(ontology));
+
+			if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
+					.anyMatch(p -> p.equals(""))) {
+				String prefix = nsm.getNamespaceForPrefix("");
+				hasExplicitDefaultPrefixNamespace = true;
+				addPrefix(PrefixManager.DEFAULT_PREFIX, prefix);
+			}
+			else {
+				hasExplicitDefaultPrefixNamespace = false;
+				generateDefaultPrefixNamespaceIfPossible(ontology.getOntologyID());
+			}
+		}
+		else
+			hasExplicitDefaultPrefixNamespace = false;
 	}
+
+	public void updateOntologyID(OWLOntologyID newID) {
+		if (!hasExplicitDefaultPrefixNamespace)
+			generateDefaultPrefixNamespaceIfPossible(newID);
+	}
+
+
+	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
+		com.google.common.base.Optional<org.semanticweb.owlapi.model.IRI> ontologyIRI = ontologyID.getOntologyIRI();
+		if (ontologyIRI.isPresent()) {
+			String prefixUri = ontologyIRI.get().toString();
+			if (!prefixUri.endsWith("#") && !prefixUri.endsWith("/")) {
+				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
+				if (!prefixUri.endsWith(defaultSeparator))  {
+					prefixUri += defaultSeparator;
+				}
+			}
+			addPrefix(PrefixManager.DEFAULT_PREFIX, prefixUri);
+		}
+	}
+
 
 	@Override
 	protected Optional<String> getIriDefinition(String prefix) {

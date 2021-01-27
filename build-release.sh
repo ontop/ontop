@@ -130,6 +130,7 @@ echo " Building Protege distribution package   "
 echo "-----------------------------------------"
 echo ""
 
+cd ${BUILD_ROOT}/client/protege/
 $BUILD_ROOT/mvnw bundle:bundle -DskipTests  || exit 1
 
 rm -fr ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}

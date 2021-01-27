@@ -86,7 +86,7 @@ public class OntopConfigurationManager {
 
     public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology currentOntology) {
 
-        OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .properties(snapshotProperties())
                 .ppMapping(obdaModelManager.getActiveOBDAModel().generatePPMapping());
 

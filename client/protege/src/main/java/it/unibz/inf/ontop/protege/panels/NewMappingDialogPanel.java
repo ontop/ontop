@@ -27,10 +27,7 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +38,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,17 +51,18 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 4351696247473906680L;
 
-	private final OBDAModel obdaModel;
 	private final OBDAModelManager obdaModelManager;
 	private final JDialog parent;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
+	private SQLPPTriplesMap mapping;
+
+
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
 	public NewMappingDialogPanel(OBDAModelManager obdaModelManager, JDialog parent) {
-		this.obdaModel = obdaModelManager.getActiveOBDAModel();
 		this.obdaModelManager = obdaModelManager;
 		this.parent = parent;
 
@@ -108,28 +106,24 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 				cmdCancel)));
 	}
 
-	private static class TABKeyListener implements KeyListener {
+	private static class TABKeyListener extends KeyAdapter {
 		@Override public void keyTyped(KeyEvent e) { typedOrPressed(e); }
-		@Override public void keyReleased(KeyEvent e) { /* NO-OP */ }
 		@Override public void keyPressed(KeyEvent e) { typedOrPressed(e); }
 
 		private void typedOrPressed(KeyEvent e) {
 			if (e.getKeyCode() == KeyEvent.VK_TAB) {
 				if (e.getModifiers() == KeyEvent.SHIFT_MASK) {
 					e.getComponent().transferFocusBackward();
-				} else {
+				}
+				else {
 					e.getComponent().transferFocus();
 				}
 				e.consume();
 			}
 		}
-
 	}
 
-	private class CTRLEnterKeyListener implements KeyListener {
-		@Override public void keyTyped(KeyEvent e) {/* NO-OP */ }
-		@Override public void keyReleased(KeyEvent e) { /* NO-OP */ }
-
+	private class CTRLEnterKeyListener extends KeyAdapter {
 		@Override
 		public void keyPressed(KeyEvent e) {
 			if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
@@ -141,49 +135,29 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		}
 	}
 
-	private void insertMapping(String target, String source) {
-		try {
-			TargetQueryParser textParser = obdaModel.createTargetQueryParser();
-			ImmutableList<TargetAtom> targetQuery = textParser.parse(target);
-
-			// List of invalid predicates that are found by the validator.
-			List<IRI> invalidPredicates = obdaModelManager.getCurrentVocabulary().validate(targetQuery);
-			if (invalidPredicates.isEmpty()) {
-				try {
-					SQLPPSourceQuery body = obdaModel.getSourceQueryFactory().createSourceQuery(source.trim());
-
-					String newId = txtMappingID.getText().trim();
-					log.info("Insert Mapping: \n"+ target + "\n" + source);
-
-					if (mapping == null) {
-						// Case when we are creating a new mapping
-						OntopNativeSQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, body, targetQuery);
-						obdaModel.addTriplesMap(newmapping, false);
-					}
-					else {
-						// Case when we are updating an existing mapping
-						obdaModel.updateMapping(mapping.getId(), newId, body, targetQuery);
-					}
-				}
-				catch (DuplicateMappingException e) {
-					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
-					return;
-				}
-				parent.setVisible(false);
-				parent.dispose();
-			}
-			else {
-				String invalidList = "";
-				for (IRI predicate : invalidPredicates) {
-					invalidList += "- " + predicate + "\n";
-				}
-				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
-			}
-		}
-		catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage());
-		}
+	public void setID(String id) {
+		this.txtMappingID.setText(id);
 	}
+
+	/***
+	 * Sets the current mapping to the input. Note, if the current mapping is
+	 * set, this means that this dialog is "updating" a mapping, and not
+	 * creating a new one.
+	 */
+	public void setMapping(SQLPPTriplesMap mapping) {
+		this.mapping = mapping;
+
+		cmdInsertMapping.setText("Update");
+		txtMappingID.setText(mapping.getId());
+
+		SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
+		String srcQuery = sourceQuery.getSQL();
+		txtSourceQuery.setText(srcQuery);
+
+		String trgQuery = obdaModelManager.getActiveOBDAModel().getTargetRendering(mapping);
+		txtTargetQuery.setText(trgQuery);
+	}
+
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -480,22 +454,59 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	}
 
 	private void cmdInsertMappingActionPerformed(ActionEvent e) {// GEN-FIRST:event_cmdInsertMappingActionPerformed
-		String targetQueryString = txtTargetQuery.getText();
-		String sourceQueryString = txtSourceQuery.getText();
-
-		if (txtMappingID.getText().trim().length() == 0) {
+		String newId = txtMappingID.getText().trim();
+		if (newId.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		if (targetQueryString.isEmpty()) {
+
+		String target = txtTargetQuery.getText();
+		if (target.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		if (sourceQueryString.isEmpty()) {
+
+		String source = txtSourceQuery.getText().trim();
+		if (source.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "ERROR: The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		insertMapping(targetQueryString, sourceQueryString);
+
+		OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
+		try {
+			ImmutableList<TargetAtom> targetQuery = obdaModel.parseTargetQuery(target);
+
+			// List of invalid predicates that are found by the validator.
+			List<IRI> invalidPredicates = obdaModelManager.getCurrentVocabulary().validate(targetQuery);
+			if (invalidPredicates.isEmpty()) {
+				try {
+					log.info("Insert Mapping: \n"+ target + "\n" + source);
+
+					if (mapping == null) {
+						obdaModel.insertMapping(newId, source, targetQuery);
+					}
+					else {
+						obdaModel.updateMapping(mapping.getId(), newId, source, targetQuery);
+					}
+				}
+				catch (DuplicateMappingException e1) {
+					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e1.getMessage() + " is already taken");
+					return;
+				}
+				parent.setVisible(false);
+				parent.dispose();
+			}
+			else {
+				String invalidList = "";
+				for (IRI predicate : invalidPredicates) {
+					invalidList += "- " + predicate + "\n";
+				}
+				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
+			}
+		}
+		catch (Exception e1) {
+			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e1.getMessage());
+		}
 	}// GEN-LAST:event_cmdInsertMappingActionPerformed
 
 	private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdCancelActionPerformed
@@ -527,31 +538,5 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
     private javax.swing.JTextPane txtTargetQuery;
     // End of variables declaration//GEN-END:variables
 
-	private SQLPPTriplesMap mapping;
 
-
-	public void setID(String id) {
-		this.txtMappingID.setText(id);
-	}
-
-	/***
-	 * Sets the current mapping to the input. Note, if the current mapping is
-	 * set, this means that this dialog is "updating" a mapping, and not
-	 * creating a new one.
-	 */
-	public void setMapping(SQLPPTriplesMap mapping) {
-		this.mapping = mapping;
-
-		cmdInsertMapping.setText("Update");
-		txtMappingID.setText(mapping.getId());
-
-		SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
-		String srcQuery = sourceQuery.getSQL();
-		txtSourceQuery.setText(srcQuery);
-
-		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(obdaModel.getMutablePrefixManager());
-		ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
-		String trgQuery = targetQueryRenderer.encode(targetQuery);
-		txtTargetQuery.setText(trgQuery);
-	}
 }

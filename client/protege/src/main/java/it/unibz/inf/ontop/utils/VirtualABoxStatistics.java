@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,28 +71,26 @@ public class VirtualABoxStatistics {
 			if (triplesCount == -1) {
 				throw new Exception("An error was occurred in the counting process.");
 			}
-			total = total + triplesCount;
+			total += triplesCount;
 		}
 		return total;
 	}
 
 	@Override
 	public String toString() {
-		String str = "";
-		str += "Mappings: \n";
-		for (String mappingId : statistics.keySet()) {
-			int count = statistics.get(mappingId);
-			str += String.format("- %s produces %s %s.\n", mappingId, count, (count == 1 ? "triple" : "triples"));
+		StringBuilder sb = new StringBuilder();
+		sb.append("Mappings: \n");
+		for (Map.Entry<String, Integer> e : statistics.entrySet()) {
+			int count = e.getValue();
+			sb.append(String.format("- %s produces %s %s.\n", e.getKey(), count, (count == 1 ? "triple" : "triples")));
 		}
-		str += "\n";
-		return str;
+		sb.append("\n");
+		return sb.toString();
 	}
 
 	public void refresh() {
 		OBDADataSource source = obdaModelManager.getDatasource();
-		List<SQLPPTriplesMap> mappingList = obdaModelManager.getActiveOBDAModel().generatePPMapping().getTripleMaps();
-
-		for (SQLPPTriplesMap mapping : mappingList) {
+		for (SQLPPTriplesMap mapping : obdaModelManager.getActiveOBDAModel().getMapping()) {
 			String mappingId = mapping.getId();
 			int triplesCount;
 			try {

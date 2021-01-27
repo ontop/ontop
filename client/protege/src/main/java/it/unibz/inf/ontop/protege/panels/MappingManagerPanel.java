@@ -543,18 +543,16 @@ public class MappingManagerPanel extends JPanel {
 		OBDAModel apic = obdaModelManager.getActiveOBDAModel();
         for (SQLPPTriplesMap mapping : selection) {
             String id = mapping.getId();
-            // Computing the next available ID
+            // find the next available ID
             String newId = id;
             for (int index = 0; index < 999999999; index++) {
                 newId = id + "(" + index + ")";
-                if (apic.indexOf(newId) == -1)
+                if (!apic.containsMappingId(newId))
                     break;
             }
 
-            SQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, mapping.getSourceQuery(),
-                    mapping.getTargetAtoms());
             try {
-                apic.addTriplesMap(newmapping, false);
+                apic.insertMapping(newId, mapping.getSourceQuery().getSQL(), mapping.getTargetAtoms());
             }
             catch (DuplicateMappingException e) {
                 JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
@@ -585,7 +583,7 @@ public class MappingManagerPanel extends JPanel {
 
 		// The manager panel can handle multiple deletions.
         for (SQLPPTriplesMap mapping : selection) {
-            obdaModelManager.getActiveOBDAModel().removeTriplesMap(mapping.getId());
+            obdaModelManager.getActiveOBDAModel().removeMapping(mapping.getId());
         }
 		mappingList.clearSelection();
 	}

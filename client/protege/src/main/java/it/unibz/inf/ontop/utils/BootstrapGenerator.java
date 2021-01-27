@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -31,80 +30,58 @@ import java.util.stream.Collectors;
  */
 public class BootstrapGenerator {
 
-    private final JDBCConnectionManager connManager;
-    private final OntopSQLOWLAPIConfiguration configuration;
-    private final OBDAModel activeOBDAModel;
-    private final OWLModelManager owlManager;
-    private final TypeFactory typeFactory;
-    private final DirectMappingEngine directMappingEngine;
-    private final JDBCMetadataProviderFactory metadataProviderFactory;
+    public static void bootstrap(OBDAModelManager obdaModelManager,
+                                 String baseURI0,
+                                 OWLModelManager owlManager) throws DuplicateMappingException, MetadataExtractionException {
 
-    public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
-                              OWLModelManager owlManager) throws DuplicateMappingException, MetadataExtractionException {
-
-        connManager = JDBCConnectionManager.getJDBCConnectionManager();
-        this.owlManager =  owlManager;
-        configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
-        activeOBDAModel = obdaModelManager.getActiveOBDAModel();
-        typeFactory = obdaModelManager.getTypeFactory();
+        OntopSQLOWLAPIConfiguration configuration = obdaModelManager
+                .getConfigurationManager()
+                .buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
         Injector injector = configuration.getInjector();
-        directMappingEngine = injector.getInstance(DirectMappingEngine.class);
-        metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 
-        bootstrapMappingAndOntologyProtege(baseUri);
-    }
+        OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
+        JDBCConnectionManager connManager = JDBCConnectionManager.getJDBCConnectionManager();
+        try (Connection conn = connManager.getConnection(configuration.getSettings())) {
+            String baseURI = (baseURI0 == null || baseURI0.isEmpty())
+                    ? obdaModel.getMutablePrefixManager().getDefaultIriPrefix()
+                    : DirectMappingEngine.fixBaseURI(baseURI0);
 
-    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, MetadataExtractionException {
+            JDBCMetadataProviderFactory metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
+            MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
+            // this operation is EXPENSIVE
+            ImmutableList<NamedRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
 
-        List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
+            Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+            AtomicInteger currentMappingIndex = new AtomicInteger(obdaModel.getMapping().size() + 1);
 
-        // update protege ontology
-        OWLOntologyManager manager = owlManager.getActiveOntology().getOWLOntologyManager();
-        Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
-                manager,
-                sqlppTriplesMaps.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream()),
-                typeFactory,
-                true);
+            DirectMappingEngine directMappingEngine = injector.getInstance(DirectMappingEngine.class);
+            List<SQLPPTriplesMap> sqlppTriplesMaps = relations.stream()
+                    .flatMap(td -> directMappingEngine.getMapping(td, baseURI, bnodeTemplateMap, currentMappingIndex).stream())
+                    .collect(ImmutableCollectors.toList());
 
-        List<AddAxiom> addAxioms = declarationAxioms.stream()
-                .map(ax -> new AddAxiom(owlManager.getActiveOntology(), ax))
-                .collect(Collectors.toList());
+            // add to the current model the boostrapped triples map
+            for (SQLPPTriplesMap triplesMap: sqlppTriplesMaps)
+                obdaModel.addTriplesMap(triplesMap, true);
 
-        owlManager.applyChanges(addAxioms);
-    }
+            // update protege ontology
+            OWLOntologyManager manager = owlManager.getActiveOntology().getOWLOntologyManager();
+            TypeFactory typeFactory = obdaModelManager.getTypeFactory();
+            Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
+                    manager,
+                    sqlppTriplesMaps.stream()
+                            .flatMap(ax -> ax.getTargetAtoms().stream()),
+                    typeFactory,
+                    true);
 
-    private List<SQLPPTriplesMap> bootstrapMapping(SQLPPMapping ppMapping, String baseURI0)
-            throws DuplicateMappingException, MetadataExtractionException {
+            List<AddAxiom> addAxioms = declarationAxioms.stream()
+                    .map(ax -> new AddAxiom(owlManager.getActiveOntology(), ax))
+                    .collect(Collectors.toList());
 
-        final Connection conn;
-        try {
-            conn = connManager.getConnection(configuration.getSettings());
+            owlManager.applyChanges(addAxioms);
         }
         catch (SQLException e) {
             throw new RuntimeException("JDBC connection is missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-
-        final String baseURI = (baseURI0 == null || baseURI0.isEmpty())
-            ? ppMapping.getPrefixManager().getDefaultIriPrefix()
-            : DirectMappingEngine.fixBaseURI(baseURI0);
-
-        MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
-        // this operation is EXPENSIVE
-        ImmutableList<NamedRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
-
-        Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
-        AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
-
-        ImmutableList<SQLPPTriplesMap> newTriplesMap = relations.stream()
-                .flatMap(td -> directMappingEngine.getMapping(td, baseURI, bnodeTemplateMap, currentMappingIndex).stream())
-                .collect(ImmutableCollectors.toList());
-
-        // add to the current model the boostrapped triples map
-        for (SQLPPTriplesMap triplesMap: newTriplesMap)
-            activeOBDAModel.addTriplesMap(triplesMap, true);
-
-        return newTriplesMap;
     }
 }

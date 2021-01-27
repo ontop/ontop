@@ -94,7 +94,7 @@ public class AboxMaterializationAction extends ProtegeAction {
         //combo box for output format,
         JLabel lFormat = new JLabel("Output format:\t");
         String[] fileOptions = {RDF_XML, TURTLE, NTRIPLES};
-        final JComboBox comboFormats = new JComboBox(fileOptions);
+        JComboBox comboFormats = new JComboBox(fileOptions);
         //should be enabled only when radio button export is selected
         comboFormats.setEnabled(false);
 

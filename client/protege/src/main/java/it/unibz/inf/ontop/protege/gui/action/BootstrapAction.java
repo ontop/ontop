@@ -103,8 +103,8 @@ public class BootstrapAction extends ProtegeAction {
 					while (map.containsKey(bootstrapPrefix)) {
 						bootstrapPrefix = "g" + bootstrapPrefix;
 					}
-					currentModel.addPrefix(bootstrapPrefix, baseUri);
-					Thread th = new Thread("Bootstrapper Action Thread"){
+					prefixManager.addPrefix(bootstrapPrefix, baseUri);
+					Thread th = new Thread("Bootstrapper Action Thread") {
 						@Override
 						public void run() {
 							try {
@@ -147,7 +147,7 @@ public class BootstrapAction extends ProtegeAction {
 
 		public void run(String baseUri) throws Exception {
 			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
-			new BootstrapGenerator(obdaModelManager, baseUri, owlManager);
+			BootstrapGenerator.bootstrap(obdaModelManager, baseUri, owlManager);
 		}
 
 		@Override

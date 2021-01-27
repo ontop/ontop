@@ -35,7 +35,7 @@ import java.awt.*;
 
 public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 
-	private final PrefixManager prefixManager;
+	private final OBDAModel obdaModel;
 
 	private final JTextPane mapTextPane;
 	private final JTextPane trgQueryTextPane;
@@ -73,7 +73,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 
 	public OBDAMappingListRenderer(OBDAModelManager obdaModelManager) {
 
-		prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
+		obdaModel = obdaModelManager.getActiveOBDAModel();
 
 		trgQueryTextPane = new JTextPane();
 		painter = new TargetQueryPainter(obdaModelManager, trgQueryTextPane);
@@ -360,8 +360,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 //		String trgQuery = map.getOptionalTargetString()
 //				.orElseGet(() -> TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager));
 
-		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
-		String trgQuery = targetQueryRenderer.encode(map.getTargetAtoms());
+		String trgQuery = obdaModel.getTargetRendering(map);
 
 		//String trgQuery = map.getOptionalTargetString();
  		trgQueryTextPane.setText(trgQuery);
