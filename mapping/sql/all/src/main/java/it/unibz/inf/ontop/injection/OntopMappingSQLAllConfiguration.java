@@ -15,7 +15,7 @@ public interface OntopMappingSQLAllConfiguration extends OntopMappingSQLConfigur
     @Override
     OntopMappingSQLAllSettings getSettings();
 
-    static Builder<? extends Builder> defaultBuilder() {
+    static Builder<? extends Builder<?>> defaultBuilder() {
         return new OntopMappingSQLAllConfigurationImpl.BuilderImpl<>();
     }
 
