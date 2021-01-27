@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.answering.reformulation.input;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -70,7 +50,6 @@ public class SPARQLQueryUtility {
 			ParsedQuery q = parser.parseQuery(strquery, "http://example.org");
 			TupleExpr expr = q.getTupleExpr();
 			String sign = expr.toString();
-			//ValueConstant (value=http://example.org/db2/neoplasm/1)
 			if (sign.contains("ValueConstant")) {
 				int idx = sign.indexOf("ValueConstant");
 				int first = sign.indexOf('=', idx) +1;
@@ -125,18 +104,5 @@ public class SPARQLQueryUtility {
 	public static String getConstructSubjQuery(String constant) {
 		return "CONSTRUCT { <" + constant + "> ?p ?o} WHERE { <"
 				+ constant + "> ?p ?o}";
-	}
-
-	public static String getSelectFromConstruct(String strquery){
-		String strlower = strquery.toLowerCase();
-		// Let's assume it IS Construct query and we don't need to check
-			StringBuilder bf = new StringBuilder();
-			int idx_con = strlower.indexOf(CONSTRUCT_KEYWORD);
-			int idx_where = strlower.indexOf(WHERE_KEYWORD);
-			bf.append(strquery.substring(0, idx_con));
-			bf.append(" SELECT * ");
-			bf.append(strquery.substring(idx_where));
-			strquery = bf.toString();
-		return strquery;
 	}
 }
