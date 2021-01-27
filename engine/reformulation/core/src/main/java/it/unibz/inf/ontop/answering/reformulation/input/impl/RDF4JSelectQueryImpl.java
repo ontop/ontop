@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
-class RDF4JSelectQueryImpl extends RDF4JInputQueryImpl<TupleResultSet> implements RDF4JSelectQuery {
+class RDF4JSelectQueryImpl extends RegularRDF4JInputImpl<TupleResultSet> implements RDF4JSelectQuery {
 
     RDF4JSelectQueryImpl(ParsedQuery parsedQuery, String queryString, BindingSet bindings) {
         super(parsedQuery, queryString, bindings);
