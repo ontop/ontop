@@ -37,8 +37,8 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
              */
             @Override
             public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-                boolean complete = completeRelations.add(relation.getID());
-                if (!complete)
+                boolean notComplete = completeRelations.add(relation.getID());
+                if (notComplete)
                     provider.insertIntegrityConstraints(relation, metadataLookup);
             }
         };
