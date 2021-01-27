@@ -20,6 +20,9 @@ if [ ! -n "$BASH" ]; then
     exit 1
 fi
 
+# location for the build ROOT folder (i.e. the directory of this script)
+BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 if type -p java; then
     JAVA=java
 elif [[ -n "${JAVA_HOME}" ]] && [[ -x "${JAVA_HOME}/bin/java" ]]; then
@@ -43,15 +46,13 @@ JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
 #fi
 
 echo '$ ./mvnw -version'
-./mvnw -version
+$BUILD_ROOT/mvnw -version
 echo ""
 
 echo "$ git --version"
 git --version || exit 1
 echo ""
 
-# location for the build ROOT folder (i.e. the directory of this script)
-BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location for the build dependencies home
 ONTOP_DEP_HOME=${BUILD_ROOT}/build/dependencies
@@ -107,7 +108,7 @@ echo " Cleaning                                "
 echo "-----------------------------------------"
 echo ""
 
-./mvnw clean -q
+$BUILD_ROOT/mvnw clean -q
 
 echo ""
 echo "========================================="
@@ -116,7 +117,7 @@ echo "-----------------------------------------"
 echo ""
 
 
-./mvnw install -DskipTests -q || exit 1
+$BUILD_ROOT/mvnw install -DskipTests || exit 1
 
 echo "[INFO] Compilation completed"
 
@@ -129,8 +130,7 @@ echo " Building Protege distribution package   "
 echo "-----------------------------------------"
 echo ""
 
-cd ${BUILD_ROOT}/client/protege/
-../../mvnw bundle:bundle -DskipTests  || exit 1
+$BUILD_ROOT/mvnw bundle:bundle -DskipTests  || exit 1
 
 rm -fr ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}
 mkdir -p ${BUILD_ROOT}/build/distribution/${PROTEGE_DIST}
@@ -224,7 +224,7 @@ echo " Building Ontop CLI distribution package     "
 echo "-----------------------------------------"
 echo ""
 
-../../mvnw assembly:single
+$BUILD_ROOT/mvnw assembly:single
 rm -fr ${ONTOP_CLI}
 mkdir -p ${ONTOP_CLI}
 echo "[INFO] Copying files..."

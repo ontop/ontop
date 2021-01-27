@@ -17,6 +17,7 @@ import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.impl.IteratingGraphQueryResult;
+import org.eclipse.rdf4j.query.parser.ParsedDescribeQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -31,8 +32,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 						   ImmutableMultimap<String, String> httpHeaders, RDF4JInputQueryFactory inputQueryFactory,
 						   OntopSystemSettings settings) {
 		super(queryString, baseIRI, parsedQuery, ontopConnection, httpHeaders, settings);
-		// TODO: replace by something stronger (based on the parsed query)
-		this.isConstruct = SPARQLQueryUtility.isConstructQuery(queryString);
+		this.isConstruct = !(parsedQuery instanceof ParsedDescribeQuery);
 		this.inputQueryFactory = inputQueryFactory;
 	}
 

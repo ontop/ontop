@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -108,18 +109,18 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toSet());
 
-            return Optional.of(variablesToFilterNulls)
-                    // If no variable to filter, no change, returns empty
-                    .filter(vs -> !vs.isEmpty())
-                    .map(vs -> vs.stream()
-                            .map(termFactory::getDBIsNotNull))
-                    .map(s -> optionalFilterCondition
-                            .map(f -> Stream.concat(Stream.of(f), s))
-                            .orElse(s))
-                    .flatMap(termFactory::getConjunction)
+            Optional<ImmutableExpression> expression = termFactory.getConjunction(
+                    Stream.concat(
+                            variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull),
+                            optionalFilterCondition.map(Stream::of).orElseGet(Stream::empty)));
+
+            InnerJoinNode innerJoinNode = expression
                     .map(iqFactory::createInnerJoinNode)
-                    // NB: will be normalized later on
-                    .map(n -> iqFactory.createNaryIQTree(n, ImmutableList.copyOf(currentChildren)));
+                    .orElseGet(iqFactory::createInnerJoinNode);
+
+            // NB: will be normalized later on
+            return Optional.of(iqFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(currentChildren)));
+
         }
 
         /**
@@ -155,10 +156,6 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                             .map(Stream::of)
                             .orElseGet(Stream::empty))
                     .collect(ImmutableCollectors.toList());
-
-            // There must be at least one match
-            if (differentArguments.size() == allIndexes.size())
-                return false;
 
             /*
              * All the non-matching arguments of the atom must be discarded variables

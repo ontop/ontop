@@ -20,14 +20,19 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.core.QueryManager;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.swing.*;
@@ -54,7 +59,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
 	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
 
-	private OBDAModel apic;
+	private OBDAModel apic; // TODO: make final!
 
 	private final QueryManager qc;
 
@@ -310,13 +315,17 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
                 OBDADataQueryAction<?> action = null;
 				if (queryString.isEmpty()){
 					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
-				} else if (SPARQLQueryUtility.isSelectQuery(queryString)) {
+				}
+				else if (isSelectQuery(queryString)) {
 					action = executeSelectAction;
-				} else if (SPARQLQueryUtility.isAskQuery(queryString)){
+				}
+				else if (isAskQuery(queryString)) {
 					action = executeAskAction;
-                } else if ((SPARQLQueryUtility.isConstructQuery(queryString) || SPARQLQueryUtility.isDescribeQuery(queryString)) ){
-					action = this.executeGraphQueryAction;
-                } else {
+                }
+				else if (isGraphQuery(queryString)) {
+                    action = executeGraphQueryAction;
+                }
+				else {
                     JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
                 }
 				if (action!=null) {
@@ -472,5 +481,22 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 					new Exception("Invalid input: " + txtFetchSize.getText()), e.toString());
 			return 0;
 		}
+	}
+
+	private static boolean isAskQuery(String query) throws MalformedQueryException {
+		return parse(query) instanceof ParsedBooleanQuery;
+	}
+
+	private static boolean isSelectQuery(String query) throws MalformedQueryException {
+		return parse(query) instanceof ParsedTupleQuery;
+	}
+
+	private static boolean isGraphQuery(String query) throws MalformedQueryException {
+		return parse(query) instanceof ParsedGraphQuery;
+	}
+
+	private static ParsedQuery parse(String query) throws MalformedQueryException {
+		SPARQLParser parser = new SPARQLParser();
+		return parser.parseQuery(query, "http://example.org");
 	}
 }
