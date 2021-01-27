@@ -6,29 +6,10 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 
 public class SPARQLQueryUtility {
-	
-	private static final String ASK_KEYWORD = "ask";
-	private static final String SELECT_KEYWORD = "select";
-	private static final String CONSTRUCT_KEYWORD = "construct";
+
 	private static final String DESCRIBE_KEYWORD = "describe";
 
 	private static final String WHERE_KEYWORD = "where";
-	
-	public static boolean isAskQuery(String query) {
-		return query.toLowerCase().contains(ASK_KEYWORD);
-	}
-	
-	public static boolean isSelectQuery(String query) {
-		return query.toLowerCase().contains(SELECT_KEYWORD);
-	}
-	
-	public static boolean isConstructQuery(String query) {
-		return query.toLowerCase().contains(CONSTRUCT_KEYWORD);
-	}
-	
-	public static boolean isDescribeQuery(String query)  {
-		return query.toLowerCase().contains(DESCRIBE_KEYWORD);
-	}
 
 	public static boolean isVarDescribe(String strquery) {
 		if (strquery.contains(WHERE_KEYWORD)) {
