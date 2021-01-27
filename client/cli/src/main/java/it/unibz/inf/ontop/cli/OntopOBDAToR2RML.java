@@ -85,7 +85,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
                     .concat(".ttl");
         }
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(inputMappingFile);
 
         if (!Strings.isNullOrEmpty(propertiesFile)) {

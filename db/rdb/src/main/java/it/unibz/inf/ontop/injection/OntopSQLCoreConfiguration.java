@@ -8,7 +8,7 @@ public interface OntopSQLCoreConfiguration extends OntopModelConfiguration {
     @Override
     OntopSQLCoreSettings getSettings();
 
-    static Builder<? extends Builder> defaultBuilder() {
+    static Builder<? extends Builder<?>> defaultBuilder() {
         return new OntopSQLCoreConfigurationImpl.BuilderImpl<>();
     }
 
