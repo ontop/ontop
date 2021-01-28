@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
@@ -46,7 +47,10 @@ public class OWLConstructDescribeTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, new Properties())) {
+		Properties properties = new Properties();
+		properties.setProperty(OntopReformulationSettings.INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE, "true");
+
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, properties)) {
 			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			reasoner = factory.createReasoner(loader.getConfiguration());
 			conn = reasoner.getConnection();

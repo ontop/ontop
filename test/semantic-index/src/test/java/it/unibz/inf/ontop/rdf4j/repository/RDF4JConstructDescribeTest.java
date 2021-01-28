@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 import java.io.File;
 import java.util.Properties;
 
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 
 import org.eclipse.rdf4j.model.*;
@@ -35,7 +36,10 @@ public class RDF4JConstructDescribeTest {
 		ValueFactory valueFactory = SimpleValueFactory.getInstance();
 		dataset.addDefaultGraph(valueFactory.createIRI(dataFile.toURI().toString()));
 
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
+		Properties properties = new Properties();
+		properties.setProperty(OntopReformulationSettings.INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE, "false");
+
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, properties)) {
 			REPOSITORY = OntopRepository.defaultRepository(loader.getConfiguration());
 			REPOSITORY.initialize();
 		}
@@ -93,9 +97,9 @@ public class RDF4JConstructDescribeTest {
 			while (gresult.hasNext()) {
 				result++;
 				Statement s = gresult.next();
-				//System.out.println(s.toString());
 			}
-			Assert.assertEquals(1, result);
+			// None because INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE is false
+			Assert.assertEquals(0, result);
 		}
 	}
 	
