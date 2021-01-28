@@ -295,29 +295,27 @@ public class JsonBasicView extends JsonView {
 
     /**
      * Infer unique constraints from the parent
-     * TODO: Confirm whether a UC name will be used to hide existing constraints
+     * TODO: If no PK is defined for child, then keep parent PK; otherwise use parent PK as regular non-PK constraint
      */
     private List<AddUniqueConstraints> extractUniqueConstraints(List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations){
 
-        List<UniqueConstraint> inheritedConstraints = Collections.emptyList();
-        ImmutableList<String> hiddenConstraintsNames = uniqueConstraints.hidden.stream()
+        ImmutableList<String> addedConstraintsColumns = uniqueConstraints.added.stream()
+                .map(a -> a.determinants)
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toList());
-        ImmutableList<String> addedConstraintsNames = uniqueConstraints.added.stream()
+
+        ImmutableList<String> addedNewColumns = columns.added.stream()
                 .map(a -> a.name)
                 .collect(ImmutableCollectors.toList());
 
-        for (NamedRelationDefinition baseRelation: baseRelations) {
-
-            ImmutableList<UniqueConstraint> addInheritedConstraints = baseRelation.getUniqueConstraints()
-                    .stream()
-                    .filter(n -> !hiddenConstraintsNames.contains(n.getName()))
-                    .filter(n -> !addedConstraintsNames.contains(n.getName()))
-                    .collect(ImmutableCollectors.toList());
-
-            inheritedConstraints = Stream.concat(inheritedConstraints.stream(), addInheritedConstraints.stream())
-                    .collect(Collectors.toList());
-        }
+        ImmutableList<UniqueConstraint> inheritedConstraints = baseRelations.stream()
+                .map(b -> b.getUniqueConstraints())
+                .flatMap(Collection::stream)
+                .filter(c -> !addedConstraintsColumns.contains(c.getAttributes().asList().toString()))
+                .filter(c -> !columns.hidden.contains(c.getAttributes().asList().toString()))
+                .filter(c -> !addedNewColumns.contains(c.getAttributes().asList().toString()))
+                .collect(ImmutableCollectors.toList());
 
         List<AddUniqueConstraints> existingUniqueConstraintsList = inheritedConstraints.stream()
                 .map(i -> new AddUniqueConstraints(
@@ -352,33 +350,18 @@ public class JsonBasicView extends JsonView {
                                                                 ImmutableList<NamedRelationDefinition> baseRelations){
 
 
-        List<FunctionalDependency> inheritedFunctionalDependencies = Collections.emptyList();
-        ImmutableList<AbstractMap.SimpleEntry<List<String>, List<String>>> hiddenFunctionalDependenciesTuples = otherFunctionalDependencies.hidden.stream()
-                .map(f -> new AbstractMap.SimpleEntry<>(f.determinants, f.dependents))
-                .collect(ImmutableCollectors.toList());
-        ImmutableList<AbstractMap.SimpleEntry<List<String>, List<String>>> addedFunctionalDependenciesTuples = otherFunctionalDependencies.hidden.stream()
-                .map(f -> new AbstractMap.SimpleEntry<>(f.determinants, f.dependents))
+        ImmutableList<String> addedNewColumns = columns.added.stream()
+                .map(a -> a.name)
                 .collect(ImmutableCollectors.toList());
 
-        for (NamedRelationDefinition baseRelation: baseRelations) {
-
-            ImmutableList<FunctionalDependency> addInheritedFunctionalDependencies = baseRelation.getOtherFunctionalDependencies()
-                    .stream()
-                    .filter(n -> !hiddenFunctionalDependenciesTuples.contains(
-                            new AbstractMap.SimpleEntry<>(
-                                    n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList()),
-                                    n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())
-                            )))
-                    .filter(n -> !addedFunctionalDependenciesTuples.contains(
-                            new AbstractMap.SimpleEntry<>(
-                                    n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList()),
-                                    n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())
-                            )))
-                    .collect(ImmutableCollectors.toList());
-
-            inheritedFunctionalDependencies = Stream.concat(inheritedFunctionalDependencies.stream(), addInheritedFunctionalDependencies.stream())
-                    .collect(Collectors.toList());
-        }
+        ImmutableList<FunctionalDependency> inheritedFunctionalDependencies = baseRelations.stream()
+                .map(b -> b.getOtherFunctionalDependencies())
+                .flatMap(Collection::stream)
+                .filter(n -> !addedNewColumns.contains(n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
+                .filter(n -> !addedNewColumns.contains(n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
+                .filter(n -> !columns.hidden.contains(n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
+                .filter(n -> !columns.hidden.contains(n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
+                .collect(ImmutableCollectors.toList());
 
         List<AddFunctionalDependency> existingFunctionalDependenciesList = inheritedFunctionalDependencies.stream()
                 .map(i -> new AddFunctionalDependency(
@@ -456,20 +439,15 @@ public class JsonBasicView extends JsonView {
     }
 
     @JsonPropertyOrder({
-            "added",
-            "hidden"
+            "added"
     })
     private static class UniqueConstraints extends JsonOpenObject {
         @Nonnull
         public final List<AddUniqueConstraints> added;
-        @Nonnull
-        public final List<String> hidden;
 
         @JsonCreator
-        public UniqueConstraints(@JsonProperty("added") List<AddUniqueConstraints> added,
-                       @JsonProperty("hidden") List<String> hidden) {
+        public UniqueConstraints(@JsonProperty("added") List<AddUniqueConstraints> added) {
             this.added = added;
-            this.hidden = hidden;
         }
     }
 
@@ -498,20 +476,15 @@ public class JsonBasicView extends JsonView {
     }
 
     @JsonPropertyOrder({
-            "added",
-            "hidden"
+            "added"
     })
     private static class OtherFunctionalDependencies extends JsonOpenObject {
         @Nonnull
         public final List<AddFunctionalDependency> added;
-        @Nonnull
-        public final List<AddFunctionalDependency> hidden;
 
         @JsonCreator
-        public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added,
-                                           @JsonProperty("hidden") List<AddFunctionalDependency> hidden) {
+        public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added) {
             this.added = added;
-            this.hidden = hidden;
         }
     }
 
@@ -533,20 +506,15 @@ public class JsonBasicView extends JsonView {
     }
 
     @JsonPropertyOrder({
-            "added",
-            "hidden"
+            "added"
     })
     private static class ForeignKeys extends JsonOpenObject {
         @Nonnull
         public final List<AddForeignKey> added;
-        @Nonnull
-        public final List<AddForeignKey> hidden;
 
         @JsonCreator
-        public ForeignKeys(@JsonProperty("added") List<AddForeignKey> added,
-                           @JsonProperty("hidden") List<AddForeignKey> hidden) {
+        public ForeignKeys(@JsonProperty("added") List<AddForeignKey> added) {
             this.added = added;
-            this.hidden = hidden;
         }
     }
 

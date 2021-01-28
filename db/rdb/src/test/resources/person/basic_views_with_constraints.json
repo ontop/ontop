@@ -33,8 +33,7 @@
             "determinants" : [ "\"status\""],
             "isPrimaryKey" : false
           }
-        ],
-        "hidden": [ ]
+        ]
       },
       "otherFunctionalDependencies": {
         "added": [
@@ -42,8 +41,7 @@
             "determinants": ["\"locality\""],
             "dependents": ["\"country\""]
           }
-        ],
-        "hidden": [ ]
+        ]
       },
       "foreignKeys": {
         "added": [
@@ -63,8 +61,7 @@
               "relation": ["\"unavailable_table\""]
             }
           }
-        ],
-        "hidden": [ ]
+        ]
       },
       "type": "BasicViewDefinition"
     }
