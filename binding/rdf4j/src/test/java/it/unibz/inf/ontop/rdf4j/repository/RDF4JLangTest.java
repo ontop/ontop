@@ -442,4 +442,15 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
 
         runGraphQueryAndCompare(query, expectedValues, bindings);
     }
+
+    @Test
+    public void testDescribe1() {
+        String query = "# CONSTRUCT or DESCRIBE query.\n" +
+                "DESCRIBE ?s WHERE {\n" +
+                " ?s ?p ?o .\n" +
+                "}\n" +
+                "LIMIT 10";
+
+        evaluateGraph(query);
+    }
 }

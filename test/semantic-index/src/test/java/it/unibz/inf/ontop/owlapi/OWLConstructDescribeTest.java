@@ -96,7 +96,8 @@ public class OWLConstructDescribeTest {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> <http://example.org/A>}";
 		Assert.assertEquals(1, countResult(query));
 	}
-	
+
+	@Ignore("The dictionary is blocked by the DISTINCT")
 	@Test
 	public void testDescribeVar2() throws Exception {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";

@@ -3,14 +3,13 @@ package it.unibz.inf.ontop.rdf4j.query.impl;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.input.GraphSPARQLQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
 import java.util.Collections;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 
 import it.unibz.inf.ontop.rdf4j.query.OntopCloseableStatementIteration;
 import org.eclipse.rdf4j.query.GraphQuery;
@@ -46,7 +45,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 		try
 		{
 			OntopStatement stm = conn.createStatement();
-			SimpleGraphResultSet res = stm.execute(query, getHttpHeaders());
+			GraphResultSet res = stm.execute(query, getHttpHeaders());
 			return new IteratingGraphQueryResult(Collections.emptyMap(), new OntopCloseableStatementIteration(res.iterator()));
 		} catch (Exception e) {
 			throw new QueryEvaluationException(e);

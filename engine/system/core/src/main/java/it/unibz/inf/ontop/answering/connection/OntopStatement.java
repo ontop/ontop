@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.answering.connection;
 
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.reformulation.input.ConstructQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
@@ -30,7 +29,7 @@ public interface OntopStatement extends OBDAStatement {
     TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException;
 
-    SimpleGraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
+    GraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
     BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)
