@@ -32,7 +32,7 @@
   }, {
     "uniqueConstraints" : [ {
       "name" : "CONSTRAINT_S",
-      "determinants" : [ "\"status\"" ],
+      "determinants" : [ "\"status_id\"" ],
       "isPrimaryKey" : true
     } ],
     "otherFunctionalDependencies" : [ ],

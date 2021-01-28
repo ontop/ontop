@@ -43,8 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -111,11 +111,9 @@ public class JsonBasicView extends JsonView {
 
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        for (AddUniqueConstraints uc : uniqueConstraints.added)
-            insertUniqueConstraints(relation, idFactory, uc, baseRelations);
+        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations);
 
-        for (AddFunctionalDependency fd : otherFunctionalDependencies.added)
-            insertFunctionalDependencies(relation, idFactory, fd, baseRelations);
+        insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added, baseRelations);
 
         for (AddForeignKey fk : foreignKeys.added) {
             insertForeignKeys(relation, metadataLookupForFK, fk);
@@ -277,31 +275,119 @@ public class JsonBasicView extends JsonView {
         return builder;
     }
 
-    /**
-     * TODO: infer unique constraints from the parent
-     */
     private void insertUniqueConstraints(NamedRelationDefinition relation,
-                                         QuotedIDFactory idFactory,
-                                         AddUniqueConstraints addUniqueConstraints,
+                                         QuotedIDFactory quotedIDFactory,
+                                         List<AddUniqueConstraints> addUniqueConstraints,
                                          ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
-        FunctionalDependency.Builder builder = addUniqueConstraints.isPrimaryKey
-                ? UniqueConstraint.primaryKeyBuilder(relation, addUniqueConstraints.name)
-                : UniqueConstraint.builder(relation, addUniqueConstraints.name);
 
-        JsonMetadata.deserializeAttributeList(idFactory, addUniqueConstraints.determinants, builder::addDeterminant);
-        builder.build();
+
+        List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations);
+
+        for (AddUniqueConstraints addUC : list) {
+            FunctionalDependency.Builder builder = addUC.isPrimaryKey
+                    ? UniqueConstraint.primaryKeyBuilder(relation, addUC.name)
+                    : UniqueConstraint.builder(relation, addUC.name);
+
+            JsonMetadata.deserializeAttributeList(quotedIDFactory, addUC.determinants, builder::addDeterminant);
+            builder.build();
+        }
     }
 
     /**
-     * TODO: infer unique constraints from the parent
+     * Infer unique constraints from the parent
+     * TODO: Confirm whether a UC name will be used to hide existing constraints
      */
-    private void insertFunctionalDependencies(NamedRelationDefinition relation, QuotedIDFactory idFactory,
-                                              AddFunctionalDependency addFunctionalDependency,
+    private List<AddUniqueConstraints> extractUniqueConstraints(List<AddUniqueConstraints> addUniqueConstraints,
+                                                                ImmutableList<NamedRelationDefinition> baseRelations){
+
+        List<UniqueConstraint> inheritedConstraints = Collections.emptyList();
+        ImmutableList<String> hiddenConstraintsNames = uniqueConstraints.hidden.stream()
+                .collect(ImmutableCollectors.toList());
+        ImmutableList<String> addedConstraintsNames = uniqueConstraints.added.stream()
+                .map(a -> a.name)
+                .collect(ImmutableCollectors.toList());
+
+        for (NamedRelationDefinition baseRelation: baseRelations) {
+
+            ImmutableList<UniqueConstraint> addInheritedConstraints = baseRelation.getUniqueConstraints()
+                    .stream()
+                    .filter(n -> !hiddenConstraintsNames.contains(n.getName()))
+                    .filter(n -> !addedConstraintsNames.contains(n.getName()))
+                    .collect(ImmutableCollectors.toList());
+
+            inheritedConstraints = Stream.concat(inheritedConstraints.stream(), addInheritedConstraints.stream())
+                    .collect(Collectors.toList());
+        }
+
+        List<AddUniqueConstraints> existingUniqueConstraintsList = inheritedConstraints.stream()
+                .map(i -> new AddUniqueConstraints(
+                        i.getName(),
+                        i.getDeterminants().stream().map(c -> c.getID().toString()).collect(Collectors.toList()),
+                        i.isPrimaryKey()))
+                .collect(Collectors.toList());
+
+        return Stream.concat(addUniqueConstraints.stream(), existingUniqueConstraintsList.stream())
+                .collect(Collectors.toList());
+    }
+
+    private void insertFunctionalDependencies(NamedRelationDefinition relation,
+                                              QuotedIDFactory idFactory,
+                                              List<AddFunctionalDependency> addFunctionalDependency,
                                               ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
-        FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
-        JsonMetadata.deserializeAttributeList(idFactory, addFunctionalDependency.determinants, builder::addDeterminant);
-        JsonMetadata.deserializeAttributeList(idFactory, addFunctionalDependency.dependents, builder::addDependent);
-        builder.build();
+
+        List<AddFunctionalDependency> list = extractOtherFunctionalDependencies(addFunctionalDependency, baseRelations);
+
+        for (AddFunctionalDependency addFD : list) {
+            FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
+            JsonMetadata.deserializeAttributeList(idFactory, addFD.determinants, builder::addDeterminant);
+            JsonMetadata.deserializeAttributeList(idFactory, addFD.dependents, builder::addDependent);
+            builder.build();
+        }
+    }
+
+    /**
+     * Infer functional dependencies from the parent
+     */
+    private List<AddFunctionalDependency> extractOtherFunctionalDependencies(List<AddFunctionalDependency> addFunctionalDependencies,
+                                                                ImmutableList<NamedRelationDefinition> baseRelations){
+
+
+        List<FunctionalDependency> inheritedFunctionalDependencies = Collections.emptyList();
+        ImmutableList<AbstractMap.SimpleEntry<List<String>, List<String>>> hiddenFunctionalDependenciesTuples = otherFunctionalDependencies.hidden.stream()
+                .map(f -> new AbstractMap.SimpleEntry<>(f.determinants, f.dependents))
+                .collect(ImmutableCollectors.toList());
+        ImmutableList<AbstractMap.SimpleEntry<List<String>, List<String>>> addedFunctionalDependenciesTuples = otherFunctionalDependencies.hidden.stream()
+                .map(f -> new AbstractMap.SimpleEntry<>(f.determinants, f.dependents))
+                .collect(ImmutableCollectors.toList());
+
+        for (NamedRelationDefinition baseRelation: baseRelations) {
+
+            ImmutableList<FunctionalDependency> addInheritedFunctionalDependencies = baseRelation.getOtherFunctionalDependencies()
+                    .stream()
+                    .filter(n -> !hiddenFunctionalDependenciesTuples.contains(
+                            new AbstractMap.SimpleEntry<>(
+                                    n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList()),
+                                    n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())
+                            )))
+                    .filter(n -> !addedFunctionalDependenciesTuples.contains(
+                            new AbstractMap.SimpleEntry<>(
+                                    n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList()),
+                                    n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())
+                            )))
+                    .collect(ImmutableCollectors.toList());
+
+            inheritedFunctionalDependencies = Stream.concat(inheritedFunctionalDependencies.stream(), addInheritedFunctionalDependencies.stream())
+                    .collect(Collectors.toList());
+        }
+
+        List<AddFunctionalDependency> existingFunctionalDependenciesList = inheritedFunctionalDependencies.stream()
+                .map(i -> new AddFunctionalDependency(
+                        i.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList()),
+                        i.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
+                .collect(Collectors.toList());
+
+        return Stream.concat(addFunctionalDependencies.stream(), existingFunctionalDependenciesList.stream())
+                .collect(Collectors.toList());
     }
 
     public void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
@@ -419,11 +505,11 @@ public class JsonBasicView extends JsonView {
         @Nonnull
         public final List<AddFunctionalDependency> added;
         @Nonnull
-        public final List<String> hidden;
+        public final List<AddFunctionalDependency> hidden;
 
         @JsonCreator
         public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added,
-                                           @JsonProperty("hidden") List<String> hidden) {
+                                           @JsonProperty("hidden") List<AddFunctionalDependency> hidden) {
             this.added = added;
             this.hidden = hidden;
         }

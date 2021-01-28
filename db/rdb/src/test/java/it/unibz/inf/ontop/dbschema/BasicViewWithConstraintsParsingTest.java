@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
@@ -33,14 +32,14 @@ public class BasicViewWithConstraintsParsingTest {
     @Test
     public void testPersonAddUniqueConstraint() throws Exception {
         Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> constraints = firstView.get().getIQ().getTree().getChildren()
+        List<String> constraints = firstView.get()
+                .getUniqueConstraints()
                 .stream()
-                .map(i -> i.inferUniqueConstraints())
+                .map(c -> c.getAttributes())
                 .flatMap(Collection::stream)
-                .flatMap(Collection::stream)
-                .map(v -> v.getName())
+                .map(v -> v.getID().getName())
                 .collect(Collectors.toList());
-        
+
         assertEquals(ImmutableList.of("status", "id"), constraints);
     }
 
@@ -50,12 +49,9 @@ public class BasicViewWithConstraintsParsingTest {
     @Test
     public void testPersonAddFunctionalDependencyDependent() throws Exception {
         Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<ExtensionalDataNode> extensionalDataNodeList = (List<ExtensionalDataNode>)(List<?>) firstView.get().getIQ().getTree().getChildren();
-
-        List<String> otherFD = extensionalDataNodeList.stream()
-                .map(e -> e.getRelationDefinition())
-                .map(r -> r.getOtherFunctionalDependencies())
-                .flatMap(Collection::stream)
+        List<String> otherFD = firstView.get()
+                .getOtherFunctionalDependencies()
+                .stream()
                 .map(d -> d.getDependents())
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
@@ -70,96 +66,15 @@ public class BasicViewWithConstraintsParsingTest {
     @Test
     public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
         Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<ExtensionalDataNode> extensionalDataNodeList = (List<ExtensionalDataNode>)(List<?>) firstView.get().getIQ().getTree().getChildren();
-
-        List<String> otherFD = extensionalDataNodeList.stream()
-                .map(e -> e.getRelationDefinition())
-                .map(r -> r.getOtherFunctionalDependencies())
-                .flatMap(Collection::stream)
+        List<String> otherFD = firstView.get()
+                .getOtherFunctionalDependencies()
+                .stream()
                 .map(d -> d.getDeterminants())
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
                 .collect(Collectors.toList());
 
         assertEquals(ImmutableList.of("locality"), otherFD);
-    }
-
-    /**
-     * Add destination relation name via viewfile
-     */
-    @Test
-    public void testPersonAddForeignKey_DestinationRelation() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<ExtensionalDataNode> extensionalDataNodeList = (List<ExtensionalDataNode>)(List<?>) firstView.get().getIQ().getTree().getChildren();
-
-        List<String> destination_relation = extensionalDataNodeList.stream()
-                .map(e -> e.getRelationDefinition())
-                .map(r -> r.getForeignKeys())
-                .flatMap(Collection::stream)
-                .map(d -> d.getReferencedRelation())
-                //.flatMap(Collection::stream)
-                .map(d -> d.getID().getComponents().get(0).getName())
-                .collect(Collectors.toList());
-
-        assertEquals(ImmutableList.of("statuses"), destination_relation);
-    }
-
-    /**
-     * Add destination relation foreign key column name via viewfile
-     */
-    @Test
-    public void testPersonAddForeignKey_DestinationColumn() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<ExtensionalDataNode> extensionalDataNodeList = (List<ExtensionalDataNode>)(List<?>) firstView.get().getIQ().getTree().getChildren();
-
-        List<String> destination_column = extensionalDataNodeList.stream()
-                .map(e -> e.getRelationDefinition())
-                .map(r -> r.getForeignKeys())
-                .flatMap(Collection::stream)
-                .map(d -> d.getComponents())
-                //.flatMap(Collection::stream)
-                .map(d -> d.get(0).getReferencedAttribute().getID().getName())
-                .collect(Collectors.toList());
-
-        assertEquals(ImmutableList.of("status_id"), destination_column);
-    }
-
-    /**
-     * Add source relation key column name via viewfile
-     */
-    @Test
-    public void testPersonAddForeignKey_SourceColumn() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<ExtensionalDataNode> extensionalDataNodeList = (List<ExtensionalDataNode>)(List<?>) firstView.get().getIQ().getTree().getChildren();
-
-        List<String> source_column = extensionalDataNodeList.stream()
-                .map(e -> e.getRelationDefinition())
-                .map(r -> r.getForeignKeys())
-                .flatMap(Collection::stream)
-                .map(d -> d.getComponents())
-                //.flatMap(Collection::stream)
-                .map(d -> d.get(0).getAttribute().getID().getName())
-                .collect(Collectors.toList());
-
-        assertEquals(ImmutableList.of("status"), source_column);
-    }
-
-    /**
-     * Add new foreign key name
-     */
-    @Test
-    public void testPersonAddForeignKey_FKName() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<ExtensionalDataNode> extensionalDataNodeList = (List<ExtensionalDataNode>)(List<?>) firstView.get().getIQ().getTree().getChildren();
-
-        List<String> source_column = extensionalDataNodeList.stream()
-                .map(e -> e.getRelationDefinition())
-                .map(r -> r.getForeignKeys())
-                .flatMap(Collection::stream)
-                .map(d -> d.getName())
-                .collect(Collectors.toList());
-
-        assertEquals(ImmutableList.of("status_id_fkey"), source_column);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
