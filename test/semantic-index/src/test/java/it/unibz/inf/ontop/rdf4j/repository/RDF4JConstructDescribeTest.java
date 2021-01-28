@@ -174,7 +174,7 @@ public class RDF4JConstructDescribeTest {
 		}
 	}
 
-	@Ignore("TODO: check the exception (not supported)")
+	@Ignore("Not supported")
 	@Test
 	public void testDescribeVar3() {
 		int result = 0;
@@ -212,7 +212,7 @@ public class RDF4JConstructDescribeTest {
 		}
 	}
 
-	@Ignore("TODO: check the exception (not supported)")
+	@Ignore("Not supported")
 	@Test
 	public void testDescribeVar5() {
 		int result = 0;
