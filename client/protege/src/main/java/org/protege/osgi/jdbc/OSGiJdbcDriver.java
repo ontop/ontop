@@ -14,13 +14,14 @@ public class OSGiJdbcDriver implements Driver {
 	private final JdbcRegistry registry;
 	
 	public OSGiJdbcDriver(BundleContext context, JdbcRegistry registry) {
-		String versionString = (String) context.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
+		String versionString = context.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
 		Version version = new Version(versionString);
 		majorVersion = version.getMajor();
 		minorVersion = version.getMinor();
 		this.registry = registry;
 	}
 
+	@Override
 	public boolean acceptsURL(String url) throws SQLException {
         for (Driver delegate : registry.getJdbcDrivers()) {
 			if (delegate.acceptsURL(url)) {
@@ -30,6 +31,7 @@ public class OSGiJdbcDriver implements Driver {
 		return false;
 	}
 
+	@Override
 	public Connection connect(String url, Properties info) throws SQLException {
 		for (Driver delegate : registry.getJdbcDrivers()) {
 			if (delegate.acceptsURL(url)) {
@@ -39,8 +41,8 @@ public class OSGiJdbcDriver implements Driver {
 		return null;
 	}
 
-	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
-			throws SQLException {
+	@Override
+	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
 		for (Driver delegate : registry.getJdbcDrivers()) {
 			if (delegate.acceptsURL(url)) {
 				return delegate.getPropertyInfo(url, info);
@@ -59,12 +61,13 @@ public class OSGiJdbcDriver implements Driver {
         throw new SQLFeatureNotSupportedException();
     }
 
+    @Override
     public int getMajorVersion() {
 		return majorVersion;
 	}
 
+	@Override
 	public int getMinorVersion() {
 		return minorVersion;
 	}
-
 }

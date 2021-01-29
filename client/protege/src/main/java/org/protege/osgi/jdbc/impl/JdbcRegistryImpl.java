@@ -14,8 +14,8 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 
 	private final List<Driver> drivers = new ArrayList<>();
 
-	public void addJdbcDriver(String className, URL location)
-			throws RegistryException {
+	@Override
+	public void addJdbcDriver(String className, URL location) throws RegistryException {
 		try {
 			URLClassLoader classLoader = new URLClassLoader(new URL[] { location }, ClassLoader.getSystemClassLoader());
 			Class<?> driverClass = classLoader.loadClass(className);
@@ -27,6 +27,7 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 		}
     }
 
+    @Override
     public void removeJdbcDriver(String className) {
 		Driver found = null;
 		for (Driver driver : drivers) {
@@ -40,8 +41,8 @@ public class JdbcRegistryImpl implements JdbcRegistry {
 		}
 	}
 
+	@Override
 	public List<Driver> getJdbcDrivers() {
 		return Collections.unmodifiableList(drivers);
 	}
-
 }

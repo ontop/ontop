@@ -51,10 +51,9 @@ public class DialogUtils {
 		SwingUtilities.invokeLater(box);
 	}
 
-	public static void centerDialogWRTParent(Component parent, Component dialog) {
-		Container myParent = (Container) parent;
-		Point topLeft = myParent.getLocationOnScreen();
-		Dimension parentSize = myParent.getSize();
+	public static void centerDialogWRTParent(Container parent, Component dialog) {
+		Point topLeft = parent.getLocationOnScreen();
+		Dimension parentSize = parent.getSize();
 		Dimension mySize = dialog.getSize();
 
 		int x = (parentSize.width > mySize.width)

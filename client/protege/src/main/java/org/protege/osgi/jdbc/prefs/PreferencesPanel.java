@@ -2,128 +2,121 @@ package org.protege.osgi.jdbc.prefs;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.protege.editor.core.prefs.Preferences;
-import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import org.protege.osgi.jdbc.JdbcRegistry;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 public class PreferencesPanel extends OWLPreferencesPanel {
     private static final long serialVersionUID = 2892884854196959326L;
 
     public static final String PREFERENCES_SET = "org.protege.osgi.jdbc.prefs";
-    public static final String DRIVER_PREFERENCES_KEY = "driver.list";
     public static final String DEFAULT_DRIVER_DIR = "driver.dir";
-    
+    public static final String DRIVER_PREFERENCES_KEY = "driver.list";
+
     private JTable table;
-    private DriverTableModel driverTableModel;
-    private ServiceTracker jdbcRegistryTracker;
+    private JDBCDriverTableModel driverTableModel;
+    private ServiceTracker<?,?> jdbcRegistryTracker;
 
     @Override
     public void initialise() throws Exception {
-        BundleContext context = Activator.getInstance().getContext();
-        jdbcRegistryTracker = new ServiceTracker(context, JdbcRegistry.class.getName(), null);
-        setPreferredSize(new java.awt.Dimension(620, 300));
+        BundleContext context = Activator.getContext();
+        jdbcRegistryTracker = new ServiceTracker<>(context, JdbcRegistry.class.getName(), null);
+
+        setPreferredSize(new Dimension(620, 300));
         setLayout(new GridBagLayout());
+
+        driverTableModel = new JDBCDriverTableModel(jdbcRegistryTracker);
+        table = new JTable(driverTableModel);
+        table.getColumnModel().getColumn(0).setPreferredWidth(70);
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);
+        table.getColumnModel().getColumn(2).setPreferredWidth(350);
+        table.getColumnModel().getColumn(3).setMaxWidth(50);
         GridBagConstraints listConstraints = new GridBagConstraints();
         listConstraints.fill = GridBagConstraints.BOTH;
         listConstraints.gridx = 0;
         listConstraints.gridy = 0;
         listConstraints.gridwidth = 3;
         listConstraints.gridheight = 3;
-        listConstraints.weightx=1;
-        listConstraints.weighty=1;
+        listConstraints.weightx = 1;
+        listConstraints.weighty = 1;
+        add(new JScrollPane(table), listConstraints);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+        JButton add = new JButton("Add");
+        add.addActionListener(this::cmdAddDriver);
+        panel.add(add);
+        JButton remove = new JButton("Remove");
+        panel.add(remove);
+        remove.addActionListener(this::cmdRemoveDriver);
+        JButton edit = new JButton("Edit");
+        panel.add(edit);
+        edit.addActionListener(this::cmdEditDriver);
         GridBagConstraints buttonsConstraints = new GridBagConstraints();
         buttonsConstraints.gridx = 0;
         buttonsConstraints.gridy = 4;
-        add(createList(), listConstraints);
-        add(createButtons(), buttonsConstraints);
-    }
+        add(panel, buttonsConstraints);
 
-    @Override
-    public void applyChanges() {
-        setDrivers(driverTableModel.getDrivers());
+        edit.setEnabled(false);
+        remove.setEnabled(false);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ListSelectionModel selectionModel = table.getSelectionModel();
+        selectionModel.addListSelectionListener(e -> {
+            boolean selectNonEmpty = !selectionModel.isSelectionEmpty();
+            edit.setEnabled(selectNonEmpty);
+            remove.setEnabled(selectNonEmpty);
+        });
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2)
+                    cmdEditDriver(null);
+            }
+        });
     }
 
     @Override
     public void dispose()  { }
 
-
-    public static List<DriverInfo> getDrivers() {
-    	List<DriverInfo> drivers  = new ArrayList<>();
-    	Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(PREFERENCES_SET, DRIVER_PREFERENCES_KEY);
-    	Iterator<String> driverStrings  = prefs.getStringList(DRIVER_PREFERENCES_KEY, new ArrayList<>()).iterator();
-    	while (driverStrings.hasNext()) {
-    		drivers.add(new DriverInfo(driverStrings.next(), driverStrings.next(), new File(driverStrings.next())));
-    	}
-    	return drivers;
-    }
-    
-    private void setDrivers(List<DriverInfo> drivers) {
-    	Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(PREFERENCES_SET, DRIVER_PREFERENCES_KEY);
-    	List<String>  prefsStringList = new ArrayList<>();
-    	for  (DriverInfo driver : drivers) {
-    		prefsStringList.add(driver.getDescription());
-    		prefsStringList.add(driver.getClassName());
-    		prefsStringList.add(driver.getDriverLocation().getPath());
-    	}
-        prefs.clear();
-    	prefs.putStringList(DRIVER_PREFERENCES_KEY, prefsStringList);
-    }
-    
-
-    private JComponent createList() {
-    	driverTableModel = new DriverTableModel(getDrivers(), jdbcRegistryTracker);
-        table = new JTable(driverTableModel);
-        return new JScrollPane(table);
-    }
-    
-    private JComponent createButtons() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout());
-        JButton add = new JButton("Add");
-        add.addActionListener(this::handleAdd);
-        panel.add(add);
-        JButton remove = new JButton("Remove");
-        panel.add(remove);
-        remove.addActionListener(this::handleRemove);
-        JButton edit = new JButton("Edit");
-        panel.add(edit);
-        edit.addActionListener(this::handleEdit);
-        return panel;
+    @Override
+    public void applyChanges() {
+        driverTableModel.store();
     }
 
-    private void handleAdd(ActionEvent e) {
-        final EditorPanel editor = new EditorPanel(jdbcRegistryTracker);
-        DriverInfo info = editor.askUserForDriverInfo();
-        if (info != null) {
-            driverTableModel.addDriver(info);
-        }
+    private void cmdAddDriver(ActionEvent e) {
+        EditJDBCDriverSettingsDialog editor = new EditJDBCDriverSettingsDialog(this, jdbcRegistryTracker);
+        Optional<JDBCDriverInfo> info = editor.askUserForDriverInfo();
+        info.ifPresent(i -> driverTableModel.addDriver(i));
     }
 
-    private void handleRemove(ActionEvent e) {
-        List<Integer> rowList = new ArrayList<>();
-        for (int row : table.getSelectedRows()) {
-            rowList.add(row);
-        }
-        driverTableModel.removeDrivers(rowList);
-    }
-
-    private void handleEdit(ActionEvent e) {
+    private void cmdEditDriver(ActionEvent e) {
         int row = table.getSelectedRow();
-        DriverInfo existing = driverTableModel.getDrivers().get(row);
-        EditorPanel editor = new EditorPanel(jdbcRegistryTracker,
-                existing.getDescription(),
-                existing.getClassName(),
-                existing.getDriverLocation());
-        DriverInfo info = editor.askUserForDriverInfo();
-        driverTableModel.replaceDriver(row, info);
+        JDBCDriverInfo info = driverTableModel.getDriver(row);
+        EditJDBCDriverSettingsDialog editor = new EditJDBCDriverSettingsDialog(this, jdbcRegistryTracker);
+        Optional<JDBCDriverInfo> newInfo = editor.askUserForDriverInfo(info);
+        newInfo.ifPresent(i -> driverTableModel.replaceDriver(row, i));
+    }
+
+    private void cmdRemoveDriver(ActionEvent e) {
+        int row = table.getSelectedRow();
+        JDBCDriverInfo info = driverTableModel.getDriver(row);
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Proceed deleting the " + info.getDescription() + " driver?",
+                "Delete Confirmation",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
+            return;
+        }
+
+        driverTableModel.removeDrivers(row);
     }
 }

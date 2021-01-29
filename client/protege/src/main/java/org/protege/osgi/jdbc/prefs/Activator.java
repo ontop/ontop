@@ -1,12 +1,9 @@
 package org.protege.osgi.jdbc.prefs;
 
-import org.protege.osgi.jdbc.RegistryException;
 import org.osgi.framework.*;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.MalformedURLException;
 
 public class Activator implements BundleActivator {
 
@@ -14,59 +11,50 @@ public class Activator implements BundleActivator {
 
 	private BundleContext context;
 	private static Activator instance;
-	private ServiceListener listener = event -> {
-        if (event.getType() == ServiceEvent.REGISTERED) {
-            try {
-                installDrivers(event.getServiceReference());
-            }
-            catch (Exception e) {
-                log.warn("Exception caught installing jdbc drivers.", e);
-            }
-        }
-    };
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		instance = this;
 		this.context = context;
-		ServiceReference sr = context.getServiceReference(JdbcRegistry.class.getName());
+		ServiceReference<JdbcRegistry> sr = context.getServiceReference(JdbcRegistry.class);
 		if (sr != null) {
 			installDrivers(sr);
 		}
 		else {
-			String filter = "(objectclass=" + JdbcRegistry.class.getName() + ")";
-			context.addServiceListener(listener, filter);
+			context.addServiceListener(evt -> {
+				if (evt.getType() == ServiceEvent.REGISTERED) {
+					ServiceReference<JdbcRegistry> sr1 = (ServiceReference<JdbcRegistry>)evt.getServiceReference();
+					installDrivers(sr1);
+				}
+			}, "(objectclass=" + JdbcRegistry.class.getName() + ")");
 		}
 	}
 
     @Override
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext context) {
 		this.context = null;
 	}
 
-	public static Activator getInstance() {
-		return instance;
+	public static BundleContext getContext() {
+		return instance.context;
 	}
 	
-	public BundleContext getContext() {
-		return context;
-	}
-	
-	private boolean installDrivers(ServiceReference sr) throws MalformedURLException, RegistryException {
+	private void installDrivers(ServiceReference<JdbcRegistry> sr) {
 		if (sr != null) {
-			JdbcRegistry registry = (JdbcRegistry) context.getService(sr);
+			JdbcRegistry registry = context.getService(sr);
 			try {
-				for (DriverInfo driver : PreferencesPanel.getDrivers()) {
-					registry.addJdbcDriver(driver.getClassName(), 
-							driver.getDriverLocation().toURI().toURL());
+				for (JDBCDriverInfo driver : JDBCDriverTableModel.getDrivers()) {
+					try {
+						registry.addJdbcDriver(driver.getClassName(), driver.getDriverURL());
+					}
+					catch (Exception e) {
+						log.warn("Exception caught installing JDBC driver: ", e);
+					}
 				}
-				return true;
 			}
 			finally {
 				context.ungetService(sr);
 			}
 		}
-		return false;
 	}
-	
 }

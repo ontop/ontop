@@ -13,7 +13,7 @@ public class Activator implements BundleActivator {
     private OSGiJdbcDriver driver;
 
 	@Override
-    public void start(BundleContext context) throws SQLException {
+    public void start(BundleContext context) {
 		try {
             JdbcRegistry registry = new JdbcRegistryImpl();
 			context.registerService(JdbcRegistry.class.getName(), registry, new Hashtable<String, String>());
@@ -26,10 +26,8 @@ public class Activator implements BundleActivator {
 	}
 
     @Override
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext context) throws SQLException {
 		DriverManager.deregisterDriver(driver);
 		driver = null;
 	}
-
-
 }

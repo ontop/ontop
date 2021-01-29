@@ -1,14 +1,16 @@
 package org.protege.osgi.jdbc.prefs;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-public class DriverInfo {
+public class JDBCDriverInfo {
 
     private final String description;
     private final String className;
     private final File   driverLocation;
     
-    public DriverInfo(String description, String className, File driverLocation) {
+    public JDBCDriverInfo(String description, String className, File driverLocation) {
         this.description = description;
         this.className = className;
         this.driverLocation = driverLocation;
@@ -22,8 +24,12 @@ public class DriverInfo {
         return className;
     }
 
-    public File getDriverLocation() {
-        return driverLocation;
+    public String getDriverPath() {
+        return driverLocation.getAbsolutePath();
     }
-    
+
+    public URL getDriverURL() throws MalformedURLException {
+        return driverLocation.toURI().toURL();
+    }
+
 }
