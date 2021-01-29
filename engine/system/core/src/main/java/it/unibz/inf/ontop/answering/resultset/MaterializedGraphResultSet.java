@@ -12,7 +12,7 @@ import org.apache.commons.rdf.api.IRI;
  * Does not allocate resources (e.g. connection) before hasNext() is called.
  *
  */
-public interface MaterializedGraphResultSet extends GraphResultSet<OntopQueryAnsweringException> {
+public interface MaterializedGraphResultSet extends GraphResultSet {
 
     /**
      * Number of RDF triples that have been materialized.

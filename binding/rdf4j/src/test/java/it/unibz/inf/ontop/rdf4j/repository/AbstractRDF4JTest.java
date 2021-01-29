@@ -227,4 +227,9 @@ public class AbstractRDF4JTest {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
         return query.evaluate();
     }
+
+    protected GraphQueryResult evaluateGraph(String queryString) {
+        GraphQuery query = REPO_CONNECTION.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+        return query.evaluate();
+    }
 }

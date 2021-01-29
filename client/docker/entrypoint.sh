@@ -76,6 +76,14 @@ if [ "${ONTOP_CONSTRAINT_FILE+x}" ]; then
   args_array+=("--constraint=${ONTOP_CONSTRAINT_FILE}")
 fi
 
+if [ "${ONTOP_DB_METADATA_FILE+x}" ]; then
+  args_array+=("--db-metadata=${ONTOP_DB_METADATA_FILE}")
+fi
+
+if [ "${ONTOP_VIEW_FILE+x}" ]; then
+  args_array+=("--ontop-views=${ONTOP_VIEW_FILE}")
+fi
+
 if [ "${ONTOP_CORS_ALLOWED_ORIGINS+x}" ]; then
   args_array+=("--cors-allowed-origins=${ONTOP_CORS_ALLOWED_ORIGINS}")
 fi

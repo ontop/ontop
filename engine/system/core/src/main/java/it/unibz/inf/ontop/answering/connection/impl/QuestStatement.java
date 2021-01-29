@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.answering.connection.impl;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
@@ -9,15 +8,9 @@ import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.spec.ontology.RDFFact;
-
-import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -28,7 +21,6 @@ import java.util.concurrent.CountDownLatch;
 public abstract class QuestStatement implements OntopStatement {
 
 	private final QueryReformulator engine;
-	private final InputQueryFactory inputQueryFactory;
 	private final QueryLogger.Factory queryLoggerFactory;
 
 	private QueryExecutionThread executionThread;
@@ -38,9 +30,8 @@ public abstract class QuestStatement implements OntopStatement {
 	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 
-	public QuestStatement(QueryReformulator queryProcessor, InputQueryFactory inputQueryFactory) {
+	public QuestStatement(QueryReformulator queryProcessor) {
 		this.engine = queryProcessor;
-		this.inputQueryFactory = inputQueryFactory;
 		this.queryLoggerFactory = queryProcessor.getQueryLoggerFactory();
 	}
 
@@ -140,31 +131,10 @@ public abstract class QuestStatement implements OntopStatement {
 		return executeBooleanQuery(executableQuery, queryLogger);
 	}
 
-	/**
-	 * TODO: describe
-	 */
-	private SimpleGraphResultSet executeDescribeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
+	private GraphResultSet executeGraphQuery(GraphSPARQLQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, true, queryLogger);
+		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger);
 	}
-
-	private SimpleGraphResultSet executeConstructQuery(ConstructQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, false, queryLogger);
-	}
-
-	@Override
-	public SimpleGraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(constructTemplate, executableQuery, false, queryLogger);
-	}
-
-	/**
-	 * TODO: refactor
-	 */
-	protected abstract SimpleGraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery,
-			boolean collectResults, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
 	/**
 	 * Cancel the processing of the target query.
@@ -191,112 +161,13 @@ public abstract class QuestStatement implements OntopStatement {
 		else if (inputQuery instanceof AskQuery) {
 			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, this::executeBooleanQuery);
 		}
-		else if (inputQuery instanceof ConstructQuery) {
-			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders, this::executeConstructQuery);
-		}
-		else if (inputQuery instanceof DescribeQuery) {
-			return (R) executeDescribeQuery((DescribeQuery) inputQuery, httpHeaders);
+		else if (inputQuery instanceof GraphSPARQLQuery) {
+			return (R) executeInThread((GraphSPARQLQuery) inputQuery, httpHeaders, this::executeGraphQuery);
 		}
 		else {
 			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);
 		}
 	}
-
-	/**
-	 * TODO: completely refactor this old-way of processing DESCRIBE.
-	 *  ---> should be converted into 1 CONSTRUCT query
-	 */
-	private SimpleGraphResultSet executeDescribeQuery(DescribeQuery inputQuery, ImmutableMultimap<String, String> httpHeaders)
-			throws OntopReformulationException, OntopResultConversionException, OntopConnectionException,
-			OntopQueryEvaluationException {
-
-		ImmutableSet<String> constants = extractDescribeQueryConstants(inputQuery);
-
-		SimpleGraphResultSet describeResultSet = null;
-
-		try {
-			// execute describe <uriconst> in subject position
-			for (String constant : constants) {
-				// for each constant we execute a construct with
-				// the uri as subject, and collect the results
-				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
-				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
-
-				SimpleGraphResultSet set = executeInThread(constructQuery, httpHeaders, this::executeDescribeConstructQuery);
-				if (describeResultSet == null) { // just for the first time
-					describeResultSet = set;
-				} else if (set != null) {
-					// 2nd and manyth times execute, but collect result into one object
-					OntopCloseableIterator<RDFFact, OntopConnectionException> iterator = set.iterator();
-					while (iterator.hasNext()){
-						describeResultSet.addNewResult(iterator.next());
-					}
-				}
-			}
-			// execute describe <uriconst> in object position
-			for (String constant : constants) {
-				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
-
-				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
-				SimpleGraphResultSet set = executeInThread(constructQuery, httpHeaders, this::executeDescribeConstructQuery);
-
-				if (describeResultSet == null) { // just for the first time
-					describeResultSet = set;
-				} else if (set != null) {
-					OntopCloseableIterator<RDFFact, OntopConnectionException> iterator = set.iterator();
-					while (iterator.hasNext()){
-						describeResultSet.addNewResult(iterator.next());
-					}
-				}
-			}
-			// Exception is re-cast because not due to the initial input query
-		} catch (OntopInvalidInputQueryException e) {
-			throw new OntopReformulationException(e);
-		}
-		return describeResultSet;
-	}
-
-	private ImmutableSet<String> extractDescribeQueryConstants(DescribeQuery inputQuery)
-			throws OntopQueryEvaluationException, OntopConnectionException,
-		  OntopReformulationException, OntopResultConversionException {
-		String inputQueryString = inputQuery.getInputString();
-
-		// create list of URI constants we want to describe
-		if (SPARQLQueryUtility.isVarDescribe(inputQueryString)) {
-			// if describe ?var, we have to do select distinct ?var first
-			String sel = SPARQLQueryUtility.getSelectVarDescribe(inputQueryString);
-			try {
-				SelectQuery selectQuery = inputQueryFactory.createSelectQuery(sel);
-				TupleResultSet resultSet = execute(selectQuery);
-
-				ImmutableSet.Builder<String> constantSetBuilder = ImmutableSet.builder();
-				while (resultSet.hasNext()) {
-					final OntopBindingSet bindingSet = resultSet.next();
-					Constant constant = Arrays.stream(bindingSet.getBindings()).findFirst().get().getValue();
-					if (constant instanceof IRIConstant) {
-						// collect constants in list
-						constantSetBuilder.add(((IRIConstant) constant).getIRI().getIRIString());
-					}
-				}
-				return constantSetBuilder.build();
-				// Exception is re-cast because not due to the initial input query
-			} catch (OntopInvalidInputQueryException e) {
-				throw new OntopReformulationException(e);
-			}
-		}
-		else if (SPARQLQueryUtility.isURIDescribe(inputQueryString)) {
-			// DESCRIBE <uri> gives direct results, so we put the
-			// <uri> constant directly in the list of constants
-			try {
-				return ImmutableSet.of(SPARQLQueryUtility.getDescribeURI(inputQueryString));
-			} catch (MalformedQueryException e) {
-				throw new OntopReformulationException(e);
-			}
-		}
-		else
-			return ImmutableSet.of();
-	}
-
 
 	/**
 	 * Internal method to start a new query execution thread type defines the
