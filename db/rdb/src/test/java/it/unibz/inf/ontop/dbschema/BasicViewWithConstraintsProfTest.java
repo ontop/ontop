@@ -59,7 +59,7 @@ public class BasicViewWithConstraintsProfTest {
     }
 
     /**
-     * The determinant of the FD is correctly added by a viewfile
+     * The FD is not added when the determinant is missing as a column
      */
     @Test
     public void testProfFailAddingFunctionalDependencyOfHiddenColumn() throws Exception {

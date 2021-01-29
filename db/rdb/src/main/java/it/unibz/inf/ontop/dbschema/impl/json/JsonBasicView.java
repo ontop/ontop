@@ -287,9 +287,15 @@ public class JsonBasicView extends JsonView {
             FunctionalDependency.Builder builder = addUC.isPrimaryKey
                     ? UniqueConstraint.primaryKeyBuilder(relation, addUC.name)
                     : UniqueConstraint.builder(relation, addUC.name);
-
-            JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
-            builder.build();
+            try {
+                JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
+                builder.build();
+            }
+            // If the determinant column has been hidden or does not exist
+            catch (MetadataExtractionException e) {
+                LOGGER.info("Cannot find correct unique constraint determinant {} for relation {}", addUC.name, relation);
+                return ;
+            }
         }
     }
 
