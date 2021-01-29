@@ -15,7 +15,11 @@
         "hidden": ["\"ssn\""]
       },
       "uniqueConstraints": {
-        "added": []
+        "added": [{
+          "name": "student_position_id",
+          "determinants": ["\"position\""],
+          "isPrimaryKey": true
+        }]
       },
       "otherFunctionalDependencies": {
         "added": []

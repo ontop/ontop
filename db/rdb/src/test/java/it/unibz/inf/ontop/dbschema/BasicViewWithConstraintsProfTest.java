@@ -10,9 +10,7 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -30,7 +28,7 @@ public class BasicViewWithConstraintsProfTest {
      * Hidden columns disappear from constraints
      */
     @Test
-    public void testPersonAddUniqueConstraint() throws Exception {
+    public void testProfUniqueConstraintOnHiddenColumns() throws Exception {
         Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
         List<String> constraints = firstView.get()
                 .getUniqueConstraints()
@@ -40,7 +38,24 @@ public class BasicViewWithConstraintsProfTest {
                 .map(v -> v.getID().getName())
                 .collect(Collectors.toList());
 
-        assertEquals(ImmutableList.of("a_id"), constraints);
+        assertEquals(ImmutableList.of("position", "a_id"), constraints);
+    }
+
+    /**
+     * Switch PK from parent to added column. Parent PK becomes standard unique constraint.
+     */
+    @Test
+    public void testProfPKChange() throws Exception {
+        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
+        Map<Object, Object> constraints = firstView.get()
+                .getUniqueConstraints()
+                .stream()
+                .collect(Collectors.toMap(c -> c.getName(), c -> c.isPrimaryKey()));
+
+        Map<Object, Object> otherMap = new HashMap<Object, Object>();
+        otherMap.put( "student_position_id", true);
+        otherMap.put("academic_pkey",false);
+        assertEquals(otherMap, constraints);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
