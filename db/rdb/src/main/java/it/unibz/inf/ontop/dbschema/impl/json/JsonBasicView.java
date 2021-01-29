@@ -295,20 +295,22 @@ public class JsonBasicView extends JsonView {
 
     /**
      * Infer unique constraints from the parent
-     * TODO: If no PK is defined for child, then keep parent PK; otherwise use parent PK as regular non-PK constraint
      */
     private List<AddUniqueConstraints> extractUniqueConstraints(List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations){
 
+        // List of constraints added
         ImmutableList<String> addedConstraintsColumns = uniqueConstraints.added.stream()
                 .map(a -> a.determinants)
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toList());
 
+        // List of columns added
         ImmutableList<String> addedNewColumns = columns.added.stream()
                 .map(a -> a.name)
                 .collect(ImmutableCollectors.toList());
 
+        // Filter inherited constraints
         ImmutableList<UniqueConstraint> inheritedConstraints = baseRelations.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
@@ -323,14 +325,21 @@ public class JsonBasicView extends JsonView {
                         .noneMatch(columns.hidden::contains))
                 .collect(ImmutableCollectors.toList());
 
-        List<AddUniqueConstraints> existingUniqueConstraintsList = inheritedConstraints.stream()
+        // Create unique constraints
+        List<AddUniqueConstraints> inferredUniqueConstraints = inheritedConstraints.stream()
                 .map(i -> new AddUniqueConstraints(
                         i.getName(),
-                        i.getDeterminants().stream().map(c -> c.getID().toString()).collect(Collectors.toList()),
-                        i.isPrimaryKey()))
+                        i.getDeterminants().stream()
+                                .map(c -> c.getID().toString())
+                                .collect(Collectors.toList()),
+                        // If no PK defined in added columns keep parent PK
+                        addUniqueConstraints.stream()
+                                .noneMatch(k -> k.isPrimaryKey.equals(true)) && i.isPrimaryKey()
+                            ))
                 .collect(Collectors.toList());
 
-        return Stream.concat(addUniqueConstraints.stream(), existingUniqueConstraintsList.stream())
+        // Return full list of added and inherited constraints
+        return Stream.concat(addUniqueConstraints.stream(), inferredUniqueConstraints.stream())
                 .collect(Collectors.toList());
     }
 
@@ -371,7 +380,7 @@ public class JsonBasicView extends JsonView {
                         .noneMatch(columns.hidden::contains))
                 .collect(ImmutableCollectors.toList());
 
-        List<AddFunctionalDependency> existingFunctionalDependenciesList = inheritedFunctionalDependencies.stream()
+        List<AddFunctionalDependency> inferredFunctionalDependencies = inheritedFunctionalDependencies.stream()
                 .map(i -> new AddFunctionalDependency(
                         i.getDeterminants().stream()
                                 .map(d -> d.getID().toString())
@@ -381,7 +390,7 @@ public class JsonBasicView extends JsonView {
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
-        return Stream.concat(addFunctionalDependencies.stream(), existingFunctionalDependenciesList.stream())
+        return Stream.concat(addFunctionalDependencies.stream(), inferredFunctionalDependencies.stream())
                 .collect(Collectors.toList());
     }
 
