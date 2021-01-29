@@ -58,6 +58,23 @@ public class BasicViewWithConstraintsProfTest {
         assertEquals(otherMap, constraints);
     }
 
+    /**
+     * The determinant of the FD is correctly added by a viewfile
+     */
+    @Test
+    public void testProfFailAddingFunctionalDependencyOfHiddenColumn() throws Exception {
+        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
+        List<String> otherFD = firstView.get()
+                .getOtherFunctionalDependencies()
+                .stream()
+                .map(d -> d.getDeterminants())
+                .flatMap(Collection::stream)
+                .map(d -> d.getID().getName())
+                .collect(Collectors.toList());
+
+        assertEquals(ImmutableList.of(), otherFD);
+    }
+
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
             throws MetadataExtractionException, FileNotFoundException {

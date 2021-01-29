@@ -358,8 +358,25 @@ public class JsonBasicView extends JsonView {
 
         for (AddFunctionalDependency addFD : list) {
             FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
-            JsonMetadata.deserializeAttributeList(idFactory, addFD.determinants, builder::addDeterminant);
-            JsonMetadata.deserializeAttributeList(idFactory, addFD.dependents, builder::addDependent);
+
+            try {
+                JsonMetadata.deserializeAttributeList(idFactory, addFD.determinants, builder::addDeterminant);
+            }
+            // If the determinant column has been hidden or does not exist
+            catch (MetadataExtractionException e) {
+                LOGGER.info("Cannot find determinant {} for Functional Dependency", addFD.determinants);
+                return ;
+            }
+
+            try {
+                JsonMetadata.deserializeAttributeList(idFactory, addFD.dependents, builder::addDependent);
+            }
+            // If the dependent column has been hidden or does not exist
+            catch (MetadataExtractionException e) {
+                LOGGER.info("Cannot find dependent {} for Functional Dependency", addFD.dependents);
+                return ;
+            }
+
             builder.build();
         }
     }
@@ -371,7 +388,7 @@ public class JsonBasicView extends JsonView {
                                                                 ImmutableList<NamedRelationDefinition> baseRelations,
                                                                              QuotedIDFactory idFactory){
 
-
+        // List of added columns
         ImmutableList<String> addedNewColumns = columns.added.stream()
                 .map(a -> a.name)
                 .collect(ImmutableCollectors.toList());
@@ -381,6 +398,7 @@ public class JsonBasicView extends JsonView {
                 .map(attributeName -> normalizeAttributeName(attributeName, idFactory))
                 .collect(ImmutableCollectors.toList());
 
+        // Filter inherited functional dependencies
         ImmutableList<FunctionalDependency> inheritedFunctionalDependencies = baseRelations.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
