@@ -276,19 +276,19 @@ public class JsonBasicView extends JsonView {
     }
 
     private void insertUniqueConstraints(NamedRelationDefinition relation,
-                                         QuotedIDFactory quotedIDFactory,
+                                         QuotedIDFactory idFactory,
                                          List<AddUniqueConstraints> addUniqueConstraints,
                                          ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
 
 
-        List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations);
+        List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations, idFactory);
 
         for (AddUniqueConstraints addUC : list) {
             FunctionalDependency.Builder builder = addUC.isPrimaryKey
                     ? UniqueConstraint.primaryKeyBuilder(relation, addUC.name)
                     : UniqueConstraint.builder(relation, addUC.name);
 
-            JsonMetadata.deserializeAttributeList(quotedIDFactory, addUC.determinants, builder::addDeterminant);
+            JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
             builder.build();
         }
     }
@@ -297,7 +297,8 @@ public class JsonBasicView extends JsonView {
      * Infer unique constraints from the parent
      */
     private List<AddUniqueConstraints> extractUniqueConstraints(List<AddUniqueConstraints> addUniqueConstraints,
-                                                                ImmutableList<NamedRelationDefinition> baseRelations){
+                                                                ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                QuotedIDFactory idFactory){
 
         // List of constraints added
         ImmutableList<String> addedConstraintsColumns = uniqueConstraints.added.stream()
@@ -310,19 +311,24 @@ public class JsonBasicView extends JsonView {
                 .map(a -> a.name)
                 .collect(ImmutableCollectors.toList());
 
+        // List of hidden columns
+        ImmutableList<String> hiddenColumnNames = columns.hidden.stream()
+                .map(attributeName -> normalizeAttributeName(attributeName, idFactory))
+                .collect(ImmutableCollectors.toList());
+
         // Filter inherited constraints
         ImmutableList<UniqueConstraint> inheritedConstraints = baseRelations.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
                 .filter(c -> c.getAttributes().stream()
-                        .map(Object::toString)
+                        .map(a -> a.getID().getName())
                         .noneMatch(addedConstraintsColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(Object::toString)
+                        .map(a -> a.getID().getName())
                         .noneMatch(addedNewColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(Object::toString)
-                        .noneMatch(columns.hidden::contains))
+                        .map(a -> a.getID().getName())
+                        .noneMatch(hiddenColumnNames::contains))
                 .collect(ImmutableCollectors.toList());
 
         // Create unique constraints
@@ -348,7 +354,7 @@ public class JsonBasicView extends JsonView {
                                               List<AddFunctionalDependency> addFunctionalDependency,
                                               ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
 
-        List<AddFunctionalDependency> list = extractOtherFunctionalDependencies(addFunctionalDependency, baseRelations);
+        List<AddFunctionalDependency> list = extractOtherFunctionalDependencies(addFunctionalDependency, baseRelations, idFactory);
 
         for (AddFunctionalDependency addFD : list) {
             FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
@@ -362,11 +368,17 @@ public class JsonBasicView extends JsonView {
      * Infer functional dependencies from the parent
      */
     private List<AddFunctionalDependency> extractOtherFunctionalDependencies(List<AddFunctionalDependency> addFunctionalDependencies,
-                                                                ImmutableList<NamedRelationDefinition> baseRelations){
+                                                                ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                             QuotedIDFactory idFactory){
 
 
         ImmutableList<String> addedNewColumns = columns.added.stream()
                 .map(a -> a.name)
+                .collect(ImmutableCollectors.toList());
+
+        // List of hidden columns
+        ImmutableList<String> hiddenColumnNames = columns.hidden.stream()
+                .map(attributeName -> normalizeAttributeName(attributeName, idFactory))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<FunctionalDependency> inheritedFunctionalDependencies = baseRelations.stream()
@@ -377,7 +389,7 @@ public class JsonBasicView extends JsonView {
                         .noneMatch(addedNewColumns::contains))
                 .filter(f -> f.getDeterminants().stream()
                         .map(d -> d.getID().toString())
-                        .noneMatch(columns.hidden::contains))
+                        .noneMatch(hiddenColumnNames::contains))
                 .collect(ImmutableCollectors.toList());
 
         List<AddFunctionalDependency> inferredFunctionalDependencies = inheritedFunctionalDependencies.stream()

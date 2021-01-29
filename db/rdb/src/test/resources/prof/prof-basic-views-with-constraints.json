@@ -1,0 +1,29 @@
+{
+  "relations": [
+    {
+      "name": [
+        "\"views\"",
+        "\"uni1\"",
+        "\"academic\""
+      ],
+      "baseRelation": [
+        "\"uni1\"",
+        "\"academic\""
+      ],
+      "columns": {
+        "added": [],
+        "hidden": ["\"ssn\""]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}
