@@ -9,6 +9,13 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.DuplicateFormatFlagsException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
 
 public class ViewDefinitionParsingTest {
 
@@ -24,9 +31,25 @@ public class ViewDefinitionParsingTest {
     public void testValidProfBasicViews() throws MetadataExtractionException, FileNotFoundException {
 
         ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views.json", "/prof/prof.db-extract.json");
-
-        // TODO: continue
     }
+
+    /**
+     * Duplicate unique constraints defined in view
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testValidProfBasicViews_DuplicateUniqueConstraints() throws MetadataExtractionException, FileNotFoundException {
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views-with-constraints-duplicate-constraints.json", "/prof/prof_with_constraints.db-extract.json");
+    }
+
+    /**
+     * Duplicate functional dependency defined in view - TEST FAILS
+     * TODO: User can duplicate functional dependencies
+     */
+    @Test
+    public void testValidProfBasicViews_DuplicateFunctionalDependency() throws MetadataExtractionException, FileNotFoundException {
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views-with-constraints-duplicateFD.json", "/prof/prof_with_constraints.db-extract.json");
+    }
+
 
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,

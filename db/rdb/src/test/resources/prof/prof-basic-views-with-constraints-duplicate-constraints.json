@@ -17,18 +17,28 @@
       "uniqueConstraints": {
         "added": [
           {
-          "name": "student_position_id",
-          "determinants": ["\"position\""],
-          "isPrimaryKey": true
+            "name": "student_position_id",
+            "determinants": ["\"position\""],
+            "isPrimaryKey": true
+          },
+          {
+            "name": "ssd",
+            "determinants": ["\"ssd\""],
+            "isPrimaryKey": true
+          },
+          {
+            "name": "ssd",
+            "determinants": ["\"position\""],
+            "isPrimaryKey": true
           }
         ]
       },
       "otherFunctionalDependencies": {
         "added": [
-            {
-              "determinants": ["\"ssn\""],
-              "dependents": ["\"last_name\""]
-            }
+          {
+            "determinants": ["\"ssn\""],
+            "dependents": ["\"last_name\""]
+          }
         ]
       },
       "foreignKeys": {

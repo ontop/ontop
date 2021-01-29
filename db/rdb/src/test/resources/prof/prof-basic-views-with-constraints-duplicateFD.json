@@ -17,18 +17,22 @@
       "uniqueConstraints": {
         "added": [
           {
-          "name": "student_position_id",
-          "determinants": ["\"position\""],
-          "isPrimaryKey": true
+            "name": "student_position_id",
+            "determinants": ["\"position\""],
+            "isPrimaryKey": true
           }
         ]
       },
       "otherFunctionalDependencies": {
         "added": [
-            {
-              "determinants": ["\"ssn\""],
-              "dependents": ["\"last_name\""]
-            }
+          {
+            "determinants": ["\"first_name\""],
+            "dependents": ["\"last_name\""]
+          },
+          {
+            "determinants": ["\"first_name\""],
+            "dependents": ["\"last_name\""]
+          }
         ]
       },
       "foreignKeys": {

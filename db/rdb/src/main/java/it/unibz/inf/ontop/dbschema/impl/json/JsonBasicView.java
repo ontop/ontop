@@ -284,17 +284,16 @@ public class JsonBasicView extends JsonView {
         List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations, idFactory);
 
         for (AddUniqueConstraints addUC : list) {
-            FunctionalDependency.Builder builder = addUC.isPrimaryKey
-                    ? UniqueConstraint.primaryKeyBuilder(relation, addUC.name)
-                    : UniqueConstraint.builder(relation, addUC.name);
             try {
+                FunctionalDependency.Builder builder = addUC.isPrimaryKey
+                        ? UniqueConstraint.primaryKeyBuilder(relation, addUC.name)
+                        : UniqueConstraint.builder(relation, addUC.name);
                 JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
                 builder.build();
             }
             // If the determinant column has been hidden or does not exist
             catch (MetadataExtractionException e) {
-                LOGGER.info("Cannot find correct unique constraint determinant {} for relation {}", addUC.name, relation);
-                return ;
+                LOGGER.info("Cannot find correct unique constraint determinant {} for relation {}", addUC.name, relation.getID().toString());
             }
         }
     }
@@ -371,7 +370,6 @@ public class JsonBasicView extends JsonView {
             // If the determinant column has been hidden or does not exist
             catch (MetadataExtractionException e) {
                 LOGGER.info("Cannot find determinant {} for Functional Dependency", addFD.determinants);
-                return ;
             }
 
             try {
@@ -380,7 +378,6 @@ public class JsonBasicView extends JsonView {
             // If the dependent column has been hidden or does not exist
             catch (MetadataExtractionException e) {
                 LOGGER.info("Cannot find dependent {} for Functional Dependency", addFD.dependents);
-                return ;
             }
 
             builder.build();
