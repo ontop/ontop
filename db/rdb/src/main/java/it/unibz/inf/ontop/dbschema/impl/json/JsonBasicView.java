@@ -310,11 +310,17 @@ public class JsonBasicView extends JsonView {
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<UniqueConstraint> inheritedConstraints = baseRelations.stream()
-                .map(b -> b.getUniqueConstraints())
+                .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
-                .filter(c -> !addedConstraintsColumns.contains(c.getAttributes().asList().toString()))
-                .filter(c -> !columns.hidden.contains(c.getAttributes().asList().toString()))
-                .filter(c -> !addedNewColumns.contains(c.getAttributes().asList().toString()))
+                .filter(c -> c.getAttributes().stream()
+                        .map(Object::toString)
+                        .noneMatch(addedConstraintsColumns::contains))
+                .filter(c -> c.getAttributes().stream()
+                        .map(Object::toString)
+                        .noneMatch(addedNewColumns::contains))
+                .filter(c -> c.getAttributes().stream()
+                        .map(Object::toString)
+                        .noneMatch(columns.hidden::contains))
                 .collect(ImmutableCollectors.toList());
 
         List<AddUniqueConstraints> existingUniqueConstraintsList = inheritedConstraints.stream()
@@ -355,18 +361,24 @@ public class JsonBasicView extends JsonView {
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<FunctionalDependency> inheritedFunctionalDependencies = baseRelations.stream()
-                .map(b -> b.getOtherFunctionalDependencies())
+                .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
-                .filter(n -> !addedNewColumns.contains(n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
-                .filter(n -> !addedNewColumns.contains(n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
-                .filter(n -> !columns.hidden.contains(n.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
-                .filter(n -> !columns.hidden.contains(n.getDependents().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
+                .filter(f -> f.getDeterminants().stream()
+                        .map(d -> d.getID().toString())
+                        .noneMatch(addedNewColumns::contains))
+                .filter(f -> f.getDeterminants().stream()
+                        .map(d -> d.getID().toString())
+                        .noneMatch(columns.hidden::contains))
                 .collect(ImmutableCollectors.toList());
 
         List<AddFunctionalDependency> existingFunctionalDependenciesList = inheritedFunctionalDependencies.stream()
                 .map(i -> new AddFunctionalDependency(
-                        i.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList()),
-                        i.getDeterminants().stream().map(d -> d.getID().toString()).collect(Collectors.toList())))
+                        i.getDeterminants().stream()
+                                .map(d -> d.getID().toString())
+                                .collect(Collectors.toList()),
+                        i.getDependents().stream()
+                                .map(d -> d.getID().toString())
+                                .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
         return Stream.concat(addFunctionalDependencies.stream(), existingFunctionalDependenciesList.stream())
