@@ -77,6 +77,69 @@ public class BasicViewWithConstraintsParsingTest {
         assertEquals(ImmutableList.of("locality"), otherFD);
     }
 
+    /**
+     * Add FK destination relation name via viewfile
+     */
+    @Test
+    public void testPersonAddForeignKey_DestinationRelation() throws Exception {
+        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
+        List<String> destination_relation = firstView.get()
+                .getForeignKeys()
+                .stream()
+                .map(f -> f.getReferencedRelation())
+                .map(d -> d.getID().getComponents().get(0).getName())
+                .collect(Collectors.toList());
+
+        assertEquals(ImmutableList.of("statuses"), destination_relation);
+    }
+
+    /**
+     * Add destination relation foreign key column name via viewfile
+     */
+    @Test
+    public void testPersonAddForeignKey_DestinationColumn() throws Exception {
+        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
+        List<String> destination_column = firstView.get()
+                .getForeignKeys()
+                .stream()
+                .map(f -> f.getComponents())
+                .map(c -> c.get(0).getReferencedAttribute().getID().getName())
+                .collect(Collectors.toList());
+
+        assertEquals(ImmutableList.of("status_id"), destination_column);
+    }
+
+    /**
+     * Add source relation key column name via viewfile
+     */
+    @Test
+    public void testPersonAddForeignKey_SourceColumn() throws Exception {
+        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
+        List<String> source_column = firstView.get()
+                .getForeignKeys()
+                .stream()
+                .map(f -> f.getComponents())
+                .map(c -> c.get(0).getAttribute().getID().getName())
+                .collect(Collectors.toList());
+
+        assertEquals(ImmutableList.of("status"), source_column);
+    }
+
+    /**
+     * Add new foreign key name
+     */
+    @Test
+    public void testPersonAddForeignKey_FKName() throws Exception {
+        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
+        List<String> fk_name = firstView.get()
+                .getForeignKeys()
+                .stream()
+                .map(f -> f.getName())
+                .collect(Collectors.toList());
+
+        assertEquals(ImmutableList.of("status_id_fkey"), fk_name);
+    }
+
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
             throws MetadataExtractionException, FileNotFoundException {
