@@ -20,8 +20,10 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -43,6 +45,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DialogUtils {
+
+	public static final String HTML_TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
+
+
+	public static <T,V> void launchWorkerWithProgressMonitor(Component parent, String message, SwingWorker<T, V> worker) {
+		ProgressMonitor progressMonitor = new ProgressMonitor(
+				parent, message, "", 0, 100);
+		progressMonitor.setProgress(0);
+		worker.addPropertyChangeListener(evt -> {
+			if ("progress".equals(evt.getPropertyName())) {
+				int progress = (Integer) evt.getNewValue();
+				progressMonitor.setProgress(progress);
+				progressMonitor.setNote("          completed " + progress + "%.");
+				if (progressMonitor.isCanceled())
+					worker.cancel(false);
+			}
+		});
+		worker.execute();
+	}
+
+
 
 	public static Function<String, String> getExtensionReplacer(String replacement) {
 		return shortForm -> {

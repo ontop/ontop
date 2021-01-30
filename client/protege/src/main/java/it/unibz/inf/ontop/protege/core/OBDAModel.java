@@ -281,17 +281,15 @@ public class OBDAModel {
             else
                 map.put(id, triplesMap);
         }
-        // TODO: fix
-        //mappingListeners.forEach(OBDAMappingListener::mappingInserted);
-        System.out.println("THREAD " + SwingUtilities.isEventDispatchThread());
+        mappingListeners.forEach(OBDAMappingListener::mappingInserted);
 
         if (!duplicateIds.isEmpty())
-            throw new DuplicateMappingException("IDs " + String.join(", ", duplicateIds));
+            throw new DuplicateMappingException(String.join(", ", duplicateIds));
     }
 
     public void add(String id, String source, ImmutableList<TargetAtom> targetQuery) throws DuplicateMappingException {
         if (map.containsKey(id))
-            throw new DuplicateMappingException("ID " + id);
+            throw new DuplicateMappingException(id);
 
         map.put(id, new OntopNativeSQLPPTriplesMap(id, sourceQueryFactory.createSourceQuery(source), targetQuery));
         mappingListeners.forEach(OBDAMappingListener::mappingInserted);

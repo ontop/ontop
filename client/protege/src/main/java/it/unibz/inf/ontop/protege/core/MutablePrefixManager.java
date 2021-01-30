@@ -73,6 +73,16 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 			generateDefaultPrefixNamespaceIfPossible(newID);
 	}
 
+	public String generateUniquePrefixForBootstrapper(String baseIri) {
+		String prefix = "g:";
+		Map<String, String> map = owlmapper.getPrefixName2PrefixMap();
+		while (map.containsKey(prefix))
+			prefix = "g" + prefix;
+
+		addPrefix(prefix, baseIri);
+		return prefix;
+	}
+
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
 		com.google.common.base.Optional<org.semanticweb.owlapi.model.IRI> ontologyIRI = ontologyID.getOntologyIRI();

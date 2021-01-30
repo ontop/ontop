@@ -12,23 +12,19 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
+import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
-import org.protege.editor.owl.ui.prefix.PrefixUtilities;
-import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +34,7 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
 
 public class OBDAModelManager implements Disposable {
 
@@ -470,6 +466,32 @@ public class OBDAModelManager implements Disposable {
 		catch (Exception e) {
 			log.warn(e.getMessage());
 		}
+	}
+
+	public List<AddAxiom> insertOntologyDeclarations(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) {
+		OWLModelManager modelManager = owlEditorKit.getModelManager();
+		OWLOntologyManager manager = modelManager.getActiveOntology().getOWLOntologyManager();
+		Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
+				manager,
+				triplesMaps.stream().flatMap(ax -> ax.getTargetAtoms().stream()),
+				typeFactory,
+				bootstraped);
+
+		List<AddAxiom> addAxioms = declarationAxioms.stream()
+				.map(ax -> new AddAxiom(modelManager.getActiveOntology(), ax))
+				.collect(Collectors.toList());
+
+		modelManager.applyChanges(addAxioms);
+
+		return addAxioms;
+	}
+
+	public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
+		OWLModelManager modelManager = owlEditorKit.getModelManager();
+		OntopSQLOWLAPIConfiguration configuration = getConfigurationManager()
+				.buildOntopSQLOWLAPIConfiguration(modelManager.getActiveOntology());
+
+		return configuration;
 	}
 
 	/*

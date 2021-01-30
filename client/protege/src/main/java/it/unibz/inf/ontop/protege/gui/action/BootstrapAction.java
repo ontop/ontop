@@ -25,25 +25,19 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +49,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
 
 public class BootstrapAction extends ProtegeAction {
 
@@ -65,31 +61,38 @@ public class BootstrapAction extends ProtegeAction {
 
 	private final Logger log = LoggerFactory.getLogger(BootstrapAction.class);
 
+	private static final String DIALOG_TITLE = "Bootstrapping";
+
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 
 		OBDAModelManager modelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
 		MutablePrefixManager prefixManager = modelManager.getActiveOBDAModel().getMutablePrefixManager();
 
+		String defaultBaseIRI = prefixManager.getDefaultIriPrefix()
+				.replace("#", "/");
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-		JLabel baseIriLabel = new JLabel(
-				"Base IRI - the prefix to be used for all generated classes and properties: ");
+
+		JLabel baseIriLabel = new JLabel("Base IRI - the prefix " +
+				"to be used for all generated classes and properties: ");
 		baseIriLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(baseIriLabel);
+
 		Dimension minsize1 = new Dimension(10, 10);
 		panel.add(new Box.Filler(minsize1, minsize1, minsize1));
-		JTextField baseIriField = new JTextField();
-		baseIriField.setText(prefixManager.getDefaultIriPrefix()
-				.replace("#", "/"));
+
+		JTextField baseIriField = new JTextField(defaultBaseIRI);
 		baseIriField.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(baseIriField);
+
 		Dimension minsize2 = new Dimension(20, 20);
 		panel.add(new Box.Filler(minsize2, minsize2, minsize2));
 
 		if (JOptionPane.showOptionDialog(getWorkspace(),
 				panel,
-				"Bootstrapping base IRI",
+				DIALOG_TITLE,
 				JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
 				null,
@@ -97,118 +100,140 @@ public class BootstrapAction extends ProtegeAction {
 				null) != JOptionPane.OK_OPTION)
 			return;
 
-		String baseIri = baseIriField.getText().trim();
-		if (baseIri.contains("#")) {
-			JOptionPane.showMessageDialog(getWorkspace(),
-					"Base IRI cannot contain '#'",
-					"Bootstrapping error",
+		String baseIri0 = baseIriField.getText().trim();
+		if (baseIri0.contains("#")) {
+			DialogUtils.showPrettyMessageDialog(getWorkspace(),
+					"Base IRIs cannot contain '#':\n" +
+							baseIri0 + " is not a valid base IRI.",
+					DIALOG_TITLE,
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		String bootstrapPrefix = "g:";
-		Map<String, String> map = prefixManager.getPrefixMap();
-		while (map.containsKey(bootstrapPrefix)) {
-			bootstrapPrefix = "g" + bootstrapPrefix;
-		}
-		prefixManager.addPrefix(bootstrapPrefix, baseIri);
+		String baseIri = DirectMappingEngine.fixBaseURI(
+				baseIri0.isEmpty() ? defaultBaseIRI : baseIri0);
+		prefixManager.generateUniquePrefixForBootstrapper(baseIri);
 
-		Thread thread = new Thread("Bootstrapper Action Thread") {
-			@Override
-			public void run() {
-				try {
-					OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-							"Bootstrapping ontology and mappings...", getWorkspace());
-					BootstrapperThread t = new BootstrapperThread();
-					monitor.addProgressListener(t);
-					monitor.start();
-					t.run(baseIri);
-					monitor.stop();
-					JOptionPane.showMessageDialog(getWorkspace(),
-							"Bootstrapping completed.",
-							"Done",
-							JOptionPane.INFORMATION_MESSAGE);
-
-					SwingUtilities.invokeLater(() -> {
-						getWorkspace().getTopLevelAncestor().repaint();
-					});
-				}
-				catch (Throwable e) {
-					DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Bootstrapping error.", log, e);
-				}
-			}
-		};
-		thread.start();
+		DialogUtils.launchWorkerWithProgressMonitor(getWorkspace(),
+				"Bootstrapping",
+				new BootstrapWorker(baseIri));
 	}
 
-	// TODO: not a thread
-	private class BootstrapperThread implements OBDAProgressListener {
+	private class BootstrapWorker extends SwingWorker<ImmutableList<SQLPPTriplesMap>, Void> {
 
-		public void run(String baseIri0) throws Exception {
+		private final String baseIri;
+		private final JDBCMetadataProviderFactory metadataProviderFactory;
+		private final DirectMappingEngine directMappingEngine;
+		private final OntopStandaloneSQLSettings settings;
+
+		private final AtomicInteger currentMappingIndex;
+
+		BootstrapWorker(String baseIri) {
+			this.baseIri = baseIri;
+
 			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
-			String baseIri = (baseIri0 == null || baseIri0.isEmpty())
-					? obdaModel.getMutablePrefixManager().getDefaultIriPrefix()
-					: DirectMappingEngine.fixBaseURI(baseIri0);
+			OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
+			this.settings = configuration.getSettings();
 
-			OWLModelManager modelManager = ((OWLEditorKit)getEditorKit()).getModelManager();
-			OntopSQLOWLAPIConfiguration configuration = obdaModelManager
-					.getConfigurationManager()
-					.buildOntopSQLOWLAPIConfiguration(modelManager.getActiveOntology());
 			Injector injector = configuration.getInjector();
+			this.metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
+			this.directMappingEngine = injector.getInstance(DirectMappingEngine.class);
 
-			JDBCConnectionManager connManager = JDBCConnectionManager.getJDBCConnectionManager();
-			try (Connection conn = connManager.getConnection(configuration.getSettings())) {
-				JDBCMetadataProviderFactory metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
+			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
+			this.currentMappingIndex = new AtomicInteger(obdaModel.getMapping().size() + 1);
+		}
+
+		@Override
+		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
+
+			final ImmutableMetadata metadata;
+			final double UNIT;
+
+			setProgress(0);
+
+			JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
+			try (Connection conn = connectionManager.getConnection(settings)) {
+
 				MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
-				// this operation is EXPENSIVE
-				ImmutableList<NamedRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
+				ImmutableList<RelationID> relationIds = metadataProvider.getRelationIDs();
 
-				Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
-				AtomicInteger currentMappingIndex = new AtomicInteger(obdaModel.getMapping().size() + 1);
+				UNIT = 50.0 / relationIds.size();
 
-				DirectMappingEngine directMappingEngine = injector.getInstance(DirectMappingEngine.class);
-				ImmutableList<SQLPPTriplesMap> sqlppTriplesMaps = relations.stream()
-						.flatMap(td -> directMappingEngine.getMapping(td, baseIri, bnodeTemplateMap, currentMappingIndex).stream())
-						.collect(ImmutableCollectors.toList());
-
-				try {
-					obdaModel.add(sqlppTriplesMaps);
+				CachingMetadataLookup lookup = new CachingMetadataLookup(metadataProvider);
+				int count = 0;
+				for (RelationID id : relationIds) {
+					lookup.getRelation(id);
+					count++;
+					setProgress((int) (count * UNIT));
+					if (isCancelled())
+						return null;
+					Thread.sleep(1000);
 				}
-				catch (DuplicateMappingException e) {
-					JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found: " + e.getLocalizedMessage());
-				}
-
-				// update protege ontology
-				OWLOntologyManager manager = modelManager.getActiveOntology().getOWLOntologyManager();
-				TypeFactory typeFactory = obdaModelManager.getTypeFactory();
-				Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
-						manager,
-						sqlppTriplesMaps.stream()
-								.flatMap(ax -> ax.getTargetAtoms().stream()),
-						typeFactory,
-						true);
-
-				List<AddAxiom> addAxioms = declarationAxioms.stream()
-						.map(ax -> new AddAxiom(modelManager.getActiveOntology(), ax))
-						.collect(Collectors.toList());
-
-				modelManager.applyChanges(addAxioms);
+				metadata = lookup.extractImmutableMetadata();
 			}
-			catch (SQLException e) {
-				throw new RuntimeException("JDBC connection is missing, have you setup Ontop Mapping properties?\n" +
-						"Message: " + e.getMessage());
+
+			{
+				Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+
+				int count = 0;
+				ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
+				for (NamedRelationDefinition relation : metadata.getAllRelations()) {
+					builder.addAll(directMappingEngine
+							.getMapping(relation, baseIri, bnodeTemplateMap, currentMappingIndex));
+					count++;
+					setProgress(50 + (int)(count * UNIT));
+					if (isCancelled())
+						return null;
+					Thread.sleep(1000);
+				}
+				return builder.build();
 			}
 		}
 
 		@Override
-		public void actionCanceled()  { }
+		public void done() {
+			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
+			try {
+				ImmutableList<SQLPPTriplesMap> triplesMaps = get();
+				try {
+					obdaModel.add(triplesMaps);
+				}
+				catch (DuplicateMappingException e) {
+					JOptionPane.showMessageDialog(getWorkspace(),
+							"<html><b>Duplicate mapping IDs:</b>" +
+									HTML_TAB + e.getMessage() + "</html>",
+							DIALOG_TITLE,
+							JOptionPane.ERROR_MESSAGE);
+				}
 
-		@Override
-		public boolean isCancelled() { return false; }
+				List<AddAxiom> addAxioms = obdaModelManager
+						.insertOntologyDeclarations(triplesMaps, true);
 
-		@Override
-		public boolean isErrorShown() { return false; }
+				JOptionPane.showMessageDialog(getWorkspace(),
+						"<html><b>Bootstrapping is complete.</b><br><br>" +
+								HTML_TAB + "<b>" + triplesMaps.size() + "</b> triple maps inserted into the mapping.<br><br>" +
+								HTML_TAB + "<b>" + addAxioms.size() + "</b> declaration axioms (re)inserted into the ontology.</html>",
+						DIALOG_TITLE,
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+			catch (CancellationException | InterruptedException e) {
+				/* NO-OP */
+			}
+			catch (ExecutionException e) {
+				if (e.getCause() instanceof SQLException) {
+					JOptionPane.showMessageDialog(getWorkspace(),
+							"<html><b>Error connecting to the database:</b> " + e.getCause().getMessage() + ".<br><br>" +
+									HTML_TAB + "JDBC driver: " + settings.getJdbcDriver() + "<br>" +
+									HTML_TAB + "Connection URL: " + settings.getJdbcUrl() + "<br>" +
+									HTML_TAB + "Username: " + settings.getJdbcUser() + "</html>",
+							DIALOG_TITLE,
+							JOptionPane.ERROR_MESSAGE);
+				}
+				else
+					DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Bootstrapper error.", log, e);
+			}
+		}
 	}
 
 
