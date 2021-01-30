@@ -293,7 +293,7 @@ public class JsonBasicView extends JsonView {
             }
             // If the determinant column has been hidden or does not exist
             catch (MetadataExtractionException e) {
-                LOGGER.info("Cannot find correct unique constraint determinant {} for relation {}", addUC.name, relation.getID().toString());
+                LOGGER.warn("Cannot find correct unique constraint determinant {} for relation {}", addUC.name, relation.getID().toString());
             }
         }
     }
@@ -369,7 +369,7 @@ public class JsonBasicView extends JsonView {
             }
             // If the determinant column has been hidden or does not exist
             catch (MetadataExtractionException e) {
-                LOGGER.info("Cannot find determinant {} for Functional Dependency", addFD.determinants);
+                LOGGER.warn("Cannot find determinant {} for Functional Dependency", addFD.determinants);
             }
 
             try {
@@ -377,7 +377,7 @@ public class JsonBasicView extends JsonView {
             }
             // If the dependent column has been hidden or does not exist
             catch (MetadataExtractionException e) {
-                LOGGER.info("Cannot find dependent {} for Functional Dependency", addFD.dependents);
+                LOGGER.warn("Cannot find dependent {} for Functional Dependency", addFD.dependents);
             }
 
             builder.build();
@@ -409,6 +409,12 @@ public class JsonBasicView extends JsonView {
                         .map(d -> d.getID().toString())
                         .noneMatch(addedNewColumns::contains))
                 .filter(f -> f.getDeterminants().stream()
+                        .map(d -> d.getID().toString())
+                        .noneMatch(hiddenColumnNames::contains))
+                .filter(f -> f.getDependents().stream()
+                        .map(d -> d.getID().toString())
+                        .noneMatch(addedNewColumns::contains))
+                .filter(f -> f.getDependents().stream()
                         .map(d -> d.getID().toString())
                         .noneMatch(hiddenColumnNames::contains))
                 .collect(ImmutableCollectors.toList());
@@ -529,9 +535,6 @@ public class JsonBasicView extends JsonView {
         }
     }
 
-    @JsonPropertyOrder({
-            "added"
-    })
     private static class OtherFunctionalDependencies extends JsonOpenObject {
         @Nonnull
         public final List<AddFunctionalDependency> added;
@@ -559,9 +562,6 @@ public class JsonBasicView extends JsonView {
         }
     }
 
-    @JsonPropertyOrder({
-            "added"
-    })
     private static class ForeignKeys extends JsonOpenObject {
         @Nonnull
         public final List<AddForeignKey> added;
