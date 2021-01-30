@@ -9,18 +9,13 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.DuplicateFormatFlagsException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
+import java.io.IOException;
+import java.io.Reader;
 
 public class ViewDefinitionParsingTest {
 
     @Test
-    public void testValidPersonBasicViews() throws MetadataExtractionException, FileNotFoundException {
+    public void testValidPersonBasicViews() throws MetadataExtractionException, FileNotFoundException, IOException {
 
         ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/person/basic_views.json", "/person/person.db-extract.json");
 
@@ -28,7 +23,7 @@ public class ViewDefinitionParsingTest {
     }
 
     @Test
-    public void testValidProfBasicViews() throws MetadataExtractionException, FileNotFoundException {
+    public void testValidProfBasicViews() throws MetadataExtractionException, FileNotFoundException, IOException {
 
         ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views.json", "/prof/prof.db-extract.json");
     }
@@ -37,14 +32,14 @@ public class ViewDefinitionParsingTest {
      * Multiple primary keys defined in view
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testValidProfBasicViews_DuplicateUniqueConstraints() throws MetadataExtractionException, FileNotFoundException {
+    public void testValidProfBasicViews_DuplicateUniqueConstraints() throws MetadataExtractionException, FileNotFoundException, IOException {
         ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views-with-constraints-duplicate-constraints.json", "/prof/prof_with_constraints.db-extract.json");
     }
 
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
-            throws MetadataExtractionException, FileNotFoundException {
+            throws MetadataExtractionException, FileNotFoundException, IOException {
 
         OntopSQLCoreConfiguration configuration = OntopSQLCoreConfiguration.defaultBuilder()
                 .jdbcUrl("jdbc:h2:mem:nowhere")
@@ -55,11 +50,15 @@ public class ViewDefinitionParsingTest {
         SerializedMetadataProvider.Factory serializedMetadataProviderFactory = injector.getInstance(SerializedMetadataProvider.Factory.class);
         OntopViewMetadataProvider.Factory viewMetadataProviderFactory = injector.getInstance(OntopViewMetadataProvider.Factory.class);
 
-        SerializedMetadataProvider dbMetadataProvider = serializedMetadataProviderFactory.getMetadataProvider(
-                new FileReader(ViewDefinitionParsingTest.class.getResource(dbMetadataFilePath).getPath()));
+        SerializedMetadataProvider dbMetadataProvider;
+        try (Reader dbMetadataReader = new FileReader(dbMetadataFilePath)) {
+            dbMetadataProvider = serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader);
+        }
 
-        OntopViewMetadataProvider viewMetadataProvider = viewMetadataProviderFactory.getMetadataProvider(dbMetadataProvider,
-                new FileReader(ViewDefinitionParsingTest.class.getResource(viewFilePath).getPath()));
+        OntopViewMetadataProvider viewMetadataProvider;
+        try (Reader viewReader = new FileReader(viewFilePath)) {
+            viewMetadataProvider = viewMetadataProviderFactory.getMetadataProvider(dbMetadataProvider, viewReader);
+        }
 
         ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(viewMetadataProvider);
 

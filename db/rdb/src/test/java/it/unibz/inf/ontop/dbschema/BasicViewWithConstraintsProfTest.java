@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,7 +24,7 @@ public class BasicViewWithConstraintsProfTest {
 
     ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions(VIEW_FILE, DBMETADATA_FILE);
 
-    public BasicViewWithConstraintsProfTest() throws MetadataExtractionException, FileNotFoundException {
+    public BasicViewWithConstraintsProfTest() throws MetadataExtractionException, FileNotFoundException, IOException {
     }
 
     /**
@@ -74,7 +76,7 @@ public class BasicViewWithConstraintsProfTest {
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
-            throws MetadataExtractionException, FileNotFoundException {
+            throws MetadataExtractionException, FileNotFoundException, IOException {
 
         OntopSQLCoreConfiguration configuration = OntopSQLCoreConfiguration.defaultBuilder()
                 .jdbcUrl("jdbc:h2:mem:nowhere")
@@ -85,11 +87,15 @@ public class BasicViewWithConstraintsProfTest {
         SerializedMetadataProvider.Factory serializedMetadataProviderFactory = injector.getInstance(SerializedMetadataProvider.Factory.class);
         OntopViewMetadataProvider.Factory viewMetadataProviderFactory = injector.getInstance(OntopViewMetadataProvider.Factory.class);
 
-        SerializedMetadataProvider dbMetadataProvider = serializedMetadataProviderFactory.getMetadataProvider(
-                new FileReader(dbMetadataFilePath));
+        SerializedMetadataProvider dbMetadataProvider;
+        try (Reader dbMetadataReader = new FileReader(dbMetadataFilePath)) {
+            dbMetadataProvider = serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader);
+        }
 
-        OntopViewMetadataProvider viewMetadataProvider = viewMetadataProviderFactory.getMetadataProvider(dbMetadataProvider,
-                new FileReader(viewFilePath));
+        OntopViewMetadataProvider viewMetadataProvider;
+        try (Reader viewReader = new FileReader(viewFilePath)) {
+            viewMetadataProvider = viewMetadataProviderFactory.getMetadataProvider(dbMetadataProvider, viewReader);
+        }
 
         ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(viewMetadataProvider);
 
