@@ -150,17 +150,9 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             Sets.SetView<Integer> allIndexes = Sets.union(firstIndexes, otherIndexes);
             Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, otherIndexes);
 
-            ImmutableList<? extends VariableOrGroundTerm> differentArguments = allIndexes.stream()
+            return allIndexes.stream()
                     .filter(i -> !(commonIndexes.contains(i) && argumentMap.get(i).equals(otherArgumentMap.get(i))))
-                    .flatMap(i -> Optional.ofNullable(argumentMap.get(i))
-                            .map(Stream::of)
-                            .orElseGet(Stream::empty))
-                    .collect(ImmutableCollectors.toList());
-
-            /*
-             * All the non-matching arguments of the atom must be discarded variables
-             */
-            return discardedVariables.containsAll(differentArguments);
+                    .noneMatch(argumentMap::containsKey);
         }
     }
 }
