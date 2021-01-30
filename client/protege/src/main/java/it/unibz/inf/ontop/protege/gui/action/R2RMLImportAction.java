@@ -65,7 +65,7 @@ public class R2RMLImportAction extends ProtegeAction {
 				JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
 			return;
 
-		JFileChooser fc = DialogUtils.getFileChooser(getEditorKit());
+		JFileChooser fc = DialogUtils.getFileChooser(getEditorKit(), null);
 		if (fc.showOpenDialog(getWorkspace()) != JFileChooser.APPROVE_OPTION)
 			return;
 

@@ -38,18 +38,32 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DialogUtils {
 
-	public static JFileChooser getFileChooser(EditorKit editorKit) {
+	public static Function<String, String> getExtensionReplacer(String replacement) {
+		return shortForm -> {
+			int i = shortForm.lastIndexOf(".");
+			String filename = (i < 1) ?
+					shortForm :
+					shortForm.substring(0, i);
+			return filename + replacement;
+		};
+	}
+
+	public static JFileChooser getFileChooser(EditorKit editorKit, Function<String, String> filenameTransformer) {
 		OWLEditorKit owlEditorKit = (OWLEditorKit) editorKit;
 		OWLModelManager modelManager = owlEditorKit.getOWLWorkspace().getOWLModelManager();
 		OWLOntology activeOntology = modelManager.getActiveOntology();
 		IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
 		File ontologyDir = new File(documentIRI.toURI().getPath());
-		return new JFileChooser(ontologyDir);
+		JFileChooser fc = new JFileChooser(ontologyDir);
+		if (filenameTransformer != null)
+			fc.setSelectedFile(new File(filenameTransformer.apply(documentIRI.getShortForm())));
+		return fc;
 	}
 
 	private static final int MAX_CHARACTERS_PER_LINE_COUNT = 150;

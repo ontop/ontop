@@ -47,23 +47,11 @@ public class R2RMLExportAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
-        // Get the path of the file of the active OWL model
-        OWLEditorKit editorKit = (OWLEditorKit) getEditorKit();
-        OWLModelManager modelManager = editorKit.getOWLModelManager();
-        OWLOntology activeOntology = modelManager.getActiveOntology();
-        IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
-
-        JFileChooser fc = DialogUtils.getFileChooser(getEditorKit());
-
-        String shortForm = documentIRI.getShortForm();
-        int i = shortForm.lastIndexOf(".");
-        String ontologyName = (i < 1)?
-                shortForm:
-                shortForm.substring(0, i);
-        fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
-
+        JFileChooser fc = DialogUtils.getFileChooser(getEditorKit(),
+                DialogUtils.getExtensionReplacer("-mapping.ttl"));
         if (fc.showSaveDialog(getWorkspace()) != JFileChooser.APPROVE_OPTION)
             return;
+
         File file = fc.getSelectedFile();
         Thread thread = new Thread("R2RML Export Action Thread") {
             @Override
