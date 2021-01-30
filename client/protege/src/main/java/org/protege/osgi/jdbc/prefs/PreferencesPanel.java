@@ -113,9 +113,8 @@ public class PreferencesPanel extends OWLPreferencesPanel {
                 "Proceed deleting the " + info.getDescription() + " driver?",
                 "Delete Confirmation",
                 JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
+        if (confirm != JOptionPane.YES_OPTION)
             return;
-        }
 
         driverTableModel.removeDrivers(row);
     }

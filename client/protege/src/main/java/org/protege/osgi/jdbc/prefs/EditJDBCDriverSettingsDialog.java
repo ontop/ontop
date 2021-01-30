@@ -130,8 +130,7 @@ public class EditJDBCDriverSettingsDialog extends JDialog {
 
     private void cmdBrowse(ActionEvent evt) {
         JFileChooser fc  = new JFileChooser(defaultDir);
-        int retVal = fc.showOpenDialog(this);
-        if (retVal == JFileChooser.APPROVE_OPTION)  {
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)  {
             File file = fc.getSelectedFile();
             fileField.setText(file.getPath());
             defaultDir = file.getParentFile();

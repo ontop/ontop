@@ -20,35 +20,113 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.protege.editor.core.editorkit.EditorKit;
+import org.protege.editor.core.ui.workspace.Workspace;
+import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.net.URI;
+import java.io.File;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DialogUtils {
 
-	public static void showQuickErrorDialog(Component parent, Exception e) {
-		showQuickErrorDialog(parent, e, "An Error Has Occurred");
+	public static JFileChooser getFileChooser(EditorKit editorKit) {
+		OWLEditorKit owlEditorKit = (OWLEditorKit) editorKit;
+		OWLModelManager modelManager = owlEditorKit.getOWLWorkspace().getOWLModelManager();
+		OWLOntology activeOntology = modelManager.getActiveOntology();
+		IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
+		File ontologyDir = new File(documentIRI.toURI().getPath());
+		return new JFileChooser(ontologyDir);
 	}
 
-	public static void open(URI uri, Component component) {
-		if (Desktop.isDesktopSupported()) {
-			try {
-				Desktop.getDesktop().browse(uri);
-			} catch (IOException e) {
-				DialogUtils.showQuickErrorDialog(component, e);
+	private static final int MAX_CHARACTERS_PER_LINE_COUNT = 150;
+
+	public static void showPrettyMessageDialog(Component parent, Object message, String title, int type) {
+		JOptionPane narrowPane = new JOptionPane(message, type) {
+			@Override
+			public int getMaxCharactersPerLineCount() {
+				return MAX_CHARACTERS_PER_LINE_COUNT;
 			}
-		} else {
-			JOptionPane.showMessageDialog(component, "URL links are not supported in this Desktop", "Error", JOptionPane.ERROR_MESSAGE);
-		}
+		};
+		JDialog errorDialog = narrowPane.createDialog(parent, title);
+		errorDialog.setVisible(true);
 	}
 
-	public static synchronized void showQuickErrorDialog(Component parent, Exception e, String message) {
-		QuickErrorDialog box = new QuickErrorDialog(parent, e, message);
-		SwingUtilities.invokeLater(box);
+
+	public static Optional<OntopProtegeReasoner> getOntopProtegeReasoner(EditorKit editorKit) {
+		Workspace workspace = editorKit.getWorkspace();
+		if (!(editorKit instanceof OWLEditorKit))
+			throw new MinorOntopInternalBugException("EditorKit is not OWLEditorKit");
+
+		OWLEditorKit owlEditorKit = (OWLEditorKit)editorKit;
+		OWLReasoner reasoner = owlEditorKit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
+		if (!(reasoner instanceof OntopProtegeReasoner)) {
+			JOptionPane.showMessageDialog(workspace,
+					"Ontop reasoner must be started before using this feature. To proceed\n" +
+							" * select Ontop in the \"Reasoners\" menu and\n" +
+							" * click \"Start reasoner\" in the same menu.",
+					"Warning",
+					JOptionPane.WARNING_MESSAGE);
+			return Optional.empty();
+		}
+		return Optional.of((OntopProtegeReasoner)reasoner);
+	}
+
+	public static void showSeeLogErrorDialog(Component parent, String message, Logger log, Throwable e) {
+		String text = message + "\n" +
+				e.getMessage() + "\n" +
+				"For more information, see the log.";
+		JOptionPane narrowPane = new JOptionPane(text, JOptionPane.ERROR_MESSAGE) {
+			@Override
+			public int getMaxCharactersPerLineCount() {
+				return MAX_CHARACTERS_PER_LINE_COUNT;
+			}
+		};
+		JDialog errorDialog = narrowPane.createDialog(parent, "Error");
+		errorDialog.setModal(true);
+		errorDialog.setVisible(true);
+
+		log.error(e.getMessage(), e);
+		e.printStackTrace();
+	}
+
+	public static void showQuickErrorDialog(Component parent, Exception e, String message) {
+		SwingUtilities.invokeLater(() -> {
+			JTextArea textArea = new JTextArea();
+			textArea.setBackground(Color.WHITE);
+			textArea.setFont(new Font("Monaco", Font.PLAIN, 11));
+			textArea.setEditable(false);
+			textArea.setWrapStyleWord(true);
+
+			String debugInfo = e.getLocalizedMessage() + "\n\n"
+					+ "###################################################\n"
+					+ "##    Debugging information for developers    ##\n"
+					+ "###################################################\n\n"
+					+ Stream.of(e.getStackTrace())
+						.map(StackTraceElement::toString)
+						.collect(Collectors.joining("\n\t", "\t", ""));
+
+			textArea.setText(debugInfo);
+			textArea.setCaretPosition(0);
+
+			JScrollPane scrollPane = new JScrollPane(textArea);
+			scrollPane.setPreferredSize(new Dimension(800, 450));
+
+			JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);
+		});
 	}
 
 	public static void centerDialogWRTParent(Container parent, Component dialog) {
@@ -70,16 +148,14 @@ public class DialogUtils {
 	private static final KeyStroke escapeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 	public static final String dispatchWindowClosingActionMapKey = "com.spodding.tackline.dispatch:WINDOW_CLOSING";
 
-	public static void installEscapeCloseOperation(final JDialog dialog) {
-		Action dispatchClosing = new AbstractAction() {
-			private static final long serialVersionUID = 1L;
+	public static void installEscapeCloseOperation(JDialog dialog) {
+		JRootPane root = dialog.getRootPane();
+		root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeStroke, dispatchWindowClosingActionMapKey);
+		root.getActionMap().put(dispatchWindowClosingActionMapKey, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING));
 			}
-		};
-		JRootPane root = dialog.getRootPane();
-		root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeStroke, dispatchWindowClosingActionMapKey);
-		root.getActionMap().put(dispatchWindowClosingActionMapKey, dispatchClosing);
+		});
 	}
 }

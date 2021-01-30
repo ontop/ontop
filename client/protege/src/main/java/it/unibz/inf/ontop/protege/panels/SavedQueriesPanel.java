@@ -263,10 +263,12 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 		if (selected_path == null)
 			return;
 
-		if (JOptionPane.showConfirmDialog(this, "This will delete the selected query. \n Continue? ", "Delete confirmation",
-				JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.CANCEL_OPTION) {
+		if (JOptionPane.showConfirmDialog(this,
+                "This will delete the selected query. \n Continue? ",
+                "Delete confirmation",
+				JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
 			return;
-		}
 
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) selected_path.getLastPathComponent();
 		if (node instanceof QueryControllerTreeModel.QueryNode) {

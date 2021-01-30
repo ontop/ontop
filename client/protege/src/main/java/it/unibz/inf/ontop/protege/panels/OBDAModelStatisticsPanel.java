@@ -20,14 +20,14 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.utils.VirtualABoxStatistics;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.Map;
 
-public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDAProgressListener {
+public class OBDAModelStatisticsPanel extends JPanel implements OBDAProgressListener {
 
 	private static final long serialVersionUID = 2317777246039649415L;
 
@@ -37,56 +37,40 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDA
     public OBDAModelStatisticsPanel() {
         initComponents();
     }
-    
-    public void initContent(VirtualABoxStatistics statistics) {
-    	
-    	/* Fill the label summary value */
-    	String message = "";
-		try {
-			int count = statistics.getTotalTriples();
-			message = String.format("%s %s", count, (count == 1 ? "triple" : "triples"));
-		} 
-		catch (Exception e) {
-			message = String.format("%s. Please try again!", e.getMessage());
-            errorShown = true;
-            e.printStackTrace();
-        }
-    	lblSummaryValue.setText(message); 	
+
+    public void initContent(ImmutableMap<String, Integer> statistics) {
+
+        errorShown = statistics.values().stream().anyMatch(v -> v == -1);
+
+        int count = statistics.values().stream()
+                .filter(v -> v != -1)
+                .reduce(0, Integer::sum);
+
+    	lblSummaryValue.setText(errorShown
+                ? "An error occurred in the counting process."
+                : count + (count == 1 ? " triple" : " triples"));
     	
     	/* Fill the triples summary table */
-    	Map<String, Integer> mappingStat = statistics.getStatistics();
-        int row = mappingStat.size();
-        int col = 2;
         String[] columnNames = {"Mapping ID", "Number of Triples"};
-
-        Object[][] rowData = new Object[row][col];
-
+        Object[][] rowData = new Object[statistics.size()][2];
         int index = 0;
-        for (Map.Entry<String, Integer> e : mappingStat.entrySet()){
+        for (Map.Entry<String, Integer> e : statistics.entrySet()) {
             rowData[index][0] = e.getKey();
             rowData[index][1] = e.getValue();
             index++;
         }
-        JTable tblTriplesCount = createStatisticTable(rowData, columnNames);
+
+        JTable tblTriplesCount = new JTable(new DefaultTableModel(rowData, columnNames)) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tblTriplesCount.getColumnModel().getColumn(0).setPreferredWidth(400);
+        tblTriplesCount.getColumnModel().getColumn(1).setMaxWidth(100);
         tabDataSources.add("Data Source: ", new JScrollPane(tblTriplesCount));
     }
-    
-    private JTable createStatisticTable(Object[][] rowData, String[] columnNames) {
-    	
-		DefaultTableModel model = new DefaultTableModel(rowData, columnNames);
 
-		@SuppressWarnings("serial")
-		JTable table = new JTable(model) {
-			// Create a model in which the cells can't be edited
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				// all cells false
-				return false;
-			}
-		};		
-		return table;
-    }
-    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -144,11 +128,11 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDA
 
     @Override
     public boolean isCancelled() {
-        return this.bCancel;
+        return bCancel;
     }
 
     @Override
     public boolean isErrorShown() {
-        return this.errorShown;
+        return errorShown;
     }
 }

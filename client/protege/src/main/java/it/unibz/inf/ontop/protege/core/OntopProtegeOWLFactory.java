@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.core;
 
 
-import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
@@ -23,11 +23,11 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 
-	
 	private void handleError(Exception e){
-		String message = "Error during reasoner initialization: " + e;
-		OptionPaneUtils.showPrettyMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
-
+		DialogUtils.showPrettyMessageDialog(null,
+				"Error during reasoner initialization: " + e,
+				"Ontop Initialization Error",
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 	@SuppressWarnings("unused")
@@ -45,7 +45,6 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 		UnsupportedOperationException e = new UnsupportedOperationException("Ontop is a buffering reasoner");
 		handleError(e);
 		throw e;
-
 	}
 
 	@Override
@@ -70,11 +69,10 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 		try {
 			checkArgument(config instanceof OntopProtegeOWLConfiguration, "config %s is not an instance of OntopProtegeOWLConfiguration", config);
 			return new OntopProtegeReasoner(ontology, (OntopProtegeOWLConfiguration) config);
-		} catch (Exception e){
+		}
+		catch (Exception e){
 			handleError(e);
 			throw e;
 		}
 	}
-
-
 }

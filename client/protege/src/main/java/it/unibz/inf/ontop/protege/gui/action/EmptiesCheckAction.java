@@ -21,107 +21,84 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Optional;
 
 public class EmptiesCheckAction extends ProtegeAction {
 
 	private static final long serialVersionUID = 3322509244957306932L;
 
-	private OWLEditorKit editorKit = null;
-	private OWLModelManager owlManager = null;
-	private QuestOWLEmptyEntitiesChecker check;
+	private final Logger log = LoggerFactory.getLogger(EmptiesCheckAction.class);
 
 	@Override
-	public void initialise() throws Exception {
-		editorKit = (OWLEditorKit) getEditorKit();
-		owlManager = editorKit.getOWLModelManager();
-//		currentOnto = owlManager.getActiveOntology();
+	public void actionPerformed(ActionEvent evt) {
+		Optional<OntopProtegeReasoner> reasoner = DialogUtils.getOntopProtegeReasoner(getEditorKit());
+		if (!reasoner.isPresent())
+			return;
 
-	}
+		try {
+			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+			QuestOWLEmptyEntitiesChecker checker = reasoner.get().getEmptyEntitiesChecker();
 
-	@Override
-	public void dispose() throws Exception {
-		// Does nothing.
-	}
+			JDialog dialog = new JDialog();
+			dialog.setModal(true);
+			dialog.setSize(520, 400);
+			dialog.setLocationRelativeTo(null);
+			dialog.setTitle("Emptiness Check");
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		OWLReasoner reasoner = owlManager.getOWLReasonerManager().getCurrentReasoner();
-
-
-		if (reasoner instanceof OntopProtegeReasoner) {
-			try {
-				check = ((OntopProtegeReasoner) reasoner).getEmptyEntitiesChecker();
-
-				JDialog dialog = new JDialog();
-				dialog.setModal(true);
-				dialog.setSize(520, 400);
-				dialog.setLocationRelativeTo(null);
-				dialog.setTitle("Empties Check");
-
-				EmptiesCheckPanel emptiesPanel = new EmptiesCheckPanel();
-				Thread th = new Thread("EmptyEntitiesCheck Thread") {
-					public void run() {
-
-						OBDAProgressMonitor monitor = new OBDAProgressMonitor("Finding empty entities...", getWorkspace());
-						monitor.addProgressListener(emptiesPanel);
-						monitor.start();
-						emptiesPanel.initContent(check);
-						monitor.stop();
-
-
-						if(!emptiesPanel.isCancelled() && !emptiesPanel.isErrorShown()) {
-							dialog.setVisible(true);
-						}
-
+			EmptiesCheckPanel emptiesPanel = new EmptiesCheckPanel();
+			Thread thread = new Thread("EmptyEntitiesCheck Thread") {
+				@Override
+				public void run() {
+					OBDAProgressMonitor monitor = new OBDAProgressMonitor("Finding empty entities...", getWorkspace());
+					monitor.addProgressListener(emptiesPanel);
+					monitor.start();
+					SwingUtilities.invokeLater(() -> emptiesPanel.initContent(checker, obdaModelManager.getActiveOBDAModel().getMutablePrefixManager()));
+					monitor.stop();
+					if (!emptiesPanel.isCancelled() && !emptiesPanel.isErrorShown()) {
+						SwingUtilities.invokeLater(() -> dialog.setVisible(true));
 					}
-				};
-				th.start();
+				}
+			};
+			thread.start();
 
-				JPanel pnlCommandButton = createButtonPanel(dialog);
-				dialog.setLayout(new BorderLayout());
-				dialog.add(emptiesPanel, BorderLayout.CENTER);
-				dialog.add(pnlCommandButton, BorderLayout.SOUTH);
-				DialogUtils.installEscapeCloseOperation(dialog);
+			JPanel panel = new JPanel();
+			panel.setLayout(new FlowLayout());
+			JButton cmdCloseInformation = new JButton("Close");
+			cmdCloseInformation.addActionListener(e -> {
+				dialog.setVisible(false);
+				dialog.removeAll();
+				dialog.dispose();
+			});
+			panel.add(cmdCloseInformation);
 
-				dialog.pack();
+			dialog.setLayout(new BorderLayout());
+			dialog.add(emptiesPanel, BorderLayout.CENTER);
+			dialog.add(panel, BorderLayout.SOUTH);
+			DialogUtils.installEscapeCloseOperation(dialog);
 
-
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(getWorkspace(), "An error occurred. For more info, see the logs.");
-			}
-
-		} else {
-			JOptionPane.showMessageDialog(getWorkspace(), "You have to start ontop reasoner for this feature.");
+			dialog.pack();
 		}
-
+		catch (Throwable e) {
+			DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error during emptiness checking.", log, e);
+		}
 	}
 
-	private JPanel createButtonPanel(final JDialog parent) {
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout());
+	@Override
+	public void initialise() { /* NO-OP */ }
 
-		JButton cmdCloseInformation = new JButton();
-		cmdCloseInformation.setText("Close Information");
-		cmdCloseInformation.addActionListener(evt -> {
-            parent.setVisible(false);
-            parent.removeAll();
-            parent.dispose();
-        });
-		panel.add(cmdCloseInformation);
-
-		return panel;
-	}
+	@Override
+	public void dispose() {  /* NO-OP */ }
 }

@@ -21,62 +21,54 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.Optional;
 
 public class InconsistencyCheckAction extends ProtegeAction {
 	
 	private static final long serialVersionUID = 1L;
-	private OWLEditorKit editorKit = null;
-	private OWLWorkspace workspace;	
-	private OWLModelManager modelManager;
-	
-	private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
+
+	private final Logger log = LoggerFactory.getLogger(InconsistencyCheckAction.class);
 	
 	@Override
-	public void initialise() throws Exception {
-		editorKit = (OWLEditorKit)getEditorKit();
-		workspace = editorKit.getWorkspace();	
-		modelManager = editorKit.getOWLModelManager();
-	}
+	public void actionPerformed(ActionEvent evt) {
+		Optional<OntopProtegeReasoner> reasoner = DialogUtils.getOntopProtegeReasoner(getEditorKit());
+		if (!reasoner.isPresent())
+			return;
 
-	@Override
-	public void dispose() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		OWLReasoner reasoner = modelManager.getOWLReasonerManager().getCurrentReasoner();
-		if (reasoner instanceof OntopProtegeReasoner) {
-			try {
-				OntopProtegeReasoner questReasoner = (OntopProtegeReasoner) reasoner;
-				boolean isConsistent = questReasoner.isQuestConsistent();
-				log.debug("Checking for inconsistency returned: "+isConsistent);
-				if (isConsistent) {
-					JOptionPane.showMessageDialog(getWorkspace(), "Your ontology is consistent! Great job!");
-				} else {
-					JOptionPane.showMessageDialog(getWorkspace(), "Your ontology is not consistent. The axiom creating inconsistency is: \n"
-							+questReasoner.getInconsistentAxiom().toString());
-				}
-				
-			}catch(Exception ex){
-				JOptionPane.showMessageDialog(getWorkspace(), "An error occured. For more info, see the logs.");
-				log.error("Error during inconsistency checking. \n"+ex.getMessage()+"\n"+ex.getLocalizedMessage());
+		try {
+			OntopProtegeReasoner ontop = reasoner.get();
+			boolean isConsistent = ontop.isQuestConsistent();
+			log.debug("Consistency checking returned: " + isConsistent);
+			if (isConsistent) {
+				JOptionPane.showMessageDialog(getWorkspace(),
+						"Your ontology is consistent! Top job!",
+						"Consistency checking",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+			else {
+				JOptionPane.showMessageDialog(getWorkspace(),
+						"Your ontology is not consistent.\n" +
+								"The axiom causing inconsistency is:\n" +
+								ontop.getInconsistentAxiom(),
+						"Consistency checking",
+						JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
-		else {
-			JOptionPane.showMessageDialog(getWorkspace(), "You have to start ontop reasoner for this feature.");
+		catch (Throwable e) {
+			DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error checking consistency.", log, e);
 		}
 	}
 
+	@Override
+	public void initialise()  { /* NO-OP */ }
+
+	@Override
+	public void dispose()  {/* NO-OP */}
 }

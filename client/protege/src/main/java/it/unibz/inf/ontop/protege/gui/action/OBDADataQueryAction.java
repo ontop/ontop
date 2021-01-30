@@ -10,12 +10,11 @@ import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import java.awt.*;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 /*
@@ -40,6 +39,8 @@ import java.util.concurrent.CountDownLatch;
 
 public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
+	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
+
 	// The string shown to the user in the dialog during execution of action
 	private final String msg;
 
@@ -59,15 +60,12 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	private boolean isCanceled = false;
 	private boolean actionStarted = false;
-	private OntopProtegeReasoner reasoner;
+
 	private final Component rootView;
 
-	private static final String QUEST_START_MESSAGE = "Ontop reasoner must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
+	private OntopProtegeReasoner ontop;
 
-	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
-
-
-	public OBDADataQueryAction(String msg, Component rootView){
+	public OBDADataQueryAction(String msg, Component rootView) {
 		this.msg = msg;
 		this.rootView = rootView;
 	}
@@ -101,31 +99,52 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 			monitor = new OBDAProgressMonitor(msg, getEditorKit().getWorkspace());
 			monitor.start();
 			latch = new CountDownLatch(1);
-			OWLEditorKit kit = this.getEditorKit();
-			OWLReasoner r = kit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
-			if (r instanceof OntopProtegeReasoner) {
-				this.reasoner = (OntopProtegeReasoner) r;
-				monitor.addProgressListener(this);
-				long startTime = System.currentTimeMillis();
-				runAction();
-				latch.await();
-				monitor.stop();
-				if(!this.isCancelled() && !this.isErrorShown()){
-					this.time = System.currentTimeMillis() - startTime;
-					handleSQLTranslation(sqlQuery);
-					handleResult(result);
+			Optional<OntopProtegeReasoner> reasoner = DialogUtils.getOntopProtegeReasoner(getEditorKit());
+			if (!reasoner.isPresent())
+				return;
+			ontop = reasoner.get();
+			monitor.addProgressListener(this);
+			long startTime = System.currentTimeMillis();
+			// FIXME
+			// sqlQuery = sqlExecutableQuery.getSQL();
+			Thread thread = new Thread(() -> {
+				try {
+					statement = ontop.getStatement();
+					if (statement == null)
+						throw new NullPointerException("QuestQueryAction received a null QuestOWLStatement object from the reasoner");
+
+					IQ sqlExecutableQuery = statement.getExecutableQuery(queryString);
+					// FIXME
+					// sqlQuery = sqlExecutableQuery.getSQL();
+					sqlQuery = sqlExecutableQuery.toString();
+					actionStarted = true;
+					result = executeQuery(statement, queryString);
+					latch.countDown();
 				}
-			}
-			else /* reasoner not OntopProtegeReasoner */ {
-				JOptionPane.showMessageDialog(rootView, QUEST_START_MESSAGE);
+				catch (Exception e) {
+					if (!isCancelled()) {
+						latch.countDown();
+						queryExecError = true;
+						DialogUtils.showSeeLogErrorDialog(rootView, "Error", log, e);
+					}
+				}
+			});
+			thread.start();
+			latch.await();
+			monitor.stop();
+			if (!this.isCancelled() && !this.isErrorShown()) {
+				this.time = System.currentTimeMillis() - startTime;
+				handleSQLTranslation(sqlQuery);
+				handleResult(result);
 			}
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(rootView, e);
+			DialogUtils.showSeeLogErrorDialog(rootView, "Error", log, e);
 		}
 		finally {
 			latch.countDown();
-			monitor.stop();
+			if (monitor != null)
+				monitor.stop();
 		}
 	}
 
@@ -138,35 +157,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	public abstract boolean isRunning();
 
-
-	private void runAction() {
-		// FIXME
-		// sqlQuery = sqlExecutableQuery.getSQL();
-		Thread thread = new Thread(() -> {
-			try {
-				statement = reasoner.getStatement();
-				if (statement == null)
-					throw new NullPointerException("QuestQueryAction received a null QuestOWLStatement object from the reasoner");
-
-				final IQ sqlExecutableQuery = statement.getExecutableQuery(queryString);
-				// FIXME
-				// sqlQuery = sqlExecutableQuery.getSQL();
-				sqlQuery = sqlExecutableQuery.toString();
-				actionStarted = true;
-				result = executeQuery(statement, queryString);
-				latch.countDown();
-			}
-			catch (Exception e) {
-				if (!isCancelled()) {
-					latch.countDown();
-					queryExecError = true;
-					log.error(e.getMessage(), e);
-					DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
-				}
-			}
-		});
-		thread.start();
-	}
 
 	/**
 	 * This thread handles the cancelling of a request.
@@ -183,9 +173,10 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		Canceller() throws OntopConnectionException {
 			this.old_latch = latch;
 			this.old_stmt = statement;
-			this.old_conn = reasoner.replaceConnection();
+			this.old_conn = ontop.replaceConnection();
 		}
 
+		@Override
 		public void run() {
 			try {
 				old_stmt.cancel();
@@ -193,13 +184,14 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 				old_conn.close();
 				old_latch.countDown();
 			}
-			catch (Exception e) {
+			catch (Throwable e) {
 				this.old_latch.countDown();
-				DialogUtils.showQuickErrorDialog(rootView, e, "Error cancelling query.");
+				DialogUtils.showSeeLogErrorDialog(rootView, "Error canceling query.", log, e);
 			}
 		}
 	}
 
+	@Override
 	public void actionCanceled() {
 		isCanceled = true;
 		if (!actionStarted)
@@ -216,11 +208,13 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		}
 	}
 
+	@Override
 	public boolean isCancelled(){
-		return this.isCanceled;
+		return isCanceled;
 	}
 
+	@Override
 	public boolean isErrorShown(){
-		return this.queryExecError;
+		return queryExecError;
 	}
 }

@@ -30,28 +30,24 @@ import java.awt.BorderLayout;
 
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
-public class QueryManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
+public class QueryManagerView extends AbstractOWLViewComponent {
 
 	private static final long serialVersionUID = 1L;
 	
 	private SavedQueriesPanel panel;
-	
-	private OBDAModelManager obdaController;
 
 	@Override
 	protected void disposeOWLView() {
-		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
+		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if (queryManagerViews == null) {
 			return;
 		}
 		queryManagerViews.remove(this);
-		obdaController.removeListener(this);
 	}
 
 	@Override
 	protected void initialiseOWLView()  {
-		obdaController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
-		obdaController.addListener(this);
+		OBDAModelManager obdaController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 
 		setLayout(new BorderLayout());
 		panel = new SavedQueriesPanel(obdaController.getQueryController());
@@ -84,8 +80,4 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 		queryManagerViews.add(this);
 	}
 
-	@Override
-	public void activeOntologyChanged() {
-		// NO-OP
-	}
 }

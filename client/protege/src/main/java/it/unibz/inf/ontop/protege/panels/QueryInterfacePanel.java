@@ -34,6 +34,8 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.semanticweb.owlapi.model.OWLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -52,6 +54,8 @@ import java.awt.event.KeyListener;
 public class QueryInterfacePanel extends JPanel implements TableModelListener {
 
 	private static final long serialVersionUID = -5902798157183352944L;
+
+	private static final Logger log = LoggerFactory.getLogger(QueryInterfacePanel.class);
 
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
 	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
@@ -314,7 +318,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 				String queryString = queryTextPane.getText();
                 OBDADataQueryAction<?> action = null;
 				if (queryString.isEmpty()){
-					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
+					JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else if (isSelectQuery(queryString)) {
 					action = executeSelectAction;
@@ -326,7 +330,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
                     action = executeGraphQueryAction;
                 }
 				else {
-                    JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
+                    JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
 				if (action!=null) {
 					action.run(queryString);
@@ -336,7 +340,8 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 						updateStatus(rows);
 						try {
 							Thread.sleep(100);
-						} catch (InterruptedException e) {
+						}
+						catch (InterruptedException e) {
 							break;
 						}
 					} while (action.isRunning());
@@ -347,7 +352,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 			queryRunnerThread.start();
 		}
 		catch (Exception e) {
-			DialogUtils.showQuickErrorDialog(this, e);
+			DialogUtils.showSeeLogErrorDialog(this, "", log, e);
 		}
 	}// GEN-LAST:event_buttonExecuteActionPerformed
 
@@ -357,7 +362,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 			query.setQuery(queryTextPane.getText());
 		}
 		else {
-			JOptionPane.showMessageDialog(QueryInterfacePanel.this,
+			JOptionPane.showMessageDialog(this,
 					"Please select first the query node that you would like to update",
 					"Warning",
 					JOptionPane.WARNING_MESSAGE);
@@ -422,7 +427,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 				lblExecutionInfo.setText(s + title + " " + value);
 			}
 			catch (OWLException e) {
-				JOptionPane.showMessageDialog(QueryInterfacePanel.this, e);
+				DialogUtils.showSeeLogErrorDialog(this, "", log, e);
 			}
 		});
 	}

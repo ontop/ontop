@@ -49,9 +49,8 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
 	 *
 	 * @param tbox the ontology, conn QuestOWL connection
-	 * @throws Exception
 	 */
-	public QuestOWLEmptyEntitiesChecker(ClassifiedTBox tbox, OWLConnection conn)	 {
+	public QuestOWLEmptyEntitiesChecker(ClassifiedTBox tbox, OWLConnection conn) {
 		this.onto = tbox;
 		this.conn = conn;
 	}
@@ -69,18 +68,14 @@ public class QuestOWLEmptyEntitiesChecker {
 	}
 
 	public int getERolesSize() {
-		return  nEmptyRoles ;
+		return  nEmptyRoles;
 	}
 
 
 	@Override
 	public String toString() {
-		String str = new String();
-
-		str += String.format("- %s Empty %s ", nEmptyConcepts, (nEmptyConcepts == 1) ? "concept" : "concepts");
-
-		str += String.format("- %s Empty %s\n", nEmptyRoles, (nEmptyRoles == 1) ? "role" : "roles");
-		return str;
+		return String.format("- %s Empty %s ", nEmptyConcepts, (nEmptyConcepts == 1) ? "concept" : "concepts") +
+		String.format("- %s Empty %s\n", nEmptyRoles, (nEmptyRoles == 1) ? "role" : "roles");
 	}
 
 

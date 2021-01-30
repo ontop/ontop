@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.*;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import org.slf4j.LoggerFactory;
@@ -439,7 +438,7 @@ public class MappingManagerPanel extends JPanel {
             canceled = false;
             List<SQLPPTriplesMap> path = mappingList.getSelectedValuesList();
             if (path.isEmpty()) {
-                JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
+                JOptionPane.showMessageDialog(this, "No mappings have been selected", "ERROR", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
@@ -552,7 +551,7 @@ public class MappingManagerPanel extends JPanel {
             }
 
             try {
-                apic.insertMapping(newId, mapping.getSourceQuery().getSQL(), mapping.getTargetAtoms());
+                apic.add(newId, mapping.getSourceQuery().getSQL(), mapping.getTargetAtoms());
             }
             catch (DuplicateMappingException e) {
                 JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
@@ -577,14 +576,13 @@ public class MappingManagerPanel extends JPanel {
 				"Proceed deleting " + selection.size() + " mapping" + (selection.size() == 1 ? "" : "s") + "?",
                 "Delete Confirmation",
                 JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
+		if (confirm != JOptionPane.YES_NO_OPTION)
 			return;
-		}
 
 		// The manager panel can handle multiple deletions.
-        for (SQLPPTriplesMap mapping : selection) {
-            obdaModelManager.getActiveOBDAModel().removeMapping(mapping.getId());
-        }
+        for (SQLPPTriplesMap mapping : selection)
+            obdaModelManager.getActiveOBDAModel().remove(mapping.getId());
+
 		mappingList.clearSelection();
 	}
 

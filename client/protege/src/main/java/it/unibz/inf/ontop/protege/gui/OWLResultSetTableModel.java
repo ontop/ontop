@@ -87,37 +87,29 @@ public class OWLResultSetTableModel implements TableModel {
 	}
 
 	
-	/**
-	 * Used to show error message during message fetching, but only if
-	 * another message has not already been shown. 
-	 * 
-	 */
-	private class RowFetcherError implements Runnable {
-		private Exception e;
-		RowFetcherError(Exception e){
-			this.e = e;
-		}
-		@Override
-        public void run(){
-			if(!stopFetching){
-				JOptionPane.showMessageDialog(
-						null,
-						"Error when fetching results. Aborting. " + e.toString());
-			}
-		}
-	}
-	
-	private void fetchRowsAsync() throws OWLException{
+
+	private void fetchRowsAsync() {
 		rowFetcher = new Thread(() -> {
 			try {
 				fetchRows(fetchSizeLimit);
-			} catch (Exception e){
-				SwingUtilities.invokeLater(new RowFetcherError(e));
+			}
+			catch (Exception e){
+				SwingUtilities.invokeLater(() -> {
+					// Used to show error message during message fetching, but only if
+					// another message has not already been shown.
+					if (!stopFetching) {
+						JOptionPane.showMessageDialog(
+								null,
+								"Error when fetching results. Aborting. " + e,
+								"Error",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				});
 				e.printStackTrace();
-			} finally {
+			}
+			finally {
 				isFetching = false;
 			}
-
 		});
 		rowFetcher.start();
 	}

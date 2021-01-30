@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,98 +32,56 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.Iterator;
 
-public class EmptiesCheckPanel extends javax.swing.JPanel   implements OBDAProgressListener {
+public class EmptiesCheckPanel extends JPanel implements OBDAProgressListener {
 
 	private static final long serialVersionUID = 2317777246039649415L;
 
-	Logger log = LoggerFactory.getLogger(EmptiesCheckPanel.class);
+	private final Logger log = LoggerFactory.getLogger(EmptiesCheckPanel.class);
 
 	private boolean bCancel = false;
 	private boolean errorShown = false;
 
 	public EmptiesCheckPanel() {
 		initComponents();
-
 	}
 
-	public void initContent(QuestOWLEmptyEntitiesChecker check) {
-
+	public void initContent(QuestOWLEmptyEntitiesChecker check, PrefixManager prefixManager) {
 		try {
-		/* Create table list for empty concepts */
-
-			Iterator<IRI> emptyC = check.iEmptyConcepts();
-
-
-			final int rowConcepts = check.getEConceptsSize();
-			final int col = 1;
-			final String[] columnConcept = {"Concepts"};
-
-			Object[][] rowDataConcept = new Object[rowConcepts][col];
-
-			JTable tblConceptCount = createTable(rowDataConcept, columnConcept);
-
+			/* Create table list for empty concepts */
+			Object[][] rowDataConcept = new Object[check.getEConceptsSize()][1];
+			JTable tblConceptCount = createTable(rowDataConcept, new String[] {"Concepts"});
 			jScrollConcepts.setViewportView(tblConceptCount);
-
 			DefaultTableModel modelConcept = (DefaultTableModel) tblConceptCount.getModel();
-
+			Iterator<IRI> emptyC = check.iEmptyConcepts();
 			while (emptyC.hasNext() && !bCancel) {
-				modelConcept.addRow(new Object[]{emptyC.next().getIRIString()});
+				modelConcept.addRow(new Object[]{prefixManager.getShortForm(emptyC.next().getIRIString())});
 			}
 
-		/* Create table list for empty roles */
-			Iterator<IRI> emptyR = check.iEmptyRoles();
-
-			final int rowRoles = check.getERolesSize();
-
-			final String[] columnRole = {"Roles"};
-
-			Object[][] rowDataRole = new Object[rowRoles][col];
-
-			JTable tblRoleCount = createTable(rowDataRole, columnRole);
-
+			/* Create table list for empty roles */
+			Object[][] rowDataRole = new Object[check.getERolesSize()][1];
+			JTable tblRoleCount = createTable(rowDataRole, new String[] {"Roles"});
 			jScrollRoles.setViewportView(tblRoleCount);
-
 			DefaultTableModel modelRole = (DefaultTableModel) tblRoleCount.getModel();
-
+			Iterator<IRI> emptyR = check.iEmptyRoles();
 			while (emptyR.hasNext() && !bCancel) {
-				modelRole.addRow(new Object[]{emptyR.next().getIRIString()});
+				modelRole.addRow(new Object[]{prefixManager.getShortForm(emptyR.next().getIRIString())});
 			}
 
-
-		/* Fill the label summary value */
-			String message;
-			try {
-				message = check.toString();
-			} catch (Exception e) {
-				message = String.format("%s. Please try again!", e.getMessage());
-			}
-			lblSummaryValue.setText(message);
-
+			lblSummaryValue.setText(check.toString());
 		}
-
 		catch (Exception e) {
 			errorShown = true;
-			log.error("If OutOfMemoryError try increasing java heap size. ");
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "An error occurred. For more info, see the logs.");
+			DialogUtils.showSeeLogErrorDialog(null, "Error checking emptiness.", log, e);
 		}
-
 	}
 
 	private JTable createTable(Object[][] rowData, String[] columnNames) {
-
-		DefaultTableModel model = new DefaultTableModel(rowData, columnNames);
-
-		@SuppressWarnings("serial")
-		JTable table = new JTable(model) {
-			// Create a model in which the cells can't be edited
+		return new JTable(new DefaultTableModel(rowData, columnNames)) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
-				// all cells false
 				return false;
 			}
 		};
-		return table;
 	}
 
 	/**
@@ -176,21 +136,21 @@ public class EmptiesCheckPanel extends javax.swing.JPanel   implements OBDAProgr
 	private javax.swing.JLabel lblSummaryValue;
 	private javax.swing.JPanel pnlEmptiesSummary;
 	private javax.swing.JPanel pnlSummary;
+	// End of variables declaration//GEN-END:variables
 
 	@Override
 	public void actionCanceled() {
-			bCancel = true;
-
+		bCancel = true;
 	}
 
 	@Override
 	public boolean isCancelled() {
-		return this.bCancel;
+		return bCancel;
 	}
 
 	@Override
 	public boolean isErrorShown() {
-		return this.errorShown;
+		return errorShown;
 	}
-	// End of variables declaration//GEN-END:variables
 }
+

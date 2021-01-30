@@ -371,7 +371,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 monitor.start();
                 CountDownLatch latch = new CountDownLatch(1);
                 List<String[]> data = tableModel.getTabularData();
-                if(monitor.isCanceled())
+                if (monitor.isCanceled())
                     return;
                 File output = new File(fileLocation);
                 BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
@@ -382,7 +382,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 monitor.stop();
             }
             catch (Exception e) {
-                DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+                DialogUtils.showSeeLogErrorDialog(this, "QueryManager error", log, e);
             }
         });
         log.debug("Query Manager view initialized");
@@ -452,19 +452,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 
     private synchronized void showGraphResultInTextPanel(String s) {
-        try {
-            SwingUtilities.invokeLater(() -> {
-                TextMessageFrame panel = new TextMessageFrame("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result");
-                JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-                DialogUtils.centerDialogWRTParent(protegeFrame, panel);
-                DialogUtils.installEscapeCloseOperation(panel);
-                panel.setTextMessage(s);
-                panel.setVisible(true);
-            });
-        }
-        catch (Exception e) {
-            DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
-        }
+        SwingUtilities.invokeLater(() -> {
+            TextMessageFrame panel = new TextMessageFrame("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result");
+            JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
+            DialogUtils.centerDialogWRTParent(protegeFrame, panel);
+            DialogUtils.installEscapeCloseOperation(panel);
+            panel.setTextMessage(s);
+            panel.setVisible(true);
+        });
     }
 
     @Override
@@ -525,8 +520,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                     if (!isCancelled()) {
                         errorShown = true;
                         latch.countDown();
-                        log.error(e.getMessage());
-                        DialogUtils.showQuickErrorDialog(null, e, "Error while writing output file.");
+                        DialogUtils.showSeeLogErrorDialog(null,"Error while writing output file.", log, e);
                     }
                 }
             });
@@ -544,7 +538,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
             }
             catch (Exception e) {
                 latch.countDown();
-                DialogUtils.showQuickErrorDialog(null, e, "Error during cancel action.");
+                DialogUtils.showSeeLogErrorDialog(null, "Error canceling action.", log, e);
             }
         }
 

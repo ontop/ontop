@@ -22,13 +22,13 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -45,81 +45,55 @@ public class R2RMLExportAction extends ProtegeAction {
 
     private static final Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
 
-    private OWLEditorKit editorKit;
-	private OBDAModelManager obdaModelManager;
-	private OWLModelManager modelManager;
-	
 	@Override
-	public void initialise()  {
-		editorKit = (OWLEditorKit)getEditorKit();
-		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-		modelManager = editorKit.getOWLModelManager();
-	}
+	public void actionPerformed(ActionEvent evt) {
+        // Get the path of the file of the active OWL model
+        OWLEditorKit editorKit = (OWLEditorKit) getEditorKit();
+        OWLModelManager modelManager = editorKit.getOWLModelManager();
+        OWLOntology activeOntology = modelManager.getActiveOntology();
+        IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
 
-	@Override
-	public void dispose()  {
-		// Does nothing!
-	}
+        JFileChooser fc = DialogUtils.getFileChooser(getEditorKit());
 
-	// Assumes initialise() has been run and has set modelManager to active OWLModelManager
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
+        String shortForm = documentIRI.getShortForm();
+        int i = shortForm.lastIndexOf(".");
+        String ontologyName = (i < 1)?
+                shortForm:
+                shortForm.substring(0, i);
+        fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
 
-        try {
-		    OWLWorkspace workspace = editorKit.getWorkspace();
-            // Get the path of the file of the active OWL model
-            OWLOntology activeOntology = modelManager.getActiveOntology();
-            IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
-
-            File ontologyDir = new File(documentIRI.toURI().getPath());
-
-            JFileChooser fc = new JFileChooser(ontologyDir);
-            String shortForm = documentIRI.getShortForm();
-            int i = shortForm.lastIndexOf(".");
-            String ontologyName = (i < 1)?
-                    shortForm:
-                    shortForm.substring(0, i);
-            fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
-
-            int approve = fc.showSaveDialog(workspace);
-            if (approve == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                Thread th = new Thread("R2RML Export Action Thread") {
-                    @Override
-                    public void run() {
-                        try {
-                            OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-                                    "Exporting the mapping to R2RML...", workspace);
-                            R2RMLExportThread t = new R2RMLExportThread();
-                            monitor.addProgressListener(t);
-                            monitor.start();
-                            t.run(file);
-                            monitor.stop();
-                            JOptionPane.showMessageDialog(workspace,
-                                    "R2RML Export completed.", "Done",
-                                    JOptionPane.INFORMATION_MESSAGE);
-                        }
-                        catch (Exception e) {
-                            JOptionPane.showMessageDialog(workspace, "An error occurred. For more info, see the logs.");
-                            log.error("Error during R2RML export: {}\n", e.getMessage());
-                            e.printStackTrace();
-                        }
-                    }
-                };
-                th.start();
+        if (fc.showSaveDialog(getWorkspace()) != JFileChooser.APPROVE_OPTION)
+            return;
+        File file = fc.getSelectedFile();
+        Thread thread = new Thread("R2RML Export Action Thread") {
+            @Override
+            public void run() {
+                try {
+                    OBDAProgressMonitor monitor = new OBDAProgressMonitor(
+                            "Exporting the mapping to R2RML...", getWorkspace());
+                    R2RMLExportThread t = new R2RMLExportThread();
+                    monitor.addProgressListener(t);
+                    monitor.start();
+                    t.run(file);
+                    monitor.stop();
+                    JOptionPane.showMessageDialog(getWorkspace(),
+                            "R2RML Export completed.",
+                            "Done",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+                catch (Throwable e) {
+                    DialogUtils.showSeeLogErrorDialog(getWorkspace(),"Error during R2RML export.", log, e);
+                }
             }
-        }
-        catch (Exception ex) {
-            JOptionPane.showMessageDialog(getWorkspace(), "An error occurred. For more info, see the logs.");
-            log.error("Error during R2RML export. \n");
-            ex.printStackTrace();
-        }
+        };
+        thread.start();
 	}
 
 	// TODO: NOT A THREAD!
     private class R2RMLExportThread implements OBDAProgressListener {
 
         public void run(File file) throws IOException {
+            OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
             R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModelManager.getRdfFactory());
             writer.write(file, obdaModelManager.getActiveOBDAModel().generatePPMapping());
         }
@@ -137,4 +111,11 @@ public class R2RMLExportAction extends ProtegeAction {
             return false;
         }
     }
+
+    @Override
+    public void initialise()  { /* NO-OP */ }
+
+    @Override
+    public void dispose()  { /* NO-OP */ }
+
 }

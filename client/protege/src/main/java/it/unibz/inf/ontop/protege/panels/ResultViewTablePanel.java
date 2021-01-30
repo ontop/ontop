@@ -147,7 +147,7 @@ public class ResultViewTablePanel extends JPanel {
 	private boolean canWrite(File outputFile) {
 		if (outputFile.exists()) {
 			int result = JOptionPane.showConfirmDialog(
-					this, "File exists, overwrite?",
+					this, "File " + outputFile.getPath() + " exists, overwrite?",
 					"Warning", JOptionPane.YES_NO_CANCEL_OPTION);
 
 			return result == JOptionPane.YES_OPTION;

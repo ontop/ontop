@@ -29,6 +29,7 @@ import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
 import org.semanticweb.owlapi.model.OWLEntity;
 
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.List;
@@ -80,7 +81,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	public void activeOntologyChanged() {
-		mappingPanel.datasourceChanged();
+		SwingUtilities.invokeLater(() -> mappingPanel.datasourceChanged());
 	}
 
 	@Override

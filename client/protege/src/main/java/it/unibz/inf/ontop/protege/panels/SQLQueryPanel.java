@@ -174,8 +174,7 @@ public class SQLQueryPanel extends JPanel {
 			}
 		}
 		catch (Exception e) {
-			OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			log.error("Error while executing query.", e);
+			DialogUtils.showSeeLogErrorDialog(this, "Error while executing query.", log, e);
 		}
 	}
 
@@ -234,10 +233,7 @@ public class SQLQueryPanel extends JPanel {
 				catch (Exception e) {
 					latch.countDown();
 					errorShown = true;
-
-					OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-
-					log.error("Error while executing query.", e);
+					DialogUtils.showSeeLogErrorDialog(null, "Error while executing query.", log, e);
 				}
 			});
 			thread.start();

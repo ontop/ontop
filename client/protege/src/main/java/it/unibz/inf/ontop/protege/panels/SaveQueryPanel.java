@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 
 import javax.swing.*;
@@ -212,7 +212,7 @@ public class SaveQueryPanel extends JPanel {
             }
         }
 		catch (IllegalArgumentException e) {
-            OptionPaneUtils.showPrettyMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            DialogUtils.showPrettyMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 		parent.dispose();
 	}// GEN-LAST:event_buttonAcceptActionPerformed

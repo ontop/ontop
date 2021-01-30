@@ -403,7 +403,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		private boolean isCancelled = false;
 		private boolean errorShown = false;
 
-
 		private ExecuteSQLQueryAction(CountDownLatch latch) {
 			this.latch = latch;
 		}
@@ -435,8 +434,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 				}
 				catch (Exception e) {
 					latch.countDown();
-					DialogUtils.showQuickErrorDialog(getRootPane(), e);
 					errorShown = true;
+					DialogUtils.showSeeLogErrorDialog(getRootPane(), "", log, e);
 				}
 			});
 			thread.start();
@@ -456,19 +455,19 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	private void cmdInsertMappingActionPerformed(ActionEvent e) {// GEN-FIRST:event_cmdInsertMappingActionPerformed
 		String newId = txtMappingID.getText().trim();
 		if (newId.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
 		String target = txtTargetQuery.getText();
 		if (target.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
 		String source = txtSourceQuery.getText().trim();
 		if (source.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
@@ -483,10 +482,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 					log.info("Insert Mapping: \n"+ target + "\n" + source);
 
 					if (mapping == null) {
-						obdaModel.insertMapping(newId, source, targetQuery);
+						obdaModel.add(newId, source, targetQuery);
 					}
 					else {
-						obdaModel.updateMapping(mapping.getId(), newId, source, targetQuery);
+						obdaModel.update(mapping.getId(), newId, source, targetQuery);
 					}
 				}
 				catch (DuplicateMappingException e1) {

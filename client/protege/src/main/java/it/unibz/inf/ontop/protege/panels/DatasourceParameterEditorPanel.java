@@ -23,16 +23,12 @@ package it.unibz.inf.ontop.protege.panels;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.*;
-import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -361,7 +357,17 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdHelpActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdHelpActionPerformed
-        DialogUtils.open(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"), this);
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().browse(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"));
+            }
+            catch (IOException e) {
+                DialogUtils.showQuickErrorDialog(this, e, "An error has occurred while opening the browser");
+            }
+        }
+        else {
+            JOptionPane.showMessageDialog(this, "URL links are not supported in this Desktop", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }// GEN-LAST:event_cmdHelpActionPerformed
 
     private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed

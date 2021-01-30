@@ -20,12 +20,17 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 
-public class ProgressPanel extends javax.swing.JPanel {
+public class ProgressPanel extends JPanel {
 
 	private static final long serialVersionUID = 8447122293962076783L;
-	
+
+	private static final Logger log = LoggerFactory.getLogger(ProgressPanel.class);
+
 	private final OBDAProgressMonitor monitor;
  
 	/** 
@@ -34,7 +39,8 @@ public class ProgressPanel extends javax.swing.JPanel {
     public ProgressPanel(OBDAProgressMonitor monitor, String msg) {
         this.monitor = monitor;
 
-    	initComponents();   	
+    	initComponents();
+
     	lblMessage.setText(msg);
     	cmdCancelOperation.setEnabled(true);
     }
@@ -93,7 +99,7 @@ public class ProgressPanel extends javax.swing.JPanel {
 			monitor.cancel();
 		} 
 		catch (Exception e) {
-            OptionPaneUtils.showPrettyMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            DialogUtils.showSeeLogErrorDialog(this, "Error canceling action", log, e);
 		}
 	}//GEN-LAST:event_cmdCancelOperationActionPerformed
 

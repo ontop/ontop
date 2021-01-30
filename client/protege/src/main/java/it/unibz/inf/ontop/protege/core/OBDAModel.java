@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+import javax.swing.*;
 import java.io.Reader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -269,19 +270,26 @@ public class OBDAModel {
     }
 
 
-    @Deprecated
-    public void addTriplesMap(SQLPPTriplesMap triplesMap, boolean disableFiringMappingInsertedEvent) throws DuplicateMappingException {
-        String mapId = triplesMap.getId();
+    public void add(ImmutableList<SQLPPTriplesMap> list) throws DuplicateMappingException {
 
-        if (map.containsKey(mapId))
-            throw new DuplicateMappingException("ID " + mapId);
-        map.put(mapId, triplesMap);
+        List<String> duplicateIds = new ArrayList<>();
 
-        if (!disableFiringMappingInsertedEvent)
-            mappingListeners.forEach(OBDAMappingListener::mappingInserted);
+        for (SQLPPTriplesMap triplesMap : list) {
+            String id = triplesMap.getId();
+            if (map.containsKey(id))
+                duplicateIds.add(id);
+            else
+                map.put(id, triplesMap);
+        }
+        // TODO: fix
+        //mappingListeners.forEach(OBDAMappingListener::mappingInserted);
+        System.out.println("THREAD " + SwingUtilities.isEventDispatchThread());
+
+        if (!duplicateIds.isEmpty())
+            throw new DuplicateMappingException("IDs " + String.join(", ", duplicateIds));
     }
 
-    public void insertMapping(String id, String source, ImmutableList<TargetAtom> targetQuery) throws DuplicateMappingException {
+    public void add(String id, String source, ImmutableList<TargetAtom> targetQuery) throws DuplicateMappingException {
         if (map.containsKey(id))
             throw new DuplicateMappingException("ID " + id);
 
@@ -289,12 +297,12 @@ public class OBDAModel {
         mappingListeners.forEach(OBDAMappingListener::mappingInserted);
     }
 
-    public void removeMapping(String id) {
+    public void remove(String id) {
         if (map.remove(id) != null)
             mappingListeners.forEach(OBDAMappingListener::mappingDeleted);
     }
 
-    public void updateMapping(String id, String newId, String source, ImmutableList<TargetAtom> targetQuery) throws DuplicateMappingException {
+    public void update(String id, String newId, String source, ImmutableList<TargetAtom> targetQuery) throws DuplicateMappingException {
         if (!map.containsKey(id))
             throw new MinorOntopInternalBugException("Mapping not found: " + id);
 
