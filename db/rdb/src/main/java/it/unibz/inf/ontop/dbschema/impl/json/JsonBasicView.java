@@ -293,7 +293,7 @@ public class JsonBasicView extends JsonView {
             }
             // If the determinant column has been hidden or does not exist
             catch (MetadataExtractionException e) {
-                LOGGER.warn("Cannot find correct unique constraint determinant {} for relation {}", addUC.name, relation.getID().toString());
+                LOGGER.warn("Cannot find correct unique constraint determinant {} for relation {}", addUC.name, relation.getID());
             }
         }
     }
@@ -326,13 +326,13 @@ public class JsonBasicView extends JsonView {
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID().getName())
+                        .map(a -> a.getID())
                         .noneMatch(addedConstraintsColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID().getName())
+                        .map(a -> a.getID())
                         .noneMatch(addedNewColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID().getName())
+                        .map(a -> a.getID())
                         .noneMatch(hiddenColumnNames::contains))
                 .collect(ImmutableCollectors.toList());
 
@@ -341,11 +341,11 @@ public class JsonBasicView extends JsonView {
                 .map(i -> new AddUniqueConstraints(
                         i.getName(),
                         i.getDeterminants().stream()
-                                .map(c -> c.getID().toString())
+                                .map(c -> c.getID().getSQLRendering())
                                 .collect(Collectors.toList()),
                         // If no PK defined in added columns keep parent PK
-                        addUniqueConstraints.stream()
-                                .noneMatch(k -> k.isPrimaryKey.equals(true)) && i.isPrimaryKey()
+                        i.isPrimaryKey() && addUniqueConstraints.stream()
+                                .noneMatch(k -> k.isPrimaryKey.equals(true))
                             ))
                 .collect(Collectors.toList());
 
@@ -406,26 +406,26 @@ public class JsonBasicView extends JsonView {
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
                 .filter(f -> f.getDeterminants().stream()
-                        .map(d -> d.getID().toString())
+                        .map(d -> d.getID().getName())
                         .noneMatch(addedNewColumns::contains))
                 .filter(f -> f.getDeterminants().stream()
-                        .map(d -> d.getID().toString())
+                        .map(d -> d.getID().getName())
                         .noneMatch(hiddenColumnNames::contains))
                 .filter(f -> f.getDependents().stream()
-                        .map(d -> d.getID().toString())
+                        .map(d -> d.getID().getName())
                         .noneMatch(addedNewColumns::contains))
                 .filter(f -> f.getDependents().stream()
-                        .map(d -> d.getID().toString())
+                        .map(d -> d.getID().getName())
                         .noneMatch(hiddenColumnNames::contains))
                 .collect(ImmutableCollectors.toList());
 
         List<AddFunctionalDependency> inferredFunctionalDependencies = inheritedFunctionalDependencies.stream()
                 .map(i -> new AddFunctionalDependency(
                         i.getDeterminants().stream()
-                                .map(d -> d.getID().toString())
+                                .map(d -> d.getID().getSQLRendering())
                                 .collect(Collectors.toList()),
                         i.getDependents().stream()
-                                .map(d -> d.getID().toString())
+                                .map(d -> d.getID().getSQLRendering())
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
