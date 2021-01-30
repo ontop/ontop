@@ -31,10 +31,9 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddUniqueConstraint() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> constraints = firstView.get()
-                .getUniqueConstraints()
-                .stream()
+        List<String> constraints = viewDefinitions.stream()
+                .map(v -> v.getUniqueConstraints())
+                .flatMap(Collection::stream)
                 .map(c -> c.getAttributes())
                 .flatMap(Collection::stream)
                 .map(v -> v.getID().getName())
@@ -48,10 +47,9 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddFunctionalDependencyDependent() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> otherFD = firstView.get()
-                .getOtherFunctionalDependencies()
-                .stream()
+        List<String> otherFD = viewDefinitions.stream()
+                .map(v -> v.getOtherFunctionalDependencies())
+                .flatMap(Collection::stream)
                 .map(d -> d.getDependents())
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
@@ -65,10 +63,9 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> otherFD = firstView.get()
-                .getOtherFunctionalDependencies()
-                .stream()
+        List<String> otherFD = viewDefinitions.stream()
+                .map(v -> v.getOtherFunctionalDependencies())
+                .flatMap(Collection::stream)
                 .map(d -> d.getDeterminants())
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
@@ -82,10 +79,9 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_DestinationRelation() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> destination_relation = firstView.get()
-                .getForeignKeys()
-                .stream()
+        List<String> destination_relation = viewDefinitions.stream()
+                .map(v -> v.getForeignKeys())
+                .flatMap(Collection::stream)
                 .map(f -> f.getReferencedRelation())
                 .map(d -> d.getID().getComponents().get(0).getName())
                 .collect(Collectors.toList());
@@ -98,10 +94,9 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_DestinationColumn() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> destination_column = firstView.get()
-                .getForeignKeys()
-                .stream()
+        List<String> destination_column = viewDefinitions.stream()
+                .map(v -> v.getForeignKeys())
+                .flatMap(Collection::stream)
                 .map(f -> f.getComponents())
                 .map(c -> c.get(0).getReferencedAttribute().getID().getName())
                 .collect(Collectors.toList());
@@ -114,10 +109,9 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_SourceColumn() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> source_column = firstView.get()
-                .getForeignKeys()
-                .stream()
+        List<String> source_column = viewDefinitions.stream()
+                .map(v -> v.getForeignKeys())
+                .flatMap(Collection::stream)
                 .map(f -> f.getComponents())
                 .map(c -> c.get(0).getAttribute().getID().getName())
                 .collect(Collectors.toList());
@@ -130,10 +124,9 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_FKName() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> fk_name = firstView.get()
-                .getForeignKeys()
-                .stream()
+        List<String> fk_name = viewDefinitions.stream()
+                .map(v -> v.getForeignKeys())
+                .flatMap(Collection::stream)
                 .map(f -> f.getName())
                 .collect(Collectors.toList());
 

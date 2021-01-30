@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -29,10 +30,9 @@ public class BasicViewWithConstraintsProfTest {
      */
     @Test
     public void testProfUniqueConstraintOnHiddenColumns() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> constraints = firstView.get()
-                .getUniqueConstraints()
-                .stream()
+        List<String> constraints = viewDefinitions.stream()
+                .map(v -> v.getUniqueConstraints())
+                .flatMap(Collection::stream)
                 .map(c -> c.getAttributes())
                 .flatMap(Collection::stream)
                 .map(v -> v.getID().getName())
@@ -46,15 +46,13 @@ public class BasicViewWithConstraintsProfTest {
      */
     @Test
     public void testProfPKChange() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        Map<Object, Object> constraints = firstView.get()
-                .getUniqueConstraints()
-                .stream()
-                .collect(Collectors.toMap(c -> c.getName(), c -> c.isPrimaryKey()));
+        Map<String, Boolean> constraints = viewDefinitions.stream()
+                .map(v -> v.getUniqueConstraints())
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(UniqueConstraint::getName, UniqueConstraint::isPrimaryKey));
 
-        Map<Object, Object> otherMap = new HashMap<Object, Object>();
-        otherMap.put( "student_position_id", true);
-        otherMap.put("academic_pkey",false);
+        Map<String, Boolean> otherMap = ImmutableMap.of("student_position_id", true,
+                                                        "academic_pkey",false);
         assertEquals(otherMap, constraints);
     }
 
@@ -63,10 +61,9 @@ public class BasicViewWithConstraintsProfTest {
      */
     @Test
     public void testProfFailAddingFunctionalDependencyOfHiddenColumn() throws Exception {
-        Optional<OntopViewDefinition> firstView = viewDefinitions.stream().findFirst();
-        List<String> otherFD = firstView.get()
-                .getOtherFunctionalDependencies()
-                .stream()
+        List<String> otherFD = viewDefinitions.stream()
+                .map(v -> v.getOtherFunctionalDependencies())
+                .flatMap(Collection::stream)
                 .map(d -> d.getDeterminants())
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())

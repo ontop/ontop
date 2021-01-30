@@ -34,22 +34,12 @@ public class ViewDefinitionParsingTest {
     }
 
     /**
-     * Duplicate unique constraints defined in view
+     * Multiple primary keys defined in view
      */
     @Test(expected = IllegalArgumentException.class)
     public void testValidProfBasicViews_DuplicateUniqueConstraints() throws MetadataExtractionException, FileNotFoundException {
         ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views-with-constraints-duplicate-constraints.json", "/prof/prof_with_constraints.db-extract.json");
     }
-
-    /**
-     * Duplicate functional dependency defined in view - TEST FAILS
-     * TODO: User can duplicate functional dependencies
-     */
-    @Test
-    public void testValidProfBasicViews_DuplicateFunctionalDependency() throws MetadataExtractionException, FileNotFoundException {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views-with-constraints-duplicateFD.json", "/prof/prof_with_constraints.db-extract.json");
-    }
-
 
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
