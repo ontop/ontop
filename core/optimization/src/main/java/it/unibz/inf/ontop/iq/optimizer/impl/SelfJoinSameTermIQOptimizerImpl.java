@@ -53,29 +53,19 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     /**
      * TODO: explain
      */
-    protected static class SameTermSelfJoinTransformer extends AbstractDiscardedVariablesTransformer {
+    protected static class SameTermSelfJoinTransformer extends AbstractBelowDistinctTransformer {
 
-        private final IQTreeTransformer lookForDistinctTransformer;
-        private final OptimizationSingletons optimizationSingletons;
         private final IntermediateQueryFactory iqFactory;
         private final TermFactory termFactory;
         private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
-        protected SameTermSelfJoinTransformer(ImmutableSet<Variable> discardedVariables,
-                                              IQTreeTransformer lookForDistinctTransformer,
+        protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer,
                                               OptimizationSingletons optimizationSingletons) {
-            super(discardedVariables, lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
-            this.lookForDistinctTransformer = lookForDistinctTransformer;
-            this.optimizationSingletons = optimizationSingletons;
+            super(lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             iqFactory = coreSingletons.getIQFactory();
             termFactory = coreSingletons.getTermFactory();
             requiredExtensionalDataNodeExtractor = optimizationSingletons.getRequiredExtensionalDataNodeExtractor();
-        }
-
-        @Override
-        protected AbstractDiscardedVariablesTransformer update(ImmutableSet<Variable> newDiscardedVariables) {
-            return new SameTermSelfJoinTransformer(newDiscardedVariables, lookForDistinctTransformer, optimizationSingletons);
         }
 
         /**
@@ -84,8 +74,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
          * Only removes some children that are extensional data nodes
          */
         @Override
-        protected Optional<IQTree> furtherSimplifyInnerJoinChildren(ImmutableList<ImmutableSet<Variable>> discardedVariablesPerChild,
-                                                                    Optional<ImmutableExpression> optionalFilterCondition,
+        protected Optional<IQTree> furtherSimplifyInnerJoinChildren(Optional<ImmutableExpression> optionalFilterCondition,
                                                                     ImmutableList<IQTree> partiallySimplifiedChildren) {
             //Mutable
             final List<IQTree> currentChildren = Lists.newArrayList(partiallySimplifiedChildren);
@@ -93,7 +82,6 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                     .boxed()
                     .filter(i -> isDetectedAsRedundant(
                             currentChildren.get(i),
-                            discardedVariablesPerChild.get(i),
                             IntStream.range(0, partiallySimplifiedChildren.size())
                                     .filter(j -> j!= i)
                                     .boxed()
@@ -104,8 +92,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             ImmutableSet<Variable> variablesToFilterNulls = IntStream.range(0, partiallySimplifiedChildren.size())
                     .filter(i -> currentChildren.get(i).getRootNode() instanceof TrueNode)
                     .boxed()
-                    .map(i -> Sets.difference(partiallySimplifiedChildren.get(i).getVariables(),
-                            discardedVariablesPerChild.get(i)))
+                    .map(i -> partiallySimplifiedChildren.get(i).getVariables())
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toSet());
 
@@ -126,18 +113,17 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
         /**
          * Should not return any false positive
          */
-        boolean isDetectedAsRedundant(IQTree child, ImmutableSet<Variable> discardedVariables, Stream<IQTree> otherChildren) {
+        boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildren) {
             return Optional.of(child)
                     .filter(c -> c instanceof ExtensionalDataNode)
                     .map(c -> (ExtensionalDataNode) c)
                     .filter(d1 -> otherChildren
                             .flatMap(t -> t.acceptVisitor(requiredExtensionalDataNodeExtractor))
-                            .anyMatch(d2 -> isDetectedAsRedundant(d1, d2, discardedVariables)))
+                            .anyMatch(d2 -> isDetectedAsRedundant(d1, d2)))
                     .isPresent();
         }
 
-        private boolean isDetectedAsRedundant(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode,
-                                              ImmutableSet<Variable> discardedVariables) {
+        private boolean isDetectedAsRedundant(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode) {
             if (!dataNode.getRelationDefinition().equals(otherDataNode.getRelationDefinition()))
                 return false;
 
