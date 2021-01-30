@@ -24,7 +24,7 @@ public class BasicViewWithConstraintsParsingTest {
 
     ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions(VIEW_FILE, DBMETADATA_FILE);
 
-    public BasicViewWithConstraintsParsingTest() throws MetadataExtractionException, FileNotFoundException, IOException {
+    public BasicViewWithConstraintsParsingTest() throws Exception {
     }
 
     /**
@@ -136,7 +136,7 @@ public class BasicViewWithConstraintsParsingTest {
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
-            throws MetadataExtractionException, FileNotFoundException, IOException {
+            throws Exception {
 
         OntopSQLCoreConfiguration configuration = OntopSQLCoreConfiguration.defaultBuilder()
                 .jdbcUrl("jdbc:h2:mem:nowhere")

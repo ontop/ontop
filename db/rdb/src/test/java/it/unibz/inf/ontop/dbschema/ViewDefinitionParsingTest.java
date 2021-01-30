@@ -15,31 +15,34 @@ import java.io.Reader;
 public class ViewDefinitionParsingTest {
 
     @Test
-    public void testValidPersonBasicViews() throws MetadataExtractionException, FileNotFoundException, IOException {
+    public void testValidPersonBasicViews() throws Exception {
 
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/person/basic_views.json", "/person/person.db-extract.json");
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/person/basic_views.json",
+                "src/test/resources/person/person.db-extract.json");
 
         // TODO: continue
     }
 
     @Test
-    public void testValidProfBasicViews() throws MetadataExtractionException, FileNotFoundException, IOException {
+    public void testValidProfBasicViews() throws Exception {
 
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views.json", "/prof/prof.db-extract.json");
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views.json",
+                "src/test/resources/prof/prof.db-extract.json");
     }
 
     /**
      * Multiple primary keys defined in view
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testValidProfBasicViews_DuplicateUniqueConstraints() throws MetadataExtractionException, FileNotFoundException, IOException {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("/prof/prof-basic-views-with-constraints-duplicate-constraints.json", "/prof/prof_with_constraints.db-extract.json");
+    public void testValidProfBasicViews_DuplicateUniqueConstraints() throws Exception {
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-duplicate-constraints.json",
+                "src/test/resources/prof/prof_with_constraints.db-extract.json");
     }
 
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
-            throws MetadataExtractionException, FileNotFoundException, IOException {
+            throws Exception {
 
         OntopSQLCoreConfiguration configuration = OntopSQLCoreConfiguration.defaultBuilder()
                 .jdbcUrl("jdbc:h2:mem:nowhere")
