@@ -20,17 +20,18 @@
             "name": "student_position_id",
             "determinants": ["\"position\""],
             "isPrimaryKey": true
+          },
+          {
+            "name": "student_last_name",
+            "determinants": ["\"last_name\""],
+            "isPrimaryKey": true
           }
         ]
       },
       "otherFunctionalDependencies": {
         "added": [
           {
-            "determinants": ["\"first_name\""],
-            "dependents": ["\"last_name\""]
-          },
-          {
-            "determinants": ["\"first_name\""],
+            "determinants": ["\"ssn\""],
             "dependents": ["\"last_name\""]
           }
         ]

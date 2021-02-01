@@ -19,24 +19,23 @@
           {
             "name": "student_position_id",
             "determinants": ["\"position\""],
-            "isPrimaryKey": true
+            "isPrimaryKey": false
           },
           {
-            "name": "ssd",
-            "determinants": ["\"ssd\""],
-            "isPrimaryKey": true
-          },
-          {
-            "name": "ssd",
+            "name": "student_position_id",
             "determinants": ["\"position\""],
-            "isPrimaryKey": true
+            "isPrimaryKey": false
           }
         ]
       },
       "otherFunctionalDependencies": {
         "added": [
           {
-            "determinants": ["\"ssn\""],
+            "determinants": ["\"first_name\""],
+            "dependents": ["\"last_name\""]
+          },
+          {
+            "determinants": ["\"first_name\""],
             "dependents": ["\"last_name\""]
           }
         ]

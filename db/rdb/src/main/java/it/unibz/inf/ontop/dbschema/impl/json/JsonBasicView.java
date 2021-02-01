@@ -278,7 +278,7 @@ public class JsonBasicView extends JsonView {
     private void insertUniqueConstraints(NamedRelationDefinition relation,
                                          QuotedIDFactory idFactory,
                                          List<AddUniqueConstraints> addUniqueConstraints,
-                                         ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
+                                         ImmutableList<NamedRelationDefinition> baseRelations) {
 
 
         List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations, idFactory);
@@ -300,6 +300,9 @@ public class JsonBasicView extends JsonView {
 
     /**
      * Infer unique constraints from the parent
+     * Streams of lists have an intrinsic order and added constraints come first in case of duplicates thus:
+     * 1. Added constraints take precedence over inferred (i.e. can overwrite PK true/false definition)
+     * 2. No precedence defined for duplicated added constraints (i.e. same constraint defined with PK true/false returns random result)
      */
     private List<AddUniqueConstraints> extractUniqueConstraints(List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations,
@@ -326,13 +329,13 @@ public class JsonBasicView extends JsonView {
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID())
+                        .map(a -> a.getID().getName())
                         .noneMatch(addedConstraintsColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID())
+                        .map(a -> a.getID().getName())
                         .noneMatch(addedNewColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID())
+                        .map(a -> a.getID().getName())
                         .noneMatch(hiddenColumnNames::contains))
                 .collect(ImmutableCollectors.toList());
 
@@ -349,15 +352,20 @@ public class JsonBasicView extends JsonView {
                             ))
                 .collect(Collectors.toList());
 
-        // Return full list of added and inherited constraints
+        // Throw a warning if duplicate unique constraints are added
+        if (!Stream.concat(addUniqueConstraints.stream(), inferredUniqueConstraints.stream()).allMatch(new HashSet<>()::add))
+            LOGGER.warn("Duplicate unique constraints defined in schema");
+
+        // Return full list of added and inherited constraints, remove duplicates based on constraint attribute
         return Stream.concat(addUniqueConstraints.stream(), inferredUniqueConstraints.stream())
+                .distinct()
                 .collect(Collectors.toList());
     }
 
     private void insertFunctionalDependencies(NamedRelationDefinition relation,
                                               QuotedIDFactory idFactory,
                                               List<AddFunctionalDependency> addFunctionalDependency,
-                                              ImmutableList<NamedRelationDefinition> baseRelations) throws MetadataExtractionException {
+                                              ImmutableList<NamedRelationDefinition> baseRelations) {
 
         List<AddFunctionalDependency> list = extractOtherFunctionalDependencies(addFunctionalDependency, baseRelations, idFactory);
 
@@ -429,7 +437,12 @@ public class JsonBasicView extends JsonView {
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
-        return Stream.concat(addFunctionalDependencies.stream(), inferredFunctionalDependencies.stream())
+        // Throw a warning if duplicate functional dependencies are added
+        if (!Stream.concat(addFunctionalDependencies.stream(), inferredFunctionalDependencies.stream()).allMatch(new HashSet<>()::add))
+            LOGGER.warn("Duplicate functional dependencies defined in schema");
+
+        // Return the unique list of functional dependencies (apply distinct)
+        return Stream.concat(addFunctionalDependencies.stream(), inferredFunctionalDependencies.stream()).distinct()
                 .collect(Collectors.toList());
     }
 
@@ -533,6 +546,32 @@ public class JsonBasicView extends JsonView {
             this.determinants = determinants;
             this.isPrimaryKey = isPrimaryKey;
         }
+
+        /*
+         * Ovverride equals method to ensure we can check for object equality
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            AddUniqueConstraints other = (AddUniqueConstraints) obj;
+            return Objects.equals(determinants, other.determinants);
+        }
+
+        /*
+         * Ovverride hashCode method to ensure we can check for object equality
+         */
+        @Override
+        public int hashCode() {
+            return Objects.hash(determinants);
+        }
     }
 
     private static class OtherFunctionalDependencies extends JsonOpenObject {
@@ -559,6 +598,33 @@ public class JsonBasicView extends JsonView {
                                        @JsonProperty("dependents") List<String> dependents) {
             this.determinants = determinants;
             this.dependents = dependents;
+        }
+
+        /*
+         * Ovverride equals method to ensure we can check for object equality
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            AddFunctionalDependency other = (AddFunctionalDependency) obj;
+            return Objects.equals(ImmutableMap.of(determinants, dependents),
+                    ImmutableMap.of(other.determinants, other.dependents));
+        }
+
+        /*
+        * Ovverride hashCode method to ensure we can check for object equality
+        */
+        @Override
+        public int hashCode() {
+            return Objects.hash(ImmutableMap.of(determinants, dependents));
         }
     }
 

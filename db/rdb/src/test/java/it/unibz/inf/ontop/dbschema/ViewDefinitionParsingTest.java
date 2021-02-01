@@ -2,14 +2,11 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.Reader;
 
 public class ViewDefinitionParsingTest {
@@ -19,8 +16,6 @@ public class ViewDefinitionParsingTest {
 
         ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/person/basic_views.json",
                 "src/test/resources/person/person.db-extract.json");
-
-        // TODO: continue
     }
 
     @Test
@@ -34,8 +29,8 @@ public class ViewDefinitionParsingTest {
      * Multiple primary keys defined in view
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testValidProfBasicViews_DuplicateUniqueConstraints() throws Exception {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-duplicate-constraints.json",
+    public void testValidProfBasicViews_DuplicatePK() throws Exception {
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-duplicate-constraintPK.json",
                 "src/test/resources/prof/prof_with_constraints.db-extract.json");
     }
 
