@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -39,6 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -49,23 +49,18 @@ public class DialogUtils {
 	public static final String HTML_TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
 
 
-	public static <T,V> void launchWorkerWithProgressMonitor(Component parent, String message, SwingWorker<T, V> worker) {
-		ProgressMonitor progressMonitor = new ProgressMonitor(
-				parent, message, "", 0, 100);
-		progressMonitor.setProgress(0);
-		worker.addPropertyChangeListener(evt -> {
-			if ("progress".equals(evt.getPropertyName())) {
-				int progress = (Integer) evt.getNewValue();
-				progressMonitor.setProgress(progress);
-				progressMonitor.setNote("          completed " + progress + "%.");
-				if (progressMonitor.isCanceled())
-					worker.cancel(false);
-			}
-		});
-		worker.execute();
+	public static String renderElapsedTime(long millis) {
+		if (millis < 1_000)
+			return String.format("%dms", millis);
+
+		if (millis < 10_000)
+			return String.format("%d.%02ds", millis / 1000, (millis % 1000 + 5)/10);
+
+		if (millis < 100_000)
+			return String.format("%d.%01ds", millis / 1000, (millis % 1000 + 50)/100);
+
+		return String.format("%ds", (millis + 500)/ 1000);
 	}
-
-
 
 	public static Function<String, String> getExtensionReplacer(String replacement) {
 		return shortForm -> {
@@ -106,7 +101,7 @@ public class DialogUtils {
 	public static Optional<OntopProtegeReasoner> getOntopProtegeReasoner(EditorKit editorKit) {
 		Workspace workspace = editorKit.getWorkspace();
 		if (!(editorKit instanceof OWLEditorKit))
-			throw new MinorOntopInternalBugException("EditorKit is not OWLEditorKit");
+			throw new MinorOntopInternalBugException("EditorKit is not an OWLEditorKit");
 
 		OWLEditorKit owlEditorKit = (OWLEditorKit)editorKit;
 		OWLReasoner reasoner = owlEditorKit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
@@ -122,22 +117,42 @@ public class DialogUtils {
 		return Optional.of((OntopProtegeReasoner)reasoner);
 	}
 
-	public static void showSeeLogErrorDialog(Component parent, String message, Logger log, Throwable e) {
+	public static void showErrorDialog(Component parent, String title, String message, Logger log, Throwable e, OntopStandaloneSQLSettings settings) {
+		if (e.getCause() instanceof SQLException && settings != null) {
+			JOptionPane.showMessageDialog(parent,
+					"<html><b>Error connecting to the database:</b> " + e.getCause().getMessage() + ".<br><br>" +
+							HTML_TAB + "JDBC driver: " + settings.getJdbcDriver() + "<br>" +
+							HTML_TAB + "Connection URL: " + settings.getJdbcUrl() + "<br>" +
+							HTML_TAB + "Username: " + settings.getJdbcUser() + "</html>",
+					title,
+					JOptionPane.ERROR_MESSAGE);
+		}
+		else
+			DialogUtils.showSeeLogErrorDialog(parent, title, message, log, e);
+	}
+
+
+	public static void showSeeLogErrorDialog(Component parent, String title, String message, Logger log, Throwable e) {
 		String text = message + "\n" +
 				e.getMessage() + "\n" +
 				"For more information, see the log.";
+
 		JOptionPane narrowPane = new JOptionPane(text, JOptionPane.ERROR_MESSAGE) {
 			@Override
 			public int getMaxCharactersPerLineCount() {
 				return MAX_CHARACTERS_PER_LINE_COUNT;
 			}
 		};
-		JDialog errorDialog = narrowPane.createDialog(parent, "Error");
+		JDialog errorDialog = narrowPane.createDialog(parent, title);
 		errorDialog.setModal(true);
 		errorDialog.setVisible(true);
 
 		log.error(e.getMessage(), e);
 		e.printStackTrace();
+	}
+
+	public static void showSeeLogErrorDialog(Component parent, String message, Logger log, Throwable e) {
+		showSeeLogErrorDialog(parent, "Error", message, log, e);
 	}
 
 	public static void showQuickErrorDialog(Component parent, Exception e, String message) {

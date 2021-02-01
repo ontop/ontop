@@ -488,10 +488,14 @@ public class OBDAModelManager implements Disposable {
 
 	public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
 		OWLModelManager modelManager = owlEditorKit.getModelManager();
-		OntopSQLOWLAPIConfiguration configuration = getConfigurationManager()
+		return getConfigurationManager()
 				.buildOntopSQLOWLAPIConfiguration(modelManager.getActiveOntology());
+	}
 
-		return configuration;
+	public void addAxiomsToObtology(Set<? extends OWLAxiom> axioms) {
+		OWLModelManager modelManager = owlEditorKit.getModelManager();
+		OWLOntologyManager ontologyManager = modelManager.getOWLOntologyManager();
+		ontologyManager.addAxioms(modelManager.getActiveOntology(), axioms);
 	}
 
 	/*

@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
 
-import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
@@ -11,21 +11,18 @@ import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.protege.utils.LogTickerSwingWorker;
+import it.unibz.inf.ontop.protege.utils.ProgressMonitor;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
+import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +32,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
-/***
- * Action to create individuals into the currently open OWL Ontology using the
- * existing mappings from the current data source
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
+
+/**
+ * Action to create individuals into the currently open OWL ontology
+ * using the mapping from the current data source
  *
  * @author Mariano Rodriguez Muro
  */
@@ -49,26 +52,41 @@ public class AboxMaterializationAction extends ProtegeAction {
     private static final long serialVersionUID = -1211395039869926309L;
 
     private static final String RDF_XML = "RDF/XML";
-//    private static final String OWL_XML = "OWL/XML";
     private static final String TURTLE = "Turtle";
     private static final String NTRIPLES = "N-Triples";
+
+    private static final String DIALOG_TITLE = "RDF Graph materialization";
+
+    private static final ImmutableMap<String, String> EXTENSIONS = ImmutableMap.of(
+             RDF_XML, ".xml",
+            NTRIPLES, ".nt",
+            TURTLE, ".ttl");
+
+    private static final ImmutableMap<String, Function<Writer, RDFHandler>> HANDLER_FACTORIES = ImmutableMap.of(
+            RDF_XML, RDFXMLWriter::new,
+            NTRIPLES, writer -> new TurtleWriter(writer)
+                    .set(BasicWriterSettings.PRETTY_PRINT, false),
+            TURTLE, writer -> new NTriplesWriter(writer)
+                    .set(BasicWriterSettings.PRETTY_PRINT, false));
 
     private final Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
 
     @Override
     public void actionPerformed(ActionEvent evt) {
+        if (!DialogUtils.getOntopProtegeReasoner(getEditorKit()).isPresent())
+            return;
+
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Choose a materialization option: "), BorderLayout.NORTH);
+        panel.add(new JLabel("<html><b>Choose the materialization option:</b></html>"), BorderLayout.NORTH);
 
         JRadioButton radioAdd = new JRadioButton("Add triples to the current ontology", true);
-        JRadioButton radioExport = new JRadioButton("Dump triples to an external file");
+        JRadioButton radioExport = new JRadioButton("Store triples in an external file");
         ButtonGroup group = new ButtonGroup();
         group.add(radioAdd);
         group.add(radioExport);
 
         JLabel lFormat = new JLabel("Output format: ");
-        JComboBox<String> comboFormats = new JComboBox<>(new String[] { RDF_XML, TURTLE, NTRIPLES });
-        // enabled only when the Export radio button is selected
+        JComboBox<String> comboFormats = new JComboBox<>(EXTENSIONS.keySet().toArray(new String[0]));
         comboFormats.setEnabled(false);
         radioExport.addItemListener(e ->
                 comboFormats.setEnabled(e.getStateChange() == ItemEvent.SELECTED));
@@ -95,7 +113,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         if (JOptionPane.showOptionDialog(getWorkspace(),
                 panel,
-                "Materialization options",
+                DIALOG_TITLE,
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
@@ -104,204 +122,190 @@ public class AboxMaterializationAction extends ProtegeAction {
             return;
 
         if (radioAdd.isSelected()) {
-            materializeOnto();
+            if (JOptionPane.showConfirmDialog(getWorkspace(),
+                    "The plugin will generate triples and save them in this current ontology.\n"
+                            + "The operation may take some time and may require a lot of memory if the database is large.\n\n"
+                            + "Do you want to continue?",
+                    "Materialize the RDF Graph?",
+                    JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                return;
+
+            MaterializeToOntologyWorker worker = new MaterializeToOntologyWorker();
+            worker.execute();
         }
         else if (radioExport.isSelected()) {
-            materializeToFile((String) comboFormats.getSelectedItem());
-        }
-    }
+            String format = (String) comboFormats.getSelectedItem();
 
-    private static String getExtension(String format) {
-        switch (format) {
-            case RDF_XML:
-                return ".xml";
-            case NTRIPLES:
-                return ".nt";
-            case TURTLE:
-                return ".ttl";
-            default:
-                throw new MinorOntopInternalBugException("Unexpected format: " + format);
-        }
-    }
+            JFileChooser fc = DialogUtils.getFileChooser(getEditorKit(),
+                    DialogUtils.getExtensionReplacer("-materialized" + EXTENSIONS.get(format)));
+            if (fc.showSaveDialog(getWorkspace()) != JFileChooser.APPROVE_OPTION)
+                return;
 
-    private static RDFHandler getHandler(String format, Writer writer) {
-        switch (format) {
-            case RDF_XML:
-                return new RDFXMLWriter(writer);
-            case TURTLE:
-                TurtleWriter tw = new TurtleWriter(writer);
-                tw.set(BasicWriterSettings.PRETTY_PRINT, false);
-                return tw;
-            case NTRIPLES:
-                NTriplesWriter nt = new NTriplesWriter(writer);
-                nt.set(BasicWriterSettings.PRETTY_PRINT, false);
-                return nt;
-            default:
-                throw new MinorOntopInternalBugException("Unexpected format: " + format);
-        }
-
-    }
-
-    private void materializeToFile(String format) {
-        JFileChooser fc = DialogUtils.getFileChooser(getEditorKit(),
-                DialogUtils.getExtensionReplacer("-materialized" + getExtension(format)));
-        if (fc.showSaveDialog(getWorkspace()) != JFileChooser.APPROVE_OPTION)
-            return;
-
-        try {
-            OWLEditorKit editorKit = (OWLEditorKit) getEditorKit();
-            OWLOntology ontology = editorKit.getOWLModelManager().getActiveOntology();
-
-            OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-            OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager()
-                    .buildOntopSQLOWLAPIConfiguration(ontology);
-            MaterializationGraphQuery result = RDF4JMaterializer.defaultMaterializer(
-                    configuration,
-                    MaterializationParams.defaultBuilder().build())
-                    .materialize();
-
-            long startTime = System.currentTimeMillis();
             File file = fc.getSelectedFile();
-            try (OutputStream out = new FileOutputStream(file);
-                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
-                RDFHandler handler = getHandler(format, writer);
-                result.evaluate(handler);
-            }
-            long endTime = System.currentTimeMillis();
-            JOptionPane.showMessageDialog(getWorkspace(),
-                    "Materialization completed\n\n" +
-                            "Number of triples: " + result.getTripleCountSoFar() + "\n" +
-                            "Vocabulary size: " + result.getSelectedVocabulary().size() + "\n" +
-                            "Elapsed time: " + (endTime - startTime) + "ms",
-                    "ABox materialization",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-        catch (Throwable e) {
-            DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error materializing ABox.", log, e);
+            if (file.exists() && JOptionPane.showConfirmDialog(getWorkspace(),
+                    "<html><br>The file " + file.getPath() + " exists.<br><br>"
+                            + "Do you want to <b>overwrite</b> it?<br></html>",
+                    DIALOG_TITLE,
+                    JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                return;
+
+            MaterializeToFileWorker worker = new MaterializeToFileWorker(file, HANDLER_FACTORIES.get(format));
+            worker.execute();
         }
     }
 
-    private void materializeOnto() {
-        if (JOptionPane.showConfirmDialog(getWorkspace(),
-                "The plugin will generate several triples and save them in this current ontology.\n"
-                        + "The operation may take some time and may require a lot of memory if the data volume is too high.\n\n"
-                        + "Do you want to continue?",
-                "Materialize?",
-                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
-            return;
+    private class MaterializeToFileWorker extends LogTickerSwingWorker<Void, Void> {
+        private final File file;
+        private final Function<Writer, RDFHandler> handlerFactory;
 
-        try {
-            OWLEditorKit editorKit = (OWLEditorKit) getEditorKit();
-            OWLModelManager modelManager = editorKit.getOWLModelManager();
-            OWLOntology ontology = modelManager.getActiveOntology();
-            OWLOntologyManager ontoManager = modelManager.getOWLOntologyManager();
+        private OntopStandaloneSQLSettings settings;
+        private long vocabularySize;
+        private volatile boolean closingFile = false;
 
+        MaterializeToFileWorker(File file, Function<Writer, RDFHandler> handlerFactory) {
+            super(new ProgressMonitor(
+                    getWorkspace(),
+                    "<html><h3>RDF Graph materialization:</h3></html>",
+                    true));
+            this.file = file;
+            this.handlerFactory = handlerFactory;
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
             OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-            OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
+            OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
+            settings = configuration.getSettings();
 
-            MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-                    .build();
-            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(configuration, materializationParams);
-            MaterializedGraphOWLResultSet graphResultSet = materializer.materialize();
+            RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
+                    configuration,
+                    MaterializationParams.defaultBuilder().build());
+            MaterializationGraphQuery query = materializer.materialize();
 
-            Thread thread = new Thread("MaterializeDataInstances Thread") {
-                public void run() {
-                    try {
-                        OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...", getWorkspace());
-                        CountDownLatch latch = new CountDownLatch(1);
-                        MaterializeAction action = new MaterializeAction(ontology, ontoManager, graphResultSet);
-                        action.setCountdownLatch(latch);
-                        monitor.addProgressListener(action);
-                        monitor.start();
-                        action.run();
-                        latch.await();
-                        monitor.stop();
+            setProgress(1);
+            try (BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(
+                            new FileOutputStream(file), StandardCharsets.UTF_8))) {
+                RDFHandler handler = handlerFactory.apply(writer);
+                try (GraphQueryResult result = query.evaluate()) {
+                    handler.startRDF();
+                    while (result.hasNext()) {
+                        handler.handleStatement(result.next());
+                        if (tick())
+                            return null;
                     }
-                    catch (Throwable e) {
-                        DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error materializing data instances.", log, e);
-                    }
+                    closingFile = true;
+                    setProgress(99);
+                    handler.endRDF();
+                    vocabularySize = query.getSelectedVocabulary().size();
                 }
-            };
-            thread.start();
-        }
-        catch (Throwable e) {
-            DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error materializing data instances.", log, e);
-        }
-    }
-
-    public class MaterializeAction implements OBDAProgressListener {
-
-        private Thread thread;
-        private CountDownLatch latch;
-
-        private final OWLOntology currentOntology;
-        private final OWLOntologyManager ontologyManager;
-        private final MaterializedGraphOWLResultSet graphResultSet;
-
-        private boolean bCancel = false;
-        private boolean errorShown = false;
-
-        public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager,
-                                 MaterializedGraphOWLResultSet graphResultSet) {
-            this.currentOntology = currentOntology;
-            this.ontologyManager = ontologyManager;
-            this.graphResultSet = graphResultSet;
-        }
-
-        public void setCountdownLatch(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        public void run() {
-            thread = new Thread("AddAxiomToOntology Thread") {
-                public void run() {
-                    try {
-                        Set<OWLAxiom> setAxioms = Sets.newHashSet();
-                        while (graphResultSet.hasNext()) {
-                            setAxioms.add(graphResultSet.next());
-                        }
-                        graphResultSet.close();
-
-                        ontologyManager.addAxioms(currentOntology, setAxioms);
-
-                        latch.countDown();
-                        if (!bCancel) {
-                            JOptionPane.showMessageDialog(getWorkspace(),
-                                    "Materialization completed\n\n" +
-                                    "Number of triples: " + graphResultSet.getTripleCountSoFar() + "\n" +
-                                    "Vocabulary size: " + graphResultSet.getSelectedVocabulary().size(),
-                                    "Materialization",
-                                    JOptionPane.INFORMATION_MESSAGE);
-                        }
-                    }
-                    catch (Throwable e) {
-                        latch.countDown();
-                        DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Could not materialize ABox.", log, e);
-                    }
-                }
-            };
-            thread.start();
+            }
+            setProgress(100);
+            return null;
         }
 
         @Override
-        public void actionCanceled() {
-            if (thread != null) {
-                bCancel = true;
-                latch.countDown();
-                thread.interrupt();
+        public void done() {
+            try {
+                get();
+                JOptionPane.showMessageDialog(getWorkspace(),
+                        "<html><h3>RDF Graph materialization completed.</h3><br>" +
+                                HTML_TAB + "<b>" + getCount() + "</b> triples materialized.<br>" +
+                                HTML_TAB + "<b>" + vocabularySize + "</b> ontology classes and properties used.<br>" +
+                                HTML_TAB + "Elapsed time: <b>" + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + "</b>.<br></html>",
+                        DIALOG_TITLE,
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+            catch (CancellationException | InterruptedException e) {
+                try {
+                    Files.deleteIfExists(file.toPath());
+                }
+                catch (IOException ioException) {
+                    /* NO-OP */
+                }
+            }
+            catch (ExecutionException e) {
+                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", log, e, settings);
             }
         }
 
         @Override
-        public boolean isCancelled() {
-            return bCancel;
+        public String getProgressNote() {
+            if (closingFile)
+                return "Closing file...";
+
+            return String.format("%d triples materialized...", getCount());
+        }
+    }
+
+    private class MaterializeToOntologyWorker extends LogTickerSwingWorker<Void, Void> {
+
+        private OntopStandaloneSQLSettings settings;
+        private long vocabularySize;
+        private volatile boolean storingInTheOntology = false;
+
+        MaterializeToOntologyWorker() {
+            super(new ProgressMonitor(
+                    getWorkspace(),
+                    "<html><h3>RDF Graph materialization:</h3></html>",
+                    true));
         }
 
         @Override
-        public boolean isErrorShown() {
-            return errorShown;
+        protected Void doInBackground() throws Exception {
+            OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+            OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
+            settings = configuration.getSettings();
+
+            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
+                    configuration,
+                    MaterializationParams.defaultBuilder().build());
+
+
+            setProgress(1);
+            Set<OWLAxiom> setAxioms = new HashSet<>();
+            try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize()) {
+                while (graphResultSet.hasNext()) {
+                    setAxioms.add(graphResultSet.next());
+                    if (tick())
+                        return null;
+                }
+                vocabularySize = graphResultSet.getSelectedVocabulary().size();
+            }
+            storingInTheOntology = true;
+            setProgress(98);
+            obdaModelManager.addAxiomsToObtology(setAxioms);
+            setProgress(100);
+            return null;
         }
 
+        @Override
+        public void done() {
+            try {
+                get();
+                JOptionPane.showMessageDialog(getWorkspace(),
+                        "<html><h3>RDF Graph materialization completed.</h3><br>" +
+                                HTML_TAB + "<b>" + getCount() + "</b> triples materialized.<br>" +
+                                HTML_TAB + "<b>" + vocabularySize + "</b> ontology classes and properties used.<br>" +
+                                HTML_TAB + "Elapsed time: <b>" + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + "</b>.<br></html>",
+                        DIALOG_TITLE,
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+            catch (CancellationException | InterruptedException e) {
+                /* NO-OP */
+            }
+			catch (ExecutionException e) {
+                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", log, e, settings);
+            }
+        }
+
+        @Override
+        public String getProgressNote() {
+            if (storingInTheOntology)
+                return "storing in the ontology...";
+
+            return String.format("%d triples materialized...", getCount());
+        }
     }
 
     @Override

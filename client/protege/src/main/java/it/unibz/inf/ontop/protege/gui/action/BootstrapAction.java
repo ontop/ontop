@@ -34,6 +34,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFuncti
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.LinearTickerSwingWorker;
+import it.unibz.inf.ontop.protege.utils.ProgressMonitor;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -61,7 +63,7 @@ public class BootstrapAction extends ProtegeAction {
 
 	private final Logger log = LoggerFactory.getLogger(BootstrapAction.class);
 
-	private static final String DIALOG_TITLE = "Bootstrapping";
+	private static final String DIALOG_TITLE = "Bootstrapping ontology and mapping";
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
@@ -114,12 +116,11 @@ public class BootstrapAction extends ProtegeAction {
 				baseIri0.isEmpty() ? defaultBaseIRI : baseIri0);
 		prefixManager.generateUniquePrefixForBootstrapper(baseIri);
 
-		DialogUtils.launchWorkerWithProgressMonitor(getWorkspace(),
-				"Bootstrapping",
-				new BootstrapWorker(baseIri));
+		BootstrapWorker worker = new BootstrapWorker(baseIri);
+		worker.execute();
 	}
 
-	private class BootstrapWorker extends SwingWorker<ImmutableList<SQLPPTriplesMap>, Void> {
+	private class BootstrapWorker extends LinearTickerSwingWorker<ImmutableList<SQLPPTriplesMap>, Void> {
 
 		private final String baseIri;
 		private final JDBCMetadataProviderFactory metadataProviderFactory;
@@ -129,6 +130,10 @@ public class BootstrapAction extends ProtegeAction {
 		private final AtomicInteger currentMappingIndex;
 
 		BootstrapWorker(String baseIri) {
+			super(new ProgressMonitor(getWorkspace(),
+					"<html><h3>Bootstrapping ontology and mapping:</h3></html>",
+					false));
+
 			this.baseIri = baseIri;
 
 			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
@@ -146,10 +151,9 @@ public class BootstrapAction extends ProtegeAction {
 		@Override
 		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
 
-			final ImmutableMetadata metadata;
-			final double UNIT;
+			setProgress(1);
 
-			setProgress(0);
+			final ImmutableMetadata metadata;
 
 			JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 			try (Connection conn = connectionManager.getConnection(settings)) {
@@ -157,37 +161,31 @@ public class BootstrapAction extends ProtegeAction {
 				MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
 				ImmutableList<RelationID> relationIds = metadataProvider.getRelationIDs();
 
-				UNIT = 50.0 / relationIds.size();
+				setMaxTicks((relationIds.size() + 1) * 2);
 
 				CachingMetadataLookup lookup = new CachingMetadataLookup(metadataProvider);
-				int count = 0;
 				for (RelationID id : relationIds) {
 					lookup.getRelation(id);
-					count++;
-					setProgress((int) (count * UNIT));
-					if (isCancelled())
+
+					if (tick())
 						return null;
-					Thread.sleep(1000);
 				}
 				metadata = lookup.extractImmutableMetadata();
 			}
 
-			{
-				Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+			Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
 
-				int count = 0;
-				ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
-				for (NamedRelationDefinition relation : metadata.getAllRelations()) {
-					builder.addAll(directMappingEngine
-							.getMapping(relation, baseIri, bnodeTemplateMap, currentMappingIndex));
-					count++;
-					setProgress(50 + (int)(count * UNIT));
-					if (isCancelled())
-						return null;
-					Thread.sleep(1000);
-				}
-				return builder.build();
+			ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
+			for (NamedRelationDefinition relation : metadata.getAllRelations()) {
+				builder.addAll(directMappingEngine
+						.getMapping(relation, baseIri, bnodeTemplateMap, currentMappingIndex));
+
+				if (tick())
+					return null;
 			}
+
+			setProgress(100);
+			return builder.build();
 		}
 
 		@Override
@@ -211,9 +209,9 @@ public class BootstrapAction extends ProtegeAction {
 						.insertOntologyDeclarations(triplesMaps, true);
 
 				JOptionPane.showMessageDialog(getWorkspace(),
-						"<html><b>Bootstrapping is complete.</b><br><br>" +
-								HTML_TAB + "<b>" + triplesMaps.size() + "</b> triple maps inserted into the mapping.<br><br>" +
-								HTML_TAB + "<b>" + addAxioms.size() + "</b> declaration axioms (re)inserted into the ontology.</html>",
+						"<html><h3>Bootstrapping the ontology and mapping is complete.</h3><br>" +
+								HTML_TAB + "<b>" + triplesMaps.size() + "</b> triple maps inserted into the mapping.<br>" +
+								HTML_TAB + "<b>" + addAxioms.size() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
 						DIALOG_TITLE,
 						JOptionPane.INFORMATION_MESSAGE);
 			}
@@ -221,18 +219,13 @@ public class BootstrapAction extends ProtegeAction {
 				/* NO-OP */
 			}
 			catch (ExecutionException e) {
-				if (e.getCause() instanceof SQLException) {
-					JOptionPane.showMessageDialog(getWorkspace(),
-							"<html><b>Error connecting to the database:</b> " + e.getCause().getMessage() + ".<br><br>" +
-									HTML_TAB + "JDBC driver: " + settings.getJdbcDriver() + "<br>" +
-									HTML_TAB + "Connection URL: " + settings.getJdbcUrl() + "<br>" +
-									HTML_TAB + "Username: " + settings.getJdbcUser() + "</html>",
-							DIALOG_TITLE,
-							JOptionPane.ERROR_MESSAGE);
-				}
-				else
-					DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Bootstrapper error.", log, e);
+				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "Bootstrapper error.", log, e, settings);
 			}
+		}
+
+		@Override
+		public String getProgressNote() {
+			return String.format("%d%% completed.", getCompletionPercentage());
 		}
 	}
 
