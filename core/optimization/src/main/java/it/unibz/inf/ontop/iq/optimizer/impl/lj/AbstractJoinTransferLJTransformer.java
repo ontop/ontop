@@ -3,16 +3,21 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,6 +33,8 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     protected final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     protected AbstractJoinTransferLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
                                                 VariableGenerator variableGenerator,
@@ -38,7 +45,10 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
 
         this.optimizationSingletons = optimizationSingletons;
-        this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
+        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override
@@ -164,7 +174,47 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
     private IQTree transfer(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild,
                             ImmutableSet<SelectedNode> selectedNodes) {
-        throw new RuntimeException("TODO: implement");
+        if (selectedNodes.isEmpty())
+            throw new IllegalArgumentException("selectedNodes must not be empty");
+
+        ImmutableSet<DataNodeAndReplacement> nodesToTransferAndReplacements = selectedNodes.stream()
+                .map(n -> n.transformForTransfer(variableGenerator, iqFactory))
+                .collect(ImmutableCollectors.toSet());
+
+        IQTree newLeftChild = iqFactory.createNaryIQTree(
+                iqFactory.createInnerJoinNode(),
+                Stream.concat(
+                        Stream.of(leftChild),
+                        nodesToTransferAndReplacements.stream()
+                                .map(n -> n.extensionalDataNode))
+                        .collect(ImmutableCollectors.toList()));
+
+        RenamingAndEqualities renamingAndEqualities = RenamingAndEqualities.extract(
+                nodesToTransferAndReplacements.stream().map(n -> n.replacement),
+                termFactory, substitutionFactory);
+
+        IQTree tmp = replaceSelectedNodesAndRename(selectedNodes, rightChild,
+                renamingAndEqualities.renamingSubstitution);
+
+        throw new RuntimeException("TODO: continue");
+
+    }
+
+    /**
+     * NB: nodes to be replaced by TrueNodes should be safe to do so (should have been already checked before)
+     * In this context, renaming is safe to apply after.
+     */
+    private IQTree replaceSelectedNodesAndRename(ImmutableSet<SelectedNode> selectedNodes, IQTree rightChild,
+                                                 InjectiveVar2VarSubstitution renamingSubstitution) {
+
+        ReplaceNodeByTrueTransformer transformer = new ReplaceNodeByTrueTransformer(
+                selectedNodes.stream()
+                        .map(n -> n.extensionalDataNode)
+                        .collect(ImmutableCollectors.toSet()),
+                iqFactory);
+
+        return rightChild.acceptTransformer(transformer)
+                .applyFreshRenaming(renamingSubstitution);
     }
 
 
@@ -265,5 +315,105 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
             this.determinantIndexes = determinantIndexes;
             this.extensionalDataNode = extensionalDataNode;
         }
+
+        /**
+         * The determinants are preserved, while the other arguments are replaced by a fresh variable
+         */
+        public DataNodeAndReplacement transformForTransfer(VariableGenerator variableGenerator,
+                                                           IntermediateQueryFactory iqFactory) {
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap = extensionalDataNode.getArgumentMap();
+            ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = initialArgumentMap.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> determinantIndexes.contains(e.getKey())
+                                    ? e.getValue()
+                                    : variableGenerator.generateNewVariable()
+                    ));
+
+            ImmutableMultimap<? extends VariableOrGroundTerm, Variable> replacement = initialArgumentMap.entrySet().stream()
+                    .filter(e -> !determinantIndexes.contains(e.getKey()))
+                    .filter(e -> !newArgumentMap.get(e.getKey()).equals(e.getValue()))
+                    .collect(ImmutableCollectors.toMultimap(
+                            Map.Entry::getValue,
+                            e -> (Variable) newArgumentMap.get(e.getKey())
+                    ));
+
+            return new DataNodeAndReplacement(
+                    iqFactory.createExtensionalDataNode(extensionalDataNode.getRelationDefinition(), newArgumentMap),
+                    replacement);
+
+        }
     }
+
+    protected static class DataNodeAndReplacement {
+        public final ExtensionalDataNode extensionalDataNode;
+        // Key: replaced argument, value: the replacing variable
+        public final ImmutableMultimap<? extends VariableOrGroundTerm, Variable> replacement;
+
+        public DataNodeAndReplacement(ExtensionalDataNode extensionalDataNode,
+                                      ImmutableMultimap<? extends VariableOrGroundTerm, Variable> replacement) {
+            this.extensionalDataNode = extensionalDataNode;
+            this.replacement = replacement;
+        }
+    }
+
+    protected static class RenamingAndEqualities {
+        public final InjectiveVar2VarSubstitution renamingSubstitution;
+        public final ImmutableSet<ImmutableExpression> equalities;
+
+        private RenamingAndEqualities(InjectiveVar2VarSubstitution renamingSubstitution,
+                                      ImmutableSet<ImmutableExpression> equalities) {
+            this.renamingSubstitution = renamingSubstitution;
+            this.equalities = equalities;
+        }
+
+        public static RenamingAndEqualities extract(
+                Stream<ImmutableMultimap<? extends VariableOrGroundTerm, Variable>> replacementStream,
+                TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+            ImmutableMap<? extends VariableOrGroundTerm, Collection<Variable>> replacement = replacementStream
+                    .flatMap(m -> m.entries().stream())
+                    .collect(ImmutableCollectors.toMultimap()).asMap();
+
+            ImmutableMap<Variable, Variable> renamingSubstitutionMap = replacement.entrySet().stream()
+                    .filter(e -> e.getKey() instanceof Variable)
+                    .collect(ImmutableCollectors.toMap(
+                            e -> (Variable) e.getKey(),
+                            e -> e.getValue().iterator().next()));
+
+            Stream<ImmutableExpression> varEqualities = replacement.values().stream()
+                    .filter(variables -> variables.size() > 1)
+                    .map(variables -> termFactory.getStrictEquality(ImmutableList.copyOf(variables)));
+
+            Stream<ImmutableExpression> groundTermEqualities = replacement.entrySet().stream()
+                    .filter(e -> e.getKey() instanceof GroundTerm)
+                    .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue().iterator().next()));
+
+            ImmutableSet<ImmutableExpression> equalities = Stream.concat(varEqualities, groundTermEqualities)
+                    .collect(ImmutableCollectors.toSet());
+
+            return new RenamingAndEqualities(
+                    substitutionFactory.getInjectiveVar2VarSubstitution(renamingSubstitutionMap),
+                    equalities);
+        }
+    }
+
+    protected static class ReplaceNodeByTrueTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+
+        private final ImmutableSet<ExtensionalDataNode> dataNodesToReplace;
+
+        protected ReplaceNodeByTrueTransformer(ImmutableSet<ExtensionalDataNode> dataNodesToReplace,
+                                               IntermediateQueryFactory iqFactory) {
+            super(iqFactory);
+            this.dataNodesToReplace = dataNodesToReplace;
+        }
+
+        @Override
+        public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
+            return dataNodesToReplace.contains(dataNode)
+                    ? iqFactory.createTrueNode()
+                    : dataNode;
+        }
+    }
+
+
 }
