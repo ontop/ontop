@@ -6,8 +6,10 @@ import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -31,6 +33,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
     protected final VariableGenerator variableGenerator;
     protected final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
+    protected final RightProvenanceNormalizer rightProvenanceNormalizer;
     protected final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
@@ -39,10 +42,12 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
     protected AbstractJoinTransferLJTransformer(Supplier<VariableNullability> variableNullabilitySupplier,
                                                 VariableGenerator variableGenerator,
                                                 RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
+                                                RightProvenanceNormalizer rightProvenanceNormalizer,
                                                 OptimizationSingletons optimizationSingletons) {
         this.variableNullabilitySupplier = variableNullabilitySupplier;
         this.variableGenerator = variableGenerator;
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
+        this.rightProvenanceNormalizer = rightProvenanceNormalizer;
 
         this.optimizationSingletons = optimizationSingletons;
         CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
@@ -193,11 +198,29 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 nodesToTransferAndReplacements.stream().map(n -> n.replacement),
                 termFactory, substitutionFactory);
 
-        IQTree tmp = replaceSelectedNodesAndRename(selectedNodes, rightChild,
+        Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(
+                Stream.concat(
+                        rootNode.getOptionalFilterCondition()
+                                .map(renamingAndEqualities.renamingSubstitution::applyToBooleanExpression)
+                                .map(Stream::of)
+                                .orElseGet(Stream::empty),
+                        renamingAndEqualities.equalities.stream()));
+
+
+        IQTree simplifiedRightChild = replaceSelectedNodesAndRename(selectedNodes, rightChild,
                 renamingAndEqualities.renamingSubstitution);
 
-        throw new RuntimeException("TODO: continue");
+        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
+                simplifiedRightChild, newLeftChild.getVariables(), newLeftJoinCondition, variableGenerator);
 
+        BinaryNonCommutativeIQTree newLeftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(
+                iqFactory.createLeftJoinNode(newLeftJoinCondition),
+                newLeftChild, rightProvenance.getRightTree());
+
+        ConstructionNode constructionNode = createConstructionNode(leftChild, rightChild,
+                renamingAndEqualities.renamingSubstitution, rightProvenance.getProvenanceVariable());
+
+        return iqFactory.createUnaryIQTree(constructionNode, newLeftJoinTree);
     }
 
     /**
@@ -215,6 +238,23 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         return rightChild.acceptTransformer(transformer)
                 .applyFreshRenaming(renamingSubstitution);
+    }
+
+    private ConstructionNode createConstructionNode(IQTree leftChild, IQTree rightChild,
+                                                    InjectiveVar2VarSubstitution renamingSubstitution,
+                                                    Variable provenanceVariable) {
+        ImmutableSet<Variable> projectedVariables = Sets.union(leftChild.getVariables(), rightChild.getVariables())
+                .immutableCopy();
+
+        ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
+
+        ImmutableMap<Variable, ImmutableTerm> substitutionMap = renamingSubstitution.getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> termFactory.getIfElseNull(condition, e.getValue())
+                ));
+
+        return iqFactory.createConstructionNode(projectedVariables, substitutionFactory.getSubstitution(substitutionMap));
     }
 
 

@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -28,13 +29,16 @@ import java.util.stream.Stream;
 public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOptimizer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
+    private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected CardinalitySensitiveJoinTransferLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
+                                                          RightProvenanceNormalizer rightProvenanceNormalizer,
                                                        OptimizationSingletons optimizationSingletons) {
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
+        this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.optimizationSingletons = optimizationSingletons;
         this.iqFactory = optimizationSingletons.getCoreSingletons().getIQFactory();
     }
@@ -46,6 +50,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
         Transformer transformer = new Transformer(initialTree::getVariableNullability,
                 query.getVariableGenerator(),
                 requiredDataNodeExtractor,
+                rightProvenanceNormalizer,
                 optimizationSingletons);
 
         IQTree newTree = initialTree.acceptTransformer(transformer);
@@ -59,8 +64,9 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
 
         protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
+                              RightProvenanceNormalizer rightProvenanceNormalizer,
                               OptimizationSingletons optimizationSingletons) {
-            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, optimizationSingletons);
+            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, optimizationSingletons);
         }
 
 
@@ -98,7 +104,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
         @Override
         protected IQTree transformBySearchingFromScratch(IQTree tree) {
             Transformer newTransformer = new Transformer(tree::getVariableNullability, variableGenerator, requiredDataNodeExtractor,
-                    optimizationSingletons);
+                    rightProvenanceNormalizer, optimizationSingletons);
             return tree.acceptTransformer(newTransformer);
         }
     }
