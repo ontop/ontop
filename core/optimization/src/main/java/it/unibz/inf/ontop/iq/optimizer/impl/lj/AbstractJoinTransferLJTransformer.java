@@ -367,8 +367,11 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                             Map.Entry::getKey,
                             e -> determinantIndexes.contains(e.getKey())
                                     ? e.getValue()
-                                    : variableGenerator.generateNewVariable()
-                    ));
+                                    : Optional.of(e.getValue())
+                                    .filter(t -> t instanceof Variable)
+                                    .map(v -> ((Variable) v).getName())
+                                    .map(variableGenerator::generateNewVariable)
+                                    .orElseGet(variableGenerator::generateNewVariable)));
 
             ImmutableMultimap<? extends VariableOrGroundTerm, Variable> replacement = initialArgumentMap.entrySet().stream()
                     .filter(e -> !determinantIndexes.contains(e.getKey()))
