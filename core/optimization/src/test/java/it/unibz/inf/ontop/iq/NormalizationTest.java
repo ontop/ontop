@@ -285,14 +285,16 @@ public class NormalizationTest {
     @Test
     public void testConstructionMerge7() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, C),
+                SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getDBIsNotNull(B)));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-        SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getDBIsNotNull(B)));
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(constructionNode, extensionalDataNode);
+        UnaryIQTree downIqTree = IQ_FACTORY.createUnaryIQTree(downConstructionNode, extensionalDataNode);
 
+        UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode, downIqTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
 
         ConstructionNode newTopConstructionNode = IQ_FACTORY.createConstructionNode(
@@ -308,18 +310,16 @@ public class NormalizationTest {
     }
 
     @Test
-    public void testConstructionMerge8() {
+    public void testConstructionRequiredVariableRemoval() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
-        ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, C),
-                SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getDBIsNotNull(B)));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getDBIsNotNull(B)));
 
-        UnaryIQTree downIqTree = IQ_FACTORY.createUnaryIQTree(downConstructionNode, extensionalDataNode);
+        UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(constructionNode, extensionalDataNode);
 
-        UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode, downIqTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
 
         ConstructionNode newTopConstructionNode = IQ_FACTORY.createConstructionNode(
