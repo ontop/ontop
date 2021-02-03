@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
@@ -102,6 +104,26 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                             .map(Optional::get))
                     .findAny()
                     .map(indexes -> new SelectedNode(indexes, rightDataNode));
+        }
+
+        /**
+         * Temporary restriction to avoid overlap with the existing LJ optimization techniques
+         *
+         * Ignores the case where a single extensional data node appears on the right.
+         *
+         * TODO: remove this restriction (after releasing 4.1)
+         */
+        @Override
+        protected Stream<ExtensionalDataNode> extractRightDataNodes(IQTree rightChild) {
+            IQTree rightChildAfterConstructionNode = Optional.of(rightChild)
+                    .filter(c -> c.getRootNode() instanceof ConstructionNode)
+                    .map(c -> ((UnaryIQTree) c).getChild())
+                    .orElse(rightChild);
+
+            if (rightChildAfterConstructionNode instanceof ExtensionalDataNode)
+                return Stream.empty();
+
+            return super.extractRightDataNodes(rightChild);
         }
 
 
