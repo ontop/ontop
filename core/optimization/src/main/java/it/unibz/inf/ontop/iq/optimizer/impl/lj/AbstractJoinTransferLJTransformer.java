@@ -223,7 +223,9 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                         .collect(ImmutableCollectors.toList()));
 
         RenamingAndEqualities renamingAndEqualities = RenamingAndEqualities.extract(
-                nodesToTransferAndReplacements.stream().map(n -> n.replacement),
+                nodesToTransferAndReplacements.stream()
+                        .map(n -> n.replacement),
+                leftChild.getVariables(),
                 termFactory, substitutionFactory);
 
         Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(
@@ -440,6 +442,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         public static RenamingAndEqualities extract(
                 Stream<ImmutableMultimap<? extends VariableOrGroundTerm, Variable>> replacementStream,
+                ImmutableSet<Variable> leftVariables,
                 TermFactory termFactory, SubstitutionFactory substitutionFactory) {
             ImmutableMap<? extends VariableOrGroundTerm, Collection<Variable>> replacement = replacementStream
                     .flatMap(m -> m.entries().stream())
@@ -447,19 +450,28 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
             ImmutableMap<Variable, Variable> renamingSubstitutionMap = replacement.entrySet().stream()
                     .filter(e -> e.getKey() instanceof Variable)
+                    .filter(e -> !leftVariables.contains(e.getKey()))
                     .collect(ImmutableCollectors.toMap(
                             e -> (Variable) e.getKey(),
                             e -> e.getValue().iterator().next()));
 
-            Stream<ImmutableExpression> varEqualities = replacement.values().stream()
+            Stream<ImmutableExpression> newVarEqualities = replacement.values().stream()
                     .filter(variables -> variables.size() > 1)
                     .map(variables -> termFactory.getStrictEquality(ImmutableList.copyOf(variables)));
+
+            Stream<ImmutableExpression> equalitiesWithLeftVariable = replacement.entrySet().stream()
+                    .filter(e -> leftVariables.contains(e.getKey()))
+                    .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue().iterator().next()));
 
             Stream<ImmutableExpression> groundTermEqualities = replacement.entrySet().stream()
                     .filter(e -> e.getKey() instanceof GroundTerm)
                     .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue().iterator().next()));
 
-            ImmutableSet<ImmutableExpression> equalities = Stream.concat(varEqualities, groundTermEqualities)
+            ImmutableSet<ImmutableExpression> equalities = Stream.concat(
+                    Stream.concat(
+                            newVarEqualities,
+                            equalitiesWithLeftVariable),
+                            groundTermEqualities)
                     .collect(ImmutableCollectors.toSet());
 
             return new RenamingAndEqualities(
