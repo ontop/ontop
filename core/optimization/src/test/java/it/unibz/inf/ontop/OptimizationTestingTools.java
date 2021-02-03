@@ -77,6 +77,7 @@ public class OptimizationTestingTools {
     public static final Variable F;
     public static final Variable F6;
     public static final Variable F0;
+    public static final Variable F1;
     public static final Variable F0F2;
     public static final Variable F0F3;
     public static final Variable FF4;
@@ -88,6 +89,7 @@ public class OptimizationTestingTools {
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
+    public static final Variable PROV;
     public static final DBConstant ONE, TWO, ONE_STR, TWO_STR;
 
     public static final AtomPredicate ANS1_AR0_PREDICATE, ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,
@@ -153,6 +155,7 @@ public class OptimizationTestingTools {
         F = TERM_FACTORY.getVariable("f");
         F6 = TERM_FACTORY.getVariable("f6");
         F0 = TERM_FACTORY.getVariable("f0");
+        F1 = TERM_FACTORY.getVariable("f1");
         F0F2 = TERM_FACTORY.getVariable("f0f2");
         F0F3 = TERM_FACTORY.getVariable("f0f3");
         FF4 = TERM_FACTORY.getVariable("ff4");
@@ -164,6 +167,7 @@ public class OptimizationTestingTools {
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
+        PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
         TWO = TERM_FACTORY.getDBIntegerConstant(2);
         ONE_STR = TERM_FACTORY.getDBStringConstant("1");

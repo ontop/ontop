@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -95,10 +93,16 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                     return Optional.of(new SelectedNode(matchingIndexes.get(), rightDataNode));
             }
 
-            // TODO: Foreign keys
-            return Optional.empty();
+            // Foreign keys
+            return leftMultimap.keys().stream()
+                    .flatMap(leftRelation -> leftRelation.getForeignKeys().stream()
+                            .filter(fk -> fk.getReferencedRelation().equals(rightRelation))
+                            .map(fk -> matchForeignKey(fk, leftMultimap.get(leftRelation), rightArgumentMap))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get))
+                    .findAny()
+                    .map(indexes -> new SelectedNode(indexes, rightDataNode));
         }
-
 
 
         @Override

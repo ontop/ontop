@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecursiveIQTreeTransformer {
@@ -167,6 +169,30 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                         i -> leftArgumentMap.get(i).equals(rightArgumentMap.get(i))))
                 .findAny()
                 .map(n -> indexes);
+    }
+
+    protected Optional<ImmutableList<Integer>> matchForeignKey(ForeignKeyConstraint fk,
+                                                               ImmutableCollection<ExtensionalDataNode> leftNodes,
+                                                               ImmutableMap<Integer,? extends VariableOrGroundTerm> rightArgumentMap) {
+        // NB: order matters
+        ImmutableList<Integer> leftIndexes = fk.getComponents().stream()
+                .map(c -> c.getAttribute().getIndex() - 1)
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<Integer> rightIndexes = fk.getComponents().stream()
+                .map(c -> c.getReferencedAttribute().getIndex() - 1)
+                .collect(ImmutableCollectors.toList());
+
+        return leftNodes.stream()
+                .map(ExtensionalDataNode::getArgumentMap)
+                .filter(lMap -> IntStream.range(0, leftIndexes.size())
+                        .allMatch(i -> Optional.ofNullable(lMap.get(leftIndexes.get(i)))
+                                .filter(l -> Optional.ofNullable(rightArgumentMap.get(rightIndexes.get(i)))
+                                        .filter(l::equals)
+                                        .isPresent())
+                                .isPresent()))
+                .findAny()
+                .map(l -> rightIndexes);
     }
 
 
