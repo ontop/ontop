@@ -275,12 +275,62 @@ public class NormalizationTest {
         UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode, downIqTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
 
-        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
         ExtensionalDataNode newExtensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0, A));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newExtensionalDataNode);
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testConstructionMerge7() {
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, C),
+                SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getDBIsNotNull(B)));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        UnaryIQTree downIqTree = IQ_FACTORY.createUnaryIQTree(downConstructionNode, extensionalDataNode);
+
+        UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode, downIqTree);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
+
+        ConstructionNode newTopConstructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(C, TRUE));
+
+        ExtensionalDataNode newExtensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2, ImmutableMap.of(0, A));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(newTopConstructionNode, newExtensionalDataNode));
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testConstructionRequiredVariableRemoval() {
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(C, TERM_FACTORY.getDBIsNotNull(B)));
+
+        UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(constructionNode, extensionalDataNode);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
+
+        ConstructionNode newTopConstructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(C, TRUE));
+
+        ExtensionalDataNode newExtensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2, ImmutableMap.of(0, A));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(newTopConstructionNode, newExtensionalDataNode));
         normalizeAndCompare(initialIQ, expectedIQ);
     }
 
