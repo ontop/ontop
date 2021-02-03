@@ -4,8 +4,6 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class ProgressMonitor {
 
@@ -19,55 +17,56 @@ public class ProgressMonitor {
     private JProgressBar progressBar;
     private JLabel noteLabel;
 
-    private String note;
     private boolean isDone;
+
+    private volatile boolean isCancelled = false;
+    private volatile boolean isCancellable = true;
 
     public ProgressMonitor(Component parent, Object message, boolean indeterminate) {
         this.parent = parent;
         this.message = message;
-        this.note = "";
         this.indeterminate = indeterminate;
 
         this.cancelOption = UIManager.getString("OptionPane.cancelButtonText");
     }
 
-    private void open() {
-        if (dialog == null && !isCanceled() && !isDone()) {
-            if (note != null)
-                noteLabel = new JLabel(note, null, SwingConstants.CENTER);
+    public void open(String note) {
+        if (dialog == null && !isDone && !isCancelled()) {
+            noteLabel = new JLabel(note, null, SwingConstants.CENTER);
 
             progressBar = new JProgressBar();
-            if (!indeterminate) {
-                progressBar.setMinimum(0);
-                progressBar.setMaximum(100);
-            }
-            else {
+            if (indeterminate) {
                 progressBar.setIndeterminate(true);
             }
+            else {
+                progressBar.setMinimum(0);
+                progressBar.setMaximum(100);
+                progressBar.setValue(0);
+            }
 
-            pane = new JOptionPane(new Object[]{message, noteLabel, progressBar},
+            pane = new JOptionPane(new Object[] { message, noteLabel, progressBar },
                     JOptionPane.INFORMATION_MESSAGE,
                     JOptionPane.DEFAULT_OPTION,
                     IconLoader.getImageIcon("images/ontop-logo.png"),
-                    new Object[]{ cancelOption },
+                    new Object[] { cancelOption },
                     null);
 
             dialog = pane.createDialog(parent, UIManager.getString("ProgressMonitor.progressText"));
-
-            dialog.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent we) {
-                    pane.setValue(cancelOption);
-                }
-            });
+            dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
             pane.addPropertyChangeListener(evt -> {
-                if ((dialog != null) && dialog.isVisible() &&
-                        evt.getSource() == pane &&
-                        (evt.getPropertyName().equals(JOptionPane.VALUE_PROPERTY) ||
-                                evt.getPropertyName().equals(JOptionPane.INPUT_VALUE_PROPERTY))){
-                    dialog.setVisible(false);
-                    dialog.dispose();
+                if (evt.getSource() == pane
+                        && evt.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)
+                        && cancelOption.equals(evt.getNewValue())) {
+                    synchronized (ProgressMonitor.this) {
+                        if (isCancellable)
+                            isCancelled = true;
+                    }
+                    if (isCancelled) {
+                        pane.setEnabled(false);
+                        setProgress(100, "cancelling...");
+                    }
+                    dialog.setVisible(true);
                 }
             });
 
@@ -76,43 +75,29 @@ public class ProgressMonitor {
         }
     }
 
-    private void close() {
+    public void close() {
         if (dialog != null) {
+            isDone = true;
             dialog.setVisible(false);
             dialog.dispose();
             dialog = null;
-            pane = null;
-            progressBar = null;
         }
     }
 
-    public boolean isCanceled() {
-        return (pane != null) && cancelOption.equals(pane.getValue());
+    public boolean isCancelled() {
+        return isCancelled;
     }
 
-    public boolean isDone() {
-        return isDone;
+    public void end() {
+        isCancellable = false;
     }
 
-    public void setNote(String note) {
-        this.note = note;
-        if (noteLabel != null)
-            noteLabel.setText(note);
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setProgress(int percentage) {
-        if (percentage < 100) {
-            open();
-            if (!indeterminate && progressBar != null)
+    public void setProgress(int percentage, String note) {
+        if (dialog != null && !isCancelled) {
+            if (!indeterminate) {
                 progressBar.setValue(percentage);
-        }
-        else {
-            isDone = true;
-            close();
+            }
+            noteLabel.setText(note);
         }
     }
 }

@@ -9,10 +9,10 @@ public abstract class LinearTickerSwingWorker<T, V> extends TickerSwingWorker<T,
     }
 
     @Override
-    protected boolean tick() {
+    protected void tick() throws CancelActionException {
         count++;
         setProgress(getCompletionPercentage());
-        return isCancelled();
+        checkCancelled();
     }
 
     public int getCount() {
@@ -25,7 +25,7 @@ public abstract class LinearTickerSwingWorker<T, V> extends TickerSwingWorker<T,
 
     public int getCompletionPercentage() {
         if (max > 0)
-            return (int) ((count + 1) * 100.0 / max);
+            return (int) (count * 99.0 / max);
 
         return 0;
     }

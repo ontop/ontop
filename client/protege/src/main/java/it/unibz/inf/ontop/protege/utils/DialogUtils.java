@@ -40,6 +40,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -117,18 +118,27 @@ public class DialogUtils {
 		return Optional.of((OntopProtegeReasoner)reasoner);
 	}
 
-	public static void showErrorDialog(Component parent, String title, String message, Logger log, Throwable e, OntopStandaloneSQLSettings settings) {
-		if (e.getCause() instanceof SQLException && settings != null) {
+	public static void showCancelledActionDialog(Component parent, String title) {
+		JOptionPane.showMessageDialog(parent,
+				"<html><b>Process cancelled.</b></html>",
+				title,
+				JOptionPane.ERROR_MESSAGE);
+	}
+
+	public static void showErrorDialog(Component parent, String title, String message, Logger log, ExecutionException e, OntopStandaloneSQLSettings settings) {
+		Throwable cause = e.getCause();
+		if (cause instanceof SQLException && settings != null) {
 			JOptionPane.showMessageDialog(parent,
-					"<html><b>Error connecting to the database:</b> " + e.getCause().getMessage() + ".<br><br>" +
+					"<html><b>Error connecting to the database:</b> " + cause.getMessage() + ".<br><br>" +
 							HTML_TAB + "JDBC driver: " + settings.getJdbcDriver() + "<br>" +
 							HTML_TAB + "Connection URL: " + settings.getJdbcUrl() + "<br>" +
 							HTML_TAB + "Username: " + settings.getJdbcUser() + "</html>",
 					title,
 					JOptionPane.ERROR_MESSAGE);
 		}
-		else
-			DialogUtils.showSeeLogErrorDialog(parent, title, message, log, e);
+		else {
+			DialogUtils.showSeeLogErrorDialog(parent, title, message, log, cause);
+		}
 	}
 
 

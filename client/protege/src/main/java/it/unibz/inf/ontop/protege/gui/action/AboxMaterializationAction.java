@@ -160,7 +160,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         private OntopStandaloneSQLSettings settings;
         private long vocabularySize;
-        private volatile boolean closingFile = false;
 
         MaterializeToFileWorker(File file, Function<Writer, RDFHandler> handlerFactory) {
             super(new ProgressMonitor(
@@ -173,6 +172,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         @Override
         protected Void doInBackground() throws Exception {
+            start("initializing...");
+
             OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
             OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
             settings = configuration.getSettings();
@@ -182,7 +183,7 @@ public class AboxMaterializationAction extends ProtegeAction {
                     MaterializationParams.defaultBuilder().build());
             MaterializationGraphQuery query = materializer.materialize();
 
-            setProgress(1);
+            startLoop(() -> String.format("%d triples materialized...", getCount()));
             try (BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(
                             new FileOutputStream(file), StandardCharsets.UTF_8))) {
@@ -191,23 +192,21 @@ public class AboxMaterializationAction extends ProtegeAction {
                     handler.startRDF();
                     while (result.hasNext()) {
                         handler.handleStatement(result.next());
-                        if (tick())
-                            return null;
+                        tick();
                     }
-                    closingFile = true;
-                    setProgress(99);
+                    endLoop("closing file...");
                     handler.endRDF();
                     vocabularySize = query.getSelectedVocabulary().size();
                 }
             }
-            setProgress(100);
+            end();
             return null;
         }
 
         @Override
         public void done() {
             try {
-                get();
+                complete();
                 JOptionPane.showMessageDialog(getWorkspace(),
                         "<html><h3>RDF Graph materialization completed.</h3><br>" +
                                 HTML_TAB + "<b>" + getCount() + "</b> triples materialized.<br>" +
@@ -223,18 +222,11 @@ public class AboxMaterializationAction extends ProtegeAction {
                 catch (IOException ioException) {
                     /* NO-OP */
                 }
+                DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
             }
             catch (ExecutionException e) {
                 DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", log, e, settings);
             }
-        }
-
-        @Override
-        public String getProgressNote() {
-            if (closingFile)
-                return "Closing file...";
-
-            return String.format("%d triples materialized...", getCount());
         }
     }
 
@@ -242,7 +234,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         private OntopStandaloneSQLSettings settings;
         private long vocabularySize;
-        private volatile boolean storingInTheOntology = false;
 
         MaterializeToOntologyWorker() {
             super(new ProgressMonitor(
@@ -253,6 +244,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         @Override
         protected Void doInBackground() throws Exception {
+            start("initializing...");
+
             OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
             OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
             settings = configuration.getSettings();
@@ -261,28 +254,25 @@ public class AboxMaterializationAction extends ProtegeAction {
                     configuration,
                     MaterializationParams.defaultBuilder().build());
 
-
-            setProgress(1);
+            startLoop(() -> String.format("%d triples materialized...", getCount()));
             Set<OWLAxiom> setAxioms = new HashSet<>();
             try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize()) {
                 while (graphResultSet.hasNext()) {
                     setAxioms.add(graphResultSet.next());
-                    if (tick())
-                        return null;
+                    tick();
                 }
                 vocabularySize = graphResultSet.getSelectedVocabulary().size();
             }
-            storingInTheOntology = true;
-            setProgress(98);
-            obdaModelManager.addAxiomsToObtology(setAxioms);
-            setProgress(100);
+            endLoop("storing " + getCount() + " triples in the ontology...");
+            obdaModelManager.addAxiomsToOntology(setAxioms);
+            end();
             return null;
         }
 
         @Override
         public void done() {
             try {
-                get();
+                complete();
                 JOptionPane.showMessageDialog(getWorkspace(),
                         "<html><h3>RDF Graph materialization completed.</h3><br>" +
                                 HTML_TAB + "<b>" + getCount() + "</b> triples materialized.<br>" +
@@ -292,19 +282,11 @@ public class AboxMaterializationAction extends ProtegeAction {
                         JOptionPane.INFORMATION_MESSAGE);
             }
             catch (CancellationException | InterruptedException e) {
-                /* NO-OP */
+                DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
             }
 			catch (ExecutionException e) {
                 DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", log, e, settings);
             }
-        }
-
-        @Override
-        public String getProgressNote() {
-            if (storingInTheOntology)
-                return "storing in the ontology...";
-
-            return String.format("%d triples materialized...", getCount());
         }
     }
 

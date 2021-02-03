@@ -151,7 +151,7 @@ public class BootstrapAction extends ProtegeAction {
 		@Override
 		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
 
-			setProgress(1);
+			start("initializing...");
 
 			final ImmutableMetadata metadata;
 
@@ -161,14 +161,13 @@ public class BootstrapAction extends ProtegeAction {
 				MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
 				ImmutableList<RelationID> relationIds = metadataProvider.getRelationIDs();
 
-				setMaxTicks((relationIds.size() + 1) * 2);
+				setMaxTicks(relationIds.size() * 2);
+				startLoop(() -> String.format("%d%% completed.", getCompletionPercentage()));
 
 				CachingMetadataLookup lookup = new CachingMetadataLookup(metadataProvider);
 				for (RelationID id : relationIds) {
 					lookup.getRelation(id);
-
-					if (tick())
-						return null;
+					tick();
 				}
 				metadata = lookup.extractImmutableMetadata();
 			}
@@ -179,12 +178,11 @@ public class BootstrapAction extends ProtegeAction {
 			for (NamedRelationDefinition relation : metadata.getAllRelations()) {
 				builder.addAll(directMappingEngine
 						.getMapping(relation, baseIri, bnodeTemplateMap, currentMappingIndex));
-
-				if (tick())
-					return null;
+				tick();
 			}
 
-			setProgress(100);
+			endLoop("");
+			end();
 			return builder.build();
 		}
 
@@ -193,7 +191,7 @@ public class BootstrapAction extends ProtegeAction {
 			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
 			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
 			try {
-				ImmutableList<SQLPPTriplesMap> triplesMaps = get();
+				ImmutableList<SQLPPTriplesMap> triplesMaps = complete();
 				try {
 					obdaModel.add(triplesMaps);
 				}
@@ -216,16 +214,11 @@ public class BootstrapAction extends ProtegeAction {
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 			catch (CancellationException | InterruptedException e) {
-				/* NO-OP */
+				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
 			catch (ExecutionException e) {
 				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "Bootstrapper error.", log, e, settings);
 			}
-		}
-
-		@Override
-		public String getProgressNote() {
-			return String.format("%d%% completed.", getCompletionPercentage());
 		}
 	}
 

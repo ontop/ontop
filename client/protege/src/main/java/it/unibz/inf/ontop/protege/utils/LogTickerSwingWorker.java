@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.protege.utils;
 
+import javax.swing.*;
+
 public abstract class LogTickerSwingWorker<T, V> extends TickerSwingWorker<T, V> {
 
     private final long startTime;
@@ -12,18 +14,18 @@ public abstract class LogTickerSwingWorker<T, V> extends TickerSwingWorker<T, V>
     }
 
     @Override
-    protected boolean tick() {
+    protected void tick() throws CancelActionException {
         count++;
         long currentTime = System.currentTimeMillis();
-        if (currentTime - previousTime > 200) {
-            if (currentTime - startTime > Math.pow(2, progress / 4.0)) {
+        if (currentTime - previousTime > 100) {
+//            if (currentTime - startTime > Math.pow(2, progress / 4.0)) {
                 previousTime = currentTime;
-                progress++;
-                setProgress(progress);
-            }
-            return isCancelled();
+            SwingUtilities.invokeLater(() -> progressMonitor.setProgress(0, ""  + count));
+//                progress++;
+//                setProgress(progress);
+//            }
         }
-        return false;
+        checkCancelled();
     }
 
     public int getCount() {
