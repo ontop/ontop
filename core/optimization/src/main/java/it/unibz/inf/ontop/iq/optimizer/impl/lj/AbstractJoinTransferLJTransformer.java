@@ -187,6 +187,8 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 .map(ExtensionalDataNode::getArgumentMap)
                 .filter(lMap -> IntStream.range(0, leftIndexes.size())
                         .allMatch(i -> Optional.ofNullable(lMap.get(leftIndexes.get(i)))
+                                .filter(t -> !(t instanceof Variable)
+                                        || !variableNullability.isPossiblyNullable((Variable)t))
                                 .filter(l -> Optional.ofNullable(rightArgumentMap.get(rightIndexes.get(i)))
                                         .filter(l::equals)
                                         .isPresent())
