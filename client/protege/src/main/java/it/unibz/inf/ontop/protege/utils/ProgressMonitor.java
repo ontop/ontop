@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class ProgressMonitor {
 
@@ -47,7 +48,7 @@ public class ProgressMonitor {
             pane = new JOptionPane(new Object[] { message, noteLabel, progressBar },
                     JOptionPane.INFORMATION_MESSAGE,
                     JOptionPane.DEFAULT_OPTION,
-                    IconLoader.getImageIcon("images/ontop-logo.png"),
+                    IconLoader.getOntopIcon(),
                     new Object[] { cancelOption },
                     null);
 
@@ -58,11 +59,8 @@ public class ProgressMonitor {
                 if (evt.getSource() == pane
                         && evt.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)
                         && cancelOption.equals(evt.getNewValue())) {
-                    synchronized (ProgressMonitor.this) {
-                        if (isCancellable)
-                            isCancelled = true;
-                    }
-                    if (isCancelled) {
+
+                    if (cancel()) {
                         pane.setEnabled(false);
                         setProgress(100, "cancelling...");
                     }
@@ -84,16 +82,32 @@ public class ProgressMonitor {
         }
     }
 
+    public synchronized boolean cancel() {
+        if (isCancellable)
+            isCancelled = true;
+
+        return isCancelled;
+    }
+
+    private synchronized void makeFinal() {
+        if (!isCancelled)
+            isCancellable = false;
+    }
+
+    public void prepareClosing(String note) {
+        makeFinal();
+        if (isCancelled)
+            close();
+        else
+            setProgress(100, note);
+    }
+
     public boolean isCancelled() {
         return isCancelled;
     }
 
-    public void end() {
-        isCancellable = false;
-    }
-
     public void setProgress(int percentage, String note) {
-        if (dialog != null && !isCancelled) {
+        if (dialog != null) {
             if (!indeterminate) {
                 progressBar.setValue(percentage);
             }

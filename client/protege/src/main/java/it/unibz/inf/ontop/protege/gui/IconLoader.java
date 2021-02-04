@@ -35,4 +35,8 @@ public class IconLoader {
 			return null;
 		}
 	}
+
+	public static ImageIcon getOntopIcon() {
+		return getImageIcon("images/ontop-logo.png");
+	}
 }

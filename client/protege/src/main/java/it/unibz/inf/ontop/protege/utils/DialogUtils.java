@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.utils;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -108,9 +109,9 @@ public class DialogUtils {
 		OWLReasoner reasoner = owlEditorKit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
 		if (!(reasoner instanceof OntopProtegeReasoner)) {
 			JOptionPane.showMessageDialog(workspace,
-					"Ontop reasoner must be started before using this feature. To proceed\n" +
-							" * select Ontop in the \"Reasoners\" menu and\n" +
-							" * click \"Start reasoner\" in the same menu.",
+					"<html><b>Ontop reasoner</b> must be started before using this feature. To proceed<br><br>" +
+							HTML_TAB + " * select Ontop in the <b>\"Reasoner\"</b> menu and<br>" +
+							HTML_TAB + " * click <b>\"Start reasoner\"</b> in the same menu.<br></html>",
 					"Warning",
 					JOptionPane.WARNING_MESSAGE);
 			return Optional.empty();
@@ -120,9 +121,9 @@ public class DialogUtils {
 
 	public static void showCancelledActionDialog(Component parent, String title) {
 		JOptionPane.showMessageDialog(parent,
-				"<html><b>Process cancelled.</b></html>",
+				"<html><b>Process cancelled.</b><br><br>No changes made.<br></html>",
 				title,
-				JOptionPane.ERROR_MESSAGE);
+				JOptionPane.WARNING_MESSAGE);
 	}
 
 	public static void showErrorDialog(Component parent, String title, String message, Logger log, ExecutionException e, OntopStandaloneSQLSettings settings) {

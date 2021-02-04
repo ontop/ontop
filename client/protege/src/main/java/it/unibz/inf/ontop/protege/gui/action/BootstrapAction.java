@@ -32,10 +32,10 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
-import it.unibz.inf.ontop.protege.utils.LinearTickerSwingWorker;
-import it.unibz.inf.ontop.protege.utils.ProgressMonitor;
+import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -47,7 +47,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +96,7 @@ public class BootstrapAction extends ProtegeAction {
 				DIALOG_TITLE,
 				JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
-				null,
+				IconLoader.getOntopIcon(),
 				null,
 				null) != JOptionPane.OK_OPTION)
 			return;
@@ -120,7 +119,7 @@ public class BootstrapAction extends ProtegeAction {
 		worker.execute();
 	}
 
-	private class BootstrapWorker extends LinearTickerSwingWorker<ImmutableList<SQLPPTriplesMap>, Void> {
+	private class BootstrapWorker extends SwingWorkerWithCompletionPercentageMonitor<ImmutableList<SQLPPTriplesMap>, Void> {
 
 		private final String baseIri;
 		private final JDBCMetadataProviderFactory metadataProviderFactory;
@@ -130,9 +129,8 @@ public class BootstrapAction extends ProtegeAction {
 		private final AtomicInteger currentMappingIndex;
 
 		BootstrapWorker(String baseIri) {
-			super(new ProgressMonitor(getWorkspace(),
-					"<html><h3>Bootstrapping ontology and mapping:</h3></html>",
-					false));
+			super(getWorkspace(),
+					"<html><h3>Bootstrapping ontology and mapping:</h3></html>");
 
 			this.baseIri = baseIri;
 
@@ -162,7 +160,7 @@ public class BootstrapAction extends ProtegeAction {
 				ImmutableList<RelationID> relationIds = metadataProvider.getRelationIDs();
 
 				setMaxTicks(relationIds.size() * 2);
-				startLoop(() -> String.format("%d%% completed.", getCompletionPercentage()));
+				startLoop(this::getCompletionPercentage, () -> String.format("%d%% completed.", getCompletionPercentage()));
 
 				CachingMetadataLookup lookup = new CachingMetadataLookup(metadataProvider);
 				for (RelationID id : relationIds) {
@@ -211,7 +209,8 @@ public class BootstrapAction extends ProtegeAction {
 								HTML_TAB + "<b>" + triplesMaps.size() + "</b> triple maps inserted into the mapping.<br>" +
 								HTML_TAB + "<b>" + addAxioms.size() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
 						DIALOG_TITLE,
-						JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.INFORMATION_MESSAGE,
+						IconLoader.getOntopIcon());
 			}
 			catch (CancellationException | InterruptedException e) {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);

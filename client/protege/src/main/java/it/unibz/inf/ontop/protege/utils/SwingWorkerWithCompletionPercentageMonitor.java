@@ -1,18 +1,20 @@
 package it.unibz.inf.ontop.protege.utils;
 
-public abstract class LinearTickerSwingWorker<T, V> extends TickerSwingWorker<T, V> {
+import java.awt.*;
+
+public abstract class SwingWorkerWithCompletionPercentageMonitor<T, V> extends SwingWorkerWithMonitor<T, V> {
 
     private int count, max;
 
-    protected LinearTickerSwingWorker(ProgressMonitor progressMonitor) {
-        super(progressMonitor);
+    protected SwingWorkerWithCompletionPercentageMonitor(Component parent, Object message) {
+        super(parent, message, false);
     }
 
     @Override
     protected void tick() throws CancelActionException {
         count++;
-        setProgress(getCompletionPercentage());
-        checkCancelled();
+        notifyProgressMonitor();
+        terminateIfCancelled();
     }
 
     public int getCount() {
@@ -25,7 +27,7 @@ public abstract class LinearTickerSwingWorker<T, V> extends TickerSwingWorker<T,
 
     public int getCompletionPercentage() {
         if (max > 0)
-            return (int) (count * 99.0 / max);
+            return (int) (count * 100.0 / max);
 
         return 0;
     }

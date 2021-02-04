@@ -11,8 +11,7 @@ import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.LogTickerSwingWorker;
-import it.unibz.inf.ontop.protege.utils.ProgressMonitor;
+import it.unibz.inf.ontop.protege.utils.SwingWorkerWithTimeIntervalMonitor;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
@@ -116,18 +115,20 @@ public class AboxMaterializationAction extends ProtegeAction {
                 DIALOG_TITLE,
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
-                null,
+                IconLoader.getOntopIcon(),
                 null,
                 null) != JOptionPane.OK_OPTION)
             return;
 
         if (radioAdd.isSelected()) {
             if (JOptionPane.showConfirmDialog(getWorkspace(),
-                    "The plugin will generate triples and save them in this current ontology.\n"
-                            + "The operation may take some time and may require a lot of memory if the database is large.\n\n"
-                            + "Do you want to continue?",
+                    "<html>The plugin will materialize triples and insert them into the current ontology.<br>"
+                            + "The operation may take some time and may require a lot of memory if the database is large.<br><br>"
+                            + "Do you wish to <b>continue</b>?<br></html>",
                     "Materialize the RDF Graph?",
-                    JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
                 return;
 
             MaterializeToOntologyWorker worker = new MaterializeToOntologyWorker();
@@ -146,7 +147,9 @@ public class AboxMaterializationAction extends ProtegeAction {
                     "<html><br>The file " + file.getPath() + " exists.<br><br>"
                             + "Do you want to <b>overwrite</b> it?<br></html>",
                     DIALOG_TITLE,
-                    JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
                 return;
 
             MaterializeToFileWorker worker = new MaterializeToFileWorker(file, HANDLER_FACTORIES.get(format));
@@ -154,7 +157,7 @@ public class AboxMaterializationAction extends ProtegeAction {
         }
     }
 
-    private class MaterializeToFileWorker extends LogTickerSwingWorker<Void, Void> {
+    private class MaterializeToFileWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Void> {
         private final File file;
         private final Function<Writer, RDFHandler> handlerFactory;
 
@@ -162,10 +165,9 @@ public class AboxMaterializationAction extends ProtegeAction {
         private long vocabularySize;
 
         MaterializeToFileWorker(File file, Function<Writer, RDFHandler> handlerFactory) {
-            super(new ProgressMonitor(
-                    getWorkspace(),
+            super(getWorkspace(),
                     "<html><h3>RDF Graph materialization:</h3></html>",
-                    true));
+                    100);
             this.file = file;
             this.handlerFactory = handlerFactory;
         }
@@ -183,7 +185,7 @@ public class AboxMaterializationAction extends ProtegeAction {
                     MaterializationParams.defaultBuilder().build());
             MaterializationGraphQuery query = materializer.materialize();
 
-            startLoop(() -> String.format("%d triples materialized...", getCount()));
+            startLoop(() -> 50, () -> String.format("%d triples materialized...", getCount()));
             try (BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(
                             new FileOutputStream(file), StandardCharsets.UTF_8))) {
@@ -209,11 +211,13 @@ public class AboxMaterializationAction extends ProtegeAction {
                 complete();
                 JOptionPane.showMessageDialog(getWorkspace(),
                         "<html><h3>RDF Graph materialization completed.</h3><br>" +
-                                HTML_TAB + "<b>" + getCount() + "</b> triples materialized.<br>" +
+                                HTML_TAB + "<b>" + getCount() + "</b> triples materialized and stored in<br>" +
+                                HTML_TAB + HTML_TAB + file.getPath() + ".<br>" +
                                 HTML_TAB + "<b>" + vocabularySize + "</b> ontology classes and properties used.<br>" +
                                 HTML_TAB + "Elapsed time: <b>" + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + "</b>.<br></html>",
                         DIALOG_TITLE,
-                        JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.INFORMATION_MESSAGE,
+                        IconLoader.getOntopIcon());
             }
             catch (CancellationException | InterruptedException e) {
                 try {
@@ -230,16 +234,15 @@ public class AboxMaterializationAction extends ProtegeAction {
         }
     }
 
-    private class MaterializeToOntologyWorker extends LogTickerSwingWorker<Void, Void> {
+    private class MaterializeToOntologyWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Void> {
 
         private OntopStandaloneSQLSettings settings;
         private long vocabularySize;
 
         MaterializeToOntologyWorker() {
-            super(new ProgressMonitor(
-                    getWorkspace(),
+            super(getWorkspace(),
                     "<html><h3>RDF Graph materialization:</h3></html>",
-                    true));
+                    100);
         }
 
         @Override
@@ -254,7 +257,7 @@ public class AboxMaterializationAction extends ProtegeAction {
                     configuration,
                     MaterializationParams.defaultBuilder().build());
 
-            startLoop(() -> String.format("%d triples materialized...", getCount()));
+            startLoop(() -> 50, () -> String.format("%d triples materialized...", getCount()));
             Set<OWLAxiom> setAxioms = new HashSet<>();
             try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize()) {
                 while (graphResultSet.hasNext()) {
@@ -279,7 +282,8 @@ public class AboxMaterializationAction extends ProtegeAction {
                                 HTML_TAB + "<b>" + vocabularySize + "</b> ontology classes and properties used.<br>" +
                                 HTML_TAB + "Elapsed time: <b>" + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + "</b>.<br></html>",
                         DIALOG_TITLE,
-                        JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.INFORMATION_MESSAGE,
+                        IconLoader.getOntopIcon());
             }
             catch (CancellationException | InterruptedException e) {
                 DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
