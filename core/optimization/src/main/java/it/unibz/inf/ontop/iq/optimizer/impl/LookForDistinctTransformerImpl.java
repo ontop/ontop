@@ -10,24 +10,17 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
  * TODO: find a better name
  */
 class LookForDistinctTransformerImpl extends DefaultRecursiveIQTreeVisitingTransformer {
-
-    protected final OptimizationSingletons optimizationSingletons;
-    private final CardinalityFreeTransformerConstructor transformerConstructor;
+    private final IQTreeTransformer subTransformer;
 
     public LookForDistinctTransformerImpl(CardinalityFreeTransformerConstructor transformerConstructor,
                                           OptimizationSingletons optimizationSingletons) {
         super(optimizationSingletons.getCoreSingletons());
-        this.optimizationSingletons = optimizationSingletons;
-        this.transformerConstructor = transformerConstructor;
+        this.subTransformer = transformerConstructor.create(this, optimizationSingletons);
     }
 
     @Override
     public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
-        IQTreeTransformer newTransformer = transformerConstructor.create(
-                this,
-                optimizationSingletons);
-
-        IQTree newChild = newTransformer.transform(child);
+        IQTree newChild = subTransformer.transform(child);
         return (newChild.equals(child))
                 ? tree
                 : iqFactory.createUnaryIQTree(rootNode, newChild);

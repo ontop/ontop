@@ -65,15 +65,19 @@ public class OptimizationTestingTools {
     public static final Variable AF2;
     public static final Variable AF3;
     public static final Variable B;
+    public static final Variable BF0;
     public static final Variable BF1;
     public static final Variable BF2;
     public static final Variable BF4F5;
     public static final Variable C;
+    public static final Variable CF0;
+    public static final Variable CF1;
     public static final Variable D;
     public static final Variable E;
     public static final Variable F;
     public static final Variable F6;
     public static final Variable F0;
+    public static final Variable F1;
     public static final Variable F0F2;
     public static final Variable F0F3;
     public static final Variable FF4;
@@ -85,6 +89,7 @@ public class OptimizationTestingTools {
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
+    public static final Variable PROV;
     public static final DBConstant ONE, TWO, ONE_STR, TWO_STR;
 
     public static final AtomPredicate ANS1_AR0_PREDICATE, ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,
@@ -138,15 +143,19 @@ public class OptimizationTestingTools {
         AF2 = TERM_FACTORY.getVariable("af2");
         AF3 = TERM_FACTORY.getVariable("af3");
         B = TERM_FACTORY.getVariable("b");
+        BF0 = TERM_FACTORY.getVariable("bf0");
         BF1 = TERM_FACTORY.getVariable("bf1");
         BF2 = TERM_FACTORY.getVariable("bf2");
         BF4F5 = TERM_FACTORY.getVariable("bf4f5");
         C = TERM_FACTORY.getVariable("c");
+        CF0 = TERM_FACTORY.getVariable("cf0");
+        CF1 = TERM_FACTORY.getVariable("cf1");
         D = TERM_FACTORY.getVariable("d");
         E = TERM_FACTORY.getVariable("e");
         F = TERM_FACTORY.getVariable("f");
         F6 = TERM_FACTORY.getVariable("f6");
         F0 = TERM_FACTORY.getVariable("f0");
+        F1 = TERM_FACTORY.getVariable("f1");
         F0F2 = TERM_FACTORY.getVariable("f0f2");
         F0F3 = TERM_FACTORY.getVariable("f0f3");
         FF4 = TERM_FACTORY.getVariable("ff4");
@@ -158,6 +167,7 @@ public class OptimizationTestingTools {
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
+        PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
         TWO = TERM_FACTORY.getDBIntegerConstant(2);
         ONE_STR = TERM_FACTORY.getDBStringConstant("1");
