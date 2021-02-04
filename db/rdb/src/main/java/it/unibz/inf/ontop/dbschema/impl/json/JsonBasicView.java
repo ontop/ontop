@@ -300,23 +300,22 @@ public class JsonBasicView extends JsonView {
 
     /**
      * Infer unique constraints from the parent
-     * Streams of lists have an intrinsic order and added constraints come first in case of duplicates thus:
-     * 1. Added constraints take precedence over inferred (i.e. can overwrite PK true/false definition)
-     * 2. No precedence defined for duplicated added constraints (i.e. same constraint defined with PK true/false returns random result)
      */
     private List<AddUniqueConstraints> extractUniqueConstraints(List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations,
                                                                 QuotedIDFactory idFactory){
 
         // List of constraints added
-        ImmutableList<String> addedConstraintsColumns = uniqueConstraints.added.stream()
+        ImmutableList<QuotedID> addedConstraintsColumns = uniqueConstraints.added.stream()
                 .map(a -> a.determinants)
                 .flatMap(Collection::stream)
+                .map(idFactory::createAttributeID)
                 .collect(ImmutableCollectors.toList());
 
-        // List of columns added
-        ImmutableList<String> addedNewColumns = columns.added.stream()
-                .map(a -> a.name)
+
+        // List of added columns
+        ImmutableList<QuotedID> addedNewColumns = columns.added.stream()
+                .map(a -> idFactory.createAttributeID(a.name))
                 .collect(ImmutableCollectors.toList());
 
         // List of hidden columns
@@ -329,13 +328,13 @@ public class JsonBasicView extends JsonView {
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID().getName())
+                        .map(Attribute::getID)
                         .noneMatch(addedConstraintsColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID().getName())
+                        .map(Attribute::getID)
                         .noneMatch(addedNewColumns::contains))
                 .filter(c -> c.getAttributes().stream()
-                        .map(a -> a.getID().getName())
+                        .map(Attribute::getID)
                         .noneMatch(hiddenColumnNames::contains))
                 .collect(ImmutableCollectors.toList());
 
@@ -348,13 +347,15 @@ public class JsonBasicView extends JsonView {
                                 .collect(Collectors.toList()),
                         // If no PK defined in added columns keep parent PK
                         i.isPrimaryKey() && addUniqueConstraints.stream()
-                                .noneMatch(k -> k.isPrimaryKey.equals(true))
+                                .noneMatch(k -> k.isPrimaryKey)
                             ))
                 .collect(Collectors.toList());
 
         // Throw a warning if duplicate unique constraints are added
-        if (!Stream.concat(addUniqueConstraints.stream(), inferredUniqueConstraints.stream()).allMatch(new HashSet<>()::add))
-            LOGGER.warn("Duplicate unique constraints defined in schema");
+        if (!(addUniqueConstraints.stream())
+                .allMatch(new HashSet<>()::add))
+            LOGGER.warn("Duplicate unique constraints found in the viewfile");
+
 
         // Return full list of added and inherited constraints, remove duplicates based on constraint attribute
         return Stream.concat(addUniqueConstraints.stream(), inferredUniqueConstraints.stream())
@@ -362,88 +363,111 @@ public class JsonBasicView extends JsonView {
                 .collect(Collectors.toList());
     }
 
+     /**
+     * Infer functional dependencies from the parent
+     */
     private void insertFunctionalDependencies(NamedRelationDefinition relation,
                                               QuotedIDFactory idFactory,
-                                              List<AddFunctionalDependency> addFunctionalDependency,
+                                              List<AddFunctionalDependency> addFunctionalDependencies,
                                               ImmutableList<NamedRelationDefinition> baseRelations) {
 
-        List<AddFunctionalDependency> list = extractOtherFunctionalDependencies(addFunctionalDependency, baseRelations, idFactory);
+        // List of hidden columns
+        ImmutableList<QuotedID> hiddenColumns = columns.hidden.stream()
+                .map(idFactory::createAttributeID)
+                .collect(ImmutableCollectors.toList());
 
-        for (AddFunctionalDependency addFD : list) {
-            FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
+        // Final list of filtered attribute IDs
+        ImmutableList<QuotedID> filteredAttributes = baseRelations.stream()
+                .map(RelationDefinition::getAttributes)
+                .flatMap(Collection::stream)
+                .map(Attribute::getID)
+                //.filter(a -> !addedNewColumns.contains(a))
+                .filter(a -> !hiddenColumns.contains(a))
+                .collect(ImmutableCollectors.toList());
 
-            try {
-                JsonMetadata.deserializeAttributeList(idFactory, addFD.determinants, builder::addDeterminant);
-            }
-            // If the determinant column has been hidden or does not exist
-            catch (MetadataExtractionException e) {
-                LOGGER.warn("Cannot find determinant {} for Functional Dependency", addFD.determinants);
-            }
+        // Create list of filtered functional dependencies
+        List<FunctionalDependencyConstruct> listFDConstructs = baseRelations.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
+                .flatMap(Collection::stream)
+                .map(f -> new FunctionalDependencyConstruct(
+                        f.getDeterminants().stream()
+                                .map(Attribute::getID)
+                                .filter(filteredAttributes::contains)
+                                .collect(ImmutableCollectors.toSet()),
+                        f.getDependents().stream()
+                                .map(Attribute::getID)
+                                .filter(filteredAttributes::contains)
+                                .collect(ImmutableCollectors.toSet()))
+                )
+                .collect(Collectors.toList());
 
-            try {
-                JsonMetadata.deserializeAttributeList(idFactory, addFD.dependents, builder::addDependent);
-            }
-            // If the dependent column has been hidden or does not exist
-            catch (MetadataExtractionException e) {
-                LOGGER.warn("Cannot find dependent {} for Functional Dependency", addFD.dependents);
-            }
 
-            builder.build();
+        List<FunctionalDependencyConstruct> mergedListFDConstructs = null;
+        for (AddFunctionalDependency jsonFD : addFunctionalDependencies) {
+
+            // Create a FunctionalDependencyConstruct for the added FDs
+            FunctionalDependencyConstruct jsonFDConstruct = new FunctionalDependencyConstruct(
+                    jsonFD.determinants.stream()
+                            .map(idFactory::createAttributeID)
+                            .collect(ImmutableCollectors.toSet()),
+                    jsonFD.dependents.stream()
+                            .map(idFactory::createAttributeID)
+                            .collect(ImmutableCollectors.toSet()));
+
+            // Merge JSON FD Constructs
+            mergedListFDConstructs = listFDConstructs.stream()
+                    .map(f -> f.merge(jsonFDConstruct).orElse(null))
+                    .collect(Collectors.toList());
+
+            // Append FDs added via JSON
+            mergedListFDConstructs.add(jsonFDConstruct);
+        }
+
+        // Remove duplicate FDs based on determinant
+        ImmutableList<FunctionalDependencyConstruct> finalListFDConstructs = mergedListFDConstructs.stream()
+                .distinct()
+                .collect(ImmutableCollectors.toList());
+
+        // Insert the FDs
+        for (FunctionalDependencyConstruct fdConstruct : finalListFDConstructs) {
+            addFunctionalDependency(relation, idFactory, fdConstruct);
         }
     }
 
-    /**
-     * Infer functional dependencies from the parent
-     */
-    private List<AddFunctionalDependency> extractOtherFunctionalDependencies(List<AddFunctionalDependency> addFunctionalDependencies,
-                                                                ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                             QuotedIDFactory idFactory){
+    private void addFunctionalDependency(NamedRelationDefinition viewDefintion,
+                                         QuotedIDFactory idFactory,
+                                         FunctionalDependencyConstruct fdConstruct) {
 
-        // List of added columns
-        ImmutableList<String> addedNewColumns = columns.added.stream()
-                .map(a -> a.name)
-                .collect(ImmutableCollectors.toList());
+        FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(viewDefintion);
 
-        // List of hidden columns
-        ImmutableList<String> hiddenColumnNames = columns.hidden.stream()
-                .map(attributeName -> normalizeAttributeName(attributeName, idFactory))
-                .collect(ImmutableCollectors.toList());
+        try {
+            JsonMetadata.deserializeAttributeList(idFactory,
+                    fdConstruct.getDeterminants().stream()
+                            .map(QuotedID::getSQLRendering)
+                            .collect(Collectors.toList()),
+                    builder::addDeterminant);
+        }
+        // If the determinant column has been hidden or does not exist
+        catch (MetadataExtractionException e) {
+            LOGGER.warn("Cannot find determinant {} for Functional Dependency", fdConstruct.getDeterminants().stream()
+                    .map(QuotedID::getName)
+                    .collect(Collectors.toList()));
+        }
 
-        // Filter inherited functional dependencies
-        ImmutableList<FunctionalDependency> inheritedFunctionalDependencies = baseRelations.stream()
-                .map(RelationDefinition::getOtherFunctionalDependencies)
-                .flatMap(Collection::stream)
-                .filter(f -> f.getDeterminants().stream()
-                        .map(d -> d.getID().getName())
-                        .noneMatch(addedNewColumns::contains))
-                .filter(f -> f.getDeterminants().stream()
-                        .map(d -> d.getID().getName())
-                        .noneMatch(hiddenColumnNames::contains))
-                .filter(f -> f.getDependents().stream()
-                        .map(d -> d.getID().getName())
-                        .noneMatch(addedNewColumns::contains))
-                .filter(f -> f.getDependents().stream()
-                        .map(d -> d.getID().getName())
-                        .noneMatch(hiddenColumnNames::contains))
-                .collect(ImmutableCollectors.toList());
-
-        List<AddFunctionalDependency> inferredFunctionalDependencies = inheritedFunctionalDependencies.stream()
-                .map(i -> new AddFunctionalDependency(
-                        i.getDeterminants().stream()
-                                .map(d -> d.getID().getSQLRendering())
-                                .collect(Collectors.toList()),
-                        i.getDependents().stream()
-                                .map(d -> d.getID().getSQLRendering())
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toList());
-
-        // Throw a warning if duplicate functional dependencies are added
-        if (!Stream.concat(addFunctionalDependencies.stream(), inferredFunctionalDependencies.stream()).allMatch(new HashSet<>()::add))
-            LOGGER.warn("Duplicate functional dependencies defined in schema");
-
-        // Return the unique list of functional dependencies (apply distinct)
-        return Stream.concat(addFunctionalDependencies.stream(), inferredFunctionalDependencies.stream()).distinct()
-                .collect(Collectors.toList());
+        try {
+            JsonMetadata.deserializeAttributeList(idFactory,
+                    fdConstruct.getDependents().stream()
+                            .map(QuotedID::getSQLRendering)
+                            .collect(Collectors.toList()),
+                    builder::addDependent);
+        }
+        // If the dependent column has been hidden or does not exist
+        catch (MetadataExtractionException e) {
+            LOGGER.warn("Cannot find dependent {} for Functional Dependency", fdConstruct.getDependents().stream()
+                    .map(QuotedID::getName)
+                    .collect(Collectors.toList()));
+        }
+        builder.build();
     }
 
     public void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
