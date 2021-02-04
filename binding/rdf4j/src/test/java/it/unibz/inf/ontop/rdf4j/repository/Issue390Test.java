@@ -26,8 +26,13 @@ public class Issue390Test extends AbstractRDF4JTest {
         release();
     }
 
+    /**
+     *   the issue was fixed in R2RML and OBDA parser overhaul in Nov 2020
+     */
+
     @Test
-    public void testLoad() throws Exception {
+    public void test_graphs_for_predicate_object_maps() {
+
         ImmutableSet<ImmutableMap<String, String>> expected = ImmutableSet.of(
                 ImmutableMap.of("g", "http://example.org#graph_1",
                         "s", "http://example.org/agency/42",
