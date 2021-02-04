@@ -32,15 +32,15 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddUniqueConstraint() throws Exception {
-        List<String> constraints = viewDefinitions.stream()
-                .map(v -> v.getUniqueConstraints())
+        ImmutableSet<String> constraints = viewDefinitions.stream()
+                .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
-                .map(c -> c.getAttributes())
+                .map(UniqueConstraint::getAttributes)
                 .flatMap(Collection::stream)
                 .map(v -> v.getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("status", "id"), constraints);
+        assertEquals(ImmutableSet.of("status", "id"), constraints);
     }
 
     /**
@@ -48,15 +48,15 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddFunctionalDependencyDependent() throws Exception {
-        List<String> otherFD = viewDefinitions.stream()
-                .map(v -> v.getOtherFunctionalDependencies())
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
-                .map(d -> d.getDependents())
+                .map(FunctionalDependency::getDependents)
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("country"), otherFD);
+        assertEquals(ImmutableSet.of("country"), otherFD);
     }
 
     /**
@@ -64,15 +64,15 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
-        List<String> otherFD = viewDefinitions.stream()
-                .map(v -> v.getOtherFunctionalDependencies())
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
-                .map(d -> d.getDeterminants())
+                .map(FunctionalDependency::getDeterminants)
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("locality"), otherFD);
+        assertEquals(ImmutableSet.of("locality"), otherFD);
     }
 
     /**
@@ -80,14 +80,14 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_DestinationRelation() throws Exception {
-        List<String> destination_relation = viewDefinitions.stream()
-                .map(v -> v.getForeignKeys())
+        ImmutableSet<String> destination_relation = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
-                .map(f -> f.getReferencedRelation())
+                .map(ForeignKeyConstraint::getReferencedRelation)
                 .map(d -> d.getID().getComponents().get(0).getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("statuses"), destination_relation);
+        assertEquals(ImmutableSet.of("statuses"), destination_relation);
     }
 
     /**
@@ -95,14 +95,14 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_DestinationColumn() throws Exception {
-        List<String> destination_column = viewDefinitions.stream()
-                .map(v -> v.getForeignKeys())
+        ImmutableSet<String> destination_column = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
-                .map(f -> f.getComponents())
+                .map(ForeignKeyConstraint::getComponents)
                 .map(c -> c.get(0).getReferencedAttribute().getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("status_id"), destination_column);
+        assertEquals(ImmutableSet.of("status_id"), destination_column);
     }
 
     /**
@@ -110,14 +110,14 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_SourceColumn() throws Exception {
-        List<String> source_column = viewDefinitions.stream()
-                .map(v -> v.getForeignKeys())
+        ImmutableSet<String> source_column = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
-                .map(f -> f.getComponents())
+                .map(ForeignKeyConstraint::getComponents)
                 .map(c -> c.get(0).getAttribute().getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("status"), source_column);
+        assertEquals(ImmutableSet.of("status"), source_column);
     }
 
     /**
@@ -125,13 +125,13 @@ public class BasicViewWithConstraintsParsingTest {
      */
     @Test
     public void testPersonAddForeignKey_FKName() throws Exception {
-        List<String> fk_name = viewDefinitions.stream()
-                .map(v -> v.getForeignKeys())
+        ImmutableSet<String> fk_name = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
                 .flatMap(Collection::stream)
-                .map(f -> f.getName())
-                .collect(Collectors.toList());
+                .map(ForeignKeyConstraint::getName)
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("status_id_fkey"), fk_name);
+        assertEquals(ImmutableSet.of("status_id_fkey"), fk_name);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,

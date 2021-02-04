@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
@@ -20,7 +21,6 @@ public class ViewDefinitionParsingTest {
 
     @Test
     public void testValidProfBasicViews() throws Exception {
-
         ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views.json",
                 "src/test/resources/prof/prof.db-extract.json");
     }
@@ -34,6 +34,23 @@ public class ViewDefinitionParsingTest {
                 "src/test/resources/prof/prof_with_constraints.db-extract.json");
     }
 
+     /**
+     * Hidden attribute present in newly added FD
+     */
+    @Test(expected = MetadataExtractionException.class)
+    public void testValidProfBasicViews_MissingFDAttributes() throws Exception {
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-hiddenFD.json",
+                "src/test/resources/prof/prof_with_constraints.db-extract.json");
+    }
+
+    /**
+     * Hidden attribute present in newly added UC
+     */
+    @Test(expected = MetadataExtractionException.class)
+    public void testValidProfBasicViews_MissingUCAttributes() throws Exception {
+        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-hiddenUC.json",
+                "src/test/resources/prof/prof_with_constraints.db-extract.json");
+    }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)

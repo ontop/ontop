@@ -12,7 +12,7 @@
       ],
       "columns": {
         "added": [],
-        "hidden": ["\"ssn\""]
+        "hidden": ["\"position\""]
       },
       "uniqueConstraints": {
         "added": [
@@ -24,7 +24,12 @@
         ]
       },
       "otherFunctionalDependencies": {
-        "added": [ ]
+        "added": [
+            {
+              "determinants": ["\"ssn\""],
+              "dependents": ["\"last_name\""]
+            }
+        ]
       },
       "foreignKeys": {
         "added": []

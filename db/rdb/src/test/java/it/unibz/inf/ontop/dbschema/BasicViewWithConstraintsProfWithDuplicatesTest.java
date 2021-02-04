@@ -29,15 +29,15 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      */
     @Test
     public void testProfDuplicateFDDeterminants() throws Exception {
-        List<String> otherFD = viewDefinitions.stream()
-                .map(v -> v.getOtherFunctionalDependencies())
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
-                .map(d -> d.getDeterminants())
+                .map(FunctionalDependency::getDeterminants)
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("first_name"), otherFD);
+        assertEquals(ImmutableSet.of("first_name"), otherFD);
     }
 
     /**
@@ -45,15 +45,15 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      */
     @Test
     public void testProfDuplicateFDDependents() throws Exception {
-        List<String> otherFD = viewDefinitions.stream()
-                .map(v -> v.getOtherFunctionalDependencies())
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
-                .map(d -> d.getDependents())
+                .map(FunctionalDependency::getDependents)
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("last_name"), otherFD);
+        assertEquals(ImmutableSet.of("last_name"), otherFD);
     }
 
     /**
@@ -61,15 +61,15 @@ public class BasicViewWithConstraintsProfWithDuplicatesTest {
      */
     @Test
     public void testProfDuplicateUCColumn() throws Exception {
-        List<String> constraints = viewDefinitions.stream()
-                .map(v -> v.getUniqueConstraints())
+        ImmutableSet<String> constraints = viewDefinitions.stream()
+                .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
-                .map(d -> d.getAttributes())
+                .map(UniqueConstraint::getAttributes)
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("position", "a_id"), constraints);
+        assertEquals(ImmutableSet.of("position", "a_id"), constraints);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,

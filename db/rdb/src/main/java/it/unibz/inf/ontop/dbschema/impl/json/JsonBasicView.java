@@ -316,8 +316,8 @@ public class JsonBasicView extends JsonView {
                 .collect(ImmutableCollectors.toList());
 
         // List of hidden columns
-        ImmutableList<String> hiddenColumnNames = columns.hidden.stream()
-                .map(attributeName -> normalizeAttributeName(attributeName, idFactory))
+        ImmutableList<QuotedID> hiddenColumnNames = columns.hidden.stream()
+                .map(a -> idFactory.createAttributeID(a))
                 .collect(ImmutableCollectors.toList());
 
         // Filter inherited constraints

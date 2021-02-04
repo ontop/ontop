@@ -45,15 +45,15 @@ public class BasicViewWithConstraintsPersonIncrTest {
      */
     @Test
     public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
-        List<String> otherFD = viewDefinitions.stream()
-                .map(v -> v.getOtherFunctionalDependencies())
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
-                .map(d -> d.getDeterminants())
+                .map(FunctionalDependency::getDeterminants)
                 .flatMap(Collection::stream)
                 .map(d -> d.getID().getName())
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableList.of("locality"), otherFD);
+        assertEquals(ImmutableSet.of("locality"), otherFD);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,

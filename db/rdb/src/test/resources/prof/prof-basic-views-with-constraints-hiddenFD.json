@@ -24,7 +24,12 @@
         ]
       },
       "otherFunctionalDependencies": {
-        "added": [ ]
+        "added": [
+            {
+              "determinants": ["\"ssn\""],
+              "dependents": ["\"last_name\""]
+            }
+        ]
       },
       "foreignKeys": {
         "added": []
