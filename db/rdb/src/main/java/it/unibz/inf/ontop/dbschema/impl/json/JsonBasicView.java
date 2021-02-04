@@ -402,7 +402,7 @@ public class JsonBasicView extends JsonView {
                 .collect(Collectors.toList());
 
 
-        List<FunctionalDependencyConstruct> mergedListFDConstructs = null;
+        List<Optional<FunctionalDependencyConstruct>> mergedListFDConstructs = null;
         for (AddFunctionalDependency jsonFD : addFunctionalDependencies) {
 
             // Create a FunctionalDependencyConstruct for the added FDs
@@ -416,16 +416,18 @@ public class JsonBasicView extends JsonView {
 
             // Merge JSON FD Constructs
             mergedListFDConstructs = listFDConstructs.stream()
-                    .map(f -> f.merge(jsonFDConstruct).orElse(null))
+                    .map(f -> f.merge(jsonFDConstruct))//.orElse(null))
                     .collect(Collectors.toList());
 
             // Append FDs added via JSON
-            mergedListFDConstructs.add(jsonFDConstruct);
+            mergedListFDConstructs.add(Optional.of(jsonFDConstruct));
         }
 
         // Remove duplicate FDs based on determinant
-        ImmutableList<FunctionalDependencyConstruct> finalListFDConstructs = mergedListFDConstructs.stream()
+        ImmutableList<FunctionalDependencyConstruct> finalListFDConstructs = Optional.ofNullable(mergedListFDConstructs)
+                .map(Collection::stream).orElse(Stream.empty())
                 .distinct()
+                .map(a -> a.orElse(null))
                 .collect(ImmutableCollectors.toList());
 
         // Insert the FDs
