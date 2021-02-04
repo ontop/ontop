@@ -1,55 +1,59 @@
 package it.unibz.inf.ontop.dbschema;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class ViewDefinitionParsingTest {
+import static org.junit.Assert.assertEquals;
 
-    @Test
-    public void testValidPersonBasicViews() throws Exception {
+public class BasicViewWithConstraintsPersonIncrTest {
+    private static final String VIEW_FILE = "src/test/resources/person/basic_views_with_constraints.json";
+    private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_FD.db-extract.json";
 
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/person/basic_views.json",
-                "src/test/resources/person/person.db-extract.json");
-    }
+    ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions(VIEW_FILE, DBMETADATA_FILE);
 
-    @Test
-    public void testValidProfBasicViews() throws Exception {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views.json",
-                "src/test/resources/prof/prof.db-extract.json");
-    }
-
-    /**
-     * Multiple primary keys defined in view
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testValidProfBasicViews_DuplicatePK() throws Exception {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-duplicate-constraintPK.json",
-                "src/test/resources/prof/prof_with_constraints.db-extract.json");
-    }
-
-     /**
-     * Hidden attribute present in newly added FD
-     */
-    @Test(expected = MetadataExtractionException.class)
-    public void testValidProfBasicViews_MissingFDAttributes() throws Exception {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-hiddenFD.json",
-                "src/test/resources/prof/prof_with_constraints.db-extract.json");
+    public BasicViewWithConstraintsPersonIncrTest() throws Exception {
     }
 
     /**
-     * Hidden attribute present in newly added UC
+     * The dependents of the FDs with identical determinants are merged
      */
-    @Test(expected = MetadataExtractionException.class)
-    public void testValidProfBasicViews_MissingUCAttributes() throws Exception {
-        ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions("src/test/resources/prof/prof-basic-views-with-constraints-hiddenUC.json",
-                "src/test/resources/prof/prof_with_constraints.db-extract.json");
+    @Test
+    public void testPersonAddFunctionalDependencyDependent() throws Exception {
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
+                .flatMap(Collection::stream)
+                .map(FunctionalDependency::getDependents)
+                .flatMap(Collection::stream)
+                .map(d -> d.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertEquals(ImmutableSet.of("status", "country"), otherFD);
+    }
+
+    /**
+     * The determinant of the FD is correctly added by a viewfile and used to merge FDs
+     */
+    @Test
+    public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
+                .flatMap(Collection::stream)
+                .map(FunctionalDependency::getDeterminants)
+                .flatMap(Collection::stream)
+                .map(d -> d.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertEquals(ImmutableSet.of("locality"), otherFD);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
@@ -82,5 +86,4 @@ public class ViewDefinitionParsingTest {
                 .map(r -> (OntopViewDefinition) r)
                 .collect(ImmutableCollectors.toSet());
     }
-
 }

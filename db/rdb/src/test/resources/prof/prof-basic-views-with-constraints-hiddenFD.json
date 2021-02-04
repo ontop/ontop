@@ -1,0 +1,40 @@
+{
+  "relations": [
+    {
+      "name": [
+        "\"views\"",
+        "\"uni1\"",
+        "\"academic\""
+      ],
+      "baseRelation": [
+        "\"uni1\"",
+        "\"academic\""
+      ],
+      "columns": {
+        "added": [],
+        "hidden": ["\"ssn\""]
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+          "name": "student_position_id",
+          "determinants": ["\"position\""],
+          "isPrimaryKey": true
+          }
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+            {
+              "determinants": ["\"ssn\""],
+              "dependents": ["\"last_name\""]
+            }
+        ]
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}
