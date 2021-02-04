@@ -14,7 +14,6 @@ public class FunctionalDependencyConstruct {
     private final ImmutableSet<QuotedID> dependents;
 
     protected FunctionalDependencyConstruct(ImmutableSet<QuotedID> determinants, ImmutableSet<QuotedID> dependents) {
-
         this.determinants = determinants;
         this.dependents = dependents;
     }
@@ -27,30 +26,25 @@ public class FunctionalDependencyConstruct {
         return dependents;
     }
 
-    /*
-     * Ovverride equals method to ensure we can check for object equality based on determinants
-     */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        FunctionalDependencyConstruct other = (FunctionalDependencyConstruct) obj;
-        return Objects.equals(determinants, other.getDeterminants());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FunctionalDependencyConstruct that = (FunctionalDependencyConstruct) o;
+        return getDeterminants().equals(that.getDeterminants()) && getDependents().equals(that.getDependents());
     }
 
-    /*
-     * Ovverride hashCode method to ensure we can check for object equality based on determinants
-     */
     @Override
     public int hashCode() {
-        return Objects.hash(determinants);
+        return Objects.hash(getDeterminants(), getDependents());
+    }
+
+    @Override
+    public String toString() {
+        return "FunctionalDependencyConstruct{" +
+                "determinants=" + determinants +
+                ", dependents=" + dependents +
+                '}';
     }
 
     /**
