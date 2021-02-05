@@ -114,9 +114,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	public void testEmptyConcepts() {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<IRI> iterator = empties.iEmptyConcepts();
-		while (iterator.hasNext()){
-			emptyConcepts.add(iterator.next());
+		for (IRI iri : empties.emptyConcepts()){
+			emptyConcepts.add(iri);
 		}
 
 		log.info("Empty concept/s: " + emptyConcepts);
@@ -130,9 +129,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	@Test
 	public void testEmptyRoles() {
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<IRI> iterator = empties.iEmptyRoles();
-		while (iterator.hasNext()){
-			emptyRoles.add(iterator.next());
+		for (IRI iri : empties.emptyRoles()) {
+			emptyRoles.add(iri);
 		}
 
 		log.info("Empty role/s: " + emptyRoles);

@@ -35,6 +35,8 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -48,6 +50,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DialogUtils {
+
+
+	public static DefaultTableModel createNonEditableTableModel(Object[] columnNames) {
+		return new DefaultTableModel(columnNames, 0) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+	}
 
 	public static final String HTML_TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
 

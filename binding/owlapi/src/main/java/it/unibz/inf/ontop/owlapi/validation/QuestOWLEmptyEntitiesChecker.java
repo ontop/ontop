@@ -42,8 +42,8 @@ public class QuestOWLEmptyEntitiesChecker {
 	private final ClassifiedTBox onto;
 	private final OWLConnection conn;
 
-	private int nEmptyConcepts = 0;
-	private int nEmptyRoles = 0;
+	private int nEmptyConcepts;
+	private int nEmptyRoles;
 
 	/**
 	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
@@ -55,12 +55,12 @@ public class QuestOWLEmptyEntitiesChecker {
 		this.conn = conn;
 	}
 
-	public Iterator<IRI> iEmptyConcepts() {
-		return new EmptyEntitiesIterator(onto.classes().iterator(), conn);
+	public Iterable<IRI> emptyConcepts() {
+		return () -> new EmptyEntitiesIterator(onto.classes().iterator(), conn);
 	}
 
-	public Iterator<IRI> iEmptyRoles() {
-		return new EmptyEntitiesIterator(onto.objectProperties().iterator(), onto.dataProperties().iterator(), conn);
+	public Iterable<IRI> emptyRoles() {
+		return () -> new EmptyEntitiesIterator(onto.objectProperties().iterator(), onto.dataProperties().iterator(), conn);
 	}
 
 	public int getEConceptsSize() {
@@ -69,13 +69,6 @@ public class QuestOWLEmptyEntitiesChecker {
 
 	public int getERolesSize() {
 		return  nEmptyRoles;
-	}
-
-
-	@Override
-	public String toString() {
-		return String.format("- %s Empty %s ", nEmptyConcepts, (nEmptyConcepts == 1) ? "concept" : "concepts") +
-		String.format("- %s Empty %s\n", nEmptyRoles, (nEmptyRoles == 1) ? "role" : "roles");
 	}
 
 
@@ -94,11 +87,11 @@ public class QuestOWLEmptyEntitiesChecker {
 		private final OWLConnection questConn;
 
 		private boolean hasNext = false;
-		private IRI nextConcept;
+		private IRI next;
 
 		private final Iterator<OClass> classIterator;
-		private final Iterator<ObjectPropertyExpression> objectRoleIterator;
-		private final Iterator<DataPropertyExpression> dataRoleIterator;
+		private final Iterator<ObjectPropertyExpression> objectPropertyIterator;
+		private final Iterator<DataPropertyExpression> dataPropertyIterator;
 
 		private final Logger log = LoggerFactory.getLogger(EmptyEntitiesIterator.class);
 
@@ -109,7 +102,7 @@ public class QuestOWLEmptyEntitiesChecker {
 
 			this.classIterator = classIterator;
 
-			this.objectRoleIterator = new Iterator<ObjectPropertyExpression>() {
+			this.objectPropertyIterator = new Iterator<ObjectPropertyExpression>() {
 				@Override
 				public boolean hasNext() {
 					return false;
@@ -121,7 +114,7 @@ public class QuestOWLEmptyEntitiesChecker {
 				}
 			};
 
-			this.dataRoleIterator = new Iterator<DataPropertyExpression>() {
+			this.dataPropertyIterator = new Iterator<DataPropertyExpression>() {
 				@Override
 				public boolean hasNext() {
 					return false;
@@ -135,7 +128,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 
 		/** iterator for roles of the ontologies */
-		public EmptyEntitiesIterator(Iterator<ObjectPropertyExpression> objectRoleIterator, Iterator<DataPropertyExpression> dataRoleIterator, OWLConnection questConn) {
+		public EmptyEntitiesIterator(Iterator<ObjectPropertyExpression> objectPropertyIterator, Iterator<DataPropertyExpression> dataPropertyIterator, OWLConnection questConn) {
 
 			this.questConn = questConn;
 
@@ -151,26 +144,8 @@ public class QuestOWLEmptyEntitiesChecker {
 				}
 			};
 
-			this.objectRoleIterator = objectRoleIterator;
-			this.dataRoleIterator = dataRoleIterator;
-		}
-
-		private String getPredicateQuery(IRI p) {
-			return String.format(queryRoles, p.getIRIString()); }
-
-		private String getClassQuery(IRI p) {
-			return String.format(queryConcepts, p.getIRIString()); }
-
-		private String getQuery(int arity, IRI iri)
-		{
-			switch(arity) {
-				case 1:
-					return getClassQuery(iri);
-				case 2:
-					return getPredicateQuery(iri);
-				default:
-					return "";
-			}
+			this.objectPropertyIterator = objectPropertyIterator;
+			this.dataPropertyIterator = dataPropertyIterator;
 		}
 
 		@Override
@@ -186,8 +161,8 @@ public class QuestOWLEmptyEntitiesChecker {
 			}
 			log.debug( "No more empty concepts" );
 
-			while (objectRoleIterator.hasNext()){
-				ObjectPropertyExpression next = objectRoleIterator.next();
+			while (objectPropertyIterator.hasNext()){
+				ObjectPropertyExpression next = objectPropertyIterator.next();
 				if (!next.isTop() && !next.isBottom()) {
 					if (nextEmptyEntity(next.getIRI(), 2)) {
 						nEmptyRoles++;
@@ -197,8 +172,8 @@ public class QuestOWLEmptyEntitiesChecker {
 			}
 			log.debug( "No more empty object roles" );
 
-			while (dataRoleIterator.hasNext()){
-				DataPropertyExpression next = dataRoleIterator.next();
+			while (dataPropertyIterator.hasNext()){
+				DataPropertyExpression next = dataPropertyIterator.next();
 				if (!next.isTop() && !next.isBottom()) {
 					if (nextEmptyEntity(next.getIRI(), 2)) {
 						nEmptyRoles++;
@@ -212,23 +187,33 @@ public class QuestOWLEmptyEntitiesChecker {
 			return hasNext;
 		}
 
-		private boolean nextEmptyEntity(IRI entity, int arity) {
+		private boolean nextEmptyEntity(IRI iri, int arity) {
 
-			String query =getQuery(arity, entity);
+			String query;
+			switch (arity) {
+				case 1:
+					query = String.format(queryConcepts, iri.getIRIString());
+					break;
+				case 2:
+					query = String.format(queryRoles, iri.getIRIString());
+					break;
+				default:
+					query = "";
+					break;
+			}
 
 			//execute next query
-			try (OWLStatement stm = questConn.createStatement()){
-				try (TupleOWLResultSet rs = stm.executeSelectQuery(query)) {
-					if (!rs.hasNext()) {
-						nextConcept = entity;
-						log.debug( "Empty " + entity );
+			try (OWLStatement stm = questConn.createStatement();
+					TupleOWLResultSet rs = stm.executeSelectQuery(query)) {
+				if (!rs.hasNext()) {
+					next = iri;
+					log.debug( "Empty " + iri );
 
-						hasNext = true;
-						return true;
-					}
-
-					return false;
+					hasNext = true;
+					return true;
 				}
+
+				return false;
 			}
 			catch (OWLException e) {
 				e.printStackTrace();
@@ -239,7 +224,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		@Override
 		public IRI next() {
 			if (hasNext) {
-				return nextConcept;
+				return next;
 			}
 			return null;
 		}

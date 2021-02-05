@@ -160,20 +160,17 @@ public class R2rmlCheckerTest {
 	public void testOBDAEmpties()  {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
-		log.info(empties.toString());
 
 		List<IRI> emptyConceptsObda = new ArrayList<>();
-		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
-		while (iteratorC.hasNext()) {
-			emptyConceptsObda.add(iteratorC.next());
+		for (IRI iri : empties.emptyConcepts()) {
+			emptyConceptsObda.add(iri);
 		}
 		log.info("Empty concepts: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
 		List<IRI> emptyRolesObda = new ArrayList<>();
-		Iterator<IRI> iteratorR = empties.iEmptyRoles();
-		while (iteratorR.hasNext()) {
-			emptyRolesObda.add(iteratorR.next());
+		for (IRI iri : empties.emptyRoles()) {
+			emptyRolesObda.add(iri);
 		}
 		log.info("Empty roles: " + emptyRolesObda);
 		assertEquals(46, emptyRolesObda.size());
@@ -188,20 +185,17 @@ public class R2rmlCheckerTest {
 	public void testR2rmlEmpties() {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
-		log.info(empties.toString());
 
 		List<IRI> emptyConceptsR2rml = new ArrayList<>();
-		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
-		while (iteratorC.hasNext()) {
-			emptyConceptsR2rml.add(iteratorC.next());
+		for (IRI iri : empties.emptyConcepts()) {
+			emptyConceptsR2rml.add(iri);
 		}
 		log.info("Empty concepts: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
 		List<IRI> emptyRolesR2rml = new ArrayList<>();
-		Iterator<IRI> iteratorR = empties.iEmptyRoles();
-		while (iteratorR.hasNext()) {
-			emptyRolesR2rml.add(iteratorR.next());
+		for (IRI iri : empties.emptyRoles()) {
+			emptyRolesR2rml.add(iri);
 		}
 		log.info("Empty roles: " + emptyRolesR2rml);
 		assertEquals(46, emptyRolesR2rml.size());

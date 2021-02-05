@@ -67,30 +67,23 @@ public class MappingStatisticsAction extends ProtegeAction {
 		boolean isValid() { return count != ERROR_ENTRY; }
 
 		Object[] asRow() {
-			return new Object[]{
-					id,
-					isValid() ? count : "<html><i>error</i></html>" };
+			return new Object[] { id, isValid() ? count : "<html><i>error</i></html>" };
 		}
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent actionEvent) {
 		JDialog dialog = new JDialog((Frame)null, DIALOG_TITLE, true);
 
 		JPanel statisticsPanel = new JPanel(new BorderLayout());
-		JPanel pnlSummary = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pnlSummary.add(new JLabel("<html><b>Total number of triples:</b></html>"));
-		JLabel lblSummaryValue = new JLabel("<html><i>retrieving...</i></html>");
-		pnlSummary.add(lblSummaryValue);
-		statisticsPanel.add(pnlSummary, BorderLayout.NORTH);
+		JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		summaryPanel.add(new JLabel("<html><b>Total number of triples:</b></html>"));
+		JLabel summaryLabel = new JLabel("<html><i>retrieving...</i></html>");
+		summaryPanel.add(summaryLabel);
+		statisticsPanel.add(summaryPanel, BorderLayout.NORTH);
 
 		String[] columnNames = {"Mapping ID", "Triples"};
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
+		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(columnNames);
 
 		JTable triplesCountTable = new JTable(tableModel);
 		triplesCountTable.getColumnModel().getColumn(0).setPreferredWidth(400);
@@ -133,7 +126,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 			protected void done() {
 				try {
 					int count = get();
-					lblSummaryValue.setText(count != ERROR_ENTRY
+					summaryLabel.setText(count != ERROR_ENTRY
 						? "<html><b>" + count + "</b></html>"
 						: "An error occurred in the counting process.");
 				}
@@ -141,7 +134,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 					/* NO-OP */
 				}
 				catch (InterruptedException e) {
-					lblSummaryValue.setText("An error occurred: " + e.getMessage());
+					summaryLabel.setText("An error occurred: " + e.getMessage());
 				}
 				catch (ExecutionException e) {
 					dialog.dispose();

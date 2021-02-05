@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.core;
 
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -9,7 +8,6 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -321,7 +319,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * @return QuestOWLEmptyEntitiesChecker class to get empty concepts and roles
      * @throws Exception
      */
-    public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
+    public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() {
         OWLOntology rootOntology = getRootOntology();
         Ontology mergeOntology = owlapiTranslator.translateAndClassify(rootOntology);
         ClassifiedTBox tBox = mergeOntology.tbox();
@@ -334,7 +332,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
      * @return The old connection: The caller must close this connection
      */
-    public OWLConnection replaceConnection() throws OntopConnectionException {
+    public OWLConnection replaceConnection() {
         OWLConnection oldconn = this.owlConnection;
         owlConnection = reasoner.getConnection();
         return oldconn;

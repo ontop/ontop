@@ -118,9 +118,9 @@
 	</extension>
 
 	<extension id="menu.ontop.emptieschecking" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Check for empties..."/>
+		<name value="Check empty entities..."/>
 		<toolTip value="Provide information about empty concepts and roles "/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.EmptiesCheckAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.EmptyEntitiesAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-C"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
