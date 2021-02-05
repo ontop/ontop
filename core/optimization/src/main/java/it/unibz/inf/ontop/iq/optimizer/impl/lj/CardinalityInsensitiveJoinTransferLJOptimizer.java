@@ -90,13 +90,16 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
 
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap = rightDataNode.getArgumentMap();
 
+            ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes = Optional.ofNullable(leftMultimap.get(rightRelation))
+                    .map(Collection::stream)
+                    .orElseGet(Stream::empty)
+                    .collect(ImmutableCollectors.toSet());
+
+            if (sameRelationLeftNodes.isEmpty())
+                return Optional.empty();
+
             ImmutableList<FunctionalDependency> functionalDependencies = rightRelation.getOtherFunctionalDependencies();
             if (!functionalDependencies.isEmpty()) {
-                ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes = Optional.ofNullable(leftMultimap.get(rightRelation))
-                        .map(Collection::stream)
-                        .orElseGet(Stream::empty)
-                        .collect(ImmutableCollectors.toSet());
-
                 Optional<ImmutableList<Integer>> matchingIndexes = functionalDependencies.stream()
                         .map(fd -> matchFunctionalDependency(fd, sameRelationLeftNodes, rightArgumentMap))
                         .filter(Optional::isPresent)
@@ -106,7 +109,10 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
                 if (matchingIndexes.isPresent())
                     return Optional.of(new SelectedNode(matchingIndexes.get(), rightDataNode));
             }
-            return Optional.empty();
+
+            // Last chance: looks for a data node having the same non-nullable terms at the same position
+            return matchIndexes(sameRelationLeftNodes, rightArgumentMap, ImmutableList.copyOf(rightArgumentMap.keySet()))
+                    .map(idx -> new SelectedNode(idx, rightDataNode));
         }
 
         @Override

@@ -156,20 +156,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         if (!rightArgumentMap.keySet().containsAll(indexes))
             return Optional.empty();
 
-        VariableNullability variableNullability = getInheritedVariableNullability();
-        if (indexes.stream().anyMatch(i ->
-                Optional.of(rightArgumentMap.get(i))
-                        .filter(t -> (t instanceof Variable) && variableNullability.isPossiblyNullable((Variable) t))
-                        .isPresent()))
-            return Optional.empty();
-
-        return sameRelationLeftNodes.stream()
-                .map(ExtensionalDataNode::getArgumentMap)
-                .filter(leftArgumentMap -> leftArgumentMap.keySet().containsAll(indexes)
-                                && indexes.stream().allMatch(
-                        i -> leftArgumentMap.get(i).equals(rightArgumentMap.get(i))))
-                .findAny()
-                .map(n -> indexes);
+        return matchIndexes(sameRelationLeftNodes, rightArgumentMap, indexes);
     }
 
     protected Optional<ImmutableList<Integer>> matchForeignKey(ForeignKeyConstraint fk,
@@ -218,6 +205,12 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 .filter(i -> !dependentIndexes.contains(i))
                 .collect(ImmutableCollectors.toList());
 
+        return matchIndexes(sameRelationLeftNodes, rightArgumentMap, indexes);
+    }
+
+    protected Optional<ImmutableList<Integer>> matchIndexes(ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes,
+                                                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap,
+                                                            ImmutableList<Integer> indexes) {
         VariableNullability variableNullability = getInheritedVariableNullability();
         if (indexes.stream().anyMatch(i ->
                 Optional.of(rightArgumentMap.get(i))
