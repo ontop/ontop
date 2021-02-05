@@ -30,7 +30,16 @@
         "added": []
       },
       "foreignKeys": {
-        "added": []
+        "added": [
+          {
+            "name": "status_id_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"statuses\""]
+            }
+          }
+        ]
       },
       "type": "BasicViewDefinition"
     }

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultIdentityIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -58,10 +59,36 @@ public class RightProvenanceNormalizer {
     }
 
     public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
+                                                    Optional<ImmutableExpression> leftJoinExpression,
+                                                    VariableGenerator variableGenerator) {
+        ImmutableSet<Variable> rightVariables = rightTree.getVariables();
+
+        VariableNullability rightNullability = leftJoinExpression
+                .flatMap(e -> termFactory.getConjunction(
+                        e.flattenAND()
+                                .filter(e1 -> rightVariables.containsAll(e1.getVariables()))))
+                .map(e -> iqFactory.createUnaryIQTree(
+                        iqFactory.createFilterNode(e),
+                        rightTree).getVariableNullability())
+                .orElseGet(rightTree::getVariableNullability);
+
+        return normalizeRightProvenance(rightTree, leftVariables, rightTree.getVariables(), variableGenerator,
+                rightNullability);
+    }
+
+    public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
                                                     ImmutableSet<Variable> rightRequiredVariables,
                                                     VariableGenerator variableGenerator) {
+        return normalizeRightProvenance(rightTree, leftVariables, rightRequiredVariables, variableGenerator,
+                rightTree.getVariableNullability());
+    }
 
-        VariableNullability rightNullability = rightTree.getVariableNullability();
+    private RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
+                                                    ImmutableSet<Variable> rightRequiredVariables,
+                                                    VariableGenerator variableGenerator,
+                                                    VariableNullability rightNullability) {
+
+
         ImmutableSet<Variable> rightVariables = rightTree.getVariables();
 
         Optional<Variable> nonNullableRightVariable = rightVariables.stream()

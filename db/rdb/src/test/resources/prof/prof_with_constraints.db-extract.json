@@ -1,0 +1,449 @@
+{
+  "metadata": {
+    "driverName": "PostgreSQL JDBC Driver",
+    "dbmsVersion": "12.5 (Debian 12.5-1.pgdg100+1)",
+    "driverVersion": "42.2.12",
+    "idFactoryType": "POSTGRESQL",
+    "extractionTime": "2021-01-15T09:27:31",
+    "dbmsProductName": "PostgreSQL",
+    "quotationString": "\""
+  },
+  "relations": [
+    {
+      "name": [
+        "\"uni1\"",
+        "\"course-registration\""
+      ],
+      "columns": [
+        {
+          "name": "\"c_id\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"s_id\"",
+          "datatype": "int4",
+          "isNullable": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "to": {
+            "columns": [
+              "\"c_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"course\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"c_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"course-registration\""
+            ]
+          },
+          "name": "course-registration_c_id_fkey"
+        },
+        {
+          "to": {
+            "columns": [
+              "\"s_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"student\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"s_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"course-registration\""
+            ]
+          },
+          "name": "course-registration_s_id_fkey"
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"uni1\"",
+        "\"student\""
+      ],
+      "columns": [
+        {
+          "name": "\"s_id\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"first_name\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        },
+        {
+          "name": "\"last_name\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        },
+        {
+          "name": "\"ssn\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "student_pkey",
+          "determinants": [
+            "\"s_id\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "student_ssn_key",
+          "determinants": [
+            "\"ssn\""
+          ],
+          "isPrimaryKey": false
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"uni1\"",
+        "\"academic\""
+      ],
+      "columns": [
+        {
+          "name": "\"a_id\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"first_name\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        },
+        {
+          "name": "\"last_name\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        },
+        {
+          "name": "\"position\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"ssn\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "academic_pkey",
+          "determinants": [
+            "\"a_id\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "academic_ssn_key",
+          "determinants": [
+            "\"ssn\""
+          ],
+          "isPrimaryKey": false
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"uni2\"",
+        "\"person\""
+      ],
+      "columns": [
+        {
+          "name": "\"pid\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"fname\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        },
+        {
+          "name": "\"lname\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        },
+        {
+          "name": "\"status\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"ssn\"",
+          "datatype": "varchar(40)",
+          "isNullable": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "person_pkey",
+          "determinants": [
+            "\"pid\""
+          ],
+          "isPrimaryKey": true
+        },
+        {
+          "name": "person_ssn_key",
+          "determinants": [
+            "\"ssn\""
+          ],
+          "isPrimaryKey": false
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"uni1\"",
+        "\"course\""
+      ],
+      "columns": [
+        {
+          "name": "\"c_id\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"title\"",
+          "datatype": "varchar(100)",
+          "isNullable": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_pkey",
+          "determinants": [
+            "\"c_id\""
+          ],
+          "isPrimaryKey": true
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"uni2\"",
+        "\"course\""
+      ],
+      "columns": [
+        {
+          "name": "\"cid\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"lecturer\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"lab_teacher\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"topic\"",
+          "datatype": "varchar(100)",
+          "isNullable": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "to": {
+            "columns": [
+              "\"pid\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"person\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"lab_teacher\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"course\""
+            ]
+          },
+          "name": "course_lab_teacher_fkey"
+        },
+        {
+          "to": {
+            "columns": [
+              "\"pid\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"person\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"lecturer\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"course\""
+            ]
+          },
+          "name": "course_lecturer_fkey"
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_pkey",
+          "determinants": [
+            "\"cid\""
+          ],
+          "isPrimaryKey": true
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"uni1\"",
+        "\"teaching\""
+      ],
+      "columns": [
+        {
+          "name": "\"c_id\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"a_id\"",
+          "datatype": "int4",
+          "isNullable": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "to": {
+            "columns": [
+              "\"a_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"academic\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"a_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"teaching\""
+            ]
+          },
+          "name": "teaching_a_id_fkey"
+        },
+        {
+          "to": {
+            "columns": [
+              "\"c_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"course\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"c_id\""
+            ],
+            "relation": [
+              "\"uni1\"",
+              "\"teaching\""
+            ]
+          },
+          "name": "teaching_c_id_fkey"
+        }
+      ]
+    },
+    {
+      "name": [
+        "\"uni2\"",
+        "\"registration\""
+      ],
+      "columns": [
+        {
+          "name": "\"pid\"",
+          "datatype": "int4",
+          "isNullable": false
+        },
+        {
+          "name": "\"cid\"",
+          "datatype": "int4",
+          "isNullable": false
+        }
+      ],
+      "foreignKeys": [
+        {
+          "to": {
+            "columns": [
+              "\"cid\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"course\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"cid\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"registration\""
+            ]
+          },
+          "name": "registration_cid_fkey"
+        },
+        {
+          "to": {
+            "columns": [
+              "\"pid\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"person\""
+            ]
+          },
+          "from": {
+            "columns": [
+              "\"pid\""
+            ],
+            "relation": [
+              "\"uni2\"",
+              "\"registration\""
+            ]
+          },
+          "name": "registration_pid_fkey"
+        }
+      ]
+    }
+  ]
+}

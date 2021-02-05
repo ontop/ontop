@@ -49,23 +49,18 @@ public class RDF4JTimeoutTest {
 	public void init()  throws Exception {
 
 		sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
-		java.sql.Statement s = sqlConnection.createStatement();
 
-		try {
-			Scanner sqlFile = new Scanner(new File(uc_create));
-			String text = sqlFile.useDelimiter("\\A").next();
-			sqlFile.close();
-			
-			s.execute(text);
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
+			try (Scanner sqlFile = new Scanner(new File(uc_create))) {
+				String text = sqlFile.useDelimiter("\\A").next();
+				s.execute(text);
+			}
+
 			for(int i = 1; i <= 10000; i++){
 				s.execute("INSERT INTO TABLE1 VALUES (" + i + "," + i + ");");
 			}
-
-		} catch(SQLException sqle) {
-			System.out.println("Exception in creating db from script");
 		}
 
-		s.close();
 
 		Properties properties = new Properties();
 		properties.setProperty(DEFAULT_QUERY_TIMEOUT, "1");
@@ -92,13 +87,10 @@ public class RDF4JTimeoutTest {
 	@After
 	public void tearDown() throws Exception{
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -132,7 +124,7 @@ public class RDF4JTimeoutTest {
 			result.close();
 		} catch (QueryEvaluationException e) {
 			long end = System.currentTimeMillis();
-			assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
+			assertTrue(e.toString().contains("OntopTupleQuery timed out. More than 1 seconds passed"));
 			assertTrue(end - start >= 1000);
 			exceptionThrown = true;
 		}
@@ -152,6 +144,5 @@ public class RDF4JTimeoutTest {
         TupleQueryResult result = tq.evaluate();
 		assertTrue(result.hasNext());
 		result.close();
-	
 	}
 }

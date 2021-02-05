@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.owlapi.connection.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.input.*;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
@@ -129,7 +129,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
 			OntopResultConversionException {
 
-		SimpleGraphResultSet resultSet = st.execute(query);
+		GraphResultSet resultSet = st.execute(query);
 		return new OntopGraphOWLResultSet(resultSet, generateSalt());
 	}
 

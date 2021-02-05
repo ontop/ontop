@@ -1,29 +1,9 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import java.io.File;
 import java.util.Properties;
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 
 import org.eclipse.rdf4j.model.*;
@@ -47,7 +27,6 @@ public class RDF4JConstructDescribeTest {
 
 	private static Repository REPOSITORY;
 	private static final String DATA_FILE_PATH = "src/test/resources/describeConstruct.ttl";
-	//String owlFile = "src/test/resources/describeConstruct.owl";
 	
 	@BeforeClass
 	public static void setUp() throws Exception {
@@ -57,7 +36,10 @@ public class RDF4JConstructDescribeTest {
 		ValueFactory valueFactory = SimpleValueFactory.getInstance();
 		dataset.addDefaultGraph(valueFactory.createIRI(dataFile.toURI().toString()));
 
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
+		Properties properties = new Properties();
+		properties.setProperty(OntopReformulationSettings.INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE, "false");
+
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, properties)) {
 			REPOSITORY = OntopRepository.defaultRepository(loader.getConfiguration());
 			REPOSITORY.initialize();
 		}
@@ -115,9 +97,9 @@ public class RDF4JConstructDescribeTest {
 			while (gresult.hasNext()) {
 				result++;
 				Statement s = gresult.next();
-				//System.out.println(s.toString());
 			}
-			Assert.assertEquals(1, result);
+			// None because INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE is false
+			Assert.assertEquals(0, result);
 		}
 	}
 	
@@ -175,7 +157,8 @@ public class RDF4JConstructDescribeTest {
 		}
 		Assert.assertEquals(1, result);
 	}
-	
+
+	@Ignore("The dictionary is blocked by the DISTINCT")
 	@Test
 	public void testDescribeVar2() throws Exception {
 		int result = 0;
@@ -192,6 +175,63 @@ public class RDF4JConstructDescribeTest {
 				//System.out.println(s.toString());
 			}
 			Assert.assertEquals(2, result);
+		}
+	}
+
+	@Ignore("Not supported")
+	@Test
+	public void testDescribeVar3() {
+		int result = 0;
+		String queryString = "DESCRIBE ?x <http://example.org/B> WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";
+
+		try (RepositoryConnection con = REPOSITORY.getConnection()) {
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
+					queryString);
+
+			GraphQueryResult gresult = graphQuery.evaluate();
+			while (gresult.hasNext()) {
+				result++;
+				Statement s = gresult.next();
+			}
+			Assert.assertEquals(3, result);
+		}
+	}
+
+	@Ignore("The dictionary is blocked by the DISTINCT")
+	@Test
+	public void testDescribeVar4() {
+		int result = 0;
+		String queryString = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y} LIMIT 1";
+
+		try (RepositoryConnection con = REPOSITORY.getConnection()) {
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
+					queryString);
+
+			GraphQueryResult gresult = graphQuery.evaluate();
+			while (gresult.hasNext()) {
+				result++;
+				gresult.next();
+			}
+			Assert.assertEquals(2, result);
+		}
+	}
+
+	@Ignore("Not supported")
+	@Test
+	public void testDescribeVar5() {
+		int result = 0;
+		String queryString = "DESCRIBE ?x ?y <http://example.org/B> WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";
+
+		try (RepositoryConnection con = REPOSITORY.getConnection()) {
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
+					queryString);
+
+			GraphQueryResult gresult = graphQuery.evaluate();
+			while (gresult.hasNext()) {
+				result++;
+				gresult.next();
+			}
+			// TODO: check the number of results
 		}
 	}
 	

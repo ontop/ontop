@@ -1,0 +1,16 @@
+<agency>
+	rr:logicalTable [
+		rr:sqlQuery "select * from AGENCY where 1 = 0";
+	];
+	rr:subjectMap [
+		rr:template "http://example.org/agency/{id}";
+		rr:termType <http://www.w3.org/ns/r2rml#IRI>;
+		rr:class <http://example.org/terms#agency>;
+	];
+	rr:predicateObjectMap [
+		rr:predicateMap [ rr:constant <http://example.org#has_url> ];
+		rr:objectMap[
+			rr:column "url";
+		];
+	];
+.
