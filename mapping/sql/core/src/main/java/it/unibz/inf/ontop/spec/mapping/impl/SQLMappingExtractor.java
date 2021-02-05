@@ -159,8 +159,10 @@ public class SQLMappingExtractor implements MappingExtractor {
             IQTree equalityTransformedTree = mappingEqualityTransformer.transform(tree);
             IQTree normalizedTree = equalityTransformedTree.normalizeForOptimization(assertion.getQuery().getVariableGenerator());
             IQTree noNullTree = noNullValueEnforcer.transform(normalizedTree);
-            MappingAssertion noNullAssertion = assertion.copyOf(noNullTree, iqFactory);
+            if (noNullTree.isDeclaredAsEmpty())
+                continue;
 
+            MappingAssertion noNullAssertion = assertion.copyOf(noNullTree, iqFactory);
             MappingAssertion filledProvAssertion = mappingDatatypeFiller.transform(noNullAssertion);
             MappingAssertion castAssertion = mappingCaster.transform(filledProvAssertion);
             builder.add(castAssertion);
