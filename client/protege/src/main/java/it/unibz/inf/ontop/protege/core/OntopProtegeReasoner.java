@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
@@ -316,15 +316,15 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     /**
      * Methods to get the empty concepts and roles in the ontology using the given mappings.
      * It generates SPARQL queries to check for entities.
-     * @return QuestOWLEmptyEntitiesChecker class to get empty concepts and roles
+     * @return OntopOWLEmptyEntitiesChecker class to get empty concepts and roles
      * @throws Exception
      */
-    public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() {
+    public OntopOWLEmptyEntitiesChecker getEmptyEntitiesChecker() {
         OWLOntology rootOntology = getRootOntology();
         Ontology mergeOntology = owlapiTranslator.translateAndClassify(rootOntology);
         ClassifiedTBox tBox = mergeOntology.tbox();
 
-        return new QuestOWLEmptyEntitiesChecker(tBox, owlConnection);
+        return new OntopOWLEmptyEntitiesChecker(tBox, owlConnection);
     }
 
     /**

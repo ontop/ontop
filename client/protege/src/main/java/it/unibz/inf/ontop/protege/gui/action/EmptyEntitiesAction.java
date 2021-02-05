@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
@@ -38,7 +37,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -97,28 +95,35 @@ public class EmptyEntitiesAction extends ProtegeAction {
 
 			@Override
 			protected String doInBackground() {
-				QuestOWLEmptyEntitiesChecker checker = reasoner.get().getEmptyEntitiesChecker();
+				OntopOWLEmptyEntitiesChecker checker = reasoner.get().getEmptyEntitiesChecker();
 				PrefixManager prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
-				for (IRI iri : checker.emptyConcepts()) {
+				int emptyClasses = 0;
+				for (IRI iri : checker.emptyClasses()) {
 					if (isCancelled())
 						break;
 
 					publish(new EmptyEntityInfo(
 							prefixManager.getShortForm(iri.getIRIString()),
 							true));
+					emptyClasses++;
 				}
 
-				for (IRI iri : checker.emptyRoles()) {
+				int emptyProperties = 0;
+				for (IRI iri : checker.emptyProperties()) {
+					if (isCancelled())
+						break;
+
 					publish(new EmptyEntityInfo(
 							prefixManager.getShortForm(iri.getIRIString()),
 							false));
+					emptyProperties++;
 				}
 
 				return String.format("%s empty %s,  %s empty %s",
-						checker.getEConceptsSize(),
-						checker.getEConceptsSize() == 1 ? "class" : "classes",
-						checker.getERolesSize(),
-						checker.getERolesSize() == 1 ? "property" : "properties");
+						emptyClasses,
+						emptyClasses == 1 ? "class" : "classes",
+						emptyProperties,
+						emptyProperties == 1 ? "property" : "properties");
 			}
 
 			@Override

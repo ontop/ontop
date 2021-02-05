@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR;
@@ -159,17 +158,17 @@ public class R2rmlCheckerTest {
 //	@Test
 	public void testOBDAEmpties()  {
 
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
+		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, reasonerOBDA.getConnection());
 
 		List<IRI> emptyConceptsObda = new ArrayList<>();
-		for (IRI iri : empties.emptyConcepts()) {
+		for (IRI iri : empties.emptyClasses()) {
 			emptyConceptsObda.add(iri);
 		}
 		log.info("Empty concepts: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
 		List<IRI> emptyRolesObda = new ArrayList<>();
-		for (IRI iri : empties.emptyRoles()) {
+		for (IRI iri : empties.emptyProperties()) {
 			emptyRolesObda.add(iri);
 		}
 		log.info("Empty roles: " + emptyRolesObda);
@@ -184,17 +183,17 @@ public class R2rmlCheckerTest {
 //	@Test
 	public void testR2rmlEmpties() {
 
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
+		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, reasonerR2rml.getConnection());
 
 		List<IRI> emptyConceptsR2rml = new ArrayList<>();
-		for (IRI iri : empties.emptyConcepts()) {
+		for (IRI iri : empties.emptyClasses()) {
 			emptyConceptsR2rml.add(iri);
 		}
 		log.info("Empty concepts: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
 		List<IRI> emptyRolesR2rml = new ArrayList<>();
-		for (IRI iri : empties.emptyRoles()) {
+		for (IRI iri : empties.emptyProperties()) {
 			emptyRolesR2rml.add(iri);
 		}
 		log.info("Empty roles: " + emptyRolesR2rml);
