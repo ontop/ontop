@@ -1,0 +1,18 @@
+<agency>
+	rr:logicalTable [
+		rr:tableName "AGENCY";
+	];
+	rr:subjectMap [
+		rr:template "http://example.org/agency/{\"agency_id\"}";
+		rr:termType <http://www.w3.org/ns/r2rml#IRI>;
+		rr:class <http://example.org/terms#agency>;
+		rr:graphMap [ rr:constant <http://example.org#graph_1> ];
+	];
+	rr:predicateObjectMap [
+		rr:predicateMap [ rr:constant <http://example.org#has_url> ];
+		rr:graphMap [ rr:constant <http://example.org#graph_2> ];
+		rr:objectMap[
+			rr:column "agency_url";
+		];
+	];
+.
