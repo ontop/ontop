@@ -60,7 +60,7 @@ public class BootstrapAction extends ProtegeAction {
 
 	private static final long serialVersionUID = 8671527155950905524L;
 
-	private final Logger log = LoggerFactory.getLogger(BootstrapAction.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BootstrapAction.class);
 
 	private static final String DIALOG_TITLE = "Bootstrapping ontology and mapping";
 
@@ -216,7 +216,7 @@ public class BootstrapAction extends ProtegeAction {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
 			catch (ExecutionException e) {
-				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "Bootstrapper error.", log, e, settings);
+				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "Bootstrapper error.", LOGGER, e, settings);
 			}
 		}
 	}

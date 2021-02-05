@@ -96,7 +96,7 @@
   <extension id="menu.ontop.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Materialize triples..."/>
 		<toolTip value="Dump OWL Assertions (ABox/Triples) derived by the mappings and ontology"/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.AboxMaterializationAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.RDFGraphMaterializationAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotA-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -120,7 +120,7 @@
 	<extension id="menu.ontop.emptieschecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check empty entities..."/>
 		<toolTip value="Provide information about empty concepts and roles "/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.EmptyEntitiesAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.EmptyEntitiesCheckAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-C"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>

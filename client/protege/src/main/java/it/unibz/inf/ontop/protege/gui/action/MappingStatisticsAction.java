@@ -49,7 +49,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 
 	private static final long serialVersionUID = 3322509244957306932L;
 
-	private static final Logger log = LoggerFactory.getLogger(MappingStatisticsAction.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MappingStatisticsAction.class);
 
 	private static final String DIALOG_TITLE = "Mapping Statistics";
 
@@ -138,7 +138,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 				}
 				catch (ExecutionException e) {
 					dialog.dispose();
-					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", log, e, source);
+					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, source);
 				}
 			}
 		};
@@ -181,7 +181,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 			}
 		}
 		catch (Exception e) {
-			log.error("Exception while computing mapping statistics", e);
+			LOGGER.error("Exception while computing mapping statistics", e);
 			return new TriplesMapInfo(mapping.getId(), ERROR_ENTRY);
 		}
 	}

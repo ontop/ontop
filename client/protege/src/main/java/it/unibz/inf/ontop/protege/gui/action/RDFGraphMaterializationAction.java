@@ -46,7 +46,7 @@ import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
  *
  * @author Mariano Rodriguez Muro
  */
-public class AboxMaterializationAction extends ProtegeAction {
+public class RDFGraphMaterializationAction extends ProtegeAction {
 
     private static final long serialVersionUID = -1211395039869926309L;
 
@@ -68,7 +68,7 @@ public class AboxMaterializationAction extends ProtegeAction {
             TURTLE, writer -> new NTriplesWriter(writer)
                     .set(BasicWriterSettings.PRETTY_PRINT, false));
 
-    private final Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
+    private final Logger log = LoggerFactory.getLogger(RDFGraphMaterializationAction.class);
 
     @Override
     public void actionPerformed(ActionEvent evt) {

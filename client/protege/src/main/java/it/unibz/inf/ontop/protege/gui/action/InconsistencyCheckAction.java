@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.slf4j.Logger;
@@ -34,8 +35,10 @@ public class InconsistencyCheckAction extends ProtegeAction {
 	
 	private static final long serialVersionUID = 1L;
 
-	private final Logger log = LoggerFactory.getLogger(InconsistencyCheckAction.class);
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(InconsistencyCheckAction.class);
+
+	private static final String DIALOG_TITlE = "Consistency checking";
+
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		Optional<OntopProtegeReasoner> reasoner = DialogUtils.getOntopProtegeReasoner(getEditorKit());
@@ -45,24 +48,26 @@ public class InconsistencyCheckAction extends ProtegeAction {
 		try {
 			OntopProtegeReasoner ontop = reasoner.get();
 			boolean isConsistent = ontop.isQuestConsistent();
-			log.debug("Consistency checking returned: " + isConsistent);
+			LOGGER.debug("Consistency checking returned: " + isConsistent);
 			if (isConsistent) {
 				JOptionPane.showMessageDialog(getWorkspace(),
 						"Your ontology is consistent! Top job!",
-						"Consistency checking",
-						JOptionPane.INFORMATION_MESSAGE);
+						DIALOG_TITlE,
+						JOptionPane.INFORMATION_MESSAGE,
+						IconLoader.getOntopIcon());
 			}
 			else {
 				JOptionPane.showMessageDialog(getWorkspace(),
 						"Your ontology is not consistent.\n" +
 								"The axiom causing inconsistency is:\n" +
 								ontop.getInconsistentAxiom(),
-						"Consistency checking",
-						JOptionPane.INFORMATION_MESSAGE);
+						DIALOG_TITlE,
+						JOptionPane.INFORMATION_MESSAGE,
+						IconLoader.getOntopIcon());
 			}
 		}
 		catch (Throwable e) {
-			DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error checking consistency.", log, e);
+			DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error checking consistency.", LOGGER, e);
 		}
 	}
 

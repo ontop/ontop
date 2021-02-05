@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -46,23 +47,18 @@ public class R2RMLImportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
 
-	private static final Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(R2RMLImportAction.class);
 
-	@Override
-	public void initialise() {
-	}
-
-	@Override
-	public void dispose()  {
-		// Does nothing!
-	}
+	private static final String DIALOG_TITLE = "R2RML Import";
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if (JOptionPane.showConfirmDialog(getWorkspace(),
-				"The imported mappings will be appended to the existing data source. Continue?",
-				"Confirmation",
-				JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+				"<html>The imported mappings will be appended to the existing data source.<br><br>Do you wish to <b>continue</b>?<br></html>",
+				DIALOG_TITLE,
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
+				IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
 			return;
 
 		JFileChooser fc = DialogUtils.getFileChooser(getEditorKit(), null);
@@ -87,7 +83,7 @@ public class R2RMLImportAction extends ProtegeAction {
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 				catch (Throwable e) {
-					DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error during R2RML import.", log, e);
+					DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error during R2RML import.", LOGGER, e);
 				}
 			}
 		};
@@ -149,5 +145,15 @@ public class R2RMLImportAction extends ProtegeAction {
 			return false;
 		}
 
+	}
+
+	@Override
+	public void initialise() {
+		/* NO-OP */
+	}
+
+	@Override
+	public void dispose()  {
+		/* NO-OP */
 	}
 }

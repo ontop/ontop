@@ -20,30 +20,29 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.protege.utils.SwingWorkerWithTimeIntervalMonitor;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+
 
 public class R2RMLExportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
 
-    private static final Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(R2RMLExportAction.class);
+
+    private static final String DIALOG_TITLE = "R2RML Export";
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
@@ -53,50 +52,56 @@ public class R2RMLExportAction extends ProtegeAction {
             return;
 
         File file = fc.getSelectedFile();
-        Thread thread = new Thread("R2RML Export Action Thread") {
-            @Override
-            public void run() {
-                try {
-                    OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-                            "Exporting the mapping to R2RML...", getWorkspace());
-                    R2RMLExportThread t = new R2RMLExportThread();
-                    monitor.addProgressListener(t);
-                    monitor.start();
-                    t.run(file);
-                    monitor.stop();
-                    JOptionPane.showMessageDialog(getWorkspace(),
-                            "R2RML Export completed.",
-                            "Done",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
-                catch (Throwable e) {
-                    DialogUtils.showSeeLogErrorDialog(getWorkspace(),"Error during R2RML export.", log, e);
-                }
-            }
-        };
-        thread.start();
+        if (file.exists() && JOptionPane.showConfirmDialog(getWorkspace(),
+                "<html><br>The file " + file.getPath() + " exists.<br><br>"
+                        + "Do you want to <b>overwrite</b> it?<br></html>",
+                DIALOG_TITLE,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
+            return;
+
+        R2RMLExportWorker worker = new R2RMLExportWorker(file);
+        worker.execute();
 	}
 
-	// TODO: NOT A THREAD!
-    private class R2RMLExportThread implements OBDAProgressListener {
+    private class R2RMLExportWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Void> {
+	    private final File file;
 
-        public void run(File file) throws IOException {
+        protected R2RMLExportWorker(File file) {
+            super(getWorkspace(),
+                    "<html><h3>Exporting R2RML mapping:</h3></html>",
+                    200);
+            this.file = file;
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            start("initializing...");
             OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
             R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModelManager.getRdfFactory());
+            endLoop("writing to file...");
             writer.write(file, obdaModelManager.getActiveOBDAModel().generatePPMapping());
+            end();
+            return null;
         }
 
         @Override
-        public void actionCanceled() {  }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public boolean isErrorShown() {
-            return false;
+        public void done() {
+            try {
+                complete();
+                JOptionPane.showMessageDialog(getWorkspace(),
+                        "<html><h3>Export of R2RML mapping is complete.</h3><br></html>",
+                        DIALOG_TITLE,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        IconLoader.getOntopIcon());
+            }
+            catch (CancellationException | InterruptedException e) {
+                DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
+            }
+            catch (ExecutionException e) {
+                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (OBDADataSource) null);
+            }
         }
     }
 
@@ -105,5 +110,4 @@ public class R2RMLExportAction extends ProtegeAction {
 
     @Override
     public void dispose()  { /* NO-OP */ }
-
 }

@@ -41,11 +41,11 @@ import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-public class EmptyEntitiesAction extends ProtegeAction {
+public class EmptyEntitiesCheckAction extends ProtegeAction {
 
 	private static final long serialVersionUID = 3322509244957306932L;
 
-	private final Logger log = LoggerFactory.getLogger(EmptyEntitiesAction.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmptyEntitiesCheckAction.class);
 
 	private static final String DIALOG_TITLE = "Empty Entities";
 
@@ -145,7 +145,7 @@ public class EmptyEntitiesAction extends ProtegeAction {
 				}
 				catch (ExecutionException e) {
 					dialog.dispose();
-					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", log, e, obdaModelManager.getDatasource());
+					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModelManager.getDatasource());
 				}
 			}
 		};
