@@ -1045,6 +1045,7 @@ public class FunctionalDependencyTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
+    @Ignore("TODO: optimize the redundant self-lj (no variable on the right is used")
     @Test
     public void testLJRedundantSelfLeftJoin1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
