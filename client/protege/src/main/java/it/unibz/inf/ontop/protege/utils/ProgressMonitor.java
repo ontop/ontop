@@ -61,8 +61,8 @@ public class ProgressMonitor {
                         && cancelOption.equals(evt.getNewValue())) {
 
                     if (cancel()) {
+                        noteLabel.setText("cancelling...");
                         pane.setEnabled(false);
-                        setProgress(100, "cancelling...");
                     }
                     dialog.setVisible(true);
                 }
@@ -82,7 +82,7 @@ public class ProgressMonitor {
         }
     }
 
-    public synchronized boolean cancel() {
+    private synchronized boolean cancel() {
         if (isCancellable)
             isCancelled = true;
 
@@ -107,7 +107,7 @@ public class ProgressMonitor {
     }
 
     public void setProgress(int percentage, String note) {
-        if (dialog != null) {
+        if (dialog != null && !isCancelled) {
             if (!indeterminate) {
                 progressBar.setValue(percentage);
             }

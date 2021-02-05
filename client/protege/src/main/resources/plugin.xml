@@ -102,9 +102,9 @@
 	</extension>
 
    <extension id="menu.ontop.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Display the mapping statistics..."/>
+		<name value="Display mapping statistics..."/>
 		<toolTip value="Provide information about the number of assertions (triples) from the mappings"/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.ABoxStatisticsAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.MappingStatisticsAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>

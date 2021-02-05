@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -134,6 +135,22 @@ public class DialogUtils {
 							HTML_TAB + "JDBC driver: " + settings.getJdbcDriver() + "<br>" +
 							HTML_TAB + "Connection URL: " + settings.getJdbcUrl() + "<br>" +
 							HTML_TAB + "Username: " + settings.getJdbcUser() + "</html>",
+					title,
+					JOptionPane.ERROR_MESSAGE);
+		}
+		else {
+			DialogUtils.showSeeLogErrorDialog(parent, title, message, log, cause);
+		}
+	}
+
+	public static void showErrorDialog(Component parent, String title, String message, Logger log, ExecutionException e, OBDADataSource datasource) {
+		Throwable cause = e.getCause();
+		if (cause instanceof SQLException && datasource != null) {
+			JOptionPane.showMessageDialog(parent,
+					"<html><b>Error connecting to the database:</b> " + cause.getMessage() + ".<br><br>" +
+							HTML_TAB + "JDBC driver: " + datasource.getDriver() + "<br>" +
+							HTML_TAB + "Connection URL: " + datasource.getURL() + "<br>" +
+							HTML_TAB + "Username: " + datasource.getUsername() + "</html>",
 					title,
 					JOptionPane.ERROR_MESSAGE);
 		}
