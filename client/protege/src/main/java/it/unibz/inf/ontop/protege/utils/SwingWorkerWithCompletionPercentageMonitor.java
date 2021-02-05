@@ -14,7 +14,7 @@ public abstract class SwingWorkerWithCompletionPercentageMonitor<T, V> extends S
     protected void tick() throws CancelActionException {
         count++;
         notifyProgressMonitor();
-        terminateIfCancelled();
+        super.tick();
     }
 
     public int getCount() {

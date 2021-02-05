@@ -77,9 +77,11 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
         }
     }
 
-    abstract protected void tick() throws CancelActionException;
+    protected void tick() throws CancelActionException {
+        terminateIfCancelled();
+    }
 
-    protected void terminateIfCancelled() throws CancelActionException {
+    private void terminateIfCancelled() throws CancelActionException {
         if (progressMonitor.isCancelled()) {
             closeProgressMonitorAndWait();
             throw new CancelActionException();

@@ -22,7 +22,7 @@ public abstract class SwingWorkerWithTimeIntervalMonitor<T, V> extends SwingWork
             previousTime = currentTime;
             notifyProgressMonitor();
         }
-        terminateIfCancelled();
+        super.tick();
     }
 
     public int getCount() {

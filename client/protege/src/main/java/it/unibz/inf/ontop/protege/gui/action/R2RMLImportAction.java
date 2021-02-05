@@ -21,27 +21,26 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.protege.core.*;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
 
 public class R2RMLImportAction extends ProtegeAction {
 
@@ -66,94 +65,60 @@ public class R2RMLImportAction extends ProtegeAction {
 			return;
 
 		File file = fc.getSelectedFile();
-		Thread thread = new Thread("R2RML Import Thread") {
-			@Override
-			public void run() {
-				try {
-					OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-							"Importing R2RML mapping ...", getWorkspace());
-					R2RMLImportThread t = new R2RMLImportThread();
-					monitor.addProgressListener(t);
-					monitor.start();
-					t.run(file);
-					monitor.stop();
-					JOptionPane.showMessageDialog(getWorkspace(),
-							"R2RML Import completed.",
-							"Done",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
-				catch (Throwable e) {
-					DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error during R2RML import.", LOGGER, e);
-				}
-			}
-		};
-		thread.start();
+		R2RMLImportWorker worker = new R2RMLImportWorker(file);
+		worker.execute();
 	}
 
-	// TODO: NOT A THREAD
-	private class R2RMLImportThread implements OBDAProgressListener {
+	private class R2RMLImportWorker extends SwingWorkerWithMonitor<Map.Entry<Integer, Integer>, Void> {
 
-		public void run(File file) throws Exception {
+		private final File file;
 
+		R2RMLImportWorker(File file) {
+			super(getWorkspace(),
+					"<html><h3>Importing R2RML mapping:</h3></html>", true);
+			this.file = file;
+		}
+
+		@Override
+		protected Map.Entry<Integer, Integer> doInBackground() throws Exception {
+			start("initializing...");
 			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+			SQLPPMapping parsedModel = obdaModelManager.getConfigurationForR2RML(file)
+					.loadProvidedPPMapping();
 
-			OBDADataSource dataSource = obdaModelManager.getDatasource();
-			OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-					.properties(dataSource.asProperties())
-					.r2rmlMappingFile(file)
-					.build();
-
-			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
-
-			OWLEditorKit editorKit = (OWLEditorKit) getEditorKit();
-			OWLModelManager modelManager = editorKit.getOWLWorkspace().getOWLModelManager();
-			OWLOntologyManager manager = modelManager.getOWLOntologyManager();
-
-			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
 			ImmutableList<SQLPPTriplesMap> tripleMaps = parsedModel.getTripleMaps();
+			endLoop("inserting into the current mapping...");
+			Set<OWLDeclarationAxiom> axioms = obdaModelManager.insertTriplesMaps(tripleMaps, false);
+			end();
+			return Maps.immutableEntry(tripleMaps.size(), axioms.size());
+		}
+
+		@Override
+		public void done() {
 			try {
-				obdaModel.add(tripleMaps);
+				Map.Entry<Integer, Integer> result = complete();
+				JOptionPane.showMessageDialog(getWorkspace(),
+						"<html><h3>Import of R2RML mapping is complete.</h3><br>" +
+								HTML_TAB + "<b>" + result.getKey() + "</b> triples maps inserted into the mapping.<br>" +
+								HTML_TAB + "<b>" + result.getValue() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
+						DIALOG_TITLE,
+						JOptionPane.INFORMATION_MESSAGE,
+						IconLoader.getOntopIcon());
 			}
-			catch (DuplicateMappingException dm) {
-				JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
-				throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
+			catch (CancellationException | InterruptedException e) {
+				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
+			catch (ExecutionException e) {
 
-			ImmutableList<AddAxiom> addAxioms = MappingOntologyUtils.extractDeclarationAxioms(
-					manager,
-					tripleMaps.stream()
-							.flatMap(tm -> tm.getTargetAtoms().stream()),
-					obdaModelManager.getTypeFactory(),
-					false)
-					.stream()
-					.map(ax -> new AddAxiom(modelManager.getActiveOntology(), ax))
-					.collect(ImmutableCollectors.toList());
-
-			modelManager.applyChanges(addAxioms);
+				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e,
+						OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getDatasource());
+			}
 		}
-
-		@Override
-		public void actionCanceled() {  }
-
-		@Override
-		public boolean isCancelled() {
-			return false;
-		}
-
-		@Override
-		public boolean isErrorShown() {
-			return false;
-		}
-
 	}
 
 	@Override
-	public void initialise() {
-		/* NO-OP */
-	}
+	public void initialise() {/* NO-OP */ }
 
 	@Override
-	public void dispose()  {
-		/* NO-OP */
-	}
+	public void dispose()  {/* NO-OP */ }
 }

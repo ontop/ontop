@@ -34,7 +34,6 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class OBDAModelManager implements Disposable {
 
@@ -125,10 +124,6 @@ public class OBDAModelManager implements Disposable {
 
 	public OntopConfigurationManager getConfigurationManager() {
 		return configurationManager;
-	}
-
-	public TypeFactory getTypeFactory() {
-		return typeFactory;
 	}
 
 	public RDF getRdfFactory() {
@@ -468,28 +463,28 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	public List<AddAxiom> insertOntologyDeclarations(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) {
+	public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateMappingException {
+		getActiveOBDAModel().add(triplesMaps);
+
 		OWLModelManager modelManager = owlEditorKit.getModelManager();
-		OWLOntologyManager manager = modelManager.getActiveOntology().getOWLOntologyManager();
-		Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
-				manager,
-				triplesMaps.stream().flatMap(ax -> ax.getTargetAtoms().stream()),
+		return MappingOntologyUtils.extractAndInsertDeclarationAxioms(
+				modelManager.getActiveOntology(),
+				triplesMaps,
 				typeFactory,
 				bootstraped);
-
-		List<AddAxiom> addAxioms = declarationAxioms.stream()
-				.map(ax -> new AddAxiom(modelManager.getActiveOntology(), ax))
-				.collect(Collectors.toList());
-
-		modelManager.applyChanges(addAxioms);
-
-		return addAxioms;
 	}
 
 	public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
 		OWLModelManager modelManager = owlEditorKit.getModelManager();
 		return getConfigurationManager()
 				.buildOntopSQLOWLAPIConfiguration(modelManager.getActiveOntology());
+	}
+
+	public OntopMappingSQLAllConfiguration getConfigurationForR2RML(File file) {
+		return OntopMappingSQLAllConfiguration.defaultBuilder()
+				.properties(source.asProperties())
+				.r2rmlMappingFile(file)
+				.build();
 	}
 
 	public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {

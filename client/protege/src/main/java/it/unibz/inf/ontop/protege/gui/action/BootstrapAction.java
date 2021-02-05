@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
@@ -39,7 +40,7 @@ import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonit
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.protege.editor.core.ui.action.ProtegeAction;
-import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -119,7 +120,7 @@ public class BootstrapAction extends ProtegeAction {
 		worker.execute();
 	}
 
-	private class BootstrapWorker extends SwingWorkerWithCompletionPercentageMonitor<ImmutableList<SQLPPTriplesMap>, Void> {
+	private class BootstrapWorker extends SwingWorkerWithCompletionPercentageMonitor<Map.Entry<Integer, Integer>, Void> {
 
 		private final String baseIri;
 		private final JDBCMetadataProviderFactory metadataProviderFactory;
@@ -147,7 +148,7 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		@Override
-		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
+		protected Map.Entry<Integer, Integer> doInBackground() throws Exception {
 
 			start("initializing...");
 
@@ -180,34 +181,21 @@ public class BootstrapAction extends ProtegeAction {
 			}
 
 			endLoop("");
+			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+			ImmutableList<SQLPPTriplesMap> triplesMaps = builder.build();
+			Set<OWLDeclarationAxiom> axioms = obdaModelManager.insertTriplesMaps(triplesMaps, true);
 			end();
-			return builder.build();
+			return Maps.immutableEntry(triplesMaps.size(), axioms.size());
 		}
 
 		@Override
 		public void done() {
-			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
 			try {
-				ImmutableList<SQLPPTriplesMap> triplesMaps = complete();
-				try {
-					obdaModel.add(triplesMaps);
-				}
-				catch (DuplicateMappingException e) {
-					JOptionPane.showMessageDialog(getWorkspace(),
-							"<html><b>Duplicate mapping IDs:</b>" +
-									HTML_TAB + e.getMessage() + "</html>",
-							DIALOG_TITLE,
-							JOptionPane.ERROR_MESSAGE);
-				}
-
-				List<AddAxiom> addAxioms = obdaModelManager
-						.insertOntologyDeclarations(triplesMaps, true);
-
+				Map.Entry<Integer, Integer> result = complete();
 				JOptionPane.showMessageDialog(getWorkspace(),
 						"<html><h3>Bootstrapping the ontology and mapping is complete.</h3><br>" +
-								HTML_TAB + "<b>" + triplesMaps.size() + "</b> triple maps inserted into the mapping.<br>" +
-								HTML_TAB + "<b>" + addAxioms.size() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
+								HTML_TAB + "<b>" + result.getKey() + "</b> triples maps inserted into the mapping.<br>" +
+								HTML_TAB + "<b>" + result.getValue() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
 						DIALOG_TITLE,
 						JOptionPane.INFORMATION_MESSAGE,
 						IconLoader.getOntopIcon());
@@ -216,7 +204,7 @@ public class BootstrapAction extends ProtegeAction {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
 			catch (ExecutionException e) {
-				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "Bootstrapper error.", LOGGER, e, settings);
+				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, settings);
 			}
 		}
 	}

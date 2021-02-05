@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.SwingWorkerWithTimeIntervalMonitor;
+import it.unibz.inf.ontop.protege.utils.SwingWorkerWithMonitor;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.slf4j.Logger;
@@ -65,13 +65,12 @@ public class R2RMLExportAction extends ProtegeAction {
         worker.execute();
 	}
 
-    private class R2RMLExportWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Void> {
+    private class R2RMLExportWorker extends SwingWorkerWithMonitor<Void, Void> {
 	    private final File file;
 
         protected R2RMLExportWorker(File file) {
             super(getWorkspace(),
-                    "<html><h3>Exporting R2RML mapping:</h3></html>",
-                    200);
+                    "<html><h3>Exporting R2RML mapping:</h3></html>", true);
             this.file = file;
         }
 

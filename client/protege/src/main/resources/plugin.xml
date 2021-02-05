@@ -88,14 +88,14 @@
 
 	<extension id="menu.ontop" point="org.protege.editor.core.application.EditorKitMenuAction">
        <name value="Ontop"/>
-       <toolTip value="Actions related to the Ontop plugin"/>
+       <toolTip value="Actions of the Ontop plugin"/>
        <path value="/SlotZ-A"/>
        <editorKitId value="any"/>
    </extension>
 
   <extension id="menu.ontop.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Materialize triples..."/>
-		<toolTip value="Dump OWL Assertions (ABox/Triples) derived by the mappings and ontology"/>
+		<toolTip value="Dump RDF triples derived from the mapping and ontology"/>
 		<class value="it.unibz.inf.ontop.protege.gui.action.RDFGraphMaterializationAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotA-A"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -103,7 +103,7 @@
 
    <extension id="menu.ontop.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Display mapping statistics..."/>
-		<toolTip value="Provide information about the number of assertions (triples) from the mappings"/>
+		<toolTip value="Provide information about the number of RDF triples produces by the mapping"/>
 		<class value="it.unibz.inf.ontop.protege.gui.action.MappingStatisticsAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-A"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -111,7 +111,7 @@
 
 	 <extension id="menu.ontop.inconsistecychecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check for inconsistencies..."/>
-		<toolTip value="Run consistency check regarding disjoint and functional properties"/>
+		<toolTip value="Run consistency check for disjoint and functional properties"/>
 		<class value="it.unibz.inf.ontop.protege.gui.action.InconsistencyCheckAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-B"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -119,31 +119,31 @@
 
 	<extension id="menu.ontop.emptieschecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check empty entities..."/>
-		<toolTip value="Provide information about empty concepts and roles "/>
+		<toolTip value="Provide the list of empty classes and properties"/>
 		<class value="it.unibz.inf.ontop.protege.gui.action.EmptyEntitiesCheckAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-C"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	 <extension id="menu.ontop.importr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Import R2RML mappings..."/>
-		<toolTip value="Import mappings from an R2RML mapping file"/>
+		<name value="Import R2RML mapping..."/>
+		<toolTip value="Import mapping from an R2RML file"/>
 		<class value="it.unibz.inf.ontop.protege.gui.action.R2RMLImportAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotC-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	 <extension id="menu.ontop.exportr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Export R2RML mappings..."/>
-		<toolTip value="Export mappings as an R2RML mapping file"/>
+		<name value="Export R2RML mapping..."/>
+		<toolTip value="Export mapping as an R2RML file"/>
 		<class value="it.unibz.inf.ontop.protege.gui.action.R2RMLExportAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotC-B"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	<extension id="menu.ontop.bootstrap" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Generate ontology and mappings..."/>
-		<toolTip value="Automatically generates classes/propertis and mappings for a DB..."/>
+		<name value="Bootstrap ontology and mapping..."/>
+		<toolTip value="Automatically generates classes/properties and mapping from a DB..."/>
 		<class value="it.unibz.inf.ontop.protege.gui.action.BootstrapAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotD-A"/>
 		<editorKitId value="OWLEditorKit"/>
