@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.docker.datatypes;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -62,8 +63,8 @@ public abstract class QuestDatatypeParent extends TestCase {
 	protected final String obdaFileURL;
 	protected final String parameterFileURL;
 	protected Repository dataRep;
-	
-	public QuestDatatypeParent(String testURI, String name, String queryFileURL, String resultFileURL, 
+
+	public QuestDatatypeParent(String testURI, String name, String queryFileURL, String resultFileURL,
 			String owlFileURL, String obdaFileURL) {
 		this(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
 	}
@@ -78,17 +79,17 @@ public abstract class QuestDatatypeParent extends TestCase {
 		this.obdaFileURL = obdaFileURL;
 		this.parameterFileURL = parameterFileURL;
 	}
-	
+
 	public interface Factory {
 		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL,
                                                     String resultFileURL, String owlFileURL, String obdaFileURL);
-		
+
 		QuestDatatypeParent createQuestDatatypeTest(String testURI, String name, String queryFileURL,
                                                     String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL);
 
 		String getMainManifestFile();
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		if (!owlFileURL.isEmpty() && !obdaFileURL.isEmpty()) {
@@ -105,7 +106,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 			}
 		}
 	}
-	
+
 	protected Repository createRepository() throws Exception {
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
@@ -119,7 +120,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		repo.initialize();
 		return repo;
 	}
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 		if (dataRep != null) {
@@ -127,7 +128,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 			dataRep = null;
 		}
 	}
-	
+
 	@Override
 	protected void runTest() throws Exception {
 		ResultSetInfo expectedResult = readResultSetInfo();
@@ -161,7 +162,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 			message.append("\n");
 			message.append("Query result: ");
 			message.append(queryResultSize);
-			message.append("\n");		
+			message.append("\n");
 			message.append("=====================================\n");
 
 			logger.error(message.toString());
@@ -182,14 +183,14 @@ public abstract class QuestDatatypeParent extends TestCase {
 			message.append("\n");
 			message.append("Thrown exception: ");
 			message.append(thrownException);
-			message.append("\n");		
+			message.append("\n");
 			message.append("=====================================\n");
 
 			logger.error(message.toString());
 			fail(message.toString());
 		}
 	}
-	
+
 	private int countTuple(TupleQueryResult tuples) throws QueryEvaluationException {
 		if (tuples == null) {
 			return -1;
@@ -205,50 +206,44 @@ public abstract class QuestDatatypeParent extends TestCase {
 //			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
 			logger.debug(b.toString());
 			counter++;
-			
+
 		}
 		return counter;
 	}
-	
+
 	private Object attributeValue(ResultSetInfo rsInfo, String attribute) throws QueryEvaluationException {
 		return rsInfo.get(attribute);
 	}
-	
+
 	private String readQueryString() throws IOException {
-		InputStream stream = new URL(queryFileURL).openStream();
-		try {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-		} finally {
-			stream.close();
+		try (InputStream stream = new URL(queryFileURL).openStream()) {
+			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		}
 	}
-	
+
 	private ResultSetInfo readResultSetInfo() throws Exception {
 		Set<Statement> resultGraph = readGraphResultSetInfo();
 		return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
 	}
-	
+
 	private Set<Statement> readGraphResultSetInfo() throws Exception {
 		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
 		if (rdfFormat != null) {
 			RDFParser parser = Rio.createParser(rdfFormat);
 
 			ParserConfig config = parser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE 
+			// To emulate DatatypeHandling.IGNORE
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
 			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
 			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 //			parser.setValueFactory(dataRep.getValueFactory());
-			Set<Statement> result = new LinkedHashSet<Statement>();
+			Set<Statement> result = new LinkedHashSet<>();
 			parser.setRDFHandler(new StatementCollector(result));
 
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
+			try (InputStream in = new URL(resultFileURL).openStream()) {
 				parser.parse(in, resultFileURL);
-			} finally {
-				in.close();
 			}
 			return result;
 		} else {
@@ -293,19 +288,19 @@ public abstract class QuestDatatypeParent extends TestCase {
 		query.append("    obdat = <http://obda.org/quest/tests/test-scenario#>, \n");
 		query.append("    qt = <http://obda.org/quest/tests/test-query#> ");
 		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
-		
+
 		logger.debug("Evaluating query..");
 		TupleQueryResult testCases = testCaseQuery.evaluate();
 		while (testCases.hasNext()) {
 			BindingSet bindingSet = testCases.next();
 
-			URI testURI = (URI) bindingSet.getValue("testURI");
+			IRI testURI = (IRI) bindingSet.getValue("testURI");
 			String testName = bindingSet.getValue("testName").toString();
 			String resultFile = bindingSet.getValue("resultFile").toString();
 			String queryFile = bindingSet.getValue("queryFile").toString();
 			String owlFile = bindingSet.getValue("owlFile").toString();
 			String obdaFile = bindingSet.getValue("obdaFile").toString();
-			String parameterFile = (bindingSet.getValue("parameterFile") == null 
+			String parameterFile = (bindingSet.getValue("parameterFile") == null
 					? "" : bindingSet.getValue("parameterFile").toString());
 
 			logger.debug("Found test case: {}", testName);
@@ -331,15 +326,11 @@ public abstract class QuestDatatypeParent extends TestCase {
 		// Try to extract suite name from manifest file
 		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
 				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
-		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));
-		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
-		try {
+		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
+		try (TupleQueryResult manifestNames = manifestNameQuery.evaluate()) {
 			if (manifestNames.hasNext()) {
 				return manifestNames.next().getValue("ManifestName").stringValue();
 			}
-		}
-		finally {
-			manifestNames.close();
 		}
 		// Derive name from manifest URL
 		int lastSlashIdx = manifestFileURL.lastIndexOf('/');

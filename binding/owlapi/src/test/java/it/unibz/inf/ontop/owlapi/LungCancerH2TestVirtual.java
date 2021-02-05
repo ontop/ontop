@@ -20,17 +20,10 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
@@ -40,6 +33,8 @@ import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -56,64 +51,23 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlfile = "src/test/resources/test/lung-cancer3.owl";
+	private static final String obdafile = "src/test/resources/test/lung-cancer3.obda";
 
-	final String owlfile = "src/test/resources/test/lung-cancer3.owl";
-	final String obdafile = "src/test/resources/test/lung-cancer3.obda";
-
-	String url = "jdbc:h2:mem:questjunitdb";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	@Override
 	public void setUp() throws Exception {
-		
-		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
-		// String driver = "org.h2.Driver";
-
 		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/lung-cancer3-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line + "\n");
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/lung-cancer3-create-h2.sql");
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-
-			dropTables();
-			conn.close();
-		
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/lung-cancer3-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/lung-cancer3-drop-h2.sql");
+		conn.close();
 	}
 
 	private void runTests() throws Exception {
@@ -131,7 +85,6 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
 
 		String query1 = "PREFIX : <http://example.org/> SELECT * WHERE { ?x :hasNeoplasm <http://example.org/db1/neoplasm/1> }";
 		String query2 = "PREFIX : <http://example.org/> SELECT * WHERE { <http://example.org/db1/1> :hasNeoplasm ?y }";
@@ -149,7 +102,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		
 		String query = "PREFIX : <http://example.org/> SELECT * WHERE { ?y :hasStage <http://example.org/stages/limi> }";
 		
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			executeQueryAssertResults(query, st, 1);
 			
 //			executeQueryAssertResults(query3, st, 1);
@@ -166,15 +119,8 @@ public class LungCancerH2TestVirtual extends TestCase {
 			 // NOTE CHECK THE CONTENT OF THIS QUERY, it seems to return the correct number of results but incorrect content, compare to the SELECT version which is correct
 			
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}
@@ -185,11 +131,10 @@ public class LungCancerH2TestVirtual extends TestCase {
 		int count = 0;
 		while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
-
             count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + bindingSet.getOWLObject(i));
+			for (String name: rs.getSignature()) {
+				System.out.print(name);
+				System.out.print("=" + bindingSet.getOWLObject(name));
 				System.out.print(" ");
 			}
 			System.out.println();

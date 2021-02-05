@@ -54,7 +54,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     /**
      * "Slave" configuration (in case of multiple inheritance)
-     *  --> uses the injector of another configuration
+     *  {@code -->} uses the injector of another configuration
      */
     protected OntopModelConfigurationImpl(@Nonnull OntopModelSettings settings, @Nonnull OntopModelConfigurationOptions options,
                                           @Nonnull Supplier<Injector> injectorSupplier) {
@@ -195,34 +195,12 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
         @Override
         public final B propertyFile(String propertyFilePath) {
-            try {
-                URI fileURI = new URI(propertyFilePath);
-                String scheme = fileURI.getScheme();
-                if (scheme == null) {
-                    return propertyFile(new File(fileURI.getPath()));
-                }
-                else if (scheme.equals("file")) {
-                    return propertyFile(new File(fileURI));
-                }
-                else {
-                    throw new InvalidOntopConfigurationException("Currently only local property files are supported.");
-                }
-            } catch (URISyntaxException e) {
-                throw new InvalidOntopConfigurationException("Invalid property file path: " + e.getMessage());
-            }
+            return propertyFile(extractPropertyFile(propertyFilePath));
         }
 
         @Override
         public final B propertyFile(File propertyFile) {
-            try {
-                Properties p = new Properties();
-                p.load(new FileReader(propertyFile));
-                return properties(p);
-
-            } catch (IOException e) {
-//                System.out.println(e);
-                throw new InvalidOntopConfigurationException("Cannot reach the property file: " + propertyFile);
-            }
+            return properties(extractProperties(propertyFile));
         }
 
         @Override
@@ -265,6 +243,35 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
             return new OntopModelConfigurationImpl(
                     new OntopModelSettingsImpl(p),
                     generateModelOptions());
+        }
+    }
+
+    public static File extractPropertyFile(String propertyFilePath) {
+        try {
+            URI fileURI = new URI(propertyFilePath);
+            String scheme = fileURI.getScheme();
+            if (scheme == null) {
+                return new File(fileURI.getPath());
+            }
+            else if (scheme.equals("file")) {
+                return new File(fileURI);
+            }
+            else {
+                throw new InvalidOntopConfigurationException("Currently only local property files are supported.");
+            }
+        } catch (URISyntaxException e) {
+            throw new InvalidOntopConfigurationException("Invalid property file path: " + e.getMessage());
+        }
+    }
+
+    public static Properties extractProperties(File propertyFile) throws InvalidOntopConfigurationException {
+        try (FileReader reader  = new FileReader(propertyFile)) {
+            Properties p = new Properties();
+            p.load(reader);
+            return p;
+        }
+        catch (IOException e) {
+            throw new InvalidOntopConfigurationException("Cannot reach the property file: " + propertyFile);
         }
     }
 }

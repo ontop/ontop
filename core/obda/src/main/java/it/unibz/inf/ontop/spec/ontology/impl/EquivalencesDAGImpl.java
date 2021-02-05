@@ -22,8 +22,10 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
@@ -31,6 +33,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 
 /**
@@ -49,11 +52,12 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
 	private final ImmutableMap<T, Equivalences<T>> vertexIndex;
 	
-	// maps all Ts (even from the non-reduced DAG) to the vertices of the possibly reduced  DAG
+	// maps all Ts (even from the non-reduced DAG) to the vertices of the possibly reduced DAG
 	private final ImmutableMap<T, Equivalences<T>> fullVertexIndex;   
 
-	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
-	private final Map<T, Set<T>> cacheSubRep;
+	// caches
+	private final Map<Equivalences<T>, ImmutableSet<T>> subRep = new HashMap<>();
+	private final Map<Equivalences<T>, ImmutableSet<Equivalences<T>>> sub = new HashMap<>();
 
 	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests only
 	
@@ -62,12 +66,28 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		this.dag = dag;
 		this.vertexIndex = vertexIndex;
 		this.fullVertexIndex = fullVertexIndex;
-
-		this.cacheSub = new HashMap<>();
-		this.cacheSubRep = new HashMap<>();
 	}
 
-	
+	private static <T> ImmutableSet<T> immutableSetOf(BreadthFirstIterator<T, DefaultEdge>  iterator) {
+		ImmutableSet.Builder<T> builder = ImmutableSet.builder();
+
+		while (iterator.hasNext()) {
+			T child = iterator.next();
+			builder.add(child);
+		}
+		return builder.build();
+	}
+
+	private static <T> ImmutableSet<T> immutableSetOfRepresentatives(BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator) {
+		ImmutableSet.Builder<T> builder = ImmutableSet.builder();
+
+		while (iterator.hasNext()) {
+			Equivalences<T> child = iterator.next();
+			builder.add(child.getRepresentative());
+		}
+		return builder.build();
+	}
+
 	/** 
 	 * 
 	 */
@@ -89,66 +109,32 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 * 
 	 */
 	@Override
-	public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
-		Set<Equivalences<T>> result = new LinkedHashSet<>();
-
-		for (DefaultEdge edge : dag.incomingEdgesOf(v)) {	
-			Equivalences<T> source = dag.getEdgeSource(edge);
-			result.add(source);
-		}
-		return Collections.unmodifiableSet(result);
+	public ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v) {
+		return dag.incomingEdgesOf(v).stream()
+				.map(e -> dag.getEdgeSource(e))
+				.collect(ImmutableCollectors.toSet());
 	}
 
 	/** 
 	 * 
 	 */
 	@Override
-	public Set<Equivalences<T>> getSub(Equivalences<T> v) {
-
-		Set<Equivalences<T>> result = cacheSub.get(v);
-		if (result == null) {
-			result = new LinkedHashSet<>();
-
-			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
-						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
-								new EdgeReversedGraph<>(dag), v);
-
-			while (iterator.hasNext()) {
-				Equivalences<T> child = iterator.next();
-				result.add(child);
-			}
-			result = Collections.unmodifiableSet(result);
-			cacheSub.put(v, result);
-		}
-		return result; 
+	public ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v) {
+		return sub.computeIfAbsent(v,
+				n -> immutableSetOf(new BreadthFirstIterator<>(new EdgeReversedGraph<>(dag), n)));
 	}
 
 	/** 
 	 * 
 	 */
 	@Override
-	public Set<T> getSubRepresentatives(T v) {
+	public ImmutableSet<T> getSubRepresentatives(T v) {
 		Equivalences<T> eq = vertexIndex.get(v);
-		
 		if (eq == null)
-			return Collections.singleton(v);
-		
-		Set<T> result = cacheSubRep.get(eq.getRepresentative());
-		if (result == null) {
-			result = new LinkedHashSet<T>();
+			return ImmutableSet.of(v);
 
-			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
-						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
-								new EdgeReversedGraph<>(dag), eq);
-
-			while (iterator.hasNext()) {
-				Equivalences<T> child = iterator.next();
-				result.add(child.getRepresentative());
-			}
-			result = Collections.unmodifiableSet(result);
-			cacheSubRep.put(eq.getRepresentative(), result);
-		}
-		return result; 
+		return subRep.computeIfAbsent(eq,
+				n -> immutableSetOfRepresentatives(new BreadthFirstIterator<>(new EdgeReversedGraph<>(dag), n)));
 	}
 	
 
@@ -157,32 +143,23 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 * 
 	 */
 	@Override
-	public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
-		Set<Equivalences<T>> result = new LinkedHashSet<>();
-
-		for (DefaultEdge edge : dag.outgoingEdgesOf(v)) {	
-			Equivalences<T> source = dag.getEdgeTarget(edge);
-			result.add(source);
-		}
-		return Collections.unmodifiableSet(result);
+	public ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
+		return dag.outgoingEdgesOf(v).stream()
+				.map(e -> dag.getEdgeTarget(e))
+				.collect(ImmutableCollectors.toSet());
 	}
 	
 	/** 
 	 * 
 	 */
 	@Override
-	public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
+	public ImmutableSet<Equivalences<T>> getSuper(Equivalences<T> v) {
+		return immutableSetOf(new BreadthFirstIterator<>(dag, v));
+	}
 
-		Set<Equivalences<T>> result = new LinkedHashSet<>();
-
-		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
-				new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(dag, v);
-
-		while (iterator.hasNext()) {
-			Equivalences<T> parent = iterator.next();
-			result.add(parent);
-		}
-		return Collections.unmodifiableSet(result);
+	@Override
+	public Stream<Equivalences<T>> stream() {
+		return dag.vertexSet().stream();
 	}
 
 	@Override

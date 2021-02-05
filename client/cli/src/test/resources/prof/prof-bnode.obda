@@ -1,0 +1,45 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-professor
+target		_:professor_{prof_id} a :Professor .
+source		SELECT prof_id, last_name FROM professors;
+
+mappingId	MAPID-fname
+target		_:professor_{prof_id} :firstName {first_name} .
+source		SELECT prof_id, first_name FROM professors;
+
+mappingId	MAPID-lname
+target		_:professor_{prof_id} :lastName {last_name} .
+source		SELECT prof_id, last_name FROM professors;
+
+mappingId	MAPID-nickname
+target		_:professor_{prof_id} :nickname {nickname} .
+source		SELECT prof_id, nickname FROM professors;
+
+mappingId	MAPID-teaches
+target		_:professor_{prof_id} :teaches _:course_{course_id} .
+source		SELECT prof_id, course_id FROM teaching;
+
+mappingId	MAPID-teachesAt
+target		_:professor_{prof_id} :teachesAt :university/Bolzano .
+source		SELECT prof_id FROM teaching;
+
+mappingId	MAPID-teacherID
+target		_:professor_{prof_id} :teacherID {prof_id} .
+source		SELECT prof_id FROM teaching;
+
+mappingId	MAPID-course
+target		_:course_{course_id} a :Course ; :duration {duration} ; :nbStudents {nb_students} .
+source		SELECT * FROM course;
+
+]]
+

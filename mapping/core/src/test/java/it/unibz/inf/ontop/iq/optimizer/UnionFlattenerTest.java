@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -10,16 +11,19 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 public class UnionFlattenerTest {
 
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private final static Variable A = TERM_FACTORY.getVariable("A");
     private final static Variable W = TERM_FACTORY.getVariable("W");
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
@@ -31,23 +35,21 @@ public class UnionFlattenerTest {
             (ANS2_PREDICATE, W, Z);
 
     private final static ExtensionalDataNode DATA_NODE1 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE1_AR3, X, Y, Z)
-    );
+            TABLE1_AR3, ImmutableMap.of(0, X, 1, Y, 2, Z));
     private final static ExtensionalDataNode DATA_NODE2 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE2_AR3, X, Y, Z)
-    );
+            TABLE2_AR3, ImmutableMap.of(0, X, 1, Y, 2, Z));
     private final static ExtensionalDataNode DATA_NODE3 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, Y, Z)
-    );
+            TABLE3_AR3, ImmutableMap.of(0, X, 1, Y, 2, Z));
     private final static ExtensionalDataNode DATA_NODE4 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE1_AR2, Y, Z)
-    );
+            TABLE1_AR2, ImmutableMap.of(0, Y, 1, Z));
     private final static ExtensionalDataNode DATA_NODE5 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE2_AR2, Y, Z)
-    );
+            TABLE2_AR2, ImmutableMap.of(0, Y, 1, Z));
 
-    private static Constant uriTemplate1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static Constant uriTemplate2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}{}");
+    private final static ImmutableList<TemplateComponent> uriTemplate2 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().addColumn().build();
+
+    private final static DBConstant CONSTANT_STRING = TERM_FACTORY.getDBConstant("john",
+            TYPE_FACTORY.getDBTypeFactory().getDBStringType());
+
 
     @Test
     public void testMergeUnions() {
@@ -80,13 +82,13 @@ public class UnionFlattenerTest {
                         )));
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue(optimizedIQ.equals(expectedIQ));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
     public void testLiftUnion() {
 
-        ImmutableSubstitution sub = SUBSTITUTION_FACTORY.getSubstitution(W, TERM_FACTORY.getImmutableUriTemplate(X, Y));
+        ImmutableSubstitution sub = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(X, Y));
         ConstructionNode cn = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
@@ -125,16 +127,14 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union2);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
     public void testLiftUnionAndMergeCn() {
 
-        ImmutableFunctionalTerm firstIRIFunctionalTerm = TERM_FACTORY.getImmutableUriTemplate(X, Y);
-
-        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(W, firstIRIFunctionalTerm);
-        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(X, uriTemplate1);
+        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(X, Y));
+        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(X, CONSTANT_STRING);
         ConstructionNode cn1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub1);
         ConstructionNode cn2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z), sub2);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
@@ -164,8 +164,7 @@ public class UnionFlattenerTest {
 
 
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, Z));
-        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W,
-                TERM_FACTORY.getImmutableFunctionalTerm(firstIRIFunctionalTerm.getFunctionSymbol(), uriTemplate1, Y));
+        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(CONSTANT_STRING, Y));
         ConstructionNode cn3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub3);
 
         IQTree c4 = IQ_FACTORY.createUnaryIQTree(
@@ -184,24 +183,25 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union2);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
     public void testLiftUnionAndMergeUnion() {
 
-        ImmutableFunctionalTerm firstIRIFunctionalTerm = TERM_FACTORY.getImmutableUriTemplate(X, Y);
-
-        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(X, uriTemplate1);
-        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(W, firstIRIFunctionalTerm);
+        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(X, CONSTANT_STRING);
+        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(X, Y));
         ConstructionNode cn1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z), sub1);
         ConstructionNode cn2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub2);
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(Y, Z));
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE4_AR3, ImmutableMap.of(1, Y, 2, Z));
+
         IQTree union1 = IQ_FACTORY.createNaryIQTree(
                 unionNode1,
-                ImmutableList.of(DATA_NODE1, DATA_NODE4)
+                ImmutableList.of(newDataNode1, DATA_NODE4)
         );
         IQTree c1 = IQ_FACTORY.createUnaryIQTree(
                 cn1,
@@ -229,8 +229,7 @@ public class UnionFlattenerTest {
 
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, Z));
-        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W,
-                TERM_FACTORY.getImmutableFunctionalTerm(firstIRIFunctionalTerm.getFunctionSymbol(), uriTemplate1, Y));
+        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(CONSTANT_STRING, Y));
         ConstructionNode cn3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub3);
 
         IQTree union3 = IQ_FACTORY.createNaryIQTree(
@@ -242,7 +241,7 @@ public class UnionFlattenerTest {
                         ),
                         IQ_FACTORY.createUnaryIQTree(
                                 cn3,
-                                DATA_NODE1
+                                newDataNode1
                         ),
                         IQ_FACTORY.createUnaryIQTree(
                                 cn3,
@@ -252,6 +251,10 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union3);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
+    }
+
+    private static ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
+        return TERM_FACTORY.getIRIFunctionalTerm(uriTemplate2, ImmutableList.of(argument1, argument2));
     }
 }

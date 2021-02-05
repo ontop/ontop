@@ -5,6 +5,6 @@
 [MappingDeclaration] @collection [[
 mappingId	test
 target		:period{CVE_PER} a :Period ; :yStart {AINICIO} ; :yEnd {ATERMINO} . 
-source		SELECT  AINICIO || '-' || ATERMINO AS CVE_PER, AINICIO, ATERMINO FROM RHPROFSNI
+source		SELECT  CONCAT(AINICIO, '-', ATERMINO) AS CVE_PER, AINICIO, ATERMINO FROM RHPROFSNI
 ]]
 

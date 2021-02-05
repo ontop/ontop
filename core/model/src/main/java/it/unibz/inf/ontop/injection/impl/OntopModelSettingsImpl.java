@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -71,20 +71,18 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
     }
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
-        Properties properties = new Properties();
-        InputStream in = localClass.getResourceAsStream(fileName);
-        if (in == null)
-            throw new RuntimeException("Configuration " + fileName + " not found.");
-
-        try {
-
+        try (InputStream in = localClass.getResourceAsStream(fileName)) {
+            if (in == null)
+                throw new RuntimeException("Configuration " + fileName + " not found.");
+            Properties properties = new Properties();
             properties.load(in);
-        } catch (IOException e1) {
+            return properties;
+        }
+        catch (IOException e1) {
             LOG.error("Error reading default OBDA properties.");
             LOG.debug(e1.getMessage(), e1);
             throw new RuntimeException("Impossible to extract configuration from " + fileName);
         }
-        return properties;
     }
 
     /**
@@ -139,11 +137,25 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
      */
     Optional<Integer> getInteger(String key) {
         String value = (String) get(key);
-        return Optional.ofNullable(Integer.parseInt(value));
+        return Optional.ofNullable((value == null) ? null : Integer.parseInt(value));
+    }
+
+    /**
+     * Returns the long value of the given key.
+     */
+    Optional<Long> getLong(String key) {
+        String value = (String) get(key);
+        return Optional.ofNullable((value == null) ? null : Long.parseLong(value));
     }
 
     int getRequiredInteger(String key) {
         return getInteger(key)
+                .orElseThrow(() -> new InvalidOntopConfigurationException(key + " is required but missing " +
+                        "(must have a default value)"));
+    }
+
+    long getRequiredLong(String key) {
+        return getLong(key)
                 .orElseThrow(() -> new InvalidOntopConfigurationException(key + " is required but missing " +
                         "(must have a default value)"));
     }
@@ -171,6 +183,10 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
         Properties p = new Properties();
         p.putAll(properties);
         return p;
+    }
+
+    protected Enumeration<Object> getPropertyKeys() {
+        return properties.keys();
     }
 
 

@@ -1,95 +1,102 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.UUID;
 
 public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
-    protected final ImmutableList<String> signature;
+    private final OntopBinding[] bindings;
 
-    // ImmutableMap is order-preserving (similar to a LinkedHashMap)
-    protected Optional<ImmutableMap<String, OntopBinding>> variableName2BindingMap;
+    // LAZY
+    @Nullable
+    private String uuid;
 
-    protected AbstractOntopBindingSet(ImmutableList<String> signature) {
-        this.signature = signature;
-        this.variableName2BindingMap = Optional.empty();
+    AbstractOntopBindingSet(OntopBinding[] bindings) {
+        this.bindings = bindings;
     }
 
     @Override
     @Nonnull
     public Iterator<OntopBinding> iterator() {
-        return getVariableName2BindingMap().values().iterator();
+        return Arrays.stream(getBindings()).iterator();
     }
 
     @Override
-    public Stream<OntopBinding> getBindings() {
-        return getVariableName2BindingMap().values().stream();
+    public OntopBinding[] getBindings() {
+        return bindings;
     }
 
-    private ImmutableMap<String, OntopBinding> getVariableName2BindingMap(){
-        return variableName2BindingMap.isPresent()?
-                variableName2BindingMap.get():
-                computeVariable2BindingMap();
-    }
-
-    private ImmutableMap<String, OntopBinding> computeVariable2BindingMap() {
-        this.variableName2BindingMap = Optional.of(
-                signature.stream()
-                .map(s -> new AbstractMap.SimpleImmutableEntry(s, computeBinding(s)))
-                .filter(e -> e.getValue() != null)
-                .collect(ImmutableCollectors.toMap())
-        );
-        return variableName2BindingMap.get();
+    @Override
+    public String[] getBindingNames() {
+        String[] bindingNames = new String[bindings.length];
+        for (int i = 0; i < bindings.length; i++) {
+            bindingNames[i] = bindings[i].getName();
+        }
+        return bindingNames;
     }
 
     @Nullable
-    protected abstract OntopBinding computeBinding(String variableName);
-
     @Override
-    public ImmutableList<String> getBindingNames() {
-        return ImmutableList.copyOf(getVariableName2BindingMap().keySet());
+    public RDFConstant getConstant(String name) {
+        OntopBinding binding = getBinding(name);
+        return (binding == null)
+                ? null
+                : binding.getValue();
     }
 
     @Override
     public String toString() {
-        return getVariableName2BindingMap().values().stream()
-                .map(OntopBinding::toString)
-                .collect(joining(",", "[", "]"));
+        StringBuilder builder = new StringBuilder();
+        builder.append("[").append(bindings[0].toString());
+        for (int i = 1; i < bindings.length; i++){
+            builder.append(bindings[i].toString()).append(",");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    @Override
+    public boolean hasBinding(String bindingName) {
+        return indexOf(bindingName) >= 0;
+    }
+
+    @Override
+    public synchronized String getRowUUIDStr() {
+        if (uuid == null)
+            uuid = UUID.randomUUID().toString();
+        return uuid;
     }
 
     @Override
     @Nullable
     public OntopBinding getBinding(String name) {
-        return variableName2BindingMap.isPresent()?
-                variableName2BindingMap.get().get(name):
-                computeBinding(name);
+        int index = indexOf(name);
+        if (index < 0){
+            return null;
+        }
+        return bindings[index];
     }
 
-    public static class UnexpectedTargeTermTypeException extends OntopInternalBugException {
-        public UnexpectedTargeTermTypeException(Term term) {
-            super("Unexpected type "+ term.getClass()+" for term "+term);
+    /**
+     * Finds the index of the binding name. If none match, -1 is returned.
+     *
+     * @param bindingName is the binding's name
+     * @return the index of the binding inside the array
+     */
+    private int indexOf(String bindingName){
+        for (int i = 0; i < bindings.length; i++){
+            if (bindings[i].getName().equals(bindingName)){
+                return i;
+            }
         }
-    }
-
-    public static class UnexpectedTargetPredicateTypeException extends OntopInternalBugException {
-        public UnexpectedTargetPredicateTypeException(Predicate predicate) {
-            super("Unexpected type "+ predicate.getClass()+" for predicate "+predicate);
-        }
+        return -1;
     }
 }

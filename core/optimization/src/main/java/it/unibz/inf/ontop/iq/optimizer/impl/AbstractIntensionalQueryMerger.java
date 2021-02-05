@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
-    private final IntermediateQueryFactory iqFactory;
+    protected final IntermediateQueryFactory iqFactory;
 
     protected AbstractIntensionalQueryMerger(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
@@ -104,7 +104,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
             return renamedIQ.getTree()
                     .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
-                    .liftBinding(variableGenerator);
+                    .normalizeForOptimization(variableGenerator);
         }
 
         private ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,

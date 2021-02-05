@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.dbschema;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,173 +20,87 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.ArrayList;
-import java.util.List;
+import it.unibz.inf.ontop.dbschema.impl.UniqueConstraintImpl;
 
 /**
- * Primary key or a unique constraint<br>
- * 
- * PRIMARY KEY (columnName (, columnName)*)<br>		
- * UNIQUE (columnName (, columnName)*)<br>	
- * 
+ * Primary key or a unique constraint
+ *
+ * PRIMARY KEY (columnName (, columnName)*)
+ * UNIQUE (columnName (, columnName)*)
+ *
  * (a form of equality-generating dependencies)
- * 
+ *
  * @author Roman Kontchakov
  *
  */
 
-public class UniqueConstraint implements FunctionalDependency {
+public interface UniqueConstraint extends FunctionalDependency {
 
-	public static final class Builder {
-		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
-		private final DatabaseRelationDefinition relation;
-		
-		/**
-		 * creates a UNIQUE constraint builder 
-		 * 
-		 * @param relation 
-		 */
-		
-		public Builder(DatabaseRelationDefinition relation) {
-			this.relation = relation;
-		}
-		
-		/**
-		 * adds an attribute to the UNIQUE constraint
-		 * 
-		 * @param attribute
-		 * @return
-		 */
-		
-		public Builder add(Attribute attribute) {
-			if (relation != attribute.getRelation())
-				throw new IllegalArgumentException("Unique Key requires the same table in all attributes: " + relation + " " + attribute);
-			
-			builder.add(attribute);
-			return this;
-		}
-
-		/**
-		 * builds a UNIQUE constraint (this includes PRIMARY KEY)
-		 * 
-		 * @param name
-		 * @return null if the list of attributes is empty
-		 */
-		
-		public UniqueConstraint build(String name, boolean isPK) {
-			ImmutableList<Attribute> attributes = builder.build();
-			if (attributes.isEmpty())
-				return null;
-			return new UniqueConstraint(name, isPK, builder.build());
-		}
-	}
-	
-	public static UniqueConstraint primaryKeyOf(Attribute att) {
-		UniqueConstraint.Builder builder = new UniqueConstraint.Builder((DatabaseRelationDefinition)att.getRelation());
-		return builder.add(att).build("PK_" + att.getRelation().getID().getTableName(), true);
-	}
-
-	public static UniqueConstraint primaryKeyOf(Attribute att, Attribute att2) {
-		UniqueConstraint.Builder builder = new UniqueConstraint.Builder((DatabaseRelationDefinition)att.getRelation());
-		return builder.add(att).add(att2).build("PK_" + att.getRelation().getID().getTableName(), true);
-	}
-	
-	/**
-	 * creates a UNIQUE constraint builder (which is also used for a PRIMARY KET builder)
-	 * 
-	 * @param relation
-	 * @return
-	 */
-	
-	public static Builder builder(DatabaseRelationDefinition relation) {
-		return new Builder(relation);
-	}
-	
-	private final String name;
-	private final ImmutableList<Attribute> attributes;
-	private final boolean isPK; // primary key
-	
-	/**
-	 * private constructor (use Builder instead)
-	 * 
-	 * @param name
-	 * @param attributes
-	 */
-	
-	private UniqueConstraint(String name, boolean isPK, ImmutableList<Attribute> attributes) {
-		this.name = name;
-		this.isPK = isPK;
-		this.attributes = attributes;
-	}
-	
 	/**
 	 * return the name of the constraint
-	 * 
+	 *
 	 * @return name
 	 */
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * return the database relation for the unique constraint
-	 * 
-	 * @return
-	 */
-	
-	public DatabaseRelationDefinition getRelation() {
-		return (DatabaseRelationDefinition)attributes.get(0).getRelation();
-	}
+
+	String getName();
 
 	/**
 	 * return true if it is a primary key and false otherwise
-	 * 
+	 *
 	 * @return true if it is a primary key constraint (false otherwise)
 	 */
-	
-	public boolean isPrimaryKey() {
-		return isPK;
-	}
-	
+
+	boolean isPrimaryKey();
+
 	/**
 	 * return the list of attributes in the unique constraint
-	 * 
+	 *
 	 * @return list of attributes
 	 */
-	
-	public ImmutableList<Attribute> getAttributes() {
-		return attributes;
+
+	ImmutableList<Attribute> getAttributes();
+
+
+	/**
+	 * creates a UNIQUE constraint builder
+	 *
+	 * @param relation
+	 * @param name
+	 * @return
+	 */
+
+	static Builder builder(NamedRelationDefinition relation, String name) {
+		return UniqueConstraintImpl.builder(relation, name);
 	}
 
-	@Override
-	public ImmutableSet<Attribute> getDeterminants() {
-		return ImmutableSet.copyOf(attributes);
+	/**
+	 * creates a PRIMARY KEY  builder
+	 *
+	 * @param relation
+	 * @param name
+	 * @return
+	 */
+
+	static Builder primaryKeyBuilder(NamedRelationDefinition relation, String name) {
+		return UniqueConstraintImpl.primaryKeyBuilder(relation, name);
 	}
 
-	@Override
-	public ImmutableSet<Attribute> getDependents() {
-		return getRelation().getAttributes().stream()
-				.filter(a -> !attributes.contains(a))
-				.collect(ImmutableCollectors.toSet());
+
+	static void primaryKeyOf(Attribute attribute) {
+		NamedRelationDefinition relation = (NamedRelationDefinition)attribute.getRelation();
+		primaryKeyBuilder(relation, "PK")
+				.addDeterminant(attribute.getIndex()).build();
 	}
-	
-	@Override
-	public String toString() {	
-		List<String> columns = new ArrayList<>(attributes.size());
-		for (Attribute c : attributes) 
-			columns.add(c.getID().toString());
-		
-		StringBuilder bf = new StringBuilder();
-		bf.append("ALTER TABLE ").append(attributes.get(0).getRelation().getID())
-			.append(" ADD CONSTRAINT ").append(name).append(isPK ? " PRIMARY KEY " : " UNIQUE ")
-			.append("(");
-		Joiner.on(", ").appendTo(bf, columns);
-		bf.append(")");
-		return bf.toString();
+
+	static void primaryKeyOf(Attribute attribute1, Attribute attribute2) {
+		if (attribute1.getRelation() != attribute2.getRelation())
+			throw new IllegalArgumentException();
+
+		NamedRelationDefinition relation = (NamedRelationDefinition)attribute1.getRelation();
+
+		primaryKeyBuilder(relation, "PK")
+				.addDeterminant(attribute1.getIndex())
+				.addDeterminant(attribute1.getIndex()).build();
 	}
 }

@@ -1,57 +1,77 @@
 package it.unibz.inf.ontop.model.term;
 
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 
 import java.util.Optional;
+import java.util.stream.Stream;
+
 
 public interface ImmutableExpression extends ImmutableFunctionalTerm {
 
     @Override
-    OperationPredicate getFunctionSymbol();
+    BooleanFunctionSymbol getFunctionSymbol();
 
     /**
      * Flattens AND expressions.
      */
-    ImmutableSet<ImmutableExpression> flattenAND();
+    Stream<ImmutableExpression> flattenAND();
 
     /**
      * Flattens OR expressions.
      */
-    ImmutableSet<ImmutableExpression> flattenOR();
+    Stream<ImmutableExpression> flattenOR();
+
+    Evaluation evaluate(VariableNullability variableNullability);
+
+    IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean isExpressionNew);
 
     /**
-     * Generalization of flattening (AND, OR, etc.).
+     * 2-valued logic (2VL): NULL is reduced to FALSE
+     * Is intended to be used by filtering condition, where both NULL and FALSE cause the condition to be rejected.
      *
-     * It is the responsibility of the caller to make sure such a flattening makes sense.
      */
-    ImmutableSet<ImmutableExpression> flatten(OperationPredicate operator);
+    Evaluation evaluate2VL(VariableNullability variableNullability);
+
+    IncrementalEvaluation evaluate2VL(VariableNullability variableNullability, boolean isExpressionNew);
+
+    ImmutableTerm simplify2VL(VariableNullability variableNullability);
 
     boolean isVar2VarEquality();
 
     /**
-     * TODO: inject termFactory and typeFactory
-     *
+     * Returns the equivalent to NOT(this)
      */
-    default Optional<TermType> getOptionalTermType() throws IncompatibleTermException {
-        try {
-            OperationPredicate predicate = getFunctionSymbol();
-            return predicate.inferType(getTerms());
-        } catch (IncompatibleTermException e) {
-            throw new IncompatibleTermException(this, e);
-        }
-    }
+    ImmutableExpression negate(TermFactory termFactory);
 
-    default Optional<TermType> getOptionalTermType(ImmutableList<Optional<TermType>> actualArgumentTypes) {
-        try {
-            OperationPredicate predicate = getFunctionSymbol();
-            return predicate.inferTypeFromArgumentTypes(actualArgumentTypes);
-        } catch (IncompatibleTermException e) {
-            throw new IncompatibleTermException(this, e);
+    interface Evaluation {
+
+        Optional<ImmutableExpression> getExpression();
+        Optional<BooleanValue> getValue();
+        ImmutableTerm getTerm();
+
+        IncrementalEvaluation getEvaluationResult(ImmutableExpression originalExpression,
+                                                  boolean wasExpressionAlreadyNew);
+
+        enum BooleanValue {
+            TRUE,
+            FALSE,
+            NULL
+        }
+
+        default boolean isEffectiveFalse() {
+            return getValue()
+                    .filter(v -> {
+                        switch (v) {
+                            case FALSE:
+                            case NULL:
+                                return true;
+                            default:
+                                return false;
+                        }
+                    })
+                    .isPresent();
         }
     }
 }

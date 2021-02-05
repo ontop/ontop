@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlapi.options;
 
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -9,7 +8,6 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,6 +17,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import it.unibz.inf.ontop.utils.OWLAPITestingTools;
 import org.junit.After;
 import org.junit.Before;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -38,7 +37,6 @@ public class TMappingDisablingTest extends TestCase {
 	
 	private Connection connection;
 
-	
 	private final String owlfile = "src/test/resources/test/tmapping/exampleTMappingNoEquivalence.owl";
 	private final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
 	private final String propertyFile = "src/test/resources/test/tmapping/exampleTMapping.properties";
@@ -51,7 +49,7 @@ public class TMappingDisablingTest extends TestCase {
 
 	@After
 	public void tearDown() throws Exception{
-		dropTables();
+		OWLAPITestingTools.executeFromFile(connection, "src/test/resources/test/tmapping/drop-tables.sql");
 		connection.close();
 	}
 	
@@ -62,47 +60,11 @@ public class TMappingDisablingTest extends TestCase {
 		String password = "";
 		
 		connection = DriverManager.getConnection(url, username, password);
-		Statement st = connection.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/tmapping/create-tables.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		connection.commit();
-		in.close();
+		OWLAPITestingTools.executeFromFile(connection, "src/test/resources/test/tmapping/create-tables.sql");
 	}
 	
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = connection.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/tmapping/drop-tables.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		connection.commit();
-		in.close();
-	}
+	public void testDisableTMappings() throws Exception {
 		
-	public void testDisableTMappings() throws DuplicateMappingException, InvalidMappingException,
-			IOException, OWLOntologyCreationException {
-		
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
@@ -110,14 +72,8 @@ public class TMappingDisablingTest extends TestCase {
 				.propertyFile(propertyFile)
 				.enableTestMode()
 				.build();
-		
 		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
-		
-		/*
-		 * Prepare the data connection for querying.
-		 */
 		OWLConnection conn = reasoner.getConnection();
-		
 		
 		String sparqlQuery = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
@@ -126,26 +82,21 @@ public class TMappingDisablingTest extends TestCase {
 		String sparqlQuery1 = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Man }";
-		OWLStatement st = null;
-		try {
-			st = conn.createStatement();
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 			assertTrue(!rs.hasNext());
 			rs.close();
 			rs = st.executeSelectQuery(sparqlQuery1);
 			assertTrue(rs.hasNext());
 			rs.close();
-		}catch(Exception e){
-			e.printStackTrace();
 		}
-		reasoner.dispose();
+		finally {
+			reasoner.dispose();
+		}
 	}
 	
-	public void testDisableSelectedTMappings() throws DuplicateMappingException, InvalidMappingException,
-			IOException, OWLOntologyCreationException {
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
+	public void testDisableSelectedTMappings() throws Exception {
+
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
@@ -155,13 +106,8 @@ public class TMappingDisablingTest extends TestCase {
 				.enableTestMode()
 				.build();
 		OntopOWLReasoner reasoner = factory.createReasoner(configuration);
-		
-		/*
-		 * Prepare the data connection for querying.
-		 */
 		OWLConnection conn = reasoner.getConnection();
-		
-		
+
 		String sparqlQuery = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Boy }";
@@ -169,18 +115,17 @@ public class TMappingDisablingTest extends TestCase {
 		String sparqlQuery1 = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Man }";
-		OWLStatement st = null;
-		try {
-			st = conn.createStatement();
+
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet  rs = st.executeSelectQuery(sparqlQuery);
 			assertTrue(!rs.hasNext());
 			rs.close();
 			rs = st.executeSelectQuery(sparqlQuery1);
 			assertTrue(rs.hasNext());
 			rs.close();
-		}catch(Exception e){
-			e.printStackTrace();
 		}
-		reasoner.dispose();
+		finally {
+			reasoner.dispose();
+		}
 	}
 }

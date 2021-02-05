@@ -3,25 +3,22 @@ package it.unibz.inf.ontop.answering.connection.impl;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.connection.DBConnector;
+import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.sql.*;
-import java.util.Optional;
 
 /**
  * For RDBMS having a JDBC driver.
@@ -30,8 +27,8 @@ public class JDBCConnector implements DBConnector {
 
     private final QueryReformulator queryReformulator;
 
+    private final SubstitutionFactory substitutionFactory;
     private final OntopSystemSQLSettings settings;
-    private final Optional<IRIDictionary> iriDictionary;
 
     /* The active connection used for keeping in-memory DBs alive */
     private transient Connection localConnection;
@@ -39,31 +36,25 @@ public class JDBCConnector implements DBConnector {
     private final Logger log = LoggerFactory.getLogger(JDBCConnector.class);
     private final JDBCConnectionPool connectionPool;
 
-    private final DBMetadata dbMetadata;
-    private final InputQueryFactory inputQueryFactory;
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final RDF rdfFactory;
+    private final JDBCStatementInitializer statementInitializer;
 
     @AssistedInject
     private JDBCConnector(@Assisted QueryReformulator queryReformulator,
-                          @Assisted DBMetadata dbMetadata,
-                          @Nullable IRIDictionary iriDictionary,
                           JDBCConnectionPool connectionPool,
-                          InputQueryFactory inputQueryFactory,
                           TermFactory termFactory,
-                          TypeFactory typeFactory,
+                          SubstitutionFactory substitutionFactory,
                           RDF rdfFactory,
+                          JDBCStatementInitializer statementInitializer,
                           OntopSystemSQLSettings settings) {
         this.queryReformulator = queryReformulator;
-        this.dbMetadata = dbMetadata;
-        this.inputQueryFactory = inputQueryFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
         this.settings = settings;
-        this.iriDictionary = Optional.ofNullable(iriDictionary);
         this.connectionPool = connectionPool;
-        this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
+        this.statementInitializer = statementInitializer;
     }
 
     /**
@@ -124,8 +115,8 @@ public class JDBCConnector implements DBConnector {
     @Override
     public OntopConnection getConnection() throws OntopConnectionException {
 
-        return new SQLConnection(this, queryReformulator, getSQLPoolConnection(), iriDictionary,
-                dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, settings);
+        return new SQLConnection(this, queryReformulator, getSQLPoolConnection(),
+                termFactory, rdfFactory, substitutionFactory, statementInitializer, settings);
     }
 
 

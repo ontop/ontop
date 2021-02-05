@@ -22,6 +22,9 @@ bin
 *.iml
 .idea
 
+# Visual Studio Code
+.vscode
+
 # Protege generated files
 catalog-v*.xml
 
@@ -40,3 +43,7 @@ ontop-optique-test
 tmp
 *.log
 
+.run
+
+# vi
+*.sw[klmnop]

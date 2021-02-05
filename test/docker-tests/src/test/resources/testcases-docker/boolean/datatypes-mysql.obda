@@ -17,7 +17,7 @@ target		:datetime-{id} a :Row ; :hasDate {type_date}  ;  :hasDate2 {type_date}^^
 source		select id, type_date, type_datetime, type_timestamp, type_time, type_year from DateTimes
 
 mappingId	Boolean Types
-target		:boolean-{id} a :Row ; :hasBit {type_bit} . 
+target		:boolean-{id} a :Row ; :hasBit {type_bit} .
 source		select id, type_bit from Booleans
 
 mappingId	Binary Types

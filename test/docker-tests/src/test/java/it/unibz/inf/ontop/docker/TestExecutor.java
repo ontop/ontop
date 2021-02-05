@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.docker;
 
 
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
@@ -17,12 +16,14 @@ import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.junit.Assert;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -34,11 +35,13 @@ public class TestExecutor {
     private final String resultFileURL;
     private final Repository dataRep;
     private final Logger logger;
+    private static final String ASK_KEYWORD = "ask";
+    private static final String SELECT_KEYWORD = "select";
 
-    TestExecutor(String name, String queryFileURL, String resultFileURL, Repository dataRep, Logger logger) {
+    public TestExecutor(String name, String queryFileURL, String resultFileURL, Repository dataRep, Logger logger) {
         this.name = name;
-        this.queryFileURL =queryFileURL;
-		this.resultFileURL =resultFileURL;
+        this.queryFileURL = queryFileURL;
+		this.resultFileURL = resultFileURL;
         this.dataRep = dataRep;
         this.logger = logger;
     }
@@ -48,11 +51,9 @@ public class TestExecutor {
             String queryString = readQueryString();
 
             // NB: the query may be wrong (on purpose) so we cannot use the RDF4J parser
-            SPARQLQueryUtility queryCategorizer = new SPARQLQueryUtility(queryString);
-
-            if (queryCategorizer.isSelectQuery()) {
+            if (isSelectQuery(queryString)) {
                 executeSelectQuery(con, queryString);
-            } else if (queryCategorizer.isAskQuery()) {
+            } else if (isAskQuery(queryString)) {
                 executeAskQuery(con, queryString);
             } else {
                 throw new IllegalArgumentException("Only ASK and SELECT SPARQL queries are supported\n Query: "
@@ -86,7 +87,7 @@ public class TestExecutor {
             throw new Exception("Expected: " + expectedResult + ", result: " + queryResult);
     }
 
-    private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
+    private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) {
         int queryResultSize = countTuple(queryResult);
         int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
         if (queryResultSize != expectedResultSize) {
@@ -102,7 +103,7 @@ public class TestExecutor {
             message.append("\n");
             message.append("=====================================\n");
             //logger.error(message.toString());
-            throw new Exception(message.toString());
+            Assert.fail(message.toString());
         }
     }
 
@@ -112,12 +113,8 @@ public class TestExecutor {
         Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(resultFileURL);
 
         if (bqrFormat.isPresent()) {
-            InputStream in = new URL(resultFileURL).openStream();
-            try {
+            try (InputStream in = new URL(resultFileURL).openStream()) {
                 return QueryResultIO.parseBoolean(in, bqrFormat.get());
-            }
-            finally {
-                in.close();
             }
         }
         else {
@@ -145,12 +142,8 @@ public class TestExecutor {
             Set<Statement> result = new LinkedHashSet<Statement>();
             parser.setRDFHandler(new StatementCollector(result));
 
-            InputStream in = new URL(resultFileURL).openStream();
-            try {
+            try (InputStream in = new URL(resultFileURL).openStream()) {
                 parser.parse(in, resultFileURL);
-            }
-            finally {
-                in.close();
             }
 
             return result;
@@ -201,11 +194,8 @@ public class TestExecutor {
 
 
     private String readQueryString() throws IOException {
-        InputStream stream = new URL(queryFileURL).openStream();
-        try {
-            return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-        } finally {
-            stream.close();
+        try (InputStream stream = new URL(queryFileURL).openStream()) {
+            return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
         }
     }
 
@@ -228,18 +218,23 @@ public class TestExecutor {
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
-            Set<Statement> result = new LinkedHashSet<Statement>();
+            Set<Statement> result = new LinkedHashSet<>();
             parser.setRDFHandler(new StatementCollector(result));
 
-            InputStream in = new URL(resultFileURL).openStream();
-            try {
+            try (InputStream in = new URL(resultFileURL).openStream()) {
                 parser.parse(in, resultFileURL);
-            } finally {
-                in.close();
             }
             return result;
         } else {
             throw new RuntimeException("Unable to determine file type of results file");
         }
+    }
+
+    public static boolean isAskQuery(String query) {
+        return query.toLowerCase().contains(ASK_KEYWORD);
+    }
+
+    public static boolean isSelectQuery(String query) {
+        return query.toLowerCase().contains(SELECT_KEYWORD);
     }
 }

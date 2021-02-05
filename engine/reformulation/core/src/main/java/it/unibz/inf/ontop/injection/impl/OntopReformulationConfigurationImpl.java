@@ -11,10 +11,8 @@ import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Properties;
@@ -27,7 +25,6 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
 
     private final OntopOptimizationConfigurationImpl optimizationConfiguration;
     private final OntopReformulationSettings settings;
-    private final OntopReformulationOptions options;
 
     @Nullable
     private final SpecificationLoader specificationLoader;
@@ -36,7 +33,6 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
                                         SpecificationLoader specificationLoader) {
         super(settings, options.obdaOptions);
         this.settings = settings;
-        this.options = options;
         this.specificationLoader = specificationLoader;
         this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
@@ -50,7 +46,6 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
     OntopReformulationConfigurationImpl(OntopReformulationSettings settings, OntopReformulationOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
-        this.options = options;
         this.specificationLoader = null;
         this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
@@ -95,11 +90,6 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
     }
 
     @Override
-    public Optional<IRIDictionary> getIRIDictionary() {
-        return options.iriDictionary;
-    }
-
-    @Override
     public QueryReformulator loadQueryReformulator() throws OBDASpecificationException {
         ReformulationFactory reformulationFactory = getInjector().getInstance(ReformulationFactory.class);
         OBDASpecification obdaSpecification = loadSpecification();
@@ -114,13 +104,11 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
     }
 
     static class OntopReformulationOptions {
-        private final Optional<IRIDictionary> iriDictionary;
         final OntopOBDAOptions obdaOptions;
         final OntopOptimizationOptions optimizationOptions;
 
-        OntopReformulationOptions(Optional<IRIDictionary> iriDictionary, OntopOBDAOptions obdaOptions,
+        OntopReformulationOptions(OntopOBDAOptions obdaOptions,
                                   OntopOptimizationOptions optimizationOptions) {
-            this.iriDictionary = iriDictionary;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
         }
@@ -130,18 +118,10 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
             implements OntopReformulationBuilderFragment<B> {
 
         private final B builder;
-        private Optional<Boolean> encodeIRISafely = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
-        private Optional<IRIDictionary> iriDictionary = Optional.empty();
 
         DefaultOntopReformulationBuilderFragment(B builder) {
             this.builder = builder;
-        }
-
-        @Override
-        public B enableIRISafeEncoding(boolean enable) {
-            this.encodeIRISafely = Optional.of(enable);
-            return builder;
         }
 
         @Override
@@ -151,16 +131,9 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
 
         }
 
-        @Override
-        public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
-            this.iriDictionary = Optional.of(iriDictionary);
-            return builder;
-        }
-
         Properties generateProperties() {
             Properties p = new Properties();
 
-            encodeIRISafely.ifPresent(e -> p.put(OntopReformulationSettings.SQL_GENERATE_REPLACE, e));
             existentialReasoning.ifPresent(r -> p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, r));
 
             return p;
@@ -168,7 +141,7 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
 
         final OntopReformulationOptions generateReformulationOptions(OntopOBDAOptions obdaOptions,
                                                                      OntopOptimizationOptions optimizationOptions) {
-            return new OntopReformulationOptions(iriDictionary, obdaOptions, optimizationOptions);
+            return new OntopReformulationOptions(obdaOptions, optimizationOptions);
         }
     }
 
@@ -186,18 +159,8 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
         }
 
         @Override
-        public B enableIRISafeEncoding(boolean enable) {
-            return localBuilderFragment.enableIRISafeEncoding(enable);
-        }
-
-        @Override
         public B enableExistentialReasoning(boolean enable) {
             return localBuilderFragment.enableExistentialReasoning(enable);
-        }
-
-        @Override
-        public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
-            return localBuilderFragment.iriDictionary(iriDictionary);
         }
 
         @Override

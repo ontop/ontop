@@ -23,18 +23,14 @@ package it.unibz.inf.ontop.protege.utils;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.swing.*;
@@ -52,6 +48,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class QueryPainter {
 	private final OBDAModel apic;
@@ -169,31 +168,25 @@ public class QueryPainter {
 	private void validate() throws Exception {
 		final String text = parent.getText().trim();
 		if (text.isEmpty() || text.length() == 1) {
-			String msg = String.format("Empty query");
 			invalid = true;
-			throw new Exception(msg);
+			throw new Exception("Empty query");
 		}
 
-		TargetQueryParser textParser = new TurtleOBDASQLParser(
-		        apic.getMutablePrefixManager().getPrefixMap(),
-                apic.getTermFactory(),
-				apic.getTargetAtomFactory(),
-				apic.getRdfFactory());
+		TargetQueryParser textParser = apic.createTargetQueryParser();
 		ImmutableList<TargetAtom> query = textParser.parse(text);
 
 		if (query == null) {
 			invalid = true;
 			throw parsingException;
 		}
-		List<IRI> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
+		ImmutableList<IRI> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
 		if (!invalidPredicates.isEmpty()) {
-			String invalidList = "";
-			for (IRI predicateIri : invalidPredicates) {
-				invalidList += "- " + predicateIri + "\n";
-			}
-			String msg = String.format("ERROR: The below list of predicates is unknown by the ontology: \n %s Note: null indicates an unknown prefix.", invalidList);
 			invalid = true;
-			throw new Exception(msg);
+			throw new Exception("ERROR: The below list of predicates is unknown by the ontology: \n "
+					+ invalidPredicates.stream()
+						.map(iri -> "- " + iri + "\n")
+						.collect(Collectors.joining())
+					+ " Note: null indicates an unknown prefix.");
 		}
 		invalid = false;
 	}
@@ -366,7 +359,7 @@ public class QueryPainter {
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
-			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
+			throw new Exception("Unable to parse the mapping target: " + input + ", " + parsingException);
 		}
 		input = doc.getText(0, doc.getLength());
 
@@ -403,7 +396,7 @@ public class QueryPainter {
 
 			if (optionalPredicateIri.isPresent()) {
 				IRI predicateIri = optionalPredicateIri.get();
-				String shortIRIForm = man.getShortForm(predicateIri.getIRIString());
+				String shortIRIForm = man.getShortForm("<"+predicateIri.getIRIString()+">");
 
 				if (vocabulary.classes().contains(predicateIri)) {
 					ColorTask task = new ColorTask(shortIRIForm, clazz);
@@ -439,12 +432,12 @@ public class QueryPainter {
 		}
 
 		ColorTask[] taskArray = order(tasks);
-		for (int i = 0; i < taskArray.length; i++) {
-			if (taskArray[i].text != null) {
-				int index = input.indexOf(taskArray[i].text, 0);
-				while (index != -1) {
-					doc.setCharacterAttributes(index, taskArray[i].text.length(), taskArray[i].set, true);
-					index = input.indexOf(taskArray[i].text, index + 1);
+		for (ColorTask ct: taskArray){
+			if (ct.text != null) {
+				Matcher matcher = Pattern.compile("\\s("+ct.text+")[\\s\\.;,]")
+						.matcher(input);
+				while (matcher.find()){
+					doc.setCharacterAttributes(matcher.start(1), ct.text.length(), ct.set, true);
 				}
 			}
 		}
@@ -453,8 +446,7 @@ public class QueryPainter {
 
 	private ImmutableList<TargetAtom> parse(String query, PrefixManager man) {
 		try {
-            TargetQueryParser textParser = new TurtleOBDASQLParser(man.getPrefixMap(),
-					apic.getTermFactory(), apic.getTargetAtomFactory(), apic.getRdfFactory());
+            TargetQueryParser textParser = apic.createTargetQueryParser(man);
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;

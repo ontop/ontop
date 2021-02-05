@@ -3,7 +3,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop</artifactId>
-        <version>3.0.0-beta-3-SNAPSHOT</version>
+        <version>4.1.0-beta-1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -15,6 +15,7 @@
         <module>cli</module>
         <module>protege</module>
         <module>rdf4j-webapps</module>
+        <module>endpoint</module>
     </modules>
 
 </project>

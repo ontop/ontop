@@ -1,0 +1,26 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix onto2: <http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#> .
+@prefix owl2xml: <http://www.w3.org/2006/12/owl2-xml#> .
+@base <http://www.w3.org/2002/07/owl#> .
+
+###  http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#1
+onto2:1 rdf:type onto2:Person ;
+       onto2:R onto2:1 ;
+       onto2:age "23"^^xsd:int .
+
+
+###  http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#2
+onto2:2 rdf:type onto2:Man ;
+       onto2:R onto2:2 ;
+       onto2:age "23" .
+
+
+###  http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#3
+onto2:3 rdf:type onto2:Woman ;
+       onto2:P onto2:3 ;
+       onto2:age "23.3"^^xsd:float .
+

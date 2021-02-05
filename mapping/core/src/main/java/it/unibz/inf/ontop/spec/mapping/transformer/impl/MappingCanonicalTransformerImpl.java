@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -17,23 +14,18 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
-import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class MappingCanonicalTransformerImpl implements MappingCanonicalTransformer {
 
-
     private final IntermediateQueryFactory iqFactory;
-    private final ProvenanceMappingFactory provenanceMappingFactory;
     private final QueryTransformerFactory transformerFactory;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
@@ -41,29 +33,22 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private final CoreUtilsFactory coreUtilsFactory;
     private final OntopMappingSettings settings;
 
-    private enum Position {SUBJECT, PROPERTY, OBJECT}
-
     @Inject
-    private MappingCanonicalTransformerImpl(IntermediateQueryFactory iqFactory,
-                                            ProvenanceMappingFactory provenanceMappingFactory,
+    private MappingCanonicalTransformerImpl(CoreSingletons coreSingletons,
                                             QueryTransformerFactory transformerFactory,
-                                            SubstitutionFactory substitutionFactory,
-                                            AtomFactory atomFactory,
-                                            CoreUtilsFactory coreUtilsFactory,
                                             UnionBasedQueryMerger queryMerger,
                                             OntopMappingSettings settings) {
-        this.coreUtilsFactory = coreUtilsFactory;
+        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.settings = settings;
-        this.iqFactory = iqFactory;
-        this.provenanceMappingFactory = provenanceMappingFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
         this.transformerFactory = transformerFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.atomFactory = atomFactory;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.atomFactory = coreSingletons.getAtomFactory();
         this.queryMerger = queryMerger;
     }
 
     @Override
-    public MappingWithProvenance transform(MappingWithProvenance mapping) {
+    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
 
         // Isolate mapping assertions with canIRI as predicate
         Optional<IQ> canIRIDefinition = extractCanIRIDefinition(mapping);
@@ -74,73 +59,67 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 mapping;
     }
 
-    private Optional<IQ> extractCanIRIDefinition(MappingWithProvenance mapping) {
+    private Optional<IQ> extractCanIRIDefinition(ImmutableList<MappingAssertion> mapping) {
         return queryMerger.mergeDefinitions(
-                mapping.getProvenanceMap().keySet().stream()
-                        .filter(q -> (MappingTools.extractRDFPredicate(q).getIri().equals(Ontop.CANONICAL_IRI)))
+                mapping.stream()
+                        .filter(a -> a.getIndex().getIri().equals(Ontop.CANONICAL_IRI))
+                        .map(MappingAssertion::getQuery)
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private MappingWithProvenance transformMapping(MappingWithProvenance mapping, IntensionalQueryMerger intensionalQueryMerger) {
-        return provenanceMappingFactory.create(
-                mapping.getProvenanceMap().entrySet().stream()
-                        .filter(e -> !(MappingTools.extractRDFPredicate(e.getKey()).getIri().equals(Ontop.CANONICAL_IRI)))
-                        .collect(ImmutableCollectors.toMap(
-                                e -> transformAssertion(
-                                        e.getKey(),
-                                        intensionalQueryMerger
-                                ),
-                                Map.Entry::getValue
-                        )),
-                mapping.getMetadata()
-        );
+    private ImmutableList<MappingAssertion> transformMapping(ImmutableList<MappingAssertion> mapping, IntensionalQueryMerger intensionalQueryMerger) {
+        return mapping.stream()
+                        .filter(a -> !(a.getIndex().getIri().equals(Ontop.CANONICAL_IRI)))
+                        .map(a -> transformAssertion(a, intensionalQueryMerger))
+                        .collect(ImmutableCollectors.toList());
     }
 
-    private IQ transformAssertion(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
+    private MappingAssertion transformAssertion(MappingAssertion assertion, IntensionalQueryMerger intensionalQueryMerger) {
         return settings.isCanIRIComplete() ?
                 transformAssertionWithJoin(assertion, intensionalQueryMerger) :
                 transformAssertionWithLeftJoin(assertion, intensionalQueryMerger);
     }
 
-    private IQ transformAssertionWithLeftJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
+    private MappingAssertion transformAssertionWithLeftJoin(MappingAssertion assertion, IntensionalQueryMerger intensionalQueryMerger) {
         throw new RuntimeException("TODO: implement");
     }
 
-    private IQ transformAssertionWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
-        IQ assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, Position.SUBJECT);
-        return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, Position.OBJECT);
+    private MappingAssertion transformAssertionWithJoin(MappingAssertion assertion, IntensionalQueryMerger intensionalQueryMerger) {
+        RDFAtomPredicate rdfAtomPredicate = assertion.getRDFAtomPredicate();
+        if (assertion.getIndex().isClass()) {
+            return canonizeWithJoin(assertion, intensionalQueryMerger, rdfAtomPredicate::getSubject, rdfAtomPredicate::updateSubject);
+        }
+        else {
+            MappingAssertion assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, rdfAtomPredicate::getSubject, rdfAtomPredicate::updateSubject);
+            return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, rdfAtomPredicate::getObject, rdfAtomPredicate::updateObject);
+        }
     }
 
-    private IQ canonizeWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Position pos) {
+    private MappingAssertion canonizeWithJoin(MappingAssertion assertion, IntensionalQueryMerger intensionalQueryMerger, RDFAtomPredicate.ComponentGetter componentGetter, RDFAtomPredicate.ComponentUpdater componentUpdater) {
 
-        Optional<Variable> replacedVar = getReplacedVar(assertion, pos);
+        ImmutableList<Variable> variables = assertion.getProjectionAtom().getArguments();
+        Variable replacedVar = componentGetter.get(variables);
 
-        if (replacedVar.isPresent()) {
-            Variable newVariable = createFreshVariable(assertion, intensionalQueryMerger, replacedVar.get());
-            IntensionalDataNode idn = getIDN(replacedVar.get(), newVariable);
-            RDFAtomPredicate pred = getRDFAtomPredicate(assertion.getProjectionAtom());
+        IQ iq = assertion.getQuery();
+        Variable newVariable = createFreshVariable(iq, intensionalQueryMerger, replacedVar);
+        IntensionalDataNode idn = iqFactory.createIntensionalDataNode(
+                atomFactory.getIntensionalTripleAtom(newVariable, Ontop.CANONICAL_IRI, replacedVar));
 
-            DistinctVariableOnlyDataAtom projAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-                    pred,
-                    replaceProjVars(
-                            pred,
-                            assertion.getProjectionAtom().getArguments(),
-                            pos,
-                            newVariable));
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
+                assertion.getRDFAtomPredicate(),
+                componentUpdater.update(variables, newVariable));
 
-            IQ intensionalCanonizedQuery = iqFactory.createIQ(
-                    projAtom,
-                    getIntensionalCanonizedTree(assertion, projAtom, idn));
+        IQ intensionalCanonizedQuery = iqFactory.createIQ(
+                projectionAtom,
+                getIntensionalCanonizedTree(iq, projectionAtom, idn));
 
-            IQ canonizedQuery = intensionalQueryMerger.optimize(intensionalCanonizedQuery)
-                    .liftBinding();
+        IQ canonizedQuery = intensionalQueryMerger.optimize(intensionalCanonizedQuery)
+                .normalizeForOptimization();
 
-            return canonizedQuery.getTree().isDeclaredAsEmpty()
-                    // No matching canonical IRI template
-                    ? assertion
-                    : canonizedQuery;
-        }
-        return assertion;
+        return canonizedQuery.getTree().isDeclaredAsEmpty()
+                // No matching canonical IRI template
+                ? assertion
+                : assertion.copyOf(canonizedQuery);
     }
 
     private IQTree getIntensionalCanonizedTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
@@ -154,89 +133,13 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         )));
     }
 
-    private Variable createFreshVariable(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {
+    private Variable createFreshVariable(IQ iq, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(
-                        assertion.getTree().getKnownVariables(),
+                        iq.getTree().getKnownVariables(),
                         intensionalQueryMerger.getKnownVariables()).immutableCopy());
 
         return variableGenerator.generateNewVariableFromVar(formerVariable);
-    }
-
-    private IntensionalDataNode getIDN(Variable formerVariable, Variable newVariable) {
-        return iqFactory.createIntensionalDataNode(
-                atomFactory.getIntensionalTripleAtom(
-                        newVariable,
-                        Ontop.CANONICAL_IRI,
-                        formerVariable
-                ));
-    }
-
-    private Optional<Variable> getReplacedVar(IQ assertion, Position pos) {
-        switch (pos) {
-            case SUBJECT:
-                return Optional.of(getVarFromRDFAtom(assertion.getProjectionAtom(), pos));
-            case OBJECT:
-                return MappingTools.extractRDFPredicate(assertion).isClass()
-                        ? Optional.empty()
-                        : Optional.of(getVarFromRDFAtom(assertion.getProjectionAtom(), pos));
-            default:
-                throw new UnexpectedPositionException(pos);
-        }
-    }
-
-    private ImmutableList<Variable> replaceProjVars(RDFAtomPredicate pred, ImmutableList<Variable> arguments, Position pos,
-                                                    Variable replacementVar) {
-        switch (pos) {
-            case SUBJECT:
-                return pred.updateSubject(arguments, replacementVar);
-            case OBJECT:
-                return pred.updateObject(arguments, replacementVar);
-            case PROPERTY:
-            default:
-                throw new UnexpectedPositionException(pos);
-        }
-    }
-
-    private Optional<IRI> getPropertyIRI(DataAtom atom) {
-        AtomPredicate atomPredicate = atom.getPredicate();
-
-        return Optional.of(atomPredicate)
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .flatMap(p -> p.getPropertyIRI(atom.getArguments()));
-    }
-
-    private Variable getVarFromRDFAtom(DistinctVariableOnlyDataAtom atom, Position position) {
-        switch (position) {
-            case SUBJECT:
-                return getRDFAtomPredicate(atom).getSubject(atom.getArguments());
-            case OBJECT:
-                return getRDFAtomPredicate(atom).getObject(atom.getArguments());
-            case PROPERTY:
-                return getRDFAtomPredicate(atom).getProperty(atom.getArguments());
-            default:
-                throw new UnexpectedPositionException(position);
-        }
-    }
-
-    private RDFAtomPredicate getRDFAtomPredicate(DataAtom atom){
-        return Optional.of(atom.getPredicate())
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
-    }
-
-    private class CanonicalTransformerException extends OntopInternalBugException {
-        CanonicalTransformerException(String text) {
-            super(text);
-        }
-    }
-
-    private class UnexpectedPositionException extends CanonicalTransformerException {
-        UnexpectedPositionException(Position pos) {
-            super("Unexpected position: " + pos);
-        }
     }
 
     private class IntensionalQueryMerger extends AbstractIntensionalQueryMerger {
@@ -244,7 +147,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         private final IQ definition;
 
         IntensionalQueryMerger(IQ definition) {
-            super(iqFactory);
+            super(MappingCanonicalTransformerImpl.this.iqFactory);
             this.definition = definition;
         }
 
@@ -261,17 +164,21 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         private class QueryMergingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
             QueryMergingTransformer(VariableGenerator variableGenerator) {
-                super(variableGenerator, iqFactory, substitutionFactory, transformerFactory);
+                super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, substitutionFactory, transformerFactory);
             }
 
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-                if (getPropertyIRI(dataNode.getDataAtom())
+                DataAtom<AtomPredicate> atom =  dataNode.getProjectionAtom();
+                if (Optional.of(atom.getPredicate())
+                        .filter(p -> p instanceof RDFAtomPredicate)
+                        .map(p -> (RDFAtomPredicate) p)
+                        .flatMap(p -> p.getPropertyIRI(atom.getArguments()))
                         .filter(i -> i.equals(Ontop.CANONICAL_IRI))
                         .isPresent()) {
                     return Optional.of(definition);
                 }
-                throw new UnexpectedPredicateException(dataNode.getDataAtom().getPredicate());
+                throw new UnexpectedPredicateException(atom.getPredicate());
             }
 
             @Override
@@ -286,5 +193,4 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
             }
         }
     }
-
 }

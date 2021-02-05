@@ -1,0 +1,35 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--/*@thymesVar id="version" type="java.lang.String"*/-->
+    <title th:text="'Ontop SPARQL endpoint v' + ${version}"></title>
+    <link href='./yasgui/yasgui.min.css' rel='stylesheet' type='text/css'/>
+    <link href='./index.css' rel='stylesheet' type='text/css'/>
+    <script src="./jquery.min.js"></script>
+</head>
+<body>
+<div id="spinner"></div>
+<div id="main">
+    <header>
+        <div id="title">Ontop SPARQL endpoint</div>
+        <div id="info">
+            endpoint address: <span class="yasgui" style="text-decoration: underline;" id="endpoint"></span>
+            <small>|</small>
+            <!--/*@thymesVar id="version" type="java.lang.String"*/-->
+            <span th:text="'ontop v'+${version}"></span>
+        </div>
+    </header>
+
+    <div class="choice-bar" id="switcher">
+    </div>
+
+    <div id="yasguis">
+        <div id='yasgui0'></div>
+    </div>
+</div>
+<script src='./yasgui/yasgui.min.js'></script>
+<script src="./index.js"></script>
+</body>
+</html>

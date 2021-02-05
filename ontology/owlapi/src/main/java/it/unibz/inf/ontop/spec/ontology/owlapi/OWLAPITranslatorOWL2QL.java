@@ -2,12 +2,7 @@ package it.unibz.inf.ontop.spec.ontology.owlapi;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
@@ -20,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static it.unibz.inf.ontop.model.vocabulary.RDF.TYPE;
 
 /**
  * 
@@ -40,14 +37,14 @@ public class OWLAPITranslatorOWL2QL {
 	private static final boolean nestedQualifiedExistentials = true; // TEMPORARY FIX
 
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final RDF rdfFactory;
+    private final IRIConstant rdfType;
 
     @Inject
-    private OWLAPITranslatorOWL2QL(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
+    private OWLAPITranslatorOWL2QL(TermFactory termFactory, RDF rdfFactory) {
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
+        this.rdfType = termFactory.getConstantIRI(TYPE);
     }
 
     public static class TranslationException extends Exception {
@@ -72,7 +69,7 @@ public class OWLAPITranslatorOWL2QL {
         Set<OWLOntology> owls = owl.getOWLOntologyManager().getImportsClosure(owl);
         log.debug("Load ontologies called. Translating {} ontologies.", owls.size());
 
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, termFactory);
         for (OWLOntology o : owls) {
             extractOntoloyVocabulary(o, builder);
         }
@@ -622,7 +619,7 @@ public class OWLAPITranslatorOWL2QL {
         public void visit(OWLDataPropertyAssertionAxiom ax) {
             try {
                 IRIConstant c1 = getIndividual(ax.getSubject());
-                ValueConstant c2 = getValueOfLiteral(ax.getObject());
+                RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
                 DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), builder.dataProperties());
 
                 builder.addDataPropertyAssertion(dpe, c1, c2);
@@ -963,7 +960,7 @@ public class OWLAPITranslatorOWL2QL {
         public void visit(OWLAnnotationAssertionAxiom ax) {
             try {
                 IRIConstant c1 = getIndividual(ax.getSubject());
-                Constant c2 = getValue(ax.getValue());
+                RDFConstant c2 = getValue(ax.getValue());
                 AnnotationProperty ap = getPropertyExpression(ax.getProperty(), builder.annotationProperties());
 
                 builder.addAnnotationAssertion(ap, c1, c2);
@@ -1000,7 +997,7 @@ public class OWLAPITranslatorOWL2QL {
 
     // METHODS FOR TRANSLATING ASSERTIONS (used in OWLAPIABoxIterator)
 
-    public ClassAssertion translate(OWLClassAssertionAxiom ax, OntologyVocabularyCategory<OClass> classes) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLClassAssertionAxiom ax, OntologyVocabularyCategory<OClass> classes) throws TranslationException {
         OWLClassExpression classExpression = ax.getClassExpression();
         if (!(classExpression instanceof OWLClass))
             throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
@@ -1008,67 +1005,71 @@ public class OWLAPITranslatorOWL2QL {
         OClass concept = getOClass((OWLClass) classExpression, classes);
         IRIConstant c = getIndividual(ax.getIndividual());
 
-        return OntologyBuilderImpl.createClassAssertion(concept, c);
+        return RDFFact.createTripleFact(c, rdfType, termFactory.getConstantIRI(concept.getIRI()));
     }
 
-    public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) throws TranslationException, InconsistentOntologyException {
         IRIConstant c1 = getIndividual(ax.getSubject());
         IRIConstant c2 = getIndividual(ax.getObject());
 
         ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty(), objectProperties);
-        return OntologyBuilderImpl.createObjectPropertyAssertion(ope, c1, c2);
+        return RDFFact.createTripleFact(c1, termFactory.getConstantIRI(ope.getIRI()), c2);
     }
 
-    public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
         IRIConstant c1 = getIndividual(ax.getSubject());
-        ValueConstant c2 = getValueOfLiteral(ax.getObject());
+        RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
 
         DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), dataProperties);
-        return OntologyBuilderImpl.createDataPropertyAssertion(dpe, c1, c2);
+        return RDFFact.createTripleFact(c1, termFactory.getConstantIRI(dpe.getIRI()), c2);
     }
 
 
-    public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax, OntologyVocabularyCategory<AnnotationProperty> annotationProperties) throws TranslationException, InconsistentOntologyException {
+    public RDFFact translate(OWLAnnotationAssertionAxiom ax, OntologyVocabularyCategory<AnnotationProperty> annotationProperties) throws TranslationException, InconsistentOntologyException {
 
         IRIConstant c1 = getIndividual(ax.getSubject());
-        Constant c2 = getValue(ax.getValue());
+        RDFConstant c2 = getValue(ax.getValue());
         AnnotationProperty ap = getPropertyExpression(ax.getProperty(), annotationProperties);
 
-        return OntologyBuilderImpl.createAnnotationAssertion(ap, c1, c2);
+        return RDFFact.createTripleFact(c1, termFactory.getConstantIRI(ap.getIRI()), c2);
     }
 
     // PRIVATE METHODS FOR TRANSLATING COMPONENTS OF ASSERTIONS
 
-    private static OClass getOClass(OWLClass clExpression, OntologyVocabularyCategory<OClass> voc) {
-        String uri = clExpression.getIRI().toString();
-        return voc.get(uri);
+    private org.apache.commons.rdf.api.IRI iri2iri(IRI iri) {
+        return rdfFactory.createIRI(iri.toString());
     }
+
+    private OClass getOClass(OWLClass clExpression, OntologyVocabularyCategory<OClass> voc) {
+        return voc.get(iri2iri(clExpression.getIRI()));
+    }
+
 
     /**
      * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
      * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
      */
 
-    private static ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression, OntologyVocabularyCategory<ObjectPropertyExpression> voc) {
+    private ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression, OntologyVocabularyCategory<ObjectPropertyExpression> voc) {
 
         if (opeExpression instanceof OWLObjectProperty) {
-            return voc.get(opeExpression.asOWLObjectProperty().getIRI().toString());
+            return voc.get(iri2iri(opeExpression.asOWLObjectProperty().getIRI()));
         }
         else {
             assert(opeExpression instanceof OWLObjectInverseOf);
 
             OWLObjectInverseOf aux = (OWLObjectInverseOf) opeExpression;
-            return voc.get(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+            return voc.get(iri2iri(aux.getInverse().asOWLObjectProperty().getIRI())).getInverse();
         }
     }
 
-    private static DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression, OntologyVocabularyCategory<DataPropertyExpression> voc)  {
+    private DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression, OntologyVocabularyCategory<DataPropertyExpression> voc)  {
         assert (dpeExpression instanceof OWLDataProperty);
-        return voc.get(dpeExpression.asOWLDataProperty().getIRI().toString());
+        return voc.get(iri2iri(dpeExpression.asOWLDataProperty().getIRI()));
     }
 
-    private static AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap, OntologyVocabularyCategory<AnnotationProperty> voc)  {
-        return voc.get(ap.getIRI().toString());
+    private AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap, OntologyVocabularyCategory<AnnotationProperty> voc)  {
+        return voc.get(iri2iri(ap.getIRI()));
     }
 
 
@@ -1084,13 +1085,12 @@ public class OWLAPITranslatorOWL2QL {
         return termFactory.getConstantIRI(rdfFactory.createIRI(ind.asOWLNamedIndividual().getIRI().toString()));
     }
 
-    private ValueConstant getValueOfLiteral(OWLLiteral object) {
+    private RDFLiteralConstant getValueOfLiteral(OWLLiteral object) {
         if (!object.getLang().isEmpty()) {
-            return termFactory.getConstantLiteral(object.getLiteral(), object.getLang());
+            return termFactory.getRDFLiteralConstant(object.getLiteral(), object.getLang());
         }
         else {
-            RDFDatatype type = typeFactory.getDatatype(rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
-            return termFactory.getConstantLiteral(object.getLiteral(), type);
+            return termFactory.getRDFLiteralConstant(object.getLiteral(), rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
         }
     }
 
@@ -1102,7 +1102,7 @@ public class OWLAPITranslatorOWL2QL {
             throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + subject);
     }
 
-    private Constant getValue(OWLAnnotationValue value)  throws TranslationException {
+    private RDFConstant getValue(OWLAnnotationValue value)  throws TranslationException {
         try {
             if (value instanceof IRI) {
                 return termFactory.getConstantIRI(rdfFactory.createIRI(value.asIRI().get().toString()));
@@ -1246,42 +1246,39 @@ public class OWLAPITranslatorOWL2QL {
 
 
 
+	private Set<org.apache.commons.rdf.api.IRI> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
 
-	private static Set<String> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
-
-        final Set<String> punnedPredicates = new HashSet<>();
+        final Set<org.apache.commons.rdf.api.IRI> punnedPredicates = new HashSet<>();
 
         // add all definitions for classes and properties
         for (OWLClass entity : owl.getClassesInSignature())  {
-            String uri = entity.getIRI().toString();
-            builder.declareClass(uri);
+            builder.declareClass(iri2iri(entity.getIRI()));
         }
 
         for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
-            String uri = prop.getIRI().toString();
-            if (builder.dataProperties().contains(uri))  {
-                punnedPredicates.add(uri);
-                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+            org.apache.commons.rdf.api.IRI iri = iri2iri(prop.getIRI());
+            if (builder.dataProperties().contains(iri))  {
+                punnedPredicates.add(iri);
+                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + iri);
             }
             else {
-                builder.declareObjectProperty(uri);
+                builder.declareObjectProperty(iri);
             }
         }
 
         for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
-            String uri = prop.getIRI().toString();
-            if (builder.objectProperties().contains(uri)) {
-                punnedPredicates.add(uri);
-                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+            org.apache.commons.rdf.api.IRI iri =  iri2iri(prop.getIRI());
+            if (builder.objectProperties().contains(iri)) {
+                punnedPredicates.add(iri);
+                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + iri);
             }
             else {
-                builder.declareDataProperty(uri);
+                builder.declareDataProperty(iri);
             }
         }
 
         for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature()) {
-            String uri = prop.getIRI().toString();
-            builder.declareAnnotationProperty(uri);
+            builder.declareAnnotationProperty(iri2iri(prop.getIRI()));
         }
 
 		return punnedPredicates;

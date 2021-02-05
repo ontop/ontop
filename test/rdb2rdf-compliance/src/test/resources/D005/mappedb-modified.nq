@@ -1,0 +1,9 @@
+_:BobSmith <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/IOUs> .
+_:BobSmith <http://example.com/base/IOUs#fname> "Bob" .
+_:BobSmith <http://example.com/base/IOUs#lname> "Smith" .
+_:BobSmith <http://example.com/base/IOUs#amount> "30.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:SueJones <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/IOUs> .
+_:SueJones <http://example.com/base/IOUs#fname> "Sue" .
+_:SueJones <http://example.com/base/IOUs#lname> "Jones" .
+_:SueJones <http://example.com/base/IOUs#amount> "20.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+	

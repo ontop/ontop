@@ -21,30 +21,26 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 
-import it.unibz.inf.ontop.model.term.Variable;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.*;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
-public class VariableImpl implements Variable, Comparable<Variable> {
-
-	private static final long serialVersionUID = 5723075311798541659L;
+public class VariableImpl extends AbstractNonFunctionalTerm implements Variable, Comparable<Variable> {
 
 	private final String name;
 
 	protected VariableImpl(String name) {
-		if (name == null) {
-			throw new RuntimeException("Variable name cannot be null");
-		}
+		Objects.requireNonNull(name, "Variable name cannot be null");
 		this.name = name;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof Variable)) {
-			return false;
-		}
-		Variable name2 = (Variable) obj;
-		return name.equals(name2.getName());
+	public boolean equals(Object other) {
+		return (other instanceof VariableImpl
+				&& this.name.equals(((VariableImpl) other).name));
 	}
 
 	@Override
@@ -66,11 +62,6 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	}
 
 	@Override
-	public Variable clone() {
-		return this;
-	}
-
-	@Override
 	public boolean isGround() {
 		return false;
 	}
@@ -78,6 +69,37 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of(this);
+	}
+
+	@Override
+	public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+		if (otherTerm instanceof Variable) {
+			return equals(otherTerm)
+					? IncrementalEvaluation.declareIsTrue()
+					: IncrementalEvaluation.declareSameExpression();
+		}
+		else if (otherTerm instanceof ImmutableFunctionalTerm) {
+			// Functional terms are in charge of evaluating other terms
+			return otherTerm.evaluateStrictEq(this, variableNullability);
+		}
+		// Constant
+		else  {
+			return otherTerm.isNull()
+					? IncrementalEvaluation.declareIsNull()
+					: IncrementalEvaluation.declareSameExpression();
+		}
+	}
+
+    @Override
+    public IncrementalEvaluation evaluateIsNotNull(VariableNullability variableNullability) {
+		return variableNullability.isPossiblyNullable(this)
+				? IncrementalEvaluation.declareSameExpression()
+				: IncrementalEvaluation.declareIsTrue();
+    }
+
+    @Override
+	public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
+		return nullableVariables.contains(this);
 	}
 
 	@Override

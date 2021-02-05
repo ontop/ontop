@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -73,14 +72,19 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
      */
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty,
+                Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                         Supplier<Optional<File>> mappingFileSupplier,
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
-                                        Supplier<Optional<File>> constraintFileSupplier)
+                                        Supplier<Optional<File>> constraintFileSupplier,
+                                        Supplier<Optional<File>> dbMetadataFileSupplier,
+                                        Supplier<Optional<Reader>> dbMetadataReaderSupplier,
+                                        Supplier<Optional<File>> ontopViewFileSupplier,
+                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -88,13 +92,17 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                 mappingFileSupplier,
                 mappingReaderSupplier,
                 mappingGraphSupplier,
-                constraintFileSupplier
+                constraintFileSupplier,
+                dbMetadataFileSupplier,
+                dbMetadataReaderSupplier,
+                ontopViewFileSupplier,
+                ontopViewReaderSupplier
         );
     }
 
 
     @Override
-    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException {
         return loadPPMapping(Optional::empty, Optional::empty, Optional::empty);
     }
 
@@ -104,7 +112,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
     Optional<SQLPPMapping> loadPPMapping(Supplier<Optional<File>> mappingFileSupplier,
                                          Supplier<Optional<Reader>> mappingReaderSupplier,
                                          Supplier<Optional<Graph>> mappingGraphSupplier)
-            throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+            throws MappingIOException, InvalidMappingException {
 
         if (options.ppMapping.isPresent()) {
             return options.ppMapping;
@@ -119,6 +127,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
+            // The parser is in charge of closing the reader
             return Optional.of(parser.parse(optionalMappingReader.get()));
         }
         Optional<Graph> optionalMappingGraph = mappingGraphSupplier.get();

@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -29,7 +28,8 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -42,11 +42,14 @@ import java.util.Properties;
  */
 public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ClassicABoxAssertionTestPositiveNoRangeTest.class);
+
 	private OWLConnection conn;
 	private OWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();
+		p.setProperty(OntopModelSettings.CARDINALITY_MODE, "STRICT");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
@@ -66,13 +69,9 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 		TupleOWLResultSet res = st.executeSelectQuery(query);
 		int count = 0;
-		int columns = res.getColumnCount();
 		while (res.hasNext()) {
             final OWLBindingSet bindingSet = res.next();
-            for (int i = 0; i < columns; i++) {
-				OWLObject o = bindingSet.getOWLObject(i+1);
-				System.out.println(o.toString());
-			}
+            LOGGER.info(bindingSet.toString());
 			count += 1;
 		}
 		res.close();

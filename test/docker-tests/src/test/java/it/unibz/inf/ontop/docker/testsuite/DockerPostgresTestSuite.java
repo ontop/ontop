@@ -20,35 +20,38 @@ package it.unibz.inf.ontop.docker.testsuite;
  * #L%
  */
 
-import it.unibz.inf.ontop.docker.QuestVirtualScenarioParent;
-import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
-import junit.framework.Test;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.docker.utils.ManifestTestUtils;
+import it.unibz.inf.ontop.docker.utils.OntopTestCase;
+import it.unibz.inf.ontop.docker.utils.RepositoryRegistry;
+import org.junit.AfterClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public class DockerPostgresTestSuite extends QuestVirtualScenarioParent {
+import java.util.Collection;
 
-	public DockerPostgresTestSuite(String testURI, String name, String queryFileURL, String resultFileURL,
-			String owlFileURL, String obdaFileURL, String parameterFileURL) {
-		super(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
+@RunWith(Parameterized.class)
+public class DockerPostgresTestSuite extends OntopTestCase {
+
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of();
+	private static final RepositoryRegistry REGISTRY = new RepositoryRegistry();
+
+	public DockerPostgresTestSuite(String name, String queryFileURL, String resultFileURL, String owlFileURL,
+								   String obdaFileURL, String parameterFileURL, RepositoryRegistry registry,
+								   ImmutableSet<String> ignoredTests) {
+		super(name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL, registry, ignoredTests);
 	}
 
-	public static Test suite() throws Exception {
-		return ScenarioManifestTestUtils.suite(new Factory() {
-			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL,
-					String resultFileURL, String owlFileURL, String obdaFileURL) {
-				return new DockerPostgresTestSuite(testURI, name, queryFileURL, resultFileURL, owlFileURL,
-						obdaFileURL, "");
-			}
-			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL,
-					String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
-				return new DockerPostgresTestSuite(testURI, name, queryFileURL, resultFileURL, owlFileURL,
-						obdaFileURL, parameterFileURL);
-			}
-			@Override
-			public String getMainManifestFile() {
-				return "/testcases-docker/manifest-scenario-postgres.ttl";
-			}
-		});
+
+	@Parameterized.Parameters(name="{0}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return ManifestTestUtils.parametersFromSuperManifest(
+				"/testcases-docker/manifest-scenario-postgres.ttl",
+				IGNORE, REGISTRY);
+	}
+
+	@AfterClass
+	public static void after() {
+		REGISTRY.shutdown();
 	}
 }

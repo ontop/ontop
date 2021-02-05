@@ -1,5 +1,5 @@
 all-test:
   script:
       - set MAVEN_OPTS="-Xms6000m -Xmx8000m"
-      - mvn install --fail-at-end
-      - cd test/docker-tests && mvn install -Ddocker.url=tom.inf.unibz.it -DskipTests=false --fail-at-end
+      - ./mvnw install --fail-at-end
+      - cd test/docker-tests && ../../mvnw install -Ddocker.url=tom.inf.unibz.it -DskipTests=false --fail-at-end

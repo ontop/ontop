@@ -8,7 +8,7 @@ target		:species/{Genus}/{Species} a :species ; :species_Genus {Genus} ; :specie
 source		select SpecCode, Genus, Species, SpeciesRefNo, Author, FBname, PicPreferredName, FamCode, AnaCat, Comments, Dangerous, DemersPelag, GameFish, GameRef, usedForAquaculture, Aquarium from species
 
 mappingId	Families
-target		:families/{Family} a :families ; :families_FamiliesRefNo {FamiliesRefNo}^^xsd:int ; :families_Activity {Activity} ; :families_Aquarium {Aquarium} ; :families_Freshwater {Freshwater} ; :families_Marine {Marine} ; :families_Species {Species} ; :families_Brackish {Brackish} ; :families_Division {Division} ; :families_Order {FamilyOrder} ; :families_Remark {Remark} ; :families_Family {Family} ; :families_Genera {Genera} ; :families_Class {Class} ; :families_SpeciesCount {SpeciesCount} ; :families_ReprGuild {ReprGuild} .
+target		:families/{Family} a :families ; :families_FamiliesRefNo {FamiliesRefNo}^^xsd:int ; :families_Activity {Activity} ; :families_Aquarium {Aquarium} ; :families_Freshwater {Freshwater}^^xsd:boolean ; :families_Marine {Marine}^^xsd:boolean ; :families_Species {Species} ; :families_Brackish {Brackish}^^xsd:boolean ; :families_Division {Division} ; :families_Order {FamilyOrder} ; :families_Remark {Remark} ; :families_Family {Family} ; :families_Genera {Genera} ; :families_Class {Class} ; :families_SpeciesCount {SpeciesCount} ; :families_ReprGuild {ReprGuild} .
 source		select FamiliesRefNo, Activity, Aquarium, Brackish, Class, Division, Family, FamCode, Genera, Freshwater, Marine, FamilyOrder, Remark, ReprGuild, Species, SpeciesCount from families
 
 mappingId	Collaborators

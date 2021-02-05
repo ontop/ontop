@@ -30,7 +30,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
         private final VariableGenerator variableGenerator;
 
         private TreeTransformer(VariableGenerator variableGenerator) {
-            super(iqFactory);
+            super(UnionFlattenerImpl.this.iqFactory);
             this.variableGenerator = variableGenerator;
         }
 
@@ -51,7 +51,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
             }
             // if the child is a construction node, merge it
             if (transformedChildRoot instanceof ConstructionNode) {
-                return rootCn.liftBinding(
+                return rootCn.normalizeForOptimization(
                         transformedChild,
                         variableGenerator,
                         iqFactory.createIQProperties()
@@ -94,15 +94,17 @@ public class UnionFlattenerImpl implements UnionFlattener {
      */
     @Override
     public IQ optimize(IQ query) {
-        TreeTransformer treeTransformer = new TreeTransformer(query.getVariableGenerator());
-        IQ prev;
+        return iqFactory.createIQ(query.getProjectionAtom(), optimize(query.getTree(), query.getVariableGenerator()));
+    }
+
+    @Override
+    public IQTree optimize(IQTree tree, VariableGenerator variableGenerator) {
+        TreeTransformer treeTransformer = new TreeTransformer(variableGenerator);
+        IQTree prev;
         do {
-            prev = query;
-            query = iqFactory.createIQ(
-                    query.getProjectionAtom(),
-                    query.getTree().acceptTransformer(treeTransformer)
-            );
-        } while (!prev.equals(query));
-        return query;
+            prev = tree;
+            tree = tree.acceptTransformer(treeTransformer);
+        } while (!prev.isEquivalentTo(tree));
+        return prev;
     }
 }

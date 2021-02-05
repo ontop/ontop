@@ -3,7 +3,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-rdf4j-webapps</artifactId>
-        <version>3.0.0-beta-3-SNAPSHOT</version>
+        <version>4.1.0-beta-1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -31,13 +31,6 @@
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-runtime</artifactId>
-            <version>${rdf4j.version}</version>
             <scope>provided</scope>
         </dependency>
 

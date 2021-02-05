@@ -2,7 +2,7 @@
     <parent>
         <artifactId>ontop-mapping</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>3.0.0-beta-3-SNAPSHOT</version>
+        <version>4.1.0-beta-1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -72,6 +72,17 @@
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>owlapi-apibinding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.protege</groupId>
+            <artifactId>org.protege.xmlcatalog</artifactId>
+            <version>1.0.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sourceforge.owlapi</groupId>
+                    <artifactId>owlapi-osgidistribution</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

@@ -29,16 +29,16 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -56,26 +56,10 @@ public class MarriageTest {
 	private static Connection CONNECTION;
 	private static OntopOWLReasoner REASONER;
 
-
 	@BeforeClass
 	public static void setUp() throws Exception {
-
 		CONNECTION = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
-
-		Statement st = CONNECTION.createStatement();
-
-		FileReader reader = new FileReader(CREATE_DB_FILE);
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		CONNECTION.commit();
+		executeFromFile(CONNECTION, CREATE_DB_FILE);
 
 		OntopOWLFactory owlFactory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -114,8 +98,8 @@ public class MarriageTest {
                 "}";
 
         ImmutableSet<String> expectedValues = ImmutableSet.of(
-                "http://example.com/person/1",
-                "http://example.com/person/2"
+                "<http://example.com/person/1>",
+                "<http://example.com/person/2>"
         );
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -140,9 +124,9 @@ public class MarriageTest {
 
 		// All distinct values of x
 		ImmutableSet<String> expectedValues = ImmutableSet.of(
-				"http://example.com/person/1",
-				"http://example.com/person/2",
-				"http://example.com/person/3"
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
 		);
 		checkReturnedValues(queryBind, expectedValues);
 	}
@@ -245,6 +229,92 @@ public class MarriageTest {
 		assertEquals(2, count);
 	}
 
+	@Test
+	public void testOptionallyMarriedToMusician() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?x ?s ?l2 \n" +
+				"WHERE {\n" +
+				"?x :firstName ?l1 .\n" +
+				   "OPTIONAL { \n" +
+				"    ?p :hasSpouse ?s .\n" +
+				"       OPTIONAL {\n" +
+				"        ?s :firstName ?l2 ;\n" +
+				"          a :Musician .\n" +
+				"       }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
+		);
+		checkReturnedValues(query, expectedValues);
+	}
+
+	@Test
+	public void testLJUnion() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?p ?x \n" +
+				"WHERE {\n" +
+				"?p a :Person .\n" +
+				"OPTIONAL { \n" +
+				"    { ?p :firstName ?x . }\n" +
+				"    UNION \n" +
+				"    { ?p :lastName ?x . }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of("Mary", "Bob", "John", "Smith", "Forester", "Doe");
+		checkReturnedValues(query, expectedValues);
+	}
+
+	@Ignore
+	@Test
+	public void testLJJoinUnion() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?p ?x \n" +
+				"WHERE {\n" +
+				"?p a :Person .\n" +
+				"OPTIONAL { \n" +
+				"    { ?p :firstName ?x . }\n" +
+				"    UNION \n" +
+				"    { ?p :lastName ?x . }\n" +
+				"    ?p a :Musician ." +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of("Mary", "Bob", "John", "Smith", "Forester", "Doe");
+		checkReturnedValues(query, expectedValues);
+	}
+
+	@Test
+	public void testEmptyClass1() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?x ?i ?e \n" +
+				"WHERE {\n" +
+				"?x :firstName ?l1 .\n" +
+				"OPTIONAL { \n" +
+				"    ?x :playsInstrument ?i .\n" +
+				"       OPTIONAL {\n" +
+				"         ?e a :EmptyElement .\n " +
+				"         ?r a :Musician \n" +
+				"       }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
+		);
+		checkReturnedValues(query, expectedValues);
+	}
+
     private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 
         // Now we are ready for querying
@@ -257,8 +327,13 @@ public class MarriageTest {
 
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-                returnedValues.add(ind1.toStringID());
+
+				OWLObject value = bindingSet.getOWLObject("x");
+				String stringValue = (value instanceof OWLLiteral)
+						? ((OWLLiteral) value).getLiteral()
+						: (value == null) ? null : value.toString();
+
+                returnedValues.add(stringValue);
             }
         } finally {
             conn.close();

@@ -1,0 +1,13 @@
+@prefix    :        <http://example.org/things#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+:xi1 :p  "1"^^xsd:integer .
+:xi2 :p  "1"^^xsd:integer .
+
+:xd1 :p  "1.0"^^xsd:double .
+:xd2 :p  "1.0"^^xsd:double .
+
+:xp1 :p  "zzz" .
+:xp2 :p  "1" .
+
+:xu :p  :z .

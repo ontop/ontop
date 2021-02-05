@@ -28,10 +28,9 @@ import java.net.URISyntaxException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -52,7 +51,7 @@ public class ParserFileTest extends TestCase {
 
 	public ParserFileTest() {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-				.jdbcUrl("fake_url")
+				.jdbcUrl("jdbc:h2:mem:fake")
 				.jdbcUser("fake_user")
 				.jdbcPassword("fake_password")
 				.build();
@@ -130,9 +129,7 @@ public class ParserFileTest extends TestCase {
 	// ------- Utility methods
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
-
-		RDBMetadata dbMetadata = createDummyMetadata();
-		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 
         /**
          * Problems found in the mapping file.
@@ -152,7 +149,7 @@ public class ParserFileTest extends TestCase {
 		log.debug("=========== " + identifier + " ===========");
 		for (SQLPPTriplesMap axiom : mappings) {
 			String query = axiom.getSourceQuery().toString();
-			boolean result = parse(query, idfac);
+			boolean result = parse(query, builder.getQuotedIDFactory());
 
 			if (!result) {
 				log.error("Cannot parse query: " + query);
@@ -163,7 +160,7 @@ public class ParserFileTest extends TestCase {
 		}
 	}
 
-	private SQLPPMapping load(String file) throws InvalidMappingException, IOException {
+	private SQLPPMapping load(String file)  {
 		final String obdafile = file.substring(0, file.length() - 3) + "obda";
         try {
             return mappingParser.parse(new File(obdafile));

@@ -1,40 +1,37 @@
 # Ontop  
 
-The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project available under the terms of the 
+The [Ontop](http://ontop-vkg.org) framework is an open source project available under the terms of the 
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 3.0.0-beta-3
-* Release date: TO BE DEFINED
-* [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
+* Current version: 4.0.3
+* Release date: 16/10/2020
+* [Changelog](https://ontop-vkg.org/guide/releases.html)
 
 
 ## Main downloads
 
-- `ontop-dist/`: Libraries/scripts to use ontop with the OWLAPI or RDF4J and from the command line.
+- `ontop-cli-[version].zip`: Command line interface of Ontop.
 
-- `ontop-protege/it.unibz.inf.ontop.protege-[version].jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
+- `it.unibz.inf.ontop.protege-[version].jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
 
-- `ontop-webapps/`: WAR files required to create an Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server.
+- `ontop-protege-bundle-[version].zip` : Protege bundled with Ontop. This is a ready-to-run package. Unzip and use the run.sh or run.bat start scripts.
 
-## Bundles
 
-- `ontop-protege-bundle-[version].zip` : Protege 5.2 bundled with Ontop and JDBC plugins. This is ready to run package, unzip and use the run.sh or run.bat start scripts.
+## RDF4J Workbench/Server-based SPARQL Endpoint (DEPRECATED)
 
-- `ontop-jetty/` : Jetty 9 + RDF4J workbench + Ontop ready to run a SPARQL end-point.
+- `ontop-webapps-[version].zip`: (DEPRECATED) WAR files required to create an Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server .
 
-- `ontop-tomcat/` : Tomcat 8 + RDF4J workbench + Ontop ready to run a SPARQL end-point.
+- `ontop-tomcat-bundle-[version].zip` : (DEPRECATED) Tomcat + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
 
-## Samples
-
-- [H2 + tutorial databases](http://sourceforge.net/projects/ontop4obda/files/sample-data/): H2 database server bundled with the databases used in the tutorials. Use this to avoid having to install a database to run the tutorials.
+- `ontop-jetty-bundle-[version].zip` : (DEPRECATED) Jetty + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
 
 ## Links
 
-
-- Official Website: http://ontop.inf.unibz.it/
-- Download: http://sourceforge.net/projects/ontop4obda/files/
-- Document Wiki: https://github.com/ontop/ontop/wiki
+- Official Website: https://ontop-vkg.org
+- Download (Github): https://github.com/ontop/ontop/releases
+- Download (Sourceforge): http://sourceforge.net/projects/ontop4obda/files/
+- Docker Hub: https://hub.docker.com/r/ontop/ontop-endpoint
 - Google Group: https://groups.google.com/forum/#!forum/ontop4obda
 - Source Code: https://github.com/ontop/ontop
 - Facebook: https://www.facebook.com/obdaontop/

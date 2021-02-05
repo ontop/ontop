@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.type.TermType;
 
 public class DistinctVariableOnlyDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate>
         implements DistinctVariableOnlyDataAtom {
@@ -29,4 +30,5 @@ public class DistinctVariableOnlyDataAtomImpl extends AbstractDataAtomImpl<AtomP
     public ImmutableList<Variable> getArguments() {
         return (ImmutableList<Variable>)super.getArguments();
     }
+
 }

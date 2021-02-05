@@ -20,31 +20,37 @@ package it.unibz.inf.ontop.docker.datatypes;
  * #L%
  */
 
-import junit.framework.Test;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.docker.utils.ManifestTestUtils;
+import it.unibz.inf.ontop.docker.utils.OntopTestCase;
+import it.unibz.inf.ontop.docker.utils.RepositoryRegistry;
+import org.junit.AfterClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public class PgsqlDatatypeTest extends QuestDatatypeParent {
+import java.util.Collection;
 
-	public PgsqlDatatypeTest(String testURI, String name, String queryFileURL, String resultFileURL, 
-			String owlFileURL, String obdaFileURL, String parameterFileURL) {
-		super(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
+@RunWith(Parameterized.class)
+public class PgsqlDatatypeTest extends OntopTestCase {
+
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of();
+	private static final RepositoryRegistry REGISTRY = new RepositoryRegistry();
+
+	public PgsqlDatatypeTest(String name, String queryFileURL, String resultFileURL, String owlFileURL, String obdaFileURL,
+							 String parameterFileURL, RepositoryRegistry registry, ImmutableSet<String> ignoredTests) {
+		super(name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL, registry, ignoredTests);
 	}
 
-	public static Test suite() throws Exception {
-		return QuestDatatypeTestUtils.suite(new Factory() {
-			@Override
-			public PgsqlDatatypeTest createQuestDatatypeTest(String testURI, String name, String queryFileURL,
-                                                             String resultFileURL, String owlFileURL, String obdaFileURL) {
-				return new PgsqlDatatypeTest(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
-			}
-			@Override
-			public PgsqlDatatypeTest createQuestDatatypeTest(String testURI, String name, String queryFileURL,
-                                                             String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
-				return new PgsqlDatatypeTest(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
-			}
-			@Override
-			public String getMainManifestFile() {
-				return "/testcases-docker/manifest-datatype-pgsql.ttl";
-			}
-		});
+	@Parameterized.Parameters(name="{0}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return ManifestTestUtils.parametersFromSuperManifest(
+				"/testcases-docker/manifest-datatype-pgsql.ttl",
+				IGNORE, REGISTRY);
+	}
+
+
+	@AfterClass
+	public static void after() {
+		REGISTRY.shutdown();
 	}
 }

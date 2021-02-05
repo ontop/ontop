@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,31 +25,33 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  */
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.eclipse.rdf4j.common.net.ParsedIRI;
+
 
 public class R2RMLVocabulary {
 
-	/**
-	 * Returns true if the passed string is a resource.
+    /**
+	 * Returns true if the passed string is an absolute IRI (possibly a template).
 	 *
-	 * @param resource
-	 * @return
      */
-    public static final boolean isResourceString(String resource) {
-		return 	resource.startsWith("http://")
-				|| resource.startsWith("https://")
-				|| resource.startsWith("urn:");
+    public static boolean isAbsolute(String resource) {
+		int index = resource.indexOf('{');
+    	String prefix = index >= 0 ? resource.substring(0, index) : resource;
+		try {
+			return ParsedIRI.create(prefix).isAbsolute();
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
 
 	/**
 	 * Pre-pends the passed resource string with a default prefix in order
 	 * to make it into a valid URI.
 	 *
-	 * @param resource
-	 * @return
      */
-    public static final String prefixUri(String resource) {
-		if ( !isResourceString(resource)) {
-			return "http://example.com/base/" + resource;
+    public static String resolveIri(String resource, String baseIRI) {
+		if ( !isAbsolute(resource)) {
+			return baseIRI + resource;
 		} else {
 			return resource;
 		}
@@ -57,7 +59,7 @@ public class R2RMLVocabulary {
 
 	public static final RDF4J rdf4j = new RDF4J();
 	public static final IRI TriplesMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#TriplesMap");
-	
+
 	public static final IRI logicalTable = rdf4j.createIRI("http://www.w3.org/ns/r2rml#logicalTable");
 	public static final IRI tableName = rdf4j.createIRI("http://www.w3.org/ns/r2rml#tableName");
 	public static final IRI baseTableOrView = rdf4j.createIRI("http://www.w3.org/ns/r2rml#baseTableOrView");
@@ -74,6 +76,7 @@ public class R2RMLVocabulary {
 	public static final IRI refObjectMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#refObjectMap");
 	public static final IRI graphMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#graphMap");
 	public static final IRI graph = rdf4j.createIRI("http://www.w3.org/ns/r2rml#graph");
+	public static final IRI defaultGraph = rdf4j.createIRI("http://www.w3.org/ns/r2rml#defaultGraph");
 
 	public static final IRI predicate = rdf4j.createIRI("http://www.w3.org/ns/r2rml#predicate");
 	public static final IRI template = rdf4j.createIRI("http://www.w3.org/ns/r2rml#template");

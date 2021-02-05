@@ -3,106 +3,104 @@ package it.unibz.inf.ontop.spec.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
-import it.unibz.inf.ontop.spec.dbschema.impl.BasicPreProcessedImplicitRelationalDBConstraintExtractor;
-import org.junit.Before;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.spec.dbschema.impl.ImplicitDBConstraintsProviderFactoryImpl;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ImplicitDBConstraintsTest {
 
-	private BasicDBMetadata md;
-	private QuotedIDFactory idfac;
+	private static final String DIR = "src/test/resources/userconstraints/";
+	private static final MetadataProvider md;
 
-	private static PreProcessedImplicitRelationalDBConstraintExtractor CONSTRAINT_EXTRACTOR = Guice.createInjector()
-			.getInstance(BasicPreProcessedImplicitRelationalDBConstraintExtractor.class);
-	
-	@Before
-	public void setupMetadata(){
-		this.md = createDummyMetadata();
-		this.idfac = md.getQuotedIDFactory();
+	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
+			.getInstance(ImplicitDBConstraintsProviderFactoryImpl.class);
 
-		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		td.addAttribute(idfac.createAttributeID("KEYNAME"), 0, null, false); // from 1
+	private static final NamedRelationDefinition TABLENAME, TABLE2;
 
-		DatabaseRelationDefinition td2 = md.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
-		td2.addAttribute(idfac.createAttributeID("KEY1"), 0, null, false);  // from 1
-		td2.addAttribute(idfac.createAttributeID("KEY2"), 0, null, false);
+	static {
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+		DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
+
+		TABLENAME = builder.createDatabaseRelation("TABLENAME",
+			"KEYNAME", stringDBType, false);
+
+		TABLE2 = builder.createDatabaseRelation( "TABLE2",
+			"KEY1", stringDBType, false,
+			"KEY2", stringDBType, false);
+
+		md = builder.build();
 	}
 	
 	@Test
-	public void testEmptyUserConstraints() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
-				new File("src/test/resources/userconstraints/empty_constraints.lst"));
+	public void testEmptyUserConstraints() throws MetadataExtractionException {
+		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
+				Optional.of(new File(DIR + "empty_constraints.lst")), md);
 
-		Set<RelationID> refs = uc.getReferredTables(idfac);
-		assertTrue(refs.size() == 0);
+		List<RelationID> refs = uc.getRelationIDs();
+		assertEquals(2, refs.size());
 	}
 
 	@Test
-	public void testUserPKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
-				new File("src/test/resources/userconstraints/pkeys.lst"));
-		Set<RelationID> refs = uc.getReferredTables(idfac);
-		assertTrue(refs.size() == 0);
+	public void testPKeys() throws MetadataExtractionException {
+		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
+				Optional.of(new File(DIR + "pkeys.lst")), md);
+		List<RelationID> refs = uc.getRelationIDs();
+		assertEquals(2, refs.size());
 	}
 
 	@Test
-	public void testAddPrimaryKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
-				new File("src/test/resources/userconstraints/pkeys.lst"));
-		uc.insertUniqueConstraints(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		Attribute attr = dd.getAttribute(idfac.createAttributeID("KEYNAME"));
-		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr)));
+	public void testAddPrimaryKeys() throws MetadataExtractionException {
+		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
+				Optional.of(new File(DIR + "pkeys.lst")), md);
+		uc.insertIntegrityConstraints(TABLENAME, uc);
+		Attribute attr = TABLENAME.getAttribute(1);
+		assertEquals(ImmutableList.of(attr), TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
 
 
 	@Test
-	public void testGetReferredTables() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
-				new File("src/test/resources/userconstraints/fkeys.lst"));
-		Set<RelationID> refs = uc.getReferredTables(idfac);
-		assertTrue(refs.size() == 1);
-		assertTrue(refs.contains(idfac.createRelationID(null, "TABLE2")));
+	public void testTables() throws MetadataExtractionException {
+		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
+				Optional.of(new File(DIR + "fkeys.lst")), md);
+		List<RelationID> refs = uc.getRelationIDs();
+		assertEquals(2, refs.size());
+		assertTrue(refs.contains(md.getQuotedIDFactory().createRelationID( "TABLE2")));
 	}
 
 	@Test
-	public void testAddForeignKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
-				new File("src/test/resources/userconstraints/fkeys.lst"));
-		uc.insertForeignKeyConstraints(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
-		assertTrue(fk != null);
-		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(),
-				idfac.createRelationID(null, "TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createAttributeID("KEY1"));
+	public void testAddForeignKeys() throws MetadataExtractionException {
+		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
+				Optional.of(new File(DIR + "fkeys.lst")), md);
+		uc.insertIntegrityConstraints(TABLENAME, uc);
+		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
+		assertNotNull(fk);
+		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
+		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((NamedRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
 	}
 
 	@Test
-	public void testAddKeys() throws ImplicitDBContraintException {
-		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
-				new File("src/test/resources/userconstraints/keys.lst"));
-		uc.insertUniqueConstraints(this.md);
-		uc.insertForeignKeyConstraints(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
-		assertTrue(fk != null);
-		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(),
-						idfac.createRelationID(null, "TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createAttributeID("KEY1"));
-		assertEquals(dd.getUniqueConstraints().get(0).getAttributes(),
-							ImmutableList.of(dd.getAttribute(idfac.createAttributeID("KEYNAME"))));
+	public void testAddKeys() throws MetadataExtractionException {
+		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
+				Optional.of(new File(DIR + "keys.lst")), md);
+		uc.insertIntegrityConstraints(TABLENAME, uc);
+		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
+		assertNotNull(fk);
+		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
+		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((NamedRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
+		assertEquals(ImmutableList.of(TABLENAME.getAttribute(1)),
+				TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
-
-	
 }

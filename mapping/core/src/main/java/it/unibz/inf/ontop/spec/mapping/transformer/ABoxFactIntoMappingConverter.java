@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.OntologyABox;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 
 public interface ABoxFactIntoMappingConverter {
 
-    Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher);
+    ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> assertions, boolean isOntologyAnnotationQueryingEnabled);
 }

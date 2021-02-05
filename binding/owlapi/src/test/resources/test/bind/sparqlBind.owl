@@ -35,6 +35,9 @@
      <Declaration>
         <DataProperty IRI="http://example.org/ns#pubYear"/>
     </Declaration>
+         <Declaration>
+            <DataProperty IRI="http://example.org/ns#pubDate"/>
+        </Declaration>
      <Declaration>
         <DataProperty IRI="http://purl.org/dc/elements/1.1/description"/>
      </Declaration>

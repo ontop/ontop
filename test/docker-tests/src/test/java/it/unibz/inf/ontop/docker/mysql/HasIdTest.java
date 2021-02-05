@@ -1,11 +1,17 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.*;
 
@@ -15,18 +21,34 @@ import static org.junit.Assert.*;
  */
 public class HasIdTest extends AbstractVirtualModeTest {
 
-    static final String owlFileName = "/mysql/pullOutEq/pullOutEq.ttl";
-    static final String obdaFileName = "/mysql/pullOutEq/pullOutEq.obda";
-    static final String propertyFileName = "/mysql/pullOutEq/pullOutEq.properties";
+    private static final String owlFileName = "/mysql/pullOutEq/pullOutEq.ttl";
+    private static final String obdaFileName = "/mysql/pullOutEq/pullOutEq.obda";
+    private static final String propertyFileName = "/mysql/pullOutEq/pullOutEq.properties";
 
-    public HasIdTest() {
-        super(owlFileName, obdaFileName, propertyFileName);
+    private static OntopOWLReasoner REASONER;
+    private static OntopOWLConnection CONNECTION;
+
+    @BeforeClass
+    public static void before() throws OWLOntologyCreationException {
+        REASONER = createReasoner(owlFileName, obdaFileName, propertyFileName);
+        CONNECTION = REASONER.getConnection();
+    }
+
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
 
     private TupleOWLResultSet runLocalQuery(String query) throws OWLException {
 
-        OWLStatement st = conn.createStatement();
+        OWLStatement st = createStatement();
         return st.executeSelectQuery(query);
     }
 
@@ -43,9 +65,9 @@ public class HasIdTest extends AbstractVirtualModeTest {
         // At least one result
         assertTrue(results.hasNext());
         final OWLBindingSet bindingSet = results.next();
-        assertEquals(bindingSet.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
-        assertEquals(bindingSet.getOWLLiteral(2), null);
-        assertEquals(bindingSet.getOWLLiteral(3), null);
+        assertEquals(bindingSet.getOWLIndividual("p").toString(), "<http://example.com/persons/3>");
+        assertNull(bindingSet.getOWLLiteral("firstName"));
+        assertNull(bindingSet.getOWLLiteral("lastName"));
         assertFalse(results.hasNext());
     }
 }

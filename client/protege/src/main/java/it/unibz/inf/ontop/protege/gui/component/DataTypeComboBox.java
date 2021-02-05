@@ -20,35 +20,33 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 public class DataTypeComboBox extends JComboBox {
 
 	private static final long serialVersionUID = 1L;
 	
-	public DataTypeComboBox(TermFactory termFactory) {
-		super(getQuestDataTypePredicates(termFactory));
+	public DataTypeComboBox() {
+		super(getQuestDataTypes());
 		setRenderer(new DataTypeRenderer());
 		setPreferredSize(new Dimension(130, 23));
 		setSelectedIndex(-1);
 	}
 	
-	private static Predicate[] getQuestDataTypePredicates(TermFactory termFactory) {
+	private static IRI[] getQuestDataTypes() {
 
 		// TODO: complete?
-		List<Predicate> prediacteList = Stream.of(
+		ImmutableList<IRI> datatypeList = ImmutableList.of(
 				XSD.BASE64BINARY,
 				XSD.BOOLEAN,
 				XSD.BYTE,
@@ -72,15 +70,12 @@ public class DataTypeComboBox extends JComboBox {
 				XSD.UNSIGNED_BYTE,
 				XSD.UNSIGNED_INT,
 				XSD.UNSIGNED_LONG,
-				XSD.UNSIGNED_SHORT)
-				.map(termFactory::getRequiredTypePredicate)
-				.collect(Collectors.toList());
-
+				XSD.UNSIGNED_SHORT);
 		
-		int length = prediacteList.size() + 1;
-		Predicate[] dataTypes = new Predicate[length];
+		int length = datatypeList.size() + 1;
+		IRI[] dataTypes = new IRI[length];
 		dataTypes[0] = null;
-		System.arraycopy(prediacteList.toArray(), 0, dataTypes, 1, prediacteList.size());
+		System.arraycopy(datatypeList.toArray(), 0, dataTypes, 1, datatypeList.size());
 		return dataTypes;
 	}
 
@@ -95,9 +90,9 @@ public class DataTypeComboBox extends JComboBox {
 				setText("<Undefined data type>");
 				setIcon(null);
 			} else {
-				if (value instanceof Predicate) {
-					Predicate item = (Predicate) value;
-					String name = item.toString();
+				if (value instanceof IRI) {
+					IRI item = (IRI) value;
+					String name = item.getIRIString();
 					if (name.contains(XSD.PREFIX)) {
 						name = name.replace(XSD.PREFIX, OntopInternal.PREFIX_XSD);
 					} else if (name.contains(RDFS.PREFIX)) {

@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.owlapi.example;
  */
 
 
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -77,11 +77,10 @@ public class QuestOWLExample_NoReplace {
 
             long t1 = System.currentTimeMillis();
             TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-            int columnSize = rs.getColumnCount();
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                for (int idx = 1; idx <= columnSize; idx++) {
-                    OWLObject binding = bindingSet.getOWLObject(idx);
+                for (String name: rs.getSignature()) {
+                    OWLObject binding = bindingSet.getOWLObject(name);
                     System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");
                 }
                 System.out.print("\n");
@@ -92,7 +91,7 @@ public class QuestOWLExample_NoReplace {
 			/*
              * Print the query summary
 			 */
-            ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
+            IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
             System.out.println();
             System.out.println("The input SPARQL query:");

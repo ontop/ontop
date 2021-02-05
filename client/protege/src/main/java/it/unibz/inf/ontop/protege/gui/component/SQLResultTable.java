@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.gui.component;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,57 +41,61 @@ public class SQLResultTable extends JTable {
 	private static final long serialVersionUID = -7327949276473574914L;
 
 	private int selectedColumn;
-	
+
 	public SQLResultTable() {
 		super();
 		setAutoscrolls(false);
 		setColumnSelectionAllowed(true);
 		setCellSelectionEnabled(true);
 		setDefaultRenderer(String.class, new ColumnHighlightRenderer());
-		
+
 		setPreferredScrollableViewportSize(getPreferredSize());
 		setIntercellSpacing(new Dimension(1, 1));
-		
+
 		JTableHeader tableHeader = getTableHeader();
 		tableHeader.setReorderingAllowed(false);
 		tableHeader.setDefaultRenderer(new HeaderHighlightRenderer());
 		tableHeader.addMouseListener(new ColumnHeaderAdapter(this));
 	}
-	
+
 	public void setColumnOnSelect(int index) {
 		selectedColumn = index;
 	}
-	
+
 	public int getColumnOnSelect() {
 		return selectedColumn;
 	}
-	
+
 	/**
 	 * An adapter class to capture the column index when user selects the table header
 	 */
 	class ColumnHeaderAdapter extends MouseAdapter {
-		
+
 		private SQLResultTable table;
-		
+
 		private JTextField textFieldOnFocus;
-		
+
 		public ColumnHeaderAdapter(SQLResultTable table) {
 			this.table = table;
 		}
 
 		@Override
 		public void mousePressed(MouseEvent e) {
+			if (e.getClickCount() == 1){
+				return;
+			}
+			// DOUBLE CLICK!
 			JTableHeader header = table.getTableHeader();
 			int index = header.columnAtPoint(e.getPoint());
 			table.setColumnOnSelect(index);
 			table.repaint();
 			header.repaint();
-			
+
 			// Find any text field component that is on focus and put the table header name there
 			Container parent = findParentContainer(table);
 			Component compOnFocus = findFocus(parent);
 			if (compOnFocus != null) {
-				if (!(compOnFocus instanceof JComboBox) && compOnFocus instanceof JTextField) {
+				if (compOnFocus instanceof JTextField) {
 					textFieldOnFocus = (JTextField) compOnFocus;
 					String existingText = getExistingText();
 					if (existingText.isEmpty()) {
@@ -103,7 +107,7 @@ public class SQLResultTable extends JTable {
 							String firstPortion = existingText.substring(0, caretPosition);
 							String secondPortion = existingText.substring(caretPosition, existingText.length());
 							String columnName = table.getColumnName(index);
-							
+
 							// Append all the texts
 							String text = String.format("%s{%s}%s", firstPortion, columnName, secondPortion);
 							textFieldOnFocus.setText(text);
@@ -117,7 +121,7 @@ public class SQLResultTable extends JTable {
 		private boolean hasPrefix(String input) {
 			// If contains prefix string, e.g., &example;person#
 			String prefix = input.substring(0, input.indexOf(":") + 1);
-			return (prefix.isEmpty()) ? false : true;
+			return !prefix.isEmpty();
 		}
 
 		private boolean writtenInFullUri(String input) {
@@ -133,7 +137,7 @@ public class SQLResultTable extends JTable {
 				return existingText;
 			}
 		}
-		
+
 		private Container findParentContainer(Component c) {
 			boolean loop = true;
 			Component comp = c;
@@ -152,7 +156,7 @@ public class SQLResultTable extends JTable {
 			}
 			return null;
 		}
-		
+
 		private Component findFocus(Container c) {
 			Component comps[] = c.getComponents();
 			for (int i = 0; i < comps.length; i++) {
@@ -180,32 +184,32 @@ public class SQLResultTable extends JTable {
 		public ColumnHighlightRenderer() {
 			super();
 		}
-		
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-			
+
 			SQLResultTable resultTable = (SQLResultTable) table;
-			if (resultTable.getColumnOnSelect() == col) {
-				setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
-			} else {
+//			if (resultTable.getColumnOnSelect() == col) {
+//				setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+//			} else {
 				setBackground(UIManager.getDefaults().getColor("Table.background"));
-			}
+//			}
 			return this;
 		}
 	}
-	
+
 	/**
 	 * A custom cell renderer to highlight the table header when selected
 	 */
 	class HeaderHighlightRenderer extends DefaultTableCellRenderer {
-		
+
 		private static final long serialVersionUID = 1L;
-		
+
 		public HeaderHighlightRenderer() {
 			super();
 		}
-		
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);

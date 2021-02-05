@@ -10,6 +10,8 @@ public interface QueryNodeVisitor {
 
     void visit(ConstructionNode constructionNode);
 
+    void visit(AggregationNode aggregationNode);
+
     void visit(UnionNode unionNode);
 
     void visit(InnerJoinNode innerJoinNode);

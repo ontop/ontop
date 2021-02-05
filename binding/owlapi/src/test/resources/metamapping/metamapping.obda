@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+
+
+[MappingDeclaration] @collection [[
+mappingId	Name
+target		:Broker-{id} a :Broker ; a :BrokerClass-{ID} .
+source		select broker.id from broker
+
+]]
+

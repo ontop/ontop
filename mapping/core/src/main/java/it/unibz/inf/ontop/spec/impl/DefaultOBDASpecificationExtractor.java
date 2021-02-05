@@ -1,13 +1,15 @@
 package it.unibz.inf.ontop.spec.impl;
 
+import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBMetadata;
+import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBParameters;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -31,26 +33,33 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+    public OBDASpecification extract(@Nonnull OBDASpecInput specInput,
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
 
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
-                specInput, dbMetadata, optionalOntology, executorRegistry);
-
-        return mappingTransformer.transform(
-                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
+        try {
+            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(specInput, optionalOntology);
+            return mappingTransformer.transform(
+                    mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
+        }
+        catch (MetadataExtractionException e) {
+            throw new MappingIOException(e);
+        }
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping,
-                                     @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> optionalOntology,
+    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping,
+                                     @Nonnull Optional<Ontology> optionalOntology,
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
-                ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
+        try {
+            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, optionalOntology);
 
-        return mappingTransformer.transform(
-                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
+            return mappingTransformer.transform(
+                    mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
+        }
+        catch (MetadataExtractionException e) {
+            throw new MappingIOException(e);
+        }
     }
 }

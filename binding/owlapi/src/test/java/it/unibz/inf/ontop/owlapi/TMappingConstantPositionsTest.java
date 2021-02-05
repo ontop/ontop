@@ -20,138 +20,31 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import com.google.common.collect.ImmutableList;
+import org.junit.*;
 
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import junit.framework.TestCase;
-import org.junit.Test;
+public class TMappingConstantPositionsTest extends AbstractOWLAPITest {
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-
-/***
- */
-
-public class TMappingConstantPositionsTest extends TestCase {
-	private Connection conn;
-
-	final String owlfile = "src/test/resources/test/tmapping-positions.owl";
-	final String obdafile = "src/test/resources/test/tmapping-positions.obda";
-
-	String url = "jdbc:h2:mem:questjunitdb";
-	String username = "sa";
-	String password = "";
-
-	@Override
-	public void setUp() throws Exception {
-		
-		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
-
-
-		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/tmapping-positions-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
-
+	@BeforeClass
+	public static void setUp() throws Exception {
+		initOBDA("/test/tmapping-positions-create-h2.sql",
+				"/test/tmapping-positions.obda",
+				"/test/tmapping-positions.owl");
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
-	
-			dropTables();
-			conn.close();
-		
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/tmapping-positions-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
-	}
-
-	private void runTests(Properties p) throws Exception {
-
-		// Creating a new instance of the reasoner
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(obdafile)
-				.ontologyFile(owlfile)
-				.properties(p)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.enableTestMode()
-				.build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
-
-		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
-		
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
-
-		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
-		try {
-			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			for (int i = 0; i < 3; i++){
-				assertTrue(rs.hasNext());
-				rs.next();
-			}
-			assertFalse(rs.hasNext());
-		}
-		catch (Exception e) {
-			throw e;
-		} 
-		finally {
-			st.close();
-		}
+		release();
 	}
 
 	@Test
 	public void testViEqSig() throws Exception {
+		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> " +
+				"SELECT * WHERE { ?x a :A. }";
 
-		Properties p = new Properties();
-		// p.put(OPTIMIZE_EQUIVALENCES, "true");
-
-		runTests(p);
+		checkReturnedValues(query, "x", ImmutableList.of(
+				"<http://example.org/2>",
+				"<http://example.org/3>",
+				"<http://example.org/1>"));
 	}
-
-
 }

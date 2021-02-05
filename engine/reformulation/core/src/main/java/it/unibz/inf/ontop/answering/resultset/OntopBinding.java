@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.answering.resultset;
 
-import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.term.Constant;
-import org.eclipse.rdf4j.query.Binding;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 
 public interface OntopBinding {
     /**
@@ -18,5 +16,5 @@ public interface OntopBinding {
      *
      * @return The value of the binding, never <tt>null</tt>.
      */
-    Constant getValue() throws OntopResultConversionException;
+    RDFConstant getValue();
 }

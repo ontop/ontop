@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.ontology;
 
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+
+import java.util.stream.Stream;
 
 public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 
@@ -14,7 +16,7 @@ public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 	
 	T getCanonicalForm(T v);
 	
-	Set<Equivalences<T>> getDirectSub(Equivalences<T> v);
+	ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v);
 
 	/**
 	 * Reflexive and transitive closure of the sub-description relation
@@ -22,16 +24,18 @@ public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 	 * @return equivalence sets for all sub-descriptions (including v)
 	 */
 	
-	Set<Equivalences<T>> getSub(Equivalences<T> v);
+	ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v);
 
-	Set<Equivalences<T>> getDirectSuper(Equivalences<T> v);
+	ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v);
 
-	Set<T> getSubRepresentatives(T v);
+	ImmutableSet<T> getSubRepresentatives(T v);
 	
 	/**
 	 * Reflexive and transitive closure of the super-description relation
 	 * @param v: an equivalence set of a description (a property or a class)
 	 * @return equivalence sets for all super-descriptions (including v)
 	 */
-	Set<Equivalences<T>> getSuper(Equivalences<T> v);
+	ImmutableSet<Equivalences<T>> getSuper(Equivalences<T> v);
+
+	Stream<Equivalences<T>> stream();
 }

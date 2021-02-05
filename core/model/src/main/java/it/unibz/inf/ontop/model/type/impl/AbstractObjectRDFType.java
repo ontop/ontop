@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 public class AbstractObjectRDFType extends RDFTermTypeImpl implements ObjectRDFType {
 
     private AbstractObjectRDFType(TermTypeAncestry parentAncestry) {
-        super("IRI or Bnode", parentAncestry, true);
+        super("IRI or Bnode", parentAncestry);
     }
 
     @Override

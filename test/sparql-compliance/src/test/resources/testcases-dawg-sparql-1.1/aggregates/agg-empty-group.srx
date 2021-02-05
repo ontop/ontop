@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+	<head>
+		<variable name="max"/>
+	</head>
+	<results>
+	    # Benjamin Cogrel 12/08/19: test fixed: there should be no result because there are grouping variables
+		<!--result>
+		</result-->
+	</results>
+</sparql>

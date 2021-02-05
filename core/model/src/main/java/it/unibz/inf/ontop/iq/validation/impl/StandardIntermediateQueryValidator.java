@@ -55,6 +55,11 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         }
 
         @Override
+        public void visit(AggregationNode aggregationNode) {
+            // TODO: shall we implement it? Only relevant for IntermediateQuery
+        }
+
+        @Override
         public void visit(UnionNode unionNode) {
             if (query.getChildren(unionNode).size() < 2) {
                 throw new InvalidIntermediateQueryException("UNION node " + unionNode

@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.substitution;
 
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
@@ -17,6 +20,10 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
      */
     <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename);
 
+    DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
+            throws ConversionException;
+
+
     /**
      * { (x,y) | (x,y) \in (this o otherSubstitution), x not excluded }
      *
@@ -29,4 +36,7 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
      */
     Optional<InjectiveVar2VarSubstitution> composeWithAndPreserveInjectivity(InjectiveVar2VarSubstitution otherSubstitution,
                                                                              Set<Variable> variablesToExcludeFromTheDomain);
+
+    @Override
+    InjectiveVar2VarSubstitution reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
 }

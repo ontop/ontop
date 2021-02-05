@@ -1,0 +1,21 @@
+[PrefixDeclaration]
+:		http://it.unibz.inf/obda/test/simple#
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-A
+target		GRAPH <http://www.ciao.it> { :{id} a :A . }
+source		SELECT id FROM TABLE1 WHERE id < 5
+
+mappingId	mapping-B
+target		GRAPH <http://www.ciao.it> { :{id} a :B . }
+source		SELECT id FROM TABLE1 WHERE id = 7
+
+mappingId	mapping-C-P
+target		GRAPH <http://www.ciao.it/{id}> { :{id} a :C ; :P :{attr1} . }
+source		SELECT id, attr1 FROM TABLE1
+
+mappingId	mapping-P-default-graph
+target		:{id} :P :{attr1} .
+source		SELECT id, attr1 FROM TABLE1
+]]
+

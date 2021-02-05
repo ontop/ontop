@@ -13,54 +13,46 @@ public class OntopQueryTest {
 
     @Test
     public void testOntopQueryCMD (){
-        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("query", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
-                "-q", "src/test/resources/books/q1.rq"};
-        Ontop.main(argv);
+                "-q", "src/test/resources/books/q1.rq");
     }
 
 
     @Test
     public void testOntopQueryCMD_Out (){
-        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("query", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-q", "src/test/resources/books/q1.rq",
-                "-o", "src/test/resources/output/q1-answer.csv"};
-        Ontop.main(argv);
+                "-o", "src/test/resources/output/q1-answer.csv");
     }
 
     @Test
     public void testOntopQueryR2RML (){
-        String[] argv = {"query", "-m", "src/test/resources/books/exampleBooks.ttl",
+        Ontop.main("query", "-m", "src/test/resources/books/exampleBooks.ttl",
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
-                "-q", "src/test/resources/books/q1.rq"};
-        Ontop.main(argv);
+                "-q", "src/test/resources/books/q1.rq");
     }
 
     @Test
     public void testOntopQueryR2RML_noOntology (){
-        String[] argv = {"query",
+        Ontop.main("query",
                 "-m", "src/test/resources/books/exampleBooks.ttl",
                 "-p", "src/test/resources/books/exampleBooks.properties",
-                "-q", "src/test/resources/books/q1.rq"};
-        Ontop.main(argv);
+                "-q", "src/test/resources/books/q1.rq");
     }
 
     @Ignore("too expensive")
     @Test
     public void testOntopQueryAnnotations_Ontology (){
-        String[] argv = {"query",
+        Ontop.main("query",
                 "-m", "src/test/resources/pgsql/annotation/doid.obda",
                 "-t", "src/test/resources/pgsql/annotation/doid.owl",
                 "-q", "src/test/resources/pgsql/annotation/q1.q",
-                "--enable-annotations"
-        };
-        Ontop.main(argv);
+                "--enable-annotations");
      }
-
-
 
 }

@@ -1,190 +1,127 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.model.term.ObjectConstant;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
+import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
-import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
-import org.apache.commons.rdf.api.IRI;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
 
-    private final Datalog2QueryMappingConverter datalog2QueryMappingConverter;
-    private final SpecificationFactory mappingFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactIntoMappingConverter.class);
-    private final AtomFactory atomFactory;
-    private final TermFactory termFactory;
-    private final DatalogFactory datalogFactory;
-    private final ImmutabilityTools immutabilityTools;
+
+    private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
+
+    private final DistinctVariableOnlyDataAtom tripleAtom;
+    private final DistinctVariableOnlyDataAtom quadAtom;
+    private final RDFAtomPredicate rdfAtomPredicate;
 
     @Inject
-    public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
-                                              SpecificationFactory mappingFactory, AtomFactory atomFactory,
-                                              TermFactory termFactory, DatalogFactory datalogFactory,
-                                              ImmutabilityTools immutabilityTools) {
-        this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
-        this.mappingFactory = mappingFactory;
-        this.atomFactory = atomFactory;
-        this.termFactory = termFactory;
-        this.datalogFactory = datalogFactory;
-        this.immutabilityTools = immutabilityTools;
+    public LegacyABoxFactIntoMappingConverter(CoreSingletons coreSingletons) {
+
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+
+        VariableGenerator projectedVariableGenerator = coreSingletons
+                .getCoreUtilsFactory().createVariableGenerator(ImmutableSet.of());
+        tripleAtom = coreSingletons.getAtomFactory().getDistinctTripleAtom(
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable());
+
+        quadAtom = coreSingletons.getAtomFactory().getDistinctQuadAtom(
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable());
+
+        rdfAtomPredicate = (RDFAtomPredicate) tripleAtom.getPredicate();
     }
 
     @Override
-    public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled,
-                           UriTemplateMatcher uriTemplateMatcher) {
+    public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts, boolean isOntologyAnnotationQueryingEnabled) {
 
-        List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
-                ontology.getAnnotationAssertions() :
-                Collections.emptyList();
+        ImmutableList<MappingAssertion> assertions = facts.stream()
+                .map(fact -> new MappingAssertion(
+                                fact.isClassAssertion()
+                                        ? MappingAssertionIndex.ofClass(rdfAtomPredicate,
+                                            Optional.of(fact.getClassOrProperty())
+                                                    .filter(c -> c instanceof IRIConstant)
+                                                    .map(c -> ((IRIConstant) c).getIRI())
+                                                    .orElseThrow(() -> new RuntimeException(
+                                                            "TODO: support bnode for classes as mapping assertion index")))
+                                        : MappingAssertionIndex.ofProperty(rdfAtomPredicate, fact.getProperty().getIRI()),
+                                    createIQ(fact),
+                                    new ABoxFactProvenance(fact)))
+                .collect(ImmutableCollectors.toList());
 
-        // Mutable !!
-//        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(Stream.empty());
+        LOGGER.debug("Appended {} assertions as fact rules", facts.size());
 
-        ImmutableList<CQIE> rules = convertAssertions(
-                ontology.getClassAssertions(),
-                ontology.getObjectPropertyAssertions(),
-                ontology.getDataPropertyAssertions(),
-                annotationAssertions,
-                uriTemplateMatcher
-        );
-
-        return datalog2QueryMappingConverter.convertMappingRules(
-                rules,
-                mappingFactory.createMetadata(
-                        //TODO: parse the ontology prefixes ??
-                        mappingFactory.createPrefixManager(ImmutableMap.of()),
-                        uriTemplateMatcher
-                ));
+        return assertions;
     }
 
-    /***
-     * Adding ontology assertions (ABox) as rules (facts, head with no body).
-     */
-    private ImmutableList<CQIE> convertAssertions(Iterable<ClassAssertion> cas,
-                                                  Iterable<ObjectPropertyAssertion> pas,
-                                                  Iterable<DataPropertyAssertion> das,
-                                                  Iterable<AnnotationAssertion> aas,
-                                                  UriTemplateMatcher uriTemplateMatcher) {
-
-        List<CQIE> mutableMapping = new ArrayList<>();
-
-        int count = 0;
-        for (ClassAssertion ca : cas) {
-            // no blank nodes are supported here
-            IRIConstant c = (IRIConstant) ca.getIndividual();
-            IRI classIRI = ca.getConcept().getIRI();
-            Function head = atomFactory.getMutableTripleHeadAtom(
-                    immutabilityTools.convertToMutableFunction(
-                            uriTemplateMatcher.generateURIFunction(c.getIRI().getIRIString())), classIRI);
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
-
-            mutableMapping.add(rule);
-            count++;
-        }
-        LOGGER.debug("Appended {} class assertions from ontology as fact rules", count);
-
-        count = 0;
-        for (ObjectPropertyAssertion pa : pas) {
-            // no blank nodes are supported here
-            IRIConstant s = (IRIConstant) pa.getSubject();
-            IRIConstant o = (IRIConstant) pa.getObject();
-            IRI propertyIRI = pa.getProperty().getIRI();
-            Function head = atomFactory.getMutableTripleHeadAtom(
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(s.getIRI().getIRIString())),
-                    propertyIRI,
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(o.getIRI().getIRIString())));
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
-
-            mutableMapping.add(rule);
-            count++;
-        }
-        LOGGER.debug("Appended {} object property assertions as fact rules", count);
-
-
-        count = 0;
-        for (DataPropertyAssertion da : das) {
-            // no blank nodes are supported here
-            IRIConstant s = (IRIConstant) da.getSubject();
-            ValueConstant o = da.getValue();
-            IRI propertyIRI = da.getProperty().getIRI();
-
-
-            Function head = o.getType().getLanguageTag()
-                    .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                            propertyIRI,
-                            termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                    .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                            propertyIRI,
-                            termFactory.getTypedTerm(o, o.getType())));
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
-
-            mutableMapping.add(rule);
-            count++;
-        }
-
-        LOGGER.debug("Appended {} data property assertions as fact rules", count);
-
-        count = 0;
-        for (AnnotationAssertion aa : aas) {
-            // no blank nodes are supported here
-
-            IRIConstant s = (IRIConstant) aa.getSubject();
-            IRI propertyIRI = aa.getProperty().getIRI();
-
-            Function head;
-            if (aa.getValue() instanceof ValueConstant) {
-
-                ValueConstant o = (ValueConstant) aa.getValue();
-
-                head = o.getType().getLanguageTag()
-                        .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                                    termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                                    propertyIRI,
-                                    termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                        .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                                termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                                propertyIRI,
-                                termFactory.getTypedTerm(o, o.getType())));
-            } else {
-
-                IRIConstant o = (IRIConstant) aa.getValue();
-                head = atomFactory.getMutableTripleHeadAtom(
-                        termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                        propertyIRI,
-                        termFactory.getUriTemplate(termFactory.getConstantLiteral(o.getIRI().getIRIString())));
-
-
-            }
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
-
-            mutableMapping.add(rule);
-            count++;
-        }
-
-        LOGGER.debug("Appended {} annotation assertions as fact rules", count);
-        return ImmutableList.copyOf(mutableMapping);
+    private IQ createIQ(RDFFact rdfFact) {
+        return rdfFact.getGraph()
+                .map(g -> createQuad(rdfFact, g))
+                .orElseGet(() -> createTriple(rdfFact));
     }
+
+
+    private IQ createTriple(RDFFact rdfFact) {
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
+                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                        tripleAtom.getTerm(0), rdfFact.getSubject(),
+                        tripleAtom.getTerm(1), rdfFact.getProperty(),
+                        tripleAtom.getTerm(2), rdfFact.getObject()));
+
+        IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
+        return iqFactory.createIQ(tripleAtom, constructionTree);
+    }
+
+    private IQ createQuad(RDFFact rdfFact, ObjectConstant graph) {
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
+                tripleAtom.getVariables(), substitutionFactory.getSubstitution(
+                        tripleAtom.getTerm(0), rdfFact.getSubject(),
+                        tripleAtom.getTerm(1), rdfFact.getProperty(),
+                        tripleAtom.getTerm(2), rdfFact.getObject(),
+                        tripleAtom.getTerm(3), graph));
+
+        IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
+        return iqFactory.createIQ(quadAtom, constructionTree);
+    }
+
+    private class ABoxFactProvenance implements PPMappingAssertionProvenance {
+        private final String provenance;
+
+        private ABoxFactProvenance(RDFFact a) {
+            provenance = a.toString();
+        }
+
+        @Override
+        public String getProvenanceInfo() {
+            return provenance;
+        }
+    }
+
 }

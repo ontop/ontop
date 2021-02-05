@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.spec.ontology.impl;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -56,10 +36,7 @@ public class OntologyImpl implements Ontology {
 
 	// assertions
 
-	private final ImmutableList<ClassAssertion> classAssertions;
-	private final ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions;
-	private final ImmutableList<DataPropertyAssertion> dataPropertyAssertions;
-	private final ImmutableList<AnnotationAssertion> annotationAssertions;
+	private final ImmutableSet<RDFFact> assertions;
 
 	// exception messages
 
@@ -101,36 +78,26 @@ public class OntologyImpl implements Ontology {
 
 
     static final class ImmutableOntologyVocabularyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
-        private final ImmutableMap<String, T> map;
+        private final ImmutableMap<IRI, T> map;
 
         private final String NOT_FOUND;
 
-        ImmutableOntologyVocabularyCategoryImpl(ImmutableMap<String, T> map, String NOT_FOUND) {
+        ImmutableOntologyVocabularyCategoryImpl(ImmutableMap<IRI, T> map, String NOT_FOUND) {
             this.map = map;
             this.NOT_FOUND = NOT_FOUND;
         }
 
-        @Override
-        public T get(String uri) {
-            T oc = map.get(uri);
-            if (oc == null)
-                throw new RuntimeException(NOT_FOUND + uri);
-            return oc;
-        }
-
 		@Override
 		public T get(IRI iri) {
-			return get(iri.getIRIString());
+			T oc = map.get(iri);
+			if (oc == null)
+				throw new RuntimeException(NOT_FOUND + iri);
+			return oc;
 		}
 
 		@Override
-        public boolean contains(String uri) {
-            return map.containsKey(uri);
-        }
-
-		@Override
 		public boolean contains(IRI iri) {
-			return contains(iri.getIRIString());
+			return map.containsKey(iri);
 		}
 
 		@Override
@@ -145,25 +112,22 @@ public class OntologyImpl implements Ontology {
 	private final ImmutableOntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties;
 
 	OntologyImpl(ImmutableOntologyVocabularyCategoryImpl<OClass> classes,
-                 ImmutableOntologyVocabularyCategoryImpl<ObjectPropertyExpression> objectProperties,
-                 ImmutableSet<ObjectPropertyExpression> auxObjectProperties,
-                 ImmutableOntologyVocabularyCategoryImpl<DataPropertyExpression> dataProperties,
-                 ImmutableOntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties,
-                 ImmutableList<BinaryAxiom<ClassExpression>> classInclusions,
-                 ImmutableList<NaryAxiom<ClassExpression>> classDisjointness,
-                 ImmutableList<BinaryAxiom<ObjectPropertyExpression>> objectPropertyInclusions,
-                 ImmutableList<NaryAxiom<ObjectPropertyExpression>> objectPropertyDisjointness,
-                 ImmutableList<BinaryAxiom<DataPropertyExpression>> dataPropertyInclusions,
-                 ImmutableList<NaryAxiom<DataPropertyExpression>> dataPropertyDisjointness,
-                 ImmutableList<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms,
-                 ImmutableSet<ObjectPropertyExpression> reflexiveObjectPropertyAxioms,
-                 ImmutableSet<ObjectPropertyExpression> irreflexiveObjectPropertyAxioms,
-                 ImmutableSet<ObjectPropertyExpression> functionalObjectPropertyAxioms,
-                 ImmutableSet<DataPropertyExpression> functionalDataPropertyAxioms,
-                 ImmutableList<ClassAssertion> classAssertions,
-                 ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions,
-                 ImmutableList<DataPropertyAssertion> dataPropertyAssertions,
-                 ImmutableList<AnnotationAssertion> annotationAssertions) {
+				 ImmutableOntologyVocabularyCategoryImpl<ObjectPropertyExpression> objectProperties,
+				 ImmutableSet<ObjectPropertyExpression> auxObjectProperties,
+				 ImmutableOntologyVocabularyCategoryImpl<DataPropertyExpression> dataProperties,
+				 ImmutableOntologyVocabularyCategoryImpl<AnnotationProperty> annotationProperties,
+				 ImmutableList<BinaryAxiom<ClassExpression>> classInclusions,
+				 ImmutableList<NaryAxiom<ClassExpression>> classDisjointness,
+				 ImmutableList<BinaryAxiom<ObjectPropertyExpression>> objectPropertyInclusions,
+				 ImmutableList<NaryAxiom<ObjectPropertyExpression>> objectPropertyDisjointness,
+				 ImmutableList<BinaryAxiom<DataPropertyExpression>> dataPropertyInclusions,
+				 ImmutableList<NaryAxiom<DataPropertyExpression>> dataPropertyDisjointness,
+				 ImmutableList<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms,
+				 ImmutableSet<ObjectPropertyExpression> reflexiveObjectPropertyAxioms,
+				 ImmutableSet<ObjectPropertyExpression> irreflexiveObjectPropertyAxioms,
+				 ImmutableSet<ObjectPropertyExpression> functionalObjectPropertyAxioms,
+				 ImmutableSet<DataPropertyExpression> functionalDataPropertyAxioms,
+				 ImmutableSet<RDFFact> assertions) {
 	    this.classes = classes;
 	    this.objectProperties = objectProperties;
 	    this.auxObjectProperties = auxObjectProperties;
@@ -175,17 +139,14 @@ public class OntologyImpl implements Ontology {
 	    this.objectPropertyDisjointness = objectPropertyDisjointness;
 	    this.dataPropertyInclusions = dataPropertyInclusions;
 	    this.dataPropertyDisjointness = dataPropertyDisjointness;
-	    this.classAssertions = classAssertions;
-	    this.objectPropertyAssertions = objectPropertyAssertions;
-	    this.dataPropertyAssertions = dataPropertyAssertions;
-	    this.annotationAssertions = annotationAssertions;
 	    this.subDataRangeAxioms = subDataRangeAxioms;
 	    this.reflexiveObjectPropertyAxioms = reflexiveObjectPropertyAxioms;
 	    this.irreflexiveObjectPropertyAxioms = irreflexiveObjectPropertyAxioms;
         this.functionalObjectPropertyAxioms = functionalObjectPropertyAxioms;
 	    this.functionalDataPropertyAxioms = functionalDataPropertyAxioms;
+		this.assertions = assertions;
 
-	    this.unclassifiedTBox = new UnclassifiedOntologyTBox();
+		this.unclassifiedTBox = new UnclassifiedOntologyTBox();
 	    this.tbox = ClassifiedTBoxImpl.classify(unclassifiedTBox);
     }
 
@@ -250,21 +211,8 @@ public class OntologyImpl implements Ontology {
     public UnclassifiedOntologyTBox unclassifiedTBox() { return unclassifiedTBox; }
 
 	@Override
-	public OntologyABox abox() {
-	    return new OntologyABox() {
-
-            @Override
-            public ImmutableList<ClassAssertion> getClassAssertions() { return classAssertions; }
-
-            @Override
-            public ImmutableList<ObjectPropertyAssertion> getObjectPropertyAssertions() { return objectPropertyAssertions; }
-
-            @Override
-            public ImmutableList<DataPropertyAssertion> getDataPropertyAssertions() { return dataPropertyAssertions; }
-
-            @Override
-            public ImmutableList<AnnotationAssertion> getAnnotationAssertions() { return annotationAssertions; }
-        };
+	public ImmutableSet<RDFFact> abox() {
+	    return assertions;
     }
 
 

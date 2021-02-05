@@ -1,67 +1,48 @@
 package it.unibz.inf.ontop.materialization;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static org.junit.Assert.assertEquals;
 
 public class OntopMaterializerTest {
@@ -69,13 +50,20 @@ public class OntopMaterializerTest {
 	private static final String PREFIX = "http://example.com/vocab#";
 
 	private static final String driver = "org.h2.Driver";
-	private static String url = "jdbc:h2:mem:aboxdump";
-	private static String username = "sa";
-	private static String password = "";
+	private static final String url = "jdbc:h2:mem:aboxdump";
+	private static final String username = "sa";
+	private static final String password = "";
 
-	private final SQLMappingFactory mappingFactory;
+	private static Connection conn;
+
+	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final RDF rdfFactory;
 	private final RDFDatatype xsdStringDt;
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+	private final TargetAtomFactory targetAtomFactory;
+	private final SpecificationFactory specificationFactory;
+	private final SQLPPMappingFactory ppMappingFactory;
 
 	private final ImmutableTerm type;
 	private final ImmutableTerm person;
@@ -84,6 +72,7 @@ public class OntopMaterializerTest {
 	private final ImmutableTerm age;
 	private final ImmutableTerm hasschool;
 	private final ImmutableTerm school;
+	private final ImmutableTerm graph;
 
 	private final IRI personIRI;
 	private final IRI fnIRI;
@@ -91,52 +80,76 @@ public class OntopMaterializerTest {
 	private final IRI ageIRI;
 	private final IRI hasschoolIRI;
 	private final IRI schoolIRI;
-	
+	private final IRI graphIRI;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
-	private final TermFactory termFactory;
-	private final TypeFactory typeFactory;
-	private final TargetAtomFactory targetAtomFactory;
-	AtomFactory atomFactory;
+
 	public OntopMaterializerTest() {
 
-		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
-				.enableTestMode()
+		OntopModelConfiguration defaultConfiguration = createAndInitConfiguration()
 				.build();
 
 		Injector injector = defaultConfiguration.getInjector();
 		termFactory = injector.getInstance(TermFactory.class);
 		typeFactory = injector.getInstance(TypeFactory.class);
-		atomFactory = injector.getInstance(AtomFactory.class);
 		targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
 		rdfFactory = injector.getInstance(RDF.class);
+		specificationFactory = injector.getInstance(SpecificationFactory.class);
+		ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
 
-		mappingFactory = SQLMappingFactoryImpl.getInstance();
+		sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
 		
 		personIRI = rdfFactory.createIRI(PREFIX + "Person");
 		fnIRI = rdfFactory.createIRI(PREFIX + "fn");
 		lnIRI = rdfFactory.createIRI(PREFIX + "ln");
 		ageIRI = rdfFactory.createIRI(PREFIX + "age");
 		hasschoolIRI = rdfFactory.createIRI(PREFIX + "hasschool");
-		schoolIRI = rdfFactory.createIRI(PREFIX + "School");
+		schoolIRI = rdfFactory.createIRI(PREFIX + "school");
+		graphIRI = rdfFactory.createIRI(PREFIX + "graph");
 
 		xsdStringDt = typeFactory.getXsdStringDatatype();
 
-		type = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
-		person = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(personIRI.getIRIString()));
-		fn = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(fnIRI.getIRIString()));
-		ln = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(lnIRI.getIRIString()));
-		age =termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ageIRI.getIRIString()));
-		hasschool = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(hasschoolIRI.getIRIString()));
-		school = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(schoolIRI.getIRIString()));
+		type = termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
+		person = termFactory.getConstantIRI(personIRI);
+		fn = termFactory.getConstantIRI(fnIRI);
+		ln = termFactory.getConstantIRI(lnIRI);
+		age = termFactory.getConstantIRI(ageIRI);
+		hasschool = termFactory.getConstantIRI(hasschoolIRI);
+		school = termFactory.getConstantIRI(schoolIRI);
+		graph = termFactory.getConstantIRI(graphIRI);
     }
 
-	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
+	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder<?>> createAndInitConfiguration() {
 		return OntopStandaloneSQLConfiguration.defaultBuilder()
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
 				.jdbcDriver(driver);
+	}
+
+	@BeforeClass
+	public static void createDB() {
+		try {
+			conn = DriverManager.getConnection(url, username, password);
+			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
+			try (Statement st = conn.createStatement()) {
+				st.executeUpdate(s);
+				conn.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} catch (SQLException | IOException e){
+			e.printStackTrace();
+		}
+	}
+
+	@AfterClass
+	public static void closeConnection(){
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test(expected = InvalidOntopConfigurationException.class)
@@ -145,7 +158,7 @@ public class OntopMaterializerTest {
 	}
 
 	@Test
-	public void testOneSource() throws Exception {
+	public void testOneSourceTriple() throws Exception {
 
     	SQLPPMapping ppMapping = createMapping();
 
@@ -155,38 +168,18 @@ public class OntopMaterializerTest {
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/mapping-test-db.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
-
 		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
 
-		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
 
-		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-				.build();
+		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(vocabulary)) {
 
-		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(
-				configuration, vocabulary, materializationParams)) {
-
-			ImmutableList.Builder<Assertion> rdfGraphBuilder = ImmutableList.builder();
+			ImmutableList.Builder<RDFFact> rdfGraphBuilder = ImmutableList.builder();
 			while (materializationResultSet.hasNext()) {
 				rdfGraphBuilder.add(materializationResultSet.next());
 			}
-			ImmutableList<Assertion> assertions = rdfGraphBuilder.build();
+			ImmutableList<RDFFact> assertions = rdfGraphBuilder.build();
 
 			LOGGER.debug("Assertions: \n");
 			assertions.forEach(a -> LOGGER.debug(a + "\n"));
@@ -197,65 +190,108 @@ public class OntopMaterializerTest {
 			assertEquals(15, count);
 		}
 
-		conn.close();
-
+		// conn.close();
 	}
 
+	@Test
+	public void testOneSourceQuad() throws Exception {
 
-
-	private SQLPPMapping createMapping() throws DuplicateMappingException {
-
-    	// TODO: we should not have to create an high-level configuration just for constructing these objects...
+    	SQLPPMapping ppMapping = createQuadMapping();
+//    	List<TargetAtom> atoms = ppMapping.getTripleMaps().iterator().next().getTargetAtoms();
+//		List<ImmutableTerm> substitutedTerms = atoms.iterator().next().getSubstitutedTerms(); // Davide> TODO Remove
 		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
+				.ppMapping(ppMapping)
 				.build();
-		Injector injector = configuration.getInjector();
-		SpecificationFactory specificationFactory = injector.getInstance(SpecificationFactory.class);
-		SQLPPMappingFactory ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
 
-    			/*
-		 * Setting up the OBDA model and the mappings
-		 */
+		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
+				.collect(ImmutableCollectors.toSet());
+
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
+
+		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(vocabulary)) {
+
+			ImmutableList.Builder<RDFFact> rdfGraphBuilder = ImmutableList.builder();
+			while (materializationResultSet.hasNext()) {
+				// TODO Davide> Qua devo controllare in che grafo si trova
+				// TODO Se si trova in un grafo, allora sto metodo rdfGraphBuilder deve essere in grado
+				// TODO Il punto, e' che rdfGradphBuilder prende una Assertion, e le Assertion NON hanno il graph
+				// TODO E' possibile mettere il graph nelle Assertions? Magari "Named Assertion"?
+				rdfGraphBuilder.add(materializationResultSet.next());
+			}
+			ImmutableList<RDFFact> assertions = rdfGraphBuilder.build();
+
+			LOGGER.debug("Assertions: \n");
+			assertions.forEach(a -> LOGGER.debug(a + "\n"));
+
+			assertEquals(15, assertions.size());
+
+			long count = materializationResultSet.getTripleCountSoFar();
+			assertEquals(15, count);
+		}
+
+		// conn.close();
+	}
+
+	private SQLPPMapping createMapping()  {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-		ImmutableFunctionalTerm personTemplate = termFactory.getImmutableUriTemplate(
-				termFactory.getConstantLiteral("http://schools.com/person/{}-{}"),
-				termFactory.getVariable("fn"),
-				termFactory.getVariable("ln"));
+		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
+				Template.builder().addSeparator("http://schools.com/person/")
+						.addColumn().addSeparator("-").addColumn().build(),
+				ImmutableList.of(
+					termFactory.getVariable("fn"),
+					termFactory.getVariable("ln")));
 
-		ImmutableFunctionalTerm schoolTemplate = termFactory.getImmutableUriTemplate(
-				termFactory.getConstantLiteral("{}"),
-				termFactory.getVariable("schooluri"));
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable("schooluri")));
 
 		RDFDatatype stringDatatype = xsdStringDt;
 
-		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
+		ImmutableList<TargetAtom> body =  ImmutableList.of(
+			targetAtomFactory.getTripleTargetAtom(personTemplate, type, person),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, fn, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("fn"), stringDatatype)),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, ln, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("ln"), stringDatatype)),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, age, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("age"), stringDatatype)),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, hasschool, schoolTemplate),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, school, schoolTemplate));
 
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, type, person));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, hasschool, schoolTemplate));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, school, schoolTemplate));
-
-		ImmutableList<TargetAtom> body = bodyBuilder.build();
-
-		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(mappingFactory.getSQLQuery(sql), body);
-
-		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-				body.stream()
-						.flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
-						.filter(t -> t instanceof ImmutableFunctionalTerm)
-						.map(t -> (ImmutableFunctionalTerm) t),
-				termFactory);
+		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(IDGenerator.getNextUniqueID("MAPID-"), sourceQueryFactory.createSourceQuery(sql), body);
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
-		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
+		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), prefixManager);
 	}
 
-	private TargetAtom getTripleTargetAtom(ImmutableTerm s, ImmutableTerm p, ImmutableTerm o) {
-		return targetAtomFactory.getTripleTargetAtom(s, p, o);
+	private SQLPPMapping createQuadMapping()  {
+
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
+
+		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
+				Template.builder().addSeparator("http://schools.com/person/")
+						.addColumn().addSeparator("-").addColumn().build(),
+				ImmutableList.of(
+					termFactory.getVariable("fn"),
+					termFactory.getVariable("ln")));
+
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable("schooluri")));
+
+		RDFDatatype stringDatatype = xsdStringDt;
+
+		ImmutableList<TargetAtom> body =  ImmutableList.of(
+				targetAtomFactory.getQuadTargetAtom(personTemplate, type, person, graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, fn, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("fn"), stringDatatype), graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, ln, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("ln"), stringDatatype), graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, age, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("age"), stringDatatype), graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, hasschool, schoolTemplate, graph),
+				targetAtomFactory.getQuadTargetAtom(personTemplate, school, schoolTemplate, graph)
+		);
+
+		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(IDGenerator.getNextUniqueID("MAPID-"), sourceQueryFactory.createSourceQuery(sql), body);
+
+		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), prefixManager);
 	}
 
 //	public void testTwoSources() throws Exception {
@@ -697,10 +733,10 @@ public class OntopMaterializerTest {
 //		Predicate q = termFactory.getIRI(OBDALibConstants.QUERY_HEAD, 4);
 //		List<Term> headTerms = new LinkedList<Term>();
 //
-//		final Term firstNameVariable = termFactory.getTypedTerm(termFactory.getVariable("fn"), COL_TYPE.STRING);
-//		final Term lastNameVariable = termFactory.getTypedTerm(termFactory.getVariable("ln"), COL_TYPE.STRING);
-//		final Term ageVariable = termFactory.getTypedTerm(termFactory.getVariable("age"), COL_TYPE.INTEGER);
-//		final Term schoolUriVariable = termFactory.getTypedTerm(termFactory.getVariable("schooluri"), COL_TYPE.STRING);
+//		final Term firstNameVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("fn"), COL_TYPE.STRING);
+//		final Term lastNameVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("ln"), COL_TYPE.STRING);
+//		final Term ageVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("age"), COL_TYPE.INTEGER);
+//		final Term schoolUriVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("schooluri"), COL_TYPE.STRING);
 //
 //		headTerms.add(firstNameVariable);
 //		headTerms.add(lastNameVariable);

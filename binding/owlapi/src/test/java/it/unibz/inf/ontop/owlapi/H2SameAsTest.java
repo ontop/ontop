@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -40,10 +41,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -51,7 +49,7 @@ import static org.junit.Assert.assertTrue;
 /***
  * Test same as using h2 simple database on wellbores
  */
-
+@Ignore
 public class H2SameAsTest {
 
 	private OWLConnection conn;
@@ -70,18 +68,10 @@ public class H2SameAsTest {
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-			    java.sql.Statement s = sqlConnection.createStatement();
-			  
-//			    try {
-			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-h2.sql") ).useDelimiter("\\A").next();
-			    	s.execute(text);
-			    	//Server.startWebServer(sqlConnection);
-			    	 
-//			    } catch(SQLException sqle) {
-//			        System.out.println("Exception in creating db from script");
-//			    }
-			   
-			    s.close();
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
+			String text = new Scanner(new File("src/test/resources/sameAs/wellbore-h2.sql")).useDelimiter("\\A").next();
+			s.execute(text);
+		}
 	}
 
 
@@ -90,13 +80,10 @@ public class H2SameAsTest {
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -113,7 +100,6 @@ public class H2SameAsTest {
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdafile)
 				.sameAsMappings(sameAs)
-				.enableFullMetadataExtraction(false)
 				.jdbcUrl(JDBC_URL)
 				.jdbcUser(JDBC_USER)
 				.jdbcPassword(JDBC_PASSWORD)
@@ -125,9 +111,8 @@ public class H2SameAsTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		OWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
@@ -136,19 +121,10 @@ public class H2SameAsTest {
 					String rendering = ToStringRenderer.getInstance().getRendering(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));
-
                 }
             }
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}
@@ -238,8 +214,8 @@ public class H2SameAsTest {
 
                 "}";
 
-		ArrayList<String> results = runTests(query, true);
-		ArrayList<String> expectedResults = new ArrayList<>();
+		List<String> results = runTests(query, true);
+		Set<String> expectedResults = new HashSet<>();
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
 		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("\"13\"^^xsd:integer");
@@ -256,7 +232,7 @@ public class H2SameAsTest {
 		expectedResults.add("\"Eljas\"^^xsd:string");
 		expectedResults.add("\"100\"^^xsd:integer");
 		assertEquals(15, results.size() );
-		assertEquals(expectedResults, results);
+		assertEquals(expectedResults, new HashSet<>(results));
 
     }
 

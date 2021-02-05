@@ -2,14 +2,11 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -35,7 +32,6 @@ public class DatatypeInferenceTest {
     private static final String DROP_SCRIPT = DIR + "drop-db.sql";
     private static final String DEFAULT_OWL_FILE = DIR + "marriage.ttl";
     private static TestConnectionManager TEST_MANAGER;
-    private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -97,7 +93,7 @@ public class DatatypeInferenceTest {
         RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .findFirst().get();
 
-        Optional<FunctionSymbol> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
+        Optional<IRI> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
                 .map(i -> mapping.getRDFPropertyDefinition(triplePredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -108,14 +104,16 @@ public class DatatypeInferenceTest {
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
-                .map(ImmutableFunctionalTerm::getFunctionSymbol)
-                .filter(p -> p instanceof DatatypePredicate)
+                .flatMap(t-> t.inferType()
+                        .flatMap(TermTypeInference::getTermType)
+                        .map(Stream::of)
+                        .orElseGet(Stream::empty))
+                .filter(t -> t instanceof RDFDatatype)
+                .map(t -> (RDFDatatype)t)
+                .map(RDFDatatype::getIRI)
                 .findFirst();
 
         assertTrue("A datatype was expected", optionalDatatype.isPresent());
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
-        FunctionSymbol datatype = optionalDatatype.get();
-
-        assertEquals(TERM_FACTORY.getRequiredTypePredicate(expectedType), datatype);
+        assertEquals(expectedType, optionalDatatype.get());
     }
 }

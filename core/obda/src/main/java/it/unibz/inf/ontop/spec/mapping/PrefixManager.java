@@ -24,26 +24,18 @@ import com.google.common.collect.ImmutableMap;
 
 /**
  * Abstracts the prefix mapping mechanism.
+ *
+ * See SpecificationFactory for creating a new instance.
  */
 public interface PrefixManager {
 
-	String getURIDefinition(String prefix);
-
-	String getPrefix(String uri);
-
-	String getDefaultPrefix();
-	
-	ImmutableMap<String, String> getPrefixMap();
-
-	String getShortForm(String uri);
-
-	String getShortForm(String uri, boolean insideQuotes);
+	String getShortForm(String iri);
 
 	String getExpandForm(String prefixedName);
-	
-	String getExpandForm(String prefixedName, boolean insideQuotes);
-	
-	boolean contains(String prefix);
+
+	ImmutableMap<String, String> getPrefixMap();
+
+	String getDefaultIriPrefix();
 
 	String DEFAULT_PREFIX = ":";
 }

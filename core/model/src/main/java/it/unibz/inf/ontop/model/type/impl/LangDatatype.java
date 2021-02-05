@@ -12,7 +12,7 @@ public class LangDatatype extends AbstractRDFDatatype {
     private final TypeFactory typeFactory;
 
     private LangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry, TypeFactory typeFactory) {
-        super(RDF.LANGSTRING, parentAncestry, false);
+        super(RDF.LANGSTRING, parentAncestry, DBTypeFactory::getDBStringType);
         this.langTag = langTag;
         this.parentAncestry = parentAncestry;
         this.typeFactory = typeFactory;
@@ -66,7 +66,7 @@ public class LangDatatype extends AbstractRDFDatatype {
 
     @Override
     public String toString() {
-        return super.toString() + "@" + langTag.getFullString();
+        return "@" + langTag.getFullString();
     }
 
     @Override

@@ -26,8 +26,6 @@ import it.unibz.inf.ontop.spec.ontology.BinaryAxiom;
 
 public class BinaryAxiomImpl<T> implements BinaryAxiom<T> {
 
-	private static final long serialVersionUID = -7590338987239580423L;
-
 	private final T including; // right-hand side
 	private final T included;
 	private final String string;

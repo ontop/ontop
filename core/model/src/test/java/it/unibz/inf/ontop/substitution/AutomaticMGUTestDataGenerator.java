@@ -20,17 +20,17 @@ package it.unibz.inf.ontop.substitution;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import static it.unibz.inf.ontop.OntopModelTestingTools.RDF_FACTORY;
-import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 
 
 /***
@@ -54,7 +54,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param unifier2
 	 * @return
 	 */
-	public boolean compareUnifiers(List<SingletonSubstitution> unifier1, List<SingletonSubstitution> unifier2) {
+	public boolean compareUnifiers(List<Map.Entry<Variable, ImmutableTerm>> unifier1, List<Map.Entry<Variable, ImmutableTerm>> unifier2) {
 		if (unifier1.size() != unifier2.size())
 			return false;
 
@@ -75,7 +75,6 @@ public class AutomaticMGUTestDataGenerator {
 		 * We found a match for every substitution in unifier1
 		 */
 		return true;
-
 	}
 
 	/***
@@ -85,9 +84,9 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param s2
 	 * @return
 	 */
-	public boolean compareSubstitutions(SingletonSubstitution s1, SingletonSubstitution s2) {
-		boolean equalVars = s1.getVariable().toString().equals(s2.getVariable().toString());
-		boolean equalTerms = s1.getTerm().toString().equals(s2.getTerm().toString());
+	public boolean compareSubstitutions(Map.Entry<Variable, ImmutableTerm> s1, Map.Entry<Variable, ImmutableTerm> s2) {
+		boolean equalVars = s1.getKey().toString().equals(s2.getKey().toString());
+		boolean equalTerms = s1.getValue().toString().equals(s2.getValue().toString());
 		return equalVars && equalTerms;
 	}
 
@@ -98,24 +97,25 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param mgustr
 	 * @return
 	 */
-	public List<SingletonSubstitution> getMGU(String mgustr) {
+	public List<Map.Entry<Variable, ImmutableTerm>> getMGU(String mgustr) {
 		if (mgustr.trim().equals("NULL"))
 			return null;
 
 		mgustr = mgustr.substring(1, mgustr.length() - 1);
 		String[] mguStrings = mgustr.split(" ");
 
-		List<SingletonSubstitution> mgu = new ArrayList<>();
+		List<Map.Entry<Variable, ImmutableTerm>> mgu = new ArrayList<>();
 		for (int i = 0; i < mguStrings.length; i++) {
 			String string = mguStrings[i];
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			SingletonSubstitution s = new SingletonSubstitution((Variable)getTerm(elements[0]), getTerm(elements[1]));
+			Map.Entry<Variable, ImmutableTerm> s = Maps.immutableEntry((Variable) getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;
 	}
+
 
 	/***
 	 * Gets the list of size 2, of the two atoms in the string atomstr. Only
@@ -124,32 +124,34 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param atomstrs
 	 * @return
 	 */
-	public List<Function> getAtoms(String atomstrs) {
+	public List<ImmutableTerm> getAtoms(String atomstrs) {
 		atomstrs = atomstrs.trim();
-		List<Function> atoms = new ArrayList<Function>();
+		List<ImmutableTerm> atoms = new ArrayList<>();
 		String[] atomstr = atomstrs.split("\\|");
 		String str1 = atomstr[0].trim();
-		Function atom1 = getAtom(str1);
+		ImmutableTerm atom1 = getAtom(str1);
 		atoms.add(atom1);
 		String str2 = atomstr[1].trim();
-		Function atom2 = getAtom(str2);
+		ImmutableTerm atom2 = getAtom(str2);
 		atoms.add(atom2);
 		return atoms;
 	}
 
-	public Function getAtom(String atomstr) {
+	public ImmutableTerm getAtom(String atomstr) {
 		String termstr = atomstr.substring(2, atomstr.length() - 1);
-		List<Term> terms = new ArrayList<Term>();
+		List<ImmutableTerm> terms = new ArrayList<>();
 
 		String[] termstra = termstr.split(" ");
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Function atom = TERM_FACTORY.getFunction(new OntopModelTestPredicate(atomstr.substring(0, 1), terms.size()), terms);
+		ImmutableTerm atom = TERM_FACTORY.getImmutableFunctionalTerm(
+				new OntopModelTestFunctionSymbol(atomstr.substring(0, 1), terms.size()),
+				ImmutableList.copyOf(terms));
 		return atom;
 	}
 
-	public Term getTerm(String termstrs) {
+	public ImmutableTerm getTerm(String termstrs) {
 		// List<Term> terms = new ArrayList<Term>();
 		// String[] termstra = termstrs.split(",");
 		// for (int i = 0; i < termstra.length; i++) {
@@ -158,19 +160,22 @@ public class AutomaticMGUTestDataGenerator {
 
 		if (termstr.indexOf('(') != -1) {
 			String[] subtermstr = termstr.substring(2, termstrs.length() - 1).split(",");
-			List<Term> fuctTerms = new ArrayList<Term>();
+			List<ImmutableTerm> fuctTerms = new ArrayList<>();
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			Predicate fs = new OntopModelTestPredicate(termstr.substring(0, 1), fuctTerms.size());
-			return TERM_FACTORY.getFunction(fs, fuctTerms);
-		} else if (termstr.charAt(0) == '"') {
-			return TERM_FACTORY.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
-		} else if (termstr.charAt(0) == '<') {
+			FunctionSymbol fs = new OntopModelTestFunctionSymbol(termstr.substring(0, 1), fuctTerms.size());
+			return TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.copyOf(fuctTerms));
+		}
+		else if (termstr.charAt(0) == '"') {
+			return TERM_FACTORY.getRDFLiteralConstant(termstr.substring(1, termstr.length() - 1), XSD.STRING);
+		}
+		else if (termstr.charAt(0) == '<') {
 			return TERM_FACTORY.getConstantIRI(RDF_FACTORY.createIRI(termstr.substring(1, termstr.length() - 1)));
 //		} else if (termstr.equals("#")) {
 //			return TERM_FACTORY.getVariableNondistinguished();
-		} else {
+		}
+		else {
 			return TERM_FACTORY.getVariable(termstr);
 			/* variable */
 		}

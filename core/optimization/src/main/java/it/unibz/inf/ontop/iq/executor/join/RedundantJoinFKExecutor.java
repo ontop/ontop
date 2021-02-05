@@ -4,9 +4,10 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.VariableOccurrenceAnalyzer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.iq.*;
@@ -18,8 +19,8 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -31,31 +32,41 @@ import java.util.stream.Stream;
 public class RedundantJoinFKExecutor implements InnerJoinExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
 
     @Inject
-    private RedundantJoinFKExecutor(IntermediateQueryFactory iqFactory) {
+    private RedundantJoinFKExecutor(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
+        this.termFactory = termFactory;
     }
 
     @Override
     public NodeCentricOptimizationResults<InnerJoinNode> apply(InnerJoinOptimizationProposal proposal,
                                                                IntermediateQuery query,
                                                                QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
 
         InnerJoinNode joinNode = proposal.getFocusNode();
         ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMap = extractDataNodeMap(query, joinNode);
 
-        ImmutableSet<DataNode> nodesToRemove = findRedundantNodes(query, joinNode, dataNodeMap);
+        ImmutableList<Redundancy> redundancies = findRedundancies(query, joinNode, dataNodeMap);
+
+        ImmutableSet<ExtensionalDataNode> nodesToRemove = redundancies.stream()
+                .map(r -> r.dataNode)
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableSet<Variable> variablesToRequireNonNull = redundancies.stream()
+                .flatMap(r -> r.fkVariables.stream())
+                .collect(ImmutableCollectors.toSet());
 
         if (!nodesToRemove.isEmpty()) {
 
             NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
-                    joinNode, nodesToRemove);
+                    joinNode, nodesToRemove, variablesToRequireNonNull);
 
             return result;
         }
-        /**
+        /*
          * No change
          */
         else {
@@ -66,13 +77,23 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     private NodeCentricOptimizationResults<InnerJoinNode> applyOptimization(IntermediateQuery query,
                                                                             QueryTreeComponent treeComponent,
                                                                             InnerJoinNode joinNode,
-                                                                            ImmutableSet<DataNode> nodesToRemove) {
+                                                                            ImmutableSet<ExtensionalDataNode> nodesToRemove,
+                                                                            ImmutableSet<Variable> variablesToRequireNonNull) {
 
         /*
          * First removes all the redundant nodes
          */
         nodesToRemove
                 .forEach(treeComponent::removeSubTree);
+
+        Optional<ImmutableExpression> newCondition = joinNode.getOptionalFilterCondition()
+                .map(c -> termFactory.getConjunction(Stream.concat(
+                        c.flattenAND(),
+                        variablesToRequireNonNull.stream()
+                                .map(termFactory::getDBIsNotNull))))
+                .orElseGet(() -> termFactory.getConjunction(
+                        variablesToRequireNonNull.stream()
+                                .map(termFactory::getDBIsNotNull)));
 
         /*
          * Then replaces the join node if needed
@@ -83,8 +104,8 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
             case 1:
                 QueryNode replacingChild = query.getFirstChild(joinNode).get();
 
-                if (joinNode.getOptionalFilterCondition().isPresent()) {
-                    FilterNode newFilterNode = iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get());
+                if (newCondition.isPresent()) {
+                    FilterNode newFilterNode = iqFactory.createFilterNode(newCondition.get());
                     treeComponent.replaceNode(joinNode, newFilterNode);
                     /*
                      * NB: the filter node is not declared as the replacing node but the child is.
@@ -97,7 +118,9 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(replacingChild));
 
             default:
-                return new NodeCentricOptimizationResultsImpl<>(query, joinNode);
+                InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(newCondition);
+                treeComponent.replaceNode(joinNode, newJoinNode);
+                return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
         }
     }
 
@@ -109,32 +132,32 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         return query.getChildren(joinNode).stream()
                 .filter(c -> c instanceof ExtensionalDataNode)
                 .map(c -> (ExtensionalDataNode) c)
-                .map(c -> Maps.immutableEntry(c.getDataAtom().getPredicate().getRelationDefinition(), c))
+                .map(c -> Maps.immutableEntry(c.getRelationDefinition(), c))
                 .collect(ImmutableCollectors.toMultimap());
     }
 
-    private ImmutableSet<DataNode> findRedundantNodes(IntermediateQuery query, InnerJoinNode joinNode,
-                                                      ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMap) {
+    private ImmutableList<Redundancy> findRedundancies(IntermediateQuery query, InnerJoinNode joinNode,
+                                                    ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMap) {
         return dataNodeMap.keySet().stream()
                 .flatMap(r -> r.getForeignKeys().stream()
                         .flatMap(c -> selectRedundantNodesForConstraint(r, c, query, joinNode, dataNodeMap)))
-                .collect(ImmutableCollectors.toSet());
+                .collect(ImmutableCollectors.toList());
     }
 
     /**
      * TODO: explain
      */
-    private Stream<ExtensionalDataNode> selectRedundantNodesForConstraint(RelationDefinition sourceRelation,
+    private Stream<Redundancy> selectRedundantNodesForConstraint(RelationDefinition sourceRelation,
                                                                ForeignKeyConstraint constraint,
                                                                IntermediateQuery query,
                                                                InnerJoinNode joinNode,
                                                                ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMap) {
-        /**
+        /*
          * "Target" data nodes === "referenced" data nodes
          */
         ImmutableCollection<ExtensionalDataNode> targetDataNodes = dataNodeMap.get(constraint.getReferencedRelation());
 
-        /**
+        /*
          * No optimization possible
          */
         if (targetDataNodes.isEmpty()) {
@@ -145,7 +168,8 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 .flatMap(s -> targetDataNodes.stream()
                         .filter(t -> areMatching(s,t,constraint)))
                 .distinct()
-                .filter(t -> areNonFKColumnsUnused(t, query, constraint));
+                .filter(t -> areNonFKColumnsUnused(t, query, constraint))
+                .map(t -> new Redundancy(t, extractJoiningVariables(t, constraint)));
     }
 
     /**
@@ -154,12 +178,16 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
      */
     private boolean areMatching(ExtensionalDataNode sourceDataNode, ExtensionalDataNode targetDataNode, ForeignKeyConstraint constraint) {
 
-        ImmutableList<? extends VariableOrGroundTerm> sourceArguments = sourceDataNode.getDataAtom().getArguments();
-        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getDataAtom().getArguments();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> sourceArgumentMap = sourceDataNode.getArgumentMap();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = targetDataNode.getArgumentMap();
 
         return constraint.getComponents().stream()
-                .allMatch(c -> sourceArguments.get(c.getAttribute().getIndex() - 1)
-                        .equals(targetArguments.get(c.getReference().getIndex() - 1)));
+                .allMatch(c -> {
+                    Optional<? extends VariableOrGroundTerm> source = Optional.ofNullable(
+                            sourceArgumentMap.get(c.getAttribute().getIndex() - 1));
+                    return source.isPresent()
+                            && source.equals(Optional.ofNullable(targetArgumentMap.get(c.getReferencedAttribute().getIndex() - 1)));
+                });
     }
 
     /**
@@ -168,22 +196,21 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     private boolean areNonFKColumnsUnused(ExtensionalDataNode targetDataNode, IntermediateQuery query,
                                           ForeignKeyConstraint constraint) {
 
-        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getDataAtom().getArguments();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArguments = targetDataNode.getArgumentMap();
 
         ImmutableSet<Integer> fkTargetIndexes = constraint.getComponents().stream()
-                .map(c -> c.getReference().getIndex() - 1)
+                .map(c -> c.getReferencedAttribute().getIndex() - 1)
                 .collect(ImmutableCollectors.toSet());
 
-        /**
+        /*
          * Terms appearing in non-FK positions
          */
-        ImmutableList<VariableOrGroundTerm> remainingTerms = IntStream.range(0, targetArguments.size())
-                .filter(i -> !fkTargetIndexes.contains(i))
-                .boxed()
-                .map(targetArguments::get)
+        ImmutableList<VariableOrGroundTerm> remainingTerms = targetArguments.entrySet().stream()
+                .filter(e -> !fkTargetIndexes.contains(e.getKey()))
+                .map(Map.Entry::getValue)
                 .collect(ImmutableCollectors.toList());
 
-        /**
+        /*
          * Check usage in the data atom.
          *
          * 1 - They should all variables
@@ -197,7 +224,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 .anyMatch(remainingTerms::contains))
             return false;
 
-        /**
+        /*
          * Check that the remaining variables are not used anywhere else
          */
         // TODO: use a more efficient implementation
@@ -207,4 +234,26 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 .map(v -> (Variable) v)
                 .noneMatch(v -> analyzer.isVariableUsedSomewhereElse(query, targetDataNode, v));
     }
+
+    private ImmutableSet<Variable> extractJoiningVariables(ExtensionalDataNode node, ForeignKeyConstraint constraint) {
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = node.getArgumentMap();
+
+        return constraint.getComponents().stream()
+                .map(c -> targetArgumentMap.get(c.getReferencedAttribute().getIndex() - 1))
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private static class Redundancy {
+        private final ExtensionalDataNode dataNode;
+        private final ImmutableSet<Variable> fkVariables;
+
+        private Redundancy(ExtensionalDataNode dataNode, ImmutableSet<Variable> fkVariables) {
+            this.dataNode = dataNode;
+            this.fkVariables = fkVariables;
+        }
+    }
+
+
 }

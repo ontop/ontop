@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -55,11 +56,11 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	private OWLConnection conn;
 	private Connection connection;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	private ClassifiedTBox onto;
 
-	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
-	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
+	private static final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
+	private static final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
 
 	// final String owlFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
@@ -79,20 +80,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		String password = "";
 
 		connection = DriverManager.getConnection(url, username, password);
-		Statement st = connection.createStatement();
-
-		FileReader reader = new
-				FileReader("src/test/resources/test/emptiesDatabase-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		connection.commit();
+		executeFromFile(connection, "src/test/resources/test/emptiesDatabase-h2.sql");
 
 		// Loading the OWL file
 		onto = OWL2QLTranslatorTest.loadOntologyFromFileAndClassify(owlfile);
@@ -114,27 +102,9 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 	@After
 	public void tearDown() throws Exception {
-			dropTables();
-			reasoner.dispose();
-			connection.close();
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = connection.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/emptiesDatabase-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		connection.commit();
+		executeFromFile(connection, "src/test/resources/test/emptiesDatabase-drop-h2.sql");
+		reasoner.dispose();
+		connection.close();
 	}
 
 	/**

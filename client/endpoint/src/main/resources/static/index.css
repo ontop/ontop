@@ -1,0 +1,94 @@
+#spinner {
+    visibility: hidden;
+    width: 100px;
+    height: 100px;
+
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #337ab7;
+    border-radius: 100%;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+header {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    line-height: 1.42857;
+    color: #333;
+    background-color: #fff;
+    padding: 6px;
+}
+
+#title {
+    font-weight: bold;
+    order: 0;
+}
+
+#info {
+    font-size: 14px;
+    order: 1;
+}
+
+#switcher {
+    padding: 6px;
+}
+
+.yasgui .controlbar {
+    display: none !important;
+}
+
+.yasgui .endpointText {
+    display: none !important;
+}
+
+#yasguis .predefined .close {
+    display: none !important;
+}
+
+#yasguis .predefined a[role="addTab"] {
+    display: none !important;
+}
+
+.choice-bar {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    width: 100%;
+    display: table;
+    table-layout: fixed;
+}
+
+.choice-option {
+    padding: 2%;
+    text-align: center;
+    display: table-cell;
+    background-color: #fff;
+    color: #337ab7;
+    border-style: ridge;
+    border-color: #337ab7;
+    border-width: 1px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.chosen {
+    background-color: #337ab7;
+    color: #fff;
+}

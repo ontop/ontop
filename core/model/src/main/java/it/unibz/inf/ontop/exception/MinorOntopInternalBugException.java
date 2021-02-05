@@ -7,4 +7,8 @@ public class MinorOntopInternalBugException extends OntopInternalBugException {
     public MinorOntopInternalBugException(String message) {
         super(message);
     }
+
+    public MinorOntopInternalBugException(String message, Throwable e) {
+        super(message, e);
+    }
 }

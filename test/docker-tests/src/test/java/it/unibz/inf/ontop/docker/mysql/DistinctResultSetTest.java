@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.resultset.impl.SQLDistinctTupleResultSet;
+import it.unibz.inf.ontop.answering.resultset.impl.DistinctJDBCTupleResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -29,16 +29,16 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link SQLDistinctTupleResultSet}
+ * Use the class {@link DistinctJDBCTupleResultSet}
  */
 
 public class DistinctResultSetTest { //
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlFile = "/mysql/example/exampleBooks.owl";
-    final String obdaFile = "/mysql/example/exampleBooks.obda";
-    final String propertyFile = "/mysql/example/exampleBooks.properties";
+    private static final String owlFile = "/mysql/example/exampleBooks.owl";
+    private static final String obdaFile = "/mysql/example/exampleBooks.obda";
+    private static  final String propertyFile = "/mysql/example/exampleBooks.properties";
     static String owlFileName;
     static String obdaFileName;
     static String propertyFileName;
@@ -50,10 +50,8 @@ public class DistinctResultSetTest { //
         propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
     }
+
     private int runTestsQuestOWL( String query) throws Exception {
-
-
-
         // Creating a new instance of the reasoner
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -65,21 +63,13 @@ public class DistinctResultSetTest { //
         OntopOWLReasoner reasoner = factory.createReasoner(config);
         // Now we are ready for querying
         OWLConnection conn = reasoner.getConnection();
-        OWLStatement st = conn.createStatement();
 
         int results = 0;
 
-        try {
+        try (OWLStatement st = conn.createStatement()) {
             results= executeQueryAssertResults(query, st);
-
-        } catch (Exception e) {
-            st.close();
-            e.printStackTrace();
-            assertTrue(false);
-
-
-        } finally {
-
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }
@@ -87,18 +77,17 @@ public class DistinctResultSetTest { //
 
     }
 
-    private int runTestsSesame(String query, String configFile){
+    private int runTestsSesame(String query, String configFile) {
         //create a sesame repository
         RepositoryConnection con = null;
         Repository repo = null;
         int count = 0;
-        try {
-            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .ontologyFile(owlFileName)
-                    .nativeOntopMappingFile(obdaFileName)
-                    .propertyFile(configFile)
-                    .enableTestMode()
-                    .build();
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .ontologyFile(owlFileName)
+                .nativeOntopMappingFile(obdaFileName)
+                .propertyFile(configFile)
+                .enableTestMode()
+                .build();
 
         repo = OntopRepository.defaultRepository(configuration);
 
@@ -107,34 +96,18 @@ public class DistinctResultSetTest { //
         con = repo.getConnection();
 
         ///query repo
-        try {
-
-            TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
-            TupleQueryResult result = tupleQuery.evaluate();
-            try {
-                List<String> bindings = result.getBindingNames();
-                while (result.hasNext()) {
-                    count++;
-                    BindingSet bindingSet = result.next();
-                    for (String b : bindings)
-                        log.debug("Binding : "+bindingSet.getBinding(b));
-                }
-            } finally {
-                result.close();
+        TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
+            List<String> bindings = result.getBindingNames();
+            while (result.hasNext()) {
+                count++;
+                BindingSet bindingSet = result.next();
+                for (String b : bindings)
+                    log.debug("Binding : " + bindingSet.getBinding(b));
             }
-        }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                assertTrue(false);
-            }
-
-        } catch (Exception e1) {
-            e1.printStackTrace();
         }
         return count;
-
-        }
+    }
 
     private int executeQueryAssertResults(String query, OWLStatement st) throws Exception {
         TupleOWLResultSet rs = st.executeSelectQuery(query);
@@ -143,14 +116,13 @@ public class DistinctResultSetTest { //
             final OWLBindingSet bindingSet = rs.next();
             count++;
             for (int i = 1; i <= rs.getColumnCount(); i++) {
-                log.debug(rs.getSignature().get(i-1) + "=" + bindingSet.getOWLObject(i));
+                String bindingName = rs.getSignature().get(i - 1);
+                log.debug(bindingName + "=" + bindingSet.getOWLObject(bindingName));
             }
 
         }
         rs.close();
-
         return count;
-
     }
 
     @Test
@@ -172,7 +144,5 @@ public class DistinctResultSetTest { //
         int nResults = runTestsSesame(query,pref) ;
         assertEquals(24, nResults);
     }
-
-
 
 }

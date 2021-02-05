@@ -1,0 +1,17 @@
+_:BobSmith30 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/IOUs> .
+_:BobSmith30 <http://example.com/base/IOUs#fname> "Bob" .
+_:BobSmith30 <http://example.com/base/IOUs#lname> "Smith" .
+_:BobSmith30 <http://example.com/base/IOUs#amount> "30.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:SueJones20 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/IOUs> .
+_:SueJones20 <http://example.com/base/IOUs#fname> "Sue" .
+_:SueJones20 <http://example.com/base/IOUs#lname> "Jones" .
+_:SueJones20 <http://example.com/base/IOUs#amount> "20.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+_:BobSmithLondon <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/Lives> .
+_:BobSmithLondon <http://example.com/base/IOUs#fname> "Bob" .
+_:BobSmithLondon <http://example.com/base/IOUs#lname> "Smith" .
+_:BobSmithLondon <http://example.com/base/IOUs#city> "London" .
+_:SueJonesMadrid <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/base/Lives> .
+_:SueJonesMadrid <http://example.com/base/IOUs#fname> "Sue" .
+_:SueJonesMadrid <http://example.com/base/IOUs#lname> "Jones" .
+_:SueJonesMadrid <http://example.com/base/IOUs#city> "Madrid" .
+

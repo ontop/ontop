@@ -34,9 +34,10 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 public class S_Indexes_NewDAGTest extends TestCase {
 	
-	ArrayList<String> input= new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_Indexes_NewDAGTest.class);
 
@@ -44,8 +45,8 @@ public class S_Indexes_NewDAGTest extends TestCase {
 		super(name);
 	}
 	
-	public void setUp() {
-
+	public void testIndexes() throws Exception {
+		ArrayList<String> input= new ArrayList<>();
 		/** C -> B  -> A  C->A*/
 		input.add("src/test/resources/test/newDag/transitive.owl");
 		/** C -> B  -> A  C->D ->A C->A */
@@ -87,12 +88,9 @@ public class S_Indexes_NewDAGTest extends TestCase {
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
 
-	}
-
-	public void testIndexes() throws Exception {
 		//for each file in the input
 		for (String fileInput : input) {
-			ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag = loadOntologyFromFileAndClassify(fileInput);
 
 			//add input named graph
 			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
@@ -144,11 +142,5 @@ public class S_Indexes_NewDAGTest extends TestCase {
 		}
 		
 		return result;
-}
-
-
-
-
-
-
+	}
 }

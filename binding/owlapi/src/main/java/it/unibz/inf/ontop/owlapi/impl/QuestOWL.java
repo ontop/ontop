@@ -56,7 +56,7 @@ import java.util.Set;
  */
 public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
-	StructuralReasoner structuralReasoner;
+	private final StructuralReasoner structuralReasoner;
 
     private final Version version;
 
@@ -71,32 +71,12 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private Exception questException = null;
 
-	// //////////////////////////////////////////////////////////////////////////////////////
-	//
-	// From Quest
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
-
 	/* The merge and translation of all loaded ontologies */
 	// TODO: see if still relevant
 	private ClassifiedTBox translatedOntologyMerge;
 
-	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
+	private static final Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-
-	// //////////////////////////////////////////////////////////////////////////////////////
-	//
-	//  User Constraints are primary and foreign keys not in the database 
-	//  
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
-	
-	// //////////////////////////////////////////////////////////////////////////////////////
-	//  Davide>
-	//  T-Mappings Configuration
-	//  
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
 
 	/* Used to enable querying annotation Properties coming from the ontology. */
 
@@ -105,10 +85,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	private final OntopQueryEngine queryEngine;
 	private final InputQueryFactory inputQueryFactory;
 	private final OWLAPITranslatorOWL2QL owlapiTranslator;
-
-	/* Used to signal whether to apply the user constraints above */
-	//private boolean applyExcludeFromTMappings = false;
-
 
 	/**
 	 * End-users: use the QuestOWLFactory instead
@@ -177,11 +153,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	@Override
     public void flush() {
 		prepared = false;
-		
 		super.flush();
-		
 		prepareReasoner();
-		
 	}
 
 	private void prepareConnector() throws OntopConnectionException {
@@ -457,7 +430,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		
 		for (ObjectPropertyExpression pfa : translatedOntologyMerge.functionalObjectProperties()) {
 			// TODO: handle inverses
-			String propFunc = pfa.getName();
+			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);
@@ -468,7 +441,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		}
 		
 		for (DataPropertyExpression pfa : translatedOntologyMerge.functionalDataProperties()) {
-			String propFunc = pfa.getName();
+			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);
@@ -490,8 +463,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			if (trs != null) {
 				boolean b = trs.getValue();
 				trs.close();
-				if (b)
-					return false;
+				return !b;
 			}
 			return true;
 		} catch (Exception e) {

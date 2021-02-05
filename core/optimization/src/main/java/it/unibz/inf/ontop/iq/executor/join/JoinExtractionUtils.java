@@ -8,10 +8,9 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,13 +22,12 @@ import java.util.Queue;
 public class JoinExtractionUtils {
 
     private final TermFactory termFactory;
-    private final ExpressionEvaluator defaultExpressionEvaluator;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-    private JoinExtractionUtils(TermFactory termFactory,
-                                ExpressionEvaluator defaultExpressionEvaluator) {
+    private JoinExtractionUtils(TermFactory termFactory, CoreUtilsFactory coreUtilsFactory) {
         this.termFactory = termFactory;
-        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     /**
@@ -44,14 +42,16 @@ public class JoinExtractionUtils {
 
         Optional<ImmutableExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
         if (foldedExpression.isPresent()) {
-            ExpressionEvaluator evaluator = defaultExpressionEvaluator.clone();
+            ImmutableExpression expression = foldedExpression.get();
 
-            ExpressionEvaluator.EvaluationResult evaluationResult = evaluator.evaluateExpression(foldedExpression.get());
+            ImmutableExpression.Evaluation evaluationResult = expression.evaluate(
+                    coreUtilsFactory.createSimplifiedVariableNullability(expression));
+
             if (evaluationResult.isEffectiveFalse()) {
                 throw new UnsatisfiableExpressionException();
             }
             else {
-                return evaluationResult.getOptionalExpression();
+                return evaluationResult.getExpression();
             }
         }
         else {
@@ -105,10 +105,10 @@ public class JoinExtractionUtils {
                 Iterator<ImmutableExpression> it = booleanExpressions.iterator();
 
                 // Non-final
-                ImmutableExpression currentExpression = termFactory.getImmutableExpression(ExpressionOperation.AND,
+                ImmutableExpression currentExpression = termFactory.getConjunction(
                         it.next(), it.next());
                 while(it.hasNext()) {
-                    currentExpression = termFactory.getImmutableExpression(ExpressionOperation.AND, currentExpression, it.next());
+                    currentExpression = termFactory.getConjunction(currentExpression, it.next());
                 }
 
                 return Optional.of(currentExpression);

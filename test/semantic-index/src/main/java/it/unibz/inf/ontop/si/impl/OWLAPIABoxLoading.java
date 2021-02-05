@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.si.impl;
 
 
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -35,15 +33,12 @@ public class OWLAPIABoxLoading {
     public static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology owlOntology, Properties properties)
             throws SemanticIndexException {
 
-        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-        OWLAPITranslatorOWL2QL translatorOWL2QL = defaultConfiguration.getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
+        LoadingConfiguration loadingConfiguration = new LoadingConfiguration();
+        OWLAPITranslatorOWL2QL translatorOWL2QL = loadingConfiguration.getTranslatorOWL2QL();
 
         Ontology ontology = translatorOWL2QL.translateAndClassify(owlOntology);
 
-        SIRepository repo = new SIRepository(ontology.tbox(), defaultConfiguration.getTermFactory(),
-                defaultConfiguration.getTypeFactory(),
-                defaultConfiguration.getInjector().getInstance(TargetAtomFactory.class)
-                );
+        SIRepository repo = new SIRepository(ontology.tbox(), loadingConfiguration);
 
         try {
             Connection connection = repo.createConnection();

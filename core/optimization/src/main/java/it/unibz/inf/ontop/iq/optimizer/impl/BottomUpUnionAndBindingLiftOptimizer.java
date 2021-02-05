@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -38,12 +37,12 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
 
     @Override
     public IQ optimize(IQ query) {
-        IQ bindingLiftedQuery = query.liftBinding();
+        IQ bindingLiftedQuery = query.normalizeForOptimization();
         return liftUnionsInTree(bindingLiftedQuery);
     }
 
     /**
-     *
+     * TODO: refactor
      */
     private IQ liftUnionsInTree(IQ query) {
         VariableGenerator variableGenerator = query.getVariableGenerator();
@@ -55,7 +54,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
         do {
             previousTree = newTree;
             newTree = liftTree(previousTree, variableGenerator)
-                    .liftBinding(variableGenerator);
+                    .normalizeForOptimization(variableGenerator);
 
         } while (!newTree.equals(previousTree) && (++i < ITERATION_BOUND));
 
@@ -109,6 +108,10 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
 
     }
 
+
+    /**
+     * TODO: refactor
+     */
     private IQTree liftInnerJoin(NaryIQTree queryTree, ImmutableList<IQTree> newChildren, VariableGenerator variableGenerator) {
         InnerJoinNode joinNode = (InnerJoinNode) queryTree.getRootNode();
 
@@ -117,11 +120,11 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                 : iqFactory.createNaryIQTree(joinNode, newChildren);
 
         return extractCandidateVariables(queryTree, joinNode.getOptionalFilterCondition(), newChildren)
-                .map(newQueryTree::liftIncompatibleDefinitions)
+                .map(variable -> newQueryTree.liftIncompatibleDefinitions(variable, variableGenerator))
                 .filter(t -> !t.equals(queryTree))
                 .findFirst()
                 .orElse(newQueryTree)
-                .liftBinding(variableGenerator);
+                .normalizeForOptimization(variableGenerator);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -159,6 +162,9 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                     : iqFactory.createBinaryNonCommutativeIQTree(root, newLeftChild, newRightChild);
     }
 
+    /**
+     * TODO: refactor
+     */
     private IQTree liftLJJoin(BinaryNonCommutativeIQTree queryTree, IQTree newLeftChild, IQTree newRightChild,
                               VariableGenerator variableGenerator) {
         LeftJoinNode leftJoinNode = (LeftJoinNode) queryTree.getRootNode();
@@ -171,11 +177,11 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
         return extractCandidateVariables(queryTree, leftJoinNode.getOptionalFilterCondition(),
                     ImmutableList.of(newLeftChild, newRightChild))
                 .filter(v -> newLeftChild.getVariables().contains(v))
-                .map(newQueryTree::liftIncompatibleDefinitions)
+                .map(variable -> newQueryTree.liftIncompatibleDefinitions(variable, variableGenerator))
                 .filter(t -> !t.equals(queryTree))
                 .findFirst()
                 .orElse(newQueryTree)
-                .liftBinding(variableGenerator);
+                .normalizeForOptimization(variableGenerator);
     }
 
 }

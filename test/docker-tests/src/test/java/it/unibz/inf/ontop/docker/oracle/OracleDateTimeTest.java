@@ -1,34 +1,19 @@
 package it.unibz.inf.ontop.docker.oracle;
 
 
-
-
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +21,30 @@ import static org.junit.Assert.*;
 
 public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "/oracle/datetime/dateTimeExampleBooks.owl";
-	static final String obdafile = "/oracle/datetime/dateTimeExampleBooks.obda";
-	static final String propertyfile = "/oracle/datetime/dateTimeExampleBooks.properties";
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlfile = "/oracle/datetime/dateTimeExampleBooks.owl";
+	private static final String obdafile = "/oracle/datetime/dateTimeExampleBooks.obda";
+	private static final String propertyfile = "/oracle/datetime/dateTimeExampleBooks.properties";
 
-	public OracleDateTimeTest() {
-		super(owlfile, obdafile, propertyfile);
+	private static final Logger log = LoggerFactory.getLogger(OracleDateTimeTest.class);
+
+	private static OntopOWLReasoner REASONER;
+	private static OntopOWLConnection CONNECTION;
+
+	@BeforeClass
+	public static void before() throws OWLOntologyCreationException {
+		REASONER = createReasoner(owlfile, obdafile, propertyfile);
+		CONNECTION = REASONER.getConnection();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
+	}
+
+	@AfterClass
+	public static void after() throws OWLException {
+		CONNECTION.close();
+		REASONER.dispose();
 	}
 
 
@@ -68,23 +70,17 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testDateTime() throws Exception {
-		OWLStatement st = null;
-		try {
-			st = conn.createStatement();
+		try (OWLStatement st = createStatement()) {
 
-				String query = "PREFIX :	<http://meraka/moss/exampleBooks.owl#> \n " +
-						" SELECT ?x ?y WHERE " +
-						"{?x :dateOfPublication ?y .}";
-				String date = runTest(st, query, true);
-				log.debug(date);
-				
-				assertEquals("\"2010-02-18T10:02:30\"^^xsd:dateTime", date);
-			
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (st != null)
-				st.close();
+			String query = "PREFIX :	<http://meraka/moss/exampleBooks.owl#> \n " +
+					" SELECT ?x ?y WHERE " +
+					"{?x :dateOfPublication ?y .}\n" +
+					"ORDER BY DESC(?y)";
+			String date = runTest(st, query, true);
+			log.debug(date);
+
+			assertEquals("\"2010-05-01T10:02:30\"^^xsd:dateTime", date);
+
 		}
 	}
 

@@ -16,6 +16,10 @@ public class OntopTest {
         Ontop.main("help");
     }
 
+    @Test
+    public void testOntopHelpEndpoint(){
+        Ontop.main("help", "endpoint");
+    }
 
     @Test
     public void testOntopHelpMapping(){
@@ -44,27 +48,26 @@ public class OntopTest {
 
     @Test
     public void testOntopMissingCommand (){
-        String[] argv = { "-m", "/Users/xiao/Projects/npd-benchmark/mappings/postgres/no-spatial/npd-v2-ql_a_postgres.obda",
+        Ontop.main("-m", "/Users/xiao/Projects/npd-benchmark/mappings/postgres/no-spatial/npd-v2-ql_a_postgres.obda",
                 "-t", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",
-                "-f", "turtle", "-o", "/tmp/npd", "--separate-files"};
-        Ontop.main(argv);
+                "-f", "turtle", "-o", "/tmp/npd", "--separate-files");
     }
 
     @Test
     public void testOntopMissingArgValues (){
-        String[] argv = { "materialize", "-m",
+        Ontop.main("materialize", "-m",
                 "-t", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",
-                "-f", "turtle", "-o", "/tmp/npd", "--separate-files"};
-        Ontop.main(argv);
+                "-f", "turtle",
+                "-o", "/tmp/npd",
+                "--separate-files");
     }
 
     @Test
     public void testOntopMissingRequiredArg (){
-        String[] argv = { "materialize",
+        Ontop.main("materialize",
                 "-t", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",
-                "-f", "turtle", "-o", "/tmp/npd", "--separate-files"};
-        Ontop.main(argv);
+                "-f", "turtle",
+                "-o", "/tmp/npd",
+                "--separate-files");
     }
-
-
 }

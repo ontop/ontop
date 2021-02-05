@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
@@ -21,8 +20,6 @@ import java.util.stream.Stream;
  *
  */
 public interface IntermediateQuery {
-
-    DBMetadata getDBMetadata();
 
     QueryNode getRootNode();
 

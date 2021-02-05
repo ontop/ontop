@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.IRI;
@@ -13,6 +11,8 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.util.*;
 import java.util.function.Function;
+
+import static it.unibz.inf.ontop.model.vocabulary.RDF.TYPE;
 
 public class OntologyBuilderImpl implements OntologyBuilder {
 
@@ -42,92 +42,60 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private final OntologyCategoryImpl<AnnotationProperty> annotationProperties;
 
     private final RDF rdfFactory;
+    private final TermFactory termFactory;
 
     // assertions
+    private final ImmutableSet.Builder<RDFFact> assertions = ImmutableSet.builder();
+    private final IRIConstant rdfType;
 
-    private final ImmutableList.Builder<ClassAssertion> classAssertions = ImmutableList.builder();
-    private final ImmutableList.Builder<ObjectPropertyAssertion> objectPropertyAssertions = ImmutableList.builder();
-    private final ImmutableList.Builder<DataPropertyAssertion> dataPropertyAssertions = ImmutableList.builder();
-    private final ImmutableList.Builder<AnnotationAssertion> annotationAssertions = ImmutableList.builder();
+    private OntologyBuilderImpl(RDF rdfFactory, TermFactory termFactory) {
+        this.termFactory = termFactory;
+        classes = new OntologyCategoryImpl<>(ClassImpl::new, CLASS_NOT_FOUND,"");
+        objectProperties = new OntologyCategoryImpl<>(ObjectPropertyExpressionImpl::new, OBJECT_PROPERTY_NOT_FOUND,"");
+        dataProperties = new OntologyCategoryImpl<>(DataPropertyExpressionImpl::new, DATA_PROPERTY_NOT_FOUND,"");
+        annotationProperties = new OntologyCategoryImpl<>(AnnotationPropertyImpl::new, ANNOTATION_PROPERTY_NOT_FOUND,"");
 
-    private OntologyBuilderImpl(RDF rdfFactory) {
-        classes = new OntologyCategoryImpl<>(s -> new ClassImpl(rdfFactory.createIRI(s)),
-                        CLASS_NOT_FOUND,"");
-        objectProperties = new OntologyCategoryImpl<>(s -> new ObjectPropertyExpressionImpl(rdfFactory.createIRI(s)),
-                        OBJECT_PROPERTY_NOT_FOUND,"");
-        dataProperties = new OntologyCategoryImpl<>(s -> new DataPropertyExpressionImpl(rdfFactory.createIRI(s)),
-                DATA_PROPERTY_NOT_FOUND,"");
-        annotationProperties = new OntologyCategoryImpl<>(s -> new AnnotationPropertyImpl(rdfFactory.createIRI(s)),
-                ANNOTATION_PROPERTY_NOT_FOUND,"");
-        classes.map.put(OWL.THING.getIRIString(), ClassImpl.owlThing);
-        classes.map.put(OWL.NOTHING.getIRIString(), ClassImpl.owlNothing);
-        objectProperties.map.put(OWL.TOP_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlTopObjectProperty);
-        objectProperties.map.put(OWL.BOTTOM_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlBottomObjectProperty);
-        dataProperties.map.put(OWL.TOP_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlTopDataProperty);
-        dataProperties.map.put(OWL.BOTTOM_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlBottomDataProperty);
+        classes.map.put(OWL.THING, ClassImpl.owlThing);
+        classes.map.put(OWL.NOTHING, ClassImpl.owlNothing);
+        objectProperties.map.put(OWL.TOP_OBJECT_PROPERTY, ObjectPropertyExpressionImpl.owlTopObjectProperty);
+        objectProperties.map.put(OWL.BOTTOM_OBJECT_PROPERTY, ObjectPropertyExpressionImpl.owlBottomObjectProperty);
+        dataProperties.map.put(OWL.TOP_DATA_PROPERTY, DataPropertyExpressionImpl.owlTopDataProperty);
+        dataProperties.map.put(OWL.BOTTOM_DATA_PROPERTY, DataPropertyExpressionImpl.owlBottomDataProperty);
+
+        this.rdfType = termFactory.getConstantIRI(TYPE);
 
         this.rdfFactory = rdfFactory;
     }
 
-    public static OntologyBuilder builder(RDF rdfFactory) {
-        return new OntologyBuilderImpl(rdfFactory);
+    public static OntologyBuilder builder(RDF rdfFactory, TermFactory termFactory) {
+        return new OntologyBuilderImpl(rdfFactory, termFactory);
     }
-
-    public static ABoxAssertionSupplier assertionSupplier(RDF rdfFactory) {
-        return new ABoxAssertionSupplier() {
-            @Override
-            public ClassAssertion createClassAssertion(String c, ObjectConstant o) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createClassAssertion(new ClassImpl(rdfFactory.createIRI(c)), o);
-            }
-
-            @Override
-            public ObjectPropertyAssertion createObjectPropertyAssertion(String op, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createObjectPropertyAssertion(new ObjectPropertyExpressionImpl(rdfFactory.createIRI(op)), o1, o2);
-            }
-
-            @Override
-            public DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createDataPropertyAssertion(new DataPropertyExpressionImpl(rdfFactory.createIRI(dp)), o, v);
-            }
-        };
-    }
-
-
 
 
     static final class OntologyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
-        private final Map<String, T> map = new HashMap<>();
+        private final Map<IRI, T> map = new HashMap<>();
 
         private final String NOT_FOUND, EXISTS;
-        private final Function<String, ? extends T> ctor;
+        private final Function<IRI, ? extends T> ctor;
 
-        OntologyCategoryImpl(Function<String, ? extends T> ctor, String NOT_FOUND, String EXISTS) {
+        OntologyCategoryImpl(Function<IRI, ? extends T> ctor, String NOT_FOUND, String EXISTS) {
             this.ctor = ctor;
             this.NOT_FOUND = NOT_FOUND;
             this.EXISTS = EXISTS;
         }
 
+
         @Override
-        public T get(String uri) {
-            T oc = map.get(uri);
+        public T get(IRI iri) {
+            T oc = map.get(iri);
             if (oc == null)
-                throw new RuntimeException(NOT_FOUND + uri);
+                throw new RuntimeException(NOT_FOUND + iri);
             return oc;
         }
 
         @Override
-        public T get(IRI iri) {
-            return get(iri.getIRIString());
-        }
-
-        @Override
-        public boolean contains(String uri) {
-            return map.containsKey(uri);
-        }
-
-        @Override
         public boolean contains(IRI iri) {
-            return contains(iri.getIRIString());
+            return map.containsKey(iri);
         }
 
         @Override
@@ -135,7 +103,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
             return map.values().iterator();
         }
 
-        private T create(String uri) {
+        private T create(IRI uri) {
             // TODO: check for built-in
             //if (map.containsKey(uri))
             //    throw new RuntimeException(EXISTS + uri);
@@ -166,23 +134,23 @@ public class OntologyBuilderImpl implements OntologyBuilder {
 
 
     @Override
-    public OClass declareClass(String uri) {
-        return classes.create(uri);
+    public OClass declareClass(IRI iri) {
+        return classes.create(iri);
     }
 
     @Override
-    public ObjectPropertyExpression declareObjectProperty(String uri) {
-        return objectProperties.create(uri);
+    public ObjectPropertyExpression declareObjectProperty(IRI iri) {
+        return objectProperties.create(iri);
     }
 
     @Override
-    public DataPropertyExpression declareDataProperty(String uri) {
+    public DataPropertyExpression declareDataProperty(IRI uri) {
         return dataProperties.create(uri);
     }
 
     @Override
-    public AnnotationProperty declareAnnotationProperty(String uri) {
-        return annotationProperties.create(uri);
+    public AnnotationProperty declareAnnotationProperty(IRI iri) {
+        return annotationProperties.create(iri);
     }
 
     @Override
@@ -433,13 +401,13 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - inconsistency if the class is bot
      */
 
-    public static ClassAssertion createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
+    private RDFFact createClassAssertion(OClass ce, ObjectConstant object) throws InconsistentOntologyException {
         if (ce.isTop())
             return null;
         if (ce.isBottom())
             throw new InconsistentOntologyException();
 
-        return new ClassAssertionImpl(ce, object);
+        return RDFFact.createTripleFact(object, rdfType, termFactory.getConstantIRI(ce.getIRI()));
     }
 
     /**
@@ -454,16 +422,16 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - swap the arguments to eliminate inverses
      */
 
-    public static ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
+    private RDFFact createObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
         if (ope.isTop())
             return null;
         if (ope.isBottom())
             throw new InconsistentOntologyException();
 
         if (ope.isInverse())
-            return new ObjectPropertyAssertionImpl(ope.getInverse(), o2, o1);
+            return RDFFact.createTripleFact(o2, termFactory.getConstantIRI(ope.getInverse().getIRI()), o1);
         else
-            return new ObjectPropertyAssertionImpl(ope, o1, o2);
+            return RDFFact.createTripleFact(o1, termFactory.getConstantIRI(ope.getIRI()), o2);
     }
 
     /**
@@ -477,13 +445,13 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      *     - inconsistency if the property is bot
      */
 
-    public static DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, ValueConstant o2) throws InconsistentOntologyException {
+    private RDFFact createDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o1, RDFLiteralConstant o2) throws InconsistentOntologyException {
         if (dpe.isTop())
             return null;
         if (dpe.isBottom())
             throw new InconsistentOntologyException();
 
-        return new DataPropertyAssertionImpl(dpe, o1, o2);
+        return RDFFact.createTripleFact(o1, termFactory.getConstantIRI(dpe.getIRI()), o2);
     }
 
     /**
@@ -492,8 +460,8 @@ public class OntologyBuilderImpl implements OntologyBuilder {
      * AnnotationSubject := IRI | AnonymousIndividual
      *
      */
-    public static AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
-        return new AnnotationAssertionImpl(ap,o,c);
+    private RDFFact createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, RDFConstant c) {
+        return RDFFact.createTripleFact(o, termFactory.getConstantIRI(ap.getIRI()), c);
     }
 
 
@@ -501,33 +469,33 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     @Override
     public void addClassAssertion(OClass ce, ObjectConstant o) throws InconsistentOntologyException {
         checkSignature(ce);
-        ClassAssertion assertion = createClassAssertion(ce, o);
+        RDFFact assertion = createClassAssertion(ce, o);
         if (assertion != null)
-            classAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
     @Override
     public void addObjectPropertyAssertion(ObjectPropertyExpression ope, ObjectConstant o1, ObjectConstant o) throws InconsistentOntologyException {
         checkSignature(ope);
-        ObjectPropertyAssertion assertion = createObjectPropertyAssertion(ope, o1, o);
+        RDFFact assertion = createObjectPropertyAssertion(ope, o1, o);
         if (assertion != null)
-            objectPropertyAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
     @Override
-    public void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException {
+    public void addDataPropertyAssertion(DataPropertyExpression dpe, ObjectConstant o, RDFLiteralConstant v) throws InconsistentOntologyException {
         checkSignature(dpe);
-        DataPropertyAssertion assertion = createDataPropertyAssertion(dpe, o, v);
+        RDFFact assertion = createDataPropertyAssertion(dpe, o, v);
         if (assertion != null)
-            dataPropertyAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
     @Override
-    public void addAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
+    public void addAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, RDFConstant c) {
         checkSignature(ap);
-        AnnotationAssertion assertion = createAnnotationAssertion(ap, o, c);
+        RDFFact assertion = createAnnotationAssertion(ap, o, c);
         if (assertion != null)
-            annotationAssertions.add(assertion);
+            assertions.add(assertion);
     }
 
 
@@ -541,7 +509,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
                 dataPropertyAxioms.inclusions.build(), dataPropertyAxioms.disjointness.build(),
                 subDataRangeAxioms.build(), reflexiveObjectPropertyAxioms.build(), irreflexiveObjectPropertyAxioms.build(),
                 functionalObjectPropertyAxioms.build(), functionalDataPropertyAxioms.build(),
-                classAssertions.build(), objectPropertyAssertions.build(), dataPropertyAssertions.build(), annotationAssertions.build());
+                assertions.build());
     }
 
 
@@ -566,7 +534,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private void checkSignature(ClassExpression desc) {
         if (desc instanceof OClass) {
             OClass cl = (OClass) desc;
-            if (!classes.contains(cl.getName()))
+            if (!classes.contains(cl.getIRI()))
                 throw new IllegalArgumentException(CLASS_NOT_FOUND + desc);
         }
         else if (desc instanceof ObjectSomeValuesFrom) {
@@ -591,17 +559,17 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         if (prop.isInverse())
             prop = prop.getInverse();
 
-        if (!objectProperties.contains(prop.getName()) && !auxObjectProperties.contains(prop))
+        if (!objectProperties.contains(prop.getIRI()) && !auxObjectProperties.contains(prop))
             throw new IllegalArgumentException(OBJECT_PROPERTY_NOT_FOUND + prop);
     }
 
     private void checkSignature(DataPropertyExpression prop) {
-        if (!dataProperties.contains(prop.getName()))
+        if (!dataProperties.contains(prop.getIRI()))
             throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
     }
 
     private void checkSignature(AnnotationProperty prop) {
-        if (!annotationProperties.contains(prop.getName()))
+        if (!annotationProperties.contains(prop.getIRI()))
             throw new IllegalArgumentException(ANNOTATION_PROPERTY_NOT_FOUND + prop);
     }
 

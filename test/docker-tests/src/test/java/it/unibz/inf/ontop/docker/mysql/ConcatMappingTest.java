@@ -1,7 +1,14 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 
 /**
@@ -12,12 +19,28 @@ import org.junit.Test;
  */
 public class ConcatMappingTest extends AbstractVirtualModeTest {
 
-    static final String owlFile = "/mysql/northwind/mapping-northwind.owl";
-    static final String obdaFile = "/mysql/northwind/mapping-northwind.obda";
-    static final String propertiesFile = "/mysql/northwind/mapping-northwind.properties";
+    private static final String owlFile = "/mysql/northwind/mapping-northwind.owl";
+    private static final String obdaFile = "/mysql/northwind/mapping-northwind.obda";
+    private static final String propertiesFile = "/mysql/northwind/mapping-northwind.properties";
 
-    public ConcatMappingTest() {
-        super(owlFile, obdaFile, propertiesFile);
+    private static OntopOWLReasoner REASONER;
+    private static OntopOWLConnection CONNECTION;
+
+    @BeforeClass
+    public static void before() throws OWLOntologyCreationException {
+        REASONER = createReasoner(owlFile, obdaFile, propertiesFile);
+        CONNECTION = REASONER.getConnection();
+    }
+
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
     @Test
@@ -27,7 +50,7 @@ public class ConcatMappingTest extends AbstractVirtualModeTest {
                 "SELECT  ?f ?y " +
                 "WHERE {?f a <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ; rdfs:label ?y .} \n";
 
-        countResults(queryBind, 9);
+        countResults(9, queryBind);
 
     }
 }

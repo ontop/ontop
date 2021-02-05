@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -8,7 +9,8 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Ignore;
@@ -37,8 +39,8 @@ public class ConstructionNodeCleanerTest {
     private final static Variable Z1 = TERM_FACTORY.getVariable("Z1");
     private final static Variable Z2 = TERM_FACTORY.getVariable("Z2");
 
-    private Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private Constant URI_TEMPLATE_STR_2_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
+    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
+    private ImmutableList<TemplateComponent> URI_TEMPLATE_STR_2_2 = Template.of("http://example.org/ds2/", 0, "/", 1);
 
     // TODO: choose an implementation
     private static IntermediateQueryOptimizer constructionNodeCleaner = null;
@@ -48,7 +50,7 @@ public class ConstructionNodeCleanerTest {
     public void removeConstructionNodeTest1() throws EmptyQueryException {
 
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
 
         SliceNode limitNode = IQ_FACTORY.createSliceNode(0,100);
@@ -72,7 +74,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, limitNode);
         queryBuilder2.addChild(limitNode, distinctNode);
@@ -93,7 +95,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         queryBuilder1.init(projectionAtom1, constructionNode1);
@@ -115,7 +117,7 @@ public class ConstructionNodeCleanerTest {
         System.out.println("\nBefore optimization: \n" + query1);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, limitNode);
         queryBuilder2.addChild(limitNode, distinctNode);
@@ -138,7 +140,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest3() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
@@ -160,7 +162,7 @@ public class ConstructionNodeCleanerTest {
                 projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution()
         );
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, constructionNode3);
         queryBuilder2.addChild(constructionNode3, dataNode1);
@@ -178,7 +180,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest4() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
 
         SliceNode limitNode1 = IQ_FACTORY.createSliceNode(0,100);
@@ -209,7 +211,7 @@ public class ConstructionNodeCleanerTest {
                 projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,generateURI1(Z2), Y, generateURI1(Z)));
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, limitNode2);
         queryBuilder2.addChild(limitNode2, constructionNode3);
@@ -231,7 +233,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest5() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
 
         SliceNode limitNode1 = IQ_FACTORY.createSliceNode(0,100);
@@ -259,7 +261,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         queryBuilder2.init(projectionAtom1, limitNode1);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
@@ -290,7 +292,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest6() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
@@ -321,7 +323,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         queryBuilder2.init(projectionAtom1, limitNode);
 
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
@@ -349,7 +351,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest7() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
 
         SliceNode limit50 = IQ_FACTORY.createSliceNode(0,50);
@@ -390,7 +392,7 @@ public class ConstructionNodeCleanerTest {
                         Y, generateURI1(Y1),
                         Z, generateURI1(Z1)));
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, limit90);
         queryBuilder2.addChild(limit90, constructionNode4);
@@ -412,7 +414,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest8() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
 
         SliceNode limit50 = IQ_FACTORY.createSliceNode(0,50);
@@ -459,7 +461,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y1, Z1));
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, limit130);
         queryBuilder2.addChild(limit130, constructionNode4);
@@ -482,7 +484,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest9() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
 
         SliceNode limit130 = IQ_FACTORY.createSliceNode(0,130);
@@ -534,7 +536,7 @@ public class ConstructionNodeCleanerTest {
         ConstructionNode constructionNode6 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1), Z, generateURI1(Z1)));
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, limit230);
         queryBuilder2.addChild(limit230, constructionNode5);
@@ -557,7 +559,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest10() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
@@ -583,7 +585,7 @@ public class ConstructionNodeCleanerTest {
         optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, constructionNode1);
         queryBuilder2.addChild(constructionNode1, dataNode1);
@@ -597,7 +599,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest11() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE,
                 X, Y);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
@@ -619,7 +621,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, constructionNode2);
         queryBuilder2.addChild(constructionNode2, dataNode1);
@@ -637,7 +639,7 @@ public class ConstructionNodeCleanerTest {
     @Test
     public void removeConstructionNodeTest12() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X1);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables()
@@ -668,7 +670,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, dataNode1);
@@ -687,10 +689,10 @@ public class ConstructionNodeCleanerTest {
 
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_1, ImmutableList.of(argument));
     }
 
     private ImmutableFunctionalTerm generateCompositeURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_2_2, argument1, argument2);
+        return TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_2_2, ImmutableList.of(argument1, argument2));
     }
 }

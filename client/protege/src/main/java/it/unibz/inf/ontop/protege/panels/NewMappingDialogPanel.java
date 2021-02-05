@@ -21,9 +21,10 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
@@ -31,16 +32,12 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import it.unibz.inf.ontop.protege.core.SourceQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +67,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private PrefixManager prefixManager;
 
@@ -188,7 +184,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				try {
 					OBDAModel mapcon = obdaModel;
 
-					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
+					SQLPPSourceQuery body = obdaModel.getSourceQueryFactory().createSourceQuery(source.trim());
 
 					String newId = txtMappingID.getText().trim();
 					log.info("Insert Mapping: \n"+ target + "\n" + source);
@@ -589,8 +585,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private SQLPPTriplesMap mapping;
 
 	private ImmutableList<TargetAtom> parse(String query) {
-        TargetQueryParser textParser = new TurtleOBDASQLParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
-				obdaModel.getTermFactory(), obdaModel.getTargetAtomFactory(), obdaModel.getRdfFactory());
+        TargetQueryParser textParser = obdaModel.createTargetQueryParser();
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
@@ -625,12 +620,13 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		cmdInsertMapping.setText("Update");
 		txtMappingID.setText(mapping.getId());
 
-		OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+		SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
+		TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
 		ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
-		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
+		String trgQuery = targetQueryRenderer.encode(targetQuery);
 		txtTargetQuery.setText(trgQuery);
 	}
 }

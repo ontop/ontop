@@ -3,13 +3,13 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
-import java.util.Optional;
 import java.util.Properties;
 
 public class OntopReformulationSQLSettingsImpl extends OntopReformulationSettingsImpl
         implements OntopReformulationSQLSettings {
 
     private static final String DEFAULT_FILE = "reformulation-sql-default.properties";
+
     private final OntopSQLCoreSettings sqlSettings;
 
     OntopReformulationSQLSettingsImpl(Properties userProperties) {
@@ -18,10 +18,9 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopSQLCoreSettingsImpl.loadDefaultOBDAProperties();
-        properties.putAll(loadDefaultQASQLProperties());
+        Properties properties = loadDefaultQASQLProperties();
         properties.putAll(userProperties);
-        return properties;
+        return OntopSQLCoreSettingsImpl.loadSQLCoreProperties(properties);
     }
 
     static Properties loadDefaultQASQLProperties() {
@@ -39,7 +38,7 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     }
 
     @Override
-    public Optional<String> getJdbcDriver() {
+    public String getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }
 }

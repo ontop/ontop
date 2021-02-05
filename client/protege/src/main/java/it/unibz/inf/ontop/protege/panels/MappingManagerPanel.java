@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.panels;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialConfiguration;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.MappingPredicateTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
 import it.unibz.inf.ontop.protege.utils.*;
@@ -35,8 +36,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.utils.IDGenerator;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -61,7 +60,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	private OBDADataSource selectedSource;
 
 	private boolean canceled;
-	
+
 	private JTree mappingsTree;
 
 	private JMenuItem menuValidateBody;
@@ -70,7 +69,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	/**
 	 * Creates a new panel.
-	 * 
+	 *
 	 * @param apic
 	 *            The API controller object.
 	 */
@@ -142,7 +141,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * A listener to trigger the context menu of the mapping list.
 	 */
 	class PopupListener extends MouseAdapter {
-		
+
 		@Override
 		public void mousePressed(MouseEvent e) {
 			maybeShowPopup(e);
@@ -161,7 +160,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}
 
 	public void setOBDAModel(OBDAModel omodel) {
-		
+
 		this.apic = omodel;
 		ListModel model = new SynchronizedMappingListModel(omodel);
 
@@ -254,7 +253,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         txtFilter = new javax.swing.JTextField();
         chkFilter = new javax.swing.JCheckBox();
         mappingScrollPane = new javax.swing.JScrollPane();
-        mappingList = new javax.swing.JList<>();
+        mappingList = new JList<SQLPPTriplesMap>();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -450,7 +449,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 				return;
 			}
 			try {
-				List<TreeModelFilter<SQLPPTriplesMap>> filters = parseSearchString(txtFilter.getText());
+
+			    List<TreeModelFilter<SQLPPTriplesMap>> filters = parseSearchString(txtFilter.getText());
 				if (filters == null) {
 					throw new Exception("Impossible to parse search string");
 				}
@@ -588,10 +588,10 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		int confirm = JOptionPane.showConfirmDialog(
 				this,
 				"This will create copies of the selected mappings. \nNumber of mappings selected = "
-				+ currentSelection.length + "\nContinue? ", 
-				"Copy confirmation", 
+				+ currentSelection.length + "\nContinue? ",
+				"Copy confirmation",
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-		
+
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
@@ -606,7 +606,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			// Computing the next available ID
 			int new_index = -1;
 			for (int index = 0; index < 999999999; index++) {
-				if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
+				if (controller.indexOf(id + "(" + index + ")") == -1) {
 					new_index = index;
 					break;
 				}
@@ -639,13 +639,13 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			return;
 		}
 		int confirm = JOptionPane.showConfirmDialog(
-				this, 
+				this,
 				"Proceed deleting " + indexes.length + " mappings?", "Conform",
 				JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
 		if (confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
-		
+
 		// The manager panel can handle multiple deletions.
 		Object[] values = mappingList.getSelectedValues();
 
@@ -682,7 +682,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setLocationRelativeTo(this);
 		dialog.setVisible(true);
 	}
-	
+
 	public void setFilter(String filter) {
 		txtFilter.setText(filter);
 		processFilterAction();
@@ -710,7 +710,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	/**
 	 * Parses the string in the search field.
-	 * 
+	 *
 	 * @param textToParse
 	 *            The target text
 	 * @return A list of filter objects or null if the string was empty or
@@ -718,20 +718,31 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 */
 	private List<TreeModelFilter<SQLPPTriplesMap>> parseSearchString(String textToParse) throws Exception {
 
-		List<TreeModelFilter<SQLPPTriplesMap>> listOfFilters = null;
+		List<TreeModelFilter<SQLPPTriplesMap>> listOfFilters = new ArrayList<>();
 
-		if (textToParse != null) {
-			ANTLRStringStream inputStream = new ANTLRStringStream(textToParse);
-			MappingFilterLexer lexer = new MappingFilterLexer(inputStream);
-			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-			MappingFilterParser parser = new MappingFilterParser(tokenStream);
+        final String PRED = "pred:";
 
-			listOfFilters = parser.parse();
+        if (textToParse != null) {
+                final MappingPredicateTreeModelFilter filter = new MappingPredicateTreeModelFilter();
+                filter.addStringFilter(textToParse);
+                listOfFilters.add(filter);
+        }
+        // TODO(xiao):
+        //  We may need to import other functionality (but probably never used) from the old ANTLR file:
+        //  ontop/client/protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingFilter.g
 
-			if (parser.getNumberOfSyntaxErrors() != 0) {
-				throw new Exception("Syntax Error: The filter string invalid");
-			}
-		}
+//		if (textToParse != null) {
+//			ANTLRStringStream inputStream = new ANTLRStringStream(textToParse);
+//			MappingFilterLexer lexer = new MappingFilterLexer(inputStream);
+//			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+//			MappingFilterParser parser = new MappingFilterParser(tokenStream);
+//
+//			listOfFilters = parser.parse();
+//
+//			if (parser.getNumberOfSyntaxErrors() != 0) {
+//				throw new Exception("Syntax Error: The filter string invalid");
+//			}
+//		}
 		return listOfFilters;
 	}
 
@@ -756,9 +767,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		// Update the mapping tree.
 		SynchronizedMappingListModel model = (SynchronizedMappingListModel) mappingList.getModel();
 		model.setFocusedSource(newSource.getSourceID());
-		
-		mappingList.revalidate();
 
+		mappingList.revalidate();
 	}
 
 

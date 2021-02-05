@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import org.apache.commons.rdf.api.Graph;
@@ -20,17 +18,17 @@ public class FakeSQLMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public SQLPPMapping parse(File file) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(File file) {
         throw new UnsupportedOperationException("This mapping parser is fake and thus does not parse");
     }
 
     @Override
-    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Reader reader) {
         throw new UnsupportedOperationException("This mapping parser is fake and thus does not parse");
     }
 
     @Override
-    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Graph mappingGraph) {
         throw new UnsupportedOperationException("This mapping parser is fake and thus does not parse");
     }
 }

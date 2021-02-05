@@ -26,17 +26,15 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.querymanager.QueryIOManager;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +74,6 @@ public class TreeWitnessRewriterH2Test{
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLPPMapping obdaModel = null;
-	private OWLOntology ontology;
 
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
 

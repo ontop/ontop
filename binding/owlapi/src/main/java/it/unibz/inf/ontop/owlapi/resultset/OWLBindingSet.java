@@ -9,32 +9,26 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 
 public interface OWLBindingSet extends Iterable<OWLBinding> {
 
     @Override
     Iterator<OWLBinding> iterator();
 
-    List<String> getBindingNames() throws OWLException;
+    Set<String> getBindingNames() throws OWLException;
 
     OWLBinding getBinding(String bindingName) throws OWLException;
 
-    OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException;
+    OWLPropertyAssertionObject getOWLPropertyAssertionObject(String bindingName) throws OWLException;
 
-    OWLIndividual getOWLIndividual(int column) throws OWLException;
+    OWLIndividual getOWLIndividual(String bindingName) throws OWLException;
 
-    OWLIndividual getOWLIndividual(String column) throws OWLException;
+    OWLNamedIndividual getOWLNamedIndividual(String bindingName) throws OWLException;
 
-    OWLNamedIndividual getOWLNamedIndividual(int column) throws OWLException;
+    OWLAnonymousIndividual getOWLAnonymousIndividual(String bindingName) throws OWLException;
 
-    OWLAnonymousIndividual getOWLAnonymousIndividual(int column) throws OWLException;
+    OWLLiteral getOWLLiteral(String bindingName) throws OWLException;
 
-    OWLLiteral getOWLLiteral(int column) throws OWLException;
-
-    OWLLiteral getOWLLiteral(String column) throws OWLException;
-
-    OWLObject getOWLObject(int column) throws OWLException;
-
-    OWLObject getOWLObject(String column) throws OWLException;
+    OWLObject getOWLObject(String bindingName) throws OWLException;
 }

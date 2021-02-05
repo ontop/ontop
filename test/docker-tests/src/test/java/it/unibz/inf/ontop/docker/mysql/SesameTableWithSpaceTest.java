@@ -30,85 +30,61 @@ import java.util.Properties;
 
 public class SesameTableWithSpaceTest extends TestCase {
 
-	String owlFile = "/mysql/northwind/1.4a.owl";
-	String ttlFile = "/mysql/northwind/mapping-northwind-1421066727259.ttl";
-	String propertyFile = "/mysql/northwind/northwind.properties";
-
-	OWLOntology owlontology;
-	Model mappings;
-	RepositoryConnection con;
-	Properties connectionProperties;
+	private static final String owlFile = "/mysql/northwind/1.4a.owl";
+	private static final String ttlFile = "/mysql/northwind/mapping-northwind-1421066727259.ttl";
+	private static final String propertyFile = "/mysql/northwind/northwind.properties";
 
 	final String owlFileName =  this.getClass().getResource(owlFile).toString();
 	final String ttlFileName =  this.getClass().getResource(ttlFile).toString();
 	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
+	OWLOntology owlontology;
+	Model mappings;
+	RepositoryConnection con;
 
-	public SesameTableWithSpaceTest() {
+	public SesameTableWithSpaceTest() throws Exception {
 		// create owlontology from file
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		URL owlFileName =  this.getClass().getResource(owlFile);
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(new File(owlFileName.getPath()).getParentFile(), false);
 		man.addIRIMapper(iriMapper);
-		try {
-			owlontology = man
-					.loadOntologyFromOntologyDocument(new File(owlFileName.getPath()));
 
-			// create RDF Graph from ttl file
-			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
-			InputStream in =  this.getClass().getResourceAsStream(ttlFile);
-			URL documentUrl = new URL("file://" + ttlFile);
-			mappings = new LinkedHashModel();
-			StatementCollector collector = new StatementCollector(mappings);
-			parser.setRDFHandler(collector);
-			parser.parse(in, documentUrl.toString());
+		owlontology = man.loadOntologyFromOntologyDocument(new File(owlFileName.getPath()));
 
-		} catch (RDFParseException | RDFHandlerException | IOException
-				| OWLOntologyCreationException e) {
-
-			e.printStackTrace();
-			assertFalse(false);
-		}
-
+		// create RDF Graph from ttl file
+		RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+		InputStream in =  this.getClass().getResourceAsStream(ttlFile);
+		URL documentUrl = new URL("file://" + ttlFile);
+		mappings = new LinkedHashModel();
+		StatementCollector collector = new StatementCollector(mappings);
+		parser.setRDFHandler(collector);
+		parser.parse(in, documentUrl.toString());
 	}
 
 	public void setUp() {
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.ontologyFile(owlFileName)
+				.r2rmlMappingFile(ttlFileName)
+				.enableExistentialReasoning(true)
+				.propertyFile(propertyFileName)
+				.enableTestMode()
+				.build();
 
-		Repository repo;
-		try {
-			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.ontologyFile(owlFileName)
-					.r2rmlMappingFile(ttlFileName)
-					.enableExistentialReasoning(true)
-					.propertyFile(propertyFileName)
-					.enableTestMode()
-					.build();
+		Repository repo = OntopRepository.defaultRepository(configuration);
+		/*
+		 * Repository must be always initialized first
+		 */
+		repo.initialize();
 
-			repo = OntopRepository.defaultRepository(configuration);
-			/*
-			 * Repository must be always initialized first
-			 */
-			repo.initialize();
-
-			/*
-			 * Get the repository connection
-			 */
-			con = repo.getConnection();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertFalse(false);
-		}
-
+		/*
+		 * Get the repository connection
+		 */
+		con = repo.getConnection();
 	}
 
 	public void tearDown() {
-		try {
-			if (con != null && con.isOpen()) {
-				con.close();
-			}
-		} catch (RepositoryException e) {
-			e.printStackTrace();
+		if (con != null && con.isOpen()) {
+			con.close();
 		}
 	}
 	
@@ -135,17 +111,13 @@ public class SesameTableWithSpaceTest extends TestCase {
 
 	@Test
 	public void test1() {
-
 		//read next query
 		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/> select * {?x a :OrderDetails}" ;
-		//read expected result
-//		int expectedResult = 14366 ;
-		int expectedResult = 2155;
-		
+
 		int obtainedResult = count(sparqlQuery);
 		System.out.println(obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
-
+//		int expectedResult = 14366 ;
+		assertEquals(2155, obtainedResult);
 	}
 
 }

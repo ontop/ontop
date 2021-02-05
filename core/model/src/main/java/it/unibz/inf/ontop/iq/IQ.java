@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 /**
  *
  * For comparison, please use equals(o)
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface IQ {
 
@@ -16,7 +18,7 @@ public interface IQ {
 
     VariableGenerator getVariableGenerator();
 
-    IQ liftBinding();
+    IQ normalizeForOptimization();
 
     void validate() throws InvalidIntermediateQueryException;
 }

@@ -1,27 +1,38 @@
 package it.unibz.inf.ontop.model.type.impl;
 
-import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermTypeAncestry;
+import it.unibz.inf.ontop.model.type.*;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Without a language tag
  */
 public class SimpleRDFDatatype extends AbstractRDFDatatype {
 
-    protected SimpleRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry, boolean isAbstract) {
-        super(datatypeIRI, parentAncestry, isAbstract);
+    /**
+     * Concrete
+     */
+    protected SimpleRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry,
+                                Function<DBTypeFactory, DBTermType> closestDBTypeFct) {
+        super(datatypeIRI, parentAncestry, closestDBTypeFct);
     }
 
-    static RDFDatatype createSimpleRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry, boolean isAbstract) {
-        return new SimpleRDFDatatype(datatypeIRI, parentAncestry, isAbstract);
+    /**
+     * Abstract
+     */
+    protected SimpleRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry) {
+        super(datatypeIRI, parentAncestry);
     }
 
-    static RDFDatatype createSimpleRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry) {
-        return new SimpleRDFDatatype(datatypeIRI, parentAncestry, false);
+    static RDFDatatype createSimpleConcreteRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry,
+                                                       Function<DBTypeFactory, DBTermType> closestDBTypeFct) {
+        return new SimpleRDFDatatype(datatypeIRI, parentAncestry, closestDBTypeFct);
+    }
+
+    static RDFDatatype createSimpleAbstractRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry) {
+        return new SimpleRDFDatatype(datatypeIRI, parentAncestry);
     }
 
     @Override

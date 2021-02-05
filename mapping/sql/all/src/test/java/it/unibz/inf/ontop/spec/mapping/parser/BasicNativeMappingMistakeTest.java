@@ -15,14 +15,13 @@ public class BasicNativeMappingMistakeTest extends AbstractBasicMappingMistakeTe
         execute("/mistake/unbound.obda");
     }
 
+    @Ignore
     @Test(expected = InvalidMappingSourceQueriesException.class)
     public void testInvalidSQLQuery1() throws OBDASpecificationException {
         execute("/mistake/invalid-sql1.obda");
     }
 
-    @Ignore("TODO: create an option for disabling black-box view creation "
-            + "and create a specific exception for it")
-    @Test
+    @Test(expected = InvalidMappingSourceQueriesException.class)
     public void testInvalidSQLQuery2() throws OBDASpecificationException {
         execute("/mistake/invalid-sql2.obda");
     }
@@ -50,12 +49,10 @@ public class BasicNativeMappingMistakeTest extends AbstractBasicMappingMistakeTe
     @Override
     protected OntopMappingSQLAllConfiguration createConfiguration(String obdaFile) {
         return OntopMappingSQLAllConfiguration.defaultBuilder()
-                .dbMetadata(getDBMetadata())
                 .nativeOntopMappingFile(getClass().getResource(obdaFile).getPath())
-                .jdbcUrl("jdbc:h2://localhost/fake")
+                .jdbcUrl("jdbc:h2:mem:questrepository")
                 .jdbcUser("fake_user")
                 .jdbcPassword("fake_password")
-                .enableProvidedDBMetadataCompletion(false)
                 .build();
     }
 

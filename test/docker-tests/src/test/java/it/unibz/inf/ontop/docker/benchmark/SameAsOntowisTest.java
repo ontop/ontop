@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.benchmark;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -279,7 +279,7 @@ public class SameAsOntowisTest {
                 .ontologyFile(owlfile)
                 .nativeOntopMappingFile(obdaFile)
                 .sameAsMappings(true)
-                .enableIRISafeEncoding(false)
+                //.enableIRISafeEncoding(false)
                 .build();
 
 
@@ -317,17 +317,9 @@ public class SameAsOntowisTest {
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
                 TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-                int columnSize = rs.getColumnCount();
                 count = 0;
                 while (rs.hasNext()) {
                     count ++;
-                    for (int idx = 1; idx <= columnSize; idx++) {
-                        final OWLBindingSet bindingSet = rs.next();
-                        @SuppressWarnings("unused")
-                        OWLObject binding = bindingSet.getOWLObject(idx);
-//                        System.out.print(binding.toString() + ", ");
-                    }
-//                    System.out.print("\n");
                 }
                 long t2 = System.currentTimeMillis();
                 //time = time + (t2-t1);
@@ -339,7 +331,7 @@ public class SameAsOntowisTest {
 				/*
 				 * Print the query summary
 				 */
-                ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
+                IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");

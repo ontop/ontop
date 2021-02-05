@@ -23,24 +23,21 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.Int2IRIStringFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
+import it.unibz.inf.ontop.utils.IDGenerator;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +56,6 @@ public class RDBMSSIRepositoryManager {
 
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	static final class TableDescription {
 		final String tableName;
@@ -67,14 +63,14 @@ public class RDBMSSIRepositoryManager {
 		private final String insertCommand;
 		private final String selectCommand;
 		
-		final List<String> createIndexCommands = new ArrayList<>(3);
-		final List<String> dropIndexCommands = new ArrayList<>(3);
+		private final List<String> createIndexCommands = new ArrayList<>(3);
+		private final List<String> dropIndexCommands = new ArrayList<>(3);
 		
-		final String dropCommand;
+		//private final String dropCommand;
 		
 		TableDescription(String tableName, ImmutableMap<String, String> columnDefintions, String selectColumns) {
 			this.tableName = tableName;
-			this.dropCommand = "DROP TABLE " + tableName;
+			//this.dropCommand = "DROP TABLE " + tableName;
 			this.createCommand = "CREATE TABLE " + tableName + 
 					" ( " + Joiner.on(", ").withKeyValueSeparator(" ").join(columnDefintions) + " )";
 			this.insertCommand = "INSERT INTO " + tableName + 
@@ -139,7 +135,7 @@ public class RDBMSSIRepositoryManager {
 	
     final static ImmutableList<TableDescription> attributeTables;
     final static TableDescription ROLE_TABLE;
-	final static  ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP;
+	final static ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP;
 	
 	private static final class AttributeTableDescritpion {
 		final IRI datatypeIRI;
@@ -244,7 +240,7 @@ public class RDBMSSIRepositoryManager {
 		ATTRIBUTE_TABLE_MAP = datatypeTableMapBuilder.build();
 	}
 	
-	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
+	private final SemanticIndexURIMap uriMap;
 	
 	private final ClassifiedTBox reasonerDag;
 
@@ -253,16 +249,27 @@ public class RDBMSSIRepositoryManager {
 	private final SemanticIndexViewsManager views;
 	private final TermFactory termFactory;
 	private final TargetAtomFactory targetAtomFactory;
+	private final FunctionSymbol int2IRIStringFunctionSymbol;
+	private final RDFTermTypeConstant iriTypeConstant;
+	private final SQLPPSourceQueryFactory sourceQueryFactory;
 
 	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag,
 									TermFactory termFactory, TypeFactory typeFactory,
-									TargetAtomFactory targetAtomFactory) {
+									TargetAtomFactory targetAtomFactory,
+									SQLPPSourceQueryFactory sourceQueryFactory) {
 		this.reasonerDag = reasonerDag;
 		this.termFactory = termFactory;
+		this.sourceQueryFactory = sourceQueryFactory;
 		views = new SemanticIndexViewsManager(typeFactory);
         cacheSI = new SemanticIndexCache(reasonerDag);
 		this.targetAtomFactory = targetAtomFactory;
 		cacheSI.buildSemanticIndexFromReasoner();
+		uriMap = new SemanticIndexURIMap();
+
+		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+		int2IRIStringFunctionSymbol = new Int2IRIStringFunctionSymbolImpl(
+				dbTypeFactory.getDBTermType("INTEGER"), dbTypeFactory.getDBStringType(), uriMap);
+		iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 	}
 
 
@@ -297,7 +304,7 @@ public class RDBMSSIRepositoryManager {
 		insertMetadata(conn);
 	}
 
-	private boolean isDBSchemaDefined(Connection conn) throws SQLException {
+	private boolean isDBSchemaDefined(Connection conn)  {
 		
 		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
@@ -320,7 +327,7 @@ public class RDBMSSIRepositoryManager {
 		return false; // there was an exception if we have got here
 	}
 	
-
+/*
 	public void dropDBSchema(Connection conn) throws SQLException {
 
 		try (Statement st = conn.createStatement()) {
@@ -340,8 +347,9 @@ public class RDBMSSIRepositoryManager {
 			// no-op: ignore all exceptions here
 		}
 	}
+*/
 
-	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
+	public int insertData(Connection conn, Iterator<RDFFact> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
 		// The precondition for the limit number must be greater or equal to one.
@@ -363,55 +371,27 @@ public class RDBMSSIRepositoryManager {
 
 		try {
 			while (data.hasNext()) {
-				Assertion ax = data.next();
+				RDFFact ax = data.next();
 
 				// log.debug("Inserting statement: {}", ax);
 				batchCount++;
 				commitCount++;
 
-				if (ax instanceof ClassAssertion) {
-					ClassAssertion ca = (ClassAssertion) ax; 
-					try {
-						process(conn, ca, uriidStm, stmMap);
-						success++;
-					}
-					catch (Exception e) {
-						IRI iri = ca.getConcept().getIRI();
-						Integer counter = failures.get(iri);
-						if (counter == null)
-							counter = 0;
-						failures.put(iri, counter + 1);
-					}
-				} 
-				else if (ax instanceof ObjectPropertyAssertion) {
-					ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
-					try {
-						process(conn, opa, uriidStm, stmMap);	
-						success++;
-					}
-					catch (Exception e) {
-						IRI iri = opa.getProperty().getIRI();
-						Integer counter = failures.get(iri);
-						if (counter == null) 
-							counter = 0;
-						failures.put(iri, counter + 1);
-					}
+				try {
+					process(conn, ax, uriidStm, stmMap);
+					success++;
 				}
-				else if (ax instanceof DataPropertyAssertion)  {
-					DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
-					try {
-						process(conn, dpa, uriidStm, stmMap);				
-						success++;					
-					}
-					catch (Exception e) {
-						IRI iri = dpa.getProperty().getIRI();
-						Integer counter = failures.get(iri);
-						if (counter == null) 
-							counter = 0;
-						failures.put(iri, counter + 1);
-					}
+				catch (Exception e) {
+					IRI iri = Optional.of(ax.getClassOrProperty())
+							.filter(c -> c instanceof IRIConstant)
+							.map(c -> (IRIConstant) c)
+							.orElseGet(ax::getProperty)
+							.getIRI();
+					Integer counter = failures.get(iri);
+					if (counter == null)
+						counter = 0;
+					failures.put(iri, counter + 1);
 				}
-
 
 				// Check if the batch count is already in the batch limit
 				if (batchCount == batchLimit) {
@@ -464,12 +444,33 @@ public class RDBMSSIRepositoryManager {
 		return success;
 	}
 
+	private void process(Connection conn, RDFFact ax, PreparedStatement uriidStm,
+						 Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+		if (ax.isClassAssertion() && (ax.getObject() instanceof IRIConstant)) {
+			IRI classIRI = ((IRIConstant) ax.getObject()).getIRI();
+			OClass cls = reasonerDag.classes().get(classIRI);
+			process(conn, ax, cls, uriidStm, stmMap);
+		}
+		else {
+			RDFConstant object = ax.getObject();
+			IRI propertyIri = ax.getProperty().getIRI();
 
-	private void process(Connection conn, ObjectPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+			if (object instanceof ObjectConstant) {
+				ObjectPropertyExpression ope = reasonerDag.objectProperties().get(propertyIri);
+				process(conn, ax, ope, uriidStm, stmMap);
+			}
+			else if (object instanceof RDFLiteralConstant) {
+				DataPropertyExpression dpe = reasonerDag.dataProperties().get(propertyIri);
+				process(conn, ax, dpe, uriidStm, stmMap);
+			}
+		}
+	}
 
-		ObjectPropertyExpression ope0 = ax.getProperty();
+	private void process(Connection conn, RDFFact assertion, ObjectPropertyExpression ope0, PreparedStatement uriidStm,
+						 Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+
 		if (ope0.isInverse()) 
-			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
+			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + assertion);
 		
 		ObjectPropertyExpression ope = reasonerDag.objectPropertiesDAG().getCanonicalForm(ope0);
 				
@@ -479,13 +480,13 @@ public class RDBMSSIRepositoryManager {
 			// and so, it is not indexed -- swap the arguments 
 			// and replace the representative with its inverse 
 			// (which must be indexed)
-			o1 = ax.getObject();
-			o2 = ax.getSubject();
+			o1 = (ObjectConstant) assertion.getObject();
+			o2 = assertion.getSubject();
 			ope = ope.getInverse();
 		}
 		else {
-			o1 = ax.getSubject();			
-			o2 = ax.getObject();
+			o1 = assertion.getSubject();
+			o2 = (ObjectConstant) assertion.getObject();
 		}
 
 		int idx = cacheSI.getEntry(ope).getIndex();
@@ -512,17 +513,16 @@ public class RDBMSSIRepositoryManager {
 		view.addIndex(idx);
 	} 
 
-	private void process(Connection conn, DataPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+	private void process(Connection conn, RDFFact assertion, DataPropertyExpression dpe0, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 
 		// replace the property by its canonical representative
-		DataPropertyExpression dpe0 = ax.getProperty();
 		DataPropertyExpression dpe = reasonerDag.dataPropertiesDAG().getCanonicalForm(dpe0);
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
-		ObjectConstant subject = ax.getSubject();
+		ObjectConstant subject = assertion.getSubject();
 		int uri_id = getObjectConstantUriId(subject, uriidStm);
 
-		ValueConstant object = ax.getValue();
+		RDFLiteralConstant object = (RDFLiteralConstant) assertion.getObject();
 
 		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
 		//                       a a workaround, obtain the URI ID first, without triggering an exception here
@@ -574,14 +574,15 @@ public class RDBMSSIRepositoryManager {
 				break;
 			case DATETIME_STAMP: // 15
 			case DATETIME: // 13
-				stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(value));
+				Timestamp timestamp = XsdDatatypeConverter.parseXsdDateTime(value);
+				stm.setTimestamp(2, timestamp);
 				break;
 			case BOOLEAN: // 14				
 				stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(value));
 				break;
 			default:
 				// UNSUPPORTED DATATYPE
-				log.warn("Ignoring assertion: {}", ax);			
+				log.warn("Ignoring assertion: {}", assertion);
 				return;				
 		}
 		
@@ -593,14 +594,13 @@ public class RDBMSSIRepositoryManager {
 	}
 	
 		
-	private void process(Connection conn, ClassAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+	private void process(Connection conn, RDFFact assertion, OClass concept0, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 		
 		// replace concept by the canonical representative (which must be a concept name)
-		OClass concept0 = ax.getConcept();
 		OClass concept = (OClass)reasonerDag.classesDAG().getCanonicalForm(concept0);
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
-		ObjectConstant c1 = ax.getIndividual();
+		ObjectConstant c1 = assertion.getSubject();
 
 		SemanticIndexView view =  views.getView(c1.getType());
 	
@@ -629,7 +629,7 @@ public class RDBMSSIRepositoryManager {
 	private int getObjectConstantUriId(ObjectConstant c, PreparedStatement uriidStm) throws SQLException {
 		
 		// TODO (ROMAN): I am not sure this is entirely correct for blank nodes
-		String uri = (c instanceof BNode) ? ((BNode) c).getName() : ((IRIConstant) c).getIRI().getIRIString();
+		String uri = (c instanceof BNode) ? ((BNode) c).getInternalLabel() : ((IRIConstant) c).getIRI().getIRIString();
 
 		int uri_id = uriMap.getId(uri);
 		if (uri_id < 0) {
@@ -647,10 +647,11 @@ public class RDBMSSIRepositoryManager {
 		return uri_id;
 	}
 
-	
 	public final static int CLASS_TYPE = 1;
 	public final static int ROLE_TYPE = 2;
 	
+/* ROMAN: commented out dead code
+
 	private void setIndex(String iri, int type, int idx) {
 		if (type == CLASS_TYPE) {
 			OClass c = reasonerDag.classes().get(iri);
@@ -734,7 +735,7 @@ public class RDBMSSIRepositoryManager {
 
 		range.addRange(intervals);	
 	}
-
+*/
 
 	public ImmutableList<SQLPPTriplesMap> getMappings() {
 
@@ -756,7 +757,7 @@ public class RDBMSSIRepositoryManager {
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.objectProperties().contains(ope.getName()))
+			if (!reasonerDag.objectProperties().contains(ope.getIRI()))
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -782,10 +783,11 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ope.getIRI().getIRIString())),
-						view.getId().getType1(), view.getId().getType2());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
+				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(ope.getIRI()),
+						view.getId().getType1(), view.getId().getType2(), getUriMap());
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
+						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -795,7 +797,7 @@ public class RDBMSSIRepositoryManager {
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.dataProperties().contains(dpe.getName()))
+			if (!reasonerDag.dataProperties().contains(dpe.getIRI()))
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);
@@ -821,12 +823,12 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(dpe.getIRI().getIRIString())) ,
-						view.getId().getType1(), view.getId().getType2());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
-						targetQuery);
+						termFactory.getConstantIRI(dpe.getIRI()) ,
+						view.getId().getType1(), view.getId().getType2(), getUriMap());
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
+						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -855,10 +857,11 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(classNode.getIRI().getIRIString())), view.getId().getType1());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+						termFactory.getConstantIRI(classNode.getIRI()), view.getId().getType1());
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
+						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -880,10 +883,10 @@ public class RDBMSSIRepositoryManager {
 
 				// Computing the merged SQL 
 				StringBuilder newSQL = new StringBuilder();
-				newSQL.append(((OBDASQLQuery) currentMappings.get(0).getSourceQuery()).toString());
+				newSQL.append(((SQLPPSourceQuery) currentMappings.get(0).getSourceQuery()).toString());
 				for (int mapi = 1; mapi < currentMappings.size(); mapi++) {
 					newSQL.append(" UNION ALL ");
-					newSQL.append(((OBDASQLQuery) currentMappings.get(mapi).getSourceQuery()).toString());
+					newSQL.append(((SQLPPSourceQuery) currentMappings.get(mapi).getSourceQuery()).toString());
 				}
 
 				// Replacing the old mappings 
@@ -898,58 +901,63 @@ public class RDBMSSIRepositoryManager {
 	}
 
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm classTerm, ObjectRDFType type) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type) {
 
 		Variable X = termFactory.getVariable("X");
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type.isBlankNode())
-			subjectTerm = termFactory.getImmutableUriTemplate(X);
+			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
-			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
+			subjectTerm = termFactory.getRDFFunctionalTerm(X, termFactory.getRDFTermTypeConstant(type));
 		}
 
-		ImmutableTerm predTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(
-				org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.toString()));
+		ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
 
 		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm ,classTerm);
 		return ImmutableList.of(targetAtom);
 	}
 	
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm iriTerm, ObjectRDFType type1,
-																		RDFTermType type2) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm iriTerm, ObjectRDFType type1,
+																		RDFTermType type2, IRIDictionary iriDictionary) {
 
 		Variable X = termFactory.getVariable("X");
 		Variable Y = termFactory.getVariable("Y");
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type1.isBlankNode())
-			subjectTerm = termFactory.getImmutableUriTemplate(X);
+			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
-			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
+			subjectTerm = termFactory.getRDFFunctionalTerm(X, termFactory.getRDFTermTypeConstant(type1));
 		}
 
 		ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
-					? termFactory.getImmutableBNodeTemplate(Y)
-					: termFactory.getImmutableUriTemplate(Y);
+					? termFactory.getRDFFunctionalTerm(Y, termFactory.getRDFTermTypeConstant(type2))
+					: getEncodedIRIFunctionalTerm(Y);
 		}
 		else {
 			RDFDatatype datatype = (RDFDatatype) type2;
 			if (datatype.getLanguageTag().isPresent()) {
 				LanguageTag languageTag = datatype.getLanguageTag().get();
-				objectTerm = termFactory.getImmutableTypedTerm(Y, languageTag.getFullString());
+				objectTerm = termFactory.getRDFLiteralFunctionalTerm(Y, languageTag.getFullString());
 			}
 			else {
-				objectTerm = termFactory.getImmutableTypedTerm(Y, datatype);
+				objectTerm = termFactory.getRDFLiteralFunctionalTerm(Y, datatype);
 			}
 		}
 
 		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm,iriTerm,objectTerm);
 
 		return ImmutableList.of(targetAtom);
+	}
+
+	public ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(ImmutableTerm dbIntegerTerm) {
+		ImmutableFunctionalTerm lexicalValue = termFactory.getImmutableFunctionalTerm(
+				int2IRIStringFunctionSymbol, dbIntegerTerm);
+		return termFactory.getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 
 	
@@ -1023,19 +1031,19 @@ public class RDBMSSIRepositoryManager {
 			// inserting index data for classes and properties 
 			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
-					stm.setString(1, concept.getKey().getName());
+					stm.setString(1, concept.getKey().getIRI().getIRIString());
 					stm.setInt(2, concept.getValue().getIndex());
 					stm.setInt(3, CLASS_TYPE);
 					stm.addBatch();
 				}
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
-					stm.setString(1, role.getKey().getName());
+					stm.setString(1, role.getKey().getIRI().getIRIString());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
 				}
 				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
-					stm.setString(1, role.getKey().getName());
+					stm.setString(1, role.getKey().getIRI().getIRIString());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
@@ -1047,7 +1055,7 @@ public class RDBMSSIRepositoryManager {
 			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					for (Interval it : concept.getValue().getIntervals()) {
-						stm.setString(1, concept.getKey().getName());
+						stm.setString(1, concept.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, CLASS_TYPE);
@@ -1056,7 +1064,7 @@ public class RDBMSSIRepositoryManager {
 				}
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
 					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getName());
+						stm.setString(1, role.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, ROLE_TYPE);
@@ -1065,7 +1073,7 @@ public class RDBMSSIRepositoryManager {
 				}
 				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
 					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getName());
+						stm.setString(1, role.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, ROLE_TYPE);
@@ -1091,7 +1099,7 @@ public class RDBMSSIRepositoryManager {
 	
 	
 	
-
+/* dead code
 	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
 		try (Statement st = conn.createStatement()) {
@@ -1110,11 +1118,6 @@ public class RDBMSSIRepositoryManager {
 			st.executeBatch();
 		}
 	}
-	
-	/**
-	 *  DROP indexes	
-	 */
-		
 
 	public void dropIndexes(Connection conn) throws SQLException {
 		log.debug("Dropping indexes");
@@ -1130,4 +1133,5 @@ public class RDBMSSIRepositoryManager {
 			st.executeBatch();
 		}
 	}
+ */
 }

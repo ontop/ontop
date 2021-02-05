@@ -20,11 +20,14 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.QueryConnectedComponentCache;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.CachedClassifiedTBoxWrapper;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,18 +35,22 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.answering.reformulation.rewriting.impl.DownwardSaturatedImmutableSet.intersectionOf;
+
 public class QueryFolding {
-	private final QueryConnectedComponentCache cache;
+	private final CachedClassifiedTBoxWrapper cache;
 	
-	private Intersection<ObjectPropertyExpression> properties;
+	private DownwardSaturatedImmutableSet<ObjectPropertyExpression> properties;
 	private Set<QueryConnectedComponent.Loop> roots;
-	private Intersection<ClassExpression> internalRootConcepts;
-	private Set<Term> internalRoots;
-	private Set<Term> internalDomain;
+	private DownwardSaturatedImmutableSet<ClassExpression> internalRootConcepts;
+	private Set<VariableOrGroundTerm> internalRoots;
+	private Set<VariableOrGroundTerm> internalDomain;
 	private List<TreeWitness> interior;
 	private TreeWitness.TermCover terms;
 	private boolean status;
@@ -55,11 +62,11 @@ public class QueryFolding {
 		return "Query Folding: " + roots + ", internal roots " + internalRoots + " and domain: " + internalDomain + " with properties: " + properties; 
 	}
 	
-	public QueryFolding(QueryConnectedComponentCache cache) {
+	public QueryFolding(CachedClassifiedTBoxWrapper cache) {
 		this.cache = cache;
-		properties = cache.getTopProperty(); 
+		properties = DownwardSaturatedImmutableSet.top();
 		roots = new HashSet<>();
-		internalRootConcepts = cache.getTopClass(); 
+		internalRootConcepts = DownwardSaturatedImmutableSet.top();
 		internalRoots = new HashSet<>();
 		internalDomain = new HashSet<>();
 		interior = Collections.emptyList(); // in-place QueryFolding for one-step TreeWitnesses, 
@@ -70,9 +77,9 @@ public class QueryFolding {
 	public QueryFolding(QueryFolding qf) {
 		this.cache = qf.cache;
 
-		properties = new Intersection<>(qf.properties);
+		properties = qf.properties;
 		roots = new HashSet<>(qf.roots);
-		internalRootConcepts = new Intersection<>(qf.internalRootConcepts);
+		internalRootConcepts = qf.internalRootConcepts;
 		internalRoots = new HashSet<>(qf.internalRoots);
 		internalDomain = new HashSet<>(qf.internalDomain);
 		interior = new LinkedList<>(qf.interior);
@@ -86,7 +93,7 @@ public class QueryFolding {
 		c.internalRoots.addAll(tw.getRoots());
 		c.internalDomain.addAll(tw.getDomain());
 		c.interior.add(tw);
-		c.internalRootConcepts.intersectWith(tw.getRootConcepts());
+		c.internalRootConcepts = intersectionOf(c.internalRootConcepts, tw.getRootConcepts());
 		if (c.internalRootConcepts.isBottom())
 			c.status = false;
 		return c;
@@ -95,10 +102,10 @@ public class QueryFolding {
 	public boolean extend(QueryConnectedComponent.Loop root, QueryConnectedComponent.Edge edge, QueryConnectedComponent.Loop internalRoot) {
 		assert(status);
 
-		properties.intersectWith(cache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
+		properties = intersectionOf(properties, cache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
 		
 		if (!properties.isBottom()) {
-			internalRootConcepts.intersectWith(cache.getLoopConcepts(internalRoot));
+			internalRootConcepts = intersectionOf(internalRootConcepts, cache.getLoopConcepts(internalRoot));
 			if (!internalRootConcepts.isBottom()) {
 				roots.add(root);
 				return true;
@@ -109,19 +116,19 @@ public class QueryFolding {
 		return false;
 	}
 	
-	public void newOneStepFolding(Term t) {
-		properties.setToTop();
+	public void newOneStepFolding(VariableOrGroundTerm t) {
+		properties = DownwardSaturatedImmutableSet.top();
 		roots.clear();
-		internalRootConcepts.setToTop(); 
+		internalRootConcepts = DownwardSaturatedImmutableSet.top();
 		internalDomain = Collections.singleton(t);
 		terms = null;
 		status = true;		
 	}
 
 	public void newQueryFolding(TreeWitness tw) {
-		properties.setToTop(); 
+		properties = DownwardSaturatedImmutableSet.top();
 		roots.clear(); 
-		internalRootConcepts = new Intersection<>(tw.getRootConcepts());
+		internalRootConcepts = tw.getRootConcepts();
 		internalRoots = new HashSet<>(tw.getRoots());
 		internalDomain = new HashSet<>(tw.getDomain());
 		interior = new LinkedList<>();
@@ -131,7 +138,7 @@ public class QueryFolding {
 	}
 
 	
-	public Intersection<ObjectPropertyExpression> getProperties() {
+	public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getProperties() {
 		return properties;
 	}
 	
@@ -151,7 +158,7 @@ public class QueryFolding {
 		return internalRoots.contains(t0.getTerm()) && !internalDomain.contains(t1.getTerm()); // && !roots.contains(t1);
 	}
 	
-	public Intersection<ClassExpression> getInternalRootConcepts() {
+	public DownwardSaturatedImmutableSet<ClassExpression> getInternalRootConcepts() {
 		return internalRootConcepts;
 	}
 	
@@ -161,53 +168,51 @@ public class QueryFolding {
 	
 	public TreeWitness.TermCover getTerms() {
 		if (terms == null) {
-			Set<Term> domain = new HashSet<Term>(internalDomain);
-			Set<Term> rootNewLiterals = new HashSet<Term>();
-			for (QueryConnectedComponent.Loop l : roots)
-				rootNewLiterals.add(l.getTerm());
-			domain.addAll(rootNewLiterals);
+			ImmutableSet<VariableOrGroundTerm> rootNewLiterals = roots.stream()
+					.map(QueryConnectedComponent.Loop::getTerm)
+					.collect(ImmutableCollectors.toSet());
+			ImmutableSet<VariableOrGroundTerm> domain = Stream.concat(
+						internalDomain.stream(), rootNewLiterals.stream())
+					.collect(ImmutableCollectors.toSet());
 			terms = new TreeWitness.TermCover(domain, rootNewLiterals);
 		}
 		return terms;
 	}
 	
-	public TreeWitness getTreeWitness(Collection<TreeWitnessGenerator> twg, Collection<QueryConnectedComponent.Edge> edges) {
+	public TreeWitness getTreeWitness(ImmutableList<TreeWitnessGenerator> twg, Collection<QueryConnectedComponent.Edge> edges) {
 		
 		log.debug("NEW TREE WITNESS");
 		log.debug("  PROPERTIES {}", properties);
 		log.debug("  ENDTYPE {}", internalRootConcepts);
 
-		Intersection<ClassExpression> rootType = cache.getTopClass();
+		boolean nonExistentialRoot = roots.stream().anyMatch(r -> !r.isExistentialVariable());
 
-		Set<Function> rootAtoms = new HashSet<>();
-		for (QueryConnectedComponent.Loop root : roots) {
-			rootAtoms.addAll(root.getAtoms());
-			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable
-				rootType.setToBottom();
-				log.debug("  NOT MERGEABLE: {} IS NOT QUANTIFIED", root);				
-			}
-		}
-		
-		// EXTEND ROOT ATOMS BY ALL-ROOT EDGES
-		for (QueryConnectedComponent.Edge edge : edges) {
-			if (roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1())) {
-				rootAtoms.addAll(edge.getBAtoms());
-				rootType.setToBottom();
-				log.debug("  NOT MERGEABLE: {} IS WITHIN THE ROOTS", edge);				
-			}
-		}
-		
+		ImmutableList<QueryConnectedComponent.Edge> edgesInRoots = edges.stream()
+				.filter(edge -> roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1()))
+				.collect(ImmutableCollectors.toList());
+
+		ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms = Stream.concat(
+					roots.stream().flatMap(root -> root.getAtoms().stream()),
+					edgesInRoots.stream().flatMap(edge -> edge.getBAtoms().stream()))
+				.collect(ImmutableCollectors.toSet());
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
-		if (!rootType.isBottom()) // not empty 
-			for (QueryConnectedComponent.Loop root : roots) {
-				rootType.intersectWith(cache.getLoopConcepts(root));
-				if (rootType.isBottom()) { // empty intersection -- not mergeable
-					log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
-					break;
-				}
-			}
+		DownwardSaturatedImmutableSet<ClassExpression> rootType;
+		if (nonExistentialRoot || !edgesInRoots.isEmpty()) {
+			rootType = DownwardSaturatedImmutableSet.bottom();
+			if (nonExistentialRoot)
+				log.debug("  NOT MERGEABLE: {} ARE NOT QUANTIFIED", roots.stream().filter(r -> r.isExistentialVariable()).collect(ImmutableCollectors.toList()));
+			if (!edgesInRoots.isEmpty())
+				log.debug("  NOT MERGEABLE: {} ARE WITHIN THE ROOTS", edgesInRoots);
+		}
+		else {
+			rootType = roots.stream()
+					.map(root -> cache.getLoopConcepts(root))
+					.collect(DownwardSaturatedImmutableSet.toIntersection());
+			if (rootType.isBottom())
+				log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
+		}
 		
-		return new TreeWitness(twg, getTerms(), rootAtoms, rootType); 	
+		return new TreeWitness(twg, getTerms(), rootAtoms, rootType);
 	}
 }

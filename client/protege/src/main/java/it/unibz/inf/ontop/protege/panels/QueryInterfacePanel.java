@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.panels;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -28,7 +27,13 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.swing.*;
@@ -45,7 +50,7 @@ import java.awt.event.KeyListener;
  * Creates a new panel to execute queries. Remember to execute the
  * setResultsPanel function to indicate where to display the results.
  */
-public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelListener, 
+public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelListener,
 		TableModelListener, OBDAPreferenceChangeListener {
 
 	/**
@@ -53,34 +58,32 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	 * query Variable currentId is the query's id that is selected
 	 */
 	private static final long serialVersionUID = -5902798157183352944L;
-	
+
 	private DefaultStyledDocument styledDocument;
-	
+
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
 	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
 	private OBDADataQueryAction<?> executeGraphQueryAction;
-	private OBDADataQueryAction<?> executeEQLAction;
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
 	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
-	private OBDADataQueryAction<?> retrieveEQLUnfoldingAction;
-	
+
 	private OBDAModel apic;
 
 	private QueryController qc;
-	
+
 	private double execTime = 0;
 	private int fetchSizeCache = 100;
-	
+
 	private String currentGroup = "";  // default value
 	private String currentId = "";  // default value
-	
-	/** 
+
+	/**
 	 * Creates new form QueryInterfacePanel
 	 */
 	public QueryInterfacePanel(OBDAModel apic, QueryController qc) {
 		this.qc = qc;
 		this.apic = apic;
-		
+
 		initComponents();
 
 		StyleContext style = new StyleContext();
@@ -317,12 +320,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}// GEN-LAST:event_getSPARQLExpansionActionPerformed
 
 	private void getSPARQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLSQLExpansionActionPerformed
-		Thread queryRunnerThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
-				action.run(queryTextPane.getText());
-			}
+		Thread queryRunnerThread = new Thread(() -> {
+			OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
+			action.run(queryTextPane.getText());
 		});
 		queryRunnerThread.start();
 	}// GEN-LAST:event_getSPARQLSQLExpansionActionPerformed
@@ -336,21 +336,21 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		try {
 			// TODO Handle this such that there is a listener checking the progress of the execution
 			Thread queryRunnerThread = new Thread(() -> {
-                SPARQLQueryUtility query = new SPARQLQueryUtility(queryTextPane.getText());
+				String queryString = queryTextPane.getText();
                 OBDADataQueryAction<?> action = null;
-				if (query.isEmpty()){
+				if (queryString.isEmpty()){
 					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
-				} else if (query.isSelectQuery() ) {
+				} else if (isSelectQuery(queryString)) {
 					action = QueryInterfacePanel.this.getExecuteSelectAction();
-				} else if (query.isAskQuery()){
+				} else if (isAskQuery(queryString)){
 					action = QueryInterfacePanel.this.getExecuteAskAction();
-                } else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
+                } else if (isGraphQuery(queryString) ){
                     action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
                 } else {
                     JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
                 }
 				if(action!=null) {
-					action.run(query.getQueryString());
+					action.run(queryString);
 					execTime = action.getExecutionTime();
 					do {
 						int rows = action.getNumberOfRows();
@@ -362,8 +362,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 						}
 					} while (action.isRunning());
 					int rows = action.getNumberOfRows();
-						updateStatus(rows);
-
+					updateStatus(rows);
 				}
             });
 			queryRunnerThread.start();
@@ -371,7 +370,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			DialogUtils.showQuickErrorDialog(QueryInterfacePanel.this, e);
 		}
 	}// GEN-LAST:event_buttonExecuteActionPerformed
-
 
 	private synchronized void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
 		final String query = queryTextPane.getText();
@@ -386,21 +384,21 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 					"Please select first the query node that you would like to update",
 					"Warning",
 					JOptionPane.WARNING_MESSAGE);
-		}	
+		}
 	}// GEN-LAST:event_buttonSaveActionPerformed
 
-	
+
 	private class QueryChanger implements Runnable {
 		String new_query;
-		
+
 		QueryChanger(String new_query){
 			this.new_query = new_query;
 		}
 		public void run(){
-			queryTextPane.setText(new_query);	
+			queryTextPane.setText(new_query);
 		}
 	}
-	
+
 	public void selectedQueryChanged(String new_group, String new_query, String new_id) {
 			Runnable runner = new QueryChanger(new_query);
 			SwingUtilities.invokeLater(runner);
@@ -555,7 +553,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	public boolean isShortURISelect() {
 		return chkShowShortURI.isSelected();
 	}
-	
+
 	public boolean isFetchAllSelect() {
 		return chkShowAll.isSelected();
 	}
@@ -565,17 +563,17 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	public boolean canGetMoreTuples() {
 		return getFetchSize() > 100;
 	}
-	
+
 	public String getQuery() {
 		return queryTextPane.getText();
 	}
-	
+
 	public int getFetchSize() {
 		int fetchSize = 0;
 		try {
 			fetchSize = Integer.parseInt(txtFetchSize.getText());
 		} catch (NumberFormatException e) {
-			DialogUtils.showQuickErrorDialog(this, 
+			DialogUtils.showQuickErrorDialog(this,
 					new Exception("Invalid input: " + txtFetchSize.getText()), e.toString());
 		}
 		return fetchSize;
@@ -588,14 +586,31 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			this.query = query;
 		}
 		public void run(){
-			queryTextPane.setText(query);	
+			queryTextPane.setText(query);
 		}
 	}
-	
+
 	@Override
 	public synchronized void preferenceChanged() {
 		String query = queryTextPane.getText();
 		SetQueryTextPane setter = new SetQueryTextPane(query);
 		SwingUtilities.invokeLater(setter);
+	}
+
+	private static boolean isAskQuery(String query) throws MalformedQueryException {
+		return parse(query) instanceof ParsedBooleanQuery;
+	}
+
+	private static boolean isSelectQuery(String query) throws MalformedQueryException {
+		return parse(query) instanceof ParsedTupleQuery;
+	}
+
+	private static boolean isGraphQuery(String query) throws MalformedQueryException {
+		return parse(query) instanceof ParsedGraphQuery;
+	}
+
+	private static ParsedQuery parse(String query) throws MalformedQueryException {
+		org.eclipse.rdf4j.query.parser.sparql.SPARQLParser parser = new SPARQLParser();
+		return parser.parseQuery(query, "http://example.org");
 	}
 }

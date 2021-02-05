@@ -2646,7 +2646,7 @@ source		SELECT tufNpdidTuf,ptlMessageDocumentNo,dateSyncNPD FROM tuf_petreg_mess
 
 mappingId	Mapping:00670:Literal:wellbore_exploration_all:wlbPressReleaseUrl
 target		npd:wellbore/{wlbNpdidWellbore} npdv:pressReleaseURL <{wlbPressReleaseUrl}> .
-source		SELECT wlbNpdidWellbore,wlbPressReleaseUrl FROM wellbore_exploration_all
+source		SELECT wlbNpdidWellbore,wlbPressReleaseUrl FROM wellbore_exploration_all WHERE wlbPressReleaseUrl LIKE 'http_%'
 
 mappingId	Mapping:00671:Literal:discovery:dscNpdidDiscovery
 target		npd:discovery/{dscNpdidDiscovery} npdv:idNPD {dscNpdidDiscovery}^^xsd:integer .

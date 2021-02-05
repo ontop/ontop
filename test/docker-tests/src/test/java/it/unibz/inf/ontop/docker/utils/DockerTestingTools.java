@@ -10,7 +10,6 @@ public class DockerTestingTools {
 
     public static final OWLAPITranslatorOWL2QL OWLAPI_TRANSLATOR;
     public static final TermFactory TERM_FACTORY;
-    public static final TypeFactory TYPE_FACTORY;
 
     static {
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
@@ -18,6 +17,5 @@ public class DockerTestingTools {
 
         OWLAPI_TRANSLATOR = injector.getInstance(OWLAPITranslatorOWL2QL.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
-        TYPE_FACTORY = injector.getInstance(TypeFactory.class);
     }
 }

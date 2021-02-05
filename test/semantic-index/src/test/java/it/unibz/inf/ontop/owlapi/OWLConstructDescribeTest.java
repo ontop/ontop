@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
@@ -39,7 +38,7 @@ import java.util.Properties;
  * both constant and uri objects. It must be clear if it's a data property or
  * object property.
  */
-public class OWLConstructDescribeTest{
+public class OWLConstructDescribeTest {
 
 	OntopOWLReasoner reasoner = null;
 	OWLConnection conn = null;
@@ -48,7 +47,10 @@ public class OWLConstructDescribeTest{
 	
 	@Before
 	public void setUp() throws Exception {
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, new Properties())) {
+		Properties properties = new Properties();
+		properties.setProperty(OntopReformulationSettings.INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE, "true");
+
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, properties)) {
 			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			reasoner = factory.createReasoner(loader.getConfiguration());
 			conn = reasoner.getConnection();
@@ -98,7 +100,8 @@ public class OWLConstructDescribeTest{
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> <http://example.org/A>}";
 		Assert.assertEquals(1, countResult(query));
 	}
-	
+
+	@Ignore("The dictionary is blocked by the DISTINCT")
 	@Test
 	public void testDescribeVar2() throws Exception {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";

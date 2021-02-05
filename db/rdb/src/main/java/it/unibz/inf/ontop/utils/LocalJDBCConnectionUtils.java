@@ -19,12 +19,10 @@ public class LocalJDBCConnectionUtils {
         } catch (SQLException ex) {
             // HACKY(xiao): This part is still necessary for Tomcat.
             // Otherwise, JDBC drivers are not initialized by default.
-            if (settings.getJdbcDriver().isPresent()) {
-                try {
-                    Class.forName(settings.getJdbcDriver().get());
-                } catch (ClassNotFoundException e) {
-                    throw new SQLException("Cannot load the driver: " + e.getMessage());
-                }
+            try {
+                Class.forName(settings.getJdbcDriver());
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("Cannot load the driver: " + e.getMessage());
             }
 
             return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());

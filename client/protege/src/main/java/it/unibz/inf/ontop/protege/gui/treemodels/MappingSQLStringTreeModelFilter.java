@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  */
 
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 
 /**
  * This filter receives a string in the constructor and returns true if any mapping contains the string in the body.
@@ -34,7 +34,7 @@ public class MappingSQLStringTreeModelFilter extends TreeModelFilter<SQLPPTriple
 
 	@Override
 	public boolean match(SQLPPTriplesMap object) {
-		final OBDASQLQuery bodyquery = (OBDASQLQuery) object.getSourceQuery();
+		final SQLPPSourceQuery bodyquery = (SQLPPSourceQuery) object.getSourceQuery();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.atom.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import org.apache.commons.rdf.api.IRI;
@@ -14,16 +15,18 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
     private final int subjectIndex;
     private final int propertyIndex;
     private final int objectIndex;
+    private final RDFTermTypeConstant iriType;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
 
     protected RDFAtomPredicateImpl(String name, ImmutableList<TermType> expectedBaseTypes,
                                    int subjectIndex, int propertyIndex, int objectIndex,
-                                   org.apache.commons.rdf.api.RDF rdfFactory) {
+                                   RDFTermTypeConstant iriType, org.apache.commons.rdf.api.RDF rdfFactory) {
         super(name, expectedBaseTypes);
         this.subjectIndex = subjectIndex;
         this.propertyIndex = propertyIndex;
         this.objectIndex = objectIndex;
         this.rdfFactory = rdfFactory;
+        this.iriType = iriType;
 
         if (subjectIndex >= expectedBaseTypes.size())
             throw new IllegalArgumentException("subjectIndex exceeds the arity");
@@ -72,21 +75,19 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
         return atomArguments.get(objectIndex);
     }
 
-    /**
-     * TODO: make it more robust
-     */
     protected Optional<IRI> extractIRI(ImmutableTerm term) {
         if (term instanceof IRIConstant) {
             return Optional.of(((IRIConstant) term).getIRI());
         }
-        // TODO: look for the RDF building function (and check the type is an IRI)
         else if (term instanceof ImmutableFunctionalTerm) {
-            return ((ImmutableFunctionalTerm) term).getArity() == 1
-                    ? extractIRI(((ImmutableFunctionalTerm) term).getTerms().get(0))
-                    : Optional.empty();
-        }
-        else if (term instanceof ValueConstant) {
-            return Optional.of(rdfFactory.createIRI( ((ValueConstant) term).getValue()));
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+
+            return Optional.of(functionalTerm)
+                    .filter(f -> f.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+                    .filter(f -> f.getTerm(1).equals(iriType))
+                    .map(f -> f.getTerm(0))
+                    .filter(t -> t instanceof DBConstant)
+                    .map(t -> rdfFactory.createIRI(((DBConstant) t).getValue()));
         }
         return Optional.empty();
     }

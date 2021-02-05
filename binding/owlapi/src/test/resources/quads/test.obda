@@ -1,0 +1,19 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/test#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+
+mappingId	Person
+target		GRAPH <http://example.org/graphs/spiderman> { :person{idPerson} :hasJob :job{idJob} ; rdfs:label {name} . }  GRAPH <http://example.org/graphs/batman> { :person{idPerson} :hasJob :job{idJob} ; rdfs:label {name} . }
+source		select idPerson, name, birthYear, idJob from Person
+
+mappingId	Job
+target		:job{idJob} :hasDescription {description} ; rdfs:label {description} .
+source		select idJob, description from Job
+]]
+

@@ -1,13 +1,13 @@
 package it.unibz.inf.ontop.protege.gui.treemodels;
 
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.model.term.*;
 
 public class TreeModelTools {
 
-    /** A helper method to check a match */
+    /**
+     * A helper method to check a match
+     */
     public static boolean match(String keyword, TargetAtom atom) {
         return atom.getSubstitutedTerms().stream()
                 .anyMatch(t -> match(keyword, t));
@@ -23,10 +23,11 @@ public class TreeModelTools {
             // Recursive
             return functionTerm.getTerms().stream()
                     .anyMatch(t -> match(keyword, t));
-        }
-        if (term instanceof Variable) {
-            return ((Variable) term).getName().contains(keyword); // match found!
-        }
-        return false;
+//        } else if (term instanceof Variable) {
+//            return ((Variable) term).getName().contains(keyword); // match found!
+        } else if (term instanceof RDFConstant) {
+            return ((RDFConstant) term).getValue().contains(keyword); // match found!
+        } else
+            return false;
     }
 }

@@ -10,13 +10,12 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.AbstractMap;
 import java.util.Map;
 
-
 /**
- * Wrapper above a ImmutableMap<Variable, ImmutableTerm> map.
+ * Wrapper above an {@code ImmutableMap<Variable, ImmutableTerm>} map.
  */
+
 public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends AbstractImmutableSubstitutionImpl<T> {
 
     private final ImmutableMap<Variable, T> map;
@@ -27,12 +26,9 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
         super(atomFactory, termFactory, substitutionFactory);
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
-        if (substitutionMap.entrySet().stream()
-                .anyMatch(e -> e.getKey().equals(e.getValue()))
-                ) {
+        if (substitutionMap.entrySet().stream().anyMatch(e -> e.getKey().equals(e.getValue())))
             throw new IllegalArgumentException("Please do not insert entries like t/t in your substitution " +
                     "(for efficiency reasons)\n. Substitution: " + substitutionMap);
-        }
     }
 
     @Override
@@ -62,31 +58,8 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     @Override
     public ImmutableTerm applyToVariable(Variable variable) {
-        if (map.containsKey(variable))
-            return map.get(variable);
-        return variable;
-    }
-
-    @Override
-    public Var2VarSubstitution getVar2VarFragment() {
-        ImmutableMap<Variable, Variable> newMap = map.entrySet().stream()
-                .filter(e -> e.getValue() instanceof Variable)
-                .map(e -> (Map.Entry<Variable, Variable>) new AbstractMap.SimpleEntry<>(
-                        e.getKey(), (Variable) e.getValue()))
-                .collect(ImmutableCollectors.toMap());
-
-        return substitutionFactory.getVar2VarSubstitution(newMap);
-    }
-
-    @Override
-    public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
-        ImmutableMap<Variable, GroundTerm> newMap = map.entrySet().stream()
-                .filter(e -> e.getValue() instanceof GroundTerm)
-                .map(e -> (Map.Entry<Variable, GroundTerm>) new AbstractMap.SimpleEntry<>(
-                        e.getKey(), (GroundTerm) e.getValue()))
-                .collect(ImmutableCollectors.toMap());
-
-        return substitutionFactory.getSubstitution(newMap);
+        T v = map.get(variable);
+        return v == null ? variable : v;
     }
 
     @Override
@@ -106,12 +79,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof ImmutableSubstitution) {
-            return map.equals(((ImmutableSubstitution) o).getImmutableMap());
-        }
-        else
-            return false;
+        return (o instanceof ImmutableSubstitution)
+                && map.equals(((ImmutableSubstitution) o).getImmutableMap());
     }
-
-
 }

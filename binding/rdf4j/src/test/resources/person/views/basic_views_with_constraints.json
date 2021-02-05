@@ -1,0 +1,69 @@
+{
+  "relations": [
+    {
+      "name": ["\"views\"", "\"persons\""],
+      "baseRelation": ["\"person\""],
+      "columns": {
+        "added": [
+          {
+            "name": "\"fullNameAndLocality\"",
+            "expression": "CONCAT(UPPER(\"fullName\"),' ',\"locality\")"
+          },
+          {
+            "name": "\"localityAbbrev\"",
+            "expression": "REGEXP_REPLACE(\"locality\",'Botzen', 'Bz')"
+          },
+          {
+            "name": "\"nullifItaly\"",
+            "expression": "NULLIF(\"country\",'it')"
+          },
+          {
+            "name": "\"statusText\"",
+            "expression": "CAST(\"status\" AS TEXT)"
+          }
+        ],
+        "hidden": [
+          "\"fullName\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "\"statusConstraint\"",
+            "determinants" : [ "\"status\""],
+            "isPrimaryKey" : false
+          }
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "determinants": ["\"locality\""],
+            "dependents": ["\"country\""]
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "status_id_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"statuses\""]
+            }
+          },
+          {
+            "name": "unavailable_table_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"unavailable_table\""]
+            }
+          }
+        ]
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}

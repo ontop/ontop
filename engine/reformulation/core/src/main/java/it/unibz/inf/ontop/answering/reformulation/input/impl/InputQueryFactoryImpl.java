@@ -4,9 +4,9 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import org.eclipse.rdf4j.query.parser.*;
 
 
@@ -24,7 +24,7 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(queryString, parsedQuery);
+            return rdf4jFactory.createSelectQuery(queryString, parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidInputQueryException("Not a valid SELECT query: " + queryString);
     }
@@ -34,7 +34,7 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(queryString, parsedQuery);
+            return rdf4jFactory.createAskQuery(queryString, parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidInputQueryException("Not a valid ASK query: " + queryString);
     }
@@ -43,8 +43,8 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
     public ConstructQuery createConstructQuery(String queryString) throws OntopInvalidInputQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
-        if ((parsedQuery instanceof ParsedGraphQuery) && SPARQLQueryUtility.isConstructQuery(queryString))
-            return rdf4jFactory.createConstructQuery(queryString, parsedQuery);
+        if ((parsedQuery instanceof ParsedGraphQuery) && !(parsedQuery instanceof ParsedDescribeQuery))
+            return rdf4jFactory.createConstructQuery(queryString, parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidInputQueryException("Not a valid CONSTRUCT query: " + queryString);
     }
@@ -53,8 +53,8 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
     public DescribeQuery createDescribeQuery(String queryString) throws OntopInvalidInputQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
-        if ((parsedQuery instanceof ParsedGraphQuery) && (!SPARQLQueryUtility.isConstructQuery(queryString)))
-            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery);
+        if (parsedQuery instanceof ParsedDescribeQuery)
+            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery, new MapBindingSet());
         else
             throw new OntopInvalidInputQueryException("Not a valid DESCRIBE query: " + queryString);
     }
@@ -65,13 +65,13 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(queryString, parsedQuery);
+            return rdf4jFactory.createSelectQuery(queryString, parsedQuery, new MapBindingSet());
         else if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(queryString, parsedQuery);
+            return rdf4jFactory.createAskQuery(queryString, parsedQuery, new MapBindingSet());
+        else if (parsedQuery instanceof ParsedDescribeQuery)
+            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery, new MapBindingSet());
         else if (parsedQuery instanceof ParsedGraphQuery)
-            return SPARQLQueryUtility.isConstructQuery(queryString)
-                    ? rdf4jFactory.createConstructQuery(queryString, parsedQuery)
-                    : rdf4jFactory.createDescribeQuery(queryString, parsedQuery);
+            return rdf4jFactory.createConstructQuery(queryString, parsedQuery, new MapBindingSet());
         else
             throw new OntopUnsupportedInputQueryException("Unsupported query: " + queryString);
     }
@@ -81,10 +81,10 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
             OntopUnsupportedInputQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
-        if (parsedQuery instanceof ParsedGraphQuery)
-            return SPARQLQueryUtility.isConstructQuery(queryString)
-                    ? rdf4jFactory.createConstructQuery(queryString, parsedQuery)
-                    : rdf4jFactory.createDescribeQuery(queryString, parsedQuery);
+        if (parsedQuery instanceof ParsedDescribeQuery)
+            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery, new MapBindingSet());
+        else if (parsedQuery instanceof ParsedGraphQuery)
+            return rdf4jFactory.createConstructQuery(queryString, parsedQuery, new MapBindingSet());
         else
             throw new OntopUnsupportedInputQueryException("Unsupported query: " + queryString);
     }

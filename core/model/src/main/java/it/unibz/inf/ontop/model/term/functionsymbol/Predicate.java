@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.TermType;
-
 /**
 * The Predicate class currently represents (1) first-order predicts, (2) function symbols, and
  * (3) logical operators (e.g. join, left join)
@@ -44,8 +41,4 @@ public interface Predicate {
 	 * @return an integer number.
 	 */
     int getArity();
-
-	TermType getExpectedBaseType(int index);
-
-	ImmutableList<TermType> getExpectedBaseArgumentTypes();
 }

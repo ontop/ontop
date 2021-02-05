@@ -1,20 +1,25 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
-import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.iq.proposal.*;
+import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
+import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 import java.util.Optional;
@@ -34,12 +39,13 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
      */
     private static final int MAX_ITERATIONS = 100;
     private final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
 
     protected RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory,
-                                        SubstitutionFactory substitutionFactory,
-                                        ImmutableUnificationTools unificationTools) {
-        super(substitutionFactory, unificationTools);
+                                        ImmutableUnificationTools unificationTools, TermFactory termFactory) {
+        super(unificationTools, termFactory);
         this.iqFactory = iqFactory;
+        this.termFactory = termFactory;
     }
 
 
@@ -52,7 +58,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
         // Non-final
         InnerJoinNode topJoinNode = highLevelProposal.getFocusNode();
 
-        ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
+        ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
         /*
          * Tries to optimize if there are data nodes
@@ -64,7 +70,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
 
             try {
                 Optional<ConcreteProposal> optionalConcreteProposal = propose(topJoinNode, initialMap, priorityVariables,
-                        query, query.getDBMetadata());
+                        query);
 
                 if (!optionalConcreteProposal.isPresent()) {
                     break;
@@ -120,25 +126,51 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
     /**
      * Throws an AtomUnificationException when the results are guaranteed to be empty
      */
-    private Optional<ConcreteProposal> propose(InnerJoinNode joinNode, ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialDataNodeMap,
+    private Optional<ConcreteProposal> propose(InnerJoinNode joinNode, ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialDataNodeMap,
                                                ImmutableList<Variable> priorityVariables,
-                                               IntermediateQuery query, DBMetadata dbMetadata)
+                                               IntermediateQuery query)
             throws AtomUnificationException {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
 
-        for (RelationPredicate predicate : initialDataNodeMap.keySet()) {
-            ImmutableCollection<ExtensionalDataNode> initialNodes = initialDataNodeMap.get(predicate);
-            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(joinNode, initialNodes, predicate, dbMetadata,
+        for (RelationDefinition relation : initialDataNodeMap.keySet()) {
+            ImmutableCollection<ExtensionalDataNode> initialNodes = initialDataNodeMap.get(relation);
+            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(joinNode, initialNodes, relation,
                     priorityVariables, query);
             predicateProposal.ifPresent(proposalListBuilder::add);
         }
 
-        return createConcreteProposal(proposalListBuilder.build(), priorityVariables);
+        return createConcreteProposal(proposalListBuilder.build(), initialDataNodeMap, priorityVariables);
+    }
+
+    protected Optional<ConcreteProposal> createConcreteProposal(
+            ImmutableList<PredicateLevelProposal> predicateProposals,
+            ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialDataNodeMap, ImmutableList<Variable> priorityVariables) {
+
+
+
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
+        try {
+            optionalMergedSubstitution = mergeSubstitutions(extractSubstitutions(predicateProposals), initialDataNodeMap, priorityVariables);
+        } catch (AtomUnificationException e) {
+            return Optional.empty();
+        }
+
+        if (! optionalMergedSubstitution.isPresent())
+            return Optional.empty();
+
+        Optional<ImmutableExpression> isNotConjunction = termFactory.getConjunction(predicateProposals.stream()
+                .map(PredicateLevelProposal::getIsNotNullConjunction)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(ImmutableExpression::flattenAND)
+                .distinct());
+
+        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, isNotConjunction));
     }
 
     protected abstract Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
-                                                                            RelationPredicate predicate, DBMetadata dbMetadata,
+                                                                            RelationDefinition relationDefinition,
                                                                             ImmutableList<Variable> priorityVariables,
                                                                             IntermediateQuery query) throws AtomUnificationException;
 
@@ -153,12 +185,6 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
                                                                                      InnerJoinNode topJoinNode,
                                                                                      ConcreteProposal proposal)
             throws EmptyQueryException {
-        /*
-         * First, add and remove non-top nodes
-         */
-        proposal.getDataNodesToRemove()
-                .forEach(treeComponent::removeSubTree);
-
         return updateJoinNodeAndPropagateSubstitution(query, treeComponent, topJoinNode, proposal);
     }
     

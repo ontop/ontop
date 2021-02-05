@@ -13,6 +13,8 @@ import java.util.Collection;
  *
  * Do not expect implementations to be thread-safe!
  *
+ * See CoreUtilsFactory for building new instances
+ *
  */
 public interface VariableGenerator {
 
@@ -35,6 +37,12 @@ public interface VariableGenerator {
      * Generates a new non-conflicting variable.
      */
     Variable generateNewVariable();
+
+    /**
+     * Creates a variable with the suggested string if no conflict is detected.
+     * However, generates a variable with a close but different name.
+     */
+    Variable generateNewVariable(String suggestedString);
 
     ImmutableSet<Variable> getKnownVariables();
 

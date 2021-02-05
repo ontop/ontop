@@ -1,63 +1,52 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-/*
- * #%L
- * ontop-quest-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.materialization.MaterializationParams;
-import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 public class OntopOntologyMaterializerTest extends TestCase {
 
-	private Connection jdbcconn = null;
+	private Connection jdbcconn;
 
 	private static final Logger LOGGER =  LoggerFactory.getLogger(OntopOntologyMaterializerTest.class);
 
-	String url = "jdbc:h2:mem:questjunitdb";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
-	public OntopOntologyMaterializerTest() {
-    }
 
 	@Override
 	public void setUp() throws Exception {
-		createTables();
+		String createDDL = readSQLFile("src/test/resources/materializer/createMaterializeTest.sql");
+
+		jdbcconn = DriverManager.getConnection(url, username, password);
+		try (Statement st = jdbcconn.createStatement()) {
+			st.executeUpdate(createDDL);
+			jdbcconn.commit();
+		}
 	}
+
+	@Override
+	public void tearDown() throws Exception {
+		String dropDDL = readSQLFile("src/test/resources/materializer/dropMaterializeTest.sql");
+
+		try (Statement st = jdbcconn.createStatement()) {
+			st.executeUpdate(dropDDL);
+			jdbcconn.commit();
+		}
+		jdbcconn.close();
+	}
+
 
 	private String readSQLFile(String file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
@@ -70,34 +59,6 @@ public class OntopOntologyMaterializerTest extends TestCase {
 		return bf.toString();
 	}
 
-	private void createTables() throws IOException, SQLException, URISyntaxException {
-		String createDDL = readSQLFile("src/test/resources/materializer/createMaterializeTest.sql");
-
-		// Initializing and H2 database with the data		
-		// String driver = "org.h2.Driver";
-		
-		jdbcconn = DriverManager.getConnection(url, username, password);
-		Statement st = jdbcconn.createStatement();
-
-		st.executeUpdate(createDDL);
-		jdbcconn.commit();
-	}
-
-	@Override
-	public void tearDown() throws Exception {
-
-		dropTables();
-//		conn.close();
-		jdbcconn.close();
-	}
-
-	private void dropTables() throws SQLException, IOException {
-		String dropDDL = readSQLFile("src/test/resources/materializer/dropMaterializeTest.sql");
-		Statement st = jdbcconn.createStatement();
-		st.executeUpdate(dropDDL);
-		st.close();
-		jdbcconn.commit();
-	}
 
 	public void testDataWithModel() throws Exception {
 	
@@ -112,29 +73,23 @@ public class OntopOntologyMaterializerTest extends TestCase {
 				.enableTestMode()
 				.build();
 		
-		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
-		MaterializationParams materializationParams = MaterializationParams.defaultBuilder().build();
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
 
-		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
-			int classAss = 0, propAss = 0, objAss = 0;
+		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
+			int factCount = 0;
+
+//			// Davide> Debug
+//			PrintWriter writer = new PrintWriter("src/test/resources/materializer/output_assertions.txt");
 
 			LOGGER.debug("Assertions:");
 			while (resultSet.hasNext()) {
-				Assertion assertion = resultSet.next();
-				LOGGER.debug(assertion.toString());
-
-				if (assertion instanceof ClassAssertion)
-					classAss++;
-
-				else if (assertion instanceof ObjectPropertyAssertion)
-					objAss++;
-
-				else // DataPropertyAssertion
-					propAss++;
+				RDFFact assertion = resultSet.next();
+				factCount++;
 			}
-			assertEquals(6, classAss); //2 classes * 3 data rows for T1
-			assertEquals(42, propAss); //2 properties * 7 tables * 3 data rows each T2-T8
-			assertEquals(3, objAss); //3 data rows for T9
+			//2 classes * 3 data rows for T1
+			//2 properties * 7 tables * 3 data rows each T2-T8 - 2 redundant
+			//3 data rows for T9
+			assertEquals(49, factCount);
 		}
 	}
 	
@@ -160,26 +115,18 @@ public class OntopOntologyMaterializerTest extends TestCase {
 		// System.out.println(onto.tbox().getSubObjectPropertyAxioms());
 		// System.out.println(onto.tbox().getSubDataPropertyAxioms());
 
-		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
-		MaterializationParams materializationParams = MaterializationParams.defaultBuilder().build();
-		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
-
-			int classAss = 0, propAss = 0, objAss = 0;
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
+		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
+			int factCount = 0;
 			while (resultSet.hasNext()) {
-				Assertion assertion = resultSet.next();
+				RDFFact assertion = resultSet.next();
+				factCount++;
 				LOGGER.debug(assertion + "\n");
-				if (assertion instanceof ClassAssertion)
-					classAss++;
-
-				else if (assertion instanceof ObjectPropertyAssertion)
-					objAss++;
-
-				else // DataPropertyAssertion
-					propAss++;
 			}
-			assertEquals(6, classAss); //3 data rows x2 for subclass prop
-			assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass
-			assertEquals(3, objAss); //3 since no subprop for obj prop
+			//3 data rows x2 for subclass prop
+			//8 tables * 3 data rows each x2 for subclass - 2 redundant
+			//3 since no subprop for obj prop
+			assertEquals(49, factCount);
 		}
 	}
 }

@@ -4,6 +4,8 @@ import com.github.rvesse.airline.Cli;
 import com.github.rvesse.airline.builder.CliBuilder;
 import com.github.rvesse.airline.parser.errors.*;
 
+import static org.junit.Assert.fail;
+
 
 public class Ontop {
 
@@ -18,9 +20,6 @@ public class Ontop {
             command.run();
         } catch (ParseCommandMissingException e) {
             main("help");
-        } catch (ParseCommandUnrecognizedException e) {
-            System.err.println("Error: " + e.getMessage());
-            System.err.println("Run `ontop help` to see the help");
         } catch (ParseArgumentsUnexpectedException | ParseOptionMissingException e) {
             System.err.println("Error: " + e.getMessage());
             String commandName = args[0];
@@ -30,6 +29,7 @@ public class Ontop {
             System.err.println("Run `ontop help` to see the help");
         } catch (Exception e) {
             e.printStackTrace();
+            fail();
         }
     }
 
@@ -47,11 +47,12 @@ public class Ontop {
                         OntopMaterialize.class,
                         OntopBootstrap.class,
                         OntopValidate.class,
+                        OntopEndpoint.class,
+                        OntopExtractDBMetadata.class,
                         /**
                          * hidden commands
                          */
                         OntopCompile.class
-                        // OntopServer.class
                 );
 
 

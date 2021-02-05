@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.injection;
 
-import java.util.Optional;
-
 public interface OntopSQLCoreSettings extends OntopOBDASettings {
 
     String getJdbcUrl();
     String getJdbcName();
-    Optional<String> getJdbcDriver();
+    String getJdbcDriver();
 
     //-------
     // Keys

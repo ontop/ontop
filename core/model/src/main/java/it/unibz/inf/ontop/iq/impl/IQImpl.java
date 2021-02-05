@@ -65,8 +65,8 @@ public class IQImpl implements IQ {
      * Assumes that trees declared as lifted will return themselves
      */
     @Override
-    public IQ liftBinding() {
-        IQTree newTree = tree.liftBinding(getVariableGenerator());
+    public IQ normalizeForOptimization() {
+        IQTree newTree = tree.normalizeForOptimization(getVariableGenerator());
         return newTree == tree
                 ? this
                 : iqFactory.createIQ(projectionAtom, newTree);
@@ -94,6 +94,9 @@ public class IQImpl implements IQ {
 
     @Override
     public boolean equals(Object otherObject) {
+        if (otherObject == this)
+            return true;
+
         return (otherObject instanceof IQ)
                 && projectionAtom.equals(((IQ) otherObject).getProjectionAtom())
                 && tree.isEquivalentTo(((IQ) otherObject).getTree());

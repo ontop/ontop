@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -43,9 +42,9 @@ public class QuestOWLExampleNotLatinTest {
 	 * Test with not latin Character
 	 * 
 	 */
-	final String owlFile = "/mysql/example/exampleBooksNotLatin.owl";
-	final String obdaFile = "/mysql/example/exampleBooksNotLatin.obda";
-	final String propertyFile = "/mysql/example/exampleBooksNotLatin.properties";
+	private static final String owlFile = "/mysql/example/exampleBooksNotLatin.owl";
+	private static final String obdaFile = "/mysql/example/exampleBooksNotLatin.obda";
+	private static final String propertyFile = "/mysql/example/exampleBooksNotLatin.properties";
 
     @Test
 	public void runQuery() throws Exception {
@@ -85,14 +84,9 @@ public class QuestOWLExampleNotLatinTest {
 		try {
             long t1 = System.currentTimeMillis();
 			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
-				for (int idx = 1; idx <= columnSize; idx++) {
-                    OWLObject binding = bindingSet.getOWLObject(idx);
-					System.out.print(binding.toString() + ", ");
-				}
-				System.out.print("\n");
+				final OWLBindingSet bindingSet = rs.next();
+				System.out.print(bindingSet + "\n");
 			}
 			rs.close();
             long t2 = System.currentTimeMillis();
@@ -101,7 +95,6 @@ public class QuestOWLExampleNotLatinTest {
 			 * Print the query summary
 			 */
 			OntopOWLStatement qst = st;
-			String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");
@@ -111,7 +104,7 @@ public class QuestOWLExampleNotLatinTest {
 			
 			System.out.println("The output SQL query:");
 			System.out.println("=====================");
-			System.out.println(sqlQuery);
+			System.out.println(qst.getExecutableQuery(sparqlQuery));
 
             System.out.println("Query Execution Time:");
             System.out.println("=====================");

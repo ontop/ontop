@@ -27,10 +27,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * See TranslationFactory for creating a new instance.
+ */
 public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
     private final Mapping mapping;
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
     private final UnionBasedQueryMerger queryMerger;
@@ -42,7 +44,6 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
                                UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory) {
         super(iqFactory);
         this.mapping = mapping;
-        this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
         this.queryMerger = queryMerger;
@@ -57,7 +58,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     protected class BasicQueryUnfoldingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
         protected BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, iqFactory, substitutionFactory, transformerFactory);
+            super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, transformerFactory);
         }
 
         @Override

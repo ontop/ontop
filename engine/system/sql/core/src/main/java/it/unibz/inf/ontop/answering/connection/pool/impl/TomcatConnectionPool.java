@@ -24,8 +24,8 @@ public class TomcatConnectionPool implements JDBCConnectionPool {
     private TomcatConnectionPool(OntopSystemSQLSettings settings) {
         PoolProperties poolProperties = new PoolProperties();
         poolProperties.setUrl(settings.getJdbcUrl());
-        settings.getJdbcDriver()
-                .ifPresent(poolProperties::setDriverClassName);
+        poolProperties.setDriverClassName(settings.getJdbcDriver());
+
         poolProperties.setUsername(settings.getJdbcUser());
         poolProperties.setPassword(settings.getJdbcPassword());
         poolProperties.setJmxEnabled(true);
@@ -35,8 +35,7 @@ public class TomcatConnectionPool implements JDBCConnectionPool {
         poolProperties.setTestOnBorrow(keepAlive);
         if (keepAlive) {
             // TODO: refactor this
-            String driver = settings.getJdbcDriver()
-                    .orElse("");
+            String driver = settings.getJdbcDriver();
             if (driver.contains("oracle"))
                 poolProperties.setValidationQuery("select 1 from dual");
             else if (driver.contains("db2"))

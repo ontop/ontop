@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -87,6 +86,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
+                Optional::empty,
+                Optional::empty,
+                Optional::empty,
+                Optional::empty,
                 Optional::empty
                 );
     }
@@ -96,12 +99,15 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Graph>> mappingGraphSupplier,
-                                                  Supplier<Optional<File>> constraintFileSupplier
+                                                  Supplier<Optional<File>> constraintFileSupplier,
+                                                  Supplier<Optional<File>> dbMetadataFileSupplier,
+                                                  Supplier<Optional<Reader>> dbMetadataReaderSupplier,
+                                                  Supplier<Optional<File>> ontopViewFileSupplier,
+                                                  Supplier<Optional<Reader>> ontopViewReaderSupplier
                                                   ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
         Optional<Ontology> optionalOntology = ontologySupplier.get();
-        Optional<DBMetadata> optionalMetadata = options.dbMetadata;
 
         /*
          * Pre-processed mapping
@@ -111,11 +117,19 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         OBDASpecInput.Builder specInputBuilder = OBDASpecInput.defaultBuilder();
         constraintFileSupplier.get()
                 .ifPresent(specInputBuilder::addConstraintFile);
+        dbMetadataFileSupplier.get()
+                .ifPresent(specInputBuilder::addDBMetadataFile);
+        dbMetadataReaderSupplier.get()
+                .ifPresent(specInputBuilder::addDBMetadataReader);
+        ontopViewFileSupplier.get()
+                .ifPresent(specInputBuilder::addOntopViewFile);
+        ontopViewReaderSupplier.get()
+                .ifPresent(specInputBuilder::addOntopViewReader);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
 
-            return extractor.extract(specInputBuilder.build(), ppMapping, optionalMetadata, optionalOntology,
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology,
                     getExecutorRegistry());
         }
 
@@ -126,7 +140,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingFile.isPresent()) {
             specInputBuilder.addMappingFile(optionalMappingFile.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
+            return extractor.extract(specInputBuilder.build(), optionalOntology,
                     getExecutorRegistry());
         }
 
@@ -137,7 +151,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingReader.isPresent()) {
             specInputBuilder.addMappingReader(optionalMappingReader.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
+            return extractor.extract(specInputBuilder.build(), optionalOntology,
                     getExecutorRegistry());
         }
 
@@ -148,7 +162,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingGraph.isPresent()) {
             specInputBuilder.addMappingGraph(optionalMappingGraph.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
+            return extractor.extract(specInputBuilder.build(), optionalOntology,
                     getExecutorRegistry());
         }
 
@@ -168,15 +182,12 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         final OntopOBDAOptions obdaOptions;
         final OntopOptimizationOptions optimizationOptions;
         private final Optional<TMappingExclusionConfig> excludeFromTMappings;
-        final Optional<DBMetadata> dbMetadata;
 
-        private OntopMappingOptions(Optional<DBMetadata> dbMetadata,
-                                    Optional<TMappingExclusionConfig> excludeFromTMappings,
+        private OntopMappingOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
                                     OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
-            this.dbMetadata = dbMetadata;
         }
     }
 
@@ -184,17 +195,12 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             implements OntopMappingBuilderFragment<B> {
 
         private final B builder;
-        private final Runnable declareDBMetadataCB;
-        private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
-        private Optional<Boolean> completeDBMetadata = Optional.empty();
         private Optional<Boolean> inferDefaultDatatype =  Optional.empty();
-        private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
         DefaultOntopMappingBuilderFragment(B builder, Runnable declareDBMetadataCB) {
             this.builder = builder;
-            this.declareDBMetadataCB = declareDBMetadataCB;
         }
 
         @Override
@@ -204,27 +210,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         @Override
-        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
-            this.obtainFullMetadata = Optional.of(obtainFullMetadata);
-            return builder;
-        }
-
-        @Override
         public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
             this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
-            return builder;
-        }
-
-        @Override
-        public B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion) {
-            this.completeDBMetadata = Optional.of(dbMetadataCompletion);
-            return builder;
-        }
-
-        @Override
-        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
-            declareDBMetadataCB.run();
-            this.dbMetadata = Optional.of(dbMetadata);
             return builder;
         }
 
@@ -236,14 +223,12 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
                                                          OntopOptimizationOptions optimizationOptions) {
-            return new OntopMappingOptions(dbMetadata, excludeFromTMappings, obdaOptions, optimizationOptions);
+            return new OntopMappingOptions(excludeFromTMappings, obdaOptions, optimizationOptions);
         }
 
         Properties generateProperties() {
             Properties properties = new Properties();
-            obtainFullMetadata.ifPresent(m -> properties.put(OntopMappingSettings.OBTAIN_FULL_METADATA, m));
             queryingAnnotationsInOntology.ifPresent(b -> properties.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, b));
-            completeDBMetadata.ifPresent(b -> properties.put(OntopMappingSettings.COMPLETE_PROVIDED_METADATA, b));
             inferDefaultDatatype.ifPresent(b -> properties.put(OntopMappingSettings.INFER_DEFAULT_DATATYPE, b));
 
             return properties;
@@ -260,6 +245,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
         private boolean isMappingDefined;
         private boolean isDBMetadataDefined;
+        private boolean isOntopViewDefined;
 
         OntopMappingBuilderMixin() {
             B builder = (B) this;
@@ -277,28 +263,13 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         @Override
-        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
-            return mappingBuilderFragment.enableFullMetadataExtraction(obtainFullMetadata);
-        }
-
-        @Override
         public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
             return mappingBuilderFragment.enableOntologyAnnotationQuerying(queryingAnnotationsInOntology);
         }
 
         @Override
-        public B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion) {
-            return mappingBuilderFragment.enableProvidedDBMetadataCompletion(dbMetadataCompletion);
-        }
-
-        @Override
         public B enableDefaultDatatypeInference(boolean inferDefaultDatatype) {
             return mappingBuilderFragment.enableDefaultDatatypeInference(inferDefaultDatatype);
-        }
-
-        @Override
-        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
-            return mappingBuilderFragment.dbMetadata(dbMetadata);
         }
 
         final OntopMappingOptions generateMappingOptions() {
@@ -333,6 +304,13 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             isDBMetadataDefined = true;
         }
 
+        final void declareOntopViewDefined() {
+            if (isOBDASpecificationAssigned()) {
+                throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
+            }
+            isOntopViewDefined = true;
+        }
+
         @Override
         void declareOBDASpecificationAssigned() {
             super.declareOBDASpecificationAssigned();
@@ -343,6 +321,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             }
             if (isMappingDefined()) {
                 throw new InvalidOntopConfigurationException("The mapping is already defined, " +
+                        "cannot assign the OBDA specification");
+            }
+            if (isOntopViewDefined) {
+                throw new InvalidOntopConfigurationException("Ontop views are already defined, " +
                         "cannot assign the OBDA specification");
             }
         }

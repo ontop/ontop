@@ -44,6 +44,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private static final String OWL_FILE_LOCATION = ROOT_LOCATION + "stockexchange.owl";
 	private static final String OBDA_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.obda";
 	private static final String PROPERTY_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.properties";
+
 	private OntopOWLReasoner reasoner;
 
 	@Override
@@ -148,8 +149,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private String readQueryFile(String queryFile) {
 		String queryFileLocation = ROOT_LOCATION + queryFile;
 		URL queryFileUrl = QuestSPARQLRewriterTest.class.getResource(queryFileLocation);
-		try {
-			InputStream stream = queryFileUrl.openStream();
+		try (InputStream stream = queryFileUrl.openStream()) {
 			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
 		} catch (IOException e) { 
 			throw new RuntimeException("Cannot read input file");
