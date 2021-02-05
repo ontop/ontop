@@ -153,7 +153,7 @@ public class LeftJoinOptimizationTest {
                 "col2", integerDBType, true);
         UniqueConstraint.primaryKeyOf(TABLE6.getAttribute(1));
 
-        TABLE21 = builder.createDatabaseRelation("table1",
+        TABLE21 = builder.createDatabaseRelation("table21",
                 "col1", integerDBType, false,
                 "col2", integerDBType, false,
                 "col3", integerDBType, false,
@@ -1538,6 +1538,9 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, initialIQ);
     }
 
+    /**
+     * TODO: remove the top distinct in the expected query
+     */
     @Test
     public void testJoinTransferFD1() {
 
@@ -1545,7 +1548,7 @@ public class LeftJoinOptimizationTest {
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE21, ImmutableMap.of(0, D, 1, A));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE21, ImmutableMap.of(1, A,2, B));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, B,2, C));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, B,1, C));
 
         NaryIQTree rightJoin = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -1561,7 +1564,7 @@ public class LeftJoinOptimizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(distinctNode, leftJoinTree));
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE21, ImmutableMap.of(0, D, 1, A, 2, BF0));
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, BF0,2, C));
+        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, BF0,1, C));
 
         BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
@@ -1570,7 +1573,9 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(B, TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(C), BF0)));
 
-        UnaryIQTree newTree = IQ_FACTORY.createUnaryIQTree(constructionNode, newLeftJoinTree);
+        // TODO: get rid of the distinct here
+        UnaryIQTree newTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, newLeftJoinTree));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
 
