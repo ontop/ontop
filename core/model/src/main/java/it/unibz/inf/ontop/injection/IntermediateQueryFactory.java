@@ -50,13 +50,15 @@ public interface IntermediateQueryFactory {
 
     FilterNode createFilterNode(ImmutableExpression filterCondition);
 
-    StrictFlattenNode createStrictFlattenNode(Variable arrayVariable,
-                                              int arrayIndexIndex,
-                                              DataAtom<RelationPredicate> dataAtom);
+    FlattenNode createFlattenNode(Variable flattenedVariable,
+                                  Variable outputVariable,
+                                  Optional<Variable> positionVariable,
+                                  boolean isStrict);
 
-    RelaxedFlattenNode createRelaxedFlattenNode(Variable newArrayTerm,
-                                                int arrayIndexIndex,
-                                                DataAtom<RelationPredicate> dataAtom);
+    FlattenNode createFlattenNode(Variable flattenedVariable,
+                                  Variable outputVariable,
+                                  Variable positionVariable,
+                                  boolean isStrict);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
 

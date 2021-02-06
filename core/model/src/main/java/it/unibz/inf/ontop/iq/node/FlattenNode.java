@@ -1,36 +1,36 @@
 package it.unibz.inf.ontop.iq.node;
 
-import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
-public interface FlattenNode<P extends FlattenNode> extends DataAtomQueryNode<RelationPredicate>, UnaryOperatorNode {
+import java.util.Optional;
+
+public interface FlattenNode extends UnaryOperatorNode {
 
 
-    Variable getArrayVariable();
+    Variable getFlattenedVariable();
 
-    VariableOrGroundTerm getArrayIndexTerm();
+    Variable getOutputVariable();
 
-    @Override
-    P acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer);
+    Optional<Variable> getPositionVariable();
 
-    @Override
-    NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
+    boolean isStrict();
 
-    /**
-     * Returns a new FlattenNode of the same type, with the new arguments
-     */
-    P newNode(Variable arrayVariable,
-              int arrayIndexIndex,
-              DataAtom<RelationPredicate> dataAtom);
+//    @Override
+//    P acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer);
 
-    int getArrayIndexIndex();
+//    @Override
+//    NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
 
-    @Override
-    P clone();
+//    /**
+//     * Returns a new FlattenNode of the same type, with the new arguments
+//     */
+//    P newNode(Variable flattenedVariable,
+//              Variable outputVariable);
+
+//    int getArrayIndexIndex();
+
+//    @Override
+//    P clone();
 
    // public ImmutableList<Boolean> getArgumentNullability();
 }

@@ -11,8 +11,8 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -117,13 +117,13 @@ import java.util.stream.Stream;
 public class FlattenLifterImpl implements FlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
-    private final ImmutabilityTools immutabilityTools;
+    private final TermFactory termFactory;
 
 
     @Inject
-    private FlattenLifterImpl(IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools) {
+    private FlattenLifterImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
-        this.immutabilityTools = immutabilityTools;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -383,7 +383,7 @@ public class FlattenLifterImpl implements FlattenLifter {
         }
 
         private ImmutableList<QueryNode> getLift(FlattenNode liftedNode, FlattenNode parent, ImmutableSet<Variable> definedVars) {
-            if (definedVars.contains(parent.getArrayVariable())) {
+            if (definedVars.contains(parent.getFlattenedVariable())) {
                 return ImmutableList.of();
             }
             return ImmutableList.of(parent, liftedNode);
@@ -425,7 +425,7 @@ public class FlattenLifterImpl implements FlattenLifter {
                     Stream.concat(
                             parent.getVariables().stream()
                                     .filter(v -> arrayDefinedVars.contains(v)),
-                            Stream.of(liftedNode.getArrayVariable())
+                            Stream.of(liftedNode.getFlattenedVariable())
                     ).collect(ImmutableCollectors.toSet());
 
             // apply the substitution to the flatten node's array variable (if applicable, which is unlikely)
@@ -488,7 +488,7 @@ public class FlattenLifterImpl implements FlattenLifter {
         private FlattenNode applySubstitution(ImmutableSubstitution substitution, FlattenNode flattenNode) {
 
             Variable arrayVar = Optional.of(
-                    substitution.apply(flattenNode.getArrayVariable()))
+                    substitution.apply(flattenNode.getFlattenedVariable()))
                     .filter(v -> v instanceof Variable)
                     .map(v -> (Variable) v)
                     .orElseThrow(() -> new FlattenLiftException("Applying this substitution is expected to yield a variable." +
@@ -535,7 +535,7 @@ public class FlattenLifterImpl implements FlattenLifter {
                 this(liftVars, expr.flattenAND());
             }
 
-            private SplitExpression(ImmutableSet<Variable> liftVars, ImmutableSet<ImmutableExpression> conjuncts) {
+            private SplitExpression(ImmutableSet<Variable> liftVars, Stream<ImmutableExpression> conjuncts) {
                 ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitMap = splitConjuncts(liftVars, conjuncts);
                 nonLiftedConjuncts = ImmutableSet.copyOf(splitMap.get(false));
                 liftedConjuncts = ImmutableSet.copyOf(splitMap.get(true));
@@ -546,8 +546,8 @@ public class FlattenLifterImpl implements FlattenLifter {
              * - conjuncts containing no variable in vars
              * - conjuncts containing some variable in vars
              */
-            private ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitConjuncts(ImmutableSet<Variable> vars, ImmutableSet<ImmutableExpression> conjuncts) {
-                return conjuncts.stream()
+            private ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitConjuncts(ImmutableSet<Variable> vars, Stream<ImmutableExpression> conjuncts) {
+                return conjuncts
                         .collect(ImmutableCollectors.partitioningBy(e -> e.getVariableStream()
                                 .anyMatch(vars::contains)));
             }
@@ -555,13 +555,13 @@ public class FlattenLifterImpl implements FlattenLifter {
             Optional<ImmutableExpression> getNonLiftedExpression() {
                 return nonLiftedConjuncts.isEmpty() ?
                         Optional.empty() :
-                        immutabilityTools.foldBooleanExpressions(nonLiftedConjuncts.stream());
+                        termFactory.getConjunction(nonLiftedConjuncts.stream());
             }
 
             Optional<ImmutableExpression> getLiftedExpression() {
                 return liftedConjuncts.isEmpty() ?
                         Optional.empty() :
-                        immutabilityTools.foldBooleanExpressions(liftedConjuncts.stream());
+                        termFactory.getConjunction(liftedConjuncts.stream());
             }
         }
 

@@ -197,8 +197,8 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
             QueryNode child = children.get(0);
             ImmutableSet<Variable> childVariables = query.getVariables(child);
 
-            if (!childVariables.contains(flattenNode.getArrayVariable())) {
-                throw new InvalidIntermediateQueryException("The array variable (" + flattenNode.getArrayVariable()
+            if (!childVariables.contains(flattenNode.getFlattenedVariable())) {
+                throw new InvalidIntermediateQueryException("The array variable (" + flattenNode.getFlattenedVariable()
                         + ") of a flatten node must be defined by its sub-tree.\n " + query);
             }
         }

@@ -25,6 +25,8 @@ public interface HomogeneousQueryNodeTransformer<T1 extends QueryNodeTransformat
 
     AggregationNode transform(AggregationNode aggregationNode) throws T1, T2;
 
+    FlattenNode transform(FlattenNode flattenNode) throws T1, T2;
+
     EmptyNode transform(EmptyNode emptyNode);
 
     TrueNode transform(TrueNode trueNode);
@@ -32,6 +34,4 @@ public interface HomogeneousQueryNodeTransformer<T1 extends QueryNodeTransformat
     DistinctNode transform(DistinctNode distinctNode) throws T1, T2;
     SliceNode transform(SliceNode sliceNode) throws T1, T2;
     OrderByNode transform(OrderByNode orderByNode) throws T1, T2;
-    StrictFlattenNode transform(StrictFlattenNode flattenNode) throws T1, T2;
-    RelaxedFlattenNode transform(RelaxedFlattenNode flattenNode) throws T1, T2;
 }

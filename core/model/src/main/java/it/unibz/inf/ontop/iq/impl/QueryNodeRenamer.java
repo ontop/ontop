@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -103,7 +102,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     private Variable getNewArrayTerm(FlattenNode flattenNode) {
-        ImmutableTerm newArrayTerm = renamingSubstitution.apply(flattenNode.getArrayVariable());
+        ImmutableTerm newArrayTerm = renamingSubstitution.apply(flattenNode.getFlattenedVariable());
         if (!(newArrayTerm instanceof Variable))
             throw new InvalidIntermediateQueryException("The array of a FlattenNode must remain a variable");
         return (Variable) newArrayTerm;

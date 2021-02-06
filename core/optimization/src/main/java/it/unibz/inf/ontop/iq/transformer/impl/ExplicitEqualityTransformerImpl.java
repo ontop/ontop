@@ -337,7 +337,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             filter,
                             iqFactory.createUnaryIQTree(
                                     node.newNode(
-                                            node.getArrayVariable(),
+                                            node.getFlattenedVariable(),
                                             node.getArrayIndexIndex(),
                                             atom),
                                     child
