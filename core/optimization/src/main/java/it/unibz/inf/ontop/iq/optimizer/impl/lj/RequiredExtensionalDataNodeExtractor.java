@@ -38,7 +38,7 @@ public class RequiredExtensionalDataNodeExtractor {
          * TODO: see how to safely extract data nodes in the fromRight case
          */
         if (fromLeft && (root instanceof LeftJoinNode))
-            return extractOtherType(((BinaryNonCommutativeIQTree) tree).getLeftChild());
+            return extractSomeRequiredNodes(((BinaryNonCommutativeIQTree) tree).getLeftChild(), true);
 
         // Usually at the top of the right child of a LJ
         if ((!fromLeft) && (root instanceof ConstructionNode))

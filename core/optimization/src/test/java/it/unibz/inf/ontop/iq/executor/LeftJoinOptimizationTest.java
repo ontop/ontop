@@ -1809,6 +1809,58 @@ public class LeftJoinOptimizationTest {
     }
 
 
+    /**
+     * TODO: remove the top distinct in the expected query
+     */
+    @Test
+    public void testJoinTransferFD6() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(5), ImmutableList.of(A, B, C, D, E));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE21, ImmutableMap.of(0, D, 1, A));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE21, ImmutableMap.of(1, A,2, B));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, B,1, C));
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE3, ImmutableMap.of(0, D,1, E));
+
+        IQTree leftChild = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode4);
+
+        NaryIQTree rightJoin = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode2, dataNode3));
+
+        BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                leftChild,
+                rightJoin);
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(distinctNode, leftJoinTree));
+
+        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(TABLE21, ImmutableMap.of(0, D, 1, A, 2, BF0));
+        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, BF0,1, C));
+
+        IQTree newLeftChild = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), dataNode5, dataNode4);
+
+        BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                newLeftChild, dataNode6);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(B, TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(C), BF0)));
+
+        // TODO: get rid of the distinct here
+        UnaryIQTree newTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, newLeftJoinTree));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+
 
     /**
      * Missing DISTINCT
