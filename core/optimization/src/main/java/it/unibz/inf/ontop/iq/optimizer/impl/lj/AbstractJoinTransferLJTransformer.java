@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
+import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -155,20 +156,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         if (!rightArgumentMap.keySet().containsAll(indexes))
             return Optional.empty();
 
-        VariableNullability variableNullability = getInheritedVariableNullability();
-        if (indexes.stream().anyMatch(i ->
-                Optional.of(rightArgumentMap.get(i))
-                        .filter(t -> (t instanceof Variable) && variableNullability.isPossiblyNullable((Variable) t))
-                        .isPresent()))
-            return Optional.empty();
-
-        return sameRelationLeftNodes.stream()
-                .map(ExtensionalDataNode::getArgumentMap)
-                .filter(leftArgumentMap -> leftArgumentMap.keySet().containsAll(indexes)
-                                && indexes.stream().allMatch(
-                        i -> leftArgumentMap.get(i).equals(rightArgumentMap.get(i))))
-                .findAny()
-                .map(n -> indexes);
+        return matchIndexes(sameRelationLeftNodes, rightArgumentMap, indexes);
     }
 
     protected Optional<ImmutableList<Integer>> matchForeignKey(ForeignKeyConstraint fk,
@@ -195,6 +183,48 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                                 .isPresent()))
                 .findAny()
                 .map(l -> rightIndexes);
+    }
+
+    protected Optional<ImmutableList<Integer>> matchFunctionalDependency(FunctionalDependency functionalDependency,
+                                                                         ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes,
+                                                                         ImmutableMap<Integer,? extends VariableOrGroundTerm> rightArgumentMap) {
+
+        ImmutableSet<Integer> determinantIndexes = functionalDependency.getDeterminants().stream()
+                .map(a -> a.getIndex() - 1)
+                .collect(ImmutableCollectors.toSet());
+
+        if (!rightArgumentMap.keySet().containsAll(determinantIndexes))
+            return Optional.empty();
+
+        ImmutableSet<Integer> dependentIndexes = functionalDependency.getDependents().stream()
+                .map(a -> a.getIndex() - 1)
+                .collect(ImmutableCollectors.toSet());
+
+        // Determinants + non-dependent indexes
+        ImmutableList<Integer> indexes = rightArgumentMap.keySet().stream()
+                .filter(i -> !dependentIndexes.contains(i))
+                .collect(ImmutableCollectors.toList());
+
+        return matchIndexes(sameRelationLeftNodes, rightArgumentMap, indexes);
+    }
+
+    protected Optional<ImmutableList<Integer>> matchIndexes(ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes,
+                                                            ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap,
+                                                            ImmutableList<Integer> indexes) {
+        VariableNullability variableNullability = getInheritedVariableNullability();
+        if (indexes.stream().anyMatch(i ->
+                Optional.of(rightArgumentMap.get(i))
+                        .filter(t -> (t instanceof Variable) && variableNullability.isPossiblyNullable((Variable) t))
+                        .isPresent()))
+            return Optional.empty();
+
+        return sameRelationLeftNodes.stream()
+                .map(ExtensionalDataNode::getArgumentMap)
+                .filter(leftArgumentMap -> leftArgumentMap.keySet().containsAll(indexes)
+                        && indexes.stream().allMatch(
+                        i -> leftArgumentMap.get(i).equals(rightArgumentMap.get(i))))
+                .findAny()
+                .map(n -> indexes);
     }
 
 

@@ -1086,6 +1086,45 @@ public class FunctionalDependencyTest {
     }
 
     @Test
+    public void testLJRedundantSelfLeftJoin2() throws EmptyQueryException {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
+
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        queryBuilder.addChild(topConstructionNode, leftJoinNode);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
+
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
+        queryBuilder.addChild(joinNode, dataNode1);
+
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(C, A, D, E, F));
+        queryBuilder.addChild(joinNode, dataNode2);
+
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(G, H, I, J, K));
+        queryBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(
+                0, X, 3, Z, 4, Y
+        ));
+
+        expectedBuilder.init(projectionAtom, dataNode4);
+
+        optimizeAndCompare(query, expectedBuilder.build());
+    }
+
+    @Test
     public void testRedundantSelfJoin10() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE11,
                 ImmutableMap.of(0, X, 1, A, 2, X));
