@@ -23,50 +23,166 @@ package it.unibz.inf.ontop.protege.panels;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.protege.osgi.jdbc.preferences.JDBCDriverInfo;
+import org.protege.osgi.jdbc.preferences.JDBCDriverTableModel;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.stream.Stream;
 
-public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements OBDADataSource.Listener {
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
+
+public class DatasourceParameterEditorPanel extends JPanel implements OBDADataSource.Listener {
 
     private static final long serialVersionUID = 3506358479342412849L;
 
     private final OBDADataSource datasource;
     private final Timer timer;
 
+    private final JLabel connectionStatusLabel;
+    private final JPasswordField passwordField;
+    private final JTextField usernameField;
+    private final JComboBox<String> jdbcDriverComboBox;
+    private final JTextField jdbcUrlField;
+
+    static private final Color COLOR_NOI18N = new Color(53, 113, 163);
+
     private boolean notify = false;
 
-    /**
-     * Creates new form DatasourceParameterEditorPanel
-     */
     public DatasourceParameterEditorPanel(OBDADataSource datasource) {
         this.datasource = datasource;
 
-        timer = new Timer(200, e -> handleTimer());
+        this.timer = new Timer(200, e -> handleTimer());
 
-        initComponents();
+        setLayout(new GridBagLayout());
 
-        txtJdbcDriver.addItemListener(e -> {
-            if (notify)
-                fieldChangeHandler(null);
-        });
+        JPanel dataSourceParametersPanel = new JPanel(new GridBagLayout());
+        dataSourceParametersPanel.setBorder(BorderFactory.createTitledBorder(
+                null,
+                "Connection parameters",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION,
+                getFont(),
+                COLOR_NOI18N));
 
-        setFocusTraversalPolicy(new CustomTraversalPolicy(ImmutableList.of(
-                pnlDataSourceParameters,
-                txtJdbcUrl,
-                txtDatabaseUsername,
-                txtDatabasePassword,
-                txtJdbcDriver,
-                cmdTestConnection)));
+        KeyAdapter timerRestartKeyAdapter = new KeyAdapter() {
+            public void keyReleased(KeyEvent evt) {
+                timer.restart();
+            }
+        };
+
+        JLabel jdbcUrlLabel = new JLabel("Connection URL:");
+        jdbcUrlLabel.setForeground(COLOR_NOI18N);
+        dataSourceParametersPanel.add(jdbcUrlLabel,
+                new GridBagConstraints(0, 0, 1, 1, 0, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(20, 10, 3, 10), 0, 0));
+
+        jdbcUrlField = new JTextField();
+        jdbcUrlField.addKeyListener(timerRestartKeyAdapter);
+        dataSourceParametersPanel.add(jdbcUrlField,
+                new GridBagConstraints(1, 0, 1, 1, 1, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(20, 10, 3, 30), 0, 0));
+
+        JLabel usernameLabel = new JLabel("Database username:");
+        usernameLabel.setForeground(COLOR_NOI18N);
+        dataSourceParametersPanel.add(usernameLabel,
+                new GridBagConstraints(0, 1, 1, 0, 0, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(3, 10, 3, 10), 0, 0));
+
+        usernameField = new JTextField();
+        usernameField.addKeyListener(timerRestartKeyAdapter);
+        dataSourceParametersPanel.add(usernameField,
+                new GridBagConstraints(1, 1, 1, 1, 1, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(3, 10, 3, 30), 0, 0));
+
+        JLabel passwordLabel = new JLabel("Database password:");
+        passwordLabel.setForeground(COLOR_NOI18N);
+        dataSourceParametersPanel.add(passwordLabel,
+                new GridBagConstraints(0, 2, 1, 1, 0, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(3, 10, 3, 10), 0, 0));
+
+        passwordField = new JPasswordField();
+        passwordField.addKeyListener(timerRestartKeyAdapter);
+        dataSourceParametersPanel.add(passwordField,
+                new GridBagConstraints(1, 2, 1, 1, 1, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(3, 10, 3, 30), 0, 0));
+
+        JLabel jdbcDriverLabel = new JLabel("JDBC driver class:");
+        jdbcDriverLabel.setForeground(COLOR_NOI18N);
+        dataSourceParametersPanel.add(jdbcDriverLabel,
+                new GridBagConstraints(0, 3, 1, 1, 0, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(3, 10, 3, 10), 0, 0));
+
+        ImmutableList<String> options = Stream.concat(
+                Stream.of("select or type the JDBC Driver class..."),
+                JDBCDriverTableModel.getDrivers().stream()
+                        .map(JDBCDriverInfo::getClassName))
+                .collect(ImmutableCollectors.toList());
+
+        jdbcDriverComboBox = new JComboBox<>(new DefaultComboBoxModel<>(options.toArray(new String[0])));
+        jdbcDriverComboBox.setEditable(true);
+        jdbcDriverComboBox.addActionListener(evt -> timer.restart());
+        jdbcDriverComboBox.addItemListener(evt -> timer.restart());
+        dataSourceParametersPanel.add(jdbcDriverComboBox,
+                new GridBagConstraints(1, 3, 1, 1, 1, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+                        new Insets(3, 10, 3, 30), 0, 0));
+
+        JButton testConnectionButton = DialogUtils.getButton("Test Connection", "execute.png");
+        testConnectionButton.addActionListener(this::cmdTestConnectionActionPerformed);
+        dataSourceParametersPanel.add(testConnectionButton,
+                new GridBagConstraints(0, 4, 1, 1, 0, 0,
+                        GridBagConstraints.NORTH, GridBagConstraints.NONE,
+                        new Insets(10, 10, 10, 20), 0, 0));
+
+        connectionStatusLabel = new JLabel();
+        dataSourceParametersPanel.add(connectionStatusLabel,
+                new GridBagConstraints(0, 5, 2, 1, 0, 1,
+                        GridBagConstraints.NORTH, GridBagConstraints.BOTH,
+                        new Insets(10, 10, 10, 10), 0, 0));
+
+        add(dataSourceParametersPanel,
+                new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                        GridBagConstraints.LINE_START, GridBagConstraints.BOTH,
+                        new Insets(0,0,0, 0), 0, 0));
+    }
+
+    @Override
+    public void changed() {
+        notify = false;
+        String driver = datasource.getDriver();
+        if (driver == null || driver.isEmpty()) {
+            jdbcDriverComboBox.setSelectedIndex(0);
+        }
+        else {
+            jdbcDriverComboBox.setSelectedItem(driver);
+        }
+        usernameField.setText(datasource.getUsername());
+        passwordField.setText(datasource.getPassword());
+        jdbcUrlField.setText(datasource.getURL());
+        connectionStatusLabel.setText("");
+        notify = true;
     }
 
     private void handleTimer() {
+        if (!notify)
+            return;
+
         timer.stop();
 
         JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
@@ -77,363 +193,77 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             // do nothing
         }
 
-        String username = txtDatabaseUsername.getText();
+        String username = usernameField.getText();
         datasource.setUsername(username);
-        String password = new String(txtDatabasePassword.getPassword());
+        String password = new String(passwordField.getPassword());
         datasource.setPassword(password);
-        String driver = txtJdbcDriver.getSelectedIndex() == 0 ? "" : (String) txtJdbcDriver.getSelectedItem();
+        String driver = jdbcDriverComboBox.getSelectedIndex() == 0 ? "" : (String) jdbcDriverComboBox.getSelectedItem();
         datasource.setDriver(driver);
-        String url = txtJdbcUrl.getText();
+        String url = jdbcUrlField.getText();
         datasource.setURL(url);
 
         if (url.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>URL ends with a space, which can cause connection problems");
+            showError("<html>Warning:<br>URL ends with a space, which can cause connection problems.</html>");
         }
         else if (driver.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>driver class ends with a space, which can cause connection problems");
+            showError("<html>Warning:<br>driver class ends with a space, which can cause connection problems.</html>");
         }
         else if (password.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>password ends with a space, which can cause connection problems");
+            showError("<html>Warning:<br>password ends with a space, which can cause connection problems.</html>");
         }
         else if (username.endsWith(" ")) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Warning:<br/>username ends with a space, which can cause connection problems");
+            showError("<html>Warning:<br>username ends with a space, which can cause connection problems.</html>");
         }
         else {
-            lblConnectionStatus.setText("");
+            showError("");
         }
     }
 
-
-    @Override
-    public void changed() {
-        notify = false;
-        String driverClass = datasource.getDriver();
-        if (driverClass == null || driverClass.isEmpty()) {
-            txtJdbcDriver.setSelectedIndex(0);
-        }
-        else {
-            txtJdbcDriver.setSelectedItem(driverClass);
-        }
-        txtDatabaseUsername.setText(datasource.getUsername());
-        txtDatabasePassword.setText(datasource.getPassword());
-        txtJdbcUrl.setText(datasource.getURL());
-        lblConnectionStatus.setText("");
-        notify = true;
+    private void showError(String s) {
+        connectionStatusLabel.setForeground(Color.RED);
+        connectionStatusLabel.setText(s);
     }
 
+    private void cmdTestConnectionActionPerformed(ActionEvent evt) {
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
-
-        pnlDataSourceParameters = new javax.swing.JPanel();
-        txtJdbcUrl = new javax.swing.JTextField();
-        txtDatabaseUsername = new javax.swing.JTextField();
-        txtDatabasePassword = new javax.swing.JPasswordField();
-        txtJdbcDriver = new javax.swing.JComboBox<>();
-        cmdTestConnection = new javax.swing.JButton();
-        lblJdbcUrl = new javax.swing.JLabel();
-        lblDatabaseUsername = new javax.swing.JLabel();
-        lblDatabasePassword = new javax.swing.JLabel();
-        lblJdbcDriver = new javax.swing.JLabel();
-        lblConnectionStatus = new javax.swing.JLabel();
-        pnlInformation = new javax.swing.JPanel();
-
-        setFocusable(false);
-        setMinimumSize(new java.awt.Dimension(640, 480));
-        setPreferredSize(new java.awt.Dimension(640, 480));
-        setLayout(new java.awt.GridBagLayout());
-
-        pnlDataSourceParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Connection parameters", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Lucida Grande", 0, 13), new java.awt.Color(53, 113, 163))); // NOI18N
-        pnlDataSourceParameters.setForeground(new java.awt.Color(53, 113, 163));
-        pnlDataSourceParameters.setAlignmentX(5.0F);
-        pnlDataSourceParameters.setAlignmentY(5.0F);
-        pnlDataSourceParameters.setAutoscrolls(true);
-        pnlDataSourceParameters.setFocusable(false);
-        pnlDataSourceParameters.setMaximumSize(new java.awt.Dimension(32767, 23));
-        pnlDataSourceParameters.setMinimumSize(new java.awt.Dimension(0, 0));
-        pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(1, 300));
-        pnlDataSourceParameters.setLayout(new java.awt.GridBagLayout());
-
-        txtJdbcUrl.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtJdbcUrl.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-        txtJdbcUrl.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtJdbcUrl.setPreferredSize(new java.awt.Dimension(180, 24));
-        txtJdbcUrl.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                fieldChangeHandler(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(30, 0, 2, 30);
-        pnlDataSourceParameters.add(txtJdbcUrl, gridBagConstraints);
-
-        txtDatabaseUsername.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtDatabaseUsername.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-        txtDatabaseUsername.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtDatabaseUsername.setPreferredSize(new java.awt.Dimension(180, 24));
-        txtDatabaseUsername.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                fieldChangeHandler(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 30);
-        pnlDataSourceParameters.add(txtDatabaseUsername, gridBagConstraints);
-
-        txtDatabasePassword.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtDatabasePassword.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtDatabasePassword.setPreferredSize(new java.awt.Dimension(180, 24));
-        txtDatabasePassword.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                fieldChangeHandler(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 30);
-        pnlDataSourceParameters.add(txtDatabasePassword, gridBagConstraints);
-
-        txtJdbcDriver.setEditable(true);
-        txtJdbcDriver.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
-        txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 24));
-        txtJdbcDriver.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtJdbcDriverActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 2, 30);
-        pnlDataSourceParameters.add(txtJdbcDriver, gridBagConstraints);
-
-        cmdTestConnection.setIcon(IconLoader.getImageIcon("images/execute.png"));
-        cmdTestConnection.setText("Test Connection");
-        cmdTestConnection.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdTestConnection.setContentAreaFilled(false);
-        cmdTestConnection.setIconTextGap(5);
-        cmdTestConnection.setMaximumSize(new java.awt.Dimension(110, 25));
-        cmdTestConnection.setMinimumSize(new java.awt.Dimension(110, 25));
-        cmdTestConnection.setPreferredSize(new java.awt.Dimension(110, 25));
-        cmdTestConnection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdTestConnectionActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(8, 10, 10, 20);
-        pnlDataSourceParameters.add(cmdTestConnection, gridBagConstraints);
-
-        lblJdbcUrl.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
-        lblJdbcUrl.setForeground(new java.awt.Color(53, 113, 163));
-        lblJdbcUrl.setText("Connection URL:");
-        lblJdbcUrl.setFocusTraversalKeysEnabled(false);
-        lblJdbcUrl.setFocusable(false);
-        lblJdbcUrl.setMaximumSize(new java.awt.Dimension(130, 24));
-        lblJdbcUrl.setMinimumSize(new java.awt.Dimension(130, 24));
-        lblJdbcUrl.setPreferredSize(new java.awt.Dimension(130, 24));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(30, 10, 2, 20);
-        pnlDataSourceParameters.add(lblJdbcUrl, gridBagConstraints);
-
-        lblDatabaseUsername.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
-        lblDatabaseUsername.setForeground(new java.awt.Color(53, 113, 163));
-        lblDatabaseUsername.setText("Database Username:");
-        lblDatabaseUsername.setFocusTraversalKeysEnabled(false);
-        lblDatabaseUsername.setFocusable(false);
-        lblDatabaseUsername.setMaximumSize(new java.awt.Dimension(130, 24));
-        lblDatabaseUsername.setMinimumSize(new java.awt.Dimension(130, 24));
-        lblDatabaseUsername.setPreferredSize(new java.awt.Dimension(130, 24));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 10, 2, 20);
-        pnlDataSourceParameters.add(lblDatabaseUsername, gridBagConstraints);
-
-        lblDatabasePassword.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
-        lblDatabasePassword.setForeground(new java.awt.Color(53, 113, 163));
-        lblDatabasePassword.setText("Database Password:");
-        lblDatabasePassword.setFocusTraversalKeysEnabled(false);
-        lblDatabasePassword.setFocusable(false);
-        lblDatabasePassword.setMaximumSize(new java.awt.Dimension(130, 24));
-        lblDatabasePassword.setMinimumSize(new java.awt.Dimension(130, 24));
-        lblDatabasePassword.setPreferredSize(new java.awt.Dimension(130, 24));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 10, 2, 20);
-        pnlDataSourceParameters.add(lblDatabasePassword, gridBagConstraints);
-
-        lblJdbcDriver.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
-        lblJdbcDriver.setForeground(new java.awt.Color(53, 113, 163));
-        lblJdbcDriver.setText("Driver class:");
-        lblJdbcDriver.setFocusTraversalKeysEnabled(false);
-        lblJdbcDriver.setFocusable(false);
-        lblJdbcDriver.setMaximumSize(new java.awt.Dimension(130, 24));
-        lblJdbcDriver.setMinimumSize(new java.awt.Dimension(130, 24));
-        lblJdbcDriver.setPreferredSize(new java.awt.Dimension(130, 24));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 10, 2, 20);
-        pnlDataSourceParameters.add(lblJdbcDriver, gridBagConstraints);
-
-        lblConnectionStatus.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        lblConnectionStatus.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        lblConnectionStatus.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 1, 1, 1));
-        lblConnectionStatus.setFocusTraversalKeysEnabled(false);
-        lblConnectionStatus.setFocusable(false);
-        lblConnectionStatus.setMaximumSize(new java.awt.Dimension(180, 108));
-        lblConnectionStatus.setMinimumSize(new java.awt.Dimension(180, 108));
-        lblConnectionStatus.setPreferredSize(new java.awt.Dimension(180, 108));
-        lblConnectionStatus.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.gridheight = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 10, 10);
-        pnlDataSourceParameters.add(lblConnectionStatus, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.weightx = 1.0;
-        add(pnlDataSourceParameters, gridBagConstraints);
-
-        pnlInformation.setFocusable(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(pnlInformation, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void cmdHelpActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdHelpActionPerformed
-        if (Desktop.isDesktopSupported()) {
-            try {
-                Desktop.getDesktop().browse(URI.create("https://github.com/ontop/ontop/wiki/ObdalibPluginJDBC"));
-            }
-            catch (IOException e) {
-                DialogUtils.showQuickErrorDialog(this, e, "An error has occurred while opening the browser");
-            }
-        }
-        else {
-            JOptionPane.showMessageDialog(this, "URL links are not supported in this Desktop", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }// GEN-LAST:event_cmdHelpActionPerformed
-
-    private void txtJdbcDriverActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtJdbcDriverActionPerformed
-        fieldChangeHandler(null);
-    }// GEN-LAST:event_txtJdbcDriverActionPerformed
-
-    private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdTestConnectionActionPerformed
-
-        lblConnectionStatus.setText("Establishing connection...");
-        lblConnectionStatus.setForeground(Color.BLACK);
+        connectionStatusLabel.setText("Establishing connection...");
+        connectionStatusLabel.setForeground(Color.BLACK);
 
         String driver  = datasource.getDriver();
         if (driver.isEmpty()) {
-            lblConnectionStatus.setForeground(Color.RED);
-            lblConnectionStatus.setText("Please, select or type in the JDBC Driver class.");
+            showError("Please, select or type in the JDBC driver class.");
+        }
+        else if (datasource.getURL().isEmpty()) {
+            showError("Please, specify a connection URL.");
         }
         else {
-            SwingUtilities.invokeLater(() -> {
-                JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
+            try {
+                JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
                 try {
-                    try {
-                        connm.closeConnection();
-                    }
-                    catch (Exception e) {
-                        // NO-OP
-                    }
-
-                    Connection conn = connm.getConnection(datasource.getURL(), datasource.getUsername(), datasource.getPassword());
-                    if (conn == null)
-                        throw new SQLException("Error connecting to the database");
-                    lblConnectionStatus.setForeground(Color.GREEN.darker());
-                    lblConnectionStatus.setText("Connection is OK");
+                    man.closeConnection();
                 }
-                catch (SQLException e) { // if fails
-                    String help = (e.getMessage().startsWith("No suitable driver"))
-                            ? "<br/><br/> HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drives\" tab." +
-                                " (Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...) " +
-                                "<br/> More information is on the Wiki: " +
-                                "<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>"
-                            : "";
-
-                    lblConnectionStatus.setForeground(Color.RED);
-                    lblConnectionStatus.setText(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
+                catch (Exception e) {
+                    // NO-OP
                 }
-            });
+
+                Connection conn = man.getConnection(datasource.getURL(), datasource.getUsername(), datasource.getPassword());
+                if (conn == null)
+                    throw new SQLException("Error connecting to the database");
+
+                connectionStatusLabel.setForeground(Color.GREEN.darker());
+                connectionStatusLabel.setText("Connection is OK");
+            }
+            catch (SQLException e) {
+                String help = (e.getMessage().startsWith("No suitable driver"))
+                        ? "<br><br>" +
+                        "HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drivers\" tab.<br>" +
+                        HTML_TAB + "(Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...)<br>" +
+                        "More information is on the Wiki:<br>" +
+                        HTML_TAB +"<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>"
+                        : "";
+
+                showError(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
+            }
        }
-
-    }// GEN-LAST:event_cmdTestConnectionActionPerformed
-
-    private void fieldChangeHandler(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_fieldChangeHandler
-        timer.restart();
-    }// GEN-LAST:event_fieldChangeHandler
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton cmdTestConnection;
-    private javax.swing.JLabel lblConnectionStatus;
-    private javax.swing.JLabel lblDatabasePassword;
-    private javax.swing.JLabel lblDatabaseUsername;
-    private javax.swing.JLabel lblJdbcDriver;
-    private javax.swing.JLabel lblJdbcUrl;
-    private javax.swing.JPanel pnlDataSourceParameters;
-    private javax.swing.JPanel pnlInformation;
-    private javax.swing.JPasswordField txtDatabasePassword;
-    private javax.swing.JTextField txtDatabaseUsername;
-    private javax.swing.JComboBox<String> txtJdbcDriver;
-    private javax.swing.JTextField txtJdbcUrl;
-    // End of variables declaration//GEN-END:variables
-
+    }
 }

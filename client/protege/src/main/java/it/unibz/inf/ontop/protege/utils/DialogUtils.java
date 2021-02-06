@@ -51,6 +51,13 @@ import java.util.stream.Stream;
 public class DialogUtils {
 
 
+	public static JButton getButton(String text, String icon) {
+		JButton button = new JButton(text, IconLoader.getImageIcon("images/" + icon));
+		button.setIconTextGap(5);
+		button.setMargin(new Insets(3, 7, 3, 7));
+		return button;
+	}
+
 	public static DefaultTableModel createNonEditableTableModel(Object[] columnNames) {
 		return new DefaultTableModel(columnNames, 0) {
 			@Override
