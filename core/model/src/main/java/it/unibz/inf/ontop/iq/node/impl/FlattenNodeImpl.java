@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.UnmodifiableIterator;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -18,8 +16,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -27,7 +23,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -174,19 +169,35 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         return ImmutableSet.of();
     }
 
+    /**
+     * Same implementation  as for other unary operators (except aggregation)
+     */
     @Override
     public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
-        return ;
+        IQTree newChild = child.removeDistincts();
+
+        IQProperties newProperties = newChild.equals(child)
+                ? iqProperties.declareDistinctRemovalWithoutEffect()
+                : iqProperties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
     }
 
-    @Override
+    /**
+     * Unique constraints are lost after flattening
+     */
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
-        return ;
+        return ImmutableSet.of();
     }
 
-    @Override
-    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
-        return ;
+    /**
+     * Only the flattened variable is required
+     */
+     @Override
+     public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return child.getNotInternallyRequiredVariables().stream()
+                .filter(v -> !v.equals(flattenedVariable))
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -244,52 +255,20 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 //        return iqFactory.createUnaryIQTree(liftedNode, newFlattenTree, liftedProperties);
 //    }
 
+    /**
+     * Assumption: a flattened array can contain null values.
+     *
+     * If so, even a relaxed flatten has no incidence on variable nullability
+     * (a tuple may map the output variable to null, and the position variable to a non-null value)
+     */
     @Override
     public VariableNullability getVariableNullability(IQTree child) {
-        ImmutableList<? extends VariableOrGroundTerm> atomArguments = dataAtom.getArguments();
 
-        ImmutableSet<Variable> localVars = atomArguments.stream()
-                .filter(t -> t instanceof Variable)
-                .map(v -> (Variable) v)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<Variable> childVariables = child.getVariables();
-        Stream<Variable> nullableLocalVars = localVars.stream()
-                .filter(v -> !v.equals(flattenedVariable) && !isRepeatedIn(v, dataAtom) && !childVariables.contains(v) &&
-                        canNull(v, atomArguments));
-
-        return new VariableNullabilityImpl(Stream.concat(
-                child.getVariableNullability().getNullableGroups().stream()
-                        .filter(g -> filterNullabilityGroup(g, localVars)),
-                nullableLocalVars
-                        .map(v -> ImmutableSet.of(v)))
-                .collect(ImmutableCollectors.toSet())
+        return child.getVariableNullability().extendToExternalVariables(
+                Stream.of(Optional.of(outputVariable), positionVariable)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
         );
-    }
-
-    private boolean canNull(Variable v, ImmutableList<? extends VariableOrGroundTerm> atomArguments) {
-        return canNull(v, atomArguments.iterator(), 0, dataAtom.getPredicate().getRelationDefinition().getAttributes());
-    }
-
-    private boolean canNull(Variable v, UnmodifiableIterator<? extends VariableOrGroundTerm> it, int i, List<Attribute> attributes) {
-        if (it.hasNext()) {
-            if (it.next().equals(v) && !attributes.get(i).canNull()) {
-                return false;
-            }
-            return canNull(v, it, i + 1, attributes);
-        }
-        return true;
-    }
-
-    private boolean isRepeatedIn(Variable v, DataAtom<RelationPredicate> dataAtom) {
-        return dataAtom.getArguments().stream()
-                .filter(t -> t.equals(v))
-                .count() > 1;
-    }
-
-    private boolean filterNullabilityGroup(ImmutableSet<Variable> group, ImmutableSet<Variable> localVars) {
-        return group.stream()
-                .anyMatch(v -> localVars.contains(v));
     }
 
     @Override
@@ -325,25 +304,46 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 .isVariableNullable(query, variable);
     }
 
+    /**
+     * TODO: check what is needed here
+     */
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        // TODO: check whether some normalization is needed
         return iqFactory.createUnaryIQTree(
                 this,
-                normalizeForOptimization(child, variableGenerator, currentIQProperties)
+                child.normalizeForOptimization(variableGenerator)
         );
     }
 
+    /**
+     * Without further information about the flattened arrays, we cannot assume that distinctness is preserved after flattening.
+     * It would be the case if we knew that each flattened array contains distinct values (i.e. is a set)
+     */
     @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
-        // Without further information about the flattened arrays, we cannot assume that distinctness is preserved after flattening
-        // It would be the case if we know that each flattened array contains distinct values (i.e. is a set)
         return false;
     }
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
-        return ;
+        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        /*
+         * Lift the union above the flatten
+         */
+        if ((newChildRoot instanceof UnionNode)
+                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+            UnionNode unionNode = (UnionNode) newChildRoot;
+            ImmutableList<IQTree> grandChildren = newChild.getChildren();
+
+            ImmutableList<IQTree> newChildren = grandChildren.stream()
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createNaryIQTree(unionNode, newChildren);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override
