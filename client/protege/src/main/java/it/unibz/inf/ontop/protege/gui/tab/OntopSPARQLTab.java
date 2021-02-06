@@ -23,10 +23,5 @@ package it.unibz.inf.ontop.protege.gui.tab;
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 
 public class OntopSPARQLTab extends OWLWorkspaceViewsTab {
-
-	@Override
-    public void initialise() {
-		super.initialise();
-	}
-
+	private static final long	serialVersionUID	= -4896884983862745722L;
 }

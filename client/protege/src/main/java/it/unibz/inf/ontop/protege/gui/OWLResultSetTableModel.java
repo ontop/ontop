@@ -36,17 +36,18 @@ import java.util.List;
 
 public class OWLResultSetTableModel implements TableModel {
 
-	private TupleOWLResultSet results;
-	private int numcols;
+	private final TupleOWLResultSet results;
+	private final int numcols;
+	private final int fetchSizeLimit;
+	private final boolean isHideUri;
+	private final boolean isFetchAll;
+
 	private int numrows;
-	private int fetchSizeLimit;
-	private boolean isHideUri;
-	private boolean isFetchAll;
 
 	// True while table is fetching sql results
-	private boolean isFetching = false;
+	private boolean isFetching;
 	// Set to true to signal the fetching thread to stop
-	private boolean stopFetching = false;
+	private boolean stopFetching;
 
 	// The thread where the rows are fetched
 	private Thread rowFetcher;

@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.protege.utils;
 
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-
 import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 
 public class ProgressMonitor {
 
