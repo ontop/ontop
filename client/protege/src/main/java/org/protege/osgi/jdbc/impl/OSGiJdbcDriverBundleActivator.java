@@ -3,13 +3,12 @@ package org.protege.osgi.jdbc.impl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.protege.osgi.jdbc.JdbcRegistry;
-import org.protege.osgi.jdbc.OSGiJdbcDriver;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Hashtable;
 
-public class Activator implements BundleActivator {
+public class OSGiJdbcDriverBundleActivator implements BundleActivator {
     private OSGiJdbcDriver driver;
 
 	@Override

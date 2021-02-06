@@ -1,21 +1,20 @@
-package org.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.preferences;
 
 import org.osgi.framework.*;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Activator implements BundleActivator {
+public class JDBCPreferencesPanelBundleActivator implements BundleActivator {
 
-    private final Logger log = LoggerFactory.getLogger(Activator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCPreferencesPanelBundleActivator.class);
 
-	private BundleContext context;
-	private static Activator instance;
+	private static BundleContext context;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		instance = this;
-		this.context = context;
+		JDBCPreferencesPanelBundleActivator.context = context;
+
 		ServiceReference<JdbcRegistry> sr = context.getServiceReference(JdbcRegistry.class);
 		if (sr != null) {
 			installDrivers(sr);
@@ -32,14 +31,14 @@ public class Activator implements BundleActivator {
 
     @Override
 	public void stop(BundleContext context) {
-		this.context = null;
+		JDBCPreferencesPanelBundleActivator.context = null;
 	}
 
 	public static BundleContext getContext() {
-		return instance.context;
+		return context;
 	}
 	
-	private void installDrivers(ServiceReference<JdbcRegistry> sr) {
+	private static void installDrivers(ServiceReference<JdbcRegistry> sr) {
 		if (sr != null) {
 			JdbcRegistry registry = context.getService(sr);
 			try {
@@ -48,7 +47,7 @@ public class Activator implements BundleActivator {
 						registry.addJdbcDriver(driver.getClassName(), driver.getDriverURL());
 					}
 					catch (Exception e) {
-						log.warn("Exception caught installing JDBC driver: ", e);
+						LOGGER.warn("Exception caught installing JDBC driver: ", e);
 					}
 				}
 			}

@@ -1,4 +1,4 @@
-package org.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.preferences;
 
 import java.io.File;
 import java.net.MalformedURLException;

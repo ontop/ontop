@@ -1,53 +1,46 @@
-package org.protege.osgi.jdbc;
+package org.protege.osgi.jdbc.impl;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
+import org.protege.osgi.jdbc.JdbcRegistry;
 
 import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 public class OSGiJdbcDriver implements Driver {
-	private final int majorVersion;
-	private final int minorVersion;
+	private final Version version;
 	private final JdbcRegistry registry;
 	
 	public OSGiJdbcDriver(BundleContext context, JdbcRegistry registry) {
-		String versionString = context.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
-		Version version = new Version(versionString);
-		majorVersion = version.getMajor();
-		minorVersion = version.getMinor();
 		this.registry = registry;
+		String versionString = context.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
+		this.version = new Version(versionString);
 	}
 
 	@Override
 	public boolean acceptsURL(String url) throws SQLException {
-        for (Driver delegate : registry.getJdbcDrivers()) {
-			if (delegate.acceptsURL(url)) {
-				return true;
-			}
-		}
-		return false;
+		return getDelegate(url) != null;
 	}
 
 	@Override
 	public Connection connect(String url, Properties info) throws SQLException {
-		for (Driver delegate : registry.getJdbcDrivers()) {
-			if (delegate.acceptsURL(url)) {
-				return delegate.connect(url, info);
-			}
-		}
-		return null;
+		Driver delegate = getDelegate(url);
+		return (delegate == null) ? null : delegate.connect(url, info);
 	}
 
 	@Override
 	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
-		for (Driver delegate : registry.getJdbcDrivers()) {
-			if (delegate.acceptsURL(url)) {
-				return delegate.getPropertyInfo(url, info);
-			}
-		}
+		Driver delegate = getDelegate(url);
+		return (delegate == null) ? null : delegate.getPropertyInfo(url, info);
+	}
+
+	private Driver getDelegate(String url) throws SQLException {
+		for (Driver delegate : registry.getJdbcDrivers())
+			if (delegate.acceptsURL(url))
+				return delegate;
+
 		return null;
 	}
 
@@ -63,11 +56,11 @@ public class OSGiJdbcDriver implements Driver {
 
     @Override
     public int getMajorVersion() {
-		return majorVersion;
+		return version.getMajor();
 	}
 
 	@Override
 	public int getMinorVersion() {
-		return minorVersion;
+		return version.getMinor();
 	}
 }

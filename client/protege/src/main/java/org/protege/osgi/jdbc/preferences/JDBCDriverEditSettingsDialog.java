@@ -1,10 +1,10 @@
-package org.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.preferences;
 
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.osgi.jdbc.JdbcRegistry;
-import org.protege.osgi.jdbc.RegistryException;
+import org.protege.osgi.jdbc.JdbcRegistryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +16,12 @@ import java.net.MalformedURLException;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.centerDialogWRTParent;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.installEscapeCloseOperation;
 
-public class EditJDBCDriverSettingsDialog extends JDialog {
+public class JDBCDriverEditSettingsDialog extends JDialog {
     private static final long serialVersionUID = -8958695683502439830L;
 
-    private final Logger log = LoggerFactory.getLogger(EditJDBCDriverSettingsDialog.class);
+    private final Logger log = LoggerFactory.getLogger(JDBCDriverEditSettingsDialog.class);
 
     private final ServiceTracker<?,?> jdbcRegistryTracker;
     
@@ -35,12 +36,12 @@ public class EditJDBCDriverSettingsDialog extends JDialog {
 
     private File defaultDir;
 
-    public EditJDBCDriverSettingsDialog(Container parent, ServiceTracker<?,?> jdbcRegistryTracker) {
+    public JDBCDriverEditSettingsDialog(Container parent, ServiceTracker<?,?> jdbcRegistryTracker) {
 
         this.jdbcRegistryTracker = jdbcRegistryTracker;
 
-        prefs = PreferencesManager.getInstance().getPreferencesForSet(PreferencesPanel.PREFERENCES_SET, PreferencesPanel.DEFAULT_DRIVER_DIR);
-        String dirName = prefs.getString(PreferencesPanel.DEFAULT_DRIVER_DIR, null);
+        prefs = PreferencesManager.getInstance().getPreferencesForSet(JDBCPreferencesPanel.PREFERENCES_SET, JDBCPreferencesPanel.DEFAULT_DRIVER_DIR);
+        String dirName = prefs.getString(JDBCPreferencesPanel.DEFAULT_DRIVER_DIR, null);
         if (dirName != null) {
             defaultDir = new File(dirName);
             if (!defaultDir.exists())
@@ -78,8 +79,8 @@ public class EditJDBCDriverSettingsDialog extends JDialog {
 
         JLabel fileLabel = new JLabel("Driver File (jar):");
         fileField = new JTextField();
-        JLabel sample = new JLabel("/home/tredmond/dev/workspaces/protege4");
-        Dimension size = sample.getPreferredSize();
+        Dimension size = new JLabel("/home/tredmond/dev/workspaces/protege4")
+                .getPreferredSize();
         fileField.setPreferredSize(size);
 
         JButton fileButton = new JButton("Browse");
@@ -126,6 +127,7 @@ public class EditJDBCDriverSettingsDialog extends JDialog {
         pack();
 
         centerDialogWRTParent(parent, this);
+        installEscapeCloseOperation(this);
     }
 
     private void cmdBrowse(ActionEvent evt) {
@@ -134,7 +136,7 @@ public class EditJDBCDriverSettingsDialog extends JDialog {
             File file = fc.getSelectedFile();
             fileField.setText(file.getPath());
             defaultDir = file.getParentFile();
-            prefs.putString(PreferencesPanel.DEFAULT_DRIVER_DIR, defaultDir.getAbsolutePath());
+            prefs.putString(JDBCPreferencesPanel.DEFAULT_DRIVER_DIR, defaultDir.getAbsolutePath());
         }
     }
 
@@ -155,7 +157,7 @@ public class EditJDBCDriverSettingsDialog extends JDialog {
                     info = new JDBCDriverInfo(nameField.getText(), className, f);
                     dispose();
                 }
-                catch (RegistryException e) {
+                catch (JdbcRegistryException e) {
                     log.info("Could not add driver to jdbc", e);
                     status.setText(e.getMessage());
                 }
@@ -170,16 +172,14 @@ public class EditJDBCDriverSettingsDialog extends JDialog {
         }
     }
 
-    public Optional<JDBCDriverInfo> askUserForDriverInfo() {
+    public Optional<JDBCDriverInfo> getDriverInfo() {
         setVisible(true);
         return Optional.ofNullable(info);
     }
 
-    public Optional<JDBCDriverInfo> askUserForDriverInfo(JDBCDriverInfo oldInfo) {
+    public void setDriverInfo(JDBCDriverInfo oldInfo) {
         nameField.setText(oldInfo.getDescription());
         classField.setSelectedItem(oldInfo.getClassName());
         fileField.setText(oldInfo.getDriverPath());
-        setVisible(true);
-        return Optional.ofNullable(info);
     }
 }

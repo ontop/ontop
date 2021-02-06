@@ -1,8 +1,7 @@
-package org.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.preferences;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import fj.P;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
@@ -103,7 +102,7 @@ public class JDBCDriverTableModel extends AbstractTableModel {
 
 
 	public void store() {
-		Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(PreferencesPanel.PREFERENCES_SET, PreferencesPanel.DRIVER_PREFERENCES_KEY);
+		Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(JDBCPreferencesPanel.PREFERENCES_SET, JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY);
 		List<String> prefsStringList = new ArrayList<>();
 		for (JDBCDriverInfo driver : drivers) {
 			prefsStringList.add(driver.getDescription());
@@ -111,13 +110,13 @@ public class JDBCDriverTableModel extends AbstractTableModel {
 			prefsStringList.add(driver.getDriverPath());
 		}
 		prefs.clear();
-		prefs.putStringList(PreferencesPanel.DRIVER_PREFERENCES_KEY, prefsStringList);
+		prefs.putStringList(JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY, prefsStringList);
 	}
 
 	public static List<JDBCDriverInfo> getDrivers() {
 		List<JDBCDriverInfo> drivers = new ArrayList<>();
-		Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(PreferencesPanel.PREFERENCES_SET, PreferencesPanel.DRIVER_PREFERENCES_KEY);
-		Iterator<String> driverStrings = prefs.getStringList(PreferencesPanel.DRIVER_PREFERENCES_KEY, new ArrayList<>()).iterator();
+		Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(JDBCPreferencesPanel.PREFERENCES_SET, JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY);
+		Iterator<String> driverStrings = prefs.getStringList(JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY, new ArrayList<>()).iterator();
 		while (driverStrings.hasNext()) {
 			drivers.add(new JDBCDriverInfo(driverStrings.next(), driverStrings.next(), new File(driverStrings.next())));
 		}

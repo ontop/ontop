@@ -1,4 +1,4 @@
-package org.protege.osgi.jdbc.prefs;
+package org.protege.osgi.jdbc.preferences;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -12,7 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
 
-public class PreferencesPanel extends OWLPreferencesPanel {
+public class JDBCPreferencesPanel extends OWLPreferencesPanel {
     private static final long serialVersionUID = 2892884854196959326L;
 
     public static final String PREFERENCES_SET = "org.protege.osgi.jdbc.prefs";
@@ -25,7 +25,7 @@ public class PreferencesPanel extends OWLPreferencesPanel {
 
     @Override
     public void initialise() throws Exception {
-        BundleContext context = Activator.getContext();
+        BundleContext context = JDBCPreferencesPanelBundleActivator.getContext();
         jdbcRegistryTracker = new ServiceTracker<>(context, JdbcRegistry.class.getName(), null);
 
         setPreferredSize(new Dimension(620, 300));
@@ -37,31 +37,26 @@ public class PreferencesPanel extends OWLPreferencesPanel {
         table.getColumnModel().getColumn(1).setPreferredWidth(100);
         table.getColumnModel().getColumn(2).setPreferredWidth(350);
         table.getColumnModel().getColumn(3).setMaxWidth(50);
-        GridBagConstraints listConstraints = new GridBagConstraints();
-        listConstraints.fill = GridBagConstraints.BOTH;
-        listConstraints.gridx = 0;
-        listConstraints.gridy = 0;
-        listConstraints.gridwidth = 3;
-        listConstraints.gridheight = 3;
-        listConstraints.weightx = 1;
-        listConstraints.weighty = 1;
-        add(new JScrollPane(table), listConstraints);
+        add(new JScrollPane(table),
+                new GridBagConstraints(0, 0, 3, 3, 1, 1,
+                        GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout());
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new FlowLayout());
         JButton add = new JButton("Add");
         add.addActionListener(this::cmdAddDriver);
-        panel.add(add);
+        controlPanel.add(add);
         JButton remove = new JButton("Remove");
-        panel.add(remove);
+        controlPanel.add(remove);
         remove.addActionListener(this::cmdRemoveDriver);
         JButton edit = new JButton("Edit");
-        panel.add(edit);
+        controlPanel.add(edit);
         edit.addActionListener(this::cmdEditDriver);
-        GridBagConstraints buttonsConstraints = new GridBagConstraints();
-        buttonsConstraints.gridx = 0;
-        buttonsConstraints.gridy = 4;
-        add(panel, buttonsConstraints);
+        add(controlPanel,
+                new GridBagConstraints(0, 4, 1, 1, 0, 0,
+                        GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
         edit.setEnabled(false);
         remove.setEnabled(false);
@@ -83,7 +78,7 @@ public class PreferencesPanel extends OWLPreferencesPanel {
     }
 
     @Override
-    public void dispose()  { }
+    public void dispose()  { /* NO-OP */ }
 
     @Override
     public void applyChanges() {
@@ -91,16 +86,17 @@ public class PreferencesPanel extends OWLPreferencesPanel {
     }
 
     private void cmdAddDriver(ActionEvent e) {
-        EditJDBCDriverSettingsDialog editor = new EditJDBCDriverSettingsDialog(this, jdbcRegistryTracker);
-        Optional<JDBCDriverInfo> info = editor.askUserForDriverInfo();
+        JDBCDriverEditSettingsDialog editor = new JDBCDriverEditSettingsDialog(this, jdbcRegistryTracker);
+        Optional<JDBCDriverInfo> info = editor.getDriverInfo();
         info.ifPresent(i -> driverTableModel.addDriver(i));
     }
 
     private void cmdEditDriver(ActionEvent e) {
         int row = table.getSelectedRow();
         JDBCDriverInfo info = driverTableModel.getDriver(row);
-        EditJDBCDriverSettingsDialog editor = new EditJDBCDriverSettingsDialog(this, jdbcRegistryTracker);
-        Optional<JDBCDriverInfo> newInfo = editor.askUserForDriverInfo(info);
+        JDBCDriverEditSettingsDialog editor = new JDBCDriverEditSettingsDialog(this, jdbcRegistryTracker);
+        editor.setDriverInfo(info);
+        Optional<JDBCDriverInfo> newInfo = editor.getDriverInfo();
         newInfo.ifPresent(i -> driverTableModel.replaceDriver(row, i));
     }
 
@@ -108,12 +104,12 @@ public class PreferencesPanel extends OWLPreferencesPanel {
         int row = table.getSelectedRow();
         JDBCDriverInfo info = driverTableModel.getDriver(row);
 
-        int confirm = JOptionPane.showConfirmDialog(
+        if (JOptionPane.showConfirmDialog(
                 this,
-                "Proceed deleting the " + info.getDescription() + " driver?",
-                "Delete Confirmation",
-                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm != JOptionPane.YES_OPTION)
+                "Proceed deleting the " + info.getDescription() + " JDBC driver?",
+                "Delete JDBC Driver Confirmation",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
             return;
 
         driverTableModel.removeDrivers(row);
