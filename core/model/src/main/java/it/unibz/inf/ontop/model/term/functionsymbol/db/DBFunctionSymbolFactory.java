@@ -196,6 +196,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBRegexpMatches3();
 
     DBBooleanFunctionSymbol getDBLike();
+    DBBooleanFunctionSymbol getDBSimilarTo();
 
     DBFunctionSymbol getDBStrBefore();
     DBFunctionSymbol getDBStrAfter();
