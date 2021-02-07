@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui;
+package it.unibz.inf.ontop.protege.gui.models;
 
 /*
  * #%L

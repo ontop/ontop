@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
+import it.unibz.inf.ontop.protege.gui.models.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.apache.commons.rdf.api.IRI;

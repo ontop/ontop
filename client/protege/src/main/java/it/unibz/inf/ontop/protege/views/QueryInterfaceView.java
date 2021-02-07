@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
-import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;
+import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
 import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;

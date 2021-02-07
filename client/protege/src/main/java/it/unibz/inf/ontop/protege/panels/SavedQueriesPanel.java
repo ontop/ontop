@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
+import it.unibz.inf.ontop.protege.gui.models.QueryControllerTreeModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
 import javax.swing.*;

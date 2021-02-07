@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.treemodels;
+package it.unibz.inf.ontop.protege.gui.models;
 
 /*
  * #%L

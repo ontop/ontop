@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.treemodels;
+package it.unibz.inf.ontop.protege.gui.models;
 
 /*
  * #%L
@@ -25,10 +25,8 @@ import javax.swing.table.TableModel;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class ResultSetTableModel implements TableModel {
 

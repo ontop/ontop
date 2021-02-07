@@ -474,6 +474,13 @@ public class OBDAModelManager implements Disposable {
 				bootstraped);
 	}
 
+	public OntopSQLCredentialSettings getConfigurationConnectionSettings() {
+		return OntopSQLCredentialConfiguration.defaultBuilder()
+				.properties(source.asProperties())
+				.build()
+				.getSettings();
+	}
+
 	public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
 		OWLModelManager modelManager = owlEditorKit.getModelManager();
 		return getConfigurationManager()

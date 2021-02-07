@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.treemodels;
+package it.unibz.inf.ontop.protege.gui.models;
 
 /*
  * #%L
@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import javax.annotation.Nullable;
 import javax.swing.*;
 
-public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriplesMap> implements OBDAMappingListener {
+public class MappingFilteredListModel extends AbstractListModel<SQLPPTriplesMap> implements OBDAMappingListener {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
@@ -38,14 +38,10 @@ public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriples
 	@Nullable
 	private String filter;
 
-	public SynchronizedMappingListModel(OBDAModel obdaModel) {
+	public MappingFilteredListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		this.filter = null;
 		obdaModel.addMappingsListener(this);
-	}
-
-	public void setFocusedSource() {
-		fireContentsChanged(this, 0, getSize());
 	}
 
 	public void setFilter(@Nullable String filter) {
@@ -113,5 +109,9 @@ public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriples
 	@Override
 	public void mappingUpdated() {
 		fireContentsChanged(obdaModel, 0, getSize());
+	}
+
+	public void setFocusedSource() {
+		fireContentsChanged(this, 0, getSize());
 	}
 }
