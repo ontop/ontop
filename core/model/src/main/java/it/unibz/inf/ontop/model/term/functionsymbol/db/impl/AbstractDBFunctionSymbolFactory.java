@@ -44,6 +44,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBBooleanFunctionSymbol dbLikeFunctionSymbol;
     // Created in init()
+    private DBBooleanFunctionSymbol dbSimilarToFunctionSymbol;
+    // Created in init()
     private DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
     // Created in init()
     private DBNotFunctionSymbol dbNotFunctionSymbol;
@@ -322,6 +324,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         dbStartsWithFunctionSymbol = createStrStartsFunctionSymbol();
         dbEndsWithFunctionSymbol = createStrEndsFunctionSymbol();
         dbLikeFunctionSymbol = createLikeFunctionSymbol();
+        dbSimilarToFunctionSymbol = createSimilarToFunctionSymbol();
         ifElseNullFunctionSymbol = createRegularIfElseNull();
         dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
 
@@ -705,6 +708,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBSimilarTo() {
+        return dbSimilarToFunctionSymbol;
+    }
+
+    @Override
     public DBFunctionSymbol getDBStrBefore() {
         return strBeforeFunctionSymbol;
     }
@@ -964,6 +972,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {
         return new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
+    }
+
+    protected DBBooleanFunctionSymbol createSimilarToFunctionSymbol() {
+        return new DBSimilarToFunctionSymbolImpl(dbBooleanType, rootDBType);
     }
 
     protected DBIfElseNullFunctionSymbol createRegularIfElseNull() {
