@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.template.TemplateComponent;
@@ -15,12 +16,14 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.SafeSeparatorFragment.NOT_A_SAFE_SEPARATOR_REGEX;
 
@@ -40,7 +43,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.components = components;
         this.safeSeparatorFragments = SafeSeparatorFragment.split(extractStringTemplate(components));
         // must not produce false positives
-        this.isInjective = safeSeparatorFragments.stream()
+        this.isInjective = atMostOnePlaceholderPerSeparator(safeSeparatorFragments);
+    }
+
+    private static boolean atMostOnePlaceholderPerSeparator(ImmutableList<SafeSeparatorFragment> safeSeparatorFragments) {
+        return safeSeparatorFragments.stream()
                 .map(SafeSeparatorFragment::getFragment)
                 .allMatch(ObjectStringTemplateFunctionSymbolImpl::atMostOnePlaceholder);
     }
@@ -161,12 +168,53 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
             if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, other.safeSeparatorFragments))
                 return IncrementalEvaluation.declareIsFalse();
+
+            if (!other.equals(this))
+                return tryToSimplifyCompatibleTemplates(other, terms, otherTerm, termFactory, variableNullability);
         }
 
         // May decompose in case of injectivity
         return super.evaluateStrictEqWithFunctionalTerm(terms, otherTerm, termFactory, variableNullability);
     }
 
+    /**
+     * TODO: shall we try to handle non-injective templates?
+     */
+    private IncrementalEvaluation tryToSimplifyCompatibleTemplates(ObjectStringTemplateFunctionSymbolImpl other,
+                                                                   ImmutableList<? extends ImmutableTerm> subTerms,
+                                                                   ImmutableFunctionalTerm otherTerm,
+                                                                   TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
+        // Redundant with the following tests but here for efficiency
+        if (isInjective && other.isInjective
+                // The injectivity test could change in the future
+                && atMostOnePlaceholderPerSeparator(safeSeparatorFragments)
+                && atMostOnePlaceholderPerSeparator(other.safeSeparatorFragments)) {
+
+            UnmodifiableIterator<? extends ImmutableTerm> subTermIterator = subTerms.iterator();
+            UnmodifiableIterator<? extends ImmutableTerm> otherSubTermIterator = otherTerm.getTerms().iterator();
+
+            Stream<ImmutableExpression> expressionStream = IntStream.range(0, safeSeparatorFragments.size()).boxed()
+                    // Sequential execution is essential
+                    .flatMap(i -> convertIntoExpressions(safeSeparatorFragments.get(i),
+                            other.safeSeparatorFragments.get(i),
+                            subTermIterator, otherSubTermIterator));
+
+            Optional<ImmutableExpression> expression = termFactory.getConjunction(expressionStream);
+            if (expression.isPresent())
+                return expression.get().evaluate(variableNullability, true);
+        }
+
+        // Fallback
+        return super.evaluateStrictEqWithFunctionalTerm(subTerms, otherTerm, termFactory, variableNullability);
+    }
+
+    private Stream<? extends ImmutableExpression> convertIntoExpressions(SafeSeparatorFragment safeSeparatorFragment,
+                                                                         SafeSeparatorFragment otherSeparatorFragment,
+                                                                         Iterator<? extends ImmutableTerm> subTermIterator,
+                                                                         Iterator<? extends ImmutableTerm> otherSubTermIterator) {
+        throw new RuntimeException("TODO: implement it (by reusing concat?)");
+    }
 
 
     @Nullable
