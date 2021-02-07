@@ -5,7 +5,7 @@
 
 	<extension id="DatasourcesManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Datasource editor"/>
+		<label value="Connection parameters"/>
 		<class
 			value="it.unibz.inf.ontop.protege.views.DatasourcesManagerView">
 		</class>

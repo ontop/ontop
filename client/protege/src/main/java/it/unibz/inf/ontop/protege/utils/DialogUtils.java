@@ -51,10 +51,11 @@ import java.util.stream.Stream;
 public class DialogUtils {
 
 
-	public static JButton getButton(String text, String icon) {
+	public static JButton getButton(String text, String icon, String tooltip) {
 		JButton button = new JButton(text, IconLoader.getImageIcon("images/" + icon));
 		button.setIconTextGap(5);
 		button.setMargin(new Insets(3, 7, 3, 7));
+		button.setToolTipText(tooltip);
 		return button;
 	}
 

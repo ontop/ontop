@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
 
-public class DatasourceParameterEditorPanel extends JPanel implements OBDADataSource.Listener {
+public class ConnectionParametersPanel extends JPanel implements OBDADataSource.Listener {
 
     private static final long serialVersionUID = 3506358479342412849L;
 
@@ -53,25 +53,14 @@ public class DatasourceParameterEditorPanel extends JPanel implements OBDADataSo
     private final JComboBox<String> jdbcDriverComboBox;
     private final JTextField jdbcUrlField;
 
-    static private final Color COLOR_NOI18N = new Color(53, 113, 163);
+//    static private final Color COLOR_NOI18N = new Color(53, 113, 163);
 
     private boolean notify = false;
 
-    public DatasourceParameterEditorPanel(OBDADataSource datasource) {
+    public ConnectionParametersPanel(OBDADataSource datasource) {
         this.datasource = datasource;
 
         this.timer = new Timer(200, e -> handleTimer());
-
-        setLayout(new GridBagLayout());
-
-        JPanel dataSourceParametersPanel = new JPanel(new GridBagLayout());
-        dataSourceParametersPanel.setBorder(BorderFactory.createTitledBorder(
-                null,
-                "Connection parameters",
-                TitledBorder.DEFAULT_JUSTIFICATION,
-                TitledBorder.DEFAULT_POSITION,
-                getFont(),
-                COLOR_NOI18N));
 
         KeyAdapter timerRestartKeyAdapter = new KeyAdapter() {
             public void keyReleased(KeyEvent evt) {
@@ -79,51 +68,51 @@ public class DatasourceParameterEditorPanel extends JPanel implements OBDADataSo
             }
         };
 
+        setLayout(new GridBagLayout());
+
+        JPanel connectionParametersPanel = new JPanel(new GridBagLayout());
+
         JLabel jdbcUrlLabel = new JLabel("Connection URL:");
-        jdbcUrlLabel.setForeground(COLOR_NOI18N);
-        dataSourceParametersPanel.add(jdbcUrlLabel,
+        connectionParametersPanel.add(jdbcUrlLabel,
                 new GridBagConstraints(0, 0, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(20, 10, 3, 10), 0, 0));
+                        new Insets(3, 10, 3, 10), 0, 0));
 
         jdbcUrlField = new JTextField();
         jdbcUrlField.addKeyListener(timerRestartKeyAdapter);
-        dataSourceParametersPanel.add(jdbcUrlField,
+        connectionParametersPanel.add(jdbcUrlField,
                 new GridBagConstraints(1, 0, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(20, 10, 3, 30), 0, 0));
+                        new Insets(3, 10, 3, 10), 0, 0));
 
         JLabel usernameLabel = new JLabel("Database username:");
-        usernameLabel.setForeground(COLOR_NOI18N);
-        dataSourceParametersPanel.add(usernameLabel,
+        connectionParametersPanel.add(usernameLabel,
                 new GridBagConstraints(0, 1, 1, 0, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
                         new Insets(3, 10, 3, 10), 0, 0));
 
         usernameField = new JTextField();
         usernameField.addKeyListener(timerRestartKeyAdapter);
-        dataSourceParametersPanel.add(usernameField,
+        connectionParametersPanel.add(usernameField,
                 new GridBagConstraints(1, 1, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 30), 0, 0));
+                        new Insets(3, 10, 3, 10), 0, 0));
 
         JLabel passwordLabel = new JLabel("Database password:");
-        passwordLabel.setForeground(COLOR_NOI18N);
-        dataSourceParametersPanel.add(passwordLabel,
+        connectionParametersPanel.add(passwordLabel,
                 new GridBagConstraints(0, 2, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
                         new Insets(3, 10, 3, 10), 0, 0));
 
         passwordField = new JPasswordField();
         passwordField.addKeyListener(timerRestartKeyAdapter);
-        dataSourceParametersPanel.add(passwordField,
+        connectionParametersPanel.add(passwordField,
                 new GridBagConstraints(1, 2, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 30), 0, 0));
+                        new Insets(3, 10, 3, 10), 0, 0));
 
         JLabel jdbcDriverLabel = new JLabel("JDBC driver class:");
-        jdbcDriverLabel.setForeground(COLOR_NOI18N);
-        dataSourceParametersPanel.add(jdbcDriverLabel,
+        connectionParametersPanel.add(jdbcDriverLabel,
                 new GridBagConstraints(0, 3, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
                         new Insets(3, 10, 3, 10), 0, 0));
@@ -138,28 +127,31 @@ public class DatasourceParameterEditorPanel extends JPanel implements OBDADataSo
         jdbcDriverComboBox.setEditable(true);
         jdbcDriverComboBox.addActionListener(evt -> timer.restart());
         jdbcDriverComboBox.addItemListener(evt -> timer.restart());
-        dataSourceParametersPanel.add(jdbcDriverComboBox,
+        connectionParametersPanel.add(jdbcDriverComboBox,
                 new GridBagConstraints(1, 3, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 30), 0, 0));
+                        new Insets(3, 10, 3, 10), 0, 0));
 
-        JButton testConnectionButton = DialogUtils.getButton("Test Connection", "execute.png");
+        JButton testConnectionButton = DialogUtils.getButton(
+                "Test Connection",
+                "execute.png",
+                "Test settings by connecting to the server");
         testConnectionButton.addActionListener(this::cmdTestConnectionActionPerformed);
-        dataSourceParametersPanel.add(testConnectionButton,
+        connectionParametersPanel.add(testConnectionButton,
                 new GridBagConstraints(0, 4, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                        new Insets(10, 10, 10, 20), 0, 0));
+                        new Insets(10, 10, 10, 10), 0, 0));
 
         connectionStatusLabel = new JLabel();
-        dataSourceParametersPanel.add(connectionStatusLabel,
+        connectionParametersPanel.add(connectionStatusLabel,
                 new GridBagConstraints(0, 5, 2, 1, 0, 1,
                         GridBagConstraints.NORTH, GridBagConstraints.BOTH,
                         new Insets(10, 10, 10, 10), 0, 0));
 
-        add(dataSourceParametersPanel,
+        add(connectionParametersPanel,
                 new GridBagConstraints(0, 1, 1, 1, 1, 1,
                         GridBagConstraints.LINE_START, GridBagConstraints.BOTH,
-                        new Insets(0,0,0, 0), 0, 0));
+                        new Insets(20,30,20, 40), 0, 0));
     }
 
     @Override

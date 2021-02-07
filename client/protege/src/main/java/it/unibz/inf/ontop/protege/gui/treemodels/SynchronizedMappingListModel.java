@@ -20,23 +20,27 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
-import java.util.LinkedList;
-import java.util.List;
 
-public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriplesMap> implements FilteredModel, OBDAMappingListener {
+public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriplesMap> implements OBDAMappingListener {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
 	private final OBDAModel obdaModel;
-	private final List<TreeModelFilter<SQLPPTriplesMap>> filters = new LinkedList<>();
+	@Nullable
+	private String filter;
 
 	public SynchronizedMappingListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
+		this.filter = null;
 		obdaModel.addMappingsListener(this);
 	}
 
@@ -44,51 +48,23 @@ public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriples
 		fireContentsChanged(this, 0, getSize());
 	}
 
-	@Override
-	public void addFilter(TreeModelFilter<SQLPPTriplesMap> filter) {
-		filters.add(filter);
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
-
-	@Override
-	public void addFilters(List<TreeModelFilter<SQLPPTriplesMap>> addFilters) {
-		filters.addAll(addFilters);
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
-
-	@Override
-	public void removeFilter(TreeModelFilter<SQLPPTriplesMap> filter) {
-		filters.remove(filter);
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
-
-	@Override
-	public void removeFilter(List<TreeModelFilter<SQLPPTriplesMap>> removeFilters) {
-		filters.removeAll(removeFilters);
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
-
-	@Override
-	public void removeAllFilters() {
-		filters.clear();
+	public void setFilter(@Nullable String filter) {
+		this.filter = filter;
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
 	public int getSize() {
-		int filteredCount = 0;
-		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
-			if (filters.stream().allMatch(f -> f.match(mapping)))
-				filteredCount++;
-		}
-		return filteredCount;
+		return (int)obdaModel.getMapping().stream()
+				.filter(this::isIncludedByFilter)
+				.count();
 	}
 
 	@Override
 	public SQLPPTriplesMap getElementAt(int index) {
 		int filteredCount = -1;
 		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
-			if (filters.stream().allMatch(f -> f.match(mapping)))
+			if (isIncludedByFilter(mapping))
 				filteredCount++;
 
 			if (filteredCount == index)
@@ -96,6 +72,33 @@ public class SynchronizedMappingListModel extends AbstractListModel<SQLPPTriples
 		}
 		return null;
 	}
+
+	private boolean isIncludedByFilter(SQLPPTriplesMap mapping) {
+		return filter == null
+				|| mapping.getTargetAtoms().stream()
+						.flatMap(a -> a.getSubstitutedTerms().stream())
+						.anyMatch(a -> match(filter, a));
+	}
+
+	private static boolean match(String keyword, ImmutableTerm term) {
+		if (term instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm functionTerm = (ImmutableFunctionalTerm) term;
+			if (functionTerm.getFunctionSymbol().toString().contains(keyword)) { // match found!
+				return true;
+			}
+			// Recursive
+			return functionTerm.getTerms().stream()
+					.anyMatch(t -> match(keyword, t));
+//        } else if (term instanceof Variable) {
+//            return ((Variable) term).getName().contains(keyword); // match found!
+		}
+		else if (term instanceof RDFConstant) {
+			return ((RDFConstant) term).getValue().contains(keyword); // match found!
+		}
+		else
+			return false;
+	}
+
 
 	@Override
 	public void mappingInserted() {

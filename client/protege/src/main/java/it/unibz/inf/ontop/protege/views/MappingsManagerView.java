@@ -27,10 +27,10 @@ import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLEntity;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.List;
 
@@ -38,45 +38,47 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	private static final long serialVersionUID = 1790921396564256165L;
 
-	private OBDAModelManager controller;
+	private OBDAModelManager obdaModelManager;
 
 	private MappingManagerPanel mappingPanel;
-
-	@Override
-	protected void disposeOWLView() {
-		controller.removeListener(this);
-	}
 
 	@Override
 	protected void initialiseOWLView() {
 		OWLEditorKit editorKit = getOWLEditorKit();
 
-		controller = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
-		controller.addListener(this);
+		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
+		obdaModelManager.addListener(this);
 
-		// Init the Mapping Manager panel.
-		mappingPanel = new MappingManagerPanel(controller);
+		mappingPanel = new MappingManagerPanel(obdaModelManager);
 
 		editorKit.getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
 			OWLEntity entity = editorKit.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
 			if (entity == null)
 				return;
-			if (!entity.isTopEntity()) {
-				String shortf = entity.getIRI().getFragment();
-				if (shortf == null) {
-					String iri = entity.getIRI().toString();
-					shortf = iri.substring(iri.lastIndexOf("/"));
-				}
-				mappingPanel.setFilter(shortf);
-			} else {
+
+			if (entity.isTopEntity()) {
 				mappingPanel.setFilter("");
+			}
+			else {
+				IRI iri = entity.getIRI();
+				if (iri.getFragment().isEmpty()) {
+					String s = iri.toString();
+					mappingPanel.setFilter(s.substring(s.lastIndexOf("/")));
+				}
+				else {
+					mappingPanel.setFilter(iri.getFragment());
+				}
 			}
 		});
 		mappingPanel.datasourceChanged();
 
-		mappingPanel.setBorder(new TitledBorder("Mapping manager"));
 		setLayout(new BorderLayout());
         add(mappingPanel, BorderLayout.CENTER);
+	}
+
+	@Override
+	protected void disposeOWLView() {
+		obdaModelManager.removeListener(this);
 	}
 
 	@Override

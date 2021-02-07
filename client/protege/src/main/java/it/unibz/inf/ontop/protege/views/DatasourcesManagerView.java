@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.views;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
+import it.unibz.inf.ontop.protege.panels.ConnectionParametersPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +34,9 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent {
 
 	private static final long serialVersionUID = -4515710047558710080L;
 
-	private static final Logger log = LoggerFactory.getLogger(DatasourcesManagerView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DatasourcesManagerView.class);
 
-	private DatasourceParameterEditorPanel editor;
+	private ConnectionParametersPanel editor;
 
 	private OBDADataSource datasource;
 
@@ -45,14 +45,14 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent {
 		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 		datasource = obdaModelManager.getDatasource();
 
-		editor = new DatasourceParameterEditorPanel(datasource);
+		editor = new ConnectionParametersPanel(datasource);
 		setLayout(new BorderLayout());
 		add(editor, BorderLayout.NORTH);
 
 		datasource.addListener(editor);
 		datasource.fireChanged();
 
-		log.debug("Datasource browser initialized");
+		LOGGER.debug("Datasource browser initialized");
 	}
 
 	@Override
