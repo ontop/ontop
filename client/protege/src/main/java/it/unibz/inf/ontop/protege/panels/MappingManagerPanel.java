@@ -234,6 +234,15 @@ public class MappingManagerPanel extends JPanel {
         actionMap.put("add", addMappingAction);
         actionMap.put("edit", editMappingAction);
 
+        mappingList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2)
+                    editMappingAction.actionPerformed(
+                            new ActionEvent(mappingList, ActionEvent.ACTION_PERFORMED, null));
+            }
+        });
+
         MappingFilteredListModel model = new MappingFilteredListModel(obdaModelManager.getActiveOBDAModel());
         model.addListDataListener(new ListDataListener() {
             @Override public void intervalRemoved(ListDataEvent e) { updateMappingSize(); }
@@ -270,17 +279,8 @@ public class MappingManagerPanel extends JPanel {
 
 
     public void editMapping(SQLPPTriplesMap mapping) {
-		JDialog dialog = new JDialog();
-
-		dialog.setTitle("Edit Mapping");
-		dialog.setModal(true);
-
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, dialog);
-		panel.setMapping(mapping);
-		dialog.setContentPane(panel);
-		dialog.setSize(600, 500);
-		dialog.setLocationRelativeTo(this);
-		dialog.setVisible(true);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, mapping);
+		panel.openDialog(this);
 	}
 
     private void validateMapping(List<SQLPPTriplesMap> selectionList) {
@@ -416,16 +416,7 @@ public class MappingManagerPanel extends JPanel {
 
     private void createMapping() {
         String id = IDGenerator.getNextUniqueID("MAPID-");
-
-        JDialog dialog = new JDialog();
-        dialog.setTitle("New Mapping");
-        dialog.setModal(true);
-
-        NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, dialog);
-        panel.setID(id);
-        dialog.setContentPane(panel);
-        dialog.setSize(600, 500);
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
+        NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, id);
+        panel.openDialog(this);
     }
 }
