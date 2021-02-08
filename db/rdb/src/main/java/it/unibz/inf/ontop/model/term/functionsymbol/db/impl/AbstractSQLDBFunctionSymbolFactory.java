@@ -819,6 +819,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    public DBFunctionSymbol getDBNullIf() {
+        return getRegularDBFunctionSymbol(NULLIF_STR, 2);
+    }
+
+    @Override
     public DBFunctionSymbol getDBUpper() {
         return getRegularDBFunctionSymbol(UPPER_STR, 1);
     }
