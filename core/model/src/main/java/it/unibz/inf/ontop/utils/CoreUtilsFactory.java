@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Collection;
@@ -34,5 +35,5 @@ public interface CoreUtilsFactory {
     VariableNullability createEmptyVariableNullability(ImmutableSet<Variable> scope);
 
     ProjectionDecomposer createProjectionDecomposer(Predicate<ImmutableFunctionalTerm> decompositionOracle,
-                                                    Boolean postprocessVariableAndConstantDefinitions);
+                                                    Predicate<NonFunctionalTerm> postprocessNonFunctionalDefinitionOracle);
 }

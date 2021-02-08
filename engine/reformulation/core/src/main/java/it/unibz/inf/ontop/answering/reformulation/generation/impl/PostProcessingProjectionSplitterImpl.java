@@ -35,9 +35,10 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.avoidPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(
-                PostProcessingProjectionSplitterImpl::hasFunctionalToBePostProcessed, false);
+                PostProcessingProjectionSplitterImpl::hasFunctionalToBePostProcessed,
+                t -> !(t.isNull() || (t instanceof Variable) || (t instanceof DBConstant)));
         this.proPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(
-                ImmutableFunctionalTerm::canBePostProcessed, true);
+                ImmutableFunctionalTerm::canBePostProcessed, t -> true);
         this.distinctNormalizer = distinctNormalizer;
     }
 
