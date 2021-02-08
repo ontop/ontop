@@ -19,13 +19,16 @@ import java.util.stream.Stream;
 public class ProjectionDecomposerImpl implements ProjectionDecomposer {
 
     private final Predicate<ImmutableFunctionalTerm> decompositionOracle;
+    private final boolean postprocessVariableAndConstantDefinitions;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @AssistedInject
     private ProjectionDecomposerImpl(@Assisted Predicate<ImmutableFunctionalTerm> decompositionOracle,
+                                    @Assisted Boolean postprocessVariableAndConstantDefinitions,
                                     SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.decompositionOracle = decompositionOracle;
+        this.postprocessVariableAndConstantDefinitions = postprocessVariableAndConstantDefinitions;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
@@ -100,6 +103,18 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
                 return new DefinitionDecomposition(newTerm,
                         substitutionFactory.getSubstitution(variable, functionalTerm));
             }
+        }
+        /*
+         * When the definition of the substitution (not a sub-term of a functional term) is a constant or a variable,
+         * we may decide not to post-process it.
+         *
+         * Useful for using Ontop for generating SQL queries with no post-processing
+         * (for other purposes than SPARQL query answering)
+         *
+         */
+        else if (definedVariable.isPresent() && (!postprocessVariableAndConstantDefinitions)) {
+            Variable variable = definedVariable.get();
+            return new DefinitionDecomposition(variable, substitutionFactory.getSubstitution(variable, term));
         }
         else
             return new DefinitionDecomposition(term);

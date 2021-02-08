@@ -33,5 +33,6 @@ public interface CoreUtilsFactory {
 
     VariableNullability createEmptyVariableNullability(ImmutableSet<Variable> scope);
 
-    ProjectionDecomposer createProjectionDecomposer(Predicate<ImmutableFunctionalTerm> decompositionOracle);
+    ProjectionDecomposer createProjectionDecomposer(Predicate<ImmutableFunctionalTerm> decompositionOracle,
+                                                    Boolean postprocessVariableAndConstantDefinitions);
 }
