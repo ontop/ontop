@@ -81,6 +81,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
 
+		txtSourceQuery.setDocument(new SQLQueryStyledDocument());
+		txtTargetQuery.setDocument(new TargetQueryStyledDocument(obdaModelManager));
+
 		cmdInsertMapping.setEnabled(false);
 		TargetQueryPainter painter = new TargetQueryPainter(obdaModelManager, txtTargetQuery);
 		painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));

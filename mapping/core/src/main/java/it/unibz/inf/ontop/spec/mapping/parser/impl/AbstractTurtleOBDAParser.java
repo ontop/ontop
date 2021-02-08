@@ -87,8 +87,8 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 		@Override
 		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
 				throws ParseCancellationException {
-			LOGGER.debug("Syntax error location: column " + charPositionInLine + "\n" + msg);
-			throw new ParseCancellationException("Syntax error location: column " + charPositionInLine + "\n" + msg);
+			LOGGER.debug("Syntax error location: column {}, line {}\n{}", charPositionInLine, line, msg);
+			throw new ParseCancellationException("Syntax error location: column " + charPositionInLine + ", line " + line + "\n" + msg);
 		}
 	}
 }

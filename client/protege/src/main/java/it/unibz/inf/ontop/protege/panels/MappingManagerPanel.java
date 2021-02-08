@@ -65,10 +65,12 @@ public class MappingManagerPanel extends JPanel {
 
         mappingList = new JList<>();
         // Setting up the mappings tree
-        mappingList.setCellRenderer(new OBDAMappingListRenderer(obdaModelManager));
+        mappingList.setCellRenderer(new MappingListRenderer(obdaModelManager));
         mappingList.setFixedCellWidth(-1);
         mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        add(new JScrollPane(mappingList), BorderLayout.CENTER);
+        add(new JScrollPane(mappingList,
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
         Action addMappingAction = new AbstractAction("Create mapping...") {
             @Override
