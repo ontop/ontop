@@ -19,13 +19,16 @@ import java.util.stream.Stream;
 public class ProjectionDecomposerImpl implements ProjectionDecomposer {
 
     private final Predicate<ImmutableFunctionalTerm> decompositionOracle;
+    private final Predicate<NonFunctionalTerm> postprocessNonFunctionalDefinitionOracle;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @AssistedInject
     private ProjectionDecomposerImpl(@Assisted Predicate<ImmutableFunctionalTerm> decompositionOracle,
+                                    @Assisted Predicate<NonFunctionalTerm> postprocessNonFunctionalDefinitionOracle,
                                     SubstitutionFactory substitutionFactory, TermFactory termFactory) {
         this.decompositionOracle = decompositionOracle;
+        this.postprocessNonFunctionalDefinitionOracle = postprocessNonFunctionalDefinitionOracle;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
@@ -100,6 +103,19 @@ public class ProjectionDecomposerImpl implements ProjectionDecomposer {
                 return new DefinitionDecomposition(newTerm,
                         substitutionFactory.getSubstitution(variable, functionalTerm));
             }
+        }
+        /*
+         * When the definition of the substitution (not a sub-term of a functional term) is not functional,
+         * we may also decide not to post-process it.
+         *
+         * Useful for using Ontop for generating SQL queries with no post-processing
+         * (for other purposes than SPARQL query answering)
+         *
+         */
+        else if (definedVariable.isPresent()
+                && (!postprocessNonFunctionalDefinitionOracle.test((NonFunctionalTerm) term))) {
+            Variable variable = definedVariable.get();
+            return new DefinitionDecomposition(variable, substitutionFactory.getSubstitution(variable, term));
         }
         else
             return new DefinitionDecomposition(term);
