@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
@@ -33,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -46,6 +49,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
 
 public class NewMappingDialogPanel extends javax.swing.JPanel {
 
@@ -57,6 +63,15 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private SQLPPTriplesMap mapping;
+	private final TargetQueryStyledDocument targetDocument;
+
+	private final Border defaultBorder;
+	private final Border errorBorder;
+
+	private static final int DEFAULT_TOOL_TIP_INITIAL_DELAY = ToolTipManager.sharedInstance().getInitialDelay();
+	private static final int DEFAULT_TOOL_TIP_DISMISS_DELAY = ToolTipManager.sharedInstance().getDismissDelay();
+	private static final int ERROR_TOOL_TIP_INITIAL_DELAY = 100;
+	private static final int ERROR_TOOL_TIP_DISMISS_DELAY = 9000;
 
 
 	/**
@@ -70,6 +85,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 		initComponents();
 
+		defaultBorder = BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY);
+		errorBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Color.RED);
+
 		// Formatting the src query
 		StyledDocument doc = txtSourceQuery.getStyledDocument();
 		Style plainStyle = doc.addStyle("PLAIN_STYLE", null);
@@ -82,12 +100,13 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
 
 		txtSourceQuery.setDocument(new SQLQueryStyledDocument());
-		txtTargetQuery.setDocument(new TargetQueryStyledDocument(obdaModelManager));
+
+		Timer timer = new Timer(1000, e -> targetValidation());
+		timer.setRepeats(false);
+		targetDocument = new TargetQueryStyledDocument(obdaModelManager, d -> timer.restart());
+		txtTargetQuery.setDocument(targetDocument);
 
 		cmdInsertMapping.setEnabled(false);
-		TargetQueryPainter painter = new TargetQueryPainter(obdaModelManager, txtTargetQuery);
-		painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
-
 		cmdInsertMapping.addActionListener(this::cmdInsertMappingActionPerformed);
 
 		txtTargetQuery.addKeyListener(new TABKeyListener());
@@ -108,6 +127,50 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 				cmdInsertMapping,
 				cmdCancel)));
 	}
+
+	private void targetValidation() {
+		try {
+			ImmutableSet<IRI> iris = targetDocument.validate();
+			if (iris.isEmpty())
+				clearError();
+			else {
+				MutablePrefixManager prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
+				setError("The following predicates are not declared in the ontology:\n "
+						+ iris.stream()
+						.map(IRI::getIRIString)
+						.map(prefixManager::getShortForm)
+						.map(iri -> "\t- " + iri)
+						.collect(Collectors.joining(",\n")) + ".");
+			}
+		}
+		catch (TargetQueryParserException e) {
+			setError((e.getMessage() == null)
+					? "Syntax error, check log"
+					: e.getMessage().replace("'<EOF>'", "the end"));
+		}
+	}
+
+	private void setError(String tooltip) {
+		txtTargetQuery.setBorder(BorderFactory.createCompoundBorder(null, errorBorder));
+		ToolTipManager.sharedInstance().setInitialDelay(ERROR_TOOL_TIP_INITIAL_DELAY);
+		ToolTipManager.sharedInstance().setDismissDelay(ERROR_TOOL_TIP_DISMISS_DELAY);
+		txtTargetQuery.setToolTipText("<html><body>" +
+				tooltip.replace("<", "&lt;")
+						.replace(">", "&gt;")
+						.replace("\n", "<br>")
+						.replace("\t", HTML_TAB)
+				+ "</body></html>");
+		cmdInsertMapping.setEnabled(false);
+	}
+
+	private void clearError() {
+		cmdInsertMapping.setEnabled(true);
+		txtTargetQuery.setToolTipText(null);
+		txtTargetQuery.setBorder(BorderFactory.createCompoundBorder(null, defaultBorder));
+		ToolTipManager.sharedInstance().setInitialDelay(DEFAULT_TOOL_TIP_INITIAL_DELAY);
+		ToolTipManager.sharedInstance().setDismissDelay(DEFAULT_TOOL_TIP_DISMISS_DELAY);
+	}
+
 
 	private static class TABKeyListener extends KeyAdapter {
 		@Override public void keyTyped(KeyEvent e) { typedOrPressed(e); }
@@ -159,6 +222,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 
 		String trgQuery = obdaModelManager.getActiveOBDAModel().getTargetRendering(mapping);
 		txtTargetQuery.setText(trgQuery);
+		targetValidation();
 	}
 
 
@@ -478,33 +542,22 @@ public class NewMappingDialogPanel extends javax.swing.JPanel {
 		try {
 			ImmutableList<TargetAtom> targetQuery = obdaModel.parseTargetQuery(target);
 
-			// List of invalid predicates that are found by the validator.
-			List<IRI> invalidPredicates = obdaModelManager.getCurrentVocabulary().validate(targetQuery);
-			if (invalidPredicates.isEmpty()) {
-				try {
-					log.info("Insert Mapping: \n"+ target + "\n" + source);
+			try {
+				log.info("Insert Mapping: \n"+ target + "\n" + source);
 
-					if (mapping == null) {
-						obdaModel.add(newId, source, targetQuery);
-					}
-					else {
-						obdaModel.update(mapping.getId(), newId, source, targetQuery);
-					}
+				if (mapping == null) {
+					obdaModel.add(newId, source, targetQuery);
 				}
-				catch (DuplicateMappingException e1) {
-					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e1.getMessage() + " is already taken");
-					return;
+				else {
+					obdaModel.update(mapping.getId(), newId, source, targetQuery);
 				}
-				parent.setVisible(false);
-				parent.dispose();
 			}
-			else {
-				String invalidList = "";
-				for (IRI predicate : invalidPredicates) {
-					invalidList += "- " + predicate + "\n";
-				}
-				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
+			catch (DuplicateMappingException e1) {
+				JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e1.getMessage() + " is already taken");
+				return;
 			}
+			parent.setVisible(false);
+			parent.dispose();
 		}
 		catch (Exception e1) {
 			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e1.getMessage());

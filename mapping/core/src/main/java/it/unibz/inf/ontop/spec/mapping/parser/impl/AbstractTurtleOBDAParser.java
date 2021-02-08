@@ -78,6 +78,9 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 			TurtleOBDASQLVisitor visitor = new TurtleOBDASQLVisitor(targetAtomFactory, termVisitorSupplier.get());
 			return visitor.visitParse(parser.parse()).collect(ImmutableCollectors.toList());
 		}
+		catch (ParseCancellationException e) {
+			throw (TargetQueryParserException)e.getCause();
+		}
 		catch (RuntimeException e) {
 			throw new TargetQueryParserException(e.getMessage(), e);
 		}
@@ -88,7 +91,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
 				throws ParseCancellationException {
 			LOGGER.debug("Syntax error location: column {}, line {}\n{}", charPositionInLine, line, msg);
-			throw new ParseCancellationException("Syntax error location: column " + charPositionInLine + ", line " + line + "\n" + msg);
+			throw new ParseCancellationException(msg, new TargetQueryParserException(line, charPositionInLine, msg, e));
 		}
 	}
 }

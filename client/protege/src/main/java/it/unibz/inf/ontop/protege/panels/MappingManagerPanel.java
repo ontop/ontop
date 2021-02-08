@@ -227,6 +227,7 @@ public class MappingManagerPanel extends JPanel {
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "remove");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), "add");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "edit");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "edit");
 
         ActionMap actionMap = mappingList.getActionMap();
         actionMap.put("remove", removeMappingAction);

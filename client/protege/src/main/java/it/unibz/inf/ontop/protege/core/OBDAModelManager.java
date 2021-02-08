@@ -311,17 +311,6 @@ public class OBDAModelManager implements Disposable {
 			else {
 				log.warn("No OBDA model was loaded because no .obda file exists in the same location as the .owl file");
 			}
-			// adding type information to the mapping predicates
-			for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
-				ImmutableList<TargetAtom> tq = mapping.getTargetAtoms();
-				ImmutableList<org.apache.commons.rdf.api.IRI> invalidIRIs = currentMutableVocabulary.validate(tq);
-				if (!invalidIRIs.isEmpty()) {
-					throw new Exception("Found an invalid target query: \n" +
-							"  mappingId:\t" + mapping.getId() + "\n" +
-							(mapping.getOptionalTargetString().map(s -> "  target:\t" + s + "\n").orElse("")) +
-							"  predicates not declared in the ontology: " + invalidIRIs);
-				}
-			}
 		}
 		catch (Exception e) {
 			InvalidOntopConfigurationException ex = new InvalidOntopConfigurationException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());

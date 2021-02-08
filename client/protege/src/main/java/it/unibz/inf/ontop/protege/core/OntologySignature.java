@@ -61,32 +61,8 @@ public class OntologySignature {
 		return ontology.containsAnnotationPropertyInSignature(convert(iri), Imports.INCLUDED);
 	}
 
-
-	public ImmutableList<IRI> validate(ImmutableList<TargetAtom> targetQuery) {
-		return targetQuery.stream()
-				.map(OntologySignature::extractIRI)
-				.filter(iri -> !isValid(iri))
-				.collect(ImmutableCollectors.toList());
+	public boolean isBuiltinProperty(IRI iri) {
+		return iri.equals(OWL.SAME_AS) || iri.equals(Ontop.CANONICAL_IRI);
 	}
 
-	private static IRI extractIRI(TargetAtom targetAtom) {
-		return targetAtom.getPredicateIRI()
-				.orElseThrow(() -> new NoPredicateIRIInTargetAtomException(targetAtom));
-	}
-
-	private boolean isValid(IRI iri) {
-		return containsClass(iri)
-				|| containsObjectProperty(iri)
-				|| containsDataProperty(iri)
-				|| containsAnnotationProperty(iri)
-				|| iri.equals(OWL.SAME_AS)
-				|| iri.equals(Ontop.CANONICAL_IRI);
-	}
-
-	private static class NoPredicateIRIInTargetAtomException extends OntopInternalBugException {
-		private NoPredicateIRIInTargetAtomException(TargetAtom targetAtom) {
-			super("No IRI could be found the predicate in the target atom " + targetAtom
-					+ "\nShould have detected before");
-		}
-	}
 }

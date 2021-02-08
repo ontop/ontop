@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -66,7 +67,15 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 		trgQueryTextPane = new JTextPane();
 		trgQueryTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
 		trgQueryTextPane.setOpaque(false);
-		trgQueryTextPane.setDocument(new TargetQueryStyledDocument(obdaModelManager));
+		trgQueryTextPane.setDocument(new TargetQueryStyledDocument(
+				obdaModelManager,
+				doc -> {
+					try {
+						doc.validate();
+					}
+					catch (TargetQueryParserException ignore) {
+					}
+				}));
 
 		srcQueryTextPane = new JTextPane();
 		srcQueryTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
