@@ -28,8 +28,14 @@ public class ProgressMonitor {
         this.cancelOption = UIManager.getString("OptionPane.cancelButtonText");
     }
 
+    private Runnable cancelAction;
+
+    public void setCancelAction(Runnable cancelAction) {
+        this.cancelAction = cancelAction;
+    }
+
     public void open(String note) {
-        if (dialog == null && !isDone && !isCancelled()) {
+        if (dialog == null && !isDone && !isCancelled) {
             noteLabel = new JLabel(note, null, SwingConstants.CENTER);
 
             progressBar = new JProgressBar();
@@ -60,6 +66,8 @@ public class ProgressMonitor {
                     if (cancel()) {
                         noteLabel.setText("cancelling...");
                         pane.setEnabled(false);
+                        if (cancelAction != null)
+                            cancelAction.run();
                     }
                     dialog.setVisible(true);
                 }
@@ -71,8 +79,8 @@ public class ProgressMonitor {
     }
 
     public void close() {
+        isDone = true;
         if (dialog != null) {
-            isDone = true;
             dialog.setVisible(false);
             dialog.dispose();
             dialog = null;

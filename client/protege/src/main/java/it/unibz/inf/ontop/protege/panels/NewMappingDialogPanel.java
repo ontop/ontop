@@ -37,14 +37,14 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
@@ -56,7 +56,7 @@ public class NewMappingDialogPanel extends JPanel {
 
 	private static final long serialVersionUID = 4351696247473906680L;
 
-	private static final Logger log = LoggerFactory.getLogger(NewMappingDialogPanel.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(NewMappingDialogPanel.class);
 
 	@Nullable
 	private final String id; // null means creating a new mapping
@@ -281,7 +281,7 @@ public class NewMappingDialogPanel extends JPanel {
 		}
 		catch (TargetQueryParserException e) {
 			error = (e.getMessage() == null)
-					? "Syntax error, check log"
+					? "Syntax error, check LOGGER"
 					: e.getMessage().replace("'<EOF>'", "the end");
 		}
 		txtTargetQuery.setBorder(BorderFactory.createCompoundBorder(null, errorBorder));
@@ -301,88 +301,69 @@ public class NewMappingDialogPanel extends JPanel {
 
 
 	private void testSqlQuery() {
-		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", this);
-		CountDownLatch latch = new CountDownLatch(1);
-		ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
-		progMonitor.addProgressListener(action);
-		progMonitor.start();
-		try {
-			action.run();
-			latch.await();
-			progMonitor.stop();
-			try (ResultSet set = action.result) {
-				if (set != null) {
-					ResultSetTableModel model = new ResultSetTableModel(set);
-					tblQueryResult.setModel(model);
-					tblQueryResult.revalidate();
+		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(parent);
+		worker.execute();
+	}
+
+	private class ExecuteSQLQuerySwingWorker extends SwingWorkerWithCompletionPercentageMonitor<DefaultTableModel, Void> {
+
+		protected ExecuteSQLQuerySwingWorker(Component parent) {
+			super(parent, "<html><h3>Executing SQL query:</h3></html>");
+			progressMonitor.setCancelAction(this::doCancel);
+		}
+
+		private Statement statement;
+
+		private void doCancel() {
+			JDBCConnectionManager.cancelQuietly(statement);
+		}
+
+		@Override
+		protected DefaultTableModel doInBackground() throws Exception {
+			start("initializing...");
+			setMaxTicks(100);
+			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+			OBDADataSource dataSource = obdaModelManager.getDatasource();
+			try (Connection conn = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword())) {
+				statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+				statement.setMaxRows(100);
+				try (ResultSet rs = statement.executeQuery(txtSourceQuery.getText().trim())) {
+					ResultSetMetaData metadata = rs.getMetaData();
+					int numcols = metadata.getColumnCount();
+					String[] columns = new String[numcols];
+					for (int i = 1; i <= numcols; i++)
+						columns[i - 1] = metadata.getColumnLabel(i);
+					DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(columns);
+					startLoop(this::getCompletionPercentage, () -> String.format("%d%% rows retrieved...", getCompletionPercentage()));
+					while (rs.next()) {
+						String[] values = new String[numcols];
+						for (int i = 1; i <= numcols; i++)
+							values[i - 1] = rs.getString(i);
+						tableModel.addRow(values);
+						tick();
+					}
+					endLoop("generating table...");
+					end();
+					return tableModel;
 				}
 			}
 			finally {
-				if (action.statement != null && !action.statement.isClosed()) {
-					action.statement.close();
-				}
+				JDBCConnectionManager.closeQuietly(statement);
 			}
-		}
-		catch (Exception e) {
-			log.error(e.getMessage());
-		}
-	}
-
-	private class ExecuteSQLQueryAction implements OBDAProgressListener {
-
-		private final CountDownLatch latch;
-		private Thread thread = null;
-		private ResultSet result;
-		private Statement statement = null;
-		private boolean isCancelled = false;
-		private boolean errorShown = false;
-
-		private ExecuteSQLQueryAction(CountDownLatch latch) {
-			this.latch = latch;
 		}
 
 		@Override
-		public void actionCanceled() throws SQLException {
-			this.isCancelled = true;
-			if (thread != null) {
-				thread.interrupt();
+		public void done() {
+			try {
+				DefaultTableModel tableModel = complete();
+				tblQueryResult.setModel(tableModel);
 			}
-			if (statement != null && !statement.isClosed()) {
-				statement.close();
+			catch (CancellationException | InterruptedException ignore) {
 			}
-			result = null;
-			latch.countDown();
-		}
-
-		public void run() {
-			thread = new Thread(() -> {
-				try {
-					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-					OBDADataSource dataSource = obdaModelManager.getDatasource();
-					Connection c = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword());
-
-					statement = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-					statement.setMaxRows(100);
-					result = statement.executeQuery(txtSourceQuery.getText().trim());
-					latch.countDown();
-				}
-				catch (Exception e) {
-					latch.countDown();
-					errorShown = true;
-					DialogUtils.showSeeLogErrorDialog(getRootPane(), "", log, e);
-				}
-			});
-			thread.start();
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return this.isCancelled;
-		}
-
-		@Override
-		public boolean isErrorShown() {
-			return this.errorShown;
+			catch (ExecutionException e) {
+				DialogUtils.showErrorDialog(parent, "Edit Mapping", "Executing SQL query error.", LOGGER, e,
+						obdaModelManager.getDatasource());
+			}
 		}
 	}
 
@@ -394,7 +375,7 @@ public class NewMappingDialogPanel extends JPanel {
 			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
 
 			ImmutableList<TargetAtom> targetQuery = obdaModel.parseTargetQuery(target);
-			log.info("Insert Mapping: \n"+ target + "\n" + source);
+			LOGGER.info("Insert Mapping: \n"+ target + "\n" + source);
 
 			if (id == null)
 				obdaModel.add(newId, source, targetQuery);

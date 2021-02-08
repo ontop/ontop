@@ -11,6 +11,8 @@ import java.util.function.Supplier;
 
 public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
 
+    private static final int DELAY_OPENING_WINDOW = 300;
+
     protected final ProgressMonitor progressMonitor;
     protected final long startTime;
 
@@ -28,7 +30,10 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
     }
 
     protected void start(String startProgressNote) {
-        SwingUtilities.invokeLater(() -> progressMonitor.open(startProgressNote));
+        // executes the action on the event-dispatch thread
+        Timer timer = new Timer(DELAY_OPENING_WINDOW, e -> progressMonitor.open(startProgressNote));
+        timer.setRepeats(false);
+        timer.start();
     }
 
     protected void startLoop(Supplier<Integer> progressSupplier, Supplier<String> statusSupplier) throws CancelActionException {

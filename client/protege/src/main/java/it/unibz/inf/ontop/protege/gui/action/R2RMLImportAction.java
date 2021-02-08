@@ -109,7 +109,6 @@ public class R2RMLImportAction extends ProtegeAction {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
 			catch (ExecutionException e) {
-
 				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e,
 						OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getDatasource());
 			}

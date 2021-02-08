@@ -24,10 +24,7 @@ import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -150,5 +147,23 @@ public class JDBCConnectionManager {
 	public Connection getConnection(OntopSQLCredentialSettings settings) throws SQLException {
 		return getConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
 				settings.getJdbcPassword());
+	}
+
+	public static void closeQuietly(Statement statement) {
+		try {
+			if (statement != null && !statement.isClosed())
+				statement.close();
+		}
+		catch (Exception ignore) {
+		}
+	}
+
+	public static void cancelQuietly(Statement statement) {
+		try {
+			if (statement != null && !statement.isClosed())
+				statement.cancel();
+		}
+		catch (Exception ignore) {
+		}
 	}
 }
