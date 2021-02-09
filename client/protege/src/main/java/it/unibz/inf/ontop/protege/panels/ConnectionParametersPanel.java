@@ -29,6 +29,7 @@ import org.protege.osgi.jdbc.preferences.JDBCDriverInfo;
 import org.protege.osgi.jdbc.preferences.JDBCDriverTableModel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
@@ -52,11 +53,11 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
     private final JComboBox<String> jdbcDriverComboBox;
     private final JTextField jdbcUrlField;
 
-//    static private final Color COLOR_NOI18N = new Color(53, 113, 163);
-
     private boolean notify = false;
 
     public ConnectionParametersPanel(OBDADataSource datasource) {
+        super(new GridBagLayout());
+
         this.datasource = datasource;
 
         this.timer = new Timer(200, e -> handleTimer());
@@ -67,54 +68,48 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
             }
         };
 
-        setLayout(new GridBagLayout());
+        setBorder(new EmptyBorder(20,40,20, 40));
 
-        JPanel connectionParametersPanel = new JPanel(new GridBagLayout());
-
-        JLabel jdbcUrlLabel = new JLabel("Connection URL:");
-        connectionParametersPanel.add(jdbcUrlLabel,
+        add(new JLabel("Connection URL:"),
                 new GridBagConstraints(0, 0, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 20), 0, 0));
 
         jdbcUrlField = new JTextField();
         jdbcUrlField.addKeyListener(timerRestartKeyAdapter);
-        connectionParametersPanel.add(jdbcUrlField,
+        add(jdbcUrlField,
                 new GridBagConstraints(1, 0, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 0), 0, 0));
 
-        JLabel usernameLabel = new JLabel("Database username:");
-        connectionParametersPanel.add(usernameLabel,
+        add(new JLabel("Database username:"),
                 new GridBagConstraints(0, 1, 1, 0, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 20), 0, 0));
 
         usernameField = new JTextField();
         usernameField.addKeyListener(timerRestartKeyAdapter);
-        connectionParametersPanel.add(usernameField,
+        add(usernameField,
                 new GridBagConstraints(1, 1, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 0), 0, 0));
 
-        JLabel passwordLabel = new JLabel("Database password:");
-        connectionParametersPanel.add(passwordLabel,
+        add(new JLabel("Database password:"),
                 new GridBagConstraints(0, 2, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 20), 0, 0));
 
         passwordField = new JPasswordField();
         passwordField.addKeyListener(timerRestartKeyAdapter);
-        connectionParametersPanel.add(passwordField,
+        add(passwordField,
                 new GridBagConstraints(1, 2, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 0), 0, 0));
 
-        JLabel jdbcDriverLabel = new JLabel("JDBC driver class:");
-        connectionParametersPanel.add(jdbcDriverLabel,
+        add(new JLabel("JDBC driver class:"),
                 new GridBagConstraints(0, 3, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 20), 0, 0));
 
         ImmutableList<String> options = Stream.concat(
                 Stream.of("select or type the JDBC Driver class..."),
@@ -126,43 +121,36 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
         jdbcDriverComboBox.setEditable(true);
         jdbcDriverComboBox.addActionListener(evt -> timer.restart());
         jdbcDriverComboBox.addItemListener(evt -> timer.restart());
-        connectionParametersPanel.add(jdbcDriverComboBox,
+        add(jdbcDriverComboBox,
                 new GridBagConstraints(1, 3, 1, 1, 1, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
-                        new Insets(3, 10, 3, 10), 0, 0));
+                        new Insets(3, 0, 3, 0), 0, 0));
 
-        connectionParametersPanel.add(
-                DialogUtils.getButton(
+        add(DialogUtils.getButton(
                         "Test Connection",
                         "execute.png",
                         "Test settings by connecting to the server",
                         this::cmdTestConnectionActionPerformed),
                 new GridBagConstraints(0, 4, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.NONE,
-                        new Insets(10, 10, 10, 10), 0, 0));
+                        new Insets(10, 0, 10, 0), 0, 0));
 
         connectionStatusLabel = new JLabel();
-        connectionParametersPanel.add(connectionStatusLabel,
+        add(connectionStatusLabel,
                 new GridBagConstraints(0, 5, 2, 1, 0, 1,
                         GridBagConstraints.NORTH, GridBagConstraints.BOTH,
-                        new Insets(10, 10, 10, 10), 0, 0));
-
-        add(connectionParametersPanel,
-                new GridBagConstraints(0, 1, 1, 1, 1, 1,
-                        GridBagConstraints.LINE_START, GridBagConstraints.BOTH,
-                        new Insets(20,30,20, 40), 0, 0));
+                        new Insets(10, 0, 10, 0), 0, 0));
     }
 
     @Override
     public void changed() {
         notify = false;
         String driver = datasource.getDriver();
-        if (driver == null || driver.isEmpty()) {
+        if (driver == null || driver.isEmpty())
             jdbcDriverComboBox.setSelectedIndex(0);
-        }
-        else {
+        else
             jdbcDriverComboBox.setSelectedItem(driver);
-        }
+
         usernameField.setText(datasource.getUsername());
         passwordField.setText(datasource.getPassword());
         jdbcUrlField.setText(datasource.getURL());
@@ -176,13 +164,7 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
 
         timer.stop();
 
-        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-        try {
-            man.closeConnection();
-        }
-        catch (SQLException e) {
-            // do nothing
-        }
+        closeConnectionQuietly();
 
         String username = usernameField.getText();
         datasource.setUsername(username);
@@ -193,21 +175,16 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
         String url = jdbcUrlField.getText();
         datasource.setURL(url);
 
-        if (url.endsWith(" ")) {
+        if (url.endsWith(" "))
             showError("<html>Warning:<br>URL ends with a space, which can cause connection problems.</html>");
-        }
-        else if (driver.endsWith(" ")) {
+        else if (driver.endsWith(" "))
             showError("<html>Warning:<br>driver class ends with a space, which can cause connection problems.</html>");
-        }
-        else if (password.endsWith(" ")) {
+        else if (password.endsWith(" "))
             showError("<html>Warning:<br>password ends with a space, which can cause connection problems.</html>");
-        }
-        else if (username.endsWith(" ")) {
+        else if (username.endsWith(" "))
             showError("<html>Warning:<br>username ends with a space, which can cause connection problems.</html>");
-        }
-        else {
+        else
             showError("");
-        }
     }
 
     private void showError(String s) {
@@ -229,15 +206,8 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
         }
         else {
             try {
-                JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-                try {
-                    man.closeConnection();
-                }
-                catch (Exception e) {
-                    // NO-OP
-                }
-
-                Connection conn = man.getConnection(datasource.getURL(), datasource.getUsername(), datasource.getPassword());
+                closeConnectionQuietly();
+                Connection conn = datasource.getConnection();
                 if (conn == null)
                     throw new SQLException("Error connecting to the database");
 
@@ -256,5 +226,14 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
                 showError(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
             }
        }
+    }
+
+    private static void closeConnectionQuietly() {
+        JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+        try {
+            man.closeConnection();
+        }
+        catch (Exception ignore) {
+        }
     }
 }

@@ -36,13 +36,9 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.sql.*;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
@@ -121,10 +117,10 @@ public class NewMappingDialogPanel extends JPanel {
 			}
 		};
 
-		Action testSqlQueryAction = new AbstractAction("Test SQL") {
+		Action executeSqlQueryAction = new AbstractAction("Test SQL") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				testSqlQuery();
+				executeSqlQuery();
 			}
 		};
 
@@ -189,10 +185,10 @@ public class NewMappingDialogPanel extends JPanel {
 
 		JPanel testSqlQueryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JButton testSqlQueryButton = getButton(
-				"<html><u>T</u>est SQL Query</html>",
+				"<html>E<u>x</u>ecute the SQL query</html>",
 				"execute.png",
-				"Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.",
-				testSqlQueryAction);
+				"Execute the SQL query in the SQL query text pane\nand display the first " + MAX_ROWS + " results in the table.",
+				executeSqlQueryAction);
 		testSqlQueryPanel.add(testSqlQueryButton);
 		testSqlQueryPanel.add(new JLabel("(" + MAX_ROWS + " rows)"));
 		add(testSqlQueryPanel,
@@ -208,10 +204,10 @@ public class NewMappingDialogPanel extends JPanel {
 				new Insets(0, 0, 10, 4), 0, 0));
 
 		InputMap inputMap = getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		inputMap.put(KeyStroke.getKeyStroke(VK_T, CTRL_DOWN_MASK), "test");
+		inputMap.put(KeyStroke.getKeyStroke(VK_X, CTRL_DOWN_MASK), "execute");
 		inputMap.put(KeyStroke.getKeyStroke(VK_ENTER, CTRL_DOWN_MASK), "save");
 		ActionMap actionMap = getActionMap();
-		actionMap.put("test", testSqlQueryAction);
+		actionMap.put("execute", executeSqlQueryAction);
 		actionMap.put("save", saveMappingAction);
 
 		this.dialog = new JDialog();
@@ -324,70 +320,13 @@ public class NewMappingDialogPanel extends JPanel {
 		}
 	}
 
-	private void testSqlQuery() {
-		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(dialog);
+	private void executeSqlQuery() {
+		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
+				dialog,
+				obdaModelManager.getDatasource(),
+				sourceQueryTextPane.getText().trim(),
+				MAX_ROWS,
+				sqlQueryResultTable::setModel);
 		worker.execute();
-	}
-
-	private class ExecuteSQLQuerySwingWorker extends SwingWorkerWithCompletionPercentageMonitor<DefaultTableModel, Void> {
-
-		protected ExecuteSQLQuerySwingWorker(Component parent) {
-			super(parent, "<html><h3>Executing SQL query:</h3></html>");
-			progressMonitor.setCancelAction(this::doCancel);
-		}
-
-		private Statement statement;
-
-		private void doCancel() {
-			JDBCConnectionManager.cancelQuietly(statement);
-		}
-
-		@Override
-		protected DefaultTableModel doInBackground() throws Exception {
-			start("initializing...");
-			setMaxTicks(100);
-			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-			OBDADataSource dataSource = obdaModelManager.getDatasource();
-			try (Connection conn = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword())) {
-				statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-				statement.setMaxRows(MAX_ROWS);
-				try (ResultSet rs = statement.executeQuery(sourceQueryTextPane.getText().trim())) {
-					ResultSetMetaData metadata = rs.getMetaData();
-					int numcols = metadata.getColumnCount();
-					String[] columns = new String[numcols];
-					for (int i = 1; i <= numcols; i++)
-						columns[i - 1] = metadata.getColumnLabel(i);
-					DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(columns);
-					startLoop(this::getCompletionPercentage, () -> String.format("%d%% rows retrieved...", getCompletionPercentage()));
-					while (rs.next()) {
-						String[] values = new String[numcols];
-						for (int i = 1; i <= numcols; i++)
-							values[i - 1] = rs.getString(i);
-						tableModel.addRow(values);
-						tick();
-					}
-					endLoop("generating table...");
-					end();
-					return tableModel;
-				}
-			}
-			finally {
-				JDBCConnectionManager.closeQuietly(statement);
-			}
-		}
-
-		@Override
-		public void done() {
-			try {
-				DefaultTableModel tableModel = complete();
-				sqlQueryResultTable.setModel(tableModel);
-			}
-			catch (CancellationException | InterruptedException ignore) {
-			}
-			catch (ExecutionException e) {
-				DialogUtils.showErrorDialog(dialog, dialog.getTitle(), "Executing SQL query error.", LOGGER, e,
-						obdaModelManager.getDatasource());
-			}
-		}
 	}
 }

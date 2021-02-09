@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.dialogs;
+package it.unibz.inf.ontop.protege.gui.dialogs;
 
 /*
  * #%L

@@ -23,8 +23,11 @@ package it.unibz.inf.ontop.protege.core;
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 public class OBDADataSource {
@@ -96,6 +99,12 @@ public class OBDADataSource {
 		Objects.requireNonNull(url);
 		this.url = url;
 	}
+
+	public Connection getConnection() throws SQLException {
+		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+		return man.getConnection(url, username, password);
+	}
+
 
 	public Properties asProperties() {
 		Properties p = new Properties();

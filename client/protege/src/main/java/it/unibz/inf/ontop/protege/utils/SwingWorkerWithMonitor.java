@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
 
-    private static final int DELAY_OPENING_WINDOW = 300;
+    private static final int DELAY_OPENING_WINDOW = 1;
 
     protected final ProgressMonitor progressMonitor;
     protected final long startTime;

@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
+import it.unibz.inf.ontop.protege.gui.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.models.*;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -366,17 +366,11 @@ public class MappingManagerPanel extends JPanel {
 	}
 
 	private void executeMappingSourceQuery(SQLPPTriplesMap mapping) {
-		String sqlQuery = mapping.getSourceQuery().getSQL();
-
-		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(obdaModelManager.getDatasource(), sqlQuery);
-
-		JDialog dlgQueryResult = new JDialog();
-		DialogUtils.installEscapeCloseOperation(dlgQueryResult);
-		dlgQueryResult.setContentPane(pnlQueryResult);
-		dlgQueryResult.pack();
-		dlgQueryResult.setLocationRelativeTo(this);
+		SQLQueryDialog dlgQueryResult = new SQLQueryDialog(
+		        obdaModelManager.getDatasource(),
+                mapping.getSourceQuery().getSQL());
+        dlgQueryResult.setLocationRelativeTo(this);
 		dlgQueryResult.setVisible(true);
-		dlgQueryResult.setTitle("SQL Query Result");
 	}
 
 	private void copyMapping(List<SQLPPTriplesMap> selection) {
@@ -408,7 +402,6 @@ public class MappingManagerPanel extends JPanel {
         catch (DuplicateMappingException e) {
             // SHOULD NEVER HAPPEN
             JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + e.getMessage());
-            return;
         }
 	}
 
