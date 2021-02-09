@@ -131,12 +131,12 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
                         GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
                         new Insets(3, 10, 3, 10), 0, 0));
 
-        JButton testConnectionButton = DialogUtils.getButton(
-                "Test Connection",
-                "execute.png",
-                "Test settings by connecting to the server");
-        testConnectionButton.addActionListener(this::cmdTestConnectionActionPerformed);
-        connectionParametersPanel.add(testConnectionButton,
+        connectionParametersPanel.add(
+                DialogUtils.getButton(
+                        "Test Connection",
+                        "execute.png",
+                        "Test settings by connecting to the server",
+                        this::cmdTestConnectionActionPerformed),
                 new GridBagConstraints(0, 4, 1, 1, 0, 0,
                         GridBagConstraints.NORTH, GridBagConstraints.NONE,
                         new Insets(10, 10, 10, 10), 0, 0));

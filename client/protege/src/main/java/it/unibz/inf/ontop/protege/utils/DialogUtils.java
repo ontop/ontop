@@ -38,6 +38,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -51,11 +52,12 @@ import java.util.stream.Stream;
 public class DialogUtils {
 
 
-	public static JButton getButton(String text, String icon, String tooltip) {
+	public static JButton getButton(String text, String icon, String tooltip, ActionListener actionListener) {
 		JButton button = new JButton(text, IconLoader.getImageIcon("images/" + icon));
 		button.setIconTextGap(5);
 		button.setMargin(new Insets(3, 7, 3, 7));
 		button.setToolTipText(tooltip);
+		button.addActionListener(actionListener);
 		return button;
 	}
 

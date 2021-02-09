@@ -122,23 +122,32 @@ public class MappingManagerPanel extends JPanel {
 
         JPanel pnlMappingButtons = new JPanel(new GridBagLayout());
 
-        JButton createMappingButton = DialogUtils.getButton("Create", "plus.png", "Create a new mapping");
-        createMappingButton.addActionListener(addMappingAction);
-        pnlMappingButtons.add(createMappingButton,
+        pnlMappingButtons.add(
+                DialogUtils.getButton(
+                        "Create",
+                        "plus.png",
+                        "Create a new mapping",
+                        addMappingAction),
                 new GridBagConstraints(0, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(2, 2, 2, 2), 0, 0));
 
-        JButton removeMappingButton = DialogUtils.getButton("Remove", "minus.png", "Remove the selected mapping(s)");
-        removeMappingButton.addActionListener(removeMappingAction);
+        JButton removeMappingButton = DialogUtils.getButton(
+                "Remove",
+                "minus.png",
+                "Remove the selected mapping",
+                removeMappingAction);
         removeMappingButton.setEnabled(false);
         pnlMappingButtons.add(removeMappingButton,
                 new GridBagConstraints(1, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(2, 2, 2, 2), 0, 0));
 
-        JButton copyMappingButton = DialogUtils.getButton("Copy", "copy.png", "Make a duplicate of the selected mapping");
-        copyMappingButton.addActionListener(copyMappingAction);
+        JButton copyMappingButton = DialogUtils.getButton(
+                "Copy",
+                "copy.png",
+                "Make a duplicate copy of the selected mapping (with fresh IDs)",
+                copyMappingAction);
         copyMappingButton.setEnabled(false);
         pnlMappingButtons.add(copyMappingButton,
                 new GridBagConstraints(2, 0, 1, 1, 0, 0,
@@ -150,16 +159,22 @@ public class MappingManagerPanel extends JPanel {
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
                         new Insets(2, 2, 2, 2), 0, 0));
 
-        JButton selectAllButton = DialogUtils.getButton("Select all", "select-all.png", "Select all");
-        selectAllButton.addActionListener(evt -> mappingList.setSelectionInterval(0, mappingList.getModel().getSize() - 1));
-        pnlMappingButtons.add(selectAllButton,
+        pnlMappingButtons.add(
+                DialogUtils.getButton(
+                        "Select all",
+                        "select-all.png",
+                        null,
+                        evt -> mappingList.setSelectionInterval(0, mappingList.getModel().getSize() - 1)),
                 new GridBagConstraints(7, 0, 1, 1, 0, 0,
                         GridBagConstraints.EAST, GridBagConstraints.NONE,
                         new Insets(2, 2, 2, 2), 0, 0));
 
-        JButton selectNoneButton = DialogUtils.getButton("Select none", "select-none.png", "Select none");
-        selectNoneButton.addActionListener(evt -> mappingList.clearSelection());
-        pnlMappingButtons.add(selectNoneButton,
+        pnlMappingButtons.add(
+                DialogUtils.getButton(
+                        "Select none",
+                        "select-none.png",
+                        null,
+                        evt -> mappingList.clearSelection()),
                 new GridBagConstraints(8, 0, 1, 1, 0, 0,
                         GridBagConstraints.EAST, GridBagConstraints.NONE,
                         new Insets(2, 2, 2, 2), 0, 0));

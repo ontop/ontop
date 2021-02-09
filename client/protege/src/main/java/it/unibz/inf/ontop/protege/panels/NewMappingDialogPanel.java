@@ -66,7 +66,6 @@ public class NewMappingDialogPanel extends JPanel {
 
 	private final TargetQueryStyledDocument targetQueryDocument;
 
-	private final JButton saveMappingButton;
 	private final JTable sqlQueryResultTable;
 	private final JTextField mappingIdField;
 	private final JTextPane targetQueryTextPane;
@@ -108,7 +107,7 @@ public class NewMappingDialogPanel extends JPanel {
 		this.obdaModelManager = obdaModelManager;
 		this.id = id;
 
-		saveMappingAction = new AbstractAction("Save") {
+		saveMappingAction = new AbstractAction(buttonText) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				saveMapping();
@@ -142,9 +141,10 @@ public class NewMappingDialogPanel extends JPanel {
 		mappingIdField = new JTextField();
 		mappingIdField.setFont(TargetQueryStyledDocument.TARGET_QUERY_FONT);
 		setKeyboardShortcuts(mappingIdField);
-		add(mappingIdField, new GridBagConstraints(1, 0, 1, 1, 0, 0,
-				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-				new Insets(8, 10, 8, 10), 0, 0));
+		add(mappingIdField,
+				new GridBagConstraints(1, 0, 1, 1, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+						new Insets(8, 10, 8, 10), 0, 0));
 
 		JPanel targetQueryPanel = new JPanel(new BorderLayout());
 		targetQueryPanel.add(new JLabel("Target (Triples Template):"), BorderLayout.NORTH);
@@ -183,32 +183,27 @@ public class NewMappingDialogPanel extends JPanel {
 		splitPane.setResizeWeight(0.5);
 		splitPane.setOneTouchExpandable(true);
 
-		add(splitPane, new GridBagConstraints(0, 2, 2, 1, 1, 1,
+		add(splitPane, new GridBagConstraints(0, 1, 2, 1, 1, 1,
 				GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
 				new Insets(0, 10, 0, 10), 0, 0));
 
 		JPanel testSqlQueryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JButton testSqlQueryButton = getButton("<html><u>T</u>est SQL Query</html>", "execute.png", "Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.");
-		testSqlQueryButton.addActionListener(testSqlQueryAction);
+		JButton testSqlQueryButton = getButton(
+				"<html><u>T</u>est SQL Query</html>",
+				"execute.png",
+				"Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.",
+				testSqlQueryAction);
 		testSqlQueryPanel.add(testSqlQueryButton);
 		testSqlQueryPanel.add(new JLabel("(" + MAX_ROWS + " rows)"));
 		add(testSqlQueryPanel,
-				new GridBagConstraints(0, 5, 2, 1, 0, 0,
+				new GridBagConstraints(0, 2, 2, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(4, 10, 0, 0), 0, 0));
 
 		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-		saveMappingButton = getButton(buttonText, "accept.png", buttonTooltip);
-		saveMappingButton.setEnabled(false);
-		saveMappingButton.addActionListener(saveMappingAction);
-		buttonsPanel.add(saveMappingButton);
-
-		JButton cancelButton = getButton("Cancel", "cancel.png", null);
-		cancelButton.addActionListener(cancelAction);
-		buttonsPanel.add(cancelButton);
-
-		add(buttonsPanel, new GridBagConstraints(0, 7, 2, 1, 0, 0,
+		buttonsPanel.add(new JButton(saveMappingAction));
+		buttonsPanel.add(new JButton(cancelAction));
+		add(buttonsPanel, new GridBagConstraints(0, 3, 2, 1, 0, 0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(0, 0, 10, 4), 0, 0));
 
@@ -258,7 +253,6 @@ public class NewMappingDialogPanel extends JPanel {
 				&& !sourceQueryTextPane.getText().trim().isEmpty();
 
 		saveMappingAction.setEnabled(isValid && allComponentsNonEmpty);
-		saveMappingButton.setEnabled(isValid && allComponentsNonEmpty);
 	}
 
 	private void targetValidation() {
@@ -270,7 +264,6 @@ public class NewMappingDialogPanel extends JPanel {
 				if (!isValid) {
 					isValid = true;
 					saveMappingAction.setEnabled(allComponentsNonEmpty);
-					saveMappingButton.setEnabled(allComponentsNonEmpty);
 					targetQueryTextPane.setToolTipText(null);
 					targetQueryTextPane.setBorder(BorderFactory.createCompoundBorder(null, defaultBorder));
 					toolTipManager.setInitialDelay(DEFAULT_TOOLTIP_INITIAL_DELAY);
@@ -303,7 +296,6 @@ public class NewMappingDialogPanel extends JPanel {
 						.replace("\t", HTML_TAB)
 				+ "</body></html>");
 		isValid = false;
-		saveMappingButton.setEnabled(false);
 		saveMappingAction.setEnabled(false);
 	}
 
