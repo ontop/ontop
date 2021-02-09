@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.protege.gui.models.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.apache.commons.rdf.api.IRI;
@@ -43,7 +42,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.*;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -58,19 +56,21 @@ public class NewMappingDialogPanel extends JPanel {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(NewMappingDialogPanel.class);
 
+	private static final int MAX_ROWS = 100;
+
 	@Nullable
 	private final String id; // null means creating a new mapping
 
 	private final OBDAModelManager obdaModelManager;
-	private final JDialog parent;
+	private final JDialog dialog;
 
-	private final TargetQueryStyledDocument targetDocument;
+	private final TargetQueryStyledDocument targetQueryDocument;
 
-	private final JButton cmdInsertMapping;
-	private final JTable tblQueryResult;
-	private final JTextField txtMappingID;
-	private final JTextPane txtTargetQuery;
-	private final JTextPane txtSourceQuery;
+	private final JButton saveMappingButton;
+	private final JTable sqlQueryResultTable;
+	private final JTextField mappingIdField;
+	private final JTextPane targetQueryTextPane;
+	private final JTextPane sourceQueryTextPane;
 
 	private final Border defaultBorder;
 	private final Border errorBorder;
@@ -80,9 +80,7 @@ public class NewMappingDialogPanel extends JPanel {
 	private static final int ERROR_TOOLTIP_INITIAL_DELAY = 100;
 	private static final int ERROR_TOOLTIP_DISMISS_DELAY = 9000;
 
-	private final Action testSqlAction;
-	private final Action storeMappingAction;
-	private final Action cancelAction;
+	private final Action saveMappingAction;
 
 	private boolean allComponentsNonEmpty = false, isValid = false;
 
@@ -90,19 +88,19 @@ public class NewMappingDialogPanel extends JPanel {
 		this(obdaModelManager,null, "New Mapping", "Create",
 				"Add the triples map to the current mapping");
 
-		txtMappingID.setText(id);
+		mappingIdField.setText(id);
 	}
 
 	public NewMappingDialogPanel(OBDAModelManager obdaModelManager, SQLPPTriplesMap mapping) {
 		this(obdaModelManager, mapping.getId(), "Edit Mapping", "Update",
 				"Update the triples map in the current mapping");
 
-		txtMappingID.setText(mapping.getId());
+		mappingIdField.setText(mapping.getId());
 
-		txtSourceQuery.setText(mapping.getSourceQuery().getSQL());
+		sourceQueryTextPane.setText(mapping.getSourceQuery().getSQL());
 
 		String trgQuery = obdaModelManager.getActiveOBDAModel().getTargetRendering(mapping);
-		txtTargetQuery.setText(trgQuery);
+		targetQueryTextPane.setText(trgQuery);
 		targetValidation();
 	}
 
@@ -110,24 +108,24 @@ public class NewMappingDialogPanel extends JPanel {
 		this.obdaModelManager = obdaModelManager;
 		this.id = id;
 
-		testSqlAction = new AbstractAction("Test SQL Query") {
+		saveMappingAction = new AbstractAction("Save") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				testSqlQuery();
+				saveMapping();
 			}
 		};
 
-		storeMappingAction = new AbstractAction("OK") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				storeMapping();
-			}
-		};
-
-		cancelAction = new AbstractAction("Cancel") {
+		Action cancelAction = new AbstractAction("Cancel") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				closeDialog();
+			}
+		};
+
+		Action testSqlQueryAction = new AbstractAction("Test SQL") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				testSqlQuery();
 			}
 		};
 
@@ -141,94 +139,103 @@ public class NewMappingDialogPanel extends JPanel {
 						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 						new Insets(8, 10, 8, 0), 0, 0));
 
-		txtMappingID = new JTextField();
-		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
-		setKeyboardShortcuts(txtMappingID);
-		add(txtMappingID, new GridBagConstraints(1, 0, 1, 1, 0, 0,
+		mappingIdField = new JTextField();
+		mappingIdField.setFont(new Font("Dialog", Font.BOLD, 12));
+		setKeyboardShortcuts(mappingIdField);
+		add(mappingIdField, new GridBagConstraints(1, 0, 1, 1, 0, 0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(8, 0, 8, 10), 0, 0));
 
-		JPanel pnlTargetQueryEditor = new JPanel(new BorderLayout());
-		pnlTargetQueryEditor.add(new JLabel("Target (Triples Template):"), BorderLayout.NORTH);
-		txtTargetQuery = new JTextPane();
-		txtTargetQuery.setBorder(defaultBorder);
+		JPanel targetQueryPanel = new JPanel(new BorderLayout());
+		targetQueryPanel.add(new JLabel("Target (Triples Template):"), BorderLayout.NORTH);
+		targetQueryTextPane = new JTextPane();
+		targetQueryTextPane.setBorder(defaultBorder);
 		Timer timer = new Timer(1000, e -> targetValidation());
 		timer.setRepeats(false);
-		targetDocument = new TargetQueryStyledDocument(obdaModelManager, d -> timer.restart());
-		txtTargetQuery.setDocument(targetDocument);
-		setKeyboardShortcuts(txtTargetQuery);
-		pnlTargetQueryEditor.add(new JScrollPane(txtTargetQuery), BorderLayout.CENTER);
+		targetQueryDocument = new TargetQueryStyledDocument(obdaModelManager, d -> timer.restart());
+		targetQueryTextPane.setDocument(targetQueryDocument);
+		setKeyboardShortcuts(targetQueryTextPane);
+		targetQueryPanel.add(new JScrollPane(targetQueryTextPane), BorderLayout.CENTER);
 
-		JPanel pnlSourceQueryEditor = new JPanel(new BorderLayout());
-		pnlSourceQueryEditor.add(new JLabel("Source (SQL Query):"), BorderLayout.NORTH);
-		txtSourceQuery = new JTextPane();
-		txtSourceQuery.setBorder(defaultBorder);
-		txtSourceQuery.setDocument(new SQLQueryStyledDocument());
-		setKeyboardShortcuts(txtSourceQuery);
-		pnlSourceQueryEditor.add(new JScrollPane(txtSourceQuery), BorderLayout.CENTER);
+		JPanel sourceQueryPanel = new JPanel(new BorderLayout());
+		sourceQueryPanel.add(new JLabel("Source (SQL Query):"), BorderLayout.NORTH);
+		sourceQueryTextPane = new JTextPane();
+		sourceQueryTextPane.setBorder(defaultBorder);
+		sourceQueryTextPane.setDocument(new SQLQueryStyledDocument());
+		setKeyboardShortcuts(sourceQueryTextPane);
+		sourceQueryPanel.add(new JScrollPane(sourceQueryTextPane), BorderLayout.CENTER);
 
-		JPanel pnlQueryResult = new JPanel(new BorderLayout());
-		pnlQueryResult.add(new JLabel("SQL Query results:"), BorderLayout.NORTH);
-		tblQueryResult = new JTable();
-		tblQueryResult.setFocusable(false);
-		pnlQueryResult.add(new JScrollPane(tblQueryResult), BorderLayout.CENTER);
+		JPanel sqlQueryResultPanel = new JPanel(new BorderLayout());
+		sqlQueryResultPanel.add(new JLabel("SQL Query results:"), BorderLayout.NORTH);
+		sqlQueryResultTable = new JTable();
+		sqlQueryResultTable.setFocusable(false);
+		sqlQueryResultPanel.add(new JScrollPane(sqlQueryResultTable), BorderLayout.CENTER);
 
-		JSplitPane splitSQL = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				pnlSourceQueryEditor,
-				pnlQueryResult);
-		splitSQL.setResizeWeight(0.6);
-		splitSQL.setOneTouchExpandable(true);
+		JSplitPane sqlSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				sourceQueryPanel,
+				sqlQueryResultPanel);
+		sqlSplitPane.setResizeWeight(0.6);
+		sqlSplitPane.setOneTouchExpandable(true);
 
-		JSplitPane splitTargetSource = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				pnlTargetQueryEditor,
-				splitSQL);
-		splitTargetSource.setResizeWeight(0.5);
-		splitTargetSource.setOneTouchExpandable(true);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				targetQueryPanel,
+				sqlSplitPane);
+		splitPane.setResizeWeight(0.5);
+		splitPane.setOneTouchExpandable(true);
 
-		add(splitTargetSource, new GridBagConstraints(0, 2, 2, 1, 1, 1,
+		add(splitPane, new GridBagConstraints(0, 2, 2, 1, 1, 1,
 				GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
 				new Insets(0, 10, 0, 10), 0, 0));
 
-		JPanel pnlTestButton = new JPanel();
-		JButton cmdTestQuery = getButton("<html><u>T</u>est SQL Query</html>", "execute.png", "Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.");
-		cmdTestQuery.addActionListener(testSqlAction);
-		pnlTestButton.add(cmdTestQuery);
-		pnlTestButton.add(new JLabel("(100 rows)"));
-		add(pnlTestButton,
+		JPanel testSqlQueryPanel = new JPanel(new FlowLayout());
+		JButton testSqlQueryButton = getButton("<html><u>T</u>est SQL Query</html>", "execute.png", "Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.");
+		testSqlQueryButton.addActionListener(testSqlQueryAction);
+		testSqlQueryPanel.add(testSqlQueryButton);
+		testSqlQueryPanel.add(new JLabel("(" + MAX_ROWS + " rows)"));
+		add(testSqlQueryPanel,
 				new GridBagConstraints(0, 5, 1, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.NONE,
 						new Insets(4, 10, 0, 0), 0, 0));
 
-		JPanel pnlCommandButton = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-		cmdInsertMapping = getButton(buttonText, "accept.png", buttonTooltip);
-		cmdInsertMapping.setEnabled(false);
-		cmdInsertMapping.addActionListener(storeMappingAction);
-		pnlCommandButton.add(cmdInsertMapping);
+		saveMappingButton = getButton(buttonText, "accept.png", buttonTooltip);
+		saveMappingButton.setEnabled(false);
+		saveMappingButton.addActionListener(saveMappingAction);
+		buttonsPanel.add(saveMappingButton);
 
-		JButton cmdCancel = getButton("Cancel", "cancel.png", null);
-		cmdCancel.addActionListener(cancelAction);
-		pnlCommandButton.add(cmdCancel);
+		JButton cancelButton = getButton("Cancel", "cancel.png", null);
+		cancelButton.addActionListener(cancelAction);
+		buttonsPanel.add(cancelButton);
 
-		add(pnlCommandButton, new GridBagConstraints(0, 7, 2, 1, 0, 0,
+		add(buttonsPanel, new GridBagConstraints(0, 7, 2, 1, 0, 0,
 				GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 				new Insets(0, 0, 10, 4), 0, 0));
 
 		InputMap inputMap = getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		inputMap.put(KeyStroke.getKeyStroke(VK_T, CTRL_DOWN_MASK), "test");
-		inputMap.put(KeyStroke.getKeyStroke(VK_ENTER, CTRL_DOWN_MASK), "store");
+		inputMap.put(KeyStroke.getKeyStroke(VK_ENTER, CTRL_DOWN_MASK), "save");
 		ActionMap actionMap = getActionMap();
-		actionMap.put("test", testSqlAction);
-		actionMap.put("store", storeMappingAction);
+		actionMap.put("test", testSqlQueryAction);
+		actionMap.put("save", saveMappingAction);
 
-		this.parent = new JDialog();
-		parent.setTitle(title);
-		parent.setModal(true);
-		parent.setContentPane(this);
-		parent.setSize(700, 600);
-		DialogUtils.installEscapeCloseOperation(parent);
+		this.dialog = new JDialog();
+		dialog.setTitle(title);
+		dialog.setModal(true);
+		dialog.setContentPane(this);
+		dialog.setSize(700, 600);
+		DialogUtils.installEscapeCloseOperation(dialog);
 	}
 
+	public void openDialog(JComponent window) {
+		dialog.setLocationRelativeTo(window);
+		dialog.setVisible(true);
+	}
+
+	private void closeDialog() {
+		dialog.setVisible(false);
+		dialog.dispose();
+	}
 
 	private void setKeyboardShortcuts(JTextComponent component) {
 		component.setFocusTraversalKeys(
@@ -239,69 +246,94 @@ public class NewMappingDialogPanel extends JPanel {
 				ImmutableSet.of(KeyStroke.getKeyStroke(VK_TAB, SHIFT_DOWN_MASK)));
 
 		component.getDocument().addDocumentListener(new DocumentListener() {
-			@Override public void insertUpdate(DocumentEvent e) { updateStoreActionStatus(); }
-			@Override public void removeUpdate(DocumentEvent e) { updateStoreActionStatus(); }
-			@Override public void changedUpdate(DocumentEvent e) { updateStoreActionStatus(); }
+			@Override public void insertUpdate(DocumentEvent e) { updateSaveMappingActionStatus(); }
+			@Override public void removeUpdate(DocumentEvent e) { updateSaveMappingActionStatus(); }
+			@Override public void changedUpdate(DocumentEvent e) { updateSaveMappingActionStatus(); }
 		});
 	}
 
-	private void updateStoreActionStatus() {
-		allComponentsNonEmpty = !txtMappingID.getText().trim().isEmpty()
-				&& !txtTargetQuery.getText().trim().isEmpty()
-				&& !txtSourceQuery.getText().trim().isEmpty();
+	private void updateSaveMappingActionStatus() {
+		allComponentsNonEmpty = !mappingIdField.getText().trim().isEmpty()
+				&& !targetQueryTextPane.getText().trim().isEmpty()
+				&& !sourceQueryTextPane.getText().trim().isEmpty();
 
-		storeMappingAction.setEnabled(isValid && allComponentsNonEmpty);
-		cmdInsertMapping.setEnabled(isValid && allComponentsNonEmpty);
+		saveMappingAction.setEnabled(isValid && allComponentsNonEmpty);
+		saveMappingButton.setEnabled(isValid && allComponentsNonEmpty);
 	}
 
 	private void targetValidation() {
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
 		String error;
 		try {
-			ImmutableSet<IRI> iris = targetDocument.validate();
+			ImmutableSet<IRI> iris = targetQueryDocument.validate();
 			if (iris.isEmpty()) {
 				if (!isValid) {
 					isValid = true;
-					storeMappingAction.setEnabled(allComponentsNonEmpty);
-					cmdInsertMapping.setEnabled(allComponentsNonEmpty);
-					txtTargetQuery.setToolTipText(null);
-					txtTargetQuery.setBorder(BorderFactory.createCompoundBorder(null, defaultBorder));
+					saveMappingAction.setEnabled(allComponentsNonEmpty);
+					saveMappingButton.setEnabled(allComponentsNonEmpty);
+					targetQueryTextPane.setToolTipText(null);
+					targetQueryTextPane.setBorder(BorderFactory.createCompoundBorder(null, defaultBorder));
 					toolTipManager.setInitialDelay(DEFAULT_TOOLTIP_INITIAL_DELAY);
 					toolTipManager.setDismissDelay(DEFAULT_TOOLTIP_DISMISS_DELAY);
 				}
 				return;
 			}
 			MutablePrefixManager prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
-			error = "The following predicates are not declared in the ontology:\n "
-					+ iris.stream()
+			error = iris.stream()
 					.map(IRI::getIRIString)
 					.map(prefixManager::getShortForm)
 					.map(iri -> "\t- " + iri)
-					.collect(Collectors.joining(",\n")) + ".";
+					.collect(Collectors.joining(
+							",\n",
+							"The following predicates are not declared in the ontology:\n",
+							"."));
 		}
 		catch (TargetQueryParserException e) {
 			error = (e.getMessage() == null)
-					? "Syntax error, check LOGGER"
+					? "Unknown syntax error, check Protege log file."
 					: e.getMessage().replace("'<EOF>'", "the end");
 		}
-		txtTargetQuery.setBorder(BorderFactory.createCompoundBorder(null, errorBorder));
+		targetQueryTextPane.setBorder(BorderFactory.createCompoundBorder(null, errorBorder));
 		toolTipManager.setInitialDelay(ERROR_TOOLTIP_INITIAL_DELAY);
 		toolTipManager.setDismissDelay(ERROR_TOOLTIP_DISMISS_DELAY);
-		txtTargetQuery.setToolTipText("<html><body>" +
+		targetQueryTextPane.setToolTipText("<html><body>" +
 				error.replace("<", "&lt;")
 						.replace(">", "&gt;")
 						.replace("\n", "<br>")
 						.replace("\t", HTML_TAB)
 				+ "</body></html>");
 		isValid = false;
-		cmdInsertMapping.setEnabled(false);
-		storeMappingAction.setEnabled(false);
+		saveMappingButton.setEnabled(false);
+		saveMappingAction.setEnabled(false);
 	}
 
+	private void saveMapping() {
+		try {
+			String newId = mappingIdField.getText().trim();
+			String target = targetQueryTextPane.getText();
+			String source = sourceQueryTextPane.getText().trim();
+			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
 
+			ImmutableList<TargetAtom> targetQuery = obdaModel.parseTargetQuery(target);
+			LOGGER.info("Insert Mapping: \n"+ target + "\n" + source);
+
+			if (id == null)
+				obdaModel.add(newId, source, targetQuery);
+			else
+				obdaModel.update(id, newId, source, targetQuery);
+
+			closeDialog();
+		}
+		catch (DuplicateMappingException e) {
+			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage());
+		}
+	}
 
 	private void testSqlQuery() {
-		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(parent);
+		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(dialog);
 		worker.execute();
 	}
 
@@ -326,8 +358,8 @@ public class NewMappingDialogPanel extends JPanel {
 			OBDADataSource dataSource = obdaModelManager.getDatasource();
 			try (Connection conn = man.getConnection(dataSource.getURL(), dataSource.getUsername(), dataSource.getPassword())) {
 				statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-				statement.setMaxRows(100);
-				try (ResultSet rs = statement.executeQuery(txtSourceQuery.getText().trim())) {
+				statement.setMaxRows(MAX_ROWS);
+				try (ResultSet rs = statement.executeQuery(sourceQueryTextPane.getText().trim())) {
 					ResultSetMetaData metadata = rs.getMetaData();
 					int numcols = metadata.getColumnCount();
 					String[] columns = new String[numcols];
@@ -356,49 +388,14 @@ public class NewMappingDialogPanel extends JPanel {
 		public void done() {
 			try {
 				DefaultTableModel tableModel = complete();
-				tblQueryResult.setModel(tableModel);
+				sqlQueryResultTable.setModel(tableModel);
 			}
 			catch (CancellationException | InterruptedException ignore) {
 			}
 			catch (ExecutionException e) {
-				DialogUtils.showErrorDialog(parent, "Edit Mapping", "Executing SQL query error.", LOGGER, e,
+				DialogUtils.showErrorDialog(dialog, dialog.getTitle(), "Executing SQL query error.", LOGGER, e,
 						obdaModelManager.getDatasource());
 			}
 		}
-	}
-
-	private void storeMapping() {
-		try {
-			String newId = txtMappingID.getText().trim();
-			String target = txtTargetQuery.getText();
-			String source = txtSourceQuery.getText().trim();
-			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
-
-			ImmutableList<TargetAtom> targetQuery = obdaModel.parseTargetQuery(target);
-			LOGGER.info("Insert Mapping: \n"+ target + "\n" + source);
-
-			if (id == null)
-				obdaModel.add(newId, source, targetQuery);
-			else
-				obdaModel.update(id, newId, source, targetQuery);
-
-			closeDialog();
-		}
-		catch (DuplicateMappingException e) {
-			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
-		}
-		catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage());
-		}
-	}
-
-	public void openDialog(JComponent window) {
-		parent.setLocationRelativeTo(window);
-		parent.setVisible(true);
-	}
-
-	private void closeDialog() {
-		parent.setVisible(false);
-		parent.dispose();
 	}
 }
