@@ -35,7 +35,7 @@ public class JsonForeignKey extends JsonOpenObject  {
                 .map(ForeignKeyConstraint.Component::getReferencedAttribute));
     }
 
-    public void insert(DatabaseTableDefinition relation, MetadataLookup lookup) throws MetadataExtractionException {
+    public void insert(NamedRelationDefinition relation, MetadataLookup lookup) throws MetadataExtractionException {
 
         ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, relation,
                 lookup.getRelation(JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), to.relation)));

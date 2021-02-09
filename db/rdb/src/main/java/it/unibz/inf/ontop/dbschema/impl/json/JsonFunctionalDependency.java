@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class JsonFunctionalDependency extends JsonOpenObject {
         this.dependents = JsonMetadata.serializeAttributeList(fd.getDependents().stream());
     }
 
-    public void insert(DatabaseTableDefinition relation, QuotedIDFactory idFactory) throws MetadataExtractionException {
+    public void insert(NamedRelationDefinition relation, QuotedIDFactory idFactory) throws MetadataExtractionException {
         FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
         JsonMetadata.deserializeAttributeList(idFactory, determinants, builder::addDeterminant);
         JsonMetadata.deserializeAttributeList(idFactory, dependents, builder::addDependent);
