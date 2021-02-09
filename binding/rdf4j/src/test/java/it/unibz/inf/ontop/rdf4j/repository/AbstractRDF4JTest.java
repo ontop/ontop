@@ -49,7 +49,7 @@ public class AbstractRDF4JTest {
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath, @Nullable String propertyFile,
                                    @Nullable String viewFile) throws SQLException, IOException {
-        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, propertyFile, null, null);
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, propertyFile, viewFile, null);
     }
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
