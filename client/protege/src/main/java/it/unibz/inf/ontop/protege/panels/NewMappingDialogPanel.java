@@ -137,14 +137,14 @@ public class NewMappingDialogPanel extends JPanel {
 		add(new JLabel("Mapping ID:"),
 				new GridBagConstraints(0, 0, 1, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-						new Insets(8, 10, 8, 0), 0, 0));
+						new Insets(8, 10, 8, 10), 0, 0));
 
 		mappingIdField = new JTextField();
-		mappingIdField.setFont(new Font("Dialog", Font.BOLD, 12));
+		mappingIdField.setFont(TargetQueryStyledDocument.TARGET_QUERY_FONT);
 		setKeyboardShortcuts(mappingIdField);
 		add(mappingIdField, new GridBagConstraints(1, 0, 1, 1, 0, 0,
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-				new Insets(8, 0, 8, 10), 0, 0));
+				new Insets(8, 10, 8, 10), 0, 0));
 
 		JPanel targetQueryPanel = new JPanel(new BorderLayout());
 		targetQueryPanel.add(new JLabel("Target (Triples Template):"), BorderLayout.NORTH);
@@ -187,14 +187,14 @@ public class NewMappingDialogPanel extends JPanel {
 				GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
 				new Insets(0, 10, 0, 10), 0, 0));
 
-		JPanel testSqlQueryPanel = new JPanel(new FlowLayout());
+		JPanel testSqlQueryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JButton testSqlQueryButton = getButton("<html><u>T</u>est SQL Query</html>", "execute.png", "Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.");
 		testSqlQueryButton.addActionListener(testSqlQueryAction);
 		testSqlQueryPanel.add(testSqlQueryButton);
 		testSqlQueryPanel.add(new JLabel("(" + MAX_ROWS + " rows)"));
 		add(testSqlQueryPanel,
-				new GridBagConstraints(0, 5, 1, 1, 0, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.NONE,
+				new GridBagConstraints(0, 5, 2, 1, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(4, 10, 0, 0), 0, 0));
 
 		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -209,7 +209,7 @@ public class NewMappingDialogPanel extends JPanel {
 		buttonsPanel.add(cancelButton);
 
 		add(buttonsPanel, new GridBagConstraints(0, 7, 2, 1, 0, 0,
-				GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 				new Insets(0, 0, 10, 4), 0, 0));
 
 		InputMap inputMap = getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);

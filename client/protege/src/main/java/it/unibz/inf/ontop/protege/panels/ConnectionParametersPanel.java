@@ -29,7 +29,6 @@ import org.protege.osgi.jdbc.preferences.JDBCDriverInfo;
 import org.protege.osgi.jdbc.preferences.JDBCDriverTableModel;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
