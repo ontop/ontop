@@ -6,7 +6,27 @@
       "isPrimaryKey" : true
     } ],
     "otherFunctionalDependencies" : [ ],
-    "foreignKeys" : [ ],
+    "foreignKeys" : [
+      {
+        "to": {
+          "columns": [
+            "\"id\""
+          ],
+          "relation": [
+            "\"entity\""
+          ]
+        },
+        "from": {
+          "columns": [
+            "\"id\""
+          ],
+          "relation": [
+            "\"person\""
+          ]
+        },
+        "name": "entity-fkey"
+      }
+    ],
     "columns" : [ {
       "name" : "\"id\"",
       "datatype" : "INTEGER",
@@ -47,7 +67,23 @@
       "isNullable" : false
     } ],
     "name" : ["\"statuses\""]
-  } ],
+  },
+    {
+      "uniqueConstraints" : [ {
+        "name" : "CONSTRAINT_D",
+        "determinants" : [ "\"id\"" ],
+        "isPrimaryKey" : true
+      } ],
+      "otherFunctionalDependencies" : [ ],
+      "foreignKeys" : [ ],
+      "columns" : [ {
+        "name" : "\"id\"",
+        "datatype" : "INTEGER",
+        "isNullable" : false
+      }],
+      "name" : ["\"entity\""]
+    }
+  ],
   "metadata" : {
     "dbmsProductName" : "H2",
     "dbmsVersion" : "1.4.199 (2019-03-13)",
