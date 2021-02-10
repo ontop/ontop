@@ -24,7 +24,9 @@ import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.gui.dialogs.EditMappingDialog;
 import it.unibz.inf.ontop.protege.gui.dialogs.MappingValidationDialog;
+import it.unibz.inf.ontop.protege.gui.dialogs.SQLQueryDialog;
 import it.unibz.inf.ontop.protege.gui.models.*;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -292,10 +294,10 @@ public class MappingManagerPanel extends JPanel {
     }
 
 
-
     public void editMapping(SQLPPTriplesMap mapping) {
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, mapping);
-		panel.openDialog(this);
+		EditMappingDialog dialog = new EditMappingDialog(obdaModelManager, mapping);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
 	}
 
     private void validateMapping(List<SQLPPTriplesMap> selectionList) {
@@ -423,8 +425,10 @@ public class MappingManagerPanel extends JPanel {
 	}
 
     private void createMapping() {
-        String id = IDGenerator.getNextUniqueID("MAPID-");
-        NewMappingDialogPanel panel = new NewMappingDialogPanel(obdaModelManager, id);
-        panel.openDialog(this);
+        EditMappingDialog dialog = new EditMappingDialog(
+                obdaModelManager,
+                IDGenerator.getNextUniqueID("MAPID-"));
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 }

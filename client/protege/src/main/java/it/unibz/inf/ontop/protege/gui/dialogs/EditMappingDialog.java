@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.panels;
+package it.unibz.inf.ontop.protege.gui.dialogs;
 
 /*
  * #%L
@@ -45,12 +45,13 @@ import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.getButton;
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 import static java.awt.event.KeyEvent.*;
+import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 
-public class NewMappingDialogPanel extends JPanel {
+public class EditMappingDialog extends JDialog {
 
 	private static final long serialVersionUID = 4351696247473906680L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(NewMappingDialogPanel.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(EditMappingDialog.class);
 
 	private static final int MAX_ROWS = 100;
 
@@ -58,7 +59,6 @@ public class NewMappingDialogPanel extends JPanel {
 	private final String id; // null means creating a new mapping
 
 	private final OBDAModelManager obdaModelManager;
-	private final JDialog dialog;
 
 	private final TargetQueryStyledDocument targetQueryDocument;
 
@@ -79,16 +79,14 @@ public class NewMappingDialogPanel extends JPanel {
 
 	private boolean allComponentsNonEmpty = false, isValid = false;
 
-	public NewMappingDialogPanel(OBDAModelManager obdaModelManager, String id) {
-		this(obdaModelManager,null, "New Mapping", "Create",
-				"Add the triples map to the current mapping");
+	public EditMappingDialog(OBDAModelManager obdaModelManager, String id) {
+		this(obdaModelManager, null, "New Mapping", "Create");
 
 		mappingIdField.setText(id);
 	}
 
-	public NewMappingDialogPanel(OBDAModelManager obdaModelManager, SQLPPTriplesMap mapping) {
-		this(obdaModelManager, mapping.getId(), "Edit Mapping", "Update",
-				"Update the triples map in the current mapping");
+	public EditMappingDialog(OBDAModelManager obdaModelManager, SQLPPTriplesMap mapping) {
+		this(obdaModelManager, mapping.getId(), "Edit Mapping", "Update");
 
 		mappingIdField.setText(mapping.getId());
 
@@ -99,7 +97,7 @@ public class NewMappingDialogPanel extends JPanel {
 		targetValidation();
 	}
 
-	private NewMappingDialogPanel(OBDAModelManager obdaModelManager, String id, String title, String buttonText, String buttonTooltip) {
+	private EditMappingDialog(OBDAModelManager obdaModelManager, String id, String title, String buttonText) {
 		this.obdaModelManager = obdaModelManager;
 		this.id = id;
 
@@ -113,7 +111,7 @@ public class NewMappingDialogPanel extends JPanel {
 		Action cancelAction = new AbstractAction("Cancel") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				closeDialog();
+				dispose();
 			}
 		};
 
@@ -124,12 +122,15 @@ public class NewMappingDialogPanel extends JPanel {
 			}
 		};
 
+		setTitle(title);
+		setModal(true);
+
 		defaultBorder = BorderFactory.createMatteBorder(1, 1, 1, 1, Color.LIGHT_GRAY);
 		errorBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Color.RED);
 
-		setLayout(new GridBagLayout());
+		JPanel mainPanel = new JPanel(new GridBagLayout());
 
-		add(new JLabel("Mapping ID:"),
+		mainPanel.add(new JLabel("Mapping ID:"),
 				new GridBagConstraints(0, 0, 1, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 						new Insets(8, 10, 8, 10), 0, 0));
@@ -137,7 +138,7 @@ public class NewMappingDialogPanel extends JPanel {
 		mappingIdField = new JTextField();
 		mappingIdField.setFont(TargetQueryStyledDocument.TARGET_QUERY_FONT);
 		setKeyboardShortcuts(mappingIdField);
-		add(mappingIdField,
+		mainPanel.add(mappingIdField,
 				new GridBagConstraints(1, 0, 1, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(8, 10, 8, 10), 0, 0));
@@ -179,9 +180,10 @@ public class NewMappingDialogPanel extends JPanel {
 		splitPane.setResizeWeight(0.5);
 		splitPane.setOneTouchExpandable(true);
 
-		add(splitPane, new GridBagConstraints(0, 1, 2, 1, 1, 1,
-				GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
-				new Insets(0, 10, 0, 10), 0, 0));
+		mainPanel.add(splitPane,
+				new GridBagConstraints(0, 1, 2, 1, 1, 1,
+						GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
+						new Insets(0, 10, 0, 10), 0, 0));
 
 		JPanel testSqlQueryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JButton testSqlQueryButton = getButton(
@@ -191,7 +193,7 @@ public class NewMappingDialogPanel extends JPanel {
 				executeSqlQueryAction);
 		testSqlQueryPanel.add(testSqlQueryButton);
 		testSqlQueryPanel.add(new JLabel("(" + MAX_ROWS + " rows)"));
-		add(testSqlQueryPanel,
+		mainPanel.add(testSqlQueryPanel,
 				new GridBagConstraints(0, 2, 2, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(4, 10, 0, 0), 0, 0));
@@ -199,33 +201,22 @@ public class NewMappingDialogPanel extends JPanel {
 		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		buttonsPanel.add(new JButton(saveMappingAction));
 		buttonsPanel.add(new JButton(cancelAction));
-		add(buttonsPanel, new GridBagConstraints(0, 3, 2, 1, 0, 0,
-				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-				new Insets(0, 0, 10, 4), 0, 0));
+		mainPanel.add(buttonsPanel,
+				new GridBagConstraints(0, 3, 2, 1, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+						new Insets(0, 0, 10, 4), 0, 0));
 
-		InputMap inputMap = getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		InputMap inputMap = mainPanel.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		inputMap.put(KeyStroke.getKeyStroke(VK_X, CTRL_DOWN_MASK), "execute");
 		inputMap.put(KeyStroke.getKeyStroke(VK_ENTER, CTRL_DOWN_MASK), "save");
-		ActionMap actionMap = getActionMap();
+		ActionMap actionMap = mainPanel.getActionMap();
 		actionMap.put("execute", executeSqlQueryAction);
 		actionMap.put("save", saveMappingAction);
 
-		this.dialog = new JDialog();
-		dialog.setTitle(title);
-		dialog.setModal(true);
-		dialog.setContentPane(this);
-		dialog.setSize(700, 600);
-		DialogUtils.installEscapeCloseOperation(dialog);
-	}
+		setContentPane(mainPanel);
 
-	public void openDialog(JComponent window) {
-		dialog.setLocationRelativeTo(window);
-		dialog.setVisible(true);
-	}
-
-	private void closeDialog() {
-		dialog.setVisible(false);
-		dialog.dispose();
+		setSize(700, 600);
+		DialogUtils.installEscapeCloseOperation(this);
 	}
 
 	private void setKeyboardShortcuts(JTextComponent component) {
@@ -310,7 +301,7 @@ public class NewMappingDialogPanel extends JPanel {
 			else
 				obdaModel.update(id, newId, source, targetQuery);
 
-			closeDialog();
+			dispose();
 		}
 		catch (DuplicateMappingException e) {
 			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
@@ -322,7 +313,7 @@ public class NewMappingDialogPanel extends JPanel {
 
 	private void executeSqlQuery() {
 		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
-				dialog,
+				this,
 				obdaModelManager.getDatasource(),
 				sourceQueryTextPane.getText().trim(),
 				MAX_ROWS,

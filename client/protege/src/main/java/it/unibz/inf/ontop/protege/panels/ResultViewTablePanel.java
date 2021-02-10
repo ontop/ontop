@@ -21,12 +21,12 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.protege.utils.IconLoader;
-import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
-import it.unibz.inf.ontop.protege.gui.action.OBDASaveQueryResultToFileAction;
+import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.io.File;
+import java.util.function.Consumer;
 
 public class ResultViewTablePanel extends JPanel {
 
@@ -34,7 +34,7 @@ public class ResultViewTablePanel extends JPanel {
 
 	private OBDADataQueryAction<Long> countAllTuplesAction;
 	private final QueryInterfacePanel querypanel;
-	private OBDASaveQueryResultToFileAction saveToFileAction;
+	private Consumer<String> saveToFileAction;
 
 	/**
 	 * Creates new form ResultViewTablePanel
@@ -134,7 +134,7 @@ public class ResultViewTablePanel extends JPanel {
 			File targetFile = fileChooser.getSelectedFile();
 			String fileLocation = targetFile.getPath();
 			if (canWrite(targetFile)) {
-				Thread thread = new Thread(() -> saveToFileAction.run(fileLocation));
+				Thread thread = new Thread(() -> saveToFileAction.accept(fileLocation));
 				thread.start();
 			}
 		}
@@ -218,7 +218,7 @@ public class ResultViewTablePanel extends JPanel {
 		this.countAllTuplesAction = countAllTuples;
 	}
 
-	public void setOBDASaveQueryToFileAction(OBDASaveQueryResultToFileAction action){
+	public void setOBDASaveQueryToFileAction(Consumer<String> action){
 		this.saveToFileAction = action;
 	}
 

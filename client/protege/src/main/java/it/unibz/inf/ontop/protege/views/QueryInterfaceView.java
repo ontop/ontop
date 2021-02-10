@@ -29,14 +29,14 @@ import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
-import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
+import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
 import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
-import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
+import it.unibz.inf.ontop.protege.gui.dialogs.TextMessageDialog;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -396,14 +396,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         }
         OBDADataQueryAction<?> action = queryEditorPanel.getRetrieveUCQExpansionAction();
         SwingUtilities.invokeLater(() -> {
-            TextMessageFrame panel = new TextMessageFrame(title);
+            TextMessageDialog dialog = new TextMessageDialog(title, result, String.format("Amount of processing time: %s sec", action.getExecutionTime()/1000));
             JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-            DialogUtils.centerDialogWRTParent(protegeFrame, panel);
-            DialogUtils.installEscapeCloseOperation(panel);
-            panel.setTextMessage(result);
-
-            panel.setTimeProcessingMessage(String.format("Amount of processing time: %s sec", action.getExecutionTime()/1000));
-            panel.setVisible(true);
+            DialogUtils.centerDialogWRTParent(protegeFrame, dialog);
+            dialog.setVisible(true);
         });
     }
 
@@ -415,15 +411,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     }
 
 
-    private int showTupleResultInTablePanel() {
-        OWLResultSetTableModel currentTableModel = tableModel;
-        if (currentTableModel != null) {
-            SwingUtilities.invokeLater(() -> resultTablePanel.setTableModel(currentTableModel));
-            return currentTableModel.getRowCount();
-        }
-        else {
-            return 0;
-        }
+    private void showTupleResultInTablePanel() {
+        if (tableModel != null)
+            SwingUtilities.invokeLater(() -> resultTablePanel.setTableModel(tableModel));
     }
 
 
@@ -453,11 +443,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
     private synchronized void showGraphResultInTextPanel(String s) {
         SwingUtilities.invokeLater(() -> {
-            TextMessageFrame panel = new TextMessageFrame("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result");
+            TextMessageDialog panel = new TextMessageDialog("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result", s, "");
             JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
             DialogUtils.centerDialogWRTParent(protegeFrame, panel);
-            DialogUtils.installEscapeCloseOperation(panel);
-            panel.setTextMessage(s);
             panel.setVisible(true);
         });
     }
