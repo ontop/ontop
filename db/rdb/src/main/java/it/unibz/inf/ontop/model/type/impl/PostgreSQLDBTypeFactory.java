@@ -65,7 +65,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
         DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(),
-                WITH_ALL);
+                WITH_ALL, false);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);
