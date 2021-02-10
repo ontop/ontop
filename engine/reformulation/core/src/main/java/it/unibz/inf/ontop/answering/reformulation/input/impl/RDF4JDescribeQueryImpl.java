@@ -148,8 +148,17 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> impleme
 
     @Override
     public ConstructTemplate getConstructTemplate() {
-        if (constructTemplate == null)
-            throw new IllegalStateException("Please make to reformulate the query before calling this method");
+
+        // May happen due to the caching of the IQ
+        if (constructTemplate == null) {
+            try {
+                transformParsedQuery();
+                return constructTemplate;
+            } catch (OntopUnsupportedInputQueryException e) {
+                throw new IllegalStateException("The fact that this query is not supported should have been detected " +
+                        "while reformulating the query.");
+            }
+        }
 
         return constructTemplate;
     }
