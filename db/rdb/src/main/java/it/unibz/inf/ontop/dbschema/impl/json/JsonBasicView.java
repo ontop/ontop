@@ -60,6 +60,8 @@ public class JsonBasicView extends JsonView {
     @Nonnull
     public final List<String> baseRelation;
     @Nonnull
+    public final String filterExpression;
+    @Nonnull
     public final UniqueConstraints uniqueConstraints;
     @Nonnull
     public final OtherFunctionalDependencies otherFunctionalDependencies;
@@ -71,12 +73,14 @@ public class JsonBasicView extends JsonView {
     @JsonCreator
     public JsonBasicView(@JsonProperty("columns") Columns columns, @JsonProperty("name") List<String> name,
                          @JsonProperty("baseRelation") List<String> baseRelation,
+                         @JsonProperty("filterExpression") String filterExpression,
                          @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                          @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
                          @JsonProperty("foreignKeys") ForeignKeys foreignKeys) {
         super(name);
         this.columns = columns;
         this.baseRelation = baseRelation;
+        this.filterExpression = filterExpression;
         this.uniqueConstraints = uniqueConstraints;
         this.otherFunctionalDependencies = otherFunctionalDependencies;
         this.foreignKeys = foreignKeys;
