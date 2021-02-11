@@ -24,11 +24,13 @@ import org.protege.editor.core.Disposable;
 
 import java.util.Properties;
 
+/**
+ * Properties need to be Disposable to store them in an EditorKit
+ */
+
 public class DisposableProperties extends Properties implements Disposable {
 
 	private static final long serialVersionUID = -1699795366967423089L;
-
-	public DisposableProperties() { }
 
 	@Override
     public void dispose() { /* NO-OP */ }

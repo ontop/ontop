@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.protege.gui.dialogs.EditMappingDialog;
 import it.unibz.inf.ontop.protege.gui.dialogs.SQLQueryDialog;
 import it.unibz.inf.ontop.protege.gui.models.*;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -357,24 +359,8 @@ public class MappingManagerPanel extends JPanel {
                  Statement statement = conn.createStatement()) {
                 statement.setMaxRows(1);
                 for (TriplesMap triplesMap : triplesMapList) {
-                    ImmutableList.Builder<String> builder = ImmutableList.builder();
                     try (ResultSet rs = statement.executeQuery(triplesMap.getSqlQuery())) {
-                        if (rs.next()) {
-                            ImmutableSet<String> vars = triplesMap.getTargetAtoms().stream()
-                                    .flatMap(a -> a.getSubstitution().getImmutableMap().values().stream())
-                                    .flatMap(ImmutableTerm::getVariableStream)
-                                    .map(Variable::getName)
-                                    .collect(ImmutableCollectors.toSet());
-                            for (String var : vars) {
-                                try {
-                                    String s = rs.getString(var);
-                                }
-                                catch (SQLException e) {
-                                    builder.add(var);
-                                }
-                            }
-                        }
-                        ImmutableList<String> invalidPlaceholders = builder.build();
+                        ImmutableList<String> invalidPlaceholders = getInvalidPlaceholders(rs, triplesMap.getTargetAtoms());
                         if (invalidPlaceholders.isEmpty())
                             publish(new ValidationReport(triplesMap.getId(), TriplesMap.Status.VALID));
                         else
@@ -431,6 +417,33 @@ public class MappingManagerPanel extends JPanel {
             }
         }
 
+    }
+
+    public static ImmutableList<String> getInvalidPlaceholders(ResultSet rs, ImmutableList<TargetAtom> targetAtoms) throws SQLException {
+        ResultSetMetaData md = rs.getMetaData();
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        for (int i = 1; i <= md.getColumnCount(); i++)
+            builder.add(md.getColumnName(i).toUpperCase());
+        ImmutableSet<String> normalizedColumnNames = builder.build();
+
+        // a very lax version of column matching - quotation and case are ignored
+       return  targetAtoms.stream()
+                .flatMap(a -> a.getSubstitution().getImmutableMap().values().stream())
+                .flatMap(ImmutableTerm::getVariableStream)
+                .map(Variable::getName)
+                .distinct()
+                .filter(p -> !normalizedColumnNames.contains(stripOffQuotationMarks(p).toUpperCase()))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private static String stripOffQuotationMarks(String placeholder) {
+	    char first = placeholder.charAt(0), last = placeholder.charAt(placeholder.length() - 1);
+	    if (first == '`' && last == '`'
+	        || first == '"' && last == '"'
+            || first == '[' && last == ']')
+	        return placeholder.substring(1, placeholder.length() - 1);
+
+	    return placeholder;
     }
 
 	private void executeMappingSourceQuery(TriplesMap triplesMap) {

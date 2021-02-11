@@ -390,7 +390,7 @@ public class OBDAModelManager implements Disposable {
 		return owlDocumentIriString.substring(0, i);
 	}
 
-	public void fireActiveOBDAModelChange() {
+	private void fireActiveOBDAModelChange() {
 		for (OBDAModelManagerListener listener : obdaManagerListeners) {
 			try {
 				listener.activeOntologyChanged();
