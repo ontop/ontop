@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConstructionSubstitutionNormalizerImpl;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -153,13 +152,11 @@ public class JsonBasicView extends JsonView {
 
         ExtensionalDataNode parentDataNode = iqFactory.createExtensionalDataNode(parentDefinition, parentArgumentMap);
 
-        ConstructionNode constructionNode = createConstructionNode(normalization, projectedVariables, dbParameters);
-
+        Optional<ConstructionNode> constructionNode = normalization.generateTopConstructionNode();
         IQTree updatedParentDataNode = updateParentDataNode(normalization, parentDataNode);
 
-        IQTree iqTree = iqFactory.createUnaryIQTree(
-                constructionNode,
-                updatedParentDataNode);
+        IQTree iqTree = constructionNode.map(c -> (IQTree) iqFactory.createUnaryIQTree(c, updatedParentDataNode))
+                .orElse(updatedParentDataNode);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
@@ -222,16 +219,6 @@ public class JsonBasicView extends JsonView {
 
     }
 
-    private ConstructionNode createConstructionNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
-                                                    ImmutableList<Variable> projectedVariables,
-                                                    DBParameters dbParameters) {
-        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
-        return iqFactory.createConstructionNode(
-                ImmutableSet.copyOf(projectedVariables),
-                normalization.getNormalizedSubstitution());
-    }
-
     private IQTree updateParentDataNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
                                         IQTree parentIQTree) {
 
@@ -247,7 +234,6 @@ public class JsonBasicView extends JsonView {
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
         TermFactory termFactory = coreSingletons.getTermFactory();
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
@@ -267,8 +253,8 @@ public class JsonBasicView extends JsonView {
             }
         }
 
-        ConstructionSubstitutionNormalizer substitutionNormalizer =
-                new ConstructionSubstitutionNormalizerImpl(iqFactory, substitutionFactory);
+        ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
+                .getConstructionSubstitutionNormalizer();
 
         return substitutionNormalizer.normalizeSubstitution(
                 substitutionFactory.getSubstitution(substitutionMapBuilder.build()),

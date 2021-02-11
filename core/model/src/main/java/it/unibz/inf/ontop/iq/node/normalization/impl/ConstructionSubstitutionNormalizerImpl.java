@@ -27,7 +27,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    public ConstructionSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+    private ConstructionSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
     }
