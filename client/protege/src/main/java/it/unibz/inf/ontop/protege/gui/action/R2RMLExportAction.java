@@ -80,7 +80,7 @@ public class R2RMLExportAction extends ProtegeAction {
             OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
             R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModelManager.getRdfFactory());
             endLoop("writing to file...");
-            writer.write(file, obdaModelManager.getActiveOBDAModel().generatePPMapping());
+            writer.write(file, obdaModelManager.getTriplesMapCollection().generatePPMapping());
             end();
             return null;
         }

@@ -38,7 +38,7 @@ public class OBDADataSource {
 	private final List<Listener> listeners = new ArrayList<>();
 
 	public interface Listener {
-		void changed();
+		void obdaDataSourceChanged();
 	}
 
 	public OBDADataSource() {
@@ -77,7 +77,7 @@ public class OBDADataSource {
 	}
 
 	public void fireChanged() {
-		listeners.forEach(Listener::changed);
+		listeners.forEach(Listener::obdaDataSourceChanged);
 	}
 
 	public void setUsername(String username) {

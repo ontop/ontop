@@ -8,10 +8,6 @@ import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.vocabulary.OWL;
-import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntologySignature;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -19,7 +15,6 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.rdf.rdfxml.parser.RDFConstants;
 
-import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.util.Optional;
@@ -42,6 +37,8 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
 
     private final OBDAModelManager obdaModelManager;
     private final Consumer<TargetQueryStyledDocument> validationCallback;
+
+    private ImmutableList<String> invalidPlaceholders = ImmutableList.of();
 
     public TargetQueryStyledDocument(OBDAModelManager obdaModelManager, Consumer<TargetQueryStyledDocument> validationCallback) {
         this.obdaModelManager = obdaModelManager;
@@ -69,7 +66,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         StyleConstants.setBold(individualStyle, true);
 
         StyleConstants.setBold(templateArgumentStyle, true);
-        StyleConstants.setItalic(templateArgumentStyle, true);
+        StyleConstants.setForeground(templateArgumentStyle, new Color(97, 66, 151));
 
         StyleConstants.setForeground(errorStyle, Color.RED);
         StyleConstants.setBold(errorStyle, true);
@@ -86,6 +83,10 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
     public void remove(int offs, int len) throws BadLocationException {
         super.remove(offs, len);
         validationCallback.accept(this);
+    }
+
+    public void setInvalidPlaceholders(ImmutableList<String> invalidPlaceholders) {
+        this.invalidPlaceholders = invalidPlaceholders;
     }
 
     public ImmutableSet<IRI> validate() throws TargetQueryParserException {
@@ -119,12 +120,12 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         RDFAtomPredicate atomPredicate = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
 
         ImmutableTerm term1 = atomPredicate.getSubject(substitutedTerms);
-        highlightTemplateAurguments(term1);
+        highlightTemplateArguments(term1);
         if (term1 instanceof IRIConstant)
             highlight(((IRIConstant) term1).getIRI(), individualStyle);
 
         ImmutableTerm term2 = atomPredicate.getProperty(substitutedTerms);
-        highlightTemplateAurguments(term2);
+        highlightTemplateArguments(term2);
         if (term2 instanceof IRIConstant) {
             IRI predicateIri = ((IRIConstant) term2).getIRI();
             if (predicateIri.getIRIString().equals(RDFConstants.RDF_TYPE)) {
@@ -154,20 +155,20 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
                 }
 
                 ImmutableTerm term3 = atomPredicate.getObject(substitutedTerms);
-                highlightTemplateAurguments(term3);
+                highlightTemplateArguments(term3);
                 if (term3 instanceof IRIConstant)
                     highlight(((IRIConstant) term3).getIRI(), individualStyle);
             }
         }
         else {
             ImmutableTerm term3 = atomPredicate.getObject(substitutedTerms);
-            highlightTemplateAurguments(term3);
+            highlightTemplateArguments(term3);
             if (term3 instanceof IRIConstant)
                 highlight(((IRIConstant) term3).getIRI(), individualStyle);
         }
         Optional<ImmutableTerm> term4 = atomPredicate.getGraph(substitutedTerms);
         if (term4.isPresent())
-            highlightTemplateAurguments(term4.get());
+            highlightTemplateArguments(term4.get());
 
         return unrecognisedIRIsBuilder.build();
     }
@@ -176,7 +177,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         try {
             String input = getText(0, getLength());
             if (!input.isEmpty())
-                return obdaModelManager.getActiveOBDAModel().parseTargetQuery(input);
+                return obdaModelManager.getTriplesMapCollection().parseTargetQuery(input);
         }
         catch (TargetQueryParserException e) {
             if (e.getLine() > 0) {
@@ -202,16 +203,17 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         return Optional.empty();
     }
 
-    private void highlightTemplateAurguments(ImmutableTerm term) throws BadLocationException {
+    private void highlightTemplateArguments(ImmutableTerm term) throws BadLocationException {
         Optional<ImmutableFunctionalTerm> template = getTemplateImmutableFunctionalTerm(term);
 
         if (template.isPresent()) {
             String input = getText(0, getLength());
             for (Variable v : template.get().getVariables()) {
                 String arg = "{" + v.getName() + "}";
+                SimpleAttributeSet style = invalidPlaceholders.contains(v.getName()) ? errorStyle : templateArgumentStyle;
                 int p, po = 0;
                 while ((p = input.indexOf(arg, po)) != -1) {
-                    setCharacterAttributes(p + 1, arg.length() - 2, templateArgumentStyle, false);
+                    setCharacterAttributes(p + 1, arg.length() - 2, style, false);
                     po = p + arg.length();
                 }
             }
@@ -219,7 +221,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
     }
 
     private void highlight(IRI iri, SimpleAttributeSet attributeSet) throws BadLocationException {
-        PrefixManager prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
+        PrefixManager prefixManager = obdaModelManager.getTriplesMapCollection().getMutablePrefixManager();
         String rendered = prefixManager.getShortForm(iri.getIRIString());
         highlight(rendered, attributeSet);
     }

@@ -20,22 +20,15 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.*;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.apache.commons.rdf.api.IRI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -50,8 +43,6 @@ import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 public class EditMappingDialog extends JDialog {
 
 	private static final long serialVersionUID = 4351696247473906680L;
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(EditMappingDialog.class);
 
 	private static final int MAX_ROWS = 100;
 
@@ -80,20 +71,24 @@ public class EditMappingDialog extends JDialog {
 	private boolean allComponentsNonEmpty = false, isValid = false;
 
 	public EditMappingDialog(OBDAModelManager obdaModelManager, String id) {
-		this(obdaModelManager, null, "New Mapping", "Create");
+		this(obdaModelManager, null, "New Triples Map", "Create");
 
 		mappingIdField.setText(id);
 	}
 
-	public EditMappingDialog(OBDAModelManager obdaModelManager, SQLPPTriplesMap mapping) {
-		this(obdaModelManager, mapping.getId(), "Edit Mapping", "Update");
+	public EditMappingDialog(OBDAModelManager obdaModelManager, TriplesMap triplesMap) {
+		this(obdaModelManager, triplesMap.getId(), "Edit Triples Map", "Update");
 
-		mappingIdField.setText(mapping.getId());
-
-		sourceQueryTextPane.setText(mapping.getSourceQuery().getSQL());
-
-		String trgQuery = obdaModelManager.getActiveOBDAModel().getTargetRendering(mapping);
-		targetQueryTextPane.setText(trgQuery);
+		mappingIdField.setText(triplesMap.getId());
+		sourceQueryTextPane.setText(triplesMap.getSqlQuery());
+		if (triplesMap.getSqlErrorMessage() != null) {
+			sourceQueryTextPane.setToolTipText(triplesMap.getSqlErrorMessage());
+			sourceQueryTextPane.setBorder(errorBorder);
+			sourceQueryTextPane.getDocument().addDocumentListener((SimpleDocumentListener)
+					e -> sourceQueryTextPane.setBorder(defaultBorder));
+		}
+		targetQueryDocument.setInvalidPlaceholders(triplesMap.getInvalidPlaceholders());
+		targetQueryTextPane.setText(triplesMap.getTargetRendering());
 		targetValidation();
 	}
 
@@ -227,11 +222,8 @@ public class EditMappingDialog extends JDialog {
 				KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,
 				ImmutableSet.of(KeyStroke.getKeyStroke(VK_TAB, SHIFT_DOWN_MASK)));
 
-		component.getDocument().addDocumentListener(new DocumentListener() {
-			@Override public void insertUpdate(DocumentEvent e) { updateSaveMappingActionStatus(); }
-			@Override public void removeUpdate(DocumentEvent e) { updateSaveMappingActionStatus(); }
-			@Override public void changedUpdate(DocumentEvent e) { updateSaveMappingActionStatus(); }
-		});
+		component.getDocument().addDocumentListener((SimpleDocumentListener)
+				e -> updateSaveMappingActionStatus());
 	}
 
 	private void updateSaveMappingActionStatus() {
@@ -252,13 +244,13 @@ public class EditMappingDialog extends JDialog {
 					isValid = true;
 					saveMappingAction.setEnabled(allComponentsNonEmpty);
 					targetQueryTextPane.setToolTipText(null);
-					targetQueryTextPane.setBorder(BorderFactory.createCompoundBorder(null, defaultBorder));
+					targetQueryTextPane.setBorder(defaultBorder);
 					toolTipManager.setInitialDelay(DEFAULT_TOOLTIP_INITIAL_DELAY);
 					toolTipManager.setDismissDelay(DEFAULT_TOOLTIP_DISMISS_DELAY);
 				}
 				return;
 			}
-			MutablePrefixManager prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
+			MutablePrefixManager prefixManager = obdaModelManager.getTriplesMapCollection().getMutablePrefixManager();
 			error = iris.stream()
 					.map(IRI::getIRIString)
 					.map(prefixManager::getShortForm)
@@ -273,7 +265,7 @@ public class EditMappingDialog extends JDialog {
 					? "Unknown syntax error, check Protege log file."
 					: e.getMessage().replace("'<EOF>'", "the end");
 		}
-		targetQueryTextPane.setBorder(BorderFactory.createCompoundBorder(null, errorBorder));
+		targetQueryTextPane.setBorder(errorBorder);
 		toolTipManager.setInitialDelay(ERROR_TOOLTIP_INITIAL_DELAY);
 		toolTipManager.setDismissDelay(ERROR_TOOLTIP_DISMISS_DELAY);
 		targetQueryTextPane.setToolTipText("<html><body>" +
@@ -291,19 +283,15 @@ public class EditMappingDialog extends JDialog {
 			String newId = mappingIdField.getText().trim();
 			String target = targetQueryTextPane.getText();
 			String source = sourceQueryTextPane.getText().trim();
-			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
-
-			ImmutableList<TargetAtom> targetQuery = obdaModel.parseTargetQuery(target);
-			LOGGER.info("Insert Mapping: \n"+ target + "\n" + source);
 
 			if (id == null)
-				obdaModel.add(newId, source, targetQuery);
+				obdaModelManager.getTriplesMapCollection().add(newId, source, target);
 			else
-				obdaModel.update(id, newId, source, targetQuery);
+				obdaModelManager.getTriplesMapCollection().update(id, newId, source, target);
 
 			dispose();
 		}
-		catch (DuplicateMappingException e) {
+		catch (DuplicateTriplesMapException e) {
 			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
 		}
 		catch (Exception e) {

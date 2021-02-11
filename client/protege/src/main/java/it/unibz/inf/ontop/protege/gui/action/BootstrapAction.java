@@ -69,7 +69,7 @@ public class BootstrapAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent evt) {
 
 		OBDAModelManager modelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-		MutablePrefixManager prefixManager = modelManager.getActiveOBDAModel().getMutablePrefixManager();
+		MutablePrefixManager prefixManager = modelManager.getTriplesMapCollection().getMutablePrefixManager();
 
 		String defaultBaseIRI = prefixManager.getDefaultIriPrefix()
 				.replace("#", "/");
@@ -143,8 +143,8 @@ public class BootstrapAction extends ProtegeAction {
 			this.metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 			this.directMappingEngine = injector.getInstance(DirectMappingEngine.class);
 
-			OBDAModel obdaModel = obdaModelManager.getActiveOBDAModel();
-			this.currentMappingIndex = new AtomicInteger(obdaModel.getMapping().size() + 1);
+			TriplesMapCollection obdaModel = obdaModelManager.getTriplesMapCollection();
+			this.currentMappingIndex = new AtomicInteger(obdaModel.size() + 1);
 		}
 
 		@Override

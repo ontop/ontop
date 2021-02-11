@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -175,8 +175,8 @@ public class DialogUtils {
 					title,
 					JOptionPane.ERROR_MESSAGE);
 		}
-		else if (e.getCause() instanceof DuplicateMappingException) {
-			DuplicateMappingException dm = (DuplicateMappingException)e.getCause();
+		else if (e.getCause() instanceof DuplicateTriplesMapException) {
+			DuplicateTriplesMapException dm = (DuplicateTriplesMapException)e.getCause();
 			JOptionPane.showMessageDialog(parent,
 					"<html><b>Duplicate mapping ID found.</b><br><br>" +
 							HTML_TAB + "Please correct the Resource node name: <b>" + dm.getMessage() + "</b>.<br></html>",

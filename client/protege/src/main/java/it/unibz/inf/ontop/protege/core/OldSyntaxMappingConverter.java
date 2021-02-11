@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.converter;
+package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L

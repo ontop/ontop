@@ -143,7 +143,7 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
     }
 
     @Override
-    public void changed() {
+    public void obdaDataSourceChanged() {
         notify = false;
         String driver = datasource.getDriver();
         if (driver == null || driver.isEmpty())

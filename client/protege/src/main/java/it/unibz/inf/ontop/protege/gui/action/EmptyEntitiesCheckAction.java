@@ -96,7 +96,7 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 			@Override
 			protected String doInBackground() {
 				OntopOWLEmptyEntitiesChecker checker = reasoner.get().getEmptyEntitiesChecker();
-				PrefixManager prefixManager = obdaModelManager.getActiveOBDAModel().getMutablePrefixManager();
+				PrefixManager prefixManager = obdaModelManager.getTriplesMapCollection().getMutablePrefixManager();
 				int emptyClasses = 0;
 				for (IRI iri : checker.emptyClasses()) {
 					if (isCancelled())

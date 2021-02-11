@@ -23,55 +23,55 @@ package it.unibz.inf.ontop.protege.gui.models;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
-import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.protege.core.TriplesMapCollection;
+import it.unibz.inf.ontop.protege.core.TriplesMap;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 
-public class MappingFilteredListModel extends AbstractListModel<SQLPPTriplesMap> implements OBDAMappingListener {
+public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
-	private final OBDAModel obdaModel;
+	private final TriplesMapCollection triplesMapCollection;
 	@Nullable
 	private String filter;
 
-	public MappingFilteredListModel(OBDAModel obdaModel) {
-		this.obdaModel = obdaModel;
+	public MappingFilteredListModel(TriplesMapCollection triplesMapCollection) {
+		this.triplesMapCollection = triplesMapCollection;
 		this.filter = null;
-		obdaModel.addMappingsListener(this);
+		triplesMapCollection.addMappingsListener(() ->
+				fireContentsChanged(triplesMapCollection, 0, getSize()));
 	}
 
 	public void setFilter(@Nullable String filter) {
 		this.filter = filter;
-		fireContentsChanged(obdaModel, 0, getSize());
+		fireContentsChanged(triplesMapCollection, 0, getSize());
 	}
 
 	@Override
 	public int getSize() {
-		return (int)obdaModel.getMapping().stream()
+		return (int) triplesMapCollection.stream()
 				.filter(this::isIncludedByFilter)
 				.count();
 	}
 
 	@Override
-	public SQLPPTriplesMap getElementAt(int index) {
+	public TriplesMap getElementAt(int index) {
 		int filteredCount = -1;
-		for (SQLPPTriplesMap mapping : obdaModel.getMapping()) {
-			if (isIncludedByFilter(mapping))
+		for (TriplesMap triplesMap : triplesMapCollection) {
+			if (isIncludedByFilter(triplesMap))
 				filteredCount++;
 
 			if (filteredCount == index)
-				return mapping;
+				return triplesMap;
 		}
 		return null;
 	}
 
-	private boolean isIncludedByFilter(SQLPPTriplesMap mapping) {
+	private boolean isIncludedByFilter(TriplesMap triplesMap) {
 		return filter == null
-				|| mapping.getTargetAtoms().stream()
+				|| triplesMap.getTargetAtoms().stream()
 						.flatMap(a -> a.getSubstitutedTerms().stream())
 						.anyMatch(a -> match(filter, a));
 	}
@@ -95,21 +95,6 @@ public class MappingFilteredListModel extends AbstractListModel<SQLPPTriplesMap>
 			return false;
 	}
 
-
-	@Override
-	public void mappingInserted() {
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
-
-	@Override
-	public void mappingDeleted() {
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
-
-	@Override
-	public void mappingUpdated() {
-		fireContentsChanged(obdaModel, 0, getSize());
-	}
 
 	public void setFocusedSource() {
 		fireContentsChanged(this, 0, getSize());

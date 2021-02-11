@@ -88,7 +88,7 @@ public class OntopConfigurationManager {
 
         OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .properties(snapshotProperties())
-                .ppMapping(obdaModelManager.getActiveOBDAModel().generatePPMapping());
+                .ppMapping(obdaModelManager.getTriplesMapCollection().generatePPMapping());
 
         Optional.ofNullable(implicitDBConstraintFile)
                 .ifPresent(builder::basicImplicitConstraintFile);

@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
@@ -63,7 +63,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
 	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
 
-	private OBDAModel apic; // TODO: make final!
+	private TriplesMapCollection apic; // TODO: make final!
 
 	private final QueryManager qc;
 
@@ -75,7 +75,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	/**
 	 * Creates new form QueryInterfacePanel
 	 */
-	public QueryInterfacePanel(OBDAModel apic, QueryManager qc) {
+	public QueryInterfacePanel(TriplesMapCollection apic, QueryManager qc) {
 		this.qc = qc;
 		this.apic = apic;
 
@@ -98,7 +98,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		});
 	}
 
-	public void setOBDAModel(OBDAModel api) {
+	public void setOBDAModel(TriplesMapCollection api) {
 		this.apic = api;
 	}
 

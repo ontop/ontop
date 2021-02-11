@@ -63,6 +63,7 @@ public class SQLQueryStyledDocument extends DefaultStyledDocument {
 		highlight("ON");
 		highlight("JOIN");
 		highlight("AND");
+		highlight("AS");
 	}
 
 	private void highlight(String keyword) throws BadLocationException {

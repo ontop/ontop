@@ -5,13 +5,11 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
-import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
@@ -47,7 +45,7 @@ public class OBDAModelManager implements Disposable {
 
 	private final OWLEditorKit owlEditorKit;
 
-	private final OBDAModel obdaModel;
+	private final TriplesMapCollection triplesMapCollection;
 
 	private final QueryManager queryController = new QueryManager();
 
@@ -109,10 +107,10 @@ public class OBDAModelManager implements Disposable {
 		OWLOntologyManager mmgr = modelManager.getOWLOntologyManager();
 		mmgr.addOntologyChangeListener(new OntologyRefactoringListener());
 
-		obdaModel = new OBDAModel(modelManager.getActiveOntology(), ppMappingFactory, termFactory,
+		triplesMapCollection = new TriplesMapCollection(modelManager.getActiveOntology(), ppMappingFactory, termFactory,
 				targetAtomFactory, substitutionFactory, targetQueryParserFactory, sourceQueryFactory);
 
-		obdaModel.addMappingsListener(new ProtegeMappingControllerListener());
+		triplesMapCollection.addMappingsListener(this::triggerOntologyChanged);
 
 		queryController.addListener(new ProtegeQueryControllerListener());
 
@@ -156,7 +154,7 @@ public class OBDAModelManager implements Disposable {
 					OWLOntologyID newID = ((SetOntologyID) change).getNewOntologyID();
 					log.debug("Ontology ID changed\nOld ID: {}\nNew ID: {}", ((SetOntologyID) change).getOriginalOntologyID(), newID);
 
-					obdaModel.getMutablePrefixManager().updateOntologyID(newID);
+					triplesMapCollection.getMutablePrefixManager().updateOntologyID(newID);
 				}
 				else if (change instanceof RemoveAxiom) {
 					OWLAxiom axiom = change.getAxiom();
@@ -179,11 +177,11 @@ public class OBDAModelManager implements Disposable {
 			}
 
 			for (Map.Entry<OWLEntity, OWLEntity> e : renamings.entrySet()) {
-				obdaModel.renamePredicateInMapping(getIRI(e.getKey()), getIRI(e.getValue()));
+				triplesMapCollection.renamePredicate(getIRI(e.getKey()), getIRI(e.getValue()));
 			}
 
 			for (OWLEntity removede : removals) {
-				obdaModel.removePredicateFromMapping(getIRI(removede));
+				triplesMapCollection.removePredicate(getIRI(removede));
 			}
 		}
 	}
@@ -201,8 +199,8 @@ public class OBDAModelManager implements Disposable {
 		obdaManagerListeners.remove(listener);
 	}
 
-	public OBDAModel getActiveOBDAModel() {
-		return obdaModel;
+	public TriplesMapCollection getTriplesMapCollection() {
+		return triplesMapCollection;
 	}
 
 	public QueryManager getQueryController() {
@@ -213,6 +211,7 @@ public class OBDAModelManager implements Disposable {
 
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
+		// TODO: clean up code - this one is called from the event dispatch thread
 		@Override
 		public void handleChange(OWLModelManagerChangeEvent event) {
 			log.debug(event.getType().name());
@@ -260,7 +259,7 @@ public class OBDAModelManager implements Disposable {
 
 		lastKnownOntologyId = id;
 
-		obdaModel.reset(ontology);
+		triplesMapCollection.reset(ontology);
 		currentMutableVocabulary.setOntology(ontology);
 
 		DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
@@ -292,7 +291,7 @@ public class OBDAModelManager implements Disposable {
 					java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
 
 					optionalDataSourceProperties.ifPresent(configurationManager::loadProperties);
-					obdaModel.parseMapping(new StringReader(converter.getRestOfFile()), configurationManager.snapshotProperties());
+					triplesMapCollection.parseMapping(new StringReader(converter.getRestOfFile()), configurationManager.snapshotProperties());
 				}
 				catch (Exception ex) {
 					throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
@@ -332,9 +331,9 @@ public class OBDAModelManager implements Disposable {
 				return;
 
 			File obdaFile = new File(URI.create(owlName + OBDA_EXT));
-			if (!obdaModel.getMapping().isEmpty()) {
+			if (!triplesMapCollection.isEmpty()) {
 				OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
-				writer.write(obdaFile, obdaModel.generatePPMapping());
+				writer.write(obdaFile, triplesMapCollection.generatePPMapping());
 				log.info("mapping file saved to {}", obdaFile);
 			}
 			else {
@@ -452,8 +451,8 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateMappingException {
-		getActiveOBDAModel().add(triplesMaps);
+	public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateTriplesMapException {
+		getTriplesMapCollection().addAll(triplesMaps);
 
 		OWLModelManager modelManager = owlEditorKit.getModelManager();
 		return MappingOntologyUtils.extractAndInsertDeclarationAxioms(
@@ -461,13 +460,6 @@ public class OBDAModelManager implements Disposable {
 				triplesMaps,
 				typeFactory,
 				bootstraped);
-	}
-
-	public OntopSQLCredentialSettings getConfigurationConnectionSettings() {
-		return OntopSQLCredentialConfiguration.defaultBuilder()
-				.properties(source.asProperties())
-				.build()
-				.getSettings();
 	}
 
 	public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
@@ -493,22 +485,6 @@ public class OBDAModelManager implements Disposable {
 	 * The following are internal helpers that dispatch "needs save" messages to
 	 * the OWL ontology model when OBDA model changes.
 	 */
-
-
-	private class ProtegeMappingControllerListener implements OBDAMappingListener {
-		@Override
-		public void mappingDeleted() {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void mappingInserted() {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void mappingUpdated() {  triggerOntologyChanged(); }
-	}
 
 	private class ProtegeQueryControllerListener implements QueryManager.EventListener {
 		@Override

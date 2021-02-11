@@ -20,20 +20,11 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-public interface OBDAMappingListener {
+import java.util.List;
+
+public class DuplicateTriplesMapException extends Exception {
 	
-	/**
-	 * Called when a mapping has been inserted into the currently selected data source.
-	 */
-	void mappingInserted();
-	
-	/**
-	 * Called when a mapping has been deleted into the currently selected data source.
-	 */
-	void mappingDeleted();
-		
-	/**
-	 * Called when a mapping has been updated into the currently selected datasource.
-	 */
-	void mappingUpdated();
+	public DuplicateTriplesMapException(List<String> ids) {
+		super(String.join(",", ids));
+	}
 }

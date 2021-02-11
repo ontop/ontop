@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.utils;
+package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
@@ -20,10 +20,12 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.TriplesMap;
+import it.unibz.inf.ontop.protege.utils.SQLQueryStyledDocument;
+import it.unibz.inf.ontop.protege.utils.TargetQueryStyledDocument;
 
 import javax.swing.*;
 import javax.swing.text.SimpleAttributeSet;
@@ -31,13 +33,14 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 
-public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
+public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 
-	private final OBDAModel obdaModel;
-
+	private final TargetQueryStyledDocument trgQueryDocument;
 	private final JTextPane mapTextPane;
 	private final JTextPane trgQueryTextPane;
 	private final JTextPane srcQueryTextPane;
+	private final JLabel statusLabel;
+	private final JPanel statusPanel;
 	private final JPanel mainPanel;
 	private final JPanel renderingComponent;
 
@@ -48,6 +51,16 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 	private static final Color SELECTION_BACKGROUND_COLOR = UIManager.getDefaults().getColor("List.selectionBackground");
 	private static final Color BACKGROUND_COLOR = new Color(240, 245, 240);
 
+	private static final ImmutableMap<TriplesMap.Status, Color> VALIDITY_BACKGROUND = ImmutableMap.of(
+			TriplesMap.Status.VALID, new Color(19, 139, 114),
+			TriplesMap.Status.NOT_VALIDATED, Color.GRAY.brighter(),
+			TriplesMap.Status.INVALID, new Color(235, 28, 93));
+
+	private static final ImmutableMap<TriplesMap.Status, String> VALIDITY_TEXT = ImmutableMap.of(
+			TriplesMap.Status.VALID, "V",
+			TriplesMap.Status.NOT_VALIDATED, "",
+			TriplesMap.Status.INVALID, "I");
+
 	private final SimpleAttributeSet mappingIdStyle = new SimpleAttributeSet();
 	private final SimpleAttributeSet selectionForeground = new SimpleAttributeSet();
 	private final SimpleAttributeSet foreground = new SimpleAttributeSet();
@@ -56,9 +69,9 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 	private static final int MARGIN = 10;
 	private static final int BORDER = 1;
 	private static final int SEPARATOR = 2;
+	private static final int STATUS_WIDTH = 2;
 
 	public MappingListRenderer(OBDAModelManager obdaModelManager) {
-		obdaModel = obdaModelManager.getActiveOBDAModel();
 
 		mapTextPane = new JTextPane();
 		mapTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
@@ -67,7 +80,7 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 		trgQueryTextPane = new JTextPane();
 		trgQueryTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
 		trgQueryTextPane.setOpaque(false);
-		trgQueryTextPane.setDocument(new TargetQueryStyledDocument(
+		trgQueryDocument = new TargetQueryStyledDocument(
 				obdaModelManager,
 				doc -> {
 					try {
@@ -75,7 +88,8 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 					}
 					catch (TargetQueryParserException ignore) {
 					}
-				}));
+				});
+		trgQueryTextPane.setDocument(trgQueryDocument);
 
 		srcQueryTextPane = new JTextPane();
 		srcQueryTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
@@ -86,12 +100,22 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 		mainPanel.add(mapTextPane);
 		mainPanel.add(trgQueryTextPane);
 		mainPanel.add(srcQueryTextPane);
-		mainPanel.setBorder(BorderFactory.createLineBorder(new Color(192, 192, 192), BORDER));
-		mainPanel.setOpaque(true);
+
+		JPanel mainPanelPluStatus = new JPanel(new BorderLayout());
+		mainPanelPluStatus.add(mainPanel, BorderLayout.CENTER);
+
+		statusLabel = new JLabel("V");
+		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		statusPanel = new JPanel(new BorderLayout());
+		statusPanel.add(statusLabel, BorderLayout.CENTER);
+		mainPanelPluStatus.add(statusPanel, BorderLayout.EAST);
+
+		mainPanelPluStatus.setBorder(BorderFactory.createLineBorder(new Color(192, 192, 192), BORDER));
+		mainPanelPluStatus.setOpaque(true);
 
 		SpringLayout layout = new SpringLayout();
 		renderingComponent = new JPanel(layout);
-		renderingComponent.add(mainPanel);
+		renderingComponent.add(mainPanelPluStatus);
 		layout.putConstraint(SpringLayout.WEST, mainPanel, PADDING, SpringLayout.WEST, renderingComponent);
 		layout.putConstraint(SpringLayout.NORTH, mainPanel, PADDING, SpringLayout.NORTH, renderingComponent);
 
@@ -119,24 +143,29 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 	}
 
 
-	private void setAttibutes(JTextPane pane, SimpleAttributeSet attibutes, boolean replace) {
+	private void setAttributes(JTextPane pane, SimpleAttributeSet attibutes, boolean replace) {
 		StyledDocument doc = pane.getStyledDocument();
 		doc.setParagraphAttributes(0, doc.getLength(), attibutes, replace);
 	}
 
 	@Override
-	public Component getListCellRendererComponent(JList<? extends SQLPPTriplesMap> list, SQLPPTriplesMap value, int index, boolean isSelected, boolean cellHasFocus) {
+	public Component getListCellRendererComponent(JList<? extends TriplesMap> list, TriplesMap triplesMap, int index, boolean isSelected, boolean cellHasFocus) {
 
-		trgQueryTextPane.setText(obdaModel.getTargetRendering(value));
-		setAttibutes(trgQueryTextPane, isSelected ? selectionForeground : foreground,false);
+		trgQueryDocument.setInvalidPlaceholders(triplesMap.getInvalidPlaceholders());
+		trgQueryTextPane.setText(triplesMap.getTargetRendering());
+		setAttributes(trgQueryTextPane, isSelected ? selectionForeground : foreground,false);
 
-		srcQueryTextPane.setText(value.getSourceQuery().getSQL());
-		setAttibutes(srcQueryTextPane, isSelected ? selectionForeground : foreground,false);
+		srcQueryTextPane.setText(triplesMap.getSqlQuery());
+		renderingComponent.setToolTipText(triplesMap.getSqlErrorMessage());
+		setAttributes(srcQueryTextPane, isSelected ? selectionForeground : foreground,false);
 
-		mapTextPane.setText(value.getId());
-		setAttibutes(mapTextPane, mappingIdStyle, true);
-		setAttibutes(mapTextPane, isSelected ? selectionForeground : foreground,false);
+		mapTextPane.setText(triplesMap.getId());
+		setAttributes(mapTextPane, mappingIdStyle, true);
+		setAttributes(mapTextPane, isSelected ? selectionForeground : foreground,false);
 
+		statusLabel.setText(VALIDITY_TEXT.get(triplesMap.getStatus()));
+
+		statusPanel.setBackground(VALIDITY_BACKGROUND.get(triplesMap.getStatus()));
 		mainPanel.setBackground(isSelected ? SELECTION_BACKGROUND_COLOR : BACKGROUND_COLOR);
 
 		int preferredWidth = list.getParent().getWidth();
@@ -155,7 +184,7 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 		 * the target query (to compute the number of lines using FontMetrics instead
 		 * of "maxChars".
 		 */
-		int mainPanelWidth = preferredWidth - 2 * BORDER - 2 * PADDING;
+		int mainPanelWidth = preferredWidth - 2 * BORDER - 2 * PADDING - plainFontWidth * STATUS_WIDTH;
 		int textWidth = mainPanelWidth - 2 * MARGIN;
 		int minTextHeight = plainFontHeight + 2 * SEPARATOR;
 
@@ -171,6 +200,7 @@ public class MappingListRenderer implements ListCellRenderer<SQLPPTriplesMap> {
 
 		int totalHeight = minTextHeight + textSourceHeight + textTargetHeight + 2 * BORDER;
 		mainPanel.setPreferredSize(new Dimension(mainPanelWidth, totalHeight));
+		statusLabel.setPreferredSize(new Dimension(STATUS_WIDTH * plainFontWidth, totalHeight));
 		renderingComponent.setPreferredSize(new Dimension(preferredWidth, totalHeight + 2 * PADDING));
 
 		renderingComponent.revalidate();

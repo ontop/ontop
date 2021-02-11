@@ -92,7 +92,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         obdaController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
         obdaController.addListener(this);
 
-        queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
+        queryEditorPanel = new QueryInterfacePanel(obdaController.getTriplesMapCollection(), obdaController.getQueryController());
         queryEditorPanel.setPreferredSize(new Dimension(400, 250));
         queryEditorPanel.setMinimumSize(new Dimension(400, 250));
 
@@ -270,7 +270,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
                     @Override
                     public void handleResult(GraphOWLResultSet result) throws OWLException{
-                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(obdaController.getActiveOBDAModel().getMutablePrefixManager());
+                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(obdaController.getTriplesMapCollection().getMutablePrefixManager());
                         if (result != null) {
                             while (result.hasNext()) {
                                 result.next().accept(owlVisitor);
@@ -420,7 +420,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     private synchronized void createTableModelFromResultSet(TupleOWLResultSet result) throws OWLException {
         if (result == null)
             throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
-        tableModel = new OWLResultSetTableModel(result, obdaController.getActiveOBDAModel().getMutablePrefixManager(),
+        tableModel = new OWLResultSetTableModel(result, obdaController.getTriplesMapCollection().getMutablePrefixManager(),
                 queryEditorPanel.isShortURISelect(),
                 queryEditorPanel.isFetchAllSelect(),
                 queryEditorPanel.getFetchSize());
@@ -544,7 +544,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
     @Override
     public void activeOntologyChanged() {
-        queryEditorPanel.setOBDAModel(obdaController.getActiveOBDAModel());
+        queryEditorPanel.setOBDAModel(obdaController.getTriplesMapCollection());
     }
 
     private static void writeCSV(List<String[]> tabularData, Writer writer) throws IOException {

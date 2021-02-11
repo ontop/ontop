@@ -23,10 +23,9 @@ package it.unibz.inf.ontop.protege.gui.action;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
-import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +99,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 				try (Connection c = man.getConnection(source.getURL(), source.getUsername(), source.getPassword());
 					 Statement st = c.createStatement()) {
 					int total = 0;
-					for (SQLPPTriplesMap map : obdaModelManager.getActiveOBDAModel().getMapping()) {
+					for (TriplesMap map : obdaModelManager.getTriplesMapCollection()) {
 						if (isCancelled())
 							break;
 
@@ -168,21 +167,20 @@ public class MappingStatisticsAction extends ProtegeAction {
 		dialog.setVisible(true);
 	}
 
-	private static TriplesMapInfo retrieveInfo(SQLPPTriplesMap mapping, Statement st) {
-		SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
+	private static TriplesMapInfo retrieveInfo(TriplesMap triplesMap, Statement st) {
 		try {
-			String sql = getSelectionString(sourceQuery.getSQL());
+			String sql = getSelectionString(triplesMap.getSqlQuery());
 			try (ResultSet rs = st.executeQuery(sql)) {
 				int count = 0;
 				while (rs.next()) {
 					count = rs.getInt(1);
 				}
-				return new TriplesMapInfo(mapping.getId(), count * mapping.getTargetAtoms().size());
+				return new TriplesMapInfo(triplesMap.getId(), count * triplesMap.getTargetAtoms().size());
 			}
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception while computing mapping statistics", e);
-			return new TriplesMapInfo(mapping.getId(), ERROR_ENTRY);
+			return new TriplesMapInfo(triplesMap.getId(), ERROR_ENTRY);
 		}
 	}
 
