@@ -68,7 +68,7 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
                 "SELECT  ?v \n" +
                 "WHERE {\n" +
                 " ?x a :Person . \n" +
-                " ?x :county ?v . \n" +
+                " ?x :region ?v . \n" +
                 "}";
         runQueryAndCompare(query, ImmutableList.of("Botzen"));
     }
