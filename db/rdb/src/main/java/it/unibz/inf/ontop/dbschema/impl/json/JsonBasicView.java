@@ -153,7 +153,7 @@ public class JsonBasicView extends JsonView {
 
         ExtensionalDataNode parentDataNode = iqFactory.createExtensionalDataNode(parentDefinition, parentArgumentMap);
 
-        ConstructionNode constructionNode = createConstructionNode(normalization);
+        ConstructionNode constructionNode = createConstructionNode(normalization, projectedVariables, dbParameters);
 
         IQTree updatedParentDataNode = updateParentDataNode(normalization, parentDataNode);
 
@@ -222,9 +222,14 @@ public class JsonBasicView extends JsonView {
 
     }
 
-    private ConstructionNode createConstructionNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization) {
-
-        return normalization.generateTopConstructionNode().get();
+    private ConstructionNode createConstructionNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
+                                                    ImmutableList<Variable> projectedVariables,
+                                                    DBParameters dbParameters) {
+        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
+        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+        return iqFactory.createConstructionNode(
+                ImmutableSet.copyOf(projectedVariables),
+                normalization.getNormalizedSubstitution());
     }
 
     private IQTree updateParentDataNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
