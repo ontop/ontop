@@ -57,4 +57,19 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableList.of());
     }
+
+    /**
+     * Rename attribute with hidden column
+     */
+    @Test
+    public void testPersonRenameAttribute() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>\n" +
+                "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?x a :Person . \n" +
+                " ?x :county ?v . \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableList.of("Botzen"));
+    }
 }

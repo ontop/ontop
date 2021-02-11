@@ -20,6 +20,8 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConstructionSubstitutionNormalizerImpl;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -144,14 +146,20 @@ public class JsonBasicView extends JsonView {
 
         ImmutableMap<Integer, Variable> parentArgumentMap = createParentArgumentMap(addedVariables, parentDefinition,
                 coreSingletons.getCoreUtilsFactory());
+
+        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
+                createConstructionSubstitution(projectedVariables, parentDefinition,
+                        parentArgumentMap, dbParameters);
+
         ExtensionalDataNode parentDataNode = iqFactory.createExtensionalDataNode(parentDefinition, parentArgumentMap);
 
-        ConstructionNode constructionNode = createConstructionNode(projectedVariables, parentDefinition,
-                parentArgumentMap, dbParameters);
+        ConstructionNode constructionNode = createConstructionNode(normalization);
+
+        IQTree updatedParentDataNode = updateParentDataNode(normalization, parentDataNode);
 
         IQTree iqTree = iqFactory.createUnaryIQTree(
                 constructionNode,
-                parentDataNode);
+                updatedParentDataNode);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
@@ -214,10 +222,22 @@ public class JsonBasicView extends JsonView {
 
     }
 
-    private ConstructionNode createConstructionNode(ImmutableList<Variable> projectedVariables,
-                                                    NamedRelationDefinition parentDefinition,
-                                                    ImmutableMap<Integer, Variable> parentArgumentMap,
-                                                    DBParameters dbParameters) throws MetadataExtractionException {
+    private ConstructionNode createConstructionNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization) {
+
+        return normalization.generateTopConstructionNode().get();
+    }
+
+    private IQTree updateParentDataNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
+                                        IQTree parentIQTree) {
+
+        return normalization.updateChild(parentIQTree);
+    }
+
+    private ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization createConstructionSubstitution(
+            ImmutableList<Variable> projectedVariables,
+            NamedRelationDefinition parentDefinition,
+            ImmutableMap<Integer, Variable> parentArgumentMap,
+            DBParameters dbParameters) throws MetadataExtractionException {
 
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
@@ -242,9 +262,12 @@ public class JsonBasicView extends JsonView {
             }
         }
 
-        return iqFactory.createConstructionNode(
-                ImmutableSet.copyOf(projectedVariables),
-                substitutionFactory.getSubstitution(substitutionMapBuilder.build()));
+        ConstructionSubstitutionNormalizer substitutionNormalizer =
+                new ConstructionSubstitutionNormalizerImpl(iqFactory, substitutionFactory);
+
+        return substitutionNormalizer.normalizeSubstitution(
+                substitutionFactory.getSubstitution(substitutionMapBuilder.build()),
+                ImmutableSet.copyOf(projectedVariables));
     }
 
     private ImmutableTerm extractExpression(String partialExpression,
