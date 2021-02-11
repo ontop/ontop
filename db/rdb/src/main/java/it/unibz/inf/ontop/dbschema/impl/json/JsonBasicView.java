@@ -152,11 +152,14 @@ public class JsonBasicView extends JsonView {
 
         ExtensionalDataNode parentDataNode = iqFactory.createExtensionalDataNode(parentDefinition, parentArgumentMap);
 
-        Optional<ConstructionNode> constructionNode = normalization.generateTopConstructionNode();
-        IQTree updatedParentDataNode = updateParentDataNode(normalization, parentDataNode);
+        ConstructionNode constructionNode = normalization.generateTopConstructionNode()
+                // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
+                // It may be eliminated by the IQ normalization
+                .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
 
-        IQTree iqTree = constructionNode.map(c -> (IQTree) iqFactory.createUnaryIQTree(c, updatedParentDataNode))
-                .orElse(updatedParentDataNode);
+
+        IQTree updatedParentDataNode = updateParentDataNode(normalization, parentDataNode);
+        IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
