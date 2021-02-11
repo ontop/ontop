@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
@@ -10,8 +9,6 @@ import org.junit.Test;
 import java.io.FileReader;
 import java.io.Reader;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 

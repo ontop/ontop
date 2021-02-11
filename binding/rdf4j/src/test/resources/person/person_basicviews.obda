@@ -10,7 +10,7 @@ quest:		http://obda.org/quest#
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-person
-target		:person/{"id"} a :Person ; :country {"country"} ; :fullNameAndLocality {"fullNameAndLocality"} ; :localityAbbrev {"localityAbbrev"} ; :nullifItaly {"nullifItaly"} .
+target		:person/{"id"} a :Person ; :country {"country"} ; :fullNameAndLocality {"fullNameAndLocality"} ; :localityAbbrev {"localityAbbrev"} ; :nullifItaly {"nullifItaly"} ; :region {"region"} .
 source		SELECT * FROM "views"."persons";
 
 ]]
