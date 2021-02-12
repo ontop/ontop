@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.core.QueryManager;
+import it.unibz.inf.ontop.protege.gui.dialogs.SelectPrefixDialog;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -307,8 +308,8 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}// GEN-LAST:event_getSPARQLSQLExpansionActionPerformed
 
 	private void cmdAttachPrefixActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAdvancedPropertiesActionPerformed
-		SelectPrefixPanel dialog = new SelectPrefixPanel(apic.getMutablePrefixManager(), queryTextPane);
-		dialog.show();
+		SelectPrefixDialog dialog = new SelectPrefixDialog(apic.getMutablePrefixManager(), queryTextPane);
+		dialog.setVisible(true);
 	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
 
 	private void cmdExecuteQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonExecuteActionPerformed
@@ -357,7 +358,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}// GEN-LAST:event_buttonExecuteActionPerformed
 
 	private synchronized void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
-		if (queryId != null) {
+		if (!queryId.isEmpty()) {
 			QueryManager.Query query = qc.getQuery(groupId, queryId);
 			query.setQuery(queryTextPane.getText());
 		}
