@@ -417,6 +417,10 @@ public class QueryLoggerImpl implements QueryLogger {
             js.writeObjectFieldStart(PAYLOAD_KEY);
             js.writeStringField(QUERY_ID_KEY, queryId.toString());
             js.writeStringField(EXCEPTION_KEY, e.getMessage());
+            if (sparqlQueryString != null)
+                js.writeStringField(SPARQL_QUERY_KEY, sparqlQueryString);
+            if (reformulatedQuery != null)
+                js.writeStringField(REFORMULATED_QUERY_KEY, reformulatedQuery.toString());
             js.writeEndObject();
             js.writeEndObject();
         } catch (IOException ex) {

@@ -47,8 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 @RestController
@@ -228,6 +227,8 @@ public class SparqlQueryController {
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+        // Invalidates the previous Cache-Control header
+        headers.set(CACHE_CONTROL, "no-store");
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         return new ResponseEntity<>(message, headers, status);
     }

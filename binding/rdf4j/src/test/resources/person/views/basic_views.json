@@ -16,6 +16,10 @@
           {
             "name": "\"nullifItaly\"",
             "expression": "NULLIF(\"country\",'it')"
+          },
+          {
+            "name": "\"region\"",
+            "expression": "\"locality\""
           }
         ],
         "hidden": [
