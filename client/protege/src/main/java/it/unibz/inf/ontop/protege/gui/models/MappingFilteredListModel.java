@@ -94,9 +94,4 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
 		else
 			return false;
 	}
-
-
-	public void setFocusedSource() {
-		fireContentsChanged(this, 0, getSize());
-	}
 }

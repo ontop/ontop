@@ -52,6 +52,16 @@ import java.util.stream.Stream;
 public class DialogUtils {
 
 
+	public static boolean confirmation(Component parent, String message, String title) {
+		return JOptionPane.showConfirmDialog(
+				parent,
+				message,
+				title,
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
+				IconLoader.getOntopIcon()) == JOptionPane.YES_OPTION;
+	}
+
 	public static JButton getButton(String text, String icon, String tooltip, ActionListener actionListener) {
 		JButton button = new JButton(text, IconLoader.getImageIcon("images/" + icon));
 		button.setIconTextGap(5);

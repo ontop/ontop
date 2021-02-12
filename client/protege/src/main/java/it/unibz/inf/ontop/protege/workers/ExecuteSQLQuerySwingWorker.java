@@ -1,6 +1,9 @@
-package it.unibz.inf.ontop.protege.utils;
+package it.unibz.inf.ontop.protege.workers;
 
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

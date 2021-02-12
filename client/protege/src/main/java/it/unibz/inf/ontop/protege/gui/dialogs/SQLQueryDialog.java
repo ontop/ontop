@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
 
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.protege.workers.ExecuteSQLQuerySwingWorker;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

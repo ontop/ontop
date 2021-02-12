@@ -117,6 +117,8 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         map = ppMapping.getTripleMaps().stream()
                 .map(m -> new TriplesMap(m, this))
                 .collect(toIndexedTripleMaps());
+
+        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
     }
 
     /**

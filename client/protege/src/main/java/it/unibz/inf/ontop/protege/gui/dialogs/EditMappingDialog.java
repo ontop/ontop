@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.protege.workers.ExecuteSQLQuerySwingWorker;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nullable;

@@ -25,75 +25,60 @@ import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.protege.editor.owl.ui.view.Findable;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLEntity;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
-public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, Findable<OWLEntity> {
+public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, OWLSelectionModelListener {
 
 	private static final long serialVersionUID = 1790921396564256165L;
 
 	private OBDAModelManager obdaModelManager;
-
 	private MappingManagerPanel mappingPanel;
 
 	@Override
 	protected void initialiseOWLView() {
 		OWLEditorKit editorKit = getOWLEditorKit();
-
 		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
-		obdaModelManager.addListener(this);
-
 		mappingPanel = new MappingManagerPanel(obdaModelManager);
 
-		editorKit.getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
-			OWLEntity entity = editorKit.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
-			if (entity == null)
-				return;
-
-			if (entity.isTopEntity()) {
-				mappingPanel.setFilter("");
-			}
-			else {
-				IRI iri = entity.getIRI();
-				if (iri.getFragment().isEmpty()) {
-					String s = iri.toString();
-					mappingPanel.setFilter(s.substring(s.lastIndexOf("/")));
-				}
-				else {
-					mappingPanel.setFilter(iri.getFragment());
-				}
-			}
-		});
-		mappingPanel.datasourceChanged();
-
 		setLayout(new BorderLayout());
-        add(mappingPanel, BorderLayout.CENTER);
+		add(mappingPanel, BorderLayout.CENTER);
+
+		obdaModelManager.addListener(this);
+		getOWLWorkspace().getOWLSelectionModel().addListener(this);
 	}
 
 	@Override
 	protected void disposeOWLView() {
+		getOWLWorkspace().getOWLSelectionModel().removeListener(this);
 		obdaModelManager.removeListener(this);
 	}
 
 	@Override
 	public void activeOntologyChanged() {
-		SwingUtilities.invokeLater(() -> mappingPanel.datasourceChanged());
+		mappingPanel.setFilter("");
 	}
 
 	@Override
-	public List<OWLEntity> find(String match) {
-		// TODO Auto-generated method stub
-		return null;
+	public void selectionChanged() {
+		OWLEntity entity = getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
+		if (entity != null)
+			mappingPanel.setFilter(getFilter(entity));
 	}
 
-	@Override
-	public void show(OWLEntity owlEntity) {
-	//	System.out.println(owlEntity);
+	private static String getFilter(OWLEntity entity) {
+		if (entity.isTopEntity())
+			return "";
+
+		IRI iri = entity.getIRI();
+		if (!iri.getFragment().isEmpty())
+			return iri.getFragment();
+
+		String s = iri.toString();
+		return s.substring(s.lastIndexOf("/"));
 	}
 }

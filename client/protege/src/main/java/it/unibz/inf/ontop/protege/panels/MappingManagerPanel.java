@@ -20,45 +20,31 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.gui.dialogs.EditMappingDialog;
 import it.unibz.inf.ontop.protege.gui.dialogs.SQLQueryDialog;
 import it.unibz.inf.ontop.protege.gui.models.*;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.protege.workers.ValidationSwingWorker;
 import it.unibz.inf.ontop.utils.IDGenerator;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-
-import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
 
 public class MappingManagerPanel extends JPanel {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MappingManagerPanel.class);
-
-	private final OBDAModelManager obdaModelManager;
-
+    private final MappingFilteredListModel model;
     private final JList<TriplesMap> mappingList;
 
-    private final JCheckBox chkFilter;
-    private final JTextField txtFilter;
+    private final JCheckBox filterCheckbox;
+    private final JTextField filterField;
+
+    private static final int GAP = 2;
 
     /**
 	 * Creates a new panel.
@@ -66,7 +52,6 @@ public class MappingManagerPanel extends JPanel {
 	 * @param obdaModelManager
 	 */
 	public MappingManagerPanel(OBDAModelManager obdaModelManager) {
-        this.obdaModelManager = obdaModelManager;
 
         setLayout(new BorderLayout());
 
@@ -79,94 +64,121 @@ public class MappingManagerPanel extends JPanel {
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
-        Action addMappingAction = new AbstractAction("New triples map") {
+        Action newAction = new AbstractAction("New triples map...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                createMapping();
+                EditMappingDialog dialog = new EditMappingDialog(
+                        obdaModelManager,
+                        IDGenerator.getNextUniqueID("MAPID-"));
+                dialog.setLocationRelativeTo(MappingManagerPanel.this);
+                dialog.setVisible(true);
             }
         };
 
-        Action removeMappingAction = new AbstractAction("Remove triples maps") {
+        Action removeAction = new AbstractAction("Remove triples maps") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                removeMapping(mappingList.getSelectedValuesList());
+                if (!removeConfirm(mappingList.getSelectedValuesList()))
+                    return;
+
+                TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
+                for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
+                    triplesMapCollection.remove(triplesMap.getId());
+
                 mappingList.clearSelection();
             }
         };
-        removeMappingAction.setEnabled(false);
+        removeAction.setEnabled(false);
 
-        Action copyMappingAction = new AbstractAction("Copy triples maps") {
+        Action copyAction = new AbstractAction("Copy triples maps") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                copyMapping(mappingList.getSelectedValuesList());
+                if (!copyConfirm(mappingList.getSelectedValuesList()))
+                    return;
+
+                TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
+                for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
+                    triplesMapCollection.duplicate(triplesMap.getId());
             }
         };
-        copyMappingAction.setEnabled(false);
+        copyAction.setEnabled(false);
 
-        Action editMappingAction = new AbstractAction("Edit triples map") {
+        Action editAction = new AbstractAction("Edit triples map...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                editMapping(mappingList.getSelectedValue());
+                EditMappingDialog dialog = new EditMappingDialog(
+                        obdaModelManager,
+                        mappingList.getSelectedValue());
+                dialog.setLocationRelativeTo(MappingManagerPanel.this);
+                dialog.setVisible(true);
             }
         };
-        editMappingAction.setEnabled(false);
+        editAction.setEnabled(false);
 
-        Action validateSQLAction = new AbstractAction("Validate triples maps") {
+        Action validateAction = new AbstractAction("Validate triples maps") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                validateMapping(mappingList.getSelectedValuesList());
+                ValidationSwingWorker worker = new ValidationSwingWorker(
+                        MappingManagerPanel.this,
+                        mappingList.getSelectedValuesList(),
+                        obdaModelManager);
+                worker.execute();
             }
         };
-        validateSQLAction.setEnabled(false);
+        validateAction.setEnabled(false);
 
-        Action executeSQLAction = new AbstractAction("Execute source SQL") {
+        Action executeSQLAction = new AbstractAction("Execute source SQL...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                executeMappingSourceQuery(mappingList.getSelectedValue());
+                SQLQueryDialog dialog = new SQLQueryDialog(
+                        obdaModelManager.getDatasource(),
+                        mappingList.getSelectedValue().getSqlQuery());
+                dialog.setLocationRelativeTo(MappingManagerPanel.this);
+                dialog.setVisible(true);
             }
         };
         executeSQLAction.setEnabled(false);
 
-        JPanel pnlMappingButtons = new JPanel(new GridBagLayout());
+        JPanel buttonsPanel = new JPanel(new GridBagLayout());
 
-        pnlMappingButtons.add(
+        buttonsPanel.add(
                 DialogUtils.getButton(
-                        "Create",
+                        "New...",
                         "plus.png",
                         "Create a new triples map",
-                        addMappingAction),
+                        newAction),
                 new GridBagConstraints(0, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(2, 2, 2, 2), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        JButton removeMappingButton = DialogUtils.getButton(
+        JButton removeButton = DialogUtils.getButton(
                 "Remove",
                 "minus.png",
                 "Remove the selected triples maps",
-                removeMappingAction);
-        removeMappingButton.setEnabled(false);
-        pnlMappingButtons.add(removeMappingButton,
+                removeAction);
+        removeButton.setEnabled(false);
+        buttonsPanel.add(removeButton,
                 new GridBagConstraints(1, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(2, 2, 2, 2), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        JButton copyMappingButton = DialogUtils.getButton(
+        JButton copyButton = DialogUtils.getButton(
                 "Copy",
                 "copy.png",
                 "Make a duplicate copy of the selected triples maps (with fresh IDs)",
-                copyMappingAction);
-        copyMappingButton.setEnabled(false);
-        pnlMappingButtons.add(copyMappingButton,
+                copyAction);
+        copyButton.setEnabled(false);
+        buttonsPanel.add(copyButton,
                 new GridBagConstraints(2, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(2, 2, 2, 2), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        pnlMappingButtons.add(new JPanel(),
+        buttonsPanel.add(new JPanel(), // stretchable panel
                 new GridBagConstraints(3, 0, 1, 1, 1, 0,
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
-                        new Insets(2, 2, 2, 2), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        pnlMappingButtons.add(
+        buttonsPanel.add(
                 DialogUtils.getButton(
                         "Select all",
                         "select-all.png",
@@ -174,9 +186,9 @@ public class MappingManagerPanel extends JPanel {
                         evt -> mappingList.setSelectionInterval(0, mappingList.getModel().getSize() - 1)),
                 new GridBagConstraints(7, 0, 1, 1, 0, 0,
                         GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(2, 2, 2, 2), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        pnlMappingButtons.add(
+        buttonsPanel.add(
                 DialogUtils.getButton(
                         "Select none",
                         "select-none.png",
@@ -184,60 +196,60 @@ public class MappingManagerPanel extends JPanel {
                         evt -> mappingList.clearSelection()),
                 new GridBagConstraints(8, 0, 1, 1, 0, 0,
                         GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(2, 2, 2, 2), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        add(pnlMappingButtons, BorderLayout.NORTH);
+        add(buttonsPanel, BorderLayout.NORTH);
 
-        JPanel pnlExtraButtons = new JPanel(new GridBagLayout());
+        JPanel extraButtonsPanel = new JPanel(new GridBagLayout());
 
         JLabel mappingStatusLabel = new JLabel();
-        pnlExtraButtons.add(mappingStatusLabel,
+        extraButtonsPanel.add(mappingStatusLabel,
                 new GridBagConstraints(0, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(2, 2, 2, 2), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        pnlExtraButtons.add(new JLabel("Search:"),
+        extraButtonsPanel.add(new JLabel("Search:"),
                 new GridBagConstraints(2, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(2, 30, 2, 2), 0, 0));
+                        new Insets(GAP, 30, GAP, GAP), 0, 0));
 
-        txtFilter = new JTextField();
-        pnlExtraButtons.add(txtFilter,
+        filterField = new JTextField();
+        extraButtonsPanel.add(filterField,
                 new GridBagConstraints(3, 0, 1, 1, 1, 0,
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
-                        new Insets(2, 2, 2, 2), 0, 0));
-        txtFilter.getDocument().addDocumentListener((SimpleDocumentListener)
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
+        filterField.getDocument().addDocumentListener((SimpleDocumentListener)
                             e ->  processFilterAction());
 
-        chkFilter = new JCheckBox("Enable filter");
-        chkFilter.setEnabled(false);
-        chkFilter.addItemListener(evt -> processFilterAction());
-        pnlExtraButtons.add(chkFilter,
+        filterCheckbox = new JCheckBox("Enable filter");
+        filterCheckbox.setEnabled(false);
+        filterCheckbox.addItemListener(evt -> processFilterAction());
+        extraButtonsPanel.add(filterCheckbox,
                 new GridBagConstraints(4, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(2, 2, 2, 20), 0, 0));
+                        new Insets(GAP, GAP, GAP, 20), 0, 0));
 
-        add(pnlExtraButtons, BorderLayout.SOUTH);
+        add(extraButtonsPanel, BorderLayout.SOUTH);
 
-        JPopupMenu menuMappings = new JPopupMenu();
-        menuMappings.add(new JMenuItem(addMappingAction));
-        menuMappings.add(new JMenuItem(removeMappingAction));
-        menuMappings.add(new JMenuItem(copyMappingAction));
-        menuMappings.add(new JMenuItem(editMappingAction));
-        menuMappings.addSeparator();
-        menuMappings.add(new JMenuItem(validateSQLAction));
-        menuMappings.add(new JMenuItem(executeSQLAction));
-        mappingList.setComponentPopupMenu(menuMappings);
+        JPopupMenu menu = new JPopupMenu();
+        menu.add(new JMenuItem(newAction));
+        menu.add(new JMenuItem(removeAction));
+        menu.add(new JMenuItem(copyAction));
+        menu.add(new JMenuItem(editAction));
+        menu.addSeparator();
+        menu.add(new JMenuItem(validateAction));
+        menu.add(new JMenuItem(executeSQLAction));
+        mappingList.setComponentPopupMenu(menu);
 
         mappingList.addListSelectionListener(evt -> {
             List<TriplesMap> selectionList = mappingList.getSelectedValuesList();
-            removeMappingAction.setEnabled(!selectionList.isEmpty());
-            removeMappingButton.setEnabled(!selectionList.isEmpty());
-            copyMappingAction.setEnabled(!selectionList.isEmpty());
-            copyMappingButton.setEnabled(!selectionList.isEmpty());
-            validateSQLAction.setEnabled(!selectionList.isEmpty());
+            removeAction.setEnabled(!selectionList.isEmpty());
+            removeButton.setEnabled(!selectionList.isEmpty());
+            copyAction.setEnabled(!selectionList.isEmpty());
+            copyButton.setEnabled(!selectionList.isEmpty());
+            validateAction.setEnabled(!selectionList.isEmpty());
 
-            editMappingAction.setEnabled(selectionList.size() == 1);
+            editAction.setEnabled(selectionList.size() == 1);
             executeSQLAction.setEnabled(selectionList.size() == 1);
         });
 
@@ -249,20 +261,20 @@ public class MappingManagerPanel extends JPanel {
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "edit");
 
         ActionMap actionMap = mappingList.getActionMap();
-        actionMap.put("remove", removeMappingAction);
-        actionMap.put("add", addMappingAction);
-        actionMap.put("edit", editMappingAction);
+        actionMap.put("remove", removeAction);
+        actionMap.put("add", newAction);
+        actionMap.put("edit", editAction);
 
         mappingList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2)
-                    editMappingAction.actionPerformed(
+                    editAction.actionPerformed(
                             new ActionEvent(mappingList, ActionEvent.ACTION_PERFORMED, null));
             }
         });
 
-        MappingFilteredListModel model = new MappingFilteredListModel(obdaModelManager.getTriplesMapCollection());
+        model = new MappingFilteredListModel(obdaModelManager.getTriplesMapCollection());
         model.addListDataListener(new ListDataListener() {
             @Override public void intervalRemoved(ListDataEvent e) { updateMappingSize(); }
             @Override public void intervalAdded(ListDataEvent e) { updateMappingSize(); }
@@ -275,224 +287,34 @@ public class MappingManagerPanel extends JPanel {
         mappingList.setModel(model);
     }
 
+    /**
+     * any change of the filter will trigger the model update via processFilterAction()
+     * @param filter
+     */
     public void setFilter(String filter) {
-        txtFilter.setText(filter);
-    }
-
-    public void datasourceChanged() {
-        // Update the mapping tree.
-        MappingFilteredListModel model = (MappingFilteredListModel) mappingList.getModel();
-        model.setFocusedSource();
-
-        mappingList.revalidate();
+        filterField.setText(filter);
     }
 
     private void processFilterAction() {
-        String filterText = txtFilter.getText().trim();
-        chkFilter.setEnabled(!filterText.isEmpty());
+        String filterText = filterField.getText().trim();
+        filterCheckbox.setEnabled(!filterText.isEmpty());
 
-        MappingFilteredListModel model = (MappingFilteredListModel) mappingList.getModel();
-        model.setFilter(chkFilter.isSelected() && chkFilter.isEnabled() ? filterText : null);
+        model.setFilter(filterCheckbox.isSelected() && filterCheckbox.isEnabled() ? filterText : null);
     }
 
-
-    public void editMapping(TriplesMap triplesMap) {
-		EditMappingDialog dialog = new EditMappingDialog(obdaModelManager, triplesMap);
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
-	}
-
-    private void validateMapping(List<TriplesMap> selectionList) {
-        ValidationSwingWorker worker = new ValidationSwingWorker(this, selectionList, obdaModelManager.getDatasource());
-        worker.execute();
-    }
-
-	private static final class ValidationReport {
-	    private final String id;
-	    private final TriplesMap.Status status;
-	    private final String sqlErrorMessage;
-	    private final ImmutableList<String> invalidPlaceholders;
-
-        ValidationReport(String id, TriplesMap.Status status)  {
-            this.id = id;
-            this.status = status;
-            this.sqlErrorMessage = null;
-            this.invalidPlaceholders = ImmutableList.of();
-        }
-        ValidationReport(String id, String sqlErrorMessage)  {
-            this.id = id;
-            this.status = TriplesMap.Status.INVALID;
-            this.sqlErrorMessage = sqlErrorMessage;
-            this.invalidPlaceholders = ImmutableList.of();
-        }
-        ValidationReport(String id, ImmutableList<String> invalidPlaceholders)  {
-            this.id = id;
-            this.status = TriplesMap.Status.INVALID;
-            this.sqlErrorMessage = null;
-            this.invalidPlaceholders = invalidPlaceholders;
-        }
-    }
-
-	private class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMonitor<Void, ValidationReport> {
-        private final Component parent;
-        private final List<TriplesMap> triplesMapList;
-        private final OBDADataSource dataSource;
-        private int invalidTriplesMapCount;
-
-        private static final String DIALOG_TITLE = "Triples Maps Validation";
-
-	    ValidationSwingWorker(Component parent, List<TriplesMap> triplesMapList, OBDADataSource dataSource) {
-            super(parent, "<html><h3>Validating Triples Maps:</h3></html>");
-            this.parent = parent;
-            this.dataSource = dataSource;
-	        this.triplesMapList = triplesMapList;
-        }
-
-        @Override
-        protected Void doInBackground() throws Exception {
-            start("initializing...");
-
-            setMaxTicks(triplesMapList.size());
-            startLoop(this::getCompletionPercentage, () -> String.format("%d%% completed.", getCompletionPercentage()));
-
-            try (Connection conn = dataSource.getConnection();
-                 Statement statement = conn.createStatement()) {
-                statement.setMaxRows(1);
-                for (TriplesMap triplesMap : triplesMapList) {
-                    try (ResultSet rs = statement.executeQuery(triplesMap.getSqlQuery())) {
-                        ImmutableList<String> invalidPlaceholders = getInvalidPlaceholders(rs, triplesMap.getTargetAtoms());
-                        if (invalidPlaceholders.isEmpty())
-                            publish(new ValidationReport(triplesMap.getId(), TriplesMap.Status.VALID));
-                        else
-                            publish(new ValidationReport(triplesMap.getId(), invalidPlaceholders));
-                    }
-                    catch (SQLException e) {
-                        publish(new ValidationReport(triplesMap.getId(), e.getMessage()));
-                    }
-                    tick();
-                }
-            }
-            endLoop("");
-            end();
-            return null;
-        }
-
-        @Override
-        protected void process(List<ValidationReport> reports) {
-	        for (ValidationReport report : reports) {
-	            if (report.status == TriplesMap.Status.INVALID)
-                    invalidTriplesMapCount++;
-
-                obdaModelManager.getTriplesMapCollection().setStatus(
-                        report.id,
-                        report.status,
-                        report.sqlErrorMessage,
-                        report.invalidPlaceholders);
-            }
-
-        }
-
-        @Override
-        protected void done() {
-            try {
-                complete();
-                String message = invalidTriplesMapCount == 0
-                        ? (triplesMapList.size() == 1
-                            ? "The only triples map has been found valid."
-                            : "All <b>" + triplesMapList.size() + "</b> triples map have been found valid.")
-                        : "<b>" + invalidTriplesMapCount + "</b> triples map" + (invalidTriplesMapCount > 1 ? "s" : "") + " (out of <b>" +
-                                triplesMapList.size() + "</b>) have been found invalid.";
-
-                JOptionPane.showMessageDialog(parent,
-                        "<html><h3>Validation of the triples maps is complete.</h3><br>" +
-                                HTML_TAB + message + "<br></html>",
-                        DIALOG_TITLE,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        IconLoader.getOntopIcon());
-            }
-            catch (CancellationException | InterruptedException ignore) {
-            }
-            catch (ExecutionException e) {
-                DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, dataSource);
-            }
-        }
-
-    }
-
-    public static ImmutableList<String> getInvalidPlaceholders(ResultSet rs, ImmutableList<TargetAtom> targetAtoms) throws SQLException {
-        ResultSetMetaData md = rs.getMetaData();
-        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for (int i = 1; i <= md.getColumnCount(); i++)
-            builder.add(md.getColumnName(i).toUpperCase());
-        ImmutableSet<String> normalizedColumnNames = builder.build();
-
-        // a very lax version of column matching - quotation and case are ignored
-       return  targetAtoms.stream()
-                .flatMap(a -> a.getSubstitution().getImmutableMap().values().stream())
-                .flatMap(ImmutableTerm::getVariableStream)
-                .map(Variable::getName)
-                .distinct()
-                .filter(p -> !normalizedColumnNames.contains(stripOffQuotationMarks(p).toUpperCase()))
-                .collect(ImmutableCollectors.toList());
-    }
-
-    private static String stripOffQuotationMarks(String placeholder) {
-	    char first = placeholder.charAt(0), last = placeholder.charAt(placeholder.length() - 1);
-	    if (first == '`' && last == '`'
-	        || first == '"' && last == '"'
-            || first == '[' && last == ']')
-	        return placeholder.substring(1, placeholder.length() - 1);
-
-	    return placeholder;
-    }
-
-	private void executeMappingSourceQuery(TriplesMap triplesMap) {
-		SQLQueryDialog dialog = new SQLQueryDialog(
-		        obdaModelManager.getDatasource(),
-                triplesMap.getSqlQuery());
-        dialog.setLocationRelativeTo(this);
-		dialog.setVisible(true);
-	}
-
-	private void copyMapping(List<TriplesMap> selection) {
-		if (JOptionPane.showConfirmDialog(
-                this,
+    private boolean copyConfirm(List<TriplesMap> selection) {
+        return DialogUtils.confirmation(this,
                 "<html>This will create a <b>copy</b> of the selected <b>" + selection.size() +
-                        " mapping" + (selection.size() == 1 ? "" : "s") + "</b>.<br><br>" +
+                        " triples map" + (selection.size() == 1 ? "" : "s") + "</b>.<br><br>" +
                         "Do you wish to <b>continue</b>?<br></html>",
-                "Copy mapping confirmation",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
-			return;
+                "Copy triples maps confirmation");
+    }
 
-        TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
-        for (TriplesMap triplesMap : selection)
-            triplesMapCollection.duplicate(triplesMap.getId());
-	}
-
-    private void removeMapping(List<TriplesMap> selection) {
-		if (JOptionPane.showConfirmDialog(
-                this,
+    private boolean removeConfirm(List<TriplesMap> selection) {
+        return DialogUtils.confirmation(this,
                 "<html>This will <b>remove</b> the selected <b>" + selection.size() +
-                        " mapping" + (selection.size() == 1 ? "" : "s") + "</b>.<br><br>" +
+                        " triples map" + (selection.size() == 1 ? "" : "s") + "</b>.<br><br>" +
                         "Do you wish to <b>continue</b>?.<br></html>",
-                "Remove mapping confirmation",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
-			return;
-
-        TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
-        for (TriplesMap triplesMap : selection)
-            triplesMapCollection.remove(triplesMap.getId());
-	}
-
-    private void createMapping() {
-        EditMappingDialog dialog = new EditMappingDialog(
-                obdaModelManager,
-                IDGenerator.getNextUniqueID("MAPID-"));
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
+                "Remove triples maps confirmation");
     }
 }
