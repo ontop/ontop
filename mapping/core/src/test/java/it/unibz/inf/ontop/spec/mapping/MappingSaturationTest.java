@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -32,9 +31,9 @@ public class MappingSaturationTest {
     private static final Variable P = TERM_FACTORY.getVariable("p");
     private static final Variable O = TERM_FACTORY.getVariable("o");
 
-    private static final ImmutableList<TemplateComponent> URI_TEMPLATE_PERSON = Template.of("http://example.org/person/", 0);
-    private static final ImmutableList<TemplateComponent>  URI_TEMPLATE_COURSE1 =  Template.of("http://example.org/uni1/course/", 0);
-    private static final ImmutableList<TemplateComponent>  URI_TEMPLATE_COURSE2 =  Template.of("http://example.org/uni2/course/", 0);
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_PERSON = Template.of("http://example.org/person/", 0);
+    private static final ImmutableList<Template.Component>  URI_TEMPLATE_COURSE1 =  Template.of("http://example.org/uni1/course/", 0);
+    private static final ImmutableList<Template.Component>  URI_TEMPLATE_COURSE2 =  Template.of("http://example.org/uni2/course/", 0);
 
     private static final IRI PROP_GIVES_LECTURE, PROP_TEACHES, PROP_GIVES_LAB, PROP_IS_TAUGHT_BY;
 

@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
@@ -27,7 +26,7 @@ import static junit.framework.TestCase.assertEquals;
 
 public class NormalizationTest {
 
-    private static GroundFunctionalTerm GROUND_FUNCTIONAL_TERM =
+    private static final GroundFunctionalTerm GROUND_FUNCTIONAL_TERM =
             (GroundFunctionalTerm) TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
                     TERM_FACTORY.getDBStringConstant("this-"),
                     TERM_FACTORY.getDBStringConstant("that")));
@@ -424,7 +423,7 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<TemplateComponent> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
                 .addColumn()
                 .addSeparator("#z")
                 .build();
@@ -433,7 +432,7 @@ public class NormalizationTest {
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A))));
 
-        ImmutableList<TemplateComponent> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
                 .addColumn()
                 .addSeparator("#")
                 .addColumn()
@@ -472,7 +471,7 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<TemplateComponent> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
                 .addColumn()
                 .addSeparator("/z")
                 .build();
@@ -481,7 +480,7 @@ public class NormalizationTest {
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A))));
 
-        ImmutableList<TemplateComponent> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
                 .addColumn()
                 .addSeparator("/")
                 .addColumn()
@@ -520,7 +519,7 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ImmutableList<TemplateComponent> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
                 .addColumn()
                 .addSeparator(".z")
                 .build();
@@ -531,7 +530,7 @@ public class NormalizationTest {
                 ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, iriTerm1));
 
-        ImmutableList<TemplateComponent> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
                 .addColumn()
                 .addSeparator(".")
                 .addColumn()
@@ -2631,8 +2630,8 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ImmutableList<TemplateComponent> template1 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().build();
-        ImmutableList<TemplateComponent> template2 = Template.builder().addSeparator("http://example.org/ds2/").addColumn().build();
+        ImmutableList<Template.Component> template1 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().build();
+        ImmutableList<Template.Component> template2 = Template.builder().addSeparator("http://example.org/ds2/").addColumn().build();
 
         ImmutableSet<Variable> unionVariables = ImmutableSet.of(X, D);
 
@@ -2682,8 +2681,8 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ImmutableList<TemplateComponent> template1 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().build();
-        ImmutableList<TemplateComponent> template2 = Template.builder().addSeparator("http://example.org/ds2/").addColumn().build();
+        ImmutableList<Template.Component> template1 = Template.builder().addSeparator("http://example.org/ds1/").addColumn().build();
+        ImmutableList<Template.Component> template2 = Template.builder().addSeparator("http://example.org/ds2/").addColumn().build();
 
         ImmutableSet<Variable> unionVariables = ImmutableSet.of(X);
 

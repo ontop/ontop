@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
@@ -70,12 +70,12 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     }
 
     private static ImmutableTerm getTermForObjectTemplate(String template, ObjectTemplateFactory factory) {
-        ImmutableList<TemplateComponent> components = factory.getComponents(template);
+        ImmutableList<Template.Component> components = factory.getComponents(template);
 
         if (components.size() == 1 && components.get(0).isColumnNameReference())
             return factory.getColumn(components.get(0).getComponent());
 
-        return factory.getTemplate(components);
+        return factory.getTemplateTerm(components);
     }
 
     @Override
@@ -97,8 +97,8 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
         String text = ctx.STRING_LITERAL_QUOTE().getText();
         String template = TurtleUtil.decodeString(text.substring(1, text.length() - 1)); // remove " "
 
-        ImmutableList<TemplateComponent> components = literalTemplateFactory.getComponents(template);
-        ImmutableTerm lexicalValue = literalTemplateFactory.getTemplate(components);
+        ImmutableList<Template.Component> components = literalTemplateFactory.getComponents(template);
+        ImmutableTerm lexicalValue = literalTemplateFactory.getTemplateTerm(components);
         return termFactory.getRDFLiteralFunctionalTerm(lexicalValue,
                 rdfDatatype.orElse(typeFactory.getXsdStringDatatype()));
     }
