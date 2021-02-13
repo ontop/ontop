@@ -20,13 +20,17 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
@@ -39,7 +43,15 @@ public class SelectPrefixDialog extends JDialog {
 	private final Map<String, String> prefixMap;
 	private final ArrayList<JCheckBox> checkboxes = new ArrayList<>();
 
-	public SelectPrefixDialog(MutablePrefixManager prefixManager, JTextPane queryTextPane) {
+	/**
+	 * Reads queryTextComponent to extract existing prefixes (using regex)
+	 * Updates queryTextComponent when the choice of prefixes is confirmed
+	 *
+	 * @param prefixManager
+	 * @param queryTextComponent query entry field
+	 */
+
+	public SelectPrefixDialog(MutablePrefixManager prefixManager, JTextComponent queryTextComponent) {
 		prefixMap = prefixManager.getPrefixMap();
 
 		setTitle("Select Prefixes for the Query");
@@ -49,8 +61,8 @@ public class SelectPrefixDialog extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String directives = getDirectives();
-				queryTextPane.setText((directives.isEmpty() ? "" : directives + "\n") +
-						queryTextPane.getText());
+				queryTextComponent.setText((directives.isEmpty() ? "" : directives + "\n") +
+						queryTextComponent.getText());
 				setVisible(false);
 				dispose();
 			}
@@ -101,6 +113,8 @@ public class SelectPrefixDialog extends JDialog {
 
 		JPanel prefixPanel = new JPanel(new GridBagLayout());
 
+		ImmutableSet<String> presentPrefixes = getPresentPrefixes(queryTextComponent.getText());
+
 		int gridYIndex = 1;
 		for (Map.Entry<String, String> e : prefixMap.entrySet()) {
 			if (e.getKey().equals("version"))
@@ -109,6 +123,10 @@ public class SelectPrefixDialog extends JDialog {
 			boolean isDefaultPrefix = e.getKey().equals(prefixManager.DEFAULT_PREFIX);
 			JCheckBox checkbox = new JCheckBox(e.getKey());
 			checkbox.setFont(checkbox.getFont().deriveFont(Font.BOLD));
+			if (presentPrefixes.contains(e.getKey())) {
+				checkbox.setSelected(true);
+				checkbox.setEnabled(false);
+			}
 			prefixPanel.add(checkbox,
 					new GridBagConstraints(0, isDefaultPrefix ? 0 : gridYIndex, 1, 1, 0, 0,
 							GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
@@ -154,14 +172,27 @@ public class SelectPrefixDialog extends JDialog {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setContentPane(mainPanel);
 		pack();
-		setLocationRelativeTo(queryTextPane);
+		setLocationRelativeTo(queryTextComponent);
 	}
 
 	private String getDirectives() {
 		return checkboxes.stream()
 				.filter(AbstractButton::isSelected)
+				.filter(Component::isEnabled)
 				.map(AbstractButton::getText)
 				.map(p -> "PREFIX " + p + " <" + prefixMap.get(p) + ">\n")
 				.collect(Collectors.joining());
+	}
+
+	private static final Pattern PREFIX_PATTERN = Pattern.compile("^\\s*PREFIX\\s+([a-zA-Z0-9-_.]*:)", Pattern.MULTILINE);
+
+	private static ImmutableSet<String> getPresentPrefixes(String sparql) {
+		Matcher matcher = PREFIX_PATTERN.matcher(sparql);
+		ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+		while (matcher.find()) {
+			String prefix = matcher.group(1);
+			builder.add(prefix);
+		}
+		return builder.build();
 	}
 }
