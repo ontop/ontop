@@ -28,6 +28,27 @@ public class Template {
 
     public static Builder builder() { return new Builder(); }
 
+    public static ImmutableList<Component> replaceFirst(ImmutableList<Component> components, String prefix) {
+        if (prefix.isEmpty())
+            return components.subList(1, components.size());
+
+        ImmutableList.Builder<Component> builder = ImmutableList.builder();
+        builder.add(new Component(prefix));
+        builder.addAll(components.subList(1, components.size()));
+        return builder.build();
+    }
+
+    public static ImmutableList<Component> replaceLast(ImmutableList<Component> components, String suffix) {
+        if (suffix.isEmpty())
+            return components.subList(0, components.size() - 1);
+
+        ImmutableList.Builder<Component> builder = ImmutableList.builder();
+        builder.addAll(components.subList(0, components.size() - 1));
+        builder.add(new Component(suffix));
+        return builder.build();
+    }
+
+
     public static class Builder {
         private final ImmutableList.Builder<Component> builder = ImmutableList.builder();
         private int index = 0;

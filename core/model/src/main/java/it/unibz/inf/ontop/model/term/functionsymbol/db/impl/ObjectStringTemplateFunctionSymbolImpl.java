@@ -193,9 +193,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
             Stream<ImmutableExpression> expressionStream = IntStream.range(0, safeSeparatorFragments.size())
                     // Sequential execution is essential
-                    .mapToObj(i -> termFactory.getStrictEquality(
-                                    convertIntoTerm(safeSeparatorFragments.get(i), subTermIterator, termFactory),
-                                    convertIntoTerm(other.safeSeparatorFragments.get(i), otherSubTermIterator, termFactory)));
+                    .mapToObj(i -> convertToEquality(
+                            safeSeparatorFragments.get(i), subTermIterator,
+                            other.safeSeparatorFragments.get(i), otherSubTermIterator, termFactory));
 
             Optional<ImmutableExpression> expression = termFactory.getConjunction(expressionStream);
             if (expression.isPresent())
@@ -206,11 +206,71 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return super.evaluateStrictEqWithFunctionalTerm(subTerms, otherTerm, termFactory, variableNullability);
     }
 
-    private ImmutableTerm convertIntoTerm(SafeSeparatorFragment safeSeparatorFragment,
-                                          Iterator<? extends ImmutableTerm> subTermIterator,
+    private ImmutableExpression convertToEquality(SafeSeparatorFragment safeSeparatorFragment,
+                                            UnmodifiableIterator<? extends ImmutableTerm> subTermIterator,
+                                            SafeSeparatorFragment otherSafeSeparatorFragment,
+                                            UnmodifiableIterator<? extends ImmutableTerm> otherSubTermIterator,
+                                            TermFactory termFactory) {
+
+        ImmutableList<Template.Component> components = safeSeparatorFragment.getComponents();
+        ImmutableList<Template.Component> otherComponents = otherSafeSeparatorFragment.getComponents();
+
+        if (!components.get(0).isColumnNameReference()
+                && !otherComponents.get(0).isColumnNameReference()) {
+            String first = components.get(0).getComponent();
+            String otherFirst = otherComponents.get(0).getComponent();
+            if (first.startsWith(otherFirst)) {
+                components = Template.replaceFirst(components, first.substring(otherFirst.length()));
+                otherComponents = Template.replaceFirst(otherComponents, "");
+            }
+            else if (otherFirst.startsWith(first)) {
+                components = Template.replaceFirst(components, "");
+                otherComponents = Template.replaceFirst(otherComponents, otherFirst.substring(first.length()));
+            }
+            else
+                return termFactory.getStrictEquality(
+                        termFactory.getDBIntegerConstant(0),
+                        termFactory.getDBIntegerConstant(1));
+
+            if (components.isEmpty() && otherComponents.isEmpty())
+                return termFactory.getStrictEquality(
+                        termFactory.getDBIntegerConstant(1),
+                        termFactory.getDBIntegerConstant(1));
+        }
+
+        if (!components.get(components.size() - 1).isColumnNameReference()
+                && !otherComponents.get(otherComponents.size() - 1).isColumnNameReference()) {
+            String last = components.get(components.size() - 1).getComponent();
+            String otherLast = otherComponents.get(otherComponents.size() - 1).getComponent();
+            if (last.endsWith(otherLast)) {
+                components = Template.replaceLast(components, last.substring(0, last.length() - otherLast.length()));
+                otherComponents = Template.replaceLast(otherComponents, "");
+            }
+            else if (otherLast.endsWith(last)) {
+                components = Template.replaceLast(components, "");
+                otherComponents = Template.replaceLast(otherComponents, otherLast.substring(0, otherLast.length() - last.length()));
+            }
+            else
+                return termFactory.getStrictEquality(
+                        termFactory.getDBIntegerConstant(0),
+                        termFactory.getDBIntegerConstant(1));
+
+            if (components.isEmpty() && otherComponents.isEmpty())
+                return termFactory.getStrictEquality(
+                        termFactory.getDBIntegerConstant(1),
+                        termFactory.getDBIntegerConstant(1));
+        }
+
+        return termFactory.getStrictEquality(
+                convertIntoTerm(components, subTermIterator, termFactory),
+                convertIntoTerm(otherComponents, otherSubTermIterator, termFactory));
+    }
+
+    private ImmutableTerm convertIntoTerm(ImmutableList<Template.Component> components,
+                                          UnmodifiableIterator<? extends ImmutableTerm> subTermIterator,
                                           TermFactory termFactory) {
 
-        ImmutableList<ImmutableTerm> args = safeSeparatorFragment.getComponents().stream()
+        ImmutableList<ImmutableTerm> args = components.stream()
                 .map(c -> c.isColumnNameReference()
                         ? subTermIterator.next()
                         : termFactory.getDBStringConstant(c.getComponent()))
