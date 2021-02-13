@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 
 import javax.annotation.Nullable;

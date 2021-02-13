@@ -44,9 +44,9 @@ public class TemplateParser {
         throw new IllegalArgumentException("Unexpected term type (only Constant and Variable are allowed):" + term);
     }
 
-    public static String getTemplateString(ImmutableList<Template.Component> components) {
+    public static String getEncodedTemplateString(ImmutableList<Template.Component> components) {
         return components.stream()
-                .map(c -> c.isColumnNameReference() ? "{}" : c.getComponent())
+                .map(c -> c.isColumnNameReference() ? "{}" : encode(c.getComponent()))
                 .collect(Collectors.joining());
     }
 

@@ -601,8 +601,11 @@ public class NormalizationTest {
 
         IQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(
-                        TERM_FACTORY.getStrictEquality(iriTerm1.getTerm(0), iriTerm2.getTerm(0))
-                ),
+                        TERM_FACTORY.getStrictEquality(
+                                TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(
+                                        ImmutableList.of(A, TERM_FACTORY.getDBStringConstant(".z"))),
+                                TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(
+                                        ImmutableList.of(B, TERM_FACTORY.getDBStringConstant("."), C)))),
                 ImmutableList.of(dataNode1, dataNode2));
 
         UnaryIQTree newIQTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, newJoinTree);
