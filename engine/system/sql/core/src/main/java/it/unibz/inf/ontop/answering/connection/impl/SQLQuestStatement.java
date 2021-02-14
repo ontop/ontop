@@ -202,7 +202,8 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    public GraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
+    protected GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger,
+                                                   boolean isSubQueryOfDescribe)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         TupleResultSet tuples;
         try {
@@ -223,7 +224,7 @@ public class SQLQuestStatement extends QuestStatement {
             queryLogger.declareResultSetUnblockedAndSerialize();
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
-        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory, this, false);
+        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory, this, isSubQueryOfDescribe);
     }
 
     private NativeNode extractNativeNode(IQ executableQuery) throws EmptyQueryException {

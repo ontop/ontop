@@ -62,7 +62,7 @@ public class RDF4JConstructDescribeTest {
 			while (gresult.hasNext()) {
 				Statement s = gresult.next();
 				result++;
-				System.out.println(s.toString());
+				//System.out.println(s.toString());
 			}
 			Assert.assertEquals(4, result);
 		}
@@ -134,7 +134,7 @@ public class RDF4JConstructDescribeTest {
 			while (gresult.hasNext()) {
 				result = false;
 				Statement s = gresult.next();
-				System.out.println(s.toString());
+				//System.out.println(s.toString());
 			}
 			Assert.assertFalse(result);
 		}
@@ -158,7 +158,6 @@ public class RDF4JConstructDescribeTest {
 		Assert.assertEquals(1, result);
 	}
 
-	@Ignore("The dictionary is blocked by the DISTINCT")
 	@Test
 	public void testDescribeVar2() throws Exception {
 		int result = 0;
@@ -178,7 +177,6 @@ public class RDF4JConstructDescribeTest {
 		}
 	}
 
-	@Ignore("Not supported")
 	@Test
 	public void testDescribeVar3() {
 		int result = 0;
@@ -197,7 +195,6 @@ public class RDF4JConstructDescribeTest {
 		}
 	}
 
-	@Ignore("The dictionary is blocked by the DISTINCT")
 	@Test
 	public void testDescribeVar4() {
 		int result = 0;
@@ -216,7 +213,6 @@ public class RDF4JConstructDescribeTest {
 		}
 	}
 
-	@Ignore("Not supported")
 	@Test
 	public void testDescribeVar5() {
 		int result = 0;
@@ -234,6 +230,25 @@ public class RDF4JConstructDescribeTest {
 			// TODO: check the number of results
 		}
 	}
+
+	@Test
+	public void testDescribeVar6() {
+		int result = 0;
+		String queryString = "DESCRIBE ?x ?y <http://example.org/B> WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> ?y}";
+
+		try (RepositoryConnection con = REPOSITORY.getConnection()) {
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
+					queryString);
+
+			GraphQueryResult gresult = graphQuery.evaluate();
+			while (gresult.hasNext()) {
+				result++;
+				Statement triple = gresult.next();
+				//System.out.println(triple);
+			}
+			Assert.assertEquals(2, result);
+		}
+	}
 	
 	@Test
 	public void testConstruct0() throws Exception {
@@ -247,7 +262,7 @@ public class RDF4JConstructDescribeTest {
 			while (gresult.hasNext()) {
 				result = false;
 				Statement s = gresult.next();
-				System.out.println(s.toString());
+				//System.out.println(s.toString());
 			}
 
 			Assert.assertFalse(result);

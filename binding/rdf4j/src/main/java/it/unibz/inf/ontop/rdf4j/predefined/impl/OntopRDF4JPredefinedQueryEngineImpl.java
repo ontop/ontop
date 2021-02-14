@@ -330,7 +330,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         try (
                 OntopConnection conn = ontopEngine.getConnection();
                 OntopStatement stm = conn.createStatement();
-                GraphResultSet res = stm.executeGraphQuery(constructTemplate, executableQuery, queryLogger)
+                GraphResultSet res = stm.executeConstructQuery(constructTemplate, executableQuery, queryLogger)
         ){
             byte[] salt = new byte[20];
             random.nextBytes(salt);
