@@ -29,7 +29,7 @@ public interface OntopStatement extends OBDAStatement {
     TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException;
 
-    GraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
+    GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
     BooleanResultSet executeBooleanQuery(IQ executableQuery, QueryLogger queryLogger)

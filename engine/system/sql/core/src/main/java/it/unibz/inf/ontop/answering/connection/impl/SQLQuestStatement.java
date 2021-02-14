@@ -202,7 +202,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    public GraphResultSet executeGraphQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
+    public GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         TupleResultSet tuples;
         try {

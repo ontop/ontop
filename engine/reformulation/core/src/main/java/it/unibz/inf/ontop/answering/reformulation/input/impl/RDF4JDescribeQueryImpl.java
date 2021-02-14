@@ -11,11 +11,8 @@ import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 
 class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> implements RDF4JDescribeQuery {
@@ -159,20 +156,20 @@ class RDF4JDescribeQueryImpl extends RDF4JInputQueryImpl<GraphResultSet> impleme
             return left;
     }
 
-    @Override
-    public ConstructTemplate getConstructTemplate() {
-
-        // May happen due to the caching of the IQ
-        if (constructTemplate == null) {
-            try {
-                transformParsedQuery();
-                return constructTemplate;
-            } catch (OntopUnsupportedInputQueryException e) {
-                throw new IllegalStateException("The fact that this query is not supported should have been detected " +
-                        "while reformulating the query.");
-            }
-        }
-
-        return constructTemplate;
-    }
+//    @Override
+//    public ConstructTemplate getConstructTemplate() {
+//
+//        // May happen due to the caching of the IQ
+//        if (constructTemplate == null) {
+//            try {
+//                transformParsedQuery();
+//                return constructTemplate;
+//            } catch (OntopUnsupportedInputQueryException e) {
+//                throw new IllegalStateException("The fact that this query is not supported should have been detected " +
+//                        "while reformulating the query.");
+//            }
+//        }
+//
+//        return constructTemplate;
+//    }
 }
