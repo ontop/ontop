@@ -28,7 +28,7 @@ public class JDBCDriverTableModel extends AbstractTableModel {
 
 	public JDBCDriverTableModel(ServiceTracker<?,?> jdbcRegistryTracker) {
 		this.jdbcRegistryTracker = jdbcRegistryTracker;
-		this.drivers = getDrivers();
+		this.drivers = getDriverInfoFromPreferences();
 		updateDriverStatus();
 	}
 
@@ -101,7 +101,7 @@ public class JDBCDriverTableModel extends AbstractTableModel {
 	}
 
 
-	public void store() {
+	public void storeDriverInfoInPreferences() {
 		Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(JDBCPreferencesPanel.PREFERENCES_SET, JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY);
 		List<String> prefsStringList = new ArrayList<>();
 		for (JDBCDriverInfo driver : drivers) {
@@ -113,7 +113,7 @@ public class JDBCDriverTableModel extends AbstractTableModel {
 		prefs.putStringList(JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY, prefsStringList);
 	}
 
-	public static List<JDBCDriverInfo> getDrivers() {
+	public static List<JDBCDriverInfo> getDriverInfoFromPreferences() {
 		List<JDBCDriverInfo> drivers = new ArrayList<>();
 		Preferences prefs = PreferencesManager.getInstance().getPreferencesForSet(JDBCPreferencesPanel.PREFERENCES_SET, JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY);
 		Iterator<String> driverStrings = prefs.getStringList(JDBCPreferencesPanel.DRIVER_PREFERENCES_KEY, new ArrayList<>()).iterator();

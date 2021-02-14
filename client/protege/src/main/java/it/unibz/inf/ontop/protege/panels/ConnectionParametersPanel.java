@@ -113,7 +113,7 @@ public class ConnectionParametersPanel extends JPanel implements OBDADataSource.
 
         ImmutableList<String> options = Stream.concat(
                 Stream.of("select or type the JDBC Driver class..."),
-                JDBCDriverTableModel.getDrivers().stream()
+                JDBCDriverTableModel.getDriverInfoFromPreferences().stream()
                         .map(JDBCDriverInfo::getClassName))
                 .collect(ImmutableCollectors.toList());
 

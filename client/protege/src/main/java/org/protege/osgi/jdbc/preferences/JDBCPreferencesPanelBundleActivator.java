@@ -42,7 +42,7 @@ public class JDBCPreferencesPanelBundleActivator implements BundleActivator {
 		if (sr != null) {
 			JdbcRegistry registry = context.getService(sr);
 			try {
-				for (JDBCDriverInfo driver : JDBCDriverTableModel.getDrivers()) {
+				for (JDBCDriverInfo driver : JDBCDriverTableModel.getDriverInfoFromPreferences()) {
 					try {
 						registry.addJdbcDriver(driver.getClassName(), driver.getDriverURL());
 					}

@@ -1,5 +1,6 @@
 package org.protege.osgi.jdbc.preferences;
 
+import it.unibz.inf.ontop.protege.gui.dialogs.JDBCDriverEditSettingsDialog;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
@@ -82,21 +83,20 @@ public class JDBCPreferencesPanel extends OWLPreferencesPanel {
 
     @Override
     public void applyChanges() {
-        driverTableModel.store();
+        driverTableModel.storeDriverInfoInPreferences();
     }
 
     private void cmdAddDriver(ActionEvent e) {
-        JDBCDriverEditSettingsDialog editor = new JDBCDriverEditSettingsDialog(this, jdbcRegistryTracker);
-        Optional<JDBCDriverInfo> info = editor.getDriverInfo();
+        JDBCDriverEditSettingsDialog dialog = new JDBCDriverEditSettingsDialog(this, jdbcRegistryTracker);
+        Optional<JDBCDriverInfo> info = dialog.showDialog();
         info.ifPresent(i -> driverTableModel.addDriver(i));
     }
 
     private void cmdEditDriver(ActionEvent e) {
         int row = table.getSelectedRow();
         JDBCDriverInfo info = driverTableModel.getDriver(row);
-        JDBCDriverEditSettingsDialog editor = new JDBCDriverEditSettingsDialog(this, jdbcRegistryTracker);
-        editor.setDriverInfo(info);
-        Optional<JDBCDriverInfo> newInfo = editor.getDriverInfo();
+        JDBCDriverEditSettingsDialog editor = new JDBCDriverEditSettingsDialog(this, jdbcRegistryTracker, info);
+        Optional<JDBCDriverInfo> newInfo = editor.showDialog();
         newInfo.ifPresent(i -> driverTableModel.replaceDriver(row, i));
     }
 

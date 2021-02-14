@@ -27,6 +27,7 @@ import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -63,8 +64,7 @@ public class SelectPrefixDialog extends JDialog {
 				String directives = getDirectives();
 				queryTextComponent.setText((directives.isEmpty() ? "" : directives + "\n") +
 						queryTextComponent.getText());
-				setVisible(false);
-				dispose();
+				dispatchEvent(new WindowEvent(SelectPrefixDialog.this, WindowEvent.WINDOW_CLOSING));
 			}
 		};
 
@@ -78,19 +78,20 @@ public class SelectPrefixDialog extends JDialog {
 		Action selectNoneAction = new AbstractAction("<html>Select <u>N</u>one</html>") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				checkboxes.forEach(c -> c.setSelected(false));
+				checkboxes.stream()
+						.filter(Component::isEnabled)
+						.forEach(c -> c.setSelected(false));
 			}
 		};
 
 		Action cancelAction = new AbstractAction("Cancel") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setVisible(false);
-				dispose();
+				dispatchEvent(new WindowEvent(SelectPrefixDialog.this, WindowEvent.WINDOW_CLOSING));
 			}
 		};
 
-		JPanel mainPanel = new JPanel(new GridBagLayout());
+		setLayout(new GridBagLayout());
 
 		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 
@@ -106,7 +107,7 @@ public class SelectPrefixDialog extends JDialog {
 		acceptButton.setToolTipText("Add selected prefixes to the query.");
 		buttonsPanel.add(acceptButton);
 
-		mainPanel.add(buttonsPanel,
+		add(buttonsPanel,
 				new GridBagConstraints(0, 2, 1, 1, 0, 0,
 						GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE,
 						new Insets(5, 5, 5, 5), 0, 0));
@@ -133,8 +134,6 @@ public class SelectPrefixDialog extends JDialog {
 							new Insets(1, 2, 1, 2), 0, 0));
 
 			JLabel label = new JLabel("<" + e.getValue() + ">");
-			// the border is required for alignment with the checkbox
-			label.setBorder(BorderFactory.createLineBorder(prefixPanel.getBackground()));
 			prefixPanel.add(label,
 					new GridBagConstraints(1, isDefaultPrefix ? 0 : gridYIndex, 1, 1, 1, 0,
 							GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
@@ -153,24 +152,23 @@ public class SelectPrefixDialog extends JDialog {
 						GridBagConstraints.WEST, GridBagConstraints.BOTH,
 						new Insets(0, 0, 0, 0), 0, 0));
 
-		mainPanel.add(new JScrollPane(prefixPanel),
+		add(new JScrollPane(prefixPanel),
 				new GridBagConstraints(0, 1, 1, 1, 1, 1,
 						GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
 						new Insets(5, 10, 5, 10), 0, 0));
 
-		InputMap inputMap = mainPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		inputMap.put(KeyStroke.getKeyStroke(VK_ENTER, 0), "ok");
+		InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		inputMap.put(KeyStroke.getKeyStroke(VK_ESCAPE, 0), "cancel");
 		inputMap.put(KeyStroke.getKeyStroke(VK_A, CTRL_DOWN_MASK), "all");
 		inputMap.put(KeyStroke.getKeyStroke(VK_N, CTRL_DOWN_MASK), "none");
-		ActionMap actionMap = mainPanel.getActionMap();
-		actionMap.put("ok", acceptAction);
+		ActionMap actionMap = getRootPane().getActionMap();
 		actionMap.put("cancel", cancelAction);
 		actionMap.put("all", selectAllAction);
 		actionMap.put("none", selectNoneAction);
 
+		getRootPane().setDefaultButton(acceptButton);
+
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		setContentPane(mainPanel);
 		pack();
 		setLocationRelativeTo(queryTextComponent);
 	}

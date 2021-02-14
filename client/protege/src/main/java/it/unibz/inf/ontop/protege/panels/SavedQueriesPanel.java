@@ -21,16 +21,15 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.protege.core.QueryManager;
+import it.unibz.inf.ontop.protege.gui.dialogs.NewQueryDialog;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.gui.models.QueryControllerTreeModel;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.Dialog.ModalityType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -243,19 +242,8 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 	}//GEN-LAST:event_reselectQueryNode
 
     private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
-    	// Open a save dialog if it is a new query
-		JDialog saveDialog = new JDialog();
-		saveDialog.setTitle("New Query");
-		saveDialog.setModalityType(ModalityType.MODELESS);
-		
-		SaveQueryPanel savePanel = new SaveQueryPanel("", saveDialog, queryController);
-		saveDialog.getContentPane().add(savePanel, java.awt.BorderLayout.CENTER);
-		saveDialog.pack();
-		
-		DialogUtils.centerDialogWRTParent(this, saveDialog);
-		DialogUtils.installEscapeCloseOperation(saveDialog);
-		
-		saveDialog.setVisible(true);
+		NewQueryDialog dialog = new NewQueryDialog(this, queryController);
+		dialog.setVisible(true);
     }//GEN-LAST:event_cmdAddActionPerformed
 
 	private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeQueryButtonActionPerformed
