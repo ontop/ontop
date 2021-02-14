@@ -20,8 +20,8 @@ import java.util.concurrent.CountDownLatch;
  */
 public abstract class QuestStatement implements OntopStatement {
 
-	private final QueryReformulator engine;
-	private final QueryLogger.Factory queryLoggerFactory;
+	protected final QueryReformulator engine;
+	protected final QueryLogger.Factory queryLoggerFactory;
 
 	private QueryExecutionThread executionThread;
 	private boolean canceled = false;
@@ -41,8 +41,9 @@ public abstract class QuestStatement implements OntopStatement {
 	@FunctionalInterface
 	private interface Evaluator<R extends OBDAResultSet, Q extends InputQuery<R>> {
 
-		R evaluate(Q inputQuery, IQ executableQuery, QueryLogger queryLogger)
-				throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
+		R evaluate(Q inputQuery, QueryLogger queryLogger)
+				throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException,
+				OntopReformulationException;
 	}
 
 	/**
@@ -54,15 +55,13 @@ public abstract class QuestStatement implements OntopStatement {
 		private final QueryLogger queryLogger;
 		private final QuestStatement.Evaluator<R, Q> evaluator;
 		private final CountDownLatch monitor;
-		private final IQ executableQuery;
 
 		private R resultSet;	  // only for SELECT and ASK queries
 		private Exception exception;
 		private boolean executingTargetQuery;
 
-		QueryExecutionThread(Q inputQuery, IQ executableQuery, QueryLogger queryLogger, Evaluator<R,Q> evaluator,
+		QueryExecutionThread(Q inputQuery, QueryLogger queryLogger, Evaluator<R,Q> evaluator,
 						CountDownLatch monitor) {
-			this.executableQuery = executableQuery;
 			this.inputQuery = inputQuery;
 			this.queryLogger = queryLogger;
 			this.evaluator = evaluator;
@@ -104,9 +103,8 @@ public abstract class QuestStatement implements OntopStatement {
 				/*
 				 * Executes the target query.
 				 */
-				log.debug("Executing the query and get the result...");
 				executingTargetQuery = true;
-				resultSet = evaluator.evaluate(inputQuery, executableQuery, queryLogger);
+				resultSet = evaluator.evaluate(inputQuery, queryLogger);
 				// NB: finished if the result set is blocking!
 				log.debug("Result set unblocked.\n");
 				/*
@@ -121,19 +119,29 @@ public abstract class QuestStatement implements OntopStatement {
 		}
 	}
 
-	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException {
+	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException, OntopReformulationException {
+		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
+		logExecutionStartingMessage();
 		return executeSelectQuery(executableQuery, queryLogger);
 	}
 
-	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException {
+	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException, OntopReformulationException {
+		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
+		logExecutionStartingMessage();
 		return executeBooleanQuery(executableQuery, queryLogger);
 	}
 
-	private GraphResultSet executeGraphQuery(GraphSPARQLQuery constructQuery, IQ executableQuery, QueryLogger queryLogger)
-			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
+	private GraphResultSet executeGraphQuery(GraphSPARQLQuery constructQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
+		IQ executableQuery = engine.reformulateIntoNativeQuery(constructQuery, queryLogger);
+		logExecutionStartingMessage();
 		return executeGraphQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger);
+	}
+
+	private void logExecutionStartingMessage() {
+		log.debug("Executing the query and get the result...");
 	}
 
 	/**
@@ -181,9 +189,8 @@ public abstract class QuestStatement implements OntopStatement {
 		queryLogger.setSparqlQuery(inputQuery.getInputString());
 
 		CountDownLatch monitor = new CountDownLatch(1);
-		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
 
-		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, executableQuery, queryLogger, evaluator,
+		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, queryLogger, evaluator,
 				monitor);
 
 		this.executionThread = executionthread;
@@ -238,7 +245,6 @@ public abstract class QuestStatement implements OntopStatement {
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		return engine.getRewritingRendering(query);
 	}
-
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
