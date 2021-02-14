@@ -29,7 +29,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
             throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
             OntopResultConversionException {
 
-        ImmutableSet<IRI> resourcesToDescribe = extractDescribeResources(describeQuery, queryLoggerFactory,
+        ImmutableSet<IRI> resourcesToDescribe = extractDescribeResources(describeQuery, queryLogger, queryLoggerFactory,
                 selectQueryEvaluator);
 
         this.iterator = new ResultSetIterator(describeQuery.computeConstructQueries(resourcesToDescribe),
@@ -38,7 +38,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
     }
 
     private static ImmutableSet<IRI> extractDescribeResources(DescribeQuery inputQuery,
-                                                              QueryLogger.Factory queryLoggerFactory,
+                                                              QueryLogger queryLogger, QueryLogger.Factory queryLoggerFactory,
                                                               Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator)
             throws OntopQueryEvaluationException, OntopConnectionException,
             OntopReformulationException, OntopResultConversionException {
@@ -46,6 +46,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
             SelectQuery selectQuery = inputQuery.getSelectQuery();
             QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
             TupleResultSet resultSet = selectQueryEvaluator.evaluate(selectQuery, selectQueryLogger);
+            queryLogger.declareResultSetUnblockedAndSerialize();
 
             ImmutableSet.Builder<IRI> iriSetBuilder = ImmutableSet.builder();
             while (resultSet.hasNext()) {
