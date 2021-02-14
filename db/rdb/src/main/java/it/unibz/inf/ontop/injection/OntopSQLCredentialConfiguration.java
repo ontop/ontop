@@ -10,7 +10,7 @@ public interface OntopSQLCredentialConfiguration extends OntopSQLCoreConfigurati
     @Override
     OntopSQLCredentialSettings getSettings();
 
-    static Builder<? extends Builder> defaultBuilder() {
+    static Builder<? extends Builder<?>> defaultBuilder() {
         return new OntopSQLCredentialConfigurationImpl.BuilderImpl<>();
     }
 

@@ -87,13 +87,13 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookupForFk) throws MetadataExtractionException {
         JsonDatabaseTable jsonTable = relationMap.get(relation.getID());
         if (jsonTable == null)
             throw new IllegalArgumentException("The relation " + relation.getID().getSQLRendering()
                     + " is unknown to the JsonSerializedMetadataProvider");
 
-        jsonTable.insertIntegrityConstraints(metadataLookup);
+        jsonTable.insertIntegrityConstraints(relation, metadataLookupForFk);
     }
 
     @Override

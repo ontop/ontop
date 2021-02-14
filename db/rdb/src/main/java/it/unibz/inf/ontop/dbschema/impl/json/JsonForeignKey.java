@@ -2,8 +2,9 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -17,6 +18,8 @@ import java.util.stream.Stream;
 public class JsonForeignKey extends JsonOpenObject  {
     public final String name;
     public final Part from, to;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonForeignKey.class);
 
     @JsonCreator
     public JsonForeignKey(@JsonProperty("name") String name,
@@ -35,10 +38,17 @@ public class JsonForeignKey extends JsonOpenObject  {
                 .map(ForeignKeyConstraint.Component::getReferencedAttribute));
     }
 
-    public void insert(DatabaseTableDefinition relation, MetadataLookup lookup) throws MetadataExtractionException {
+    public void insert(NamedRelationDefinition relation, MetadataLookup lookup) throws MetadataExtractionException {
 
-        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, relation,
-                lookup.getRelation(JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), to.relation)));
+        ForeignKeyConstraint.Builder builder;
+        try {
+            builder = ForeignKeyConstraint.builder(name, relation,
+                    lookup.getRelation(JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), to.relation)));
+        }
+        catch (MetadataExtractionException e) {
+            LOGGER.warn("Cannot find table {} for FK {}", to.relation, name);
+            return ;
+        }
 
         try {
             for (int i = 0; i < from.columns.size(); i++)

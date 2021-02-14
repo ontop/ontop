@@ -94,6 +94,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIfThenElse();
 
+    DBFunctionSymbol getDBNullIf();
+
     DBFunctionSymbol getDBUpper();
 
     DBFunctionSymbol getDBLower();
