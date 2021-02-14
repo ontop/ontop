@@ -615,6 +615,54 @@ public class NormalizationTest {
     }
 
     @Test
+    public void testJoinDifferentIRITemplate4() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2, ImmutableMap.of(0, A));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2, ImmutableMap.of(0, B, 1, C));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
+
+        ImmutableList<Template.Component> iriTemplate1 = Template.builder().addSeparator("http://example.org/house/")
+                .addColumn()
+                .addSeparator("#%2F")
+                .build();
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate1, ImmutableList.of(A))));
+
+        ImmutableList<Template.Component> iriTemplate2 = Template.builder().addSeparator("http://example.org/house/")
+                .addColumn()
+                .addSeparator("#")
+                .addColumn()
+                .build();
+
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(X),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getIRIFunctionalTerm(iriTemplate2,
+                        ImmutableList.of(B, C))));
+
+        IQTree iqTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(
+                        IQ_FACTORY.createUnaryIQTree(constructionNode1, dataNode1),
+                        IQ_FACTORY.createUnaryIQTree(constructionNode2, dataNode2)));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
+
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2, ImmutableMap.of(0, A,
+                1, TERM_FACTORY.getDBStringConstant("/")));
+
+        IQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, newDataNode2));
+
+        UnaryIQTree newIQTree = IQ_FACTORY.createUnaryIQTree(constructionNode1, newJoinTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newIQTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
     public void testFilter1() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ImmutableExpression expression = createExpression(A);
