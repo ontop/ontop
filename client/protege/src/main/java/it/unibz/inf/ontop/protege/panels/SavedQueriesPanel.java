@@ -22,14 +22,19 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.NewQueryDialog;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.gui.models.QueryControllerTreeModel;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,28 +57,93 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 	
 	private final QueryControllerTreeModel queryControllerModel = new QueryControllerTreeModel();
 
-	private final QueryManager queryController;
+	private final QueryManager queryManager;
 		
 	private QueryControllerTreeModel.QueryNode currentId;
 	private QueryControllerTreeModel.QueryNode previousId;
 
-	/** 
+    private final JTree treSavedQuery;
+
+    /**
 	 * Creates new form SavedQueriesPanel 
 	 */
-	public SavedQueriesPanel(QueryManager queryController) {
+	public SavedQueriesPanel(QueryManager queryManager) {
+        this.queryManager = queryManager;
 
-        this.saved_query_icon = IconLoader.getImageIcon(PATH_SAVEDQUERY_ICON);
-        this.query_group_icon = IconLoader.getImageIcon(PATH_QUERYGROUP_ICON);
-        this.root_node_icon = IconLoader.getImageIcon(PATH_ROOT_NODE_ICON);
+        saved_query_icon = IconLoader.getImageIcon(PATH_SAVEDQUERY_ICON);
+        query_group_icon = IconLoader.getImageIcon(PATH_QUERYGROUP_ICON);
+        root_node_icon = IconLoader.getImageIcon(PATH_ROOT_NODE_ICON);
 
-        initComponents();
+        setLayout(new BorderLayout());
 
-		this.queryController = queryController;
-		this.queryController.addListener(queryControllerModel);
-		this.queryController.addListener(this);
+        treSavedQuery = new JTree(queryControllerModel);
+        treSavedQuery.setBorder(BorderFactory.createEtchedBorder());
+        treSavedQuery.setForeground(new Color(51, 51, 51));
+        treSavedQuery.setMaximumSize(new Dimension(5000, 5000));
+        treSavedQuery.setRootVisible(false);
+        treSavedQuery.setCellRenderer(new DefaultTreeCellRenderer() {
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+
+                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
+                if (value instanceof QueryControllerTreeModel.QueryNode)
+                    setIcon(saved_query_icon);
+                else if (value instanceof QueryControllerTreeModel.GroupNode)
+                    setIcon(query_group_icon);
+                else
+                    setIcon(root_node_icon);
+
+                return this;
+            }
+        });
+        treSavedQuery.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                reselectQueryNode(evt);
+            }
+        });
+        treSavedQuery.addTreeSelectionListener(this::selectQueryNode);
+
+        JScrollPane scrSavedQuery = new JScrollPane(treSavedQuery);
+        scrSavedQuery.setOpaque(false);
+        scrSavedQuery.setPreferredSize(new Dimension(300, 200));
+        scrSavedQuery.setMinimumSize(new Dimension(400, 200));
+        add(scrSavedQuery, BorderLayout.CENTER);
+
+        JPanel controlPanel = new JPanel(new GridBagLayout());
+
+        controlPanel.add(new JLabel("Stored queries:"),
+                new GridBagConstraints(0, 0, 1, 1, 1.5, 0,
+                        GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+                        new Insets(0,0,0,0), 0, 0));
+
+        JButton addButton = DialogUtils.getButton(
+                "Add",
+                "plus.png",
+                "Add a new query",
+                this::cmdAddActionPerformed);
+        controlPanel.add(addButton,
+                new GridBagConstraints(3, 0, 1, 1, 0, 0,
+                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+                        new Insets(1, 1, 1, 1), 0, 0));
+
+        JButton removeButton = DialogUtils.getButton(
+                "Remove",
+                "minus.png",
+                "Remove the selected query",
+                this::cmdRemoveActionPerformed);
+        controlPanel.add(removeButton,
+                new GridBagConstraints(4, 0, 1, 1, 0, 0,
+                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+                        new Insets(1, 1, 1, 1), 0, 0));
+
+        add(controlPanel, BorderLayout.NORTH);
+
+		queryManager.addListener(queryControllerModel);
+		queryManager.addListener(this);
 		
 		// Fill the tree model with existing elements from the controller
-		queryControllerModel.synchronize(queryController);
+		queryControllerModel.synchronize(queryManager);
 		queryControllerModel.reload();
 	}
 
@@ -87,133 +157,8 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 		    listeners.remove(listener);
 	}
 
-    private class SavedQueriesTreeCellRenderer extends DefaultTreeCellRenderer {
-        @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value,
-                                                      boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
-            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-
-            if (value instanceof QueryControllerTreeModel.QueryNode) {
-                setIcon(saved_query_icon);
-            }
-            else if (value instanceof QueryControllerTreeModel.GroupNode) {
-                setIcon(query_group_icon);
-            }
-            else {
-                setIcon(root_node_icon);
-            }
-            return this;
-        }
-    }
-
-
-    /**
-	 * This method is called from within the constructor to initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is always
-	 * regenerated by the Form Editor.
-	 */
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
-
-        pnlSavedQuery = new javax.swing.JPanel();
-        scrSavedQuery = new javax.swing.JScrollPane();
-        treSavedQuery = new javax.swing.JTree();
-        pnlCommandPanel = new javax.swing.JPanel();
-        lblSavedQuery = new javax.swing.JLabel();
-        cmdRemove = new javax.swing.JButton();
-        cmdAdd = new javax.swing.JButton();
-
-        setLayout(new java.awt.BorderLayout());
-
-        pnlSavedQuery.setMinimumSize(new java.awt.Dimension(200, 50));
-        pnlSavedQuery.setLayout(new java.awt.BorderLayout());
-
-        scrSavedQuery.setMinimumSize(new java.awt.Dimension(400, 200));
-        scrSavedQuery.setOpaque(false);
-        scrSavedQuery.setPreferredSize(new java.awt.Dimension(300, 200));
-
-        treSavedQuery.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        treSavedQuery.setForeground(new java.awt.Color(51, 51, 51));
-        treSavedQuery.setModel(queryControllerModel);
-        treSavedQuery.setCellRenderer(new SavedQueriesTreeCellRenderer());
-        treSavedQuery.setMaximumSize(new java.awt.Dimension(5000, 5000));
-        treSavedQuery.setRootVisible(false);
-        treSavedQuery.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                reselectQueryNode(evt);
-            }
-        });
-        treSavedQuery.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                selectQueryNode(evt);
-            }
-        });
-        scrSavedQuery.setViewportView(treSavedQuery);
-
-        pnlSavedQuery.add(scrSavedQuery, java.awt.BorderLayout.CENTER);
-
-        pnlCommandPanel.setLayout(new java.awt.GridBagLayout());
-
-        lblSavedQuery.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        lblSavedQuery.setForeground(new java.awt.Color(153, 153, 153));
-        lblSavedQuery.setText("Stored Query:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.5;
-        pnlCommandPanel.add(lblSavedQuery, gridBagConstraints);
-
-        cmdRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
-        cmdRemove.setText("Remove");
-        cmdRemove.setToolTipText("Remove the selected query");
-        cmdRemove.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdRemove.setContentAreaFilled(false);
-        cmdRemove.setIconTextGap(5);
-        cmdRemove.setMaximumSize(new java.awt.Dimension(25, 25));
-        cmdRemove.setMinimumSize(new java.awt.Dimension(25, 25));
-        cmdRemove.setPreferredSize(new java.awt.Dimension(80, 25));
-        cmdRemove.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdRemoveActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-        pnlCommandPanel.add(cmdRemove, gridBagConstraints);
-
-        cmdAdd.setIcon(IconLoader.getImageIcon("images/plus.png"));
-        cmdAdd.setText("Add");
-        cmdAdd.setToolTipText("Add a new query");
-        cmdAdd.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdAdd.setContentAreaFilled(false);
-        cmdAdd.setIconTextGap(4);
-        cmdAdd.setMaximumSize(new java.awt.Dimension(25, 25));
-        cmdAdd.setMinimumSize(new java.awt.Dimension(25, 25));
-        cmdAdd.setPreferredSize(new java.awt.Dimension(63, 25));
-        cmdAdd.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdAddActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-        pnlCommandPanel.add(cmdAdd, gridBagConstraints);
-
-        pnlSavedQuery.add(pnlCommandPanel, java.awt.BorderLayout.NORTH);
-
-        add(pnlSavedQuery, java.awt.BorderLayout.CENTER);
-    }// </editor-fold>//GEN-END:initComponents
-    
-    private void selectQueryNode(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_selectQueryNode
+    private void selectQueryNode(TreeSelectionEvent evt) {
     	DefaultMutableTreeNode node = (DefaultMutableTreeNode) evt.getPath().getLastPathComponent();
         if (node instanceof QueryControllerTreeModel.QueryNode) {
             currentId = (QueryControllerTreeModel.QueryNode)node;
@@ -227,9 +172,9 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
         else if (node == null) {
             currentId = null;
         }
-    }//GEN-LAST:event_selectQueryNode
+    }
 
-	private void reselectQueryNode(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_reselectQueryNode
+	private void reselectQueryNode(MouseEvent evt) {
 		if (currentId == null) {
 			return;
 		}
@@ -239,14 +184,14 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 		else { // register the selected node
 			previousId = currentId;
 		}
-	}//GEN-LAST:event_reselectQueryNode
+	}
 
-    private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
-		NewQueryDialog dialog = new NewQueryDialog(this, queryController);
+    private void cmdAddActionPerformed(ActionEvent evt) {
+		NewQueryDialog dialog = new NewQueryDialog(this, queryManager);
 		dialog.setVisible(true);
-    }//GEN-LAST:event_cmdAddActionPerformed
+    }
 
-	private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeQueryButtonActionPerformed
+	private void cmdRemoveActionPerformed(ActionEvent evt) {
 		TreePath selected_path = treSavedQuery.getSelectionPath();
 		if (selected_path == null)
 			return;
@@ -261,23 +206,14 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) selected_path.getLastPathComponent();
 		if (node instanceof QueryControllerTreeModel.QueryNode) {
             QueryControllerTreeModel.QueryNode queryTreeElement = (QueryControllerTreeModel.QueryNode)node;
-			queryController.removeQuery(queryTreeElement.getGroupID(), queryTreeElement.getQueryID());
+			queryManager.removeQuery(queryTreeElement.getGroupID(), queryTreeElement.getQueryID());
 		}
 		else if (node instanceof QueryControllerTreeModel.GroupNode) {
             QueryControllerTreeModel.GroupNode groupTreeElement = (QueryControllerTreeModel.GroupNode)node;
-			queryController.removeGroup(groupTreeElement.getGroupID());
+			queryManager.removeGroup(groupTreeElement.getGroupID());
 		}
-	}// GEN-LAST:event_removeQueryButtonActionPerformed
+	}
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton cmdAdd;
-    private javax.swing.JButton cmdRemove;
-    private javax.swing.JLabel lblSavedQuery;
-    private javax.swing.JPanel pnlCommandPanel;
-    private javax.swing.JPanel pnlSavedQuery;
-    private javax.swing.JScrollPane scrSavedQuery;
-    private javax.swing.JTree treSavedQuery;
-    // End of variables declaration//GEN-END:variables
 
     @Override
 	public void added(QueryManager.Group group) {
