@@ -263,9 +263,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 return Optional.empty();
         }
 
-        return Optional.of((ImmutableExpression) termFactory.getStrictEquality(
+        return Optional.of(termFactory.getStrictEquality(
                 convertIntoTerm(components, subTermIterator, termFactory),
-                convertIntoTerm(otherComponents, otherSubTermIterator, termFactory)).simplify());
+                convertIntoTerm(otherComponents, otherSubTermIterator, termFactory)));
     }
 
     /**
