@@ -20,30 +20,33 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
 import static java.awt.event.KeyEvent.*;
 
 public class NewQueryDialog extends JDialog {
 
 	private static final long serialVersionUID = -7101725310389493765L;
 	
-	private final static String NEW_GROUP = "New group...";
-	private final static String NO_GROUP = "No group";
+	private final static String GROUP_PROMPT = "Select or enter a new group name";
+	private final static String NO_GROUP = "[No group]";
 
 	private final QueryManager queryManager;
 
-    private final JComboBox<String> cmbQueryGroup;
-    private final JTextField txtGroupName;
-    private final JTextField txtQueryID;
+    private final JComboBox<String> groupComboBox;
+    private final JTextField queryIdTextField;
 
 	public NewQueryDialog(JComponent parent, QueryManager queryManager) {
 		this.queryManager = queryManager;
@@ -56,7 +59,9 @@ public class NewQueryDialog extends JDialog {
 
         JPanel mainPanel = new JPanel(new GridBagLayout());
 
-        mainPanel.add(new JLabel("<html>Insert an ID and select/create a group for this query.</html>"),
+        mainPanel.add(new JLabel("<html>Insert an ID and select or create a new group for this query.<br>" +
+                        "Note: a new group ID cannot coincide with<br>" +
+                        HTML_TAB + " an ID of a query without a group.</html>"),
                 new GridBagConstraints(0, 0, 2, 1, 1, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(10, 0, 10, 0), 0, 0));
@@ -66,8 +71,8 @@ public class NewQueryDialog extends JDialog {
                         GridBagConstraints.CENTER, GridBagConstraints.NONE,
                         new Insets(0, 0, 4, 0), 0 ,0));
 
-        txtQueryID = new JTextField();
-        mainPanel.add(txtQueryID,
+        queryIdTextField = new JTextField();
+        mainPanel.add(queryIdTextField,
                 new GridBagConstraints(1, 1, 1, 1, 1, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(0, 0, 4, 0), 0 ,0));
@@ -77,30 +82,22 @@ public class NewQueryDialog extends JDialog {
                         GridBagConstraints.CENTER, GridBagConstraints.NONE,
                         new Insets(0, 0, 4, 0), 0 ,0));
 
-        cmbQueryGroup = new JComboBox<>(new DefaultComboBoxModel<>(new String[0]));
-        cmbQueryGroup.insertItemAt(NO_GROUP, cmbQueryGroup.getItemCount());
-        for (QueryManager.Group group : queryManager.getGroups()) {
-            if (!group.isDegenerate())
-                cmbQueryGroup.insertItemAt(group.getID(), cmbQueryGroup.getItemCount());
-        }
-        cmbQueryGroup.insertItemAt(NEW_GROUP, cmbQueryGroup.getItemCount());
-        cmbQueryGroup.setSelectedItem(NO_GROUP);
+        groupComboBox = new JComboBox<>();
+        groupComboBox.addItem(GROUP_PROMPT);
+        groupComboBox.addItem(NO_GROUP);
+        queryManager.getGroups().stream()
+                .filter(g -> !g.isDegenerate())
+                .forEach(g -> groupComboBox.addItem(g.getID()));
+        groupComboBox.setEditable(true);
 
-        mainPanel.add(cmbQueryGroup,
+        ImmutableSet<String> degenerateGroups = queryManager.getGroups().stream()
+                .filter(QueryManager.Group::isDegenerate)
+                .flatMap(g -> g.getQueries().stream())
+                .map(QueryManager.Query::getID)
+                .collect(ImmutableCollectors.toSet());
+
+        mainPanel.add(groupComboBox,
                 new GridBagConstraints(1, 2, 1, 1, 1, 0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(0, 0, 4, 0), 0 ,0));
-
-        mainPanel.add(new JLabel("Group name:"),
-                new GridBagConstraints(0, 3, 1, 1, 0, 0,
-                        GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                        new Insets(0, 0, 4, 0), 0 ,0));
-
-        txtGroupName = new JTextField();
-        txtGroupName.setEnabled(false);
-        cmbQueryGroup.addItemListener(e -> txtGroupName.setEnabled(e.getItem().equals(NEW_GROUP)));
-        mainPanel.add(txtGroupName,
-                new GridBagConstraints(1, 3, 1, 1, 1, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(0, 0, 4, 0), 0 ,0));
 
@@ -121,7 +118,7 @@ public class NewQueryDialog extends JDialog {
         Action okAction = new AbstractAction("OK") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cmdCreateNewActionPerformed(e);
+                createNewQuery((String) groupComboBox.getSelectedItem(), queryIdTextField.getText().trim());
             }
         };
 
@@ -133,8 +130,14 @@ public class NewQueryDialog extends JDialog {
         controlPanel.add(okButton);
         add(controlPanel, BorderLayout.SOUTH);
 
-        txtQueryID.getDocument().addDocumentListener((SimpleDocumentListener)
-                e -> okButton.setEnabled(!txtQueryID.getText().trim().isEmpty()));
+        JTextComponent tc = (JTextComponent) groupComboBox.getEditor().getEditorComponent();
+        SimpleDocumentListener okButtonEnabler = e -> okButton.setEnabled(
+                !queryIdTextField.getText().trim().isEmpty()
+                        && !GROUP_PROMPT.equals(tc.getText())
+                        && !tc.getText().trim().isEmpty()
+                        && !degenerateGroups.contains(tc.getText().trim()));
+        queryIdTextField.getDocument().addDocumentListener(okButtonEnabler);
+        tc.getDocument().addDocumentListener(okButtonEnabler);
 
         InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         inputMap.put(KeyStroke.getKeyStroke(VK_ESCAPE, 0), "cancel");
@@ -148,28 +151,25 @@ public class NewQueryDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
-    private void cmdCreateNewActionPerformed(ActionEvent evt) {
+    private void createNewQuery(String groupId, String id) {
 		try {
-            String id = txtQueryID.getText().trim();
-            String groupId = (String) cmbQueryGroup.getSelectedItem();
             if (NO_GROUP.equals(groupId)) {
                 queryManager.addQuery(id, "");
             }
             else {
                 QueryManager.Group group;
-                if (NEW_GROUP.equals(groupId)) {
-                    String newGroupId = txtGroupName.getText().trim();
-                    group = queryManager.addGroup(newGroupId);
-                }
-                else {
+                try {
                     group = queryManager.getGroup(groupId);
                 }
+                catch (IllegalArgumentException e) {
+                    group = queryManager.addGroup(groupId.trim());
+                }
                 queryManager.addQuery(group, id, "");
+                dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             }
         }
 		catch (IllegalArgumentException e) {
             DialogUtils.showPrettyMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 }
