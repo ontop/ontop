@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -35,7 +34,7 @@ public class PunningTest {
     private static Variable P = TERM_FACTORY.getVariable("p");
     private static Variable O = TERM_FACTORY.getVariable("o");
 
-    private static final ImmutableList<TemplateComponent> IRI_TEMPLATE_1 = Template.of("http://example.org/company/", 0);
+    private static final ImmutableList<Template.Component> IRI_TEMPLATE_1 = Template.of("http://example.org/company/", 0);
     private static final IRI PROP_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
     private static final IRI CLASS_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
 
