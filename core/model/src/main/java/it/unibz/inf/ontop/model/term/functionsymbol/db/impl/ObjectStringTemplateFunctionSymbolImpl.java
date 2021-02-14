@@ -271,9 +271,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
         ImmutableList<ImmutableTerm> args = components.stream()
                 .map(c -> c.isColumnNameReference()
-                        // TODO: restore encoding
-                        // ? termFactory.getR2RMLIRISafeEncodeFunctionalTerm(subTermIterator.next())
-                        ? subTermIterator.next()
+                        ? termFactory.getR2RMLIRISafeEncodeFunctionalTerm(subTermIterator.next())
                         : termFactory.getDBStringConstant(c.getComponent()))
                 .collect(ImmutableCollectors.toList());
 
