@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractEncodeURIorIRIFunctionSymbol.IRISafeEnDecoder;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -34,6 +35,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final boolean isInjective;
     private final ImmutableList<Template.Component> components;
     private final ImmutableList<SafeSeparatorFragment> safeSeparatorFragments;
+    private final IRISafeEnDecoder enDecoder;
 
     protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
         super(getTemplateString(components), createBaseTypes(components, typeFactory));
@@ -42,6 +44,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.safeSeparatorFragments = SafeSeparatorFragment.split(TemplateParser.getEncodedTemplateString(components));
         // must not produce false positives
         this.isInjective = atMostOnePlaceholderPerSeparator(safeSeparatorFragments);
+        this.enDecoder = new IRISafeEnDecoder();
     }
 
     private boolean atMostOnePlaceholderPerSeparator(ImmutableList<SafeSeparatorFragment> safeSeparatorFragments) {
@@ -265,14 +268,23 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 convertIntoTerm(otherComponents, otherSubTermIterator, termFactory)).simplify());
     }
 
+    /**
+     * To be used only in equalities.
+     *
+     * As an optimization, we directly apply decoding to the strings. This saves the column references from being
+     * encoded, while the string constants are immediately decoded.
+     *
+     * Particularly useful when the CONCAT cannot be eliminated. In particular, the SQL queries become much less
+     * verbose.
+     */
     private ImmutableTerm convertIntoTerm(ImmutableList<Template.Component> components,
                                           UnmodifiableIterator<? extends ImmutableTerm> subTermIterator,
                                           TermFactory termFactory) {
 
         ImmutableList<ImmutableTerm> args = components.stream()
                 .map(c -> c.isColumnNameReference()
-                        ? termFactory.getR2RMLIRISafeEncodeFunctionalTerm(subTermIterator.next())
-                        : termFactory.getDBStringConstant(c.getComponent()))
+                        ? subTermIterator.next()
+                        : termFactory.getDBStringConstant(enDecoder.decode(c.getComponent())))
                 .collect(ImmutableCollectors.toList());
 
         return args.size() == 1
