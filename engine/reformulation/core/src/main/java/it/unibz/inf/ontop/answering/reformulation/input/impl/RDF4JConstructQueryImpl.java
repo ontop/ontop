@@ -19,8 +19,7 @@ class RDF4JConstructQueryImpl extends RegularRDF4JInputImpl<GraphResultSet> impl
         this(split(parsedQuery), queryString, bindings);
     }
 
-    private RDF4JConstructQueryImpl(ConstructQuerySplit split, String queryString,
-                                    BindingSet bindings) {
+    RDF4JConstructQueryImpl(ConstructQuerySplit split, String queryString, BindingSet bindings) {
         this(split.getConstructTemplate(), split.getSelectParsedQuery(), queryString, bindings);
     }
 

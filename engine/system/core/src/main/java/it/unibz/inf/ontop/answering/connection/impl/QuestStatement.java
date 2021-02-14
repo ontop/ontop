@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.*;
+import it.unibz.inf.ontop.answering.resultset.impl.DefaultDescribeGraphResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
 import org.slf4j.Logger;
@@ -22,7 +23,6 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private final QueryReformulator engine;
 	private final QueryLogger.Factory queryLoggerFactory;
-	private final DescribeQueryEvaluator describeQueryEvaluator;
 
 	private QueryExecutionThread executionThread;
 	private boolean canceled = false;
@@ -34,12 +34,6 @@ public abstract class QuestStatement implements OntopStatement {
 	public QuestStatement(QueryReformulator queryProcessor) {
 		this.engine = queryProcessor;
 		this.queryLoggerFactory = queryProcessor.getQueryLoggerFactory();
-		this.describeQueryEvaluator = new DescribeQueryEvaluator(
-				engine,
-				queryLoggerFactory,
-				this::executeSelectQuery,
-				this::executeConstructQuery
-		);
 	}
 
 	/**
@@ -131,9 +125,33 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
+		return executeConstructQuery(constructQuery, queryLogger, false);
+	}
+
+	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryLogger queryLogger,
+												 boolean isSubQueryOfDescribe)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
 		IQ executableQuery = engine.reformulateIntoNativeQuery(constructQuery, queryLogger);
 		logExecutionStartingMessage();
-		return executeConstructQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger);
+		return executeConstructQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger, isSubQueryOfDescribe);
+	}
+
+	@Override
+	public GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
+		return executeConstructQuery(constructTemplate, executableQuery, queryLogger, false);
+	}
+
+	protected abstract GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger,
+															boolean isSubQueryOfDescribe)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
+
+	protected GraphResultSet executeDescribeQuery(DescribeQuery describeQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException, OntopResultConversionException {
+		return new DefaultDescribeGraphResultSet(describeQuery, queryLogger, queryLoggerFactory,
+				this::executeSelectQuery,
+				(constructQuery, logger) -> executeConstructQuery(constructQuery, logger, true),
+				this::close);
 	}
 
 	private void logExecutionStartingMessage() {
@@ -166,7 +184,7 @@ public abstract class QuestStatement implements OntopStatement {
 			return (R) executeInThread((AskQuery) inputQuery, httpHeaders, this::executeBooleanQuery);
 		}
 		else if (inputQuery instanceof DescribeQuery) {
-			return (R) executeInThread((DescribeQuery) inputQuery, httpHeaders, describeQueryEvaluator::evaluate);
+			return (R) executeInThread((DescribeQuery) inputQuery, httpHeaders, this::executeDescribeQuery);
 		}
 		else if (inputQuery instanceof ConstructQuery) {
 			return (R) executeInThread((ConstructQuery) inputQuery, httpHeaders, this::executeConstructQuery);
