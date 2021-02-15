@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
@@ -18,6 +19,13 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
     protected final ResultSet rs;
     protected final ImmutableList<Variable> signature;
     private final QueryLogger queryLogger;
+
+    /**
+     * Provided when the closing the result set should involve closing the OBDA statement.
+     * Needed because binding libraries do not always use OBDAStatement as initially intended.
+     */
+    @Nullable
+    private final OntopConnectionCloseable statementClosingCB;
 
     /**
      * Flag used to emulate the expected behavior of next() and hasNext()
@@ -31,10 +39,12 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     private long rowCount = 0;
 
-    AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature, QueryLogger queryLogger){
+    AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature, QueryLogger queryLogger,
+                           @Nullable OntopConnectionCloseable statementClosingCB){
         this.rs = rs;
         this.signature = signature;
         this.queryLogger = queryLogger;
+        this.statementClosingCB = statementClosingCB;
     }
 
     @Override
@@ -90,8 +100,10 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
                 throw buildConnectionException(e);
             }
         }
-        if (!foundNextElement)
+        if (!foundNextElement) {
             queryLogger.declareLastResultRetrievedAndSerialize(rowCount);
+            close();
+        }
         return foundNextElement;
     }
 
@@ -104,6 +116,8 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
     public void close() throws OntopConnectionException {
         try {
             rs.close();
+            if (statementClosingCB != null)
+                statementClosingCB.close();
         } catch (Exception e) {
             throw buildConnectionException(e);
         }

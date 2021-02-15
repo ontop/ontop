@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.resultset.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -35,20 +34,15 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 	private final ResultSetIterator iterator;
 
-	private final int fetchSize;
-
 	public DefaultSimpleGraphResultSet(
 			TupleResultSet tupleResultSet,
 			ConstructTemplate constructTemplate,
 			TermFactory termFactory,
-			org.apache.commons.rdf.api.RDF rdfFactory, OntopStatement ontopStatement,
-			boolean preloadStatements)
+			org.apache.commons.rdf.api.RDF rdfFactory)
 			throws OntopConnectionException {
-		this.fetchSize = tupleResultSet.getFetchSize();
 		try {
 			iterator =
-					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory, ontopStatement,
-							preloadStatements);
+					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory);
 		} catch (Exception e) {
 			throw new SailException(e.getCause());
 		}
@@ -80,28 +74,19 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		private final TermFactory termFactory;
 		private final org.apache.commons.rdf.api.RDF rdfFactory;
 		private final Queue<RDFFact> statementBuffer;
-		private final OntopStatement ontopStatement;
-		private final boolean enablePreloadStatements;
 		private ImmutableMap<String, ValueExpr> extMap;
 
 		private ResultSetIterator(
 				TupleResultSet resultSet,
 				ConstructTemplate constructTemplate,
 				TermFactory termFactory,
-				org.apache.commons.rdf.api.RDF rdfFactory, OntopStatement ontopStatement,
-				boolean enablePreloadStatements)
-				throws OntopConnectionException, OntopResultConversionException {
+				org.apache.commons.rdf.api.RDF rdfFactory) {
 			this.resultSet = resultSet;
 			this.constructTemplate = constructTemplate;
 			this.termFactory = termFactory;
 			this.rdfFactory = rdfFactory;
-			this.ontopStatement = ontopStatement;
 			intExtMap();
 			this.statementBuffer = new LinkedList<>();
-			this.enablePreloadStatements = enablePreloadStatements;
-			if (enablePreloadStatements) {
-				preloadStatements();
-			}
 		}
 
 		@Override
@@ -110,7 +95,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 				addStatementFromResultSet();
 			}
 			boolean hasNext = !statementBuffer.isEmpty();
-			if (!hasNext && !enablePreloadStatements) {
+			if (!hasNext) {
 				handleClose();
 			}
 			return hasNext;
@@ -118,7 +103,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 
 		@Override
 		public RDFFact next() throws OntopConnectionException {
-			if (statementBuffer.isEmpty() && !enablePreloadStatements) {
+			if (statementBuffer.isEmpty()) {
 				handleClose();
 			}
 			return statementBuffer.remove();
@@ -133,13 +118,8 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		public void handleClose() throws OntopConnectionException {
 			try {
 				if (resultSet.isConnectionAlive()) {
-					// closing sql statement, automatically closes the result set as well, but should not close
-					// for Describe queries as it is used multiple times
-					if (ontopStatement != null && !enablePreloadStatements) {
-						ontopStatement.close();
-					} else {
-						resultSet.close();
-					}
+					// The responsibility to close or not the DB statement is delegated to the underlying tuple result set
+					resultSet.close();
 				}
 			} catch (Exception e) {
 				throw new OntopConnectionException(e);
@@ -208,10 +188,6 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			return constant;
 		}
 
-		public void addNewRDFFact(RDFFact statement) {
-			statementBuffer.add(statement);
-		}
-
 		private void intExtMap() {
 			Extension ex = constructTemplate.getExtension();
 			if (ex != null) {
@@ -223,17 +199,7 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			}
 		}
 
-		private void preloadStatements() throws OntopConnectionException, OntopResultConversionException {
-			while (resultSet.hasNext()) {
-				addStatementFromResultSet();
-			}
-			handleClose();
-		}
-
 		private boolean resultSetHasNext() throws OntopConnectionException, OntopResultConversionException {
-			if (enablePreloadStatements) {
-				return false;
-			}
 			if (!resultSet.isConnectionAlive()) {
 				return false;
 			}
