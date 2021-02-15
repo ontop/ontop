@@ -23,16 +23,20 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.SelectPrefixDialog;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
+import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
+import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorkerFactory;
 import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
 import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
+import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,7 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.NumberFormat;
+import java.util.function.BiFunction;
 
 /**
  * Creates a new panel to execute queries. Remember to execute the
@@ -58,8 +63,6 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
 	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
 	private OBDADataQueryAction<?> executeGraphQueryAction;
-	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
-	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
 
 	private final QueryManager queryManager;
 
@@ -75,18 +78,22 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	// TODO: move to the other panel
 	private final JLabel executionInfoLabel;
 
+	public QueryInterfacePanel(OWLEditorKit editorKit,
+							   OBDAModelManager obdaModelManager,
+							   OntopQuerySwingWorkerFactory<String> retrieveUCQExpansionAction,
+							   OntopQuerySwingWorkerFactory<String> retrieveUCQUnfoldingAction) {
 
-	public QueryInterfacePanel(OBDAModelManager obdaModelManager) {
 		this.queryManager = obdaModelManager.getQueryController();
-
 
 		JPopupMenu sparqlPopupMenu = new JPopupMenu();
 		JMenuItem getSPARQLExpansion = new JMenuItem("View Intermediate Query...");
-		getSPARQLExpansion.addActionListener(this::getSPARQLExpansionActionPerformed);
+		getSPARQLExpansion.addActionListener(evt ->
+				OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(), retrieveUCQExpansionAction));
 		sparqlPopupMenu.add(getSPARQLExpansion);
 
 		JMenuItem getSPARQLSQLExpansion = new JMenuItem("View SQL translation...");
-		getSPARQLSQLExpansion.addActionListener(this::getSPARQLSQLExpansionActionPerformed);
+		getSPARQLSQLExpansion.addActionListener(evt ->
+				OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(), retrieveUCQUnfoldingAction));
 		sparqlPopupMenu.add(getSPARQLSQLExpansion);
 
 		setLayout(new BorderLayout());
@@ -212,18 +219,6 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		actionMap.put("execute", executeAction);
 	}
 
-	private void getSPARQLExpansionActionPerformed(ActionEvent evt) {
-		Thread queryRunnerThread = new Thread(() ->
-				retrieveUCQExpansionAction.run(queryTextPane.getText()));
-		queryRunnerThread.start();
-	}
-
-	private void getSPARQLSQLExpansionActionPerformed(ActionEvent evt) {
-		Thread queryRunnerThread = new Thread(() ->
-				retrieveUCQUnfoldingAction.run(queryTextPane.getText()));
-		queryRunnerThread.start();
-	}
-
 	private void cmdExecuteQueryActionPerformed(ActionEvent evt) {
 		try {
 			// TODO Handle this such that there is a listener checking the progress of the execution
@@ -299,18 +294,6 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		this.executeGraphQueryAction = action;
 	}
 
-
-	public void setRetrieveUCQExpansionAction(OBDADataQueryAction<String> retrieveUCQExpansionAction) {
-		this.retrieveUCQExpansionAction = retrieveUCQExpansionAction;
-	}
-
-	public OBDADataQueryAction<?> getRetrieveUCQExpansionAction() {
-		return retrieveUCQExpansionAction;
-	}
-
-	public void setRetrieveUCQUnfoldingAction(OBDADataQueryAction<String> retrieveUCQUnfoldingAction) {
-		this.retrieveUCQUnfoldingAction = retrieveUCQUnfoldingAction;
-	}
 
 
 	//get and update the info box with  the actual time in seconds of the execution of the query

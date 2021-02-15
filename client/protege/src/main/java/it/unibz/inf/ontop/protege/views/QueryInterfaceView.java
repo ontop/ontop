@@ -33,8 +33,9 @@ import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
 import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.gui.dialogs.TextMessageDialog;
-import org.protege.editor.core.ProtegeManager;
+import it.unibz.inf.ontop.protege.gui.dialogs.TextQueryResultsDialog;
+import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
+import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorkerFactory;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owlapi.model.OWLException;
@@ -79,12 +80,48 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         }
     }
 
+    private final OntopQuerySwingWorkerFactory<String> retrieveUCQExpansionAction = (ontop, query) -> new OntopQuerySwingWorker<String>(this, ontop, "Rewriting query", query) {
+
+        @Override
+        protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
+            return statement.getRewritingRendering(query);
+        }
+
+        @Override
+        protected void onCompletion(String result, String sqlQuery) {
+            setSQLTranslation(sqlQuery);
+            TextQueryResultsDialog dialog = new TextQueryResultsDialog(getWorkspace(),
+                    "Intermediate Query",
+                    result,
+                    "Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
+            dialog.setVisible(true);
+        }
+    };
+
+    private final OntopQuerySwingWorkerFactory<String> retrieveUCQUnfoldingAction = (ontop, query) -> new OntopQuerySwingWorker<String>(this, ontop, "Rewriting query", query) {
+
+        @Override
+        protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
+            // TODO: should we show the SQL query only?
+            return statement.getExecutableQuery(query).toString();
+        }
+
+        @Override
+        protected void onCompletion(String result, String sqlQuery) {
+            setSQLTranslation(sqlQuery);
+            TextQueryResultsDialog dialog = new TextQueryResultsDialog(getWorkspace(),
+                    "SQL Translation",
+                    result,
+                    "Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
+            dialog.setVisible(true);
+        }
+    };
 
     @Override
     protected void initialiseOWLView() {
         obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 
-        queryEditorPanel = new QueryInterfacePanel(obdaModelManager);
+        queryEditorPanel = new QueryInterfacePanel(getOWLEditorKit(), obdaModelManager, retrieveUCQExpansionAction, retrieveUCQUnfoldingAction);
         queryEditorPanel.setPreferredSize(new Dimension(400, 250));
         queryEditorPanel.setMinimumSize(new Dimension(400, 250));
 
@@ -114,38 +151,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         setupListeners();
 
         // Setting up actions for all the buttons of this view.
-
-        //count the tuples in the result table for SELECT queries
-        resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Long>("Counting tuples...", QueryInterfaceView.this) {
-            @Override
-            public OWLEditorKit getEditorKit(){
-                return getOWLEditorKit();
-            }
-            @Override
-            public int getNumberOfRows() {
-                return -1;
-            }
-
-            @Override
-            public void handleResult(Long result){
-                updateTablePanelStatus(result);
-            }
-
-            @Override
-            public void handleSQLTranslation(String sqlQuery) {
-                resultTablePanel.setSQLTranslation(sqlQuery);
-            }
-
-            @Override
-            public Long executeQuery(OntopOWLStatement st, String query) throws OWLException {
-                return st.getTupleCount(query);
-            }
-
-            @Override
-            public boolean isRunning() {
-                return false;
-            }
-        });
 
         //action clicking on execute button with a select query
         queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<TupleOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
@@ -288,98 +293,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                     }
                 });
 
-        //action after right click on the query for UCQ expansion
-        queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...", QueryInterfaceView.this) {
-
-            @Override
-            public String executeQuery(OntopOWLStatement st, String query) throws OWLException {
-                removeResultTable();
-                return st.getRewritingRendering(query);
-            }
-
-            @Override
-            public OWLEditorKit getEditorKit(){
-                return getOWLEditorKit();
-            }
-
-            @Override
-            public void handleResult(String result){
-                showActionResultInTextPanel("UCQ Expansion Result", result);
-            }
-
-            @Override
-            public void handleSQLTranslation(String sqlQuery) {
-                resultTablePanel.setSQLTranslation(sqlQuery);
-            }
-
-            @Override
-            public int getNumberOfRows() {
-                return -1;
-            }
-            @Override
-            public boolean isRunning() {
-                return false;
-            }
-        });
-
-        //action after right click on the query for UCQ Unfolding
-        queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
-            @Override
-            public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
-                removeResultTable();
-				// TODO: should we show the SQL query only?
-				return st.getExecutableQuery(query).toString();
-            }
-
-            @Override
-            public OWLEditorKit getEditorKit(){
-                return getOWLEditorKit();
-            }
-
-            @Override
-            public void handleResult(String result){
-                showActionResultInTextPanel("SQL Translation", result);
-            }
-
-            @Override
-            public void handleSQLTranslation(String sqlQuery) {
-                resultTablePanel.setSQLTranslation(sqlQuery);
-            }
-
-            @Override
-            public int getNumberOfRows() {
-                return -1;
-            }
-            @Override
-            public boolean isRunning() {
-                return false;
-            }
-        });
-
         log.debug("Query Manager view initialized");
     }
 
 
-
-    private void showActionResultInTextPanel(String title, String result) {
-        if (result == null) {
-            return;
-        }
-        OBDADataQueryAction<?> action = queryEditorPanel.getRetrieveUCQExpansionAction();
-        SwingUtilities.invokeLater(() -> {
-            TextMessageDialog dialog = new TextMessageDialog(title, result, String.format("Amount of processing time: %s sec", action.getExecutionTime()/1000));
-            JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-            DialogUtils.centerDialogWRTParent(protegeFrame, dialog);
-            dialog.setVisible(true);
-        });
-    }
-
-
-    protected void updateTablePanelStatus(Long result) {
-        if (result != -1) {
-            SwingUtilities.invokeLater(() -> queryEditorPanel.updateStatus(result));
-        }
-    }
 
 
     private void showTupleResultInTablePanel() {
@@ -387,6 +304,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
             SwingUtilities.invokeLater(() -> resultTablePanel.setTableModel(tableModel));
     }
 
+    private void setSQLTranslation(String s) {
+        resultTablePanel.setSQLTranslation(s);
+    }
 
     private synchronized void createTableModelFromResultSet(TupleOWLResultSet result) throws OWLException {
         if (result == null)
@@ -414,9 +334,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
     private synchronized void showGraphResultInTextPanel(String s) {
         SwingUtilities.invokeLater(() -> {
-            TextMessageDialog panel = new TextMessageDialog("SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result", s, "");
-            JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-            DialogUtils.centerDialogWRTParent(protegeFrame, panel);
+            TextQueryResultsDialog panel = new TextQueryResultsDialog(getWorkspace(), "SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result", s, "");
             panel.setVisible(true);
         });
     }

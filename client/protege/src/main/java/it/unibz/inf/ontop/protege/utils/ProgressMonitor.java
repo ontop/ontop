@@ -66,8 +66,10 @@ public class ProgressMonitor {
                     if (cancel()) {
                         noteLabel.setText("cancelling...");
                         pane.setEnabled(false);
-                        if (cancelAction != null)
-                            cancelAction.run();
+                        if (cancelAction != null) {
+                            Thread cancellationThread = new Thread(cancelAction);
+                            cancellationThread.start();
+                        }
                     }
                     dialog.setVisible(true);
                 }

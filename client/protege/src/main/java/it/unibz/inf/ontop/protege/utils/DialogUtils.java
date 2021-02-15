@@ -267,22 +267,6 @@ public class DialogUtils {
 		});
 	}
 
-	public static void centerDialogWRTParent(Container parent, Component dialog) {
-		Point topLeft = parent.getLocationOnScreen();
-		Dimension parentSize = parent.getSize();
-		Dimension mySize = dialog.getSize();
-
-		int x = (parentSize.width > mySize.width)
-				? ((parentSize.width - mySize.width) / 2) + topLeft.x
-				: topLeft.x;
-
-		int y = (parentSize.height > mySize.height)
-				? ((parentSize.height - mySize.height) / 2) + topLeft.y
-				: topLeft.y;
-
-		dialog.setLocation(x, y);
-	}
-
 	private static final KeyStroke escapeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 	public static final String dispatchWindowClosingActionMapKey = "com.spodding.tackline.dispatch:WINDOW_CLOSING";
 

@@ -20,10 +20,12 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.workers.ExportResultsToCSVSwingWorker;
+import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
 import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
@@ -97,16 +99,25 @@ public class ResultViewTablePanel extends JPanel {
 		add(resultTabbedPanel, BorderLayout.CENTER);
 
 		JPopupMenu menu = new JPopupMenu();
-		JMenuItem countAll = new JMenuItem("count all tuples");
+		JMenuItem countAll = new JMenuItem("Count tuples");
 		countAll.addActionListener(e -> {
-			Thread thread = new Thread(() -> {
-				String query = querypanel.getQuery();
-				countAllTuplesAction.run(query);
+			OntopQuerySwingWorker.getOntopAndExecute(editorKit, querypanel.getQuery(), (ontop, query) -> new OntopQuerySwingWorker<Long>(
+					this.getParent(), ontop, "Counting tuples", query) {
+
+				@Override
+				protected Long runQuery(OntopOWLStatement statement, String query) throws Exception {
+					return statement.getTupleCount(query);
+				}
+
+				@Override
+				protected void onCompletion(Long result, String sqlQuery) {
+					querypanel.updateStatus(result);
+					setSQLTranslation(sqlQuery);
+				}
 			});
-			thread.start();
 		});
 		menu.add(countAll);
-		queryResultTable.setComponentPopupMenu(menu);
+		sparqlResultPanel.setComponentPopupMenu(menu);
 	}
 
 	// TODO: remove .getParent thrice
@@ -153,10 +164,6 @@ public class ResultViewTablePanel extends JPanel {
 		commentLabel.setText(msg);
 	}
 
-
-	public void setCountAllTuplesActionForUCQ(OBDADataQueryAction<Long> countAllTuples) {
-		this.countAllTuplesAction = countAllTuples;
-	}
 
 
 	public void setSQLTranslation(String sql){
