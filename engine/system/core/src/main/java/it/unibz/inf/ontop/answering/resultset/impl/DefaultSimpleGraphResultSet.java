@@ -15,7 +15,6 @@ import org.eclipse.rdf4j.query.algebra.ProjectionElem;
 import org.eclipse.rdf4j.query.algebra.ProjectionElemList;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.ValueExpr;
-import org.eclipse.rdf4j.sail.SailException;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
@@ -38,14 +37,8 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 			TupleResultSet tupleResultSet,
 			ConstructTemplate constructTemplate,
 			TermFactory termFactory,
-			org.apache.commons.rdf.api.RDF rdfFactory)
-			throws OntopConnectionException {
-		try {
-			iterator =
-					new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory);
-		} catch (Exception e) {
-			throw new SailException(e.getCause());
-		}
+			org.apache.commons.rdf.api.RDF rdfFactory) {
+		iterator = new ResultSetIterator(tupleResultSet, constructTemplate, termFactory, rdfFactory);
 	}
 
 	@Override
