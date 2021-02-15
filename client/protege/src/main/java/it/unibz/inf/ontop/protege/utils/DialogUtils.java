@@ -172,7 +172,7 @@ public class DialogUtils {
 
 	public static void showCancelledActionDialog(Component parent, String title) {
 		JOptionPane.showMessageDialog(parent,
-				"<html><b>Process cancelled.</b><br><br>No changes made.<br></html>",
+				"<html><b>Process cancelled.</b> No changes made.<br></html>",
 				title,
 				JOptionPane.WARNING_MESSAGE);
 	}

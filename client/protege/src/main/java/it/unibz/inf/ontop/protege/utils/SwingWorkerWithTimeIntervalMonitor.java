@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.protege.utils;
 
 import java.awt.*;
+import java.util.function.Supplier;
 
 public abstract class SwingWorkerWithTimeIntervalMonitor<T, V> extends SwingWorkerWithMonitor<T, V> {
 
@@ -9,9 +10,13 @@ public abstract class SwingWorkerWithTimeIntervalMonitor<T, V> extends SwingWork
     private int count;
 
     protected SwingWorkerWithTimeIntervalMonitor(Component parent, Object message, long monitorUpdateInterval) {
-        super(parent, message, true);
+        this(() -> new ProgressMonitor(parent, message, true), monitorUpdateInterval);
+    }
+
+    protected SwingWorkerWithTimeIntervalMonitor(Supplier<AbstractProgressMonitor> progressMonitorConstructor, long monitorUpdateInterval) {
+        super(progressMonitorConstructor);
         this.monitorUpdateInterval = monitorUpdateInterval;
-        previousTime = startTime;
+        this.previousTime = startTime;
     }
 
     @Override

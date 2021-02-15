@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.protege.utils;
 import javax.swing.*;
 import java.awt.*;
 
-public class ProgressMonitor {
+public class ProgressMonitor extends AbstractProgressMonitor {
 
     private final Component parent;
     private final String cancelOption;
@@ -15,11 +15,6 @@ public class ProgressMonitor {
     private JProgressBar progressBar;
     private JLabel noteLabel;
 
-    private boolean isDone;
-
-    private volatile boolean isCancelled = false;
-    private volatile boolean isCancellable = true;
-
     public ProgressMonitor(Component parent, Object message, boolean indeterminate) {
         this.parent = parent;
         this.message = message;
@@ -28,15 +23,10 @@ public class ProgressMonitor {
         this.cancelOption = UIManager.getString("OptionPane.cancelButtonText");
     }
 
-    private Runnable cancelAction;
-
-    public void setCancelAction(Runnable cancelAction) {
-        this.cancelAction = cancelAction;
-    }
-
-    public void open(String note) {
-        if (dialog == null && !isDone && !isCancelled) {
-            noteLabel = new JLabel(note, null, SwingConstants.CENTER);
+    @Override
+    public void open(String status) {
+        if (dialog == null && !isDone() && !isCancelled()) {
+            noteLabel = new JLabel("", null, SwingConstants.CENTER);
 
             progressBar = new JProgressBar();
             if (indeterminate) {
@@ -63,13 +53,9 @@ public class ProgressMonitor {
                         && evt.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)
                         && cancelOption.equals(evt.getNewValue())) {
 
-                    if (cancel()) {
-                        noteLabel.setText("cancelling...");
+                    if (cancelIfPossible()) {
                         pane.setEnabled(false);
-                        if (cancelAction != null) {
-                            Thread cancellationThread = new Thread(cancelAction);
-                            cancellationThread.start();
-                        }
+                        proceedCancelling();
                     }
                     dialog.setVisible(true);
                 }
@@ -78,10 +64,12 @@ public class ProgressMonitor {
             dialog.setResizable(true);
             dialog.setVisible(true);
         }
+        super.open(status);
     }
 
+    @Override
     public void close() {
-        isDone = true;
+        super.close();
         if (dialog != null) {
             dialog.setVisible(false);
             dialog.dispose();
@@ -89,37 +77,21 @@ public class ProgressMonitor {
         }
     }
 
-    private synchronized boolean cancel() {
-        if (isCancellable)
-            isCancelled = true;
 
-        return isCancelled;
-    }
-
-    private synchronized void makeFinal() {
-        if (!isCancelled)
-            isCancellable = false;
-    }
-
-    public void prepareClosing(String note) {
-        makeFinal();
-        if (isCancelled)
-            close();
-        else
-            setProgress(100, note);
-    }
-
-    public boolean isCancelled() {
-        return isCancelled;
-    }
-
+    @Override
     public void setProgress(int percentage, String note) {
-        if (dialog != null && !isCancelled) {
+        if (dialog != null && !isCancelled()) {
             if (!indeterminate) {
                 progressBar.setValue(percentage);
             }
             noteLabel.setText(note);
         }
+    }
+
+    @Override
+    public void setStatus(String status) {
+        if (dialog != null)
+            noteLabel.setText(status);
     }
 }
 

@@ -13,7 +13,7 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
 
     private static final int DELAY_OPENING_WINDOW = 0; //300;
 
-    protected final ProgressMonitor progressMonitor;
+    protected final AbstractProgressMonitor progressMonitor;
     protected final long startTime;
 
     private PropertyChangeListener listener;
@@ -21,7 +21,11 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
     private Supplier<Integer> progressSupplier;
 
     protected SwingWorkerWithMonitor(Component parent, Object message, boolean indeterminate) {
-        this.progressMonitor = new ProgressMonitor(parent, message, indeterminate);
+        this(() -> new ProgressMonitor(parent, message, indeterminate));
+    }
+
+    protected SwingWorkerWithMonitor(Supplier<AbstractProgressMonitor> progressMonitorConstructor) {
+        this.progressMonitor = progressMonitorConstructor.get();
         this.startTime = System.currentTimeMillis();
     }
 
