@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -161,8 +162,22 @@ public class JsonBasicView extends JsonView {
                 // It may be eliminated by the IQ normalization
                 .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
 
+        IQTree filteredParentDataNode = parentDataNode;
+        if (filterExpression != null && (!filterExpression.isEmpty())) {
+            ImmutableList<ImmutableExpression> filterConditions;
+            try {
+                filterConditions = extractFilter(parentArgumentMap, parentDefinition, quotedIdFactory, coreSingletons);
+            } catch (JSQLParserException e) {
+                throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
+            }
 
-        IQTree updatedParentDataNode = updateParentDataNode(normalization, parentDataNode);
+            for (ImmutableExpression filterCondition : filterConditions) {
+                FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
+                filteredParentDataNode = iqFactory.createUnaryIQTree(filterNode, filteredParentDataNode);
+            }
+        }
+
+        IQTree updatedParentDataNode = updateParentDataNode(normalization, filteredParentDataNode);
         IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
@@ -277,6 +292,23 @@ public class JsonBasicView extends JsonView {
         SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
         net.sf.jsqlparser.expression.Expression exp = ((SelectExpressionItem) si).getExpression();
         return parser.parseTerm(exp, new RAExpressionAttributes(parentAttributeMap, null));
+    }
+
+    private ImmutableList<ImmutableExpression> extractFilter(ImmutableMap<Integer, Variable> parentArgumentMap,
+                                                             NamedRelationDefinition parentDefinition,
+                                                             QuotedIDFactory quotedIdFactory,
+                                                             CoreSingletons coreSingletons) throws JSQLParserException {
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> new QualifiedAttributeID(null, parentDefinition.getAttributes().get(e.getKey()).getID()),
+                        Map.Entry::getValue));
+        String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
+        ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
+        Statement statement = CCJSqlParserUtil.parse(sqlQuery);
+        PlainSelect plainSelect = ((PlainSelect) ((Select) statement).getSelectBody());
+        return plainSelect.getWhere() == null
+                ? ImmutableList.of()
+                : parser.parseBooleanExpression(plainSelect.getWhere(), new RAExpressionAttributes(parentAttributeMap, null));
     }
 
     private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
