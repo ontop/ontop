@@ -169,10 +169,9 @@ public class JsonBasicView extends JsonView {
                 throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
             }
 
-            for (ImmutableExpression filterCondition : filterConditions) {
-                FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
-                filteredParentDataNode = iqFactory.createUnaryIQTree(filterNode, filteredParentDataNode);
-            }
+            ImmutableExpression newCondition = termFactory.getConjunction(filterConditions);
+            FilterNode filterNode = iqFactory.createFilterNode(newCondition);
+            filteredParentDataNode = iqFactory.createUnaryIQTree(filterNode, filteredParentDataNode);
         }
 
         IQTree updatedParentDataNode = updateParentDataNode(normalization, filteredParentDataNode);
