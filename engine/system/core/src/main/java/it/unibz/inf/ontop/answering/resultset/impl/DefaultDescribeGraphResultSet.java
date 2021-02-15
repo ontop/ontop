@@ -42,10 +42,8 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                                                               Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator)
             throws OntopQueryEvaluationException, OntopConnectionException,
             OntopReformulationException, OntopResultConversionException {
-        try {
-            SelectQuery selectQuery = inputQuery.getSelectQuery();
-            QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
-            TupleResultSet resultSet = selectQueryEvaluator.evaluate(selectQuery, selectQueryLogger);
+        QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
+        try (TupleResultSet resultSet = selectQueryEvaluator.evaluate(inputQuery.getSelectQuery(), selectQueryLogger)) {
             queryLogger.declareResultSetUnblockedAndSerialize();
 
             ImmutableSet.Builder<IRI> iriSetBuilder = ImmutableSet.builder();
@@ -137,8 +135,10 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                     rowCount++;
                     return true;
                 }
-                else
+                else {
+                    currentGraphResultSetIterator.close();
                     currentGraphResultSetIterator = null;
+                }
             } while (true);
         }
 
@@ -161,6 +161,8 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
 
         @Override
         protected void handleClose() throws OntopConnectionException {
+            if (currentGraphResultSetIterator != null)
+                currentGraphResultSetIterator.close();
             closeHandler.close();
         }
 
