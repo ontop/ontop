@@ -143,13 +143,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
                 return;
 
             File file = fc.getSelectedFile();
-            if (file.exists() && JOptionPane.showConfirmDialog(getWorkspace(),
-                    "<html><br>The file " + file.getPath() + " exists.<br><br>"
-                            + "Do you want to <b>overwrite</b> it?<br></html>",
-                    DIALOG_TITLE,
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
+            if (!DialogUtils.confirmCanWrite(file, getWorkspace(), DIALOG_TITLE))
                 return;
 
             MaterializeToFileWorker worker = new MaterializeToFileWorker(file, HANDLER_FACTORIES.get(format));

@@ -27,15 +27,12 @@ import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
 import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.protege.gui.dialogs.TextMessageDialog;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
@@ -48,9 +45,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.*;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener {
 
@@ -94,7 +88,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         queryEditorPanel.setPreferredSize(new Dimension(400, 250));
         queryEditorPanel.setMinimumSize(new Dimension(400, 250));
 
-        resultTablePanel = new ResultViewTablePanel(queryEditorPanel);
+        resultTablePanel = new ResultViewTablePanel(getOWLEditorKit(), queryEditorPanel);
         resultTablePanel.setMinimumSize(new java.awt.Dimension(400, 250));
         resultTablePanel.setPreferredSize(new java.awt.Dimension(400, 250));
 
@@ -362,27 +356,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
             }
         });
 
-        //action to save the query on a file
-        resultTablePanel.setOBDASaveQueryToFileAction(fileLocation -> {
-            try {
-                OBDAProgressMonitor monitor = new OBDAProgressMonitor("Writing output files...", getOWLWorkspace());
-                monitor.start();
-                CountDownLatch latch = new CountDownLatch(1);
-                List<String[]> data = tableModel.getTabularData();
-                if (monitor.isCanceled())
-                    return;
-                File output = new File(fileLocation);
-                BufferedWriter writer = new BufferedWriter(new FileWriter(output, false));
-                SaveQueryToFileAction action = new SaveQueryToFileAction(latch, data, writer);
-                monitor.addProgressListener(action);
-                action.run();
-                latch.await();
-                monitor.stop();
-            }
-            catch (Exception e) {
-                DialogUtils.showSeeLogErrorDialog(this, "QueryManager error", log, e);
-            }
-        });
         log.debug("Query Manager view initialized");
     }
 
@@ -477,86 +450,5 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 queryInterfaceView.addListener(this);
             }
         }
-    }
-
-
-    private static class SaveQueryToFileAction implements OBDAProgressListener {
-
-        private final CountDownLatch latch;
-        private final List<String[]> rawData;
-        private final Writer writer;
-        private boolean isCancelled;
-        private boolean errorShown;
-
-        private SaveQueryToFileAction(CountDownLatch latch, List<String[]> rawData, Writer writer) {
-            this.latch = latch;
-            this.rawData = rawData;
-            this.writer = writer;
-            this.errorShown = false;
-            this.isCancelled = false;
-        }
-
-        public void run() {
-            Thread thread = new Thread(() -> {
-                try {
-                    writeCSV(rawData, writer);
-                    latch.countDown();
-                }
-                catch (Exception e) {
-                    if (!isCancelled()) {
-                        errorShown = true;
-                        latch.countDown();
-                        DialogUtils.showSeeLogErrorDialog(null,"Error while writing output file.", log, e);
-                    }
-                }
-            });
-            thread.start();
-        }
-
-        @Override
-        public void actionCanceled() throws Exception {
-            this.isCancelled = true;
-            try {
-                writer.flush();
-                writer.close();
-                latch.countDown();
-                log.info("Writing operation cancelled by users.");
-            }
-            catch (Exception e) {
-                latch.countDown();
-                DialogUtils.showSeeLogErrorDialog(null, "Error canceling action.", log, e);
-            }
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return this.isCancelled;
-        }
-
-        @Override
-        public boolean isErrorShown() {
-            return this.errorShown;
-        }
-    }
-
-
-    private static void writeCSV(List<String[]> tabularData, Writer writer) throws IOException {
-
-        // Print the CSV content
-        for (String[] rows : tabularData) {
-            StringBuilder line = new StringBuilder();
-            boolean needComma = false;
-            for (String row : rows) {
-                if (needComma) {
-                    line.append(",");
-                }
-                line.append(row);
-                needComma = true;
-            }
-            line.append("\n");
-            writer.write(line.toString());
-            writer.flush();
-        }
-        writer.close();
     }
 }

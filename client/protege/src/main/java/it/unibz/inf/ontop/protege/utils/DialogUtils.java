@@ -127,6 +127,16 @@ public class DialogUtils {
 		return fc;
 	}
 
+	public static boolean confirmCanWrite(File file, Container parent, String title) {
+		return !file.exists() || JOptionPane.showConfirmDialog(parent,
+				"<html><br>The file " + file.getPath() + " exists.<br><br>"
+						+ "Do you want to <b>overwrite</b> it?<br></html>",
+				title,
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE,
+				IconLoader.getOntopIcon()) == JOptionPane.YES_OPTION;
+	}
+
 	private static final int MAX_CHARACTERS_PER_LINE_COUNT = 150;
 
 	public static void showPrettyMessageDialog(Component parent, Object message, String title, int type) {

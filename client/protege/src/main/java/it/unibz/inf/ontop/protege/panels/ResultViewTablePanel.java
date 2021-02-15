@@ -20,13 +20,18 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.utils.IconLoader;
+import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
+import it.unibz.inf.ontop.protege.workers.ExportResultsToCSVSwingWorker;
+import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.function.Consumer;
 
 public class ResultViewTablePanel extends JPanel {
 
@@ -34,175 +39,65 @@ public class ResultViewTablePanel extends JPanel {
 
 	private OBDADataQueryAction<Long> countAllTuplesAction;
 	private final QueryInterfacePanel querypanel;
-	private Consumer<String> saveToFileAction;
 
-	/**
-	 * Creates new form ResultViewTablePanel
-	 */
-	public ResultViewTablePanel(QueryInterfacePanel panel) {
+	private final JLabel commentLabel;
+	private final JTable queryResultTable;
+	private final JTextArea txtSqlTranslation;
+	private final JButton exportButton;
+
+	private final OWLEditorKit editorKit;
+
+	public ResultViewTablePanel(OWLEditorKit editorKit, QueryInterfacePanel panel) {
+		this.editorKit = editorKit;
 		querypanel = panel;
-		initComponents();
-		addPopUpMenu();
-	}
 
-	@SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+		setMinimumSize(new Dimension(400, 250));
+		setPreferredSize(new Dimension(400, 250));
+		setLayout(new BorderLayout(0, 5));
 
-        resultTabbedPanel = new javax.swing.JTabbedPane();
-        sparqlResultPanel = new javax.swing.JPanel();
-        sparqlQueryResult = new javax.swing.JScrollPane();
-        tblQueryResult = new javax.swing.JTable();
-        pnlCommandButton = new javax.swing.JPanel();
-        pnlComment = new javax.swing.JPanel();
-        lblHint = new javax.swing.JLabel();
-        lblComment = new javax.swing.JLabel();
-        cmdExportResult = new javax.swing.JButton();
-        sqlTranslationPanel = new javax.swing.JScrollPane();
-        txtSqlTranslation = new javax.swing.JTextArea();
+		JTabbedPane resultTabbedPanel = new JTabbedPane();
 
-        setMinimumSize(new java.awt.Dimension(400, 250));
-        setPreferredSize(new java.awt.Dimension(400, 250));
-        setLayout(new java.awt.BorderLayout(0, 5));
+		JPanel sparqlResultPanel = new JPanel(new BorderLayout());
 
-        resultTabbedPanel.setPreferredSize(new java.awt.Dimension(400, 240));
+		queryResultTable = new JTable(new DefaultTableModel(
+            new Object [][] {},
+            new String [] {"Results"} ));
 
-        sparqlResultPanel.setPreferredSize(new java.awt.Dimension(400, 230));
-        sparqlResultPanel.setLayout(new java.awt.BorderLayout());
+		sparqlResultPanel.add(new JScrollPane(queryResultTable), BorderLayout.CENTER);
 
-        tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+		JPanel controlPanel = new JPanel(new BorderLayout(0, 5));
 
-            },
-            new String [] {
-                "Results"
-            }
-        ));
-        sparqlQueryResult.setViewportView(tblQueryResult);
+		JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 7, 5));
+		statusPanel.setPreferredSize(new Dimension(64, 36));
 
-        sparqlResultPanel.add(sparqlQueryResult, java.awt.BorderLayout.CENTER);
+		JLabel hintLabel = new JLabel("Hint:");
+		hintLabel.setFont(new Font("Tahoma", Font.BOLD, 11)); // NOI18N
+		statusPanel.add(hintLabel);
 
-        pnlCommandButton.setMinimumSize(new java.awt.Dimension(500, 32));
-        pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 36));
-        pnlCommandButton.setLayout(new java.awt.BorderLayout(0, 5));
+		commentLabel = new JLabel("--");
+		statusPanel.add(commentLabel);
 
-        pnlComment.setPreferredSize(new java.awt.Dimension(64, 36));
-        pnlComment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 7, 5));
+		controlPanel.add(statusPanel, BorderLayout.CENTER);
 
-        lblHint.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        lblHint.setText("Hint:");
-        pnlComment.add(lblHint);
+		exportButton = DialogUtils.getButton(
+				"Export to CSV...",
+				"export.png",
+				"Export the results to a CSV file",
+				this::cmdExportResultActionPerformed);
+		exportButton.setEnabled(false);
+		controlPanel.add(exportButton, BorderLayout.EAST);
 
-        lblComment.setText("--");
-        pnlComment.add(lblComment);
+		sparqlResultPanel.add(controlPanel, BorderLayout.SOUTH);
 
-        pnlCommandButton.add(pnlComment, java.awt.BorderLayout.CENTER);
+		resultTabbedPanel.addTab("SPARQL results", sparqlResultPanel);
 
-        cmdExportResult.setIcon(IconLoader.getImageIcon("images/export.png"));
-        cmdExportResult.setText("Export to CSV...");
-        cmdExportResult.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdExportResult.setContentAreaFilled(false);
-        cmdExportResult.setFocusable(false);
-        cmdExportResult.setIconTextGap(5);
-        cmdExportResult.setMaximumSize(new java.awt.Dimension(125, 25));
-        cmdExportResult.setMinimumSize(new java.awt.Dimension(125, 25));
-        cmdExportResult.setPreferredSize(new java.awt.Dimension(125, 36));
-        cmdExportResult.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdExportResultActionPerformed(evt);
-            }
-        });
-        pnlCommandButton.add(cmdExportResult, java.awt.BorderLayout.EAST);
+		txtSqlTranslation = new JTextArea();
+		resultTabbedPanel.addTab("SQL Translation", new JScrollPane(txtSqlTranslation));
 
-        sparqlResultPanel.add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
+		add(resultTabbedPanel, BorderLayout.CENTER);
 
-        resultTabbedPanel.addTab("SPARQL results", sparqlResultPanel);
-
-        sqlTranslationPanel.setViewportView(txtSqlTranslation);
-
-        resultTabbedPanel.addTab("SQL Translation", sqlTranslationPanel);
-
-        add(resultTabbedPanel, java.awt.BorderLayout.CENTER);
-    }// </editor-fold>//GEN-END:initComponents
-
-
-	private void cmdExportResultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveResultsActionPerformed
-		JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
-		fileChooser.setDialogTitle("Export to...");
-		int response = fileChooser.showSaveDialog(this);
-		if (response == JFileChooser.APPROVE_OPTION) {
-			File targetFile = fileChooser.getSelectedFile();
-			String fileLocation = targetFile.getPath();
-			if (canWrite(targetFile)) {
-				Thread thread = new Thread(() -> saveToFileAction.accept(fileLocation));
-				thread.start();
-			}
-		}
-	}// GEN-LAST:event_buttonSaveResultsActionPerformed
-
-	/**
-	 * A utility method to check if the result should be written to the target file.
-	 * Return true if the target file doesn't exist yet or the user allows overwriting.
-	 */
-	private boolean canWrite(File outputFile) {
-		if (outputFile.exists()) {
-			int result = JOptionPane.showConfirmDialog(
-					this, "File " + outputFile.getPath() + " exists, overwrite?",
-					"Warning", JOptionPane.YES_NO_CANCEL_OPTION);
-
-			return result == JOptionPane.YES_OPTION;
-		}
-		return true;
-	}
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton cmdExportResult;
-    private javax.swing.JLabel lblComment;
-    private javax.swing.JLabel lblHint;
-    private javax.swing.JPanel pnlCommandButton;
-    private javax.swing.JPanel pnlComment;
-    private javax.swing.JTabbedPane resultTabbedPanel;
-    private javax.swing.JScrollPane sparqlQueryResult;
-    private javax.swing.JPanel sparqlResultPanel;
-    private javax.swing.JScrollPane sqlTranslationPanel;
-    private javax.swing.JTable tblQueryResult;
-    private javax.swing.JTextArea txtSqlTranslation;
-    // End of variables declaration//GEN-END:variables
-
-	public void setTableModel(final TableModel newmodel) {
-		SwingUtilities.invokeLater(() -> {
-			tblQueryResult.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-			ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult);
-			ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult.getTableHeader());
-
-			TableModel oldmodel = tblQueryResult.getModel();
-			if (oldmodel != null) {
-				oldmodel.removeTableModelListener(tblQueryResult);
-			}
-			tblQueryResult.setModel(newmodel);
-
-			addNotify();
-
-			tblQueryResult.invalidate();
-			tblQueryResult.repaint();
-		});
-
-		// Write a hint in the comment panel for user information
-		writeHintMessage();
-	}
-
-	// TODO Change the implementation of checking the table model after refactoring the code.
-	private void writeHintMessage() {
-		String msg = (querypanel.isFetchAllSelect() || querypanel.canGetMoreTuples())
-			? "Try to continue scrolling down the table to retrieve more results."
-        	: "--";
-		lblComment.setText(msg);
-	}
-
-	private void addPopUpMenu(){
 		JPopupMenu menu = new JPopupMenu();
-		JMenuItem countAll = new JMenuItem();
-		countAll.setText("count all tuples");
+		JMenuItem countAll = new JMenuItem("count all tuples");
 		countAll.addActionListener(e -> {
 			Thread thread = new Thread(() -> {
 				String query = querypanel.getQuery();
@@ -211,16 +106,58 @@ public class ResultViewTablePanel extends JPanel {
 			thread.start();
 		});
 		menu.add(countAll);
-		tblQueryResult.setComponentPopupMenu(menu);
+		queryResultTable.setComponentPopupMenu(menu);
 	}
+
+	// TODO: remove .getParent thrice
+	private void cmdExportResultActionPerformed(ActionEvent evt) {
+		JFileChooser fileChooser = DialogUtils.getFileChooser(editorKit,
+				DialogUtils.getExtensionReplacer(".csv"));
+
+		if (fileChooser.showSaveDialog(this.getParent()) != JFileChooser.APPROVE_OPTION)
+			return;
+
+		File file = fileChooser.getSelectedFile();
+		if (!DialogUtils.confirmCanWrite(file, this.getParent(), "Export to CSV"))
+			return;
+
+		ExportResultsToCSVSwingWorker worker = new ExportResultsToCSVSwingWorker(
+				this.getParent(), file, ((OWLResultSetTableModel) queryResultTable.getModel()));
+		worker.execute();
+	}
+
+
+	public void setTableModel(TableModel tableModel) {
+		SwingUtilities.invokeLater(() -> {
+			queryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+			ToolTipManager.sharedInstance().unregisterComponent(queryResultTable);
+			ToolTipManager.sharedInstance().unregisterComponent(queryResultTable.getTableHeader());
+
+			TableModel oldmodel = queryResultTable.getModel();
+			if (oldmodel != null) {
+				oldmodel.removeTableModelListener(queryResultTable);
+			}
+			queryResultTable.setModel(tableModel);
+
+			addNotify();
+
+			queryResultTable.invalidate();
+			queryResultTable.repaint();
+			exportButton.setEnabled(tableModel instanceof OWLResultSetTableModel);
+		});
+
+		// Write a hint in the comment panel for user information
+		String msg = (querypanel.isFetchAllSelect() || querypanel.canGetMoreTuples())
+			? "Try to continue scrolling down the table to retrieve more results."
+        	: "--";
+		commentLabel.setText(msg);
+	}
+
 
 	public void setCountAllTuplesActionForUCQ(OBDADataQueryAction<Long> countAllTuples) {
 		this.countAllTuplesAction = countAllTuples;
 	}
 
-	public void setOBDASaveQueryToFileAction(Consumer<String> action){
-		this.saveToFileAction = action;
-	}
 
 	public void setSQLTranslation(String sql){
 		txtSqlTranslation.setText(sql);

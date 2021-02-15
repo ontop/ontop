@@ -59,7 +59,8 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
                         publish(new ValidationReport(triplesMap.getId(), TriplesMap.Status.VALID));
                     else
                         publish(new ValidationReport(triplesMap.getId(), invalidPlaceholders));
-                } catch (SQLException e) {
+                }
+                catch (SQLException e) {
                     publish(new ValidationReport(triplesMap.getId(), e.getMessage()));
                 }
                 tick();
