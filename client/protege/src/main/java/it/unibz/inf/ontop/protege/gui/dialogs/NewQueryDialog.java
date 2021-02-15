@@ -165,8 +165,8 @@ public class NewQueryDialog extends JDialog {
                     group = queryManager.addGroup(groupId.trim());
                 }
                 queryManager.addQuery(group, id, "");
-                dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             }
+            dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         }
 		catch (IllegalArgumentException e) {
             DialogUtils.showPrettyMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

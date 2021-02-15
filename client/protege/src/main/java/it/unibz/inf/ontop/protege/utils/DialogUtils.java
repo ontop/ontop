@@ -71,6 +71,15 @@ public class DialogUtils {
 		return button;
 	}
 
+	public static JButton getButton(OntopAbstractAction action) {
+		JButton button = new JButton(action.getName(), action.getIcon());
+		button.setIconTextGap(5);
+		button.setMargin(new Insets(3, 7, 3, 7));
+		button.setToolTipText(action.getTooltip());
+		button.addActionListener(action);
+		return button;
+	}
+
 	public static DefaultTableModel createNonEditableTableModel(Object[] columnNames) {
 		return new DefaultTableModel(columnNames, 0) {
 			@Override

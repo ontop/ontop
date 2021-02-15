@@ -22,13 +22,12 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.protege.core.TriplesMapCollection;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.SelectPrefixDialog;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import org.eclipse.rdf4j.query.MalformedQueryException;
+import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
 import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -42,11 +41,9 @@ import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
+import java.text.NumberFormat;
 
 /**
  * Creates a new panel to execute queries. Remember to execute the
@@ -56,7 +53,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 
 	private static final long serialVersionUID = -5902798157183352944L;
 
-	private static final Logger log = LoggerFactory.getLogger(QueryInterfacePanel.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfacePanel.class);
 
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
 	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
@@ -64,276 +61,195 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
 	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
 
-	private TriplesMapCollection apic; // TODO: make final!
-
-	private final QueryManager qc;
+	private final QueryManager queryManager;
 
 	private double execTime = 0;
-	private int fetchSizeCache = 100;
 
-	private String groupId, queryId;
+	private String groupId = "", queryId = "";
 
-	/**
-	 * Creates new form QueryInterfacePanel
-	 */
-	public QueryInterfacePanel(TriplesMapCollection apic, QueryManager qc) {
-		this.qc = qc;
-		this.apic = apic;
+	private final JCheckBox showAllCheckBox;
+	private final JCheckBox showShortIriCheckBox;
+	private final JTextPane queryTextPane;
+	private final JFormattedTextField fetchSizeTextField;
 
-		initComponents();
+	// TODO: move to the other panel
+	private final JLabel executionInfoLabel;
 
-		StyleContext style = new StyleContext();
-		DefaultStyledDocument styledDocument = new DefaultStyledDocument(style);
 
-		queryTextPane.setDocument(styledDocument);
-		queryTextPane.setBackground(Color.WHITE);
-		queryTextPane.setCaretColor(Color.BLACK);
-		queryTextPane.addKeyListener(new KeyListener() {
-			@Override public void keyTyped(KeyEvent e) { }
-			@Override public void keyReleased(KeyEvent e) { }
-			@Override public void keyPressed(KeyEvent e) {
-				if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
-					cmdExecuteQueryActionPerformed(null);
+	public QueryInterfacePanel(OBDAModelManager obdaModelManager) {
+		this.queryManager = obdaModelManager.getQueryController();
+
+
+		JPopupMenu sparqlPopupMenu = new JPopupMenu();
+		JMenuItem getSPARQLExpansion = new JMenuItem("View Intermediate Query...");
+		getSPARQLExpansion.addActionListener(this::getSPARQLExpansionActionPerformed);
+		sparqlPopupMenu.add(getSPARQLExpansion);
+
+		JMenuItem getSPARQLSQLExpansion = new JMenuItem("View SQL translation...");
+		getSPARQLSQLExpansion.addActionListener(this::getSPARQLSQLExpansionActionPerformed);
+		sparqlPopupMenu.add(getSPARQLSQLExpansion);
+
+		setLayout(new BorderLayout());
+
+		queryTextPane = new JTextPane();
+		queryTextPane.setFont(new Font("Lucida Console", Font.PLAIN, 14)); // NOI18N
+		queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
+		add(new JScrollPane(queryTextPane), BorderLayout.CENTER);
+
+		JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+
+		JPanel executionInfoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+		executionInfoLabel = new JLabel();
+		executionInfoPanel.add(executionInfoLabel);
+
+		executionInfoPanel.add(new JLabel("Show"));
+
+		fetchSizeTextField = new JFormattedTextField(NumberFormat.getIntegerInstance());
+		fetchSizeTextField.setValue(100);
+		fetchSizeTextField.setColumns(4);
+		fetchSizeTextField.setHorizontalAlignment(JTextField.RIGHT);
+		executionInfoPanel.add(fetchSizeTextField);
+
+		executionInfoPanel.add(new JLabel("or"));
+
+		showAllCheckBox = new JCheckBox("all results.");
+		showAllCheckBox.addActionListener(new ActionListener() {
+			private int fetchSizeSaved = 100;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (showAllCheckBox.isSelected()) {
+					fetchSizeSaved = getFetchSize();
+					fetchSizeTextField.setValue(0);
 				}
+				else 
+					fetchSizeTextField.setValue(fetchSizeSaved);
+				
+				fetchSizeTextField.setEnabled(!showAllCheckBox.isSelected());
 			}
 		});
+		executionInfoPanel.add(showAllCheckBox);
+
+		showShortIriCheckBox = new JCheckBox("Use short IRIs");
+		executionInfoPanel.add(showShortIriCheckBox);
+
+		controlPanel.add(executionInfoPanel);
+
+		OntopAbstractAction prefixesAction = new OntopAbstractAction(
+				"Prefixes...",
+				"attach.png",
+				"Select prefixes to insert into the query") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SelectPrefixDialog dialog = new SelectPrefixDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane);
+				dialog.setVisible(true);
+			}
+		};
+
+		OntopAbstractAction executeAction = new OntopAbstractAction(
+				"Execute",
+				"execute.png",
+				"Execute the query and display the results") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				cmdExecuteQueryActionPerformed(e);
+			}
+		};
+
+		OntopAbstractAction updateAction = new OntopAbstractAction(
+				"Update",
+				"save.png",
+				"Update the query in the catalog") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (queryId.isEmpty()) {
+					JOptionPane.showMessageDialog(QueryInterfacePanel.this,
+							"Please select first the query you would like to update",
+							"Warning",
+							JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+
+				QueryManager.Query query = queryManager.getQuery(groupId, queryId);
+				query.setQuery(queryTextPane.getText());
+			}
+		};
+
+		JButton executeButton = DialogUtils.getButton(executeAction);
+		controlPanel.add(executeButton);
+
+		add(controlPanel, BorderLayout.SOUTH);
+
+		JPanel topControlPanel = new JPanel(new GridBagLayout());
+		topControlPanel.add(new JLabel("SPARQL Query"),
+				new GridBagConstraints(0, 0, 1, 1, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.NONE,
+						new Insets(0, 0, 0, 0), 0, 0));
+
+		topControlPanel.add(new JPanel(), // gobbler
+				new GridBagConstraints(1, 0, 1, 1, 1, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+						new Insets(0, 0, 0, 0), 0, 0));
+
+		JButton prefixesButton = DialogUtils.getButton(prefixesAction);
+		topControlPanel.add(prefixesButton,
+				new GridBagConstraints(2, 0, 1, 1, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.NONE,
+						new Insets(0, 0, 0, 0), 0, 0));
+
+		JButton updateButton = DialogUtils.getButton(updateAction);
+		topControlPanel.add(updateButton,
+				new GridBagConstraints(3, 0, 1, 1, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.NONE,
+						new Insets(0, 0, 0, 0), 0, 0));
+
+		add(topControlPanel, BorderLayout.NORTH);
+
+
+		InputMap inputMap = queryTextPane.getInputMap();
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), "execute");
+		ActionMap actionMap = queryTextPane.getActionMap();
+		actionMap.put("execute", executeAction);
 	}
 
-	public void setOBDAModel(TriplesMapCollection api) {
-		this.apic = api;
-	}
-
-	/**
-	 * This method is called from within the constructor to initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is always
-	 * regenerated by the Form Editor.
-	 */
-	@SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
-
-        sparqlPopupMenu = new javax.swing.JPopupMenu();
-        getSPARQLExpansion = new javax.swing.JMenuItem();
-        getSPARQLSQLExpansion = new javax.swing.JMenuItem();
-        pnlQueryButtons = new javax.swing.JPanel();
-        pnlExecutionInfo = new javax.swing.JPanel();
-        lblExecutionInfo = new javax.swing.JLabel();
-        lblShow = new javax.swing.JLabel();
-        txtFetchSize = new javax.swing.JTextField();
-        chkShowAll = new javax.swing.JCheckBox();
-        chkShowShortURI = new javax.swing.JCheckBox();
-        cmdAttachPrefix = new javax.swing.JButton();
-        cmdExecuteQuery = new javax.swing.JButton();
-        cmdSaveChanges = new javax.swing.JButton();
-        pnlQueryEditor = new javax.swing.JPanel();
-        jLabelHeader = new javax.swing.JLabel();
-        jScrollQueryPane = new javax.swing.JScrollPane();
-        queryTextPane = new javax.swing.JTextPane();
-
-        sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
-
-        getSPARQLExpansion.setText("Get expansion this UCQ...");
-        getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                getSPARQLExpansionActionPerformed(evt);
-            }
-        });
-        sparqlPopupMenu.add(getSPARQLExpansion);
-
-        getSPARQLSQLExpansion.setText("Get SQL translation...");
-        getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                getSPARQLSQLExpansionActionPerformed(evt);
-            }
-        });
-        sparqlPopupMenu.add(getSPARQLSQLExpansion);
-
-        setLayout(new java.awt.GridBagLayout());
-
-        pnlQueryButtons.setPreferredSize(new java.awt.Dimension(445, 30));
-        pnlQueryButtons.setLayout(new java.awt.GridBagLayout());
-
-        pnlExecutionInfo.setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
-        pnlExecutionInfo.add(lblExecutionInfo, gridBagConstraints);
-
-        lblShow.setText("Show: ");
-        pnlExecutionInfo.add(lblShow, new java.awt.GridBagConstraints());
-
-        txtFetchSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtFetchSize.setText("100");
-        txtFetchSize.setPreferredSize(new java.awt.Dimension(40, 20));
-        pnlExecutionInfo.add(txtFetchSize, new java.awt.GridBagConstraints());
-
-        chkShowAll.setText("All");
-        chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        chkShowAll.setPreferredSize(new java.awt.Dimension(55, 23));
-        chkShowAll.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkShowAllActionPerformed(evt);
-            }
-        });
-        pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
-
-        chkShowShortURI.setText("Short IRI");
-        chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        chkShowShortURI.setMaximumSize(new java.awt.Dimension(75, 23));
-        chkShowShortURI.setMinimumSize(new java.awt.Dimension(75, 23));
-        pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        pnlQueryButtons.add(pnlExecutionInfo, gridBagConstraints);
-
-        cmdAttachPrefix.setIcon(IconLoader.getImageIcon("images/attach.png"));
-        cmdAttachPrefix.setText("Attach Prefixes");
-        cmdAttachPrefix.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdAttachPrefix.setContentAreaFilled(false);
-        cmdAttachPrefix.setIconTextGap(5);
-        cmdAttachPrefix.setMaximumSize(new java.awt.Dimension(112, 26));
-        cmdAttachPrefix.setMinimumSize(new java.awt.Dimension(112, 26));
-        cmdAttachPrefix.setPreferredSize(new java.awt.Dimension(112, 26));
-        cmdAttachPrefix.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdAttachPrefixActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        pnlQueryButtons.add(cmdAttachPrefix, gridBagConstraints);
-
-        cmdExecuteQuery.setIcon(IconLoader.getImageIcon("images/execute.png"));
-        cmdExecuteQuery.setMnemonic('x');
-        cmdExecuteQuery.setText("Execute");
-        cmdExecuteQuery.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdExecuteQuery.setContentAreaFilled(false);
-        cmdExecuteQuery.setIconTextGap(5);
-        cmdExecuteQuery.setMaximumSize(new java.awt.Dimension(82, 26));
-        cmdExecuteQuery.setMinimumSize(new java.awt.Dimension(82, 26));
-        cmdExecuteQuery.setPreferredSize(new java.awt.Dimension(82, 26));
-        cmdExecuteQuery.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdExecuteQueryActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        pnlQueryButtons.add(cmdExecuteQuery, gridBagConstraints);
-
-        cmdSaveChanges.setIcon(IconLoader.getImageIcon("images/save.png"));
-        cmdSaveChanges.setText("Save Changes");
-        cmdSaveChanges.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdSaveChanges.setContentAreaFilled(false);
-        cmdSaveChanges.setIconTextGap(5);
-        cmdSaveChanges.setMaximumSize(new java.awt.Dimension(112, 26));
-        cmdSaveChanges.setMinimumSize(new java.awt.Dimension(112, 26));
-        cmdSaveChanges.setPreferredSize(new java.awt.Dimension(112, 26));
-        cmdSaveChanges.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSaveChangesActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-        pnlQueryButtons.add(cmdSaveChanges, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        add(pnlQueryButtons, gridBagConstraints);
-
-        pnlQueryEditor.setLayout(new java.awt.BorderLayout());
-
-        jLabelHeader.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        jLabelHeader.setForeground(new java.awt.Color(153, 153, 153));
-        jLabelHeader.setText("  Query Editor");
-        jLabelHeader.setMaximumSize(new java.awt.Dimension(68, 18));
-        jLabelHeader.setMinimumSize(new java.awt.Dimension(68, 18));
-        jLabelHeader.setPreferredSize(new java.awt.Dimension(68, 18));
-        pnlQueryEditor.add(jLabelHeader, java.awt.BorderLayout.NORTH);
-
-        queryTextPane.setFont(new java.awt.Font("Lucida Console", 0, 14)); // NOI18N
-        queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
-        jScrollQueryPane.setViewportView(queryTextPane);
-
-        pnlQueryEditor.add(jScrollQueryPane, java.awt.BorderLayout.CENTER);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(pnlQueryEditor, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
-
-    private synchronized void chkShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowAllActionPerformed
-    	SwingUtilities.invokeLater(() -> {
-			if (chkShowAll.isSelected()) {
-				fetchSizeCache = getFetchSize();
-				txtFetchSize.setText("0");
-				txtFetchSize.setEditable(false);
-			}
-			else {
-				txtFetchSize.setText(fetchSizeCache + "");
-				txtFetchSize.setEditable(true);
-			}
-		});
-    }//GEN-LAST:event_chkShowAllActionPerformed
-
-	private void getSPARQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLExpansionActionPerformed
+	private void getSPARQLExpansionActionPerformed(ActionEvent evt) {
 		Thread queryRunnerThread = new Thread(() ->
 				retrieveUCQExpansionAction.run(queryTextPane.getText()));
 		queryRunnerThread.start();
-	}// GEN-LAST:event_getSPARQLExpansionActionPerformed
+	}
 
-	private void getSPARQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLSQLExpansionActionPerformed
+	private void getSPARQLSQLExpansionActionPerformed(ActionEvent evt) {
 		Thread queryRunnerThread = new Thread(() ->
 				retrieveUCQUnfoldingAction.run(queryTextPane.getText()));
 		queryRunnerThread.start();
-	}// GEN-LAST:event_getSPARQLSQLExpansionActionPerformed
+	}
 
-	private void cmdAttachPrefixActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAdvancedPropertiesActionPerformed
-		SelectPrefixDialog dialog = new SelectPrefixDialog(apic.getMutablePrefixManager(), queryTextPane);
-		dialog.setVisible(true);
-	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
-
-	private void cmdExecuteQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonExecuteActionPerformed
+	private void cmdExecuteQueryActionPerformed(ActionEvent evt) {
 		try {
 			// TODO Handle this such that there is a listener checking the progress of the execution
 			Thread queryRunnerThread = new Thread(() -> {
 				String queryString = queryTextPane.getText();
-                OBDADataQueryAction<?> action = null;
-				if (queryString.isEmpty()){
+				if (queryString.isEmpty()) {
 					JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
 				}
-				else if (isSelectQuery(queryString)) {
-					action = executeSelectAction;
-				}
-				else if (isAskQuery(queryString)) {
-					action = executeAskAction;
-                }
-				else if (isGraphQuery(queryString)) {
-                    action = executeGraphQueryAction;
-                }
-				else {
-                    JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-				if (action!=null) {
+				try {
+					OBDADataQueryAction<?> action;
+					SPARQLParser parser = new SPARQLParser();
+					ParsedQuery parsedQuery = parser.parseQuery(queryString, "http://example.org");
+					if (parsedQuery instanceof ParsedTupleQuery) {
+						action = executeSelectAction;
+					}
+					else if (parsedQuery instanceof ParsedBooleanQuery) {
+						action = executeAskAction;
+					}
+					else if (parsedQuery instanceof ParsedGraphQuery) {
+						action = executeGraphQueryAction;
+					}
+					else {
+						JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
 					action.run(queryString);
 					execTime = action.getExecutionTime();
 					do {
@@ -349,30 +265,24 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 					int rows = action.getNumberOfRows();
 					updateStatus(rows);
 				}
+				catch (Exception e) {
+					JOptionPane.showMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				}
             });
 			queryRunnerThread.start();
 		}
 		catch (Exception e) {
-			DialogUtils.showSeeLogErrorDialog(this, "", log, e);
+			DialogUtils.showSeeLogErrorDialog(this, "", LOGGER, e);
 		}
-	}// GEN-LAST:event_buttonExecuteActionPerformed
-
-	private synchronized void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
-		if (!queryId.isEmpty()) {
-			QueryManager.Query query = qc.getQuery(groupId, queryId);
-			query.setQuery(queryTextPane.getText());
-		}
-		else {
-			JOptionPane.showMessageDialog(this,
-					"Please select first the query node that you would like to update",
-					"Warning",
-					JOptionPane.WARNING_MESSAGE);
-		}
-	}// GEN-LAST:event_buttonSaveActionPerformed
+	}
 
 
 	public void selectedQueryChanged(String groupId, String queryId, String query) {
-		SwingUtilities.invokeLater(() -> queryTextPane.setText(query));
+//		if (!this.queryId.isEmpty()) {
+//			QueryManager.Query previous = queryManager.getQuery(this.groupId, this.queryId);
+//			previous.setQuery(queryTextPane.getText());
+//		}
+		queryTextPane.setText(query);
 		this.groupId = groupId;
 		this.queryId = queryId;
 	}
@@ -409,8 +319,8 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 			Double time = execTime / 1000;
 			String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, result);
 			SwingUtilities.invokeLater(() -> {
-				lblExecutionInfo.setText(s);
-				lblExecutionInfo.setOpaque(false);
+				executionInfoLabel.setText(s);
+				executionInfoLabel.setOpaque(false);
 			});
 		}
 	}
@@ -423,35 +333,15 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		SwingUtilities.invokeLater(() -> {
 			try {
 				boolean value = result.getValue();
-				lblExecutionInfo.setBackground(value ? Color.GREEN : Color.RED);
-				lblExecutionInfo.setOpaque(true);
-				lblExecutionInfo.setText(s + title + " " + value);
+				executionInfoLabel.setBackground(value ? Color.GREEN : Color.RED);
+				executionInfoLabel.setOpaque(true);
+				executionInfoLabel.setText(s + title + " " + value);
 			}
 			catch (OWLException e) {
-				DialogUtils.showSeeLogErrorDialog(this, "", log, e);
+				DialogUtils.showSeeLogErrorDialog(this, "", LOGGER, e);
 			}
 		});
 	}
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox chkShowAll;
-    private javax.swing.JCheckBox chkShowShortURI;
-    private javax.swing.JButton cmdAttachPrefix;
-    private javax.swing.JButton cmdExecuteQuery;
-    private javax.swing.JButton cmdSaveChanges;
-    private javax.swing.JMenuItem getSPARQLExpansion;
-    private javax.swing.JMenuItem getSPARQLSQLExpansion;
-    private javax.swing.JLabel jLabelHeader;
-    private javax.swing.JScrollPane jScrollQueryPane;
-    private javax.swing.JLabel lblExecutionInfo;
-    private javax.swing.JLabel lblShow;
-    private javax.swing.JPanel pnlExecutionInfo;
-    private javax.swing.JPanel pnlQueryButtons;
-    private javax.swing.JPanel pnlQueryEditor;
-    private javax.swing.JTextPane queryTextPane;
-    private javax.swing.JPopupMenu sparqlPopupMenu;
-    private javax.swing.JTextField txtFetchSize;
-    // End of variables declaration//GEN-END:variables
 
 	//update the number of rows when the table change
 	@Override
@@ -461,11 +351,11 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}
 
 	public boolean isShortURISelect() {
-		return chkShowShortURI.isSelected();
+		return showShortIriCheckBox.isSelected();
 	}
 
 	public boolean isFetchAllSelect() {
-		return chkShowAll.isSelected();
+		return showAllCheckBox.isSelected();
 	}
 
 	// TODO Remove this method after moving the GUI package to protege41 module.
@@ -479,30 +369,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}
 
 	public int getFetchSize() {
-		try {
-			return Integer.parseInt(txtFetchSize.getText());
-		}
-		catch (NumberFormatException e) {
-			DialogUtils.showQuickErrorDialog(this,
-					new Exception("Invalid input: " + txtFetchSize.getText()), e.toString());
-			return 0;
-		}
+		return ((Number) fetchSizeTextField.getValue()).intValue();
 	}
 
-	private static boolean isAskQuery(String query) throws MalformedQueryException {
-		return parse(query) instanceof ParsedBooleanQuery;
-	}
-
-	private static boolean isSelectQuery(String query) throws MalformedQueryException {
-		return parse(query) instanceof ParsedTupleQuery;
-	}
-
-	private static boolean isGraphQuery(String query) throws MalformedQueryException {
-		return parse(query) instanceof ParsedGraphQuery;
-	}
-
-	private static ParsedQuery parse(String query) throws MalformedQueryException {
-		SPARQLParser parser = new SPARQLParser();
-		return parser.parseQuery(query, "http://example.org");
-	}
 }

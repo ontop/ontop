@@ -47,11 +47,9 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 
     static private final String PATH_SAVEDQUERY_ICON = "images/query_icon.png";
     static private final String PATH_QUERYGROUP_ICON = "images/group_icon.png";
-    static private final String PATH_ROOT_NODE_ICON = "images/metadata.gif";
 
     private final Icon saved_query_icon;
     private final Icon query_group_icon;
-    private final Icon root_node_icon;
 
     private final List<SavedQueriesPanelListener> listeners = new ArrayList<>();
 	
@@ -64,22 +62,15 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 
     private final JTree treSavedQuery;
 
-    /**
-	 * Creates new form SavedQueriesPanel 
-	 */
 	public SavedQueriesPanel(QueryManager queryManager) {
         this.queryManager = queryManager;
 
         saved_query_icon = IconLoader.getImageIcon(PATH_SAVEDQUERY_ICON);
         query_group_icon = IconLoader.getImageIcon(PATH_QUERYGROUP_ICON);
-        root_node_icon = IconLoader.getImageIcon(PATH_ROOT_NODE_ICON);
 
         setLayout(new BorderLayout());
 
         treSavedQuery = new JTree(queryControllerModel);
-        treSavedQuery.setBorder(BorderFactory.createEtchedBorder());
-        treSavedQuery.setForeground(new Color(51, 51, 51));
-        treSavedQuery.setMaximumSize(new Dimension(5000, 5000));
         treSavedQuery.setRootVisible(false);
         treSavedQuery.setCellRenderer(new DefaultTreeCellRenderer() {
             @Override
@@ -91,8 +82,6 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
                     setIcon(saved_query_icon);
                 else if (value instanceof QueryControllerTreeModel.GroupNode)
                     setIcon(query_group_icon);
-                else
-                    setIcon(root_node_icon);
 
                 return this;
             }
@@ -103,39 +92,23 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
             }
         });
         treSavedQuery.addTreeSelectionListener(this::selectQueryNode);
+        add(new JScrollPane(treSavedQuery), BorderLayout.CENTER);
 
-        JScrollPane scrSavedQuery = new JScrollPane(treSavedQuery);
-        scrSavedQuery.setOpaque(false);
-        scrSavedQuery.setPreferredSize(new Dimension(300, 200));
-        scrSavedQuery.setMinimumSize(new Dimension(400, 200));
-        add(scrSavedQuery, BorderLayout.CENTER);
-
-        JPanel controlPanel = new JPanel(new GridBagLayout());
-
-        controlPanel.add(new JLabel("Stored queries:"),
-                new GridBagConstraints(0, 0, 1, 1, 1.5, 0,
-                        GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
-                        new Insets(0,0,0,0), 0, 0));
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
         JButton addButton = DialogUtils.getButton(
                 "Add",
                 "plus.png",
                 "Add a new query",
                 this::cmdAddActionPerformed);
-        controlPanel.add(addButton,
-                new GridBagConstraints(3, 0, 1, 1, 0, 0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(1, 1, 1, 1), 0, 0));
+        controlPanel.add(addButton);
 
         JButton removeButton = DialogUtils.getButton(
                 "Remove",
                 "minus.png",
                 "Remove the selected query",
                 this::cmdRemoveActionPerformed);
-        controlPanel.add(removeButton,
-                new GridBagConstraints(4, 0, 1, 1, 0, 0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(1, 1, 1, 1), 0, 0));
+        controlPanel.add(removeButton);
 
         add(controlPanel, BorderLayout.NORTH);
 
@@ -159,6 +132,7 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 
 
     private void selectQueryNode(TreeSelectionEvent evt) {
+
     	DefaultMutableTreeNode node = (DefaultMutableTreeNode) evt.getPath().getLastPathComponent();
         if (node instanceof QueryControllerTreeModel.QueryNode) {
             currentId = (QueryControllerTreeModel.QueryNode)node;
@@ -231,7 +205,15 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
 	}
 
-	@Override
+    @Override
+    public void changed(QueryManager.Query query) {
+        DefaultMutableTreeNode node = queryControllerModel.getQueryNode(query);
+        // Select the modified node in the JTree
+        treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
+        treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
+    }
+
+    @Override
 	public void removed(QueryManager.Query query) {
         listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
     }
@@ -240,12 +222,4 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 	public void removed(QueryManager.Group group) {
         listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
     }
-
-	@Override
-	public void changed(QueryManager.Query query) {
-		DefaultMutableTreeNode node = queryControllerModel.getQueryNode(query);
-		// Select the modified node in the JTree
-		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
-		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
-	}
 }

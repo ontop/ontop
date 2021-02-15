@@ -52,7 +52,7 @@ import java.io.*;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener, OBDAModelManagerListener {
+public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,7 +62,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
     private OWLOntologyChangeListener ontologyListener;
 
-    private OBDAModelManager obdaController;
+    private OBDAModelManager obdaModelManager;
 
     private OWLResultSetTableModel tableModel;
 
@@ -83,16 +83,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 queryInterfaceView.removeListener(this);
             }
         }
-        obdaController.removeListener(this);
     }
 
 
     @Override
     protected void initialiseOWLView() {
-        obdaController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
-        obdaController.addListener(this);
+        obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 
-        queryEditorPanel = new QueryInterfacePanel(obdaController.getTriplesMapCollection(), obdaController.getQueryController());
+        queryEditorPanel = new QueryInterfacePanel(obdaModelManager);
         queryEditorPanel.setPreferredSize(new Dimension(400, 250));
         queryEditorPanel.setMinimumSize(new Dimension(400, 250));
 
@@ -270,7 +268,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
                     @Override
                     public void handleResult(GraphOWLResultSet result) throws OWLException{
-                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(obdaController.getTriplesMapCollection().getMutablePrefixManager());
+                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager());
                         if (result != null) {
                             while (result.hasNext()) {
                                 result.next().accept(owlVisitor);
@@ -420,7 +418,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     private synchronized void createTableModelFromResultSet(TupleOWLResultSet result) throws OWLException {
         if (result == null)
             throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
-        tableModel = new OWLResultSetTableModel(result, obdaController.getTriplesMapCollection().getMutablePrefixManager(),
+        tableModel = new OWLResultSetTableModel(result, obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
                 queryEditorPanel.isShortURISelect(),
                 queryEditorPanel.isFetchAllSelect(),
                 queryEditorPanel.getFetchSize());
@@ -451,7 +449,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
     }
 
     @Override
-    public synchronized void selectedQueryChanged(String groupId, String queryId, String query) {
+    public void selectedQueryChanged(String groupId, String queryId, String query) {
         queryEditorPanel.selectedQueryChanged(groupId, queryId, query);
     }
 
@@ -541,11 +539,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         }
     }
 
-
-    @Override
-    public void activeOntologyChanged() {
-        queryEditorPanel.setOBDAModel(obdaController.getTriplesMapCollection());
-    }
 
     private static void writeCSV(List<String[]> tabularData, Writer writer) throws IOException {
 
