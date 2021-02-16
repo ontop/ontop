@@ -20,11 +20,9 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.SelectPrefixDialog;
-import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
@@ -39,9 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.NumberFormat;
@@ -54,12 +49,8 @@ public class QueryInterfacePanel extends JPanel {
 
 	private static final long serialVersionUID = -5902798157183352944L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfacePanel.class);
-
 	private Runnable executeSelectAction;
 	private Runnable executeGraphQuery;
-
-
 	private Runnable executeAsk;
 
 	private final QueryManager queryManager;
@@ -285,12 +276,6 @@ public class QueryInterfacePanel extends JPanel {
 
 	public boolean isFetchAllSelect() {
 		return showAllCheckBox.isSelected();
-	}
-
-	// TODO Remove this method after moving the GUI package to protege41 module.
-	// The constant 100 is the same as the NEXT_FETCH_SIZE in OWLResultSetTableModel
-	public boolean canGetMoreTuples() {
-		return getFetchSize() > 100;
 	}
 
 	public String getQuery() {

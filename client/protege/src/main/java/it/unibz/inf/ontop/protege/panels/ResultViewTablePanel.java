@@ -168,15 +168,10 @@ public class ResultViewTablePanel extends JPanel {
 
 	public void setTableModel(TableModel tableModel) {
 		queryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-		ToolTipManager.sharedInstance().unregisterComponent(queryResultTable);
-		ToolTipManager.sharedInstance().unregisterComponent(queryResultTable.getTableHeader());
-
 		queryResultTable.setModel(tableModel);
-
-		addNotify();
-
 		queryResultTable.invalidate();
 		queryResultTable.repaint();
+
 		exportButton.setEnabled(false);
 	}
 
@@ -279,8 +274,10 @@ public class ResultViewTablePanel extends JPanel {
 						try (TupleOWLResultSet rs = statement.executeSelectQuery(query)) {
 							if (rs != null) {
 								List<String> signature = rs.getSignature();
-								SwingUtilities.invokeLater(() ->
-										tableModel.setColumnIdentifiers(signature.toArray()));
+								SwingUtilities.invokeLater(() -> {
+										tableModel.setColumnIdentifiers(signature.toArray());
+										queryResultTable.revalidate();
+								});
 								int columns = signature.size();
 								while (rs.hasNext()) {
 									String[] row = new String[columns];
