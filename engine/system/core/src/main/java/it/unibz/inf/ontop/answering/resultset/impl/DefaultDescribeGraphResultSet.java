@@ -149,16 +149,6 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
             return currentGraphResultSetIterator.next();
         }
 
-        /**
-         * TODO: shall we remove it?
-         */
-        @Override
-        public void remove() throws OntopConnectionException {
-            if (currentGraphResultSetIterator == null)
-                throw new IllegalStateException("Make sure to call hasNext() before calling remove()");
-            currentGraphResultSetIterator.remove();
-        }
-
         @Override
         protected void handleClose() throws OntopConnectionException {
             if (currentGraphResultSetIterator != null)

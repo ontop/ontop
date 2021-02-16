@@ -103,11 +103,6 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 		}
 
 		@Override
-		public void remove() throws OntopConnectionException {
-			next();
-		}
-
-		@Override
 		public void handleClose() throws OntopConnectionException {
 			try {
 				if (resultSet.isConnectionAlive()) {

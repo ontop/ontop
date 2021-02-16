@@ -10,8 +10,6 @@ public interface OntopCloseableIterator<X extends RDFFact, Y extends OntopConnec
 
     X next() throws Y;
 
-    void remove() throws Y;
-
     void close() throws Y;
 
 }
