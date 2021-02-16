@@ -111,10 +111,26 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopReformulationException {
+		return executeSelectQuery(inputQuery, queryLogger, true);
+	}
+
+	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryLogger queryLogger,
+											  boolean shouldAlsoCloseStatement)
+			throws OntopQueryEvaluationException, OntopReformulationException {
 		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
 		logExecutionStartingMessage();
-		return executeSelectQuery(executableQuery, queryLogger);
+		return executeSelectQuery(executableQuery, queryLogger, shouldAlsoCloseStatement);
 	}
+
+	@Override
+	public TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
+			throws OntopQueryEvaluationException {
+		return executeSelectQuery(executableQuery, queryLogger, true);
+	}
+
+	protected abstract TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger,
+														 boolean shouldAlsoCloseStatement)
+			throws OntopQueryEvaluationException;
 
 	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopReformulationException {
@@ -125,32 +141,32 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
-		return executeConstructQuery(constructQuery, queryLogger, false);
+		return executeConstructQuery(constructQuery, queryLogger, true);
 	}
 
 	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryLogger queryLogger,
-												 boolean isSubQueryOfDescribe)
+												 boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
 		IQ executableQuery = engine.reformulateIntoNativeQuery(constructQuery, queryLogger);
 		logExecutionStartingMessage();
-		return executeConstructQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger, isSubQueryOfDescribe);
+		return executeConstructQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger, shouldAlsoCloseStatement);
 	}
 
 	@Override
 	public GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeConstructQuery(constructTemplate, executableQuery, queryLogger, false);
+		return executeConstructQuery(constructTemplate, executableQuery, queryLogger, true);
 	}
 
 	protected abstract GraphResultSet executeConstructQuery(ConstructTemplate constructTemplate, IQ executableQuery, QueryLogger queryLogger,
-															boolean isSubQueryOfDescribe)
+															boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
 	protected GraphResultSet executeDescribeQuery(DescribeQuery describeQuery, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException, OntopResultConversionException {
 		return new DefaultDescribeGraphResultSet(describeQuery, queryLogger, queryLoggerFactory,
-				this::executeSelectQuery,
-				(constructQuery, logger) -> executeConstructQuery(constructQuery, logger, true),
+				(selectQuery, logger) -> executeSelectQuery(selectQuery, logger, false),
+				(constructQuery, logger) -> executeConstructQuery(constructQuery, logger, false),
 				this::close);
 	}
 
@@ -169,7 +185,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 */
 	@Override
 	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopConnectionException,
-			                                                                            OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
+			OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 		return execute(inputQuery, ImmutableMultimap.of());
 	}
 

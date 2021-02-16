@@ -45,7 +45,6 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClassicABoxAssertionTestPositiveNoRangeTest.class);
 
 	private OWLConnection conn;
-	private OWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();
@@ -60,22 +59,23 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		}
 
 		conn = reasoner.getConnection();
-		st = conn.createStatement();
 	}
 
 	private int executeQuery(String q) throws OWLException {
 		String prefix = "PREFIX : <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#> \n PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 		String query = prefix + " " + q;
 
-		TupleOWLResultSet res = st.executeSelectQuery(query);
-		int count = 0;
-		while (res.hasNext()) {
-            final OWLBindingSet bindingSet = res.next();
-            LOGGER.info(bindingSet.toString());
-			count += 1;
+		try(OWLStatement st = conn.createStatement();
+			TupleOWLResultSet res = st.executeSelectQuery(query)) {
+			int count = 0;
+			while (res.hasNext()) {
+				final OWLBindingSet bindingSet = res.next();
+				LOGGER.info(bindingSet.toString());
+				count += 1;
+			}
+			res.close();
+			return count;
 		}
-		res.close();
-		return count;
 	}
 
 	public void testClassAssertions() throws OWLException {

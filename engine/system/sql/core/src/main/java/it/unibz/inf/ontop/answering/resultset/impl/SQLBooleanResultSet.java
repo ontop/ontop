@@ -31,20 +31,23 @@ public class SQLBooleanResultSet implements BooleanResultSet {
 
     private final ResultSet set;
     private final QueryLogger queryLogger;
+    private final OntopConnectionCloseable statementClosingCB;
     private boolean hasRead;
 
-    public SQLBooleanResultSet(ResultSet set, QueryLogger queryLogger) {
+    public SQLBooleanResultSet(ResultSet set, QueryLogger queryLogger,
+                               OntopConnectionCloseable statementClosingCB) {
         this.set = set;
         this.queryLogger = queryLogger;
+        this.statementClosingCB = statementClosingCB;
         this.hasRead = false;
     }
 
     @Override
     public void close() throws OntopConnectionException {
-        if (set == null)
-            return;
         try {
-            set.close();
+            if (set != null)
+                set.close();
+            statementClosingCB.close();
         } catch (SQLException e) {
             queryLogger.declareConnectionException(e);
             throw new OntopConnectionException(e);

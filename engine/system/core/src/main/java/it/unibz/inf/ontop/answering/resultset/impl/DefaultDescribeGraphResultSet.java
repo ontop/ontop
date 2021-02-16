@@ -25,7 +25,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                                          QueryLogger.Factory queryLoggerFactory,
                                          Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator,
                                          Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator,
-                                         OntopConnectionCloseable closeCallback)
+                                         OntopConnectionCloseable statementClosingCB)
             throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
             OntopResultConversionException {
 
@@ -33,7 +33,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                 selectQueryEvaluator);
 
         this.iterator = new ResultSetIterator(describeQuery.computeConstructQueries(resourcesToDescribe),
-                queryLogger, queryLoggerFactory, constructQueryEvaluator, closeCallback);
+                queryLogger, queryLoggerFactory, constructQueryEvaluator, statementClosingCB);
 
     }
 
@@ -87,7 +87,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
     protected static class ResultSetIterator extends RDFFactCloseableIterator {
 
         private final UnmodifiableIterator<ConstructQuery> constructQueryIterator;
-        private final OntopConnectionCloseable closeHandler;
+        private final OntopConnectionCloseable statementClosingCB;
         private final QueryLogger queryLogger;
         private final QueryLogger.Factory queryLoggerFactory;
         private final Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator;
@@ -99,10 +99,10 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
         public ResultSetIterator(ImmutableCollection<ConstructQuery> constructQueries,
                                  QueryLogger queryLogger, QueryLogger.Factory queryLoggerFactory,
                                  Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator,
-                                 OntopConnectionCloseable closeHandler) {
+                                 OntopConnectionCloseable statementClosingCB) {
 
             this.constructQueryIterator = constructQueries.iterator();
-            this.closeHandler = closeHandler;
+            this.statementClosingCB = statementClosingCB;
             this.currentGraphResultSetIterator = null;
             this.queryLogger = queryLogger;
             this.queryLoggerFactory = queryLoggerFactory;
@@ -163,7 +163,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
         protected void handleClose() throws OntopConnectionException {
             if (currentGraphResultSetIterator != null)
                 currentGraphResultSetIterator.close();
-            closeHandler.close();
+            statementClosingCB.close();
         }
 
         /**
@@ -187,8 +187,4 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
         }
     }
 
-    @FunctionalInterface
-    public interface OntopConnectionCloseable {
-        void close() throws OntopConnectionException;
-    }
 }
