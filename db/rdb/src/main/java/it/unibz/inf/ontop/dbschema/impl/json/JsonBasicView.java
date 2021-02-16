@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -160,21 +159,22 @@ public class JsonBasicView extends JsonView {
                 // It may be eliminated by the IQ normalization
                 .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
 
-        IQTree filteredParentDataNode = parentDataNode;
-        if (filterExpression != null && (!filterExpression.isEmpty())) {
-            ImmutableList<ImmutableExpression> filterConditions;
-            try {
-                filterConditions = extractFilter(parentArgumentMap, parentDefinition, quotedIdFactory, coreSingletons);
+        ImmutableList<ImmutableExpression> filterConditions;
+        try {
+            filterConditions = filterExpression != null && !filterExpression.isEmpty()
+                ? extractFilter(parentArgumentMap, parentDefinition, quotedIdFactory, coreSingletons)
+                : ImmutableList.of();
             } catch (JSQLParserException e) {
                 throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
-            }
-
-            ImmutableExpression newCondition = termFactory.getConjunction(filterConditions);
-            FilterNode filterNode = iqFactory.createFilterNode(newCondition);
-            filteredParentDataNode = iqFactory.createUnaryIQTree(filterNode, filteredParentDataNode);
         }
 
-        IQTree updatedParentDataNode = updateParentDataNode(normalization, filteredParentDataNode);
+        IQTree updatedParentDataNode = filterConditions.stream()
+                .reduce(termFactory::getConjunction)
+                .map(iqFactory::createFilterNode)
+                .map(f -> updateParentDataNode(normalization,
+                        iqFactory.createUnaryIQTree(f, parentDataNode)))
+                .orElse(updateParentDataNode(normalization, parentDataNode));
+
         IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
