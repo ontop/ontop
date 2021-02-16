@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public interface JDBCStatementInitializer {
+public interface JDBCStatementInitializer extends JDBCStatementFinalizer {
 
     Statement createAndInitStatement(Connection connection) throws SQLException;
 

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
+import it.unibz.inf.ontop.answering.connection.JDBCStatementFinalizer;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
@@ -37,17 +38,19 @@ import java.sql.ResultSet;
 public class SQLQuestStatement extends QuestStatement {
 
     private final Statement sqlStatement;
+    private final JDBCStatementFinalizer statementFinalizer;
     private final TermFactory termFactory;
     private final RDF rdfFactory;
     private final SubstitutionFactory substitutionFactory;
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
-                             TermFactory termFactory,
+                             JDBCStatementFinalizer statementFinalizer, TermFactory termFactory,
                              RDF rdfFactory, SubstitutionFactory substitutionFactory,
                              OntopSystemSQLSettings settings) {
         super(queryProcessor);
         this.sqlStatement = sqlStatement;
+        this.statementFinalizer = statementFinalizer;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
         this.substitutionFactory = substitutionFactory;
@@ -145,7 +148,7 @@ public class SQLQuestStatement extends QuestStatement {
     public void close() throws OntopConnectionException {
         try {
             if (sqlStatement != null)
-                sqlStatement.close();
+                statementFinalizer.closeStatement(sqlStatement);
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }
