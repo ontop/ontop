@@ -192,26 +192,28 @@ public class RegexpTest extends TestCase {
 	 */
 	@Test
 	public void testSparql2sqlRegex() throws Exception {
-		try (OWLStatement st = conn.createStatement()) {
-			List<String> queries = Lists.newArrayList(
-					"'J[ano]*'",
-					"'^J[ano]*$'",
-					"'J'");
-			if (acceptFlags) {
-				queries.add("'j[ANO]*', 'i'");
-				queries.add("'^J[ano]*$', 'm'");
-			}
+		List<String> queries = Lists.newArrayList(
+				"'J[ano]*'",
+				"'^J[ano]*$'",
+				"'J'");
+		if (acceptFlags) {
+			queries.add("'j[ANO]*', 'i'");
+			queries.add("'^J[ano]*$', 'm'");
+		}
 
-			for (String regex : queries){
+		for (String regex : queries){
+			try (OWLStatement st = conn.createStatement()) {
 				String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, " + regex + ")}";
 				String broker = runTest(st, query, true);
 				assertEquals(broker, "<http://www.owl-ontologies.com/Ontology1207768242.owl#person-112>");
 			}
-			String[] wrongs = {
-					"'^j[ANO]*$'",
-					"'j[ANO]*'"
-					};
-			for (String regex : wrongs){
+		}
+		String[] wrongs = {
+				"'^j[ANO]*$'",
+				"'j[ANO]*'"
+				};
+		for (String regex : wrongs){
+			try (OWLStatement st = conn.createStatement()) {
 				String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, " + regex + ")}";
 				String res = runTest(st, query, false);
 				assertEquals(res, "");

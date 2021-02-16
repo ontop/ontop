@@ -25,7 +25,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                                          QueryLogger.Factory queryLoggerFactory,
                                          Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator,
                                          Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator,
-                                         OntopConnectionCloseable closeCallback)
+                                         OntopConnectionCloseable statementClosingCB)
             throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
             OntopResultConversionException {
 
@@ -33,7 +33,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                 selectQueryEvaluator);
 
         this.iterator = new ResultSetIterator(describeQuery.computeConstructQueries(resourcesToDescribe),
-                queryLogger, queryLoggerFactory, constructQueryEvaluator, closeCallback);
+                queryLogger, queryLoggerFactory, constructQueryEvaluator, statementClosingCB);
 
     }
 
@@ -42,10 +42,8 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                                                               Evaluator<TupleResultSet, SelectQuery> selectQueryEvaluator)
             throws OntopQueryEvaluationException, OntopConnectionException,
             OntopReformulationException, OntopResultConversionException {
-        try {
-            SelectQuery selectQuery = inputQuery.getSelectQuery();
-            QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
-            TupleResultSet resultSet = selectQueryEvaluator.evaluate(selectQuery, selectQueryLogger);
+        QueryLogger selectQueryLogger = queryLoggerFactory.create(ImmutableMultimap.of());
+        try (TupleResultSet resultSet = selectQueryEvaluator.evaluate(inputQuery.getSelectQuery(), selectQueryLogger)) {
             queryLogger.declareResultSetUnblockedAndSerialize();
 
             ImmutableSet.Builder<IRI> iriSetBuilder = ImmutableSet.builder();
@@ -89,7 +87,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
     protected static class ResultSetIterator extends RDFFactCloseableIterator {
 
         private final UnmodifiableIterator<ConstructQuery> constructQueryIterator;
-        private final OntopConnectionCloseable closeHandler;
+        private final OntopConnectionCloseable statementClosingCB;
         private final QueryLogger queryLogger;
         private final QueryLogger.Factory queryLoggerFactory;
         private final Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator;
@@ -101,10 +99,10 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
         public ResultSetIterator(ImmutableCollection<ConstructQuery> constructQueries,
                                  QueryLogger queryLogger, QueryLogger.Factory queryLoggerFactory,
                                  Evaluator<GraphResultSet, ConstructQuery> constructQueryEvaluator,
-                                 OntopConnectionCloseable closeHandler) {
+                                 OntopConnectionCloseable statementClosingCB) {
 
             this.constructQueryIterator = constructQueries.iterator();
-            this.closeHandler = closeHandler;
+            this.statementClosingCB = statementClosingCB;
             this.currentGraphResultSetIterator = null;
             this.queryLogger = queryLogger;
             this.queryLoggerFactory = queryLoggerFactory;
@@ -137,8 +135,10 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
                     rowCount++;
                     return true;
                 }
-                else
+                else {
+                    currentGraphResultSetIterator.close();
                     currentGraphResultSetIterator = null;
+                }
             } while (true);
         }
 
@@ -161,7 +161,9 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
 
         @Override
         protected void handleClose() throws OntopConnectionException {
-            closeHandler.close();
+            if (currentGraphResultSetIterator != null)
+                currentGraphResultSetIterator.close();
+            statementClosingCB.close();
         }
 
         /**
@@ -185,8 +187,4 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
         }
     }
 
-    @FunctionalInterface
-    public interface OntopConnectionCloseable {
-        void close() throws OntopConnectionException;
-    }
 }

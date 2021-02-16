@@ -29,10 +29,11 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
                               ImmutableSortedSet<Variable> sqlSignature,
                               ImmutableMap<Variable, DBTermType> sqlTypeMap,
                               ConstructionNode constructionNode,
-                              DistinctVariableOnlyDataAtom answerAtom,
-                              QueryLogger queryLogger, TermFactory termFactory,
+                              DistinctVariableOnlyDataAtom answerAtom, QueryLogger queryLogger,
+                              @Nullable OntopConnectionCloseable statementClosingCB,
+                              TermFactory termFactory,
                               SubstitutionFactory substitutionFactory) {
-        super(rs, answerAtom.getArguments(),queryLogger);
+        super(rs, answerAtom.getArguments(),queryLogger, statementClosingCB);
         this.sqlSignature = sqlSignature;
         this.sqlTypeMap = sqlTypeMap;
         this.substitutionFactory = substitutionFactory;
@@ -68,11 +69,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
         return termFactory.getDBConstant(jdbcValue, termType);
     }
 
-    private OntopBinding[] computeBindingMap(
-            // ImmutableList<Variable> signature,
-            ImmutableSubstitution<Constant> sqlVar2Constant
-            // ImmutableSubstitution<ImmutableTerm> sparqlVar2Term
-    ) {
+    private OntopBinding[] computeBindingMap(ImmutableSubstitution<Constant> sqlVar2Constant) {
         ImmutableSubstitution<ImmutableTerm> composition = sqlVar2Constant.composeWith(sparqlVar2Term);
         //this can be improved and simplified
         return signature.stream()
