@@ -119,8 +119,9 @@ public class ResultViewTablePanel extends JPanel {
 		JPopupMenu menu = new JPopupMenu();
 		JMenuItem countAll = new JMenuItem("Count tuples");
 		countAll.addActionListener(e -> {
-			OntopQuerySwingWorker.getOntopAndExecute(editorKit, querypanel.getQuery(), (ontop, query) -> new OntopQuerySwingWorker<Long>(
-					this.getParent(), ontop, "Counting tuples", query) {
+			OntopQuerySwingWorker.getOntopAndExecute(editorKit, querypanel.getQuery(),
+					(ontop, query) -> new OntopQuerySwingWorker<Long>(
+								ontop, query, getParent(), "Counting tuples") {
 
 				@Override
 				protected Long runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -184,7 +185,8 @@ public class ResultViewTablePanel extends JPanel {
 
 	public void runAskQuery(String askQuery) {
 		OntopQuerySwingWorker.getOntopAndExecute(editorKit, askQuery,
-				(ontop, query) -> new OntopQuerySwingWorker<Boolean>(getParent(), ontop, "Execute ASK Query", query, querypanel.executeButton, stopButton, commentLabel) {
+				(ontop, query) -> new OntopQuerySwingWorker<Boolean>(ontop, query, getParent(),
+						"Execute ASK Query", querypanel.executeButton, stopButton, commentLabel) {
 			@Override
 			protected Boolean runQuery(OntopOWLStatement statement, String query) throws Exception {
 				return statement.executeAskQuery(query).getValue();

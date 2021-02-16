@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.views;
 
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
@@ -80,7 +79,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         }
     }
 
-    private final OntopQuerySwingWorkerFactory<String> retrieveUCQExpansionAction = (ontop, query) -> new OntopQuerySwingWorker<String>(this, ontop, "Rewriting query", query) {
+    private final OntopQuerySwingWorkerFactory<String> retrieveUCQExpansionAction =
+            (ontop, query) -> new OntopQuerySwingWorker<String>(ontop, query, this, "Rewriting query") {
 
         @Override
         protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -98,7 +98,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         }
     };
 
-    private final OntopQuerySwingWorkerFactory<String> retrieveUCQUnfoldingAction = (ontop, query) -> new OntopQuerySwingWorker<String>(this, ontop, "Rewriting query", query) {
+    private final OntopQuerySwingWorkerFactory<String> retrieveUCQUnfoldingAction =
+            (ontop, query) -> new OntopQuerySwingWorker<String>(ontop, query, this, "Rewriting query") {
 
         @Override
         protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -220,7 +221,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                     @Override
                     public GraphOWLResultSet executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
                         removeResultTable();
-                        if(queryEditorPanel.isFetchAllSelect())
+                        if (queryEditorPanel.isFetchAllSelect())
                             return st.executeGraphQuery(queryString);
 
                         DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) st;
@@ -230,7 +231,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
                     @Override
                     public void handleResult(GraphOWLResultSet result) throws OWLException{
-                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager());
+                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(
+                                obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
+                                queryEditorPanel.isShortIriSelected());
+
                         if (result != null) {
                             while (result.hasNext()) {
                                 result.next().accept(owlVisitor);
@@ -275,7 +279,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         if (result == null)
             throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
         tableModel = new OWLResultSetTableModel(result, obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
-                queryEditorPanel.isShortURISelect(),
+                queryEditorPanel.isShortIriSelected(),
                 queryEditorPanel.isFetchAllSelect(),
                 queryEditorPanel.getFetchSize());
         tableModel.addTableModelListener(queryEditorPanel);

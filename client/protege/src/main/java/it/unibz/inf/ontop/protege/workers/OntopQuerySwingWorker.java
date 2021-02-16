@@ -33,16 +33,16 @@ public abstract class OntopQuerySwingWorker<T> extends SwingWorkerWithTimeInterv
 
     private OntopOWLStatement statement;
 
-    protected OntopQuerySwingWorker(Component parent, OntopProtegeReasoner ontop, String title, String query) {
-        this(parent, ontop, title, query, () -> new DialogProgressMonitor(parent, "<html><h3>" + title + "</h3></html>", true));
+    protected OntopQuerySwingWorker(OntopProtegeReasoner ontop, String query, Component parent, String title) {
+        this(ontop, query, parent, title, new DialogProgressMonitor(parent, "<html><h3>" + title + "</h3></html>", true));
     }
 
-    protected OntopQuerySwingWorker(Component parent, OntopProtegeReasoner ontop, String title, String query, JButton startButton, JButton stopButton, JLabel statusLabel) {
-        this(parent, ontop, title, query, () -> new EmbeddedProgressMonitor(startButton, stopButton, statusLabel));
+    protected OntopQuerySwingWorker(OntopProtegeReasoner ontop, String query, Component parent, String title, JButton startButton, JButton stopButton, JLabel statusLabel) {
+        this(ontop, query, parent, title, new EmbeddedProgressMonitor(startButton, stopButton, statusLabel));
     }
 
-    protected OntopQuerySwingWorker(Component parent, OntopProtegeReasoner ontop, String title, String query, Supplier<AbstractProgressMonitor> progressMonitorSupplier) {
-        super(progressMonitorSupplier, MONITOR_UPDATE_INTERVAL);
+    protected OntopQuerySwingWorker(OntopProtegeReasoner ontop, String query, Component parent, String title, AbstractProgressMonitor progressMonitor) {
+        super(progressMonitor, MONITOR_UPDATE_INTERVAL);
 
         this.parent = parent;
         this.title = title;

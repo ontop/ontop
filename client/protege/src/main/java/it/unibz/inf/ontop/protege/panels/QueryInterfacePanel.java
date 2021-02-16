@@ -325,7 +325,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		updateStatus(rows);
 	}
 
-	public boolean isShortURISelect() {
+	public boolean isShortIriSelected() {
 		return showShortIriCheckBox.isSelected();
 	}
 

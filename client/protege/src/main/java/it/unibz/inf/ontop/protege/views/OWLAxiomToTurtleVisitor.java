@@ -9,6 +9,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OWLAxiomToTurtleVisitor extends OWLAxiomVisitorAdapter {
 
@@ -17,16 +18,17 @@ public class OWLAxiomToTurtleVisitor extends OWLAxiomVisitorAdapter {
 	private final StringBuilder classAssertionBuffer = new StringBuilder();
 	private final StringBuilder objectPropertyAssertionBuffer = new StringBuilder();
 	private final StringBuilder dataPropertyAssertionBuffer = new StringBuilder();
+	private final StringBuilder annotationPropertyAssertionBuffer = new StringBuilder();
 
 	private final PrefixManager prefixManager;
+	private final boolean shotenIRIs;
 
-	public OWLAxiomToTurtleVisitor(PrefixManager prefixManager) {
+	public OWLAxiomToTurtleVisitor(PrefixManager prefixManager, boolean shortenIRIs) {
 		this.prefixManager = prefixManager;
-		Map<String, String> namespaces = prefixManager.getPrefixMap();
-		for (String prefix : namespaces.keySet()) {
-			parentBuffer.append(String.format("@prefix %s <%s> .\n", prefix,
-					namespaces.get(prefix)));
-		}
+		this.shotenIRIs = shortenIRIs;
+		prefixManager.getPrefixMap().entrySet().stream()
+				.map(e -> "@prefix " + e.getKey() + " " + e.getValue() + ".\n")
+				.forEach(parentBuffer::append);
 		parentBuffer.append("\n");
 	}
 
@@ -36,15 +38,18 @@ public class OWLAxiomToTurtleVisitor extends OWLAxiomVisitorAdapter {
 		String subject = prefixManager.getShortForm(axiom.getSubject().toString());
 		String predicate = prefixManager.getShortForm(axiom.getProperty().toString());
 		String object = prefixManager.getShortForm(axiom.getObject().toString());
-		objectPropertyAssertionBuffer.append(String.format("%s %s %s .\n",
-				subject, predicate, object));
+		objectPropertyAssertionBuffer.append(subject).append(" ")
+				.append(predicate).append(" ")
+				.append(object).append(". \n");
 	}
 
 	@Override
 	public void visit(OWLClassAssertionAxiom axiom) {
 		String subject = prefixManager.getShortForm(axiom.getIndividual().toString());
 		String object = prefixManager.getShortForm(axiom.getClassExpression().toString());
-		classAssertionBuffer.append(String.format("%s rdf:type %s .\n", subject, object));
+		classAssertionBuffer.append(subject)
+				.append(" rdf:type ")
+				.append(object).append(" .\n");
 	}
 
 
@@ -53,8 +58,9 @@ public class OWLAxiomToTurtleVisitor extends OWLAxiomVisitorAdapter {
 		String subject = prefixManager.getShortForm(axiom.getSubject().toString());
 		String predicate = prefixManager.getShortForm(axiom.getProperty().toString());
 		String object = ToStringRenderer.getInstance().getRendering(axiom.getObject());
-		dataPropertyAssertionBuffer.append(String.format("%s %s %s .\n",
-				subject, predicate, object));
+		dataPropertyAssertionBuffer.append(subject).append(" ")
+						.append(predicate).append(" ")
+						.append(object).append(". \n");
 	}
 
 	@Override
@@ -62,21 +68,23 @@ public class OWLAxiomToTurtleVisitor extends OWLAxiomVisitorAdapter {
 		String subject = prefixManager.getShortForm(axiom.getSubject().toString());
 		String predicate = prefixManager.getShortForm(axiom.getProperty().toString());
 		String object = ToStringRenderer.getInstance().getRendering(axiom.getValue());
-		dataPropertyAssertionBuffer.append(String.format("%s %s %s .\n",
-				subject, predicate, object));
+		annotationPropertyAssertionBuffer.append(subject).append(" ")
+				.append(predicate).append(" ")
+				.append(object).append(". \n");
 	}
 
 	public String getString() {
-		parentBuffer.append("# Class assertion axioms\n");
-		parentBuffer.append(classAssertionBuffer);
-		parentBuffer.append("\n");
-
-		parentBuffer.append("# Object property assertion axioms\n");
-		parentBuffer.append(objectPropertyAssertionBuffer);
-		parentBuffer.append("\n");
-
-		parentBuffer.append("# Data property assertion axioms\n");
-		parentBuffer.append(dataPropertyAssertionBuffer);
+		parentBuffer.append("# Class assertion axioms\n")
+				.append(classAssertionBuffer)
+				.append("\n")
+				.append("# Object property assertion axioms\n")
+				.append(objectPropertyAssertionBuffer)
+				.append("\n")
+				.append("# Data annotation property assertion axioms\n")
+				.append(dataPropertyAssertionBuffer)
+				.append("\n")
+				.append("# Annotation property assertion axioms\n")
+				.append(annotationPropertyAssertionBuffer);
 
 		return parentBuffer.toString();
 	}

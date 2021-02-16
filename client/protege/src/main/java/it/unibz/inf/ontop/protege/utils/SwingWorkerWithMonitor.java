@@ -19,11 +19,11 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
     private Supplier<Integer> progressSupplier;
 
     protected SwingWorkerWithMonitor(Component parent, Object message, boolean indeterminate) {
-        this(() -> new DialogProgressMonitor(parent, message, indeterminate));
+        this(new DialogProgressMonitor(parent, message, indeterminate));
     }
 
-    protected SwingWorkerWithMonitor(Supplier<AbstractProgressMonitor> progressMonitorConstructor) {
-        this.progressMonitor = progressMonitorConstructor.get();
+    protected SwingWorkerWithMonitor(AbstractProgressMonitor progressMonitor) {
+        this.progressMonitor = progressMonitor;
         this.startTime = System.currentTimeMillis();
     }
 

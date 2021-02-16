@@ -13,7 +13,6 @@ public class EmbeddedProgressMonitor extends AbstractProgressMonitor implements 
         this.startButton = startButton;
         this.stopButton = stopButton;
         this.statusLabel = statusLabel;
-        stopButton.addActionListener(this);
     }
 
     @Override
@@ -29,14 +28,15 @@ public class EmbeddedProgressMonitor extends AbstractProgressMonitor implements 
     @Override
     public void close() {
         super.close();
-        stopButton.removeActionListener(this);
         stopButton.setEnabled(false);
+        stopButton.removeActionListener(this);
         startButton.setEnabled(true);
     }
 
     @Override
     public void open(String status) {
         startButton.setEnabled(false);
+        stopButton.addActionListener(this);
         stopButton.setEnabled(true);
         super.open(status);
     }
