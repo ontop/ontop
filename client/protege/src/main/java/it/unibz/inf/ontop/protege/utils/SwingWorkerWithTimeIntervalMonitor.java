@@ -10,7 +10,7 @@ public abstract class SwingWorkerWithTimeIntervalMonitor<T, V> extends SwingWork
     private int count;
 
     protected SwingWorkerWithTimeIntervalMonitor(Component parent, Object message, long monitorUpdateInterval) {
-        this(() -> new ProgressMonitor(parent, message, true), monitorUpdateInterval);
+        this(() -> new DialogProgressMonitor(parent, message, true), monitorUpdateInterval);
     }
 
     protected SwingWorkerWithTimeIntervalMonitor(Supplier<AbstractProgressMonitor> progressMonitorConstructor, long monitorUpdateInterval) {

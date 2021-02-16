@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.protege.editor.core.editorkit.EditorKit;
@@ -204,11 +205,20 @@ public class DialogUtils {
 					title,
 					JOptionPane.ERROR_MESSAGE);
 		}
-		else if (e.getCause() instanceof DuplicateTriplesMapException) {
-			DuplicateTriplesMapException dm = (DuplicateTriplesMapException)e.getCause();
+		else if (cause instanceof DuplicateTriplesMapException) {
+			DuplicateTriplesMapException dm = (DuplicateTriplesMapException)cause;
 			JOptionPane.showMessageDialog(parent,
 					"<html><b>Duplicate mapping ID found.</b><br><br>" +
 							HTML_TAB + "Please correct the Resource node name: <b>" + dm.getMessage() + "</b>.<br></html>",
+					title,
+					JOptionPane.ERROR_MESSAGE);
+		}
+		else if (cause instanceof OWLException) {
+			OWLException owlException = (OWLException) cause;
+			Throwable owlExceptionCause = owlException.getCause();
+			JOptionPane.showMessageDialog(parent,
+					"<html><b>Error executing SPARQL query.</b><br><br>" +
+							HTML_TAB + owlExceptionCause.getMessage() + "</b>.<br></html>",
 					title,
 					JOptionPane.ERROR_MESSAGE);
 		}

@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.protege.utils;
 import javax.swing.*;
 import java.awt.*;
 
-public class ProgressMonitor extends AbstractProgressMonitor {
+public class DialogProgressMonitor extends AbstractProgressMonitor {
+
+    private static final int DELAY_OPENING_WINDOW = 300;
 
     private final Component parent;
     private final String cancelOption;
@@ -15,7 +17,7 @@ public class ProgressMonitor extends AbstractProgressMonitor {
     private JProgressBar progressBar;
     private JLabel noteLabel;
 
-    public ProgressMonitor(Component parent, Object message, boolean indeterminate) {
+    public DialogProgressMonitor(Component parent, Object message, boolean indeterminate) {
         this.parent = parent;
         this.message = message;
         this.indeterminate = indeterminate;
@@ -25,6 +27,13 @@ public class ProgressMonitor extends AbstractProgressMonitor {
 
     @Override
     public void open(String status) {
+        // executes the action on the event-dispatch thread
+        Timer timer = new Timer(DELAY_OPENING_WINDOW, e -> showDialog(status));
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    private void showDialog(String status) {
         if (dialog == null && !isDone() && !isCancelled()) {
             noteLabel = new JLabel("", null, SwingConstants.CENTER);
 
@@ -45,7 +54,7 @@ public class ProgressMonitor extends AbstractProgressMonitor {
                     new Object[] { cancelOption },
                     null);
 
-            dialog = pane.createDialog(parent, UIManager.getString("ProgressMonitor.progressText"));
+            dialog = pane.createDialog(parent, UIManager.getString("DialogProgressMonitor.progressText"));
             dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
             pane.addPropertyChangeListener(evt -> {

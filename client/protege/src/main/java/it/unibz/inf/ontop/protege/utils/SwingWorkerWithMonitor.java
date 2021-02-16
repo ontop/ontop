@@ -11,8 +11,6 @@ import java.util.function.Supplier;
 
 public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
 
-    private static final int DELAY_OPENING_WINDOW = 0; //300;
-
     protected final AbstractProgressMonitor progressMonitor;
     protected final long startTime;
 
@@ -21,7 +19,7 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
     private Supplier<Integer> progressSupplier;
 
     protected SwingWorkerWithMonitor(Component parent, Object message, boolean indeterminate) {
-        this(() -> new ProgressMonitor(parent, message, indeterminate));
+        this(() -> new DialogProgressMonitor(parent, message, indeterminate));
     }
 
     protected SwingWorkerWithMonitor(Supplier<AbstractProgressMonitor> progressMonitorConstructor) {
@@ -34,10 +32,7 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
     }
 
     protected void start(String startProgressNote) {
-        // executes the action on the event-dispatch thread
-        Timer timer = new Timer(DELAY_OPENING_WINDOW, e -> progressMonitor.open(startProgressNote));
-        timer.setRepeats(false);
-        timer.start();
+        progressMonitor.open(startProgressNote);
     }
 
     protected void startLoop(Supplier<Integer> progressSupplier, Supplier<String> statusSupplier) throws CancelActionException {
@@ -97,7 +92,7 @@ public abstract class SwingWorkerWithMonitor<T, V> extends SwingWorker<T, V> {
         }
     }
 
-    protected static class CancelActionException extends Exception { }
+    public static class CancelActionException extends Exception { }
 
     private void closeProgressMonitorAndWait() {
         try {

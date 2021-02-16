@@ -39,13 +39,13 @@ public class ResultViewTablePanel extends JPanel {
 
 	private static final long serialVersionUID = -8494558136315031084L;
 
-	private OBDADataQueryAction<Long> countAllTuplesAction;
 	private final QueryInterfacePanel querypanel;
 
 	private final JLabel commentLabel;
 	private final JTable queryResultTable;
 	private final JTextArea txtSqlTranslation;
 	private final JButton exportButton;
+	private final JButton stopButton;
 
 	private final OWLEditorKit editorKit;
 
@@ -67,19 +67,33 @@ public class ResultViewTablePanel extends JPanel {
 
 		sparqlResultPanel.add(new JScrollPane(queryResultTable), BorderLayout.CENTER);
 
-		JPanel controlPanel = new JPanel(new BorderLayout(0, 5));
-
-		JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 7, 5));
-		statusPanel.setPreferredSize(new Dimension(64, 36));
+		JPanel controlPanel = new JPanel(new GridBagLayout());
 
 		JLabel hintLabel = new JLabel("Hint:");
 		hintLabel.setFont(new Font("Tahoma", Font.BOLD, 11)); // NOI18N
-		statusPanel.add(hintLabel);
+		controlPanel.add(hintLabel,
+				new GridBagConstraints(0, 0, 1, 1, 1, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+						new Insets(0, 0, 0, 0), 0, 0));
 
 		commentLabel = new JLabel("--");
-		statusPanel.add(commentLabel);
+		controlPanel.add(commentLabel,
+				new GridBagConstraints(0, 1, 1, 1, 1, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+						new Insets(0, 0, 0, 0), 0, 0));
 
-		controlPanel.add(statusPanel, BorderLayout.CENTER);
+
+		stopButton = DialogUtils.getButton(
+				"Stop",
+				"stop.png",
+				"Stop running the current query",
+				null);
+		stopButton.setEnabled(false);
+		controlPanel.add(stopButton,
+				new GridBagConstraints(1, 0, 1, 2, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.NONE,
+						new Insets(0, 0, 0, 0), 0, 0));
+
 
 		exportButton = DialogUtils.getButton(
 				"Export to CSV...",
@@ -87,7 +101,11 @@ public class ResultViewTablePanel extends JPanel {
 				"Export the results to a CSV file",
 				this::cmdExportResultActionPerformed);
 		exportButton.setEnabled(false);
-		controlPanel.add(exportButton, BorderLayout.EAST);
+		controlPanel.add(exportButton,
+				new GridBagConstraints(2, 0, 1, 2, 0, 0,
+						GridBagConstraints.CENTER, GridBagConstraints.NONE,
+						new Insets(0, 0, 0, 0), 0, 0));
+
 
 		sparqlResultPanel.add(controlPanel, BorderLayout.SOUTH);
 
@@ -164,6 +182,24 @@ public class ResultViewTablePanel extends JPanel {
 		commentLabel.setText(msg);
 	}
 
+	public void runAskQuery(String askQuery) {
+		OntopQuerySwingWorker.getOntopAndExecute(editorKit, askQuery,
+				(ontop, query) -> new OntopQuerySwingWorker<Boolean>(getParent(), ontop, "Execute ASK Query", query, querypanel.executeButton, stopButton, commentLabel) {
+			@Override
+			protected Boolean runQuery(OntopOWLStatement statement, String query) throws Exception {
+				return statement.executeAskQuery(query).getValue();
+			}
+
+			@Override
+			protected void onCompletion(Boolean result, String sqlQuery) {
+				querypanel.showBooleanActionResultInTextInfo(
+						"Execution time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + ". " +
+								"Result: " + result,
+						result);
+				setSQLTranslation(sqlQuery);
+			}
+		});
+	}
 
 
 	public void setSQLTranslation(String sql){

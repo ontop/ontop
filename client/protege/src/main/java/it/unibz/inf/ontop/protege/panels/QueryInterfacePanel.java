@@ -61,8 +61,10 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfacePanel.class);
 
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
-	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
 	private OBDADataQueryAction<?> executeGraphQueryAction;
+
+
+	private Runnable executeAsk;
 
 	private final QueryManager queryManager;
 
@@ -74,6 +76,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	private final JCheckBox showShortIriCheckBox;
 	private final JTextPane queryTextPane;
 	private final JFormattedTextField fetchSizeTextField;
+	public final JButton executeButton;
 
 	// TODO: move to the other panel
 	private final JLabel executionInfoLabel;
@@ -182,7 +185,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 			}
 		};
 
-		JButton executeButton = DialogUtils.getButton(executeAction);
+		executeButton = DialogUtils.getButton(executeAction);
 		controlPanel.add(executeButton);
 
 		add(controlPanel, BorderLayout.SOUTH);
@@ -236,7 +239,9 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 						action = executeSelectAction;
 					}
 					else if (parsedQuery instanceof ParsedBooleanQuery) {
-						action = executeAskAction;
+						executeAsk.run();
+						return;
+						//action = executeAskAction;
 					}
 					else if (parsedQuery instanceof ParsedGraphQuery) {
 						action = executeGraphQueryAction;
@@ -286,14 +291,13 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		this.executeSelectAction = executeUCQAction;
 	}
 
-	public void setExecuteAskAction(OBDADataQueryAction<BooleanOWLResultSet> executeUCQAction) {
-		this.executeAskAction = executeUCQAction;
-	}
-
 	public void setExecuteGraphQueryAction(OBDADataQueryAction<?> action) {
 		this.executeGraphQueryAction = action;
 	}
 
+	public void setExecuteAskAction(Runnable action) {
+		this.executeAsk = action;
+	}
 
 
 	//get and update the info box with  the actual time in seconds of the execution of the query
@@ -308,22 +312,10 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		}
 	}
 
-	//set the boolean result in the info box of the ask query
-	//show the result for ask query
-	public  void showBooleanActionResultInTextInfo(String title, BooleanOWLResultSet result) {
-		Double time = execTime / 1000;
-		String s = String.format("Execution time: %s sec - ", time);
-		SwingUtilities.invokeLater(() -> {
-			try {
-				boolean value = result.getValue();
-				executionInfoLabel.setBackground(value ? Color.GREEN : Color.RED);
-				executionInfoLabel.setOpaque(true);
-				executionInfoLabel.setText(s + title + " " + value);
-			}
-			catch (OWLException e) {
-				DialogUtils.showSeeLogErrorDialog(this, "", LOGGER, e);
-			}
-		});
+	public  void showBooleanActionResultInTextInfo(String title, boolean result) {
+		executionInfoLabel.setBackground(result ? Color.GREEN : Color.RED);
+		executionInfoLabel.setOpaque(true);
+		executionInfoLabel.setText(title);
 	}
 
 	//update the number of rows when the table change
@@ -353,6 +345,10 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 
 	public int getFetchSize() {
 		return ((Number) fetchSizeTextField.getValue()).intValue();
+	}
+
+	public void enableExecute(boolean b) {
+		executeButton.setEnabled(b);
 	}
 
 }

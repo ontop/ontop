@@ -203,46 +203,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
             }
         });
 
-
-        //action clicking on execute button with an ask query
-        queryEditorPanel.setExecuteAskAction(new OBDADataQueryAction<BooleanOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
-
-            @Override
-            public OWLEditorKit getEditorKit(){
-                return getOWLEditorKit();
-            }
-
-            @Override
-            public void handleResult(BooleanOWLResultSet result) throws OWLException{
-                queryEditorPanel.showBooleanActionResultInTextInfo("Result:", result);
-            }
-
-            @Override
-            public void handleSQLTranslation(String sqlQuery) {
-                resultTablePanel.setSQLTranslation(sqlQuery);
-            }
-
-            @Override
-            public int getNumberOfRows() {
-                return -1;
-            }
-
-            @Override
-            public boolean isRunning() {
-                return tableModel != null && tableModel.isFetching();
-            }
-            @Override
-            public BooleanOWLResultSet executeQuery(OntopOWLStatement st,
-                                                    String queryString) throws OWLException {
-                removeResultTable();
-                if(queryEditorPanel.isFetchAllSelect())
-                    return st.executeAskQuery(queryString);
-
-                DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) st;
-                defaultOntopOWLStatement.setMaxRows(queryEditorPanel.getFetchSize());
-                return defaultOntopOWLStatement.executeAskQuery(queryString);
-            }
-
+        queryEditorPanel.setExecuteAskAction(() -> {
+            removeResultTable();
+            resultTablePanel.runAskQuery(queryEditorPanel.getQuery());
         });
 
         //action clicking on execute button with an graph query (describe or construct)
