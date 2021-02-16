@@ -18,9 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Supplier;
 
-public abstract class OntopQuerySwingWorker<T> extends SwingWorkerWithTimeIntervalMonitor<Map.Entry<T, String>, Void> {
+public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeIntervalMonitor<Map.Entry<T, String>, V> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OntopQuerySwingWorker.class);
 
@@ -54,12 +53,12 @@ public abstract class OntopQuerySwingWorker<T> extends SwingWorkerWithTimeInterv
     }
 
 
-    public static <T> void getOntopAndExecute(EditorKit editorKit, String query, OntopQuerySwingWorkerFactory<T> factory) {
+    public static <T, V> void getOntopAndExecute(EditorKit editorKit, String query, OntopQuerySwingWorkerFactory<T, V> factory) {
         Optional<OntopProtegeReasoner> ontop = DialogUtils.getOntopProtegeReasoner(editorKit);
         if (!ontop.isPresent())
             return;
 
-        OntopQuerySwingWorker<T> worker = factory.apply(ontop.get(), query);
+        OntopQuerySwingWorker<T, V> worker = factory.apply(ontop.get(), query);
         worker.execute();
     }
 

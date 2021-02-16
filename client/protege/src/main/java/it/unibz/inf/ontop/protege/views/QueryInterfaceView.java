@@ -79,8 +79,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         }
     }
 
-    private final OntopQuerySwingWorkerFactory<String> retrieveUCQExpansionAction =
-            (ontop, query) -> new OntopQuerySwingWorker<String>(ontop, query, this, "Rewriting query") {
+    private final OntopQuerySwingWorkerFactory<String, Void> retrieveUCQExpansionAction =
+            (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, this, "Rewriting query") {
 
         @Override
         protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -98,8 +98,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         }
     };
 
-    private final OntopQuerySwingWorkerFactory<String> retrieveUCQUnfoldingAction =
-            (ontop, query) -> new OntopQuerySwingWorker<String>(ontop, query, this, "Rewriting query") {
+    private final OntopQuerySwingWorkerFactory<String, Void> retrieveUCQUnfoldingAction =
+            (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, this, "Rewriting query") {
 
         @Override
         protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -209,56 +209,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
             resultTablePanel.runAskQuery(queryEditorPanel.getQuery());
         });
 
-        //action clicking on execute button with an graph query (describe or construct)
-        queryEditorPanel.setExecuteGraphQueryAction(
-                new OBDADataQueryAction<GraphOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
-
-                    @Override
-                    public OWLEditorKit getEditorKit(){
-                        return getOWLEditorKit();
-                    }
-
-                    @Override
-                    public GraphOWLResultSet executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
-                        removeResultTable();
-                        if (queryEditorPanel.isFetchAllSelect())
-                            return st.executeGraphQuery(queryString);
-
-                        DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) st;
-                        defaultOntopOWLStatement.setMaxRows(queryEditorPanel.getFetchSize());
-                        return defaultOntopOWLStatement.executeGraphQuery(queryString);
-                    }
-
-                    @Override
-                    public void handleResult(GraphOWLResultSet result) throws OWLException{
-                        OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(
-                                obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
-                                queryEditorPanel.isShortIriSelected());
-
-                        if (result != null) {
-                            while (result.hasNext()) {
-                                result.next().accept(owlVisitor);
-                            }
-                            result.close();
-                        }
-                        showGraphResultInTextPanel(owlVisitor.getString());
-                    }
-
-                    @Override
-                    public void handleSQLTranslation(String sqlQuery) {
-                        resultTablePanel.setSQLTranslation(sqlQuery);
-                    }
-
-                    @Override
-                    public int getNumberOfRows() {
-                        return 0;
-                    }
-
-                    @Override
-                    public boolean isRunning() {
-                        return tableModel != null && tableModel.isFetching();
-                    }
-                });
+        queryEditorPanel.setExecuteGraphQueryAction(() -> {
+            removeResultTable();
+            resultTablePanel.runGraphQuery(obdaModelManager, queryEditorPanel.getQuery());
+        });
 
         log.debug("Query Manager view initialized");
     }
@@ -298,13 +252,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         resultTablePanel.setTableModel(new DefaultTableModel());
     }
 
-
-    private synchronized void showGraphResultInTextPanel(String s) {
-        SwingUtilities.invokeLater(() -> {
-            TextQueryResultsDialog panel = new TextQueryResultsDialog(getWorkspace(), "SPARQL Graph Query (CONSTRUCT/DESCRIBE) Result", s, "");
-            panel.setVisible(true);
-        });
-    }
 
     @Override
     public void selectedQueryChanged(String groupId, String queryId, String query) {

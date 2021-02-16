@@ -21,9 +21,13 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
+import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
+import it.unibz.inf.ontop.protege.views.OWLAxiomToTurtleTranslator;
 import it.unibz.inf.ontop.protege.workers.ExportResultsToCSVSwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
 import org.protege.editor.owl.OWLEditorKit;
@@ -120,7 +124,7 @@ public class ResultViewTablePanel extends JPanel {
 		JMenuItem countAll = new JMenuItem("Count tuples");
 		countAll.addActionListener(e -> {
 			OntopQuerySwingWorker.getOntopAndExecute(editorKit, querypanel.getQuery(),
-					(ontop, query) -> new OntopQuerySwingWorker<Long>(
+					(ontop, query) -> new OntopQuerySwingWorker<Long, Void>(
 								ontop, query, getParent(), "Counting tuples") {
 
 				@Override
@@ -185,7 +189,7 @@ public class ResultViewTablePanel extends JPanel {
 
 	public void runAskQuery(String askQuery) {
 		OntopQuerySwingWorker.getOntopAndExecute(editorKit, askQuery,
-				(ontop, query) -> new OntopQuerySwingWorker<Boolean>(ontop, query, getParent(),
+				(ontop, query) -> new OntopQuerySwingWorker<Boolean, Void>(ontop, query, getParent(),
 						"Execute ASK Query", querypanel.executeButton, stopButton, commentLabel) {
 			@Override
 			protected Boolean runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -203,6 +207,58 @@ public class ResultViewTablePanel extends JPanel {
 		});
 	}
 
+	public void runGraphQuery(OBDAModelManager obdaModelManager, String graphQuery) {
+		boolean fetchAll = querypanel.isFetchAllSelect();
+		int fetchSize = querypanel.getFetchSize();
+		boolean shortIris = querypanel.isShortIriSelected();
+		MutablePrefixManager prefixManager = obdaModelManager.getTriplesMapCollection().getMutablePrefixManager();
+
+		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(new String[] {"RDF triples"});
+		setTableModel(tableModel);
+
+		OntopQuerySwingWorker.getOntopAndExecute(editorKit, graphQuery,
+				(ontop, query) -> new OntopQuerySwingWorker<Void, String>(ontop, query, getParent(),
+						"Execute CONSTRUCT/DESCRIBE Query", querypanel.executeButton, stopButton, commentLabel) {
+
+					@Override
+					protected Void runQuery(OntopOWLStatement statement, String query) throws Exception {
+						OWLAxiomToTurtleTranslator owlTranslator = new OWLAxiomToTurtleTranslator(prefixManager, shortIris);
+						prefixManager.getPrefixMap().entrySet().stream()
+								.map(e -> "@prefix " + e.getKey() + " " + e.getValue() + ".\n")
+								.forEach(this::publish);
+						publish("\n");
+
+						if (!fetchAll) {
+							DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) statement;
+							defaultOntopOWLStatement.setMaxRows(fetchSize);
+						}
+						try (GraphOWLResultSet rs = statement.executeGraphQuery(query)) {
+							if (rs != null)
+								while (rs.hasNext()) {
+									owlTranslator.render(rs.next())
+											.ifPresent(this::publish);
+									tick();
+							}
+						}
+						return null;
+					}
+
+					@Override
+					protected void process(java.util.List<String> chunks) {
+						for (String row : chunks)
+							tableModel.addRow(new String[] { row });
+					}
+
+					@Override
+					protected void onCompletion(Void result, String sqlQuery) {
+						querypanel.showActionResult(
+								"Execution time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + ".\n" +
+										"OWL Axioms produced: " + getCount());
+						setSQLTranslation(sqlQuery);
+					}
+				});
+
+	}
 
 	public void setSQLTranslation(String sql){
 		txtSqlTranslation.setText(sql);

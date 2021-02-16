@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.SelectPrefixDialog;
 import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
@@ -37,7 +35,6 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +45,6 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.NumberFormat;
-import java.util.function.BiFunction;
 
 /**
  * Creates a new panel to execute queries. Remember to execute the
@@ -61,7 +57,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfacePanel.class);
 
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
-	private OBDADataQueryAction<?> executeGraphQueryAction;
+	private Runnable executeGraphQuery;
 
 
 	private Runnable executeAsk;
@@ -83,8 +79,8 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 
 	public QueryInterfacePanel(OWLEditorKit editorKit,
 							   OBDAModelManager obdaModelManager,
-							   OntopQuerySwingWorkerFactory<String> retrieveUCQExpansionAction,
-							   OntopQuerySwingWorkerFactory<String> retrieveUCQUnfoldingAction) {
+							   OntopQuerySwingWorkerFactory<String, Void> retrieveUCQExpansionAction,
+							   OntopQuerySwingWorkerFactory<String, Void> retrieveUCQUnfoldingAction) {
 
 		this.queryManager = obdaModelManager.getQueryController();
 
@@ -244,7 +240,8 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 						//action = executeAskAction;
 					}
 					else if (parsedQuery instanceof ParsedGraphQuery) {
-						action = executeGraphQueryAction;
+						executeGraphQuery.run();
+						return;
 					}
 					else {
 						JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -291,8 +288,8 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		this.executeSelectAction = executeUCQAction;
 	}
 
-	public void setExecuteGraphQueryAction(OBDADataQueryAction<?> action) {
-		this.executeGraphQueryAction = action;
+	public void setExecuteGraphQueryAction(Runnable action) {
+		this.executeGraphQuery = action;
 	}
 
 	public void setExecuteAskAction(Runnable action) {
@@ -310,6 +307,11 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 				executionInfoLabel.setOpaque(false);
 			});
 		}
+	}
+
+	public void showActionResult(String s) {
+		executionInfoLabel.setText(s);
+		executionInfoLabel.setOpaque(false);
 	}
 
 	public  void showBooleanActionResultInTextInfo(String title, boolean result) {
@@ -346,9 +348,4 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	public int getFetchSize() {
 		return ((Number) fetchSizeTextField.getValue()).intValue();
 	}
-
-	public void enableExecute(boolean b) {
-		executeButton.setEnabled(b);
-	}
-
 }
