@@ -80,7 +80,7 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
             String sql = sqlExecutableQuery.toString();
 
             startLoop(() -> 50, () -> getCount() == 0
-                    ? "Starting retrieving results..."
+                    ? "Started retrieving results..."
                     : String.format("%d results retrieved...", getCount()));
             T value = runQuery(statement, query);
             endLoop("Completed results retrieval.");

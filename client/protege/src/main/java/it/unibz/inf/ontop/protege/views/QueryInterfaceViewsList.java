@@ -33,5 +33,5 @@ public class QueryInterfaceViewsList extends ArrayList<QueryInterfaceView> imple
 	private static final long serialVersionUID = -7082548696764069555L;
 
 	@Override
-	public void dispose()  {/* NO-OP */}
+	public void dispose() { /* NO-OP */ }
 }

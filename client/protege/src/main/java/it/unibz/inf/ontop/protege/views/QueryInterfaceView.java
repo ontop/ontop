@@ -20,16 +20,8 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
-import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.gui.dialogs.TextQueryResultsDialog;
-import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
-import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorkerFactory;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.slf4j.Logger;
@@ -45,136 +37,24 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfaceView.class);
 
-
     private QueryInterfacePanel queryEditorPanel;
-    private ResultViewTablePanel resultTablePanel;
-
     private OWLOntologyChangeListener ontologyListener;
-
-    private OBDAModelManager obdaModelManager;
-
-    @Override
-    protected void disposeOWLView() {
-        getOWLModelManager().removeOntologyChangeListener(ontologyListener);
-
-        QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) this.getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
-        if ((queryInterfaceViews != null)) {
-            queryInterfaceViews.remove(this);
-        }
-
-        QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
-        if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {
-            for (QueryManagerView queryInterfaceView : queryManagerViews) {
-                queryInterfaceView.removeListener(this);
-            }
-        }
-    }
-
-    private final OntopQuerySwingWorkerFactory<String, Void> retrieveUCQExpansionAction =
-            (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, this, "Rewriting query") {
-
-        @Override
-        protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
-            return statement.getRewritingRendering(query);
-        }
-
-        @Override
-        protected void onCompletion(String result, String sqlQuery) {
-            setSQLTranslation(sqlQuery);
-            TextQueryResultsDialog dialog = new TextQueryResultsDialog(getWorkspace(),
-                    "Intermediate Query",
-                    result,
-                    "Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
-            dialog.setVisible(true);
-        }
-    };
-
-    private final OntopQuerySwingWorkerFactory<String, Void> retrieveUCQUnfoldingAction =
-            (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, this, "Rewriting query") {
-
-        @Override
-        protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
-            // TODO: should we show the SQL query only?
-            return statement.getExecutableQuery(query).toString();
-        }
-
-        @Override
-        protected void onCompletion(String result, String sqlQuery) {
-            setSQLTranslation(sqlQuery);
-            TextQueryResultsDialog dialog = new TextQueryResultsDialog(getWorkspace(),
-                    "SQL Translation",
-                    result,
-                    "Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
-            dialog.setVisible(true);
-        }
-    };
 
     @Override
     protected void initialiseOWLView() {
-        obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
-
-        queryEditorPanel = new QueryInterfacePanel(getOWLEditorKit(), obdaModelManager, retrieveUCQExpansionAction, retrieveUCQUnfoldingAction);
-        queryEditorPanel.setPreferredSize(new Dimension(400, 250));
-        queryEditorPanel.setMinimumSize(new Dimension(400, 250));
-
-        resultTablePanel = new ResultViewTablePanel(getOWLEditorKit(), queryEditorPanel);
-        resultTablePanel.setMinimumSize(new java.awt.Dimension(400, 250));
-        resultTablePanel.setPreferredSize(new java.awt.Dimension(400, 250));
-
-        JSplitPane splQueryInterface = new JSplitPane();
-        splQueryInterface.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        splQueryInterface.setResizeWeight(0.5);
-        splQueryInterface.setDividerLocation(0.5);
-        splQueryInterface.setOneTouchExpandable(true);
-        splQueryInterface.setTopComponent(queryEditorPanel);
-        splQueryInterface.setBottomComponent(resultTablePanel);
-        JPanel pnlQueryInterfacePane = new JPanel();
-        pnlQueryInterfacePane.setLayout(new BorderLayout());
-        pnlQueryInterfacePane.add(splQueryInterface, BorderLayout.CENTER);
         setLayout(new BorderLayout());
-        add(pnlQueryInterfacePane, BorderLayout.CENTER);
-
+        queryEditorPanel = new QueryInterfacePanel(getOWLEditorKit());
+        add(queryEditorPanel, BorderLayout.CENTER);
 
         // Setting up model listeners
         ontologyListener = changes ->
-                SwingUtilities.invokeLater(() -> resultTablePanel.setTableModel(new DefaultTableModel()));
+                SwingUtilities.invokeLater(() -> queryEditorPanel.setTableModel(new DefaultTableModel()));
 
-        this.getOWLModelManager().addOntologyChangeListener(ontologyListener);
-        setupListeners();
+        getOWLModelManager().addOntologyChangeListener(ontologyListener);
 
-        queryEditorPanel.setExecuteSelectAction(() -> {
-            resultTablePanel.runSelectQuery(obdaModelManager, queryEditorPanel.getQuery());
-        });
-
-        queryEditorPanel.setExecuteAskAction(() -> {
-            resultTablePanel.runAskQuery(queryEditorPanel.getQuery());
-        });
-
-        queryEditorPanel.setExecuteGraphQueryAction(() -> {
-            resultTablePanel.runGraphQuery(obdaModelManager, queryEditorPanel.getQuery());
-        });
-
-        LOGGER.debug("Query Manager view initialized");
-    }
-
-
-
-    private void setSQLTranslation(String s) {
-        resultTablePanel.setSQLTranslation(s);
-    }
-
-
-    @Override
-    public void selectedQueryChanged(String groupId, String queryId, String query) {
-        queryEditorPanel.selectedQueryChanged(groupId, queryId, query);
-    }
-
-    /**
-     * On creation of a new view, we register it globally and make sure that its selector is listened
-     * by all other instances of query view in this editor kit. Also, we make this new instance listen
-     * to the selection of all other query selectors in the views.
-     */
-    public void setupListeners() {
+        /* On creation of a new view, we register it globally and make sure that its selector is listened
+           by all other instances of query view in this editor kit. Also, we make this new instance listen
+           to the selection of all other query selectors in the views. */
 
         // Getting the list of views
         QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
@@ -187,11 +67,33 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         queryInterfaceViews.add(this);
 
         // Registering the current query view with all existing query manager views
-        QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
-        if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {
-            for (QueryManagerView queryInterfaceView : queryManagerViews) {
+        QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) getOWLEditorKit().get(QueryManagerViewsList.class.getName());
+        if (queryManagerViews != null)
+            for (QueryManagerView queryInterfaceView : queryManagerViews)
                 queryInterfaceView.addListener(this);
-            }
-        }
+
+
+        LOGGER.debug("Ontop QueryInterfaceView initialized");
+    }
+
+    @Override
+    protected void disposeOWLView() {
+        getOWLModelManager().removeOntologyChangeListener(ontologyListener);
+
+        QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
+        if (queryInterfaceViews != null)
+            queryInterfaceViews.remove(this);
+
+        QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) getOWLEditorKit().get(QueryManagerViewsList.class.getName());
+        if (queryManagerViews != null)
+            for (QueryManagerView queryInterfaceView : queryManagerViews)
+                queryInterfaceView.removeListener(this);
+    }
+
+
+
+    @Override
+    public void selectedQueryChanged(String groupId, String queryId, String query) {
+        queryEditorPanel.selectedQueryChanged(groupId, queryId, query);
     }
 }

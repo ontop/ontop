@@ -1,20 +1,24 @@
-package it.unibz.inf.ontop.protege.views;
+package it.unibz.inf.ontop.protege.utils;
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 
+import java.util.Map;
 import java.util.Optional;
 
-public class OWLAxiomToTurtleTranslator {
+public class OWL2TurtleTranslator {
 
 	private final PrefixManager prefixManager;
 	private final boolean shortenIRIs;
 
-	public OWLAxiomToTurtleTranslator(PrefixManager prefixManager, boolean shortenIRIs) {
+	public OWL2TurtleTranslator(PrefixManager prefixManager, boolean shortenIRIs) {
+		// TODO: subclass AbstractPrefixManager
 		this.prefixManager = prefixManager;
 		this.shortenIRIs = shortenIRIs;
 	}
+
+	public Map<String, String> getPrefixMap() { return prefixManager.getPrefixMap(); }
 
 	public Optional<String> render(OWLAxiom axiom) {
 		if (axiom instanceof OWLClassAssertionAxiom)
