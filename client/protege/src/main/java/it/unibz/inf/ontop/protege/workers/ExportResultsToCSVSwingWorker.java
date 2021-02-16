@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.protege.workers;
 
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
@@ -9,11 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -24,11 +25,11 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
 
     private final Component parent;
     private final File file;
-    private final OWLResultSetTableModel tableModel;
+    private final DefaultTableModel tableModel;
 
     private static final String DIALOG_TITLE = "Export to CSV";
 
-    public ExportResultsToCSVSwingWorker(Component parent, File file, OWLResultSetTableModel tableModel) {
+    public ExportResultsToCSVSwingWorker(Component parent, File file, DefaultTableModel tableModel) {
         super(parent, "<html><h3>Exporting results to CSV file:</h3></html>");
         this.parent = parent;
         this.file = file;
@@ -39,16 +40,16 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
     protected Void doInBackground() throws Exception {
         start("initializing...");
 
-        List<String[]> data = tableModel.getTabularData();
+        Vector<Vector<Object>> data = tableModel.getDataVector();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
             setMaxTicks(data.size());
             startLoop(this::getCompletionPercentage, () -> String.format("%d%% completed.", getCompletionPercentage()));
 
-            for (String[] rows : data) {
+            for (Vector<Object> rows : data) {
                 StringBuilder line = new StringBuilder();
                 boolean needComma = false;
-                for (String row : rows) {
+                for (Object row : rows) {
                     if (needComma) {
                         line.append(",");
                     }

@@ -50,21 +50,19 @@ import java.text.NumberFormat;
  * Creates a new panel to execute queries. Remember to execute the
  * setResultsPanel function to indicate where to display the results.
  */
-public class QueryInterfacePanel extends JPanel implements TableModelListener {
+public class QueryInterfacePanel extends JPanel {
 
 	private static final long serialVersionUID = -5902798157183352944L;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfacePanel.class);
 
-	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
+	private Runnable executeSelectAction;
 	private Runnable executeGraphQuery;
 
 
 	private Runnable executeAsk;
 
 	private final QueryManager queryManager;
-
-	private double execTime = 0;
 
 	private String groupId = "", queryId = "";
 
@@ -219,57 +217,29 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}
 
 	private void cmdExecuteQueryActionPerformed(ActionEvent evt) {
+		String queryString = queryTextPane.getText();
+		if (queryString.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		try {
-			// TODO Handle this such that there is a listener checking the progress of the execution
-			Thread queryRunnerThread = new Thread(() -> {
-				String queryString = queryTextPane.getText();
-				if (queryString.isEmpty()) {
-					JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				try {
-					OBDADataQueryAction<?> action;
-					SPARQLParser parser = new SPARQLParser();
-					ParsedQuery parsedQuery = parser.parseQuery(queryString, "http://example.org");
-					if (parsedQuery instanceof ParsedTupleQuery) {
-						action = executeSelectAction;
-					}
-					else if (parsedQuery instanceof ParsedBooleanQuery) {
-						executeAsk.run();
-						return;
-						//action = executeAskAction;
-					}
-					else if (parsedQuery instanceof ParsedGraphQuery) {
-						executeGraphQuery.run();
-						return;
-					}
-					else {
-						JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					action.run(queryString);
-					execTime = action.getExecutionTime();
-					do {
-						int rows = action.getNumberOfRows();
-						updateStatus(rows);
-						try {
-							Thread.sleep(100);
-						}
-						catch (InterruptedException e) {
-							break;
-						}
-					} while (action.isRunning());
-					int rows = action.getNumberOfRows();
-					updateStatus(rows);
-				}
-				catch (Exception e) {
-					JOptionPane.showMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-				}
-            });
-			queryRunnerThread.start();
+			SPARQLParser parser = new SPARQLParser();
+			ParsedQuery parsedQuery = parser.parseQuery(queryString, "http://example.org");
+			if (parsedQuery instanceof ParsedTupleQuery) {
+				executeSelectAction.run();
+			}
+			else if (parsedQuery instanceof ParsedBooleanQuery) {
+				executeAsk.run();
+			}
+			else if (parsedQuery instanceof ParsedGraphQuery) {
+				executeGraphQuery.run();
+			}
+			else {
+				JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 		catch (Exception e) {
-			DialogUtils.showSeeLogErrorDialog(this, "", LOGGER, e);
+			JOptionPane.showMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -284,7 +254,7 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		this.queryId = queryId;
 	}
 
-	public void setExecuteSelectAction(OBDADataQueryAction<TupleOWLResultSet> executeUCQAction) {
+	public void setExecuteSelectAction(Runnable executeUCQAction) {
 		this.executeSelectAction = executeUCQAction;
 	}
 
@@ -297,18 +267,6 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 	}
 
 
-	//get and update the info box with  the actual time in seconds of the execution of the query
-	public void updateStatus(long result) {
-		if (result != - 1) {
-			Double time = execTime / 1000;
-			String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, result);
-			SwingUtilities.invokeLater(() -> {
-				executionInfoLabel.setText(s);
-				executionInfoLabel.setOpaque(false);
-			});
-		}
-	}
-
 	public void showActionResult(String s) {
 		executionInfoLabel.setText(s);
 		executionInfoLabel.setOpaque(false);
@@ -320,12 +278,6 @@ public class QueryInterfacePanel extends JPanel implements TableModelListener {
 		executionInfoLabel.setText(title);
 	}
 
-	//update the number of rows when the table change
-	@Override
-	public void tableChanged(TableModelEvent e) {
-		int rows = ((TableModel) e.getSource()).getRowCount();
-		updateStatus(rows);
-	}
 
 	public boolean isShortIriSelected() {
 		return showShortIriCheckBox.isSelected();

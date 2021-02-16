@@ -21,13 +21,8 @@ package it.unibz.inf.ontop.protege.views;
  */
 
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
-import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.gui.models.OWLResultSetTableModel;
-import it.unibz.inf.ontop.protege.utils.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
 import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
@@ -35,9 +30,7 @@ import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.gui.dialogs.TextQueryResultsDialog;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorkerFactory;
-import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,17 +43,15 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
     private static final long serialVersionUID = 1L;
 
-    private QueryInterfacePanel queryEditorPanel;
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfaceView.class);
 
+
+    private QueryInterfacePanel queryEditorPanel;
     private ResultViewTablePanel resultTablePanel;
 
     private OWLOntologyChangeListener ontologyListener;
 
     private OBDAModelManager obdaModelManager;
-
-    private OWLResultSetTableModel tableModel;
-
-    private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
 
     @Override
     protected void disposeOWLView() {
@@ -151,105 +142,25 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         this.getOWLModelManager().addOntologyChangeListener(ontologyListener);
         setupListeners();
 
-        // Setting up actions for all the buttons of this view.
-
-        //action clicking on execute button with a select query
-        queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<TupleOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
-
-            @Override
-            public OWLEditorKit getEditorKit(){
-                return getOWLEditorKit();
-            }
-
-            @Override
-            public void handleResult(TupleOWLResultSet result) throws OWLException{
-                createTableModelFromResultSet(result);
-                showTupleResultInTablePanel();
-            }
-
-            @Override
-            public void handleSQLTranslation(String sqlQuery) {
-                resultTablePanel.setSQLTranslation(sqlQuery);
-            }
-
-            @Override
-            public void run(String query){
-                removeResultTable();
-                super.run(query);
-            }
-
-            @Override
-            public int getNumberOfRows() {
-                if (tableModel == null)
-                    return 0;
-                return tableModel.getRowCount();
-            }
-
-            @Override
-            public boolean isRunning() {
-                return tableModel != null && tableModel.isFetching();
-            }
-
-            @Override
-            public TupleOWLResultSet executeQuery(OntopOWLStatement st,
-                                                  String queryString) throws OWLException {
-                if(queryEditorPanel.isFetchAllSelect()) {
-                    return st.executeSelectQuery(queryString);
-                }
-                else {
-                    DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) st;
-                    defaultOntopOWLStatement.setMaxRows(queryEditorPanel.getFetchSize());
-                    return defaultOntopOWLStatement.executeSelectQuery(queryString);
-                }
-            }
+        queryEditorPanel.setExecuteSelectAction(() -> {
+            resultTablePanel.runSelectQuery(obdaModelManager, queryEditorPanel.getQuery());
         });
 
         queryEditorPanel.setExecuteAskAction(() -> {
-            removeResultTable();
             resultTablePanel.runAskQuery(queryEditorPanel.getQuery());
         });
 
         queryEditorPanel.setExecuteGraphQueryAction(() -> {
-            removeResultTable();
             resultTablePanel.runGraphQuery(obdaModelManager, queryEditorPanel.getQuery());
         });
 
-        log.debug("Query Manager view initialized");
+        LOGGER.debug("Query Manager view initialized");
     }
 
 
-
-
-    private void showTupleResultInTablePanel() {
-        if (tableModel != null)
-            SwingUtilities.invokeLater(() -> resultTablePanel.setTableModel(tableModel));
-    }
 
     private void setSQLTranslation(String s) {
         resultTablePanel.setSQLTranslation(s);
-    }
-
-    private synchronized void createTableModelFromResultSet(TupleOWLResultSet result) throws OWLException {
-        if (result == null)
-            throw new NullPointerException("An error occurred. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
-        tableModel = new OWLResultSetTableModel(result, obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
-                queryEditorPanel.isShortIriSelected(),
-                queryEditorPanel.isFetchAllSelect(),
-                queryEditorPanel.getFetchSize());
-        tableModel.addTableModelListener(queryEditorPanel);
-    }
-
-    /**
-     * removes the result table.
-     * Could be called at data query execution, or at cancelling
-     * Not necessary when replacing with a new result, just to remove old
-     * results that are outdated
-     */
-    private synchronized void removeResultTable(){
-        if (tableModel != null) {
-            tableModel.close();
-        }
-        resultTablePanel.setTableModel(new DefaultTableModel());
     }
 
 

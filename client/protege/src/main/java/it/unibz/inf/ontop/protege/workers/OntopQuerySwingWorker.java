@@ -71,7 +71,7 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
     @Override
     protected Map.Entry<T, String> doInBackground() throws Exception {
         try {
-            start("initializing...");
+            start("Rewriting the query...");
             statement = ontop.getStatement();
             if (statement == null)
                 throw new NullPointerException("OntopQuerySwingWorker received a null OntopOWLStatement object from the reasoner");
@@ -79,9 +79,11 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
             IQ sqlExecutableQuery = statement.getExecutableQuery(query);
             String sql = sqlExecutableQuery.toString();
 
-            startLoop(() -> 50, () -> String.format("%d results retrieved...", getCount()));
+            startLoop(() -> 50, () -> getCount() == 0
+                    ? "Starting retrieving results..."
+                    : String.format("%d results retrieved...", getCount()));
             T value = runQuery(statement, query);
-            endLoop("");
+            endLoop("Completed results retrieval.");
             end();
             return Maps.immutableEntry(value, sql);
         }

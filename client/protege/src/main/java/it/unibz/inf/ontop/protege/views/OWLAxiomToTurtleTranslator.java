@@ -9,11 +9,11 @@ import java.util.Optional;
 public class OWLAxiomToTurtleTranslator {
 
 	private final PrefixManager prefixManager;
-	private final boolean shotenIRIs;
+	private final boolean shortenIRIs;
 
 	public OWLAxiomToTurtleTranslator(PrefixManager prefixManager, boolean shortenIRIs) {
 		this.prefixManager = prefixManager;
-		this.shotenIRIs = shortenIRIs;
+		this.shortenIRIs = shortenIRIs;
 	}
 
 	public Optional<String> render(OWLAxiom axiom) {
@@ -28,7 +28,14 @@ public class OWLAxiomToTurtleTranslator {
 		return Optional.empty();
 	}
 
+	public String render(OWLObject constant) {
+		if (constant == null)
+			return "";
 
+		return constant instanceof OWLNamedIndividual
+				? getIRI(constant.toString())
+				: ToStringRenderer.getInstance().getRendering(constant);
+	}
 
 	private String renderAxiom(OWLObjectPropertyAssertionAxiom axiom) {
 		String subject = getIRI(axiom.getSubject().toString());
@@ -46,18 +53,18 @@ public class OWLAxiomToTurtleTranslator {
 	private String renderAxiom(OWLDataPropertyAssertionAxiom axiom) {
 		String subject = getIRI(axiom.getSubject().toString());
 		String predicate = getIRI(axiom.getProperty().toString());
-		String object = ToStringRenderer.getInstance().getRendering(axiom.getObject());
+		String object = render(axiom.getObject());
 		return subject + " " + predicate + " " + object + ". \n";
 	}
 
 	private String renderAxiom(OWLAnnotationAssertionAxiom axiom) {
 		String subject = getIRI(axiom.getSubject().toString());
 		String predicate = getIRI(axiom.getProperty().toString());
-		String object = ToStringRenderer.getInstance().getRendering(axiom.getValue());
+		String object = render(axiom.getValue());
 		return subject + " " + predicate + " " + object + ". \n";
 	}
 
 	private String getIRI(String iri) {
-		return shotenIRIs ? prefixManager.getShortForm(iri) : iri;
+		return shortenIRIs ? prefixManager.getShortForm(iri) : iri;
 	}
 }
