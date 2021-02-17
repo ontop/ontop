@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.SelectPrefixDialog;
 import it.unibz.inf.ontop.protege.gui.dialogs.TextQueryResultsDialog;
@@ -47,12 +48,12 @@ import org.semanticweb.owlapi.model.OWLObject;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Creates a new panel to execute queries. Remember to execute the
@@ -72,7 +73,7 @@ public class QueryInterfacePanel extends JPanel {
 	private final JFormattedTextField fetchSizeTextField;
 	public final JButton executeButton;
 
-
+	private final JTabbedPane resultTabbedPane;
 	private final JLabel executionInfoLabel;
 	private final JTable queryResultTable;
 	private final JTextArea txtSqlTranslation;
@@ -87,11 +88,11 @@ public class QueryInterfacePanel extends JPanel {
 
 		JPopupMenu sparqlPopupMenu = new JPopupMenu();
 		JMenuItem getIqMenuItem = new JMenuItem("View Intermediate Query...");
-		getIqMenuItem.addActionListener(this::getIqActionPerformed);
+		getIqMenuItem.addActionListener(evt -> getOntopAndExecute(getShowIqExecutor()));
 		sparqlPopupMenu.add(getIqMenuItem);
 
 		JMenuItem getSqlMenuItem = new JMenuItem("View SQL translation...");
-		getSqlMenuItem.addActionListener(this::getSqlActionPerformed);
+		getSqlMenuItem.addActionListener(evt -> getOntopAndExecute(getShowSqlExecutor()));
 		sparqlPopupMenu.add(getSqlMenuItem);
 
 		JPanel queryPanel = new JPanel(new BorderLayout());
@@ -248,7 +249,7 @@ public class QueryInterfacePanel extends JPanel {
 		executionInfoLabel.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
 		resultsPanel.add(executionInfoLabel, BorderLayout.NORTH);
 
-		JTabbedPane resultTabbedPane = new JTabbedPane();
+		resultTabbedPane = new JTabbedPane();
 		resultTabbedPane.setMinimumSize(new Dimension(400, 250));
 		resultTabbedPane.setPreferredSize(new Dimension(400, 250));
 
@@ -256,7 +257,8 @@ public class QueryInterfacePanel extends JPanel {
 		resultTabbedPane.addTab("SPARQL results", sparqlResultPanel);
 
 		queryResultTable = new JTable(new DefaultTableModel(new String[] {"Results"}, 0));
-		sparqlResultPanel.add(new JScrollPane(queryResultTable), BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(queryResultTable);
+		sparqlResultPanel.add(scrollPane, BorderLayout.CENTER);
 
 		JPanel controlBottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		exportButton = DialogUtils.getButton(
@@ -274,9 +276,12 @@ public class QueryInterfacePanel extends JPanel {
 
 		JPopupMenu menu = new JPopupMenu();
 		JMenuItem countResultsMenuItem = new JMenuItem("Count tuples");
-		countResultsMenuItem.addActionListener(this::countResultsActionPerformed);
+		countResultsMenuItem.addActionListener(evt -> getOntopAndExecute(getCountResultsExecutor()));
 		menu.add(countResultsMenuItem);
-		sparqlResultPanel.setComponentPopupMenu(menu);
+		resultsPanel.setComponentPopupMenu(menu);
+		queryResultTable.setComponentPopupMenu(menu);
+		resultTabbedPane.setComponentPopupMenu(menu);
+		scrollPane.setComponentPopupMenu(menu);
 
 		resultsPanel.add(resultTabbedPane, BorderLayout.CENTER);
 
@@ -304,13 +309,13 @@ public class QueryInterfacePanel extends JPanel {
 			SPARQLParser parser = new SPARQLParser();
 			ParsedQuery parsedQuery = parser.parseQuery(query, "http://example.org");
 			if (parsedQuery instanceof ParsedTupleQuery) {
-				OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(), getSelectQueryExecutor());
+				getOntopAndExecute(getSelectQueryExecutor());
 			}
 			else if (parsedQuery instanceof ParsedBooleanQuery) {
-				OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(), getAskQueryExecutor());
+				getOntopAndExecute(getAskQueryExecutor());
 			}
 			else if (parsedQuery instanceof ParsedGraphQuery) {
-				OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(), getGraphQueryExecutor());
+				getOntopAndExecute(getGraphQueryExecutor());
 			}
 			else {
 				JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -329,19 +334,18 @@ public class QueryInterfacePanel extends JPanel {
 		queryTextPane.setText(query);
 		this.groupId = groupId;
 		this.queryId = queryId;
-		setTableModel(new DefaultTableModel());
+		resetTableModel(new String[0]);
 		txtSqlTranslation.setText("");
 		//executeButton.setEnabled(true);
 		//stopButton.setEnabled(false);
 		executionInfoLabel.setText("<html>&nbsp</html>");
-	}
-
-
-	private void showActionResult(String s) {
-		executionInfoLabel.setText(s);
 		executionInfoLabel.setOpaque(false);
 	}
 
+	private void showActionResult(long time, String second) {
+		executionInfoLabel.setText("Execution time: " + DialogUtils.renderElapsedTime(time) + ". " + second);
+		executionInfoLabel.setOpaque(false);
+	}
 
 	private String getQuery() {
 		return queryTextPane.getText();
@@ -349,6 +353,17 @@ public class QueryInterfacePanel extends JPanel {
 
 	private int getFetchSize() {
 		return ((Number) fetchSizeTextField.getValue()).intValue();
+	}
+
+	public DefaultTableModel resetTableModel(String[] columnNames) {
+		queryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(columnNames);
+		queryResultTable.setModel(tableModel);
+		queryResultTable.invalidate();
+		queryResultTable.repaint();
+
+		exportButton.setEnabled(false);
+		return tableModel;
 	}
 
 
@@ -369,17 +384,8 @@ public class QueryInterfacePanel extends JPanel {
 	}
 
 
-	public void setTableModel(TableModel tableModel) {
-		queryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-		queryResultTable.setModel(tableModel);
-		queryResultTable.invalidate();
-		queryResultTable.repaint();
-
-		exportButton.setEnabled(false);
-	}
-
 	private OntopQuerySwingWorkerFactory<Boolean, Void> getAskQueryExecutor() {
-		setTableModel(new DefaultTableModel());
+		resetTableModel(new String[0]);
 
 		return (ontop, query) -> new OntopQuerySwingWorker<Boolean, Void>(ontop, query, getParent(),
 						"Execute ASK Query", executeButton, stopButton, executionInfoLabel) {
@@ -390,18 +396,16 @@ public class QueryInterfacePanel extends JPanel {
 
 			@Override
 			protected void onCompletion(Boolean result, String sqlQuery) {
+				showActionResult(elapsedTimeMillis(), "Result: " + result + ".");
 				executionInfoLabel.setBackground(result ? Color.GREEN : Color.RED);
-				showActionResult("Execution time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + ". " +
-										"Result: " + result);
+				executionInfoLabel.setOpaque(true);
 				setSQLTranslation(sqlQuery);
 			}
 		};
 	}
 
 	private OntopQuerySwingWorkerFactory<Void, String> getGraphQueryExecutor() {
-		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(new String[] {"RDF triples"});
-		setTableModel(tableModel);
-
+		DefaultTableModel tableModel = resetTableModel(new String[] {"RDF triples"});
 		return (ontop, query) -> new OntopQuerySwingWorker<Void, String>(ontop, query, getParent(),
 						"Execute CONSTRUCT/DESCRIBE Query", executeButton, stopButton, executionInfoLabel) {
 
@@ -432,9 +436,7 @@ public class QueryInterfacePanel extends JPanel {
 
 			@Override
 			protected void onCompletion(Void result, String sqlQuery) {
-				showActionResult(
-						"Execution time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + ".\n" +
-								"OWL Axioms produced: " + getCount());
+				showActionResult(elapsedTimeMillis(), "OWL axioms produced: " + getCount() + ".");
 				setSQLTranslation(sqlQuery);
 				exportButton.setEnabled(tableModel.getRowCount() > 0);
 			}
@@ -442,9 +444,7 @@ public class QueryInterfacePanel extends JPanel {
 	}
 
 	private OntopQuerySwingWorkerFactory<Void, String[]> getSelectQueryExecutor() {
-		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(new String[0]);
-		setTableModel(tableModel);
-
+		DefaultTableModel tableModel = resetTableModel(new String[0]);
 		return (ontop, query) -> new OntopQuerySwingWorker<Void, String[]>(ontop, query, getParent(),
 						"Execute SELECT Query", executeButton, stopButton, executionInfoLabel) {
 
@@ -482,9 +482,7 @@ public class QueryInterfacePanel extends JPanel {
 
 			@Override
 			protected void onCompletion(Void result, String sqlQuery) {
-				showActionResult(
-						"Execution time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + ".\n" +
-								"Solution mappings returned: " + getCount());
+				showActionResult(elapsedTimeMillis(), "Solution mappings returned: " + getCount() + ".");
 				setSQLTranslation(sqlQuery);
 				exportButton.setEnabled(tableModel.getRowCount() > 0);
 			}
@@ -508,9 +506,17 @@ public class QueryInterfacePanel extends JPanel {
 		txtSqlTranslation.setText(sql);
 	}
 
-	private void getIqActionPerformed(ActionEvent evt) {
-		OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(), (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, this, "Rewriting query") {
+	private void getOntopAndExecute(OntopQuerySwingWorkerFactory<?, ?> executor) {
+		Optional<OntopProtegeReasoner> ontop = DialogUtils.getOntopProtegeReasoner(editorKit);
+		if (!ontop.isPresent())
+			return;
 
+		OntopQuerySwingWorker<?, ?> worker = executor.apply(ontop.get(), getQuery());
+		worker.execute();
+	}
+
+	private OntopQuerySwingWorkerFactory<String, Void> getShowIqExecutor() {
+		return (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, getParent(), "Rewriting query") {
 			@Override
 			protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
 				return statement.getRewritingRendering(query);
@@ -525,48 +531,45 @@ public class QueryInterfacePanel extends JPanel {
 						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
 				dialog.setVisible(true);
 			}
-		});
+		};
 	}
 
-	private void getSqlActionPerformed(ActionEvent evt) {
-		OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(), (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, this, "Rewriting query") {
+	private OntopQuerySwingWorkerFactory<String, Void> getShowSqlExecutor() {
+		return (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, getParent(), "Rewriting query") {
 
 			@Override
 			protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
-				// TODO: should we show the SQL query only?
 				return statement.getExecutableQuery(query).toString();
 			}
 
 			@Override
 			protected void onCompletion(String result, String sqlQuery) {
 				setSQLTranslation(sqlQuery);
-				TextQueryResultsDialog dialog = new TextQueryResultsDialog(editorKit.getWorkspace(),
-						"SQL Translation",
-						result,
-						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
-				dialog.setVisible(true);
+				resultTabbedPane.setSelectedIndex(1);
+				showActionResult(elapsedTimeMillis(), "Translated into SQL.");
+//				TextQueryResultsDialog dialog = new TextQueryResultsDialog(editorKit.getWorkspace(),
+//						"SQL Translation",
+//						result,
+//						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
+//				dialog.setVisible(true);
 			}
-		});
+		};
 	}
 
-	private void countResultsActionPerformed(ActionEvent evt) {
-		OntopQuerySwingWorker.getOntopAndExecute(editorKit, getQuery(),
-				(ontop, query) -> new OntopQuerySwingWorker<Long, Void>(
-						ontop, query, getParent(), "Counting tuples") {
+	private OntopQuerySwingWorkerFactory<Long, Void> getCountResultsExecutor() {
+		return (ontop, query) -> new OntopQuerySwingWorker<Long, Void>(ontop, query, getParent(), "Counting results") {
 
-					@Override
-					protected Long runQuery(OntopOWLStatement statement, String query) throws Exception {
-						return statement.getTupleCount(query);
-					}
+			@Override
+			protected Long runQuery(OntopOWLStatement statement, String query) throws Exception {
+				return statement.getTupleCount(query);
+			}
 
-					@Override
-					protected void onCompletion(Long result, String sqlQuery) {
-						showActionResult(
-								"Execution time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()) +
-										" - Number of rows retrieved: " + result);
-						setSQLTranslation(sqlQuery);
-					}
-				});
+			@Override
+			protected void onCompletion(Long result, String sqlQuery) {
+				showActionResult(elapsedTimeMillis(),"The number of results: " + result + ".");
+				setSQLTranslation(sqlQuery);
+			}
+		};
 	}
 
 }

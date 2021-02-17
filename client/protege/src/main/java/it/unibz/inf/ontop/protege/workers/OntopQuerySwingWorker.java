@@ -53,16 +53,6 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
     }
 
 
-    public static <T, V> void getOntopAndExecute(EditorKit editorKit, String query, OntopQuerySwingWorkerFactory<T, V> factory) {
-        Optional<OntopProtegeReasoner> ontop = DialogUtils.getOntopProtegeReasoner(editorKit);
-        if (!ontop.isPresent())
-            return;
-
-        OntopQuerySwingWorker<T, V> worker = factory.apply(ontop.get(), query);
-        worker.execute();
-    }
-
-
     abstract protected T runQuery(OntopOWLStatement statement, String query) throws Exception;
 
     abstract protected void onCompletion(T result, String sqlQuery);

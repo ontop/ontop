@@ -48,7 +48,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
         // Setting up model listeners
         ontologyListener = changes ->
-                SwingUtilities.invokeLater(() -> queryEditorPanel.setTableModel(new DefaultTableModel()));
+                SwingUtilities.invokeLater(() -> queryEditorPanel.resetTableModel(new String[0]));
 
         getOWLModelManager().addOntologyChangeListener(ontologyListener);
 
