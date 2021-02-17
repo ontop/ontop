@@ -9,4 +9,7 @@ popd
 
 set CLASSPATH=%ONTOP_HOME%\lib\*;%ONTOP_HOME%\jdbc\*
 
-%JAVA% %ONTOP_JAVA_ARGS% -cp "%CLASSPATH%" -Dlogback.configurationFile="%ONTOP_HOME%\log\logback.xml" -Dlogging.config="%ONTOP_HOME%\log\logback.xml" it.unibz.inf.ontop.cli.Ontop %*
+set ENCODING=%ONTOP_FILE_ENCODING%
+if "%ENCODING%" == "" (set ENCODING="UTF-8")
+
+%JAVA% %ONTOP_JAVA_ARGS% -cp "%CLASSPATH%" -Dfile.encoding="%ENCODING%" -Dlogback.configurationFile="%ONTOP_HOME%\log\logback.xml" -Dlogging.config="%ONTOP_HOME%\log\logback.xml" it.unibz.inf.ontop.cli.Ontop %*
