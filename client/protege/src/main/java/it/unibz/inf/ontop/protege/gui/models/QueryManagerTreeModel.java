@@ -1,183 +1,158 @@
 package it.unibz.inf.ontop.protege.gui.models;
 
-/*
- * #%L
- * ontop-protege4
- * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 
-import java.util.Enumeration;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
+import java.util.ArrayList;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListener {
+    private final QueryManager queryManager;
 
-public class QueryManagerTreeModel extends DefaultTreeModel implements QueryManager.EventListener {
+    public QueryManagerTreeModel(QueryManager queryManager) {
+        this.queryManager = queryManager;
+        queryManager.addListener(this);
+    }
 
-	private static final long serialVersionUID = -5182895959682699380L;
+    @Override
+    public Object getRoot() {
+        return queryManager;
+    }
 
-	public static class GroupNode extends DefaultMutableTreeNode implements MutableTreeNode {
+    @Override
+    public Object getChild(Object parent, int index) {
+        if (parent == queryManager) {
+            ImmutableList<QueryManager.Group> groups = ImmutableList.copyOf(queryManager.getGroups());
+            QueryManager.Group group = groups.get(index);
+            return (group.isDegenerate())
+                ? group.getQueries().iterator().next()
+                : group;
+        }
+        if (parent instanceof QueryManager.Group) {
+            QueryManager.Group group = (QueryManager.Group) parent;
+            ImmutableList<QueryManager.Query> queries = ImmutableList.copyOf(group.getQueries());
+            return queries.get(index);
+        }
 
-		private static final long serialVersionUID = 7496292557025215559L;
+        return null;
+    }
 
-		private final String groupId;
+    @Override
+    public int getChildCount(Object parent) {
+        if (parent == queryManager) {
+            return queryManager.getGroups().size();
+        }
+        if (parent instanceof QueryManager.Group) {
+            QueryManager.Group group = (QueryManager.Group) parent;
+            return group.getQueries().size();
+        }
 
-		public GroupNode(String groupId) {
-			this.groupId = groupId;
-			setUserObject(groupId);
-		}
+        return 0;
+    }
 
-		public String getGroupID() {
-			return groupId;
-		}
-	}
+    @Override
+    public boolean isLeaf(Object node) {
+        return node instanceof QueryManager.Query;
+    }
 
-	public static class QueryNode extends DefaultMutableTreeNode implements MutableTreeNode {
+    @Override
+    public void valueForPathChanged(TreePath path, Object newValue) {
+// TODO:
+    }
 
-		private static final long serialVersionUID = -5221902062065891204L;
+    @Override
+    public int getIndexOfChild(Object parent, Object child) {
 
-		private final String groupId, queryId;
-		private String query;
+        if (child instanceof QueryManager.Group) {
+            QueryManager.Group group = (QueryManager.Group) child;
+            return group.getIndex();
+        }
 
-		public QueryNode(String groupId, String queryId, String query) {
-			this.groupId = groupId;
-			this.queryId = queryId;
-			this.query = query;
-			setUserObject(queryId);
-			setAllowsChildren(false);
-		}
+        if (child instanceof QueryManager.Query) {
+            QueryManager.Query query = (QueryManager.Query) child;
+            return query.getIndex();
+        }
 
-		public String getGroupID() {
-			return groupId;
-		}
+        return -1;
+    }
 
-		public String getQueryID() {
-			return queryId;
-		}
+    private final ArrayList<TreeModelListener> listeners = new ArrayList<>();
 
-		public String getQuery() {
-			return query;
-		}
+    @Override
+    public void addTreeModelListener(TreeModelListener l) {
+        if (l != null && !listeners.contains(l))
+            listeners.add(l);
+    }
 
-		public void setQuery(String query) {
-			this.query = query;
-		}
-	}
+    @Override
+    public void removeTreeModelListener(TreeModelListener l) {
+        listeners.remove(l);
+    }
 
+    @Override
+    public void added(QueryManager.Group group) {
+        listeners.forEach(l -> l.treeNodesInserted(createEvent(group)));
+    }
 
-	public QueryManagerTreeModel() {
-		super(new DefaultMutableTreeNode(""));
-	}
+    @Override
+    public void added(QueryManager.Query query) {
+        listeners.forEach(l -> l.treeNodesInserted(createEvent(query)));
+    }
 
-	/**
-	 * Takes all the existing nodes and constructs the tree.
-	 */
-	public void synchronize(QueryManager qc) {
-		for (QueryManager.Group group : qc.getGroups()) {
-			if (!group.isDegenerate()) {
-				GroupNode groupNode = new GroupNode(group.getID());
-				for (QueryManager.Query query : group.getQueries()) {
-					QueryNode queryNode = new QueryNode(group.getID(), query.getID(), query.getQuery());
-					insertNodeInto(queryNode, groupNode, groupNode.getChildCount());
-				}
-				insertNodeInto(groupNode, (DefaultMutableTreeNode) root, root.getChildCount());
-			}
-			else {
-				QueryManager.Query query = group.getQueries().iterator().next();
-				QueryNode queryNode = new QueryNode(null, query.getID(), query.getQuery());
-				insertNodeInto(queryNode, (DefaultMutableTreeNode) root, root.getChildCount());
-			}
-		}
-	}
+    @Override
+    public void removed(QueryManager.Group group) {
+        listeners.forEach(l -> l.treeNodesRemoved(createEvent(group)));
+    }
 
-	@Override
-	public void added(QueryManager.Group group) {
-		GroupNode groupNode = new GroupNode(group.getID());
-		insertNodeInto(groupNode, (MutableTreeNode) root, root.getChildCount());
-	}
+    @Override
+    public void removed(QueryManager.Query query) {
+        listeners.forEach(l -> l.treeNodesRemoved(createEvent(query)));
+    }
 
-	@Override
-	public void added(QueryManager.Query query) {
-		MutableTreeNode parent = (query.getGroup().isDegenerate())
-			? (MutableTreeNode)root
-			: getGroupNode(query.getGroup());
+    @Override
+    public void changed(QueryManager.Query query) {
+        listeners.forEach(l -> l.treeNodesChanged(createEvent(query)));
+    }
 
-		QueryNode queryNode = new QueryNode(query.getGroup().getID(), query.getID(), query.getQuery());
-		insertNodeInto(queryNode, parent, parent.getChildCount());
-	}
+    private TreeModelEvent createEvent(Object node) {
+        Object parent = getParent(node);
+        return new TreeModelEvent(
+                this,
+                getPathToRoot(parent),
+                new int[]{ getIndexOfChild(parent, node) }, new Object[]{ node });
+    }
 
-	@Override
-	public void removed(QueryManager.Group group) {
-		GroupNode groupNode = getGroupNode(group);
-		removeNodeFromParent(groupNode);
-	}
+    private TreePath getPathToRoot(Object node) {
+        if (node == queryManager)
+            return new TreePath(new Object[]{ queryManager });
 
-	@Override
-	public void removed(QueryManager.Query query) {
-		QueryNode queryNode = getQueryNode(query);
-		removeNodeFromParent(queryNode);
-	}
+        if (node instanceof QueryManager.Group)
+            return new TreePath(new Object[]{ queryManager, node });
 
-	@Override
-	public void changed(QueryManager.Query query) {
-		QueryNode queryNode = getQueryNode(query);
-		queryNode.setQuery(query.getQuery());
-		nodeChanged(queryNode);
-	}
+        if (node instanceof QueryManager.Query) {
+            QueryManager.Query query = (QueryManager.Query) node;
+            if (query.getGroup().isDegenerate())
+                return new TreePath(new Object[]{ queryManager, node });
+            else
+                return new TreePath(new Object[]{ queryManager, query.getGroup(), query });
+        }
+        return null;
+    }
 
-	public QueryNode getQueryNode(QueryManager.Query query) {
-		if (!query.getGroup().isDegenerate()) {
-			GroupNode groupNode = getGroupNode(query.getGroup());
-			return getQueryNode(groupNode, query.getID());
-		}
-		else
-			return getQueryNode(root, query.getID());
-	}
+    private Object getParent(Object node) {
+        if (node instanceof QueryManager.Group)
+            return queryManager;
 
-	public GroupNode getGroupNode(QueryManager.Group group) {
-		String groupId = group.getID();
-		Enumeration<? extends TreeNode> parent = root.children();
-		while (parent.hasMoreElements()) {
-			TreeNode node = parent.nextElement();
-			if (node instanceof GroupNode) {
-				GroupNode groupNode = (GroupNode) node;
-				if (groupNode.getGroupID().equals(groupId)) {
-					return groupNode;
-				}
-			}
-		}
-		throw new IllegalArgumentException("GroupNode " + groupId + " not found");
-	}
-
-	private QueryNode getQueryNode(TreeNode root, String queryId) {
-		Enumeration<? extends TreeNode> parent = root.children();
-		while (parent.hasMoreElements()) {
-			TreeNode node = parent.nextElement();
-			if (node instanceof QueryNode) {
-				QueryNode queryNode = (QueryNode) node;
-				if (queryNode.getQueryID().equals(queryId)) {
-					return queryNode;
-				}
-			}
-		}
-		throw new IllegalArgumentException("QueryNode " + queryId + " not found");
-	}
-
+        if (node instanceof QueryManager.Query) {
+            QueryManager.Query query = (QueryManager.Query) node;
+            if (query.getGroup().isDegenerate())
+                return queryManager;
+            else
+                return query.getGroup();
+        }
+        return null;
+    }
 }

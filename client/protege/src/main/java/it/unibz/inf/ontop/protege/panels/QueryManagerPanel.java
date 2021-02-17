@@ -22,26 +22,24 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.NewQueryDialog;
+import it.unibz.inf.ontop.protege.gui.models.QueryManagerTreeModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
-import it.unibz.inf.ontop.protege.gui.models.QueryManagerTreeModel;
 
 import javax.swing.*;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-/**
- * This class represents the display of stored queries using a tree structure.
- */
-public class QueryManagerPanel extends JPanel implements QueryManager.EventListener {
+public class QueryManagerPanel extends JPanel {
 
 	private static final long serialVersionUID = 6920100822784727963L;
 
@@ -52,13 +50,8 @@ public class QueryManagerPanel extends JPanel implements QueryManager.EventListe
     private final Icon query_group_icon;
 
     private final List<QueryManagerSelectionListener> listeners = new ArrayList<>();
-	
-	private final QueryManagerTreeModel queryControllerModel = new QueryManagerTreeModel();
 
-	private final QueryManager queryManager;
-		
-	private QueryManagerTreeModel.QueryNode currentId;
-	private QueryManagerTreeModel.QueryNode previousId;
+    private final QueryManager queryManager;
 
     private final JTree treSavedQuery;
 
@@ -70,7 +63,8 @@ public class QueryManagerPanel extends JPanel implements QueryManager.EventListe
 
         setLayout(new BorderLayout());
 
-        treSavedQuery = new JTree(queryControllerModel);
+        QueryManagerTreeModel model = new QueryManagerTreeModel(queryManager);
+        treSavedQuery = new JTree(model);
         treSavedQuery.setRootVisible(false);
         treSavedQuery.setCellRenderer(new DefaultTreeCellRenderer() {
             @Override
@@ -78,20 +72,27 @@ public class QueryManagerPanel extends JPanel implements QueryManager.EventListe
 
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-                if (value instanceof QueryManagerTreeModel.QueryNode)
+                if (value instanceof QueryManager.Query) {
                     setIcon(saved_query_icon);
-                else if (value instanceof QueryManagerTreeModel.GroupNode)
+                    setText(((QueryManager.Query) value).getID());
+                }
+                else if (value instanceof QueryManager.Group) {
                     setIcon(query_group_icon);
+                    setText(((QueryManager.Group) value).getID());
+                }
 
                 return this;
             }
         });
-        treSavedQuery.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                reselectQueryNode(evt);
-            }
+        treSavedQuery.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        treSavedQuery.getSelectionModel().addTreeSelectionListener(this::selectQueryNode);
+
+        model.addTreeModelListener(new TreeModelListener() {
+            @Override public void treeNodesChanged(TreeModelEvent e) { selectAndScrollTo(getExtendedTreePath(e)); }
+            @Override public void treeNodesInserted(TreeModelEvent e) { selectAndScrollTo(getExtendedTreePath(e)); }
+            @Override public void treeNodesRemoved(TreeModelEvent e) { selectAndScrollTo(e.getTreePath()); }
+            @Override public void treeStructureChanged(TreeModelEvent e) { selectAndScrollTo(e.getTreePath()); }
         });
-        treSavedQuery.addTreeSelectionListener(this::selectQueryNode);
         add(new JScrollPane(treSavedQuery), BorderLayout.CENTER);
 
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -111,13 +112,6 @@ public class QueryManagerPanel extends JPanel implements QueryManager.EventListe
         controlPanel.add(removeButton);
 
         add(controlPanel, BorderLayout.NORTH);
-
-		queryManager.addListener(queryControllerModel);
-		queryManager.addListener(this);
-		
-		// Fill the tree model with existing elements from the controller
-		queryControllerModel.synchronize(queryManager);
-		queryControllerModel.reload();
 	}
 
 	public void addQueryManagerSelectionListener(QueryManagerSelectionListener listener) {
@@ -132,33 +126,20 @@ public class QueryManagerPanel extends JPanel implements QueryManager.EventListe
 
 
     private void selectQueryNode(TreeSelectionEvent evt) {
+    	Object node = evt.getPath().getLastPathComponent();
 
-    	DefaultMutableTreeNode node = (DefaultMutableTreeNode) evt.getPath().getLastPathComponent();
-        if (node instanceof QueryManagerTreeModel.QueryNode) {
-            currentId = (QueryManagerTreeModel.QueryNode)node;
-            listeners.forEach(l -> l.selectedQueryChanged(currentId.getGroupID(), currentId.getQueryID(), currentId.getQuery()));
+        if (node instanceof QueryManager.Query) {
+            QueryManager.Query query =  (QueryManager.Query)node;
+            listeners.forEach(l -> l.selectedQueryChanged(query.getGroup().getID(), query.getID(), query.getQuery()));
         }
-        else if (node instanceof QueryManagerTreeModel.GroupNode) {
-            QueryManagerTreeModel.GroupNode groupElement = (QueryManagerTreeModel.GroupNode)node;
-            currentId = null;
-            listeners.forEach(l -> l.selectedQueryChanged(groupElement.getGroupID(), "", ""));
+        else if (node instanceof QueryManager.Group) {
+            QueryManager.Group group = (QueryManager.Group)node;
+            listeners.forEach(l -> l.selectedQueryChanged(group.getID(), "", ""));
         }
-        else if (node == null) {
-            currentId = null;
+        else {
+            listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
         }
     }
-
-	private void reselectQueryNode(MouseEvent evt) {
-		if (currentId == null) {
-			return;
-		}
-		if (previousId == currentId) {
-            listeners.forEach(l -> l.selectedQueryChanged(currentId.getGroupID(), currentId.getQueryID(), currentId.getQuery()));
-        }
-		else { // register the selected node
-			previousId = currentId;
-		}
-	}
 
     private void cmdAddActionPerformed(ActionEvent evt) {
 		NewQueryDialog dialog = new NewQueryDialog(this, queryManager);
@@ -166,60 +147,44 @@ public class QueryManagerPanel extends JPanel implements QueryManager.EventListe
     }
 
 	private void cmdRemoveActionPerformed(ActionEvent evt) {
-		TreePath selected_path = treSavedQuery.getSelectionPath();
-		if (selected_path == null)
+		TreePath path = treSavedQuery.getSelectionPath();
+		if (path == null)
 			return;
 
-		if (JOptionPane.showConfirmDialog(this,
-                "This will delete the selected query.\nContinue?",
-                "Delete confirmation",
-				JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
-			return;
+		Object node = path.getLastPathComponent();
+		if (node instanceof QueryManager.Query) {
+            QueryManager.Query query = (QueryManager.Query)node;
+            if (JOptionPane.showConfirmDialog(this,
+                    "This will delete query " + query.getID() +  ".\nContinue?",
+                    "Delete confirmation",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
+                return;
 
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) selected_path.getLastPathComponent();
-		if (node instanceof QueryManagerTreeModel.QueryNode) {
-            QueryManagerTreeModel.QueryNode queryTreeElement = (QueryManagerTreeModel.QueryNode)node;
-			queryManager.removeQuery(queryTreeElement.getGroupID(), queryTreeElement.getQueryID());
+            queryManager.removeQuery(query.getGroup().getID(), query.getID());
 		}
-		else if (node instanceof QueryManagerTreeModel.GroupNode) {
-            QueryManagerTreeModel.GroupNode groupTreeElement = (QueryManagerTreeModel.GroupNode)node;
-			queryManager.removeGroup(groupTreeElement.getGroupID());
+		else if (node instanceof QueryManager.Group) {
+            QueryManager.Group group = (QueryManager.Group)node;
+            if (JOptionPane.showConfirmDialog(this,
+                    "This will delete group " + group.getID() +  " (with all its queries).\nContinue?",
+                    "Delete confirmation",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
+                return;
+
+			queryManager.removeGroup(group.getID());
 		}
 	}
 
-
-    @Override
-	public void added(QueryManager.Group group) {
-		DefaultMutableTreeNode node = queryControllerModel.getGroupNode(group);
-		// Select the new node in the JTree
-		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
-		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
-	}
-
-	@Override
-	public void added(QueryManager.Query query) {
-		DefaultMutableTreeNode node = queryControllerModel.getQueryNode(query);
-		// Select the new node in the JTree
-		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
-		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
-	}
-
-    @Override
-    public void changed(QueryManager.Query query) {
-        DefaultMutableTreeNode node = queryControllerModel.getQueryNode(query);
-        // Select the modified node in the JTree
-        treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
-        treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
+    private TreePath getExtendedTreePath(TreeModelEvent e) {
+        Object[] path = e.getPath();
+        Object[] extendedPath = Arrays.copyOf(path, path.length + 1);
+        extendedPath[path.length] = e.getChildren()[0];
+        return new TreePath(extendedPath);
     }
 
-    @Override
-	public void removed(QueryManager.Query query) {
-        listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
-    }
-
-	@Override
-	public void removed(QueryManager.Group group) {
-        listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
+    private void selectAndScrollTo(TreePath treePath) {
+        treSavedQuery.setSelectionPath(treePath);
+        treSavedQuery.scrollPathToVisible(treePath);
     }
 }

@@ -39,12 +39,14 @@ public class QueryManager {
 	public class Query {
 		private final Group group;
 		private final String id;
+		private final int index;
 		private String query;
 
 		private Query(Group group, String id, String query) {
 			this.group = group;
 			this.id = id;
 			this.query = query;
+			this.index = group.queries.size();
 
 			if (id.isEmpty())
 				throw new IllegalArgumentException("The query ID can't be blank!");
@@ -63,6 +65,7 @@ public class QueryManager {
 		public Group getGroup() { return group; }
 		public String getID() { return id; }
 		public String getQuery() { return query; }
+		public int getIndex() { return group.isDegenerate ? group.index : index; }
 
 		public void setQuery(String query) {
 			this.query = query;
@@ -73,11 +76,13 @@ public class QueryManager {
 	public class Group {
 		private final String id;
 		private final boolean isDegenerate; // a single query whose ID is the group ID
+		private final int index;
 		private final Map<String, Query> queries = new LinkedHashMap<>();
 
 		private Group(String id) {
 			this.id = id;
 			this.isDegenerate = false;
+			this.index = groups.size();
 			init();
 		}
 
@@ -87,6 +92,7 @@ public class QueryManager {
 		private Group(String id, String query) {
 			this.id = id;
 			this.isDegenerate = true;
+			this.index = groups.size();
 			new Query(this, id, query);
 			init();
 		}
@@ -102,6 +108,7 @@ public class QueryManager {
 
 		public String getID() { return isDegenerate ? null : id; }
 		public boolean isDegenerate() { return isDegenerate; }
+		public int getIndex() { return index; }
 
 		public Collection<Query> getQueries() { return queries.values(); }
 	}
