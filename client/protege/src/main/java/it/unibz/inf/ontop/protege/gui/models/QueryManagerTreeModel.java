@@ -111,7 +111,6 @@ public class QueryManagerTreeModel extends DefaultTreeModel implements QueryMana
 	public void added(QueryManager.Group group) {
 		GroupNode groupNode = new GroupNode(group.getID());
 		insertNodeInto(groupNode, (MutableTreeNode) root, root.getChildCount());
-		nodeStructureChanged(root);
 	}
 
 	@Override
@@ -122,21 +121,18 @@ public class QueryManagerTreeModel extends DefaultTreeModel implements QueryMana
 
 		QueryNode queryNode = new QueryNode(query.getGroup().getID(), query.getID(), query.getQuery());
 		insertNodeInto(queryNode, parent, parent.getChildCount());
-		nodeStructureChanged(root);
 	}
 
 	@Override
 	public void removed(QueryManager.Group group) {
 		GroupNode groupNode = getGroupNode(group);
 		removeNodeFromParent(groupNode);
-		nodeStructureChanged(root);
 	}
 
 	@Override
 	public void removed(QueryManager.Query query) {
 		QueryNode queryNode = getQueryNode(query);
 		removeNodeFromParent(queryNode);
-		nodeStructureChanged(root);
 	}
 
 	@Override

@@ -171,7 +171,7 @@ public class QueryManagerPanel extends JPanel implements QueryManager.EventListe
 			return;
 
 		if (JOptionPane.showConfirmDialog(this,
-                "This will delete the selected query. \n Continue? ",
+                "This will delete the selected query.\nContinue?",
                 "Delete confirmation",
 				JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
