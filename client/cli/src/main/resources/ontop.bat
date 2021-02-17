@@ -9,4 +9,4 @@ popd
 
 set CLASSPATH=%ONTOP_HOME%\lib\*;%ONTOP_HOME%\jdbc\*
 
-%JAVA% -cp "%CLASSPATH%" -Dlogback.configurationFile="%ONTOP_HOME%\log\logback.xml" -Dlogging.config="%ONTOP_HOME%\log\logback.xml" it.unibz.inf.ontop.cli.Ontop %*
+%JAVA% %ONTOP_JAVA_ARGS% -cp "%CLASSPATH%" -Dlogback.configurationFile="%ONTOP_HOME%\log\logback.xml" -Dlogging.config="%ONTOP_HOME%\log\logback.xml" it.unibz.inf.ontop.cli.Ontop %*
