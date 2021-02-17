@@ -7,7 +7,7 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<directory>${project.build.directory}/unpack/${protege.bundle.rootdir}</directory>
+			<directory>${project.build.directory}/unpack/protege-desktop-platform-independent/${protege.bundle.rootdir}</directory>
 			<outputDirectory>/${protege.bundle.rootdir}/</outputDirectory>
 		</fileSet>
 	</fileSets>
