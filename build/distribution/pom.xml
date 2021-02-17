@@ -14,7 +14,7 @@
         <assembly.appendAssemblyId>false</assembly.appendAssemblyId>
         <jetty.bundle.version>9.4.20.v20190813</jetty.bundle.version>
         <tomcat.bundle.version>9.0.24</tomcat.bundle.version>
-        <protege.bundle.url>https://github.com/protegeproject/protege-distribution/releases/download/v5.5.0/Protege-5.5.0-platform-independent.zip</protege.bundle.url>
+		<protege.desktop.version>5.5.0</protege.desktop.version>
         <protege.bundle.rootdir>Protege-5.5.0</protege.bundle.rootdir>
     </properties>
 
@@ -95,28 +95,85 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>com.googlecode.maven-download-plugin</groupId>
-						<artifactId>download-maven-plugin</artifactId>
-						<version>1.6.1</version>
-						<executions>
-							<execution>
-								<id>unpack-protege</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>wget</goal>
-								</goals>
-								<configuration>
-									<url>${protege.bundle.url}</url>
-									<unpack>true</unpack>
-									<outputDirectory>${project.build.directory}/unpack/</outputDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
 						<executions>
+							<execution>
+								<id>unpack-protege-platform-independent</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/unpack/protege-desktop-platform-independent/</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>edu.stanford.protege</groupId>
+											<artifactId>protege-desktop</artifactId>
+											<version>${protege.desktop.version}</version>
+											<classifier>platform-independent</classifier>
+											<type>zip</type>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+							<execution>
+								<id>unpack-protege-os-x</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/unpack/protege-desktop-os-x/</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>edu.stanford.protege</groupId>
+											<artifactId>protege-desktop</artifactId>
+											<version>${protege.desktop.version}</version>
+											<classifier>os-x</classifier>
+											<type>zip</type>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+							<execution>
+								<id>unpack-protege-win</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/unpack/protege-desktop-win/</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>edu.stanford.protege</groupId>
+											<artifactId>protege-desktop</artifactId>
+											<version>${protege.desktop.version}</version>
+											<classifier>win</classifier>
+											<type>zip</type>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+							<execution>
+								<id>unpack-protege-linux</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/unpack/protege-desktop-linux/</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>edu.stanford.protege</groupId>
+											<artifactId>protege-desktop</artifactId>
+											<version>${protege.desktop.version}</version>
+											<classifier>linux</classifier>
+											<type>tar.gz</type>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
 							<execution>
 								<id>unpack-jetty-tomcat</id>
 								<phase>prepare-package</phase>
@@ -219,16 +276,55 @@
 								</configuration>
 							</execution>
 							<execution>
-								<id>attach-protege-bundle</id>
+								<id>attach-protege-bundle-platform-independent</id>
 								<phase>package</phase>
 								<goals>
 									<goal>single</goal>
 								</goals>
 								<configuration>
 									<descriptors>
-										<descriptor>src/assembly/ontop-protege-bundle.xml</descriptor>
+										<descriptor>src/assembly/ontop-protege-bundle-platform-independent.xml</descriptor>
 									</descriptors>
-									<finalName>ontop-protege-bundle-${project.version}</finalName>
+									<finalName>ontop-protege-bundle-platform-independent-${project.version}</finalName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>attach-protege-bundle-win</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-protege-bundle-win.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-protege-bundle-win-${project.version}</finalName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>attach-protege-bundle-linux</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-protege-bundle-linux.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-protege-bundle-linux-${project.version}</finalName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>attach-protege-bundle-os-x</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-protege-bundle-os-x.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-protege-bundle-os-x-${project.version}</finalName>
 								</configuration>
 							</execution>
 						</executions>
