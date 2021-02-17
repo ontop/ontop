@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.transformer.impl;
+package it.unibz.inf.ontop.iq.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -23,13 +23,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class MappingEqualityTransformerImpl implements MappingEqualityTransformer {
+public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTransformer {
 
     private final IQTreeTransformer expressionTransformer;
 
     @Inject
-    protected MappingEqualityTransformerImpl(UniqueTermTypeExtractor typeExtractor,
-                                             CoreSingletons coreSingletons) {
+    protected NotYetTypedEqualityTransformerImpl(UniqueTermTypeExtractor typeExtractor,
+                                                 CoreSingletons coreSingletons) {
         this.expressionTransformer = new ExpressionTransformer(typeExtractor, coreSingletons);
     }
 

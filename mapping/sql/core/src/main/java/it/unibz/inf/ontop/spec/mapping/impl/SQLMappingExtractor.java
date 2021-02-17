@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
@@ -44,7 +44,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private final MappingCanonicalTransformer canonicalTransformer;
     private final MappingCaster mappingCaster;
-    private final MappingEqualityTransformer mappingEqualityTransformer;
+    private final NotYetTypedEqualityTransformer mappingEqualityTransformer;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final JDBCMetadataProviderFactory metadataProviderFactory;
@@ -72,7 +72,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer,
                                 MappingCaster mappingCaster,
-                                MappingEqualityTransformer mappingEqualityTransformer,
+                                NotYetTypedEqualityTransformer mappingEqualityTransformer,
                                 NoNullValueEnforcer noNullValueEnforcer,
                                 IntermediateQueryFactory iqFactory,
                                 MetaMappingExpander metamappingExpander,
