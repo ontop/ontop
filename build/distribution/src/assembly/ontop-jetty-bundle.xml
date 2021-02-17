@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<assembly>
+	<id>jetty-bundle</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>${project.build.directory}/unpack/jetty-distribution-${jetty.bundle.version}</directory>
+			<outputDirectory>/jetty-distribution-${jetty.bundle.version}/</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>/jetty-distribution-${jetty.bundle.version}/ontop-base/lib/ext/</outputDirectory>
+			<excludes><exclude>**/*</exclude></excludes> <!-- Create empty directory -->
+		</fileSet>
+	</fileSets>
+	<files>
+		<file>
+			<source>${project.basedir}/../../client/jetty/start.ini</source>
+			<outputDirectory>/jetty-distribution-${jetty.bundle.version}/ontop-base/</outputDirectory>
+		</file>
+		<file>
+			<source>${project.basedir}/../../client/jetty/README.md</source>
+			<outputDirectory>/jetty-distribution-${jetty.bundle.version}/</outputDirectory>
+			<destName>README_ONTOP_JETTY.md</destName>
+		</file>
+	</files>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>/jetty-distribution-${jetty.bundle.version}/ontop-base/webapps/</outputDirectory>
+			<outputFileNameMapping>rdf4j-server.war</outputFileNameMapping>
+			<includes>
+				<include>it.unibz.inf.ontop:ontop-rdf4j-server:war</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/jetty-distribution-${jetty.bundle.version}/ontop-base/webapps/</outputDirectory>
+			<outputFileNameMapping>rdf4j-workbench.war</outputFileNameMapping>
+			<includes>
+				<include>it.unibz.inf.ontop:ontop-rdf4j-workbench:war</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+</assembly>

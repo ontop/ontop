@@ -12,6 +12,10 @@
 
     <properties>
         <assembly.appendAssemblyId>false</assembly.appendAssemblyId>
+        <jetty.bundle.version>9.4.20.v20190813</jetty.bundle.version>
+        <tomcat.bundle.version>9.0.24</tomcat.bundle.version>
+        <protege.bundle.url>https://github.com/protegeproject/protege-distribution/releases/download/v5.5.0/Protege-5.5.0-platform-independent.zip</protege.bundle.url>
+        <protege.bundle.rootdir>Protege-5.5.0</protege.bundle.rootdir>
     </properties>
 
 	<dependencies>
@@ -34,6 +38,33 @@
 			<artifactId>ontop-cli</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-rdf4j-server</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-rdf4j-workbench</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<!-- this dependency serves to order ontop-distribution after ontop-protege
+			     during a multi-module build, so that ontop-protege bundle can be
+			     resolved from reactor instead of having to install & download it from
+			     a maven repository -->
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-protege</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -50,16 +81,6 @@
      		</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/assembly/ontop-distribution-bin.xml</descriptor>
-					</descriptors>
-					<finalName>ontop-cli-${project.version}</finalName>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
@@ -67,4 +88,154 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.googlecode.maven-download-plugin</groupId>
+						<artifactId>download-maven-plugin</artifactId>
+						<version>1.6.1</version>
+						<executions>
+							<execution>
+								<id>unpack-protege</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>wget</goal>
+								</goals>
+								<configuration>
+									<url>${protege.bundle.url}</url>
+									<unpack>true</unpack>
+									<outputDirectory>${project.build.directory}/unpack/</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unpack-jetty-tomcat</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/unpack/</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.eclipse.jetty</groupId>
+											<artifactId>jetty-distribution</artifactId>
+											<version>${jetty.bundle.version}</version>
+											<type>zip</type>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.apache.tomcat</groupId>
+											<artifactId>tomcat</artifactId>
+											<version>${tomcat.bundle.version}</version>
+											<type>zip</type>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+							<execution>
+								<id>copy-protege-plugin</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>it.unibz.inf.ontop</groupId>
+											<artifactId>ontop-protege</artifactId>
+											<version>${project.version}</version>
+											<classifier>bundle</classifier>
+											<destFileName>it.unibz.inf.ontop.protege-${project.version}.jar</destFileName>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-cli-assembly</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-cli.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-cli-${project.version}</finalName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>attach-webapps-assembly</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-webapps.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-webapps-${project.version}</finalName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>attach-tomcat-bundle</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-tomcat-bundle.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-tomcat-bundle-${project.version}</finalName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>attach-jetty-bundle</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-jetty-bundle.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-jetty-bundle-${project.version}</finalName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>attach-protege-bundle</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<descriptors>
+										<descriptor>src/assembly/ontop-protege-bundle.xml</descriptor>
+									</descriptors>
+									<finalName>ontop-protege-bundle-${project.version}</finalName>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

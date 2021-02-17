@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<assembly>
+	<id>tomcat-bundle</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>${project.build.directory}/unpack/apache-tomcat-${tomcat.bundle.version}</directory>
+			<outputDirectory>/apache-tomcat-${tomcat.bundle.version}/</outputDirectory>
+		</fileSet>
+	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>/apache-tomcat-${tomcat.bundle.version}/webapps/</outputDirectory>
+			<outputFileNameMapping>rdf4j-server.war</outputFileNameMapping>
+			<includes>
+				<include>it.unibz.inf.ontop:ontop-rdf4j-server:war</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/apache-tomcat-${tomcat.bundle.version}/webapps/</outputDirectory>
+			<outputFileNameMapping>rdf4j-workbench.war</outputFileNameMapping>
+			<includes>
+				<include>it.unibz.inf.ontop:ontop-rdf4j-workbench:war</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+</assembly>
