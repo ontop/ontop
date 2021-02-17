@@ -44,22 +44,21 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 
+import javax.annotation.Nonnull;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Creates a new panel to execute queries. Remember to execute the
- * setResultsPanel function to indicate where to display the results.
- */
-public class QueryInterfacePanel extends JPanel {
+public class QueryInterfacePanel extends JPanel implements QueryManagerSelectionListener, OWLOntologyChangeListener {
 
 	private static final long serialVersionUID = -5902798157183352944L;
 
@@ -67,11 +66,10 @@ public class QueryInterfacePanel extends JPanel {
 
 	private String groupId = "", queryId = "";
 
-	private final JCheckBox showAllCheckBox;
+	private final QueryInterfaceLimitPanel limitPanel;
 	private final JCheckBox showShortIriCheckBox;
 	private final JTextPane queryTextPane;
-	private final JFormattedTextField fetchSizeTextField;
-	public final JButton executeButton;
+	private final JButton executeButton;
 
 	private final JTabbedPane resultTabbedPane;
 	private final JLabel executionInfoLabel;
@@ -106,54 +104,23 @@ public class QueryInterfacePanel extends JPanel {
 
 		JPanel controlPanel = new JPanel(new GridBagLayout());
 
-		JPanel executionLimitPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-		executionLimitPanel.setBorder(BorderFactory.createEtchedBorder());
-		executionLimitPanel.add(new JLabel("Show"));
-
-		fetchSizeTextField = new JFormattedTextField(NumberFormat.getIntegerInstance());
-		fetchSizeTextField.setValue(100);
-		fetchSizeTextField.setColumns(4);
-		fetchSizeTextField.setHorizontalAlignment(JTextField.RIGHT);
-		executionLimitPanel.add(fetchSizeTextField);
-
-		executionLimitPanel.add(new JLabel("or"));
-
-		showAllCheckBox = new JCheckBox("all results.");
-		showAllCheckBox.addActionListener(new ActionListener() {
-			private int fetchSizeSaved = 100;
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (showAllCheckBox.isSelected()) {
-					fetchSizeSaved = getFetchSize();
-					fetchSizeTextField.setValue(0);
-				}
-				else 
-					fetchSizeTextField.setValue(fetchSizeSaved);
-				
-				fetchSizeTextField.setEnabled(!showAllCheckBox.isSelected());
-			}
-		});
-		executionLimitPanel.add(showAllCheckBox);
-		controlPanel.add(executionLimitPanel,
-				new GridBagConstraints(0, 0, 1, 1, 0, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.NONE,
-						new Insets(0, 0, 0, 0), 0, 0));
-
-		controlPanel.add(new Panel(), // gobbler
-				new GridBagConstraints(1, 0, 1, 1, 0.3, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-						new Insets(0, 0, 0, 0), 0, 0));
+		limitPanel = new QueryInterfaceLimitPanel();
+		limitPanel.setBorder(BorderFactory.createEtchedBorder());
+		controlPanel.add(limitPanel,
+				new GridBagConstraints(0, 0, 1, 1, 0, 1,
+						GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
+						new Insets(3, 0, 3, 10), 0, 0));
 
 		JPanel showShortIriPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
 		showShortIriPanel.setBorder(BorderFactory.createEtchedBorder());
 		showShortIriCheckBox = new JCheckBox("Use short IRIs");
 		showShortIriPanel.add(showShortIriCheckBox);
 		controlPanel.add(showShortIriPanel,
-				new GridBagConstraints(2, 0, 1, 1, 0, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.NONE,
-						new Insets(0, 0, 0, 0), 0, 0));
+				new GridBagConstraints(2, 0, 1, 1, 0, 1,
+						GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
+						new Insets(3, 10, 3, 0), 0, 0));
 
-		controlPanel.add(new Panel(), // gobbler
+		controlPanel.add(new JPanel(), // gobbler
 				new GridBagConstraints(3, 0, 1, 1, 1, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(0, 0, 0, 0), 0, 0));
@@ -218,29 +185,14 @@ public class QueryInterfacePanel extends JPanel {
 
 		queryPanel.add(controlPanel, BorderLayout.SOUTH);
 
-		JPanel topControlPanel = new JPanel(new GridBagLayout());
-		topControlPanel.add(new JLabel("SPARQL Query"),
-				new GridBagConstraints(0, 0, 1, 1, 0, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.NONE,
-						new Insets(0, 0, 0, 0), 0, 0));
-
-		topControlPanel.add(new JPanel(), // gobbler
-				new GridBagConstraints(1, 0, 1, 1, 1, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-						new Insets(0, 0, 0, 0), 0, 0));
-
+		JPanel topControlPanel = new JPanel();
+		topControlPanel.setLayout(new BoxLayout(topControlPanel, BoxLayout.LINE_AXIS));
+		topControlPanel.add(new JLabel("SPARQL Query"));
+		topControlPanel.add(Box.createHorizontalGlue());
 		JButton prefixesButton = DialogUtils.getButton(prefixesAction);
-		topControlPanel.add(prefixesButton,
-				new GridBagConstraints(2, 0, 1, 1, 0, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.NONE,
-						new Insets(0, 0, 0, 0), 0, 0));
-
+		topControlPanel.add(prefixesButton);
 		JButton updateButton = DialogUtils.getButton(updateAction);
-		topControlPanel.add(updateButton,
-				new GridBagConstraints(3, 0, 1, 1, 0, 0,
-						GridBagConstraints.CENTER, GridBagConstraints.NONE,
-						new Insets(0, 0, 0, 0), 0, 0));
-
+		topControlPanel.add(updateButton);
 		queryPanel.add(topControlPanel, BorderLayout.NORTH);
 
 		JPanel resultsPanel = new JPanel(new BorderLayout());
@@ -326,6 +278,7 @@ public class QueryInterfacePanel extends JPanel {
 		}
 	}
 
+	@Override
 	public void selectedQueryChanged(String groupId, String queryId, String query) {
 //		if (!this.queryId.isEmpty()) {
 //			QueryManager.Query previous = queryManager.getQuery(this.groupId, this.queryId);
@@ -342,6 +295,11 @@ public class QueryInterfacePanel extends JPanel {
 		executionInfoLabel.setOpaque(false);
 	}
 
+	@Override
+	public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) throws OWLException {
+		resetTableModel(new String[0]);
+	}
+
 	private void showActionResult(long time, String second) {
 		executionInfoLabel.setText("Execution time: " + DialogUtils.renderElapsedTime(time) + ". " + second);
 		executionInfoLabel.setOpaque(false);
@@ -351,11 +309,7 @@ public class QueryInterfacePanel extends JPanel {
 		return queryTextPane.getText();
 	}
 
-	private int getFetchSize() {
-		return ((Number) fetchSizeTextField.getValue()).intValue();
-	}
-
-	public DefaultTableModel resetTableModel(String[] columnNames) {
+	private DefaultTableModel resetTableModel(String[] columnNames) {
 		queryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(columnNames);
 		queryResultTable.setModel(tableModel);
@@ -490,9 +444,9 @@ public class QueryInterfacePanel extends JPanel {
 	}
 
 	private void setFetchSize(OntopOWLStatement statement) throws OntopOWLException {
-		if (!showAllCheckBox.isSelected()) {
+		if (!limitPanel.isFetchAllSelected()) {
 			DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) statement;
-			defaultOntopOWLStatement.setMaxRows(getFetchSize());
+			defaultOntopOWLStatement.setMaxRows(limitPanel.getFetchSize());
 		}
 	}
 
@@ -571,5 +525,4 @@ public class QueryInterfacePanel extends JPanel {
 			}
 		};
 	}
-
 }

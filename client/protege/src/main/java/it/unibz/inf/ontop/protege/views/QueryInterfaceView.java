@@ -21,79 +21,85 @@ package it.unibz.inf.ontop.protege.views;
  */
 
 import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
-import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
+import it.unibz.inf.ontop.protege.panels.QueryManagerSelectionListener;
+import org.protege.editor.core.Disposable;
+import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.annotation.Nonnull;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener {
+
+public class QueryInterfaceView extends AbstractOWLViewComponent {
 
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryInterfaceView.class);
 
-    private QueryInterfacePanel queryEditorPanel;
-    private OWLOntologyChangeListener ontologyListener;
+    private QueryInterfacePanel panel;
 
     @Override
     protected void initialiseOWLView() {
         setLayout(new BorderLayout());
-        queryEditorPanel = new QueryInterfacePanel(getOWLEditorKit());
-        add(queryEditorPanel, BorderLayout.CENTER);
+        panel = new QueryInterfacePanel(getOWLEditorKit());
+        add(panel, BorderLayout.CENTER);
 
-        // Setting up model listeners
-        ontologyListener = changes ->
-                SwingUtilities.invokeLater(() -> queryEditorPanel.resetTableModel(new String[0]));
+        getOWLModelManager().addOntologyChangeListener(panel);
 
-        getOWLModelManager().addOntologyChangeListener(ontologyListener);
-
-        /* On creation of a new view, we register it globally and make sure that its selector is listened
-           by all other instances of query view in this editor kit. Also, we make this new instance listen
+        /* On creation of a new view, we register it globally and make sure that
+           its selector is listened by all other instances of query view in this editor kit.
+           Also, we make this new instance listen
            to the selection of all other query selectors in the views. */
+        List<QueryInterfaceView> queryInterfaceViews = getList(getOWLEditorKit());
+        if (queryInterfaceViews.isEmpty())
+            queryInterfaceViews = new QueryInterfaceViewsList(getOWLEditorKit());
 
-        // Getting the list of views
-        QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
-        if (queryInterfaceViews == null) {
-            queryInterfaceViews = new QueryInterfaceViewsList();
-            getOWLEditorKit().put(QueryInterfaceViewsList.class.getName(), queryInterfaceViews);
-        }
-
-        // Adding the new instance (this)
         queryInterfaceViews.add(this);
 
-        // Registering the current query view with all existing query manager views
-        QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) getOWLEditorKit().get(QueryManagerViewsList.class.getName());
-        if (queryManagerViews != null)
-            for (QueryManagerView queryInterfaceView : queryManagerViews)
-                queryInterfaceView.addListener(this);
-
+        // Registering the current query view with ALL existing query manager views
+        for (QueryManagerView queryInterfaceView : QueryManagerView.getList(getOWLEditorKit()))
+            queryInterfaceView.addSelectionListener(getSelectionListener());
 
         LOGGER.debug("Ontop QueryInterfaceView initialized");
     }
 
     @Override
     protected void disposeOWLView() {
-        getOWLModelManager().removeOntologyChangeListener(ontologyListener);
+        getOWLModelManager().removeOntologyChangeListener(panel);
 
-        QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
-        if (queryInterfaceViews != null)
-            queryInterfaceViews.remove(this);
+        List<QueryInterfaceView> queryInterfaceViews = getList(getOWLEditorKit());
+        queryInterfaceViews.remove(this);
 
-        QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) getOWLEditorKit().get(QueryManagerViewsList.class.getName());
-        if (queryManagerViews != null)
-            for (QueryManagerView queryInterfaceView : queryManagerViews)
-                queryInterfaceView.removeListener(this);
+        for (QueryManagerView queryInterfaceView : QueryManagerView.getList(getOWLEditorKit()))
+            queryInterfaceView.removeSelectionListener(getSelectionListener());
+    }
+
+    public QueryManagerSelectionListener getSelectionListener() {
+        return panel;
     }
 
 
-
-    @Override
-    public void selectedQueryChanged(String groupId, String queryId, String query) {
-        queryEditorPanel.selectedQueryChanged(groupId, queryId, query);
+    @Nonnull
+    public static List<QueryInterfaceView> getList(OWLEditorKit editorKit) {
+        QueryInterfaceViewsList list = (QueryInterfaceViewsList) editorKit.get(QueryInterfaceViewsList.class.getName());
+        return list == null ? Collections.emptyList() : list;
     }
+
+    private static class QueryInterfaceViewsList extends ArrayList<QueryInterfaceView> implements Disposable {
+
+        private static final long serialVersionUID = -7082548696764069555L;
+
+        private QueryInterfaceViewsList(OWLEditorKit editorKit) {
+            editorKit.put(QueryInterfaceViewsList.class.getName(), this);
+        }
+
+        @Override
+        public void dispose() { /* NO-OP */ }
+    }
+
 }

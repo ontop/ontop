@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.views;
+package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
@@ -20,18 +20,6 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import org.protege.editor.core.Disposable;
-
-import java.util.ArrayList;
-
-/**
- * This is a holder for all QueryView objects instantiated in protege. We keep
- * them to coordinate their query selectors.
- */
-public class QueryInterfaceViewsList extends ArrayList<QueryInterfaceView> implements Disposable {
-
-	private static final long serialVersionUID = -7082548696764069555L;
-
-	@Override
-	public void dispose() { /* NO-OP */ }
+public interface QueryManagerSelectionListener {
+	void selectedQueryChanged(String groupId, String queryId, String query);
 }

@@ -29,7 +29,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
-public class QueryControllerTreeModel extends DefaultTreeModel implements QueryManager.EventListener {
+public class QueryManagerTreeModel extends DefaultTreeModel implements QueryManager.EventListener {
 
 	private static final long serialVersionUID = -5182895959682699380L;
 
@@ -82,7 +82,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryM
 	}
 
 
-	public QueryControllerTreeModel() {
+	public QueryManagerTreeModel() {
 		super(new DefaultMutableTreeNode(""));
 	}
 
@@ -107,9 +107,6 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryM
 		}
 	}
 
-	/**
-	 * Inserts a new node group or query into the Tree
-	 */
 	@Override
 	public void added(QueryManager.Group group) {
 		GroupNode groupNode = new GroupNode(group.getID());
@@ -128,9 +125,6 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryM
 		nodeStructureChanged(root);
 	}
 
-	/**
-	 * Removes a TreeNode group or query from the Tree
-	 */
 	@Override
 	public void removed(QueryManager.Group group) {
 		GroupNode groupNode = getGroupNode(group);
@@ -138,9 +132,6 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements QueryM
 		nodeStructureChanged(root);
 	}
 
-	/*
-	 * * Removes a TreeNode query from a group into the tree
-	 */
 	@Override
 	public void removed(QueryManager.Query query) {
 		QueryNode queryNode = getQueryNode(query);

@@ -22,54 +22,73 @@ package it.unibz.inf.ontop.protege.views;
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.panels.SavedQueriesPanel;
-import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
+import it.unibz.inf.ontop.protege.panels.QueryManagerPanel;
+import it.unibz.inf.ontop.protege.panels.QueryManagerSelectionListener;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.protege.editor.core.Disposable;
+import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+
+import javax.annotation.Nonnull;
 
 public class QueryManagerView extends AbstractOWLViewComponent {
 
 	private static final long serialVersionUID = 1L;
 	
-	private SavedQueriesPanel panel;
-
-	@Override
-	protected void disposeOWLView() {
-		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) getOWLEditorKit().get(QueryManagerViewsList.class.getName());
-		if (queryManagerViews != null)
-			queryManagerViews.remove(this);
-	}
+	private QueryManagerPanel panel;
 
 	@Override
 	protected void initialiseOWLView()  {
-		OBDAModelManager obdaController = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
+		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 
 		setLayout(new BorderLayout());
-		panel = new SavedQueriesPanel(obdaController.getQueryController());
-
+		panel = new QueryManagerPanel(obdaModelManager.getQueryController());
 		add(panel, BorderLayout.CENTER);
 
-		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) getOWLEditorKit().get(QueryManagerViewsList.class.getName());
-		if (queryManagerViews == null) {
-			queryManagerViews = new QueryManagerViewsList();
-			getOWLEditorKit().put(QueryManagerViewsList.class.getName(), queryManagerViews);
-		}
-
-		QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
-		if (queryInterfaceViews != null)
-			for (QueryInterfaceView queryInterfaceView : queryInterfaceViews)
-				this.addListener(queryInterfaceView);
+		List<QueryManagerView> queryManagerViews = getList(getOWLEditorKit());
+		if (queryManagerViews.isEmpty())
+			queryManagerViews = new QueryManagerViewsList(getOWLEditorKit());
 
 		queryManagerViews.add(this);
+
+		for (QueryInterfaceView queryInterfaceView : QueryInterfaceView.getList(getOWLEditorKit()))
+			addSelectionListener(queryInterfaceView.getSelectionListener());
 	}
 
-	public void addListener(SavedQueriesPanelListener listener) {
-		panel.addQueryManagerListener(listener);
+	@Override
+	protected void disposeOWLView() {
+		List<QueryManagerView> queryManagerViews = getList(getOWLEditorKit());
+		queryManagerViews.remove(this);
 	}
 
-	public void removeListener(SavedQueriesPanelListener listener) {
-		panel.removeQueryManagerListener(listener);
+	public void addSelectionListener(QueryManagerSelectionListener listener) {
+		panel.addQueryManagerSelectionListener(listener);
+	}
+
+	public void removeSelectionListener(QueryManagerSelectionListener listener) {
+		panel.removeQueryManagerSelectionListener(listener);
+	}
+
+	@Nonnull
+	public static List<QueryManagerView> getList(OWLEditorKit editorKit) {
+		QueryManagerViewsList list = (QueryManagerViewsList) editorKit.get(QueryManagerViewsList.class.getName());
+		return list == null ? Collections.emptyList() : list;
+	}
+
+	private static class QueryManagerViewsList extends ArrayList<QueryManagerView> implements Disposable {
+
+		private static final long serialVersionUID = 2986737849606126197L;
+
+		private QueryManagerViewsList(OWLEditorKit editorKit) {
+			editorKit.put(QueryManagerViewsList.class.getName(), this);
+		}
+
+		@Override
+		public void dispose() { /* NO-OP */ }
 	}
 }

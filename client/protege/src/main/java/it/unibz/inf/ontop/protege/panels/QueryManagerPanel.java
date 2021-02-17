@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.gui.dialogs.NewQueryDialog;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
-import it.unibz.inf.ontop.protege.gui.models.QueryControllerTreeModel;
+import it.unibz.inf.ontop.protege.gui.models.QueryManagerTreeModel;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * This class represents the display of stored queries using a tree structure.
  */
-public class SavedQueriesPanel extends JPanel implements QueryManager.EventListener {
+public class QueryManagerPanel extends JPanel implements QueryManager.EventListener {
 
 	private static final long serialVersionUID = 6920100822784727963L;
 
@@ -51,18 +51,18 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
     private final Icon saved_query_icon;
     private final Icon query_group_icon;
 
-    private final List<SavedQueriesPanelListener> listeners = new ArrayList<>();
+    private final List<QueryManagerSelectionListener> listeners = new ArrayList<>();
 	
-	private final QueryControllerTreeModel queryControllerModel = new QueryControllerTreeModel();
+	private final QueryManagerTreeModel queryControllerModel = new QueryManagerTreeModel();
 
 	private final QueryManager queryManager;
 		
-	private QueryControllerTreeModel.QueryNode currentId;
-	private QueryControllerTreeModel.QueryNode previousId;
+	private QueryManagerTreeModel.QueryNode currentId;
+	private QueryManagerTreeModel.QueryNode previousId;
 
     private final JTree treSavedQuery;
 
-	public SavedQueriesPanel(QueryManager queryManager) {
+	public QueryManagerPanel(QueryManager queryManager) {
         this.queryManager = queryManager;
 
         saved_query_icon = IconLoader.getImageIcon(PATH_SAVEDQUERY_ICON);
@@ -78,9 +78,9 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-                if (value instanceof QueryControllerTreeModel.QueryNode)
+                if (value instanceof QueryManagerTreeModel.QueryNode)
                     setIcon(saved_query_icon);
-                else if (value instanceof QueryControllerTreeModel.GroupNode)
+                else if (value instanceof QueryManagerTreeModel.GroupNode)
                     setIcon(query_group_icon);
 
                 return this;
@@ -120,12 +120,12 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 		queryControllerModel.reload();
 	}
 
-	public void addQueryManagerListener(SavedQueriesPanelListener listener) {
+	public void addQueryManagerSelectionListener(QueryManagerSelectionListener listener) {
 		if (listener != null && !listeners.contains(listener))
 		    listeners.add(listener);
 	}
 
-	public void removeQueryManagerListener(SavedQueriesPanelListener listener) {
+	public void removeQueryManagerSelectionListener(QueryManagerSelectionListener listener) {
 		if (listener != null)
 		    listeners.remove(listener);
 	}
@@ -134,12 +134,12 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
     private void selectQueryNode(TreeSelectionEvent evt) {
 
     	DefaultMutableTreeNode node = (DefaultMutableTreeNode) evt.getPath().getLastPathComponent();
-        if (node instanceof QueryControllerTreeModel.QueryNode) {
-            currentId = (QueryControllerTreeModel.QueryNode)node;
+        if (node instanceof QueryManagerTreeModel.QueryNode) {
+            currentId = (QueryManagerTreeModel.QueryNode)node;
             listeners.forEach(l -> l.selectedQueryChanged(currentId.getGroupID(), currentId.getQueryID(), currentId.getQuery()));
         }
-        else if (node instanceof QueryControllerTreeModel.GroupNode) {
-            QueryControllerTreeModel.GroupNode groupElement = (QueryControllerTreeModel.GroupNode)node;
+        else if (node instanceof QueryManagerTreeModel.GroupNode) {
+            QueryManagerTreeModel.GroupNode groupElement = (QueryManagerTreeModel.GroupNode)node;
             currentId = null;
             listeners.forEach(l -> l.selectedQueryChanged(groupElement.getGroupID(), "", ""));
         }
@@ -178,12 +178,12 @@ public class SavedQueriesPanel extends JPanel implements QueryManager.EventListe
 			return;
 
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) selected_path.getLastPathComponent();
-		if (node instanceof QueryControllerTreeModel.QueryNode) {
-            QueryControllerTreeModel.QueryNode queryTreeElement = (QueryControllerTreeModel.QueryNode)node;
+		if (node instanceof QueryManagerTreeModel.QueryNode) {
+            QueryManagerTreeModel.QueryNode queryTreeElement = (QueryManagerTreeModel.QueryNode)node;
 			queryManager.removeQuery(queryTreeElement.getGroupID(), queryTreeElement.getQueryID());
 		}
-		else if (node instanceof QueryControllerTreeModel.GroupNode) {
-            QueryControllerTreeModel.GroupNode groupTreeElement = (QueryControllerTreeModel.GroupNode)node;
+		else if (node instanceof QueryManagerTreeModel.GroupNode) {
+            QueryManagerTreeModel.GroupNode groupTreeElement = (QueryManagerTreeModel.GroupNode)node;
 			queryManager.removeGroup(groupTreeElement.getGroupID());
 		}
 	}
