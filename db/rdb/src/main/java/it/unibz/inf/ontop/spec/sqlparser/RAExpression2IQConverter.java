@@ -15,7 +15,7 @@ public class RAExpression2IQConverter {
     private final CoreSingletons coreSingletons;
 
     @Inject
-    public RAExpression2IQConverter(TermFactory termFactory, IntermediateQueryFactory iqFactory) {
+    private RAExpression2IQConverter(TermFactory termFactory, IntermediateQueryFactory iqFactory) {
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
         this.coreSingletons = null;
