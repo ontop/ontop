@@ -341,7 +341,7 @@ public class OBDAModelManager implements Disposable {
 			}
 
 			File queriesFile = new File(URI.create(owlName + QUERY_EXT));
-			if (!queryController.getGroups().isEmpty()) {
+			if (queryController.getRoot().getChildNumber() != 0) {
 				try (FileWriter writer = new FileWriter(queriesFile)) {
 					writer.write(queryController.renderQueries());
 				}
@@ -488,27 +488,17 @@ public class OBDAModelManager implements Disposable {
 
 	private class ProtegeQueryControllerListener implements QueryManager.EventListener {
 		@Override
-		public void added(QueryManager.Group group) {
+		public void added(QueryManager.Item group, int indexInParent) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void added(QueryManager.Query query) {
+		public void removed(QueryManager.Item group, int indexInParent) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-		public void removed(QueryManager.Group group) {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void removed(QueryManager.Query query) {
-			triggerOntologyChanged();
-		}
-
-		@Override
-		public void changed(QueryManager.Query query) {
+		public void changed(QueryManager.Item group, int indexInParent) {
 			triggerOntologyChanged();
 		}
 	}

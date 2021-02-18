@@ -20,6 +20,10 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.core.QueryManager;
+
+import javax.annotation.Nullable;
+
 public interface QueryManagerSelectionListener {
-	void selectedQueryChanged(String groupId, String queryId, String query);
+	void selectedQueryChanged(@Nullable QueryManager.Item entity);
 }

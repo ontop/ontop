@@ -20,11 +20,9 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
  * #L%
  */
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -85,16 +83,10 @@ public class NewQueryDialog extends JDialog {
         groupComboBox = new JComboBox<>();
         groupComboBox.addItem(GROUP_PROMPT);
         groupComboBox.addItem(NO_GROUP);
-        queryManager.getGroups().stream()
-                .filter(g -> !g.isDegenerate())
+        queryManager.getRoot().getChildren().stream()
+                .filter(e -> !e.isQuery())
                 .forEach(g -> groupComboBox.addItem(g.getID()));
         groupComboBox.setEditable(true);
-
-        ImmutableSet<String> degenerateGroups = queryManager.getGroups().stream()
-                .filter(QueryManager.Group::isDegenerate)
-                .flatMap(g -> g.getQueries().stream())
-                .map(QueryManager.Query::getID)
-                .collect(ImmutableCollectors.toSet());
 
         mainPanel.add(groupComboBox,
                 new GridBagConstraints(1, 2, 1, 1, 1, 0,
@@ -134,8 +126,7 @@ public class NewQueryDialog extends JDialog {
         SimpleDocumentListener okButtonEnabler = e -> okButton.setEnabled(
                 !queryIdTextField.getText().trim().isEmpty()
                         && !GROUP_PROMPT.equals(tc.getText())
-                        && !tc.getText().trim().isEmpty()
-                        && !degenerateGroups.contains(tc.getText().trim()));
+                        && !tc.getText().trim().isEmpty());
         queryIdTextField.getDocument().addDocumentListener(okButtonEnabler);
         tc.getDocument().addDocumentListener(okButtonEnabler);
 
@@ -153,19 +144,13 @@ public class NewQueryDialog extends JDialog {
 
     private void createNewQuery(String groupId, String id) {
 		try {
-            if (NO_GROUP.equals(groupId)) {
-                queryManager.addQuery(id, "");
-            }
-            else {
-                QueryManager.Group group;
-                try {
-                    group = queryManager.getGroup(groupId);
-                }
-                catch (IllegalArgumentException e) {
-                    group = queryManager.addGroup(groupId.trim());
-                }
-                queryManager.addQuery(group, id, "");
-            }
+		    QueryManager.Item root = queryManager.getRoot();
+            QueryManager.Item group = NO_GROUP.equals(groupId)
+                    ? root
+                    : root.getChild(groupId).orElseGet(() -> root.addGroupChild(groupId.trim()));
+
+            group.addQueryChild(id, "");
+
             dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         }
 		catch (IllegalArgumentException e) {

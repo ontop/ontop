@@ -64,7 +64,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 
 	private final OBDAModelManager obdaModelManager;
 
-	private String groupId = "", queryId = "";
+	private QueryManager.Item query;
 
 	private final QueryInterfaceLimitPanel limitPanel;
 	private final JCheckBox showShortIriCheckBox;
@@ -152,7 +152,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 				"Update the query in the catalog") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (queryId.isEmpty()) {
+				if (query == null) {
 					JOptionPane.showMessageDialog(QueryInterfacePanel.this,
 							"Please select first the query you would like to update",
 							"Warning",
@@ -160,8 +160,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 					return;
 				}
 
-				QueryManager.Query query = obdaModelManager.getQueryController().getQuery(groupId, queryId);
-				query.setQuery(queryTextPane.getText());
+				query.setQueryString(queryTextPane.getText());
 			}
 		};
 
@@ -279,14 +278,13 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 	}
 
 	@Override
-	public void selectedQueryChanged(String groupId, String queryId, String query) {
+	public void selectedQueryChanged(QueryManager.Item query) {
 //		if (!this.queryId.isEmpty()) {
 //			QueryManager.Query previous = queryManager.getQuery(this.groupId, this.queryId);
-//			previous.setQuery(queryTextPane.getText());
+//			previous.setQueryString(queryTextPane.getText());
 //		}
-		queryTextPane.setText(query);
-		this.groupId = groupId;
-		this.queryId = queryId;
+		this.query = query;
+		queryTextPane.setText(query != null ? query.getQueryString() : "");
 		resetTableModel(new String[0]);
 		txtSqlTranslation.setText("");
 		//executeButton.setEnabled(true);

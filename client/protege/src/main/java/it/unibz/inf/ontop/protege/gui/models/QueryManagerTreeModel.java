@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.gui.models;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.QueryManager;
 
 import javax.swing.event.TreeModelEvent;
@@ -8,6 +7,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
+import java.util.List;
 
 public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListener {
     private final QueryManager queryManager;
@@ -19,43 +19,25 @@ public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListe
 
     @Override
     public Object getRoot() {
-        return queryManager;
+        return queryManager.getRoot();
     }
 
     @Override
-    public Object getChild(Object parent, int index) {
-        if (parent == queryManager) {
-            ImmutableList<QueryManager.Group> groups = ImmutableList.copyOf(queryManager.getGroups());
-            QueryManager.Group group = groups.get(index);
-            return (group.isDegenerate())
-                ? group.getQueries().iterator().next()
-                : group;
-        }
-        if (parent instanceof QueryManager.Group) {
-            QueryManager.Group group = (QueryManager.Group) parent;
-            ImmutableList<QueryManager.Query> queries = ImmutableList.copyOf(group.getQueries());
-            return queries.get(index);
-        }
-
-        return null;
+    public Object getChild(Object parentO, int index) {
+        QueryManager.Item parent = (QueryManager.Item)parentO;
+        return index < parent.getChildNumber() ? parent.getChild(index) :  null;
     }
 
     @Override
-    public int getChildCount(Object parent) {
-        if (parent == queryManager) {
-            return queryManager.getGroups().size();
-        }
-        if (parent instanceof QueryManager.Group) {
-            QueryManager.Group group = (QueryManager.Group) parent;
-            return group.getQueries().size();
-        }
-
-        return 0;
+    public int getChildCount(Object parentO) {
+        QueryManager.Item parent = (QueryManager.Item)parentO;
+        return parent.getChildNumber();
     }
 
     @Override
     public boolean isLeaf(Object node) {
-        return node instanceof QueryManager.Query;
+        QueryManager.Item item = (QueryManager.Item)node;
+        return item.getChildNumber() == 0;
     }
 
     @Override
@@ -64,19 +46,10 @@ public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListe
     }
 
     @Override
-    public int getIndexOfChild(Object parent, Object child) {
-
-        if (child instanceof QueryManager.Group) {
-            QueryManager.Group group = (QueryManager.Group) child;
-            return group.getIndex();
-        }
-
-        if (child instanceof QueryManager.Query) {
-            QueryManager.Query query = (QueryManager.Query) child;
-            return query.getIndex();
-        }
-
-        return -1;
+    public int getIndexOfChild(Object parentO, Object childO) {
+        QueryManager.Item parent = (QueryManager.Item)parentO;
+        QueryManager.Item child = (QueryManager.Item)childO;
+        return parent.getChildIndex(child);
     }
 
     private final ArrayList<TreeModelListener> listeners = new ArrayList<>();
@@ -93,66 +66,39 @@ public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListe
     }
 
     @Override
-    public void added(QueryManager.Group group) {
-        listeners.forEach(l -> l.treeNodesInserted(createEvent(group)));
+    public void added(QueryManager.Item item, int indexInParent) {
+        listeners.forEach(l -> l.treeNodesInserted(createEvent(item, indexInParent)));
     }
 
     @Override
-    public void added(QueryManager.Query query) {
-        listeners.forEach(l -> l.treeNodesInserted(createEvent(query)));
+    public void removed(QueryManager.Item item, int indexInParent) {
+        listeners.forEach(l -> l.treeNodesRemoved(createEvent(item, indexInParent)));
     }
 
     @Override
-    public void removed(QueryManager.Group group) {
-        listeners.forEach(l -> l.treeNodesRemoved(createEvent(group)));
+    public void changed(QueryManager.Item item, int indexInParent) {
+        listeners.forEach(l -> l.treeNodesChanged(createEvent(item, indexInParent)));
     }
 
-    @Override
-    public void removed(QueryManager.Query query) {
-        listeners.forEach(l -> l.treeNodesRemoved(createEvent(query)));
-    }
-
-    @Override
-    public void changed(QueryManager.Query query) {
-        listeners.forEach(l -> l.treeNodesChanged(createEvent(query)));
-    }
-
-    private TreeModelEvent createEvent(Object node) {
-        Object parent = getParent(node);
+    private TreeModelEvent createEvent(QueryManager.Item item, int indexInParent) {
+        Object parent = item.getParent();
         return new TreeModelEvent(
                 this,
                 getPathToRoot(parent),
-                new int[]{ getIndexOfChild(parent, node) }, new Object[]{ node });
+                new int[]{ indexInParent }, new Object[]{ item });
     }
 
     private TreePath getPathToRoot(Object node) {
-        if (node == queryManager)
-            return new TreePath(new Object[]{ queryManager });
-
-        if (node instanceof QueryManager.Group)
-            return new TreePath(new Object[]{ queryManager, node });
-
-        if (node instanceof QueryManager.Query) {
-            QueryManager.Query query = (QueryManager.Query) node;
-            if (query.getGroup().isDegenerate())
-                return new TreePath(new Object[]{ queryManager, node });
-            else
-                return new TreePath(new Object[]{ queryManager, query.getGroup(), query });
+        List<QueryManager.Item> reversedPath = new ArrayList<>();
+        QueryManager.Item current = (QueryManager.Item)node;
+        while (current != null) {
+            reversedPath.add(current);
+            current = current.getParent();
         }
-        return null;
-    }
+        Object[] path = new Object[reversedPath.size()];
+        for (int i = path.length - 1; i >= 0; i--)
+            path[i] = reversedPath.get(path.length - 1 - i);
 
-    private Object getParent(Object node) {
-        if (node instanceof QueryManager.Group)
-            return queryManager;
-
-        if (node instanceof QueryManager.Query) {
-            QueryManager.Query query = (QueryManager.Query) node;
-            if (query.getGroup().isDegenerate())
-                return queryManager;
-            else
-                return query.getGroup();
-        }
-        return null;
+        return new TreePath(path);
     }
 }

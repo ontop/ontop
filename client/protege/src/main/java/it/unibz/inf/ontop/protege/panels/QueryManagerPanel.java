@@ -72,14 +72,9 @@ public class QueryManagerPanel extends JPanel {
 
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-                if (value instanceof QueryManager.Query) {
-                    setIcon(saved_query_icon);
-                    setText(((QueryManager.Query) value).getID());
-                }
-                else if (value instanceof QueryManager.Group) {
-                    setIcon(query_group_icon);
-                    setText(((QueryManager.Group) value).getID());
-                }
+                QueryManager.Item entity = (QueryManager.Item)value;
+                setText(entity.getID());
+                setIcon(entity.getQueryString() != null ? saved_query_icon : query_group_icon);
 
                 return this;
             }
@@ -126,19 +121,11 @@ public class QueryManagerPanel extends JPanel {
 
 
     private void selectQueryNode(TreeSelectionEvent evt) {
-    	Object node = evt.getPath().getLastPathComponent();
-
-        if (node instanceof QueryManager.Query) {
-            QueryManager.Query query =  (QueryManager.Query)node;
-            listeners.forEach(l -> l.selectedQueryChanged(query.getGroup().getID(), query.getID(), query.getQuery()));
-        }
-        else if (node instanceof QueryManager.Group) {
-            QueryManager.Group group = (QueryManager.Group)node;
-            listeners.forEach(l -> l.selectedQueryChanged(group.getID(), "", ""));
-        }
-        else {
-            listeners.forEach(l -> l.selectedQueryChanged("", "", ""));
-        }
+    	QueryManager.Item entity = (QueryManager.Item) evt.getPath().getLastPathComponent();
+    	if (entity.isQuery())
+    	    listeners.forEach(l -> l.selectedQueryChanged(entity));
+        else
+            listeners.forEach(l -> l.selectedQueryChanged(null));
     }
 
     private void cmdAddActionPerformed(ActionEvent evt) {
@@ -151,29 +138,20 @@ public class QueryManagerPanel extends JPanel {
 		if (path == null)
 			return;
 
-		Object node = path.getLastPathComponent();
-		if (node instanceof QueryManager.Query) {
-            QueryManager.Query query = (QueryManager.Query)node;
-            if (JOptionPane.showConfirmDialog(this,
-                    "This will delete query " + query.getID() +  ".\nContinue?",
-                    "Delete confirmation",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
-                return;
+        QueryManager.Item entity = (QueryManager.Item)path.getLastPathComponent();
+        if (entity.getParent() == null) // root cannot be removed
+            return;
 
-            queryManager.removeQuery(query.getGroup().getID(), query.getID());
-		}
-		else if (node instanceof QueryManager.Group) {
-            QueryManager.Group group = (QueryManager.Group)node;
-            if (JOptionPane.showConfirmDialog(this,
-                    "This will delete group " + group.getID() +  " (with all its queries).\nContinue?",
-                    "Delete confirmation",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
-                return;
+        if (JOptionPane.showConfirmDialog(this,
+                entity.isQuery()
+                        ? "This will delete query " + entity.getID() +  ".\nContinue? "
+                        : "This will delete group " + entity.getID() +  " (with all its queries).\nContinue?",
+                "Delete confirmation",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
+            return;
 
-			queryManager.removeGroup(group.getID());
-		}
+        entity.getParent().removeChild(entity);
 	}
 
     private TreePath getExtendedTreePath(TreeModelEvent e) {

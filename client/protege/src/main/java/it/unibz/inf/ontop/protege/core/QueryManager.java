@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
@@ -27,179 +28,135 @@ import java.util.stream.Collectors;
 
 public class QueryManager {
 
+	private final Item root = new Item(null, "ROOT", null);
+
+	public Item getRoot() {
+		return root;
+	}
+
+	public class Item {
+		@Nullable
+		private final Item parent;
+		private final List<Item> children = new ArrayList<>();
+		@Nonnull
+		private String id;
+		@Nullable
+		private String queryString;
+
+		private Item(Item parent, @Nonnull String id, String queryString) {
+			this.parent = parent;
+			this.id = id;
+			this.queryString = queryString;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof Item) {
+				Item other = (Item)obj;
+				return this.parent == other.parent && this.id.equals(other.id);
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return "QME " + id + " WITH CHILDREN " + children;
+		}
+
+		public Item addGroupChild(String id) {
+			return addChild(id, null);
+		}
+
+		public Item addQueryChild(String id, String queryString) {
+			if (queryString == null)
+				throw new IllegalArgumentException("Query string cannot be null in a query.");
+
+			return addChild(id, queryString);
+		}
+
+		private Item addChild(String id, String queryString) {
+			if (id == null || id.isEmpty())
+				throw new IllegalArgumentException("The query ID cannot be null or blank.");
+
+			if (isQuery())
+				throw new IllegalArgumentException("Cannot add entities to a query.");
+
+			Item item = new Item(this, id, queryString);
+
+			if (children.contains(item))
+				throw new IllegalArgumentException("The parent group already contains this group / query.");
+
+			children.add(item);
+			listeners.forEach(l -> l.added(item, children.size() - 1));
+			return item;
+		}
+
+		public void removeChild(Item item) {
+			int indexInParent = children.indexOf(item);
+			if (indexInParent == -1)
+				throw new IllegalArgumentException("Cannot find the child");
+
+			children.remove(item);
+			listeners.forEach(l -> l.removed(item, indexInParent));
+		}
+
+		public String getID() { return id; }
+
+		public Item getParent() { return parent; }
+
+		public boolean isQuery() { return queryString != null; }
+
+		public String getQueryString() { return queryString; }
+
+		public void setQueryString(String queryString) {
+			if (queryString == null)
+				throw new IllegalArgumentException("The query string cannot be null in a query.");
+
+			if (!children.isEmpty() || parent == null)
+				throw new IllegalArgumentException("Cannot set a query string for a group / root.");
+
+			this.queryString = queryString;
+			listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
+		}
+
+		public Optional<Item> getChild(String id) {
+			for (Item child : children)
+				if (child.getID().equals(id))
+					return Optional.of(child);
+
+			return Optional.empty();
+		}
+
+		public int getChildIndex(Item child) {
+			return children.indexOf(child);
+		}
+
+		public Item getChild(int index) {
+			return children.get(index);
+		}
+
+		public int getChildNumber() { return children.size(); }
+
+		public List<Item> getChildren() { return Collections.unmodifiableList(children); }
+	}
+
+
+
+	public interface EventListener  {
+
+		void added(Item entity, int indexInParent);
+
+		void removed(Item entity, int indexInParent);
+
+		void changed(Item query, int indexInParent);
+	}
+
 	private final List<EventListener> listeners = new ArrayList<>();
-	
+
 	public void addListener(EventListener listener) {
 		if (!listeners.contains(listener))
 			listeners.add(listener);
 	}
-
-	private final Map<String, Group> groups = new LinkedHashMap<>();
-
-	public class Query {
-		private final Group group;
-		private final String id;
-		private final int index;
-		private String query;
-
-		private Query(Group group, String id, String query) {
-			this.group = group;
-			this.id = id;
-			this.query = query;
-			this.index = group.queries.size();
-
-			if (id.isEmpty())
-				throw new IllegalArgumentException("The query ID can't be blank!");
-
-			if (group.isDegenerate && group.queries.size() > 0)
-				throw new IllegalArgumentException("A query is added to a degenerate group");
-
-			if (!group.isDegenerate && id.equals(group.id))
-				throw new IllegalArgumentException("The group ID can't be the same as the query ID!");
-
-			if (group.queries.containsKey(id))
-				throw new IllegalArgumentException("The query ID already exists!");
-			group.queries.put(id, this);
-		}
-
-		public Group getGroup() { return group; }
-		public String getID() { return id; }
-		public String getQuery() { return query; }
-		public int getIndex() { return group.isDegenerate ? group.index : index; }
-
-		public void setQuery(String query) {
-			this.query = query;
-			listeners.forEach(l -> l.changed(this));
-		}
-	}
-
-	public class Group {
-		private final String id;
-		private final boolean isDegenerate; // a single query whose ID is the group ID
-		private final int index;
-		private final Map<String, Query> queries = new LinkedHashMap<>();
-
-		private Group(String id) {
-			this.id = id;
-			this.isDegenerate = false;
-			this.index = groups.size();
-			init();
-		}
-
-		/**
-			degenerate group that consists of a single query (their IDs are the same)
-		 */
-		private Group(String id, String query) {
-			this.id = id;
-			this.isDegenerate = true;
-			this.index = groups.size();
-			new Query(this, id, query);
-			init();
-		}
-
-		private void init() {
-			if (id.isEmpty())
-				throw new IllegalArgumentException("The group ID can't be blank!");
-
-			if (groups.containsKey(id))
-				throw new IllegalArgumentException("Group with ID " + id + " already exists");
-			groups.put(id, this);
-		}
-
-		public String getID() { return isDegenerate ? null : id; }
-		public boolean isDegenerate() { return isDegenerate; }
-		public int getIndex() { return index; }
-
-		public Collection<Query> getQueries() { return queries.values(); }
-	}
-
-	public interface EventListener  {
-		void added(Group group);
-		void added(Query query);
-		void removed(Group group);
-		void removed(Query query);
-		void changed(Query query);
-	}
-
-
-
-	public void addQuery(Group group, String queryId, String query) {
-		Query q = new Query(group, queryId, query);
-		listeners.forEach(l -> l.added(q));
-	}
-
-	public void addQuery(String queryId, String query) {
-		Group g = new Group(queryId, query);
-		Query q = g.getQueries().iterator().next();
-		listeners.forEach(l -> l.added(q));
-	}
-
-	public Group addGroup(String groupId) {
-		Group g = new Group(groupId);
-		listeners.forEach(l -> l.added(g));
-		return g;
-	}
-
-	public Group getGroup(String groupId) {
-		Group g = groups.get(groupId);
-		if (g == null)
-			throw new IllegalArgumentException("Group " + groupId + " not found");
-
-		return g;
-	}
-
-	public Query getQuery(@Nullable String groupId, String queryId) {
-		if (groupId == null) {
-			Group group = groups.get(queryId);
-			if (group == null || !group.isDegenerate())
-				throw new IllegalArgumentException("Query with ID " + queryId + " not found");
-
-			return group.getQueries().iterator().next();
-		}
-		else {
-			Group group = getGroup(groupId);
-			if (group.isDegenerate())
-				throw new IllegalArgumentException("Incorrect use of degenerate groups");
-
-			Query query = group.queries.get(queryId);
-			if (query == null)
-				throw new IllegalArgumentException("Query with ID " + queryId + " not found in group " + group.id);
-
-			return query;
-		}
-	}
-
-	public void removeQuery(@Nullable String groupId, String queryId) {
-		Query query;
-		if (groupId == null) {
-			Group group = groups.remove(queryId);
-			if (group == null || !group.isDegenerate())
-				throw new IllegalArgumentException("Query with ID " + queryId + " not found");
-
-			query = group.getQueries().iterator().next();
-		}
-		else {
-			Group group = getGroup(groupId);
-			if (group.isDegenerate())
-				throw new IllegalArgumentException("Incorrect use of degenerate groups");
-
-			query = group.queries.remove(queryId);
-			if (query == null)
-				throw new IllegalArgumentException("Query with ID " + queryId + " not found in group " + group.id);
-		}
-		listeners.forEach(l -> l.removed(query));
-	}
-
-	public void removeGroup(String groupId) {
-		Group g = groups.remove(groupId);
-		if (g == null)
-			throw new IllegalArgumentException("Cannot find group: " + groupId);
-
-		listeners.forEach(l -> l.removed(g));
-	}
-
-	public Collection<Group> getGroups() { return groups.values(); }
-
 
 
 
@@ -218,27 +175,20 @@ public class QueryManager {
 	 * The save/write operation.
 	 */
 	public String renderQueries()  {
-		return groups.values().stream()
-					.map(QueryManager::renderGroup)
-					.collect(Collectors.joining("\n"));
+		return rendeItem(root);
 	}
 
-	private static String renderGroup(QueryManager.Group group) {
-		if (!group.isDegenerate())
-			return String.format(QUERY_GROUP_TAG, group.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
-					+ group.getQueries().stream()
-					.map(QueryManager::renderQuery)
+	private static String rendeItem(Item item) {
+		if (item.isQuery())
+			return String.format(QUERY_ITEM_TAG, item.getID()) + "\n"
+					+ item.getQueryString().trim() + "\n";
+		else
+			return String.format(QUERY_GROUP_TAG, item.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
+					+ item.children.stream()
+					.map(QueryManager::rendeItem)
 					.collect(Collectors.joining("\n"))
 					+ END_COLLECTION_SYMBOL + "\n";
-		else
-			return renderQuery(group.getQueries().iterator().next());
 	}
-
-	private static String renderQuery(QueryManager.Query query) {
-		return String.format(QUERY_ITEM_TAG, query.getID()) + "\n"
-				+ query.getQuery().trim() + "\n";
-	}
-
 
 	/**
 	 * The load/write operation
@@ -249,7 +199,7 @@ public class QueryManager {
 	 */
 	public void load(FileReader file) throws IOException {
 		// Clean the controller first before loading
-		groups.clear();
+		root.children.clear();
 
 		LineNumberReader lineNumberReader = new LineNumberReader(file);
 		try {
@@ -261,7 +211,7 @@ public class QueryManager {
 					else if (line.contains(QUERY_ITEM))
 						readQuery(lineNumberReader, null, getID(line));
 					else
-						throw new IOException("Expected a group or query tag");
+						throw new IOException("Expected a group or queryString tag");
 				}
 			}
 		}
@@ -277,7 +227,7 @@ public class QueryManager {
 				if (line.contains(QUERY_ITEM))
 					readQuery(lineNumberReader, groupId, getID(line));
 				else
-					throw new IOException("Unexpected a query tag");
+					throw new IOException("Unexpected a queryString tag");
 			}
 		}
 	}
@@ -298,19 +248,13 @@ public class QueryManager {
 			buffer.append(line).append("\n");
 		}
 		lineNumberReader.reset(); // rewind back to the start of the last line
-		String queryText = buffer.toString();
+		String queryString = buffer.toString();
 
-		if (groupId == null)
-			addQuery(queryId, queryText);
-		else {
-			Group group = groups.get(groupId);
-			if (group == null) {
-				Group newGroup = addGroup(groupId);
-				addQuery(newGroup, queryId, queryText);
-			}
-			else
-				addQuery(group, queryId, queryText);
-		}
+		Item group = (groupId == null)
+				? root
+				: root.getChild(groupId).orElseGet(() -> root.addGroupChild(groupId));
+
+		group.addQueryChild(queryId, queryString);
 	}
 
 	private static boolean isNotACommentOrEmptyLine(String line) {
