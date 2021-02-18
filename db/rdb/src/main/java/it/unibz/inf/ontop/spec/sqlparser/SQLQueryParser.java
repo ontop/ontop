@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
@@ -28,9 +27,9 @@ public class SQLQueryParser {
     private final DBTypeFactory dbTypeFactory;
 
     @Inject
-    public SQLQueryParser(CoreSingletons coreSingletons, TypeFactory typeFactory) {
+    public SQLQueryParser(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
-        this.dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
     }
 
     public RAExpression getRAExpression(String sourceQuery, MetadataLookup metadataLookup) throws InvalidSelectQueryException {

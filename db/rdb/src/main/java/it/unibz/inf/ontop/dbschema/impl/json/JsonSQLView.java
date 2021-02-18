@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
@@ -13,12 +12,10 @@ import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
-import it.unibz.inf.ontop.iq.type.impl.NotYetTypedEqualityTransformerImpl;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -54,8 +51,6 @@ public class JsonSQLView extends JsonView {
     public final ForeignKeys foreignKeys;
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(JsonSQLView.class);
-    
-    private static NotYetTypedEqualityTransformer notYetTypedEqualityTransformer;
 
     @JsonCreator
     public JsonSQLView(@JsonProperty("name") List<String> name,
@@ -107,7 +102,7 @@ public class JsonSQLView extends JsonView {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
 
-        RAExpression2IQConverter raExpression2IQConverter = new RAExpression2IQConverter(termFactory, iqFactory);
+        RAExpression2IQConverter raExpression2IQConverter = new RAExpression2IQConverter(coreSingletons);
 
         IQTree iqTree;
         RAExpression raExpression;
@@ -128,9 +123,7 @@ public class JsonSQLView extends JsonView {
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
         InjectiveVar2VarSubstitution injectiveVar2VarSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(map1);
         IQTree iqTreeRenamedVariables = iqTree.applyFreshRenaming(injectiveVar2VarSubstitution);
-        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-        Injector injector = defaultConfiguration.getInjector();
-        notYetTypedEqualityTransformer = injector.getInstance(NotYetTypedEqualityTransformerImpl.class);
+        NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree iqTreeTransformed = notYetTypedEqualityTransformer.transform(iqTreeRenamedVariables);
 
         ImmutableSet<Variable> iqTreeVariables = iqTree.getVariables();
@@ -147,7 +140,7 @@ public class JsonSQLView extends JsonView {
     private RAExpression extractRAExpression(DBParameters dbParameters, MetadataLookup metadataLookup)
             throws JSQLParserException, UnsupportedSelectQueryException, InvalidSelectQueryException {
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
-        SQLQueryParser sq = new SQLQueryParser(coreSingletons, coreSingletons.getTypeFactory());
+        SQLQueryParser sq = new SQLQueryParser(coreSingletons);
         return sq.getRAExpression(query, metadataLookup);
     }
 
