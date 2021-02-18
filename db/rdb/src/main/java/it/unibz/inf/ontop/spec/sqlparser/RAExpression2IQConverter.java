@@ -13,7 +13,7 @@ public class RAExpression2IQConverter {
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private RAExpression2IQConverter(TermFactory termFactory, IntermediateQueryFactory iqFactory) {
+    public RAExpression2IQConverter(TermFactory termFactory, IntermediateQueryFactory iqFactory) {
         this.termFactory = termFactory;
 
         this.iqFactory = iqFactory;

@@ -28,7 +28,7 @@ public class SQLQueryParser {
     private final DBTypeFactory dbTypeFactory;
 
     @Inject
-    private SQLQueryParser(CoreSingletons coreSingletons, TypeFactory typeFactory) {
+    public SQLQueryParser(CoreSingletons coreSingletons, TypeFactory typeFactory) {
         this.coreSingletons = coreSingletons;
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
     }
