@@ -22,8 +22,8 @@ public class RAExpression2IQConverter {
     }
 
     public RAExpression2IQConverter(CoreSingletons coreSingletons) {
-        this.termFactory = null;
-        this.iqFactory = null;
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
         this.coreSingletons = coreSingletons;
     }
 
