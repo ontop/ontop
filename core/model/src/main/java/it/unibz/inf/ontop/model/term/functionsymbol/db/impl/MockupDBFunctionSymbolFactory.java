@@ -184,11 +184,18 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     /**
      * Too simplistic!
-     * @param booleanType
      */
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
         return createSimpleCastFunctionSymbol(dbTypeFactory.getDBBooleanType(), dbStringType);
+    }
+
+    /**
+     * Too simplistic!
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryNormFunctionSymbol(DBTermType binaryType) {
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBHexBinaryType(), dbStringType);
     }
 
     @Override
@@ -198,6 +205,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

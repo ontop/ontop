@@ -708,6 +708,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryNormFunctionSymbol(DBTermType binaryType) {
+        return new DefaultHexBinaryNormFunctionSymbol(binaryType, dbStringType, this::serializeHexBinaryNorm);
+    }
+
+    protected String serializeHexBinaryNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return termConverter.apply(
+                termFactory.getDBUpper(
+                        termFactory.getDBCastFunctionalTerm(dbStringType, terms.get(0))));
+    }
+
+    @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         return new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
@@ -715,6 +727,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
         return new DefaultBooleanDenormFunctionSymbol(dbBooleanType, dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol() {
+        throw new RuntimeException("TODO: implement createHexBinaryDenormFunctionSymbol");
     }
 
     @Override
