@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -70,7 +71,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
 
     @Override
-    public OntopBindingSet next() throws OntopConnectionException {
+    public OntopBindingSet next() throws OntopConnectionException, OntopResultConversionException {
 
         if (!lastCalledIsHasNext) {
             try {
@@ -131,7 +132,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
         }
     }
 
-    protected abstract OntopBindingSet readCurrentRow() throws OntopConnectionException;
+    protected abstract OntopBindingSet readCurrentRow() throws OntopConnectionException, OntopResultConversionException;
 
     protected OntopConnectionException buildConnectionException(Exception e) {
         queryLogger.declareConnectionException(e);

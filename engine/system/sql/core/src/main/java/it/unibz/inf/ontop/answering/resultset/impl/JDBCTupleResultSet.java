@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -43,7 +44,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
 
     @Override
-    protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException {
+    protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException, OntopResultConversionException {
         //builder (+loop) in order to throw checked exception
         final ImmutableMap.Builder<Variable, Constant> builder = ImmutableMap.builder();
         Iterator<Variable> it = sqlSignature.iterator();
@@ -60,7 +61,11 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
         } catch (SQLException e) {
             throw buildConnectionException(e);
         }
-        return new SQLOntopBindingSet(computeBindingMap(substitutionFactory.getSubstitution(builder.build())));
+        try {
+            return new SQLOntopBindingSet(computeBindingMap(substitutionFactory.getSubstitution(builder.build())));
+        } catch (Exception e) {
+            throw new OntopResultConversionException(e);
+        }
     }
 
     private Constant convertToConstant(@Nullable String jdbcValue, DBTermType termType) {
