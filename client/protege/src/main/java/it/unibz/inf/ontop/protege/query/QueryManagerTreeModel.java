@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.protege.query;
 
-import it.unibz.inf.ontop.protege.query.QueryManager;
-import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
-
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;

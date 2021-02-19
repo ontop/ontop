@@ -82,15 +82,13 @@ public class BootstrapAction extends ProtegeAction {
 		baseIriLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(baseIriLabel);
 
-		Dimension minsize1 = new Dimension(10, 10);
-		panel.add(new Box.Filler(minsize1, minsize1, minsize1));
+		panel.add(Box.createRigidArea(new Dimension(10, 10)));
 
 		JTextField baseIriField = new JTextField(defaultBaseIRI);
 		baseIriField.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.add(baseIriField);
 
-		Dimension minsize2 = new Dimension(20, 20);
-		panel.add(new Box.Filler(minsize2, minsize2, minsize2));
+		panel.add(Box.createRigidArea(new Dimension(20, 20)));
 
 		if (JOptionPane.showOptionDialog(getWorkspace(),
 				panel,
