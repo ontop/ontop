@@ -114,11 +114,7 @@ public class RDB2RDFTest {
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"tc0018a",
 			// Should create an IRI based on a column and the base IRI. TODO: support the base IRI in R2RML
-			"tc0019a",
-			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
-			"tc0019b",
-			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
-			"tc0020b"
+			"tc0019a"
 	);
 
 	private static List<String> FAILURES = Lists.newArrayList();
