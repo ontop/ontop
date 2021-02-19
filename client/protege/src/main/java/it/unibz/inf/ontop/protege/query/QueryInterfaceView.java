@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.views;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
-import it.unibz.inf.ontop.protege.panels.QueryManagerSelectionListener;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -79,7 +77,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent {
             queryInterfaceView.removeSelectionListener(getSelectionListener());
     }
 
-    public QueryManagerSelectionListener getSelectionListener() {
+    public QueryManagerPanelSelectionListener getSelectionListener() {
         return panel;
     }
 

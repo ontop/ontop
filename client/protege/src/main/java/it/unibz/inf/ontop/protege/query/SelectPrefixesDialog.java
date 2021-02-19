@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.dialogs;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 import static java.awt.event.KeyEvent.*;
 
-public class SelectPrefixDialog extends JDialog {
+public class SelectPrefixesDialog extends JDialog {
 
 	private static final long serialVersionUID = -8277829841902027620L;
 
@@ -52,7 +52,7 @@ public class SelectPrefixDialog extends JDialog {
 	 * @param queryTextComponent query entry field
 	 */
 
-	public SelectPrefixDialog(MutablePrefixManager prefixManager, JTextComponent queryTextComponent) {
+	public SelectPrefixesDialog(MutablePrefixManager prefixManager, JTextComponent queryTextComponent) {
 		prefixMap = prefixManager.getPrefixMap();
 
 		setTitle("Select Prefixes for the Query");
@@ -64,7 +64,7 @@ public class SelectPrefixDialog extends JDialog {
 				String directives = getDirectives();
 				queryTextComponent.setText((directives.isEmpty() ? "" : directives + "\n") +
 						queryTextComponent.getText());
-				dispatchEvent(new WindowEvent(SelectPrefixDialog.this, WindowEvent.WINDOW_CLOSING));
+				dispatchEvent(new WindowEvent(SelectPrefixesDialog.this, WindowEvent.WINDOW_CLOSING));
 			}
 		};
 
@@ -87,7 +87,7 @@ public class SelectPrefixDialog extends JDialog {
 		Action cancelAction = new AbstractAction("Cancel") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispatchEvent(new WindowEvent(SelectPrefixDialog.this, WindowEvent.WINDOW_CLOSING));
+				dispatchEvent(new WindowEvent(SelectPrefixesDialog.this, WindowEvent.WINDOW_CLOSING));
 			}
 		};
 

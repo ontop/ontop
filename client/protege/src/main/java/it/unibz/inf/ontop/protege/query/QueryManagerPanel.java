@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.panels;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.QueryManager;
-import it.unibz.inf.ontop.protege.gui.dialogs.NewQueryDialog;
-import it.unibz.inf.ontop.protege.gui.models.QueryManagerTreeModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 
@@ -47,7 +44,7 @@ public class QueryManagerPanel extends JPanel {
     private final Icon saved_query_icon;
     private final Icon query_group_icon;
 
-    private final List<QueryManagerSelectionListener> listeners = new ArrayList<>();
+    private final List<QueryManagerPanelSelectionListener> listeners = new ArrayList<>();
 
     private final QueryManager queryManager;
 
@@ -124,12 +121,12 @@ public class QueryManagerPanel extends JPanel {
         add(controlPanel, BorderLayout.NORTH);
 	}
 
-	public void addQueryManagerSelectionListener(QueryManagerSelectionListener listener) {
+	public void addQueryManagerSelectionListener(QueryManagerPanelSelectionListener listener) {
 		if (listener != null && !listeners.contains(listener))
 		    listeners.add(listener);
 	}
 
-	public void removeQueryManagerSelectionListener(QueryManagerSelectionListener listener) {
+	public void removeQueryManagerSelectionListener(QueryManagerPanelSelectionListener listener) {
 		if (listener != null)
 		    listeners.remove(listener);
 	}

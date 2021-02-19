@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.dialogs;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
  */
 
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.core.QueryManager;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 
 import javax.swing.*;

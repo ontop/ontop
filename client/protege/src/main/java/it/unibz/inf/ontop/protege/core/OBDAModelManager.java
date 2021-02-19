@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.protege.query.QueryManager;
+import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -341,7 +343,7 @@ public class OBDAModelManager implements Disposable {
 			}
 
 			File queriesFile = new File(URI.create(owlName + QUERY_EXT));
-			if (queryController.getRoot().getChildNumber() != 0) {
+			if (queryController.getRoot().getChildCount() != 0) {
 				try (FileWriter writer = new FileWriter(queriesFile)) {
 					writer.write(queryController.renderQueries());
 				}
@@ -486,7 +488,7 @@ public class OBDAModelManager implements Disposable {
 	 * the OWL ontology model when OBDA model changes.
 	 */
 
-	private class ProtegeQueryControllerListener implements QueryManager.EventListener {
+	private class ProtegeQueryControllerListener implements QueryManagerEventListener {
 		@Override
 		public void inserted(QueryManager.Item group, int indexInParent) {
 			triggerOntologyChanged();

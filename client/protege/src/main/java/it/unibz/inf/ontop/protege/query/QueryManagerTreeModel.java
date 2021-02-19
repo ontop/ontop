@@ -1,6 +1,7 @@
-package it.unibz.inf.ontop.protege.gui.models;
+package it.unibz.inf.ontop.protege.query;
 
-import it.unibz.inf.ontop.protege.core.QueryManager;
+import it.unibz.inf.ontop.protege.query.QueryManager;
+import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -17,7 +18,7 @@ public class QueryManagerTreeModel implements TreeModel {
     public QueryManagerTreeModel(QueryManager queryManager) {
         this.queryManager = queryManager;
 
-        queryManager.addListener(new QueryManager.EventListener() {
+        queryManager.addListener(new QueryManagerEventListener() {
             @Override
             public void inserted(QueryManager.Item item, int indexInParent) {
                 createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesInserted);
@@ -43,27 +44,35 @@ public class QueryManagerTreeModel implements TreeModel {
     @Override
     public Object getChild(Object parentO, int index) {
         QueryManager.Item parent = (QueryManager.Item)parentO;
-        return index < parent.getChildNumber() ? parent.getChild(index) :  null;
+        if (index < 0 || index >= parent.getChildCount())
+            return null;
+
+        return parent.getChild(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        return ((QueryManager.Item)parent).getChildNumber();
+        return ((QueryManager.Item)parent).getChildCount();
     }
 
     @Override
     public boolean isLeaf(Object node) {
-        return ((QueryManager.Item)node).getChildNumber() == 0;
+        return ((QueryManager.Item)node).getChildCount() == 0;
     }
 
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
-// TODO:
+        QueryManager.Item item = (QueryManager.Item)path.getLastPathComponent();
+        //item.setUserObject(newValue);
+        //nodeChanged(aNode);
     }
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        return ((QueryManager.Item)parent).getChildIndex((QueryManager.Item)child);
+        if(parent == null || child == null)
+            return -1;
+
+        return ((QueryManager.Item)parent).getIndexOfChild((QueryManager.Item)child);
     }
 
     private final ArrayList<TreeModelListener> listeners = new ArrayList<>();

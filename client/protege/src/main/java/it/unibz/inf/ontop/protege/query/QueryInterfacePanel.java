@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.panels;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -29,12 +29,10 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
-import it.unibz.inf.ontop.protege.core.QueryManager;
-import it.unibz.inf.ontop.protege.gui.dialogs.SelectPrefixDialog;
-import it.unibz.inf.ontop.protege.gui.dialogs.TextQueryResultsDialog;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.protege.utils.OWL2TurtleTranslator;
+import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 import it.unibz.inf.ontop.protege.workers.ExportResultsToCSVSwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorkerFactory;
@@ -44,7 +42,6 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
@@ -58,7 +55,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-public class QueryInterfacePanel extends JPanel implements QueryManagerSelectionListener, OWLOntologyChangeListener {
+public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSelectionListener, OWLOntologyChangeListener {
 
 	private static final long serialVersionUID = -5902798157183352944L;
 
@@ -100,6 +97,10 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 		queryTextPane = new JTextPane();
 		queryTextPane.setFont(new Font("Lucida Console", Font.PLAIN, 14)); // NOI18N
 		queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
+		queryTextPane.getDocument().addDocumentListener((SimpleDocumentListener) e -> {
+			if (query != null)
+				query.setQueryString(queryTextPane.getText().trim());
+		});
 		queryPanel.add(new JScrollPane(queryTextPane), BorderLayout.CENTER);
 
 		JPanel controlPanel = new JPanel(new GridBagLayout());
@@ -131,7 +132,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 				"Select prefixes to insert into the query") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SelectPrefixDialog dialog = new SelectPrefixDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane);
+				SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane);
 				dialog.setVisible(true);
 			}
 		};
@@ -143,24 +144,6 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				executeActionPerformed(e);
-			}
-		};
-
-		OntopAbstractAction updateAction = new OntopAbstractAction(
-				"Update",
-				"save.png",
-				"Update the query in the catalog") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (query == null) {
-					JOptionPane.showMessageDialog(QueryInterfacePanel.this,
-							"Please select first the query you would like to update",
-							"Warning",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-
-				query.setQueryString(queryTextPane.getText());
 			}
 		};
 
@@ -190,8 +173,6 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 		topControlPanel.add(Box.createHorizontalGlue());
 		JButton prefixesButton = DialogUtils.getButton(prefixesAction);
 		topControlPanel.add(prefixesButton);
-		JButton updateButton = DialogUtils.getButton(updateAction);
-		topControlPanel.add(updateButton);
 		queryPanel.add(topControlPanel, BorderLayout.NORTH);
 
 		JPanel resultsPanel = new JPanel(new BorderLayout());
@@ -278,14 +259,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 	}
 
 	@Override
-	public void selectedQueryChanged(QueryManager.Item newSelection) {
-		if (query != null
-				/* has not been removed - the parent, which always exists, contains the query ID */
-				&& query.getParent() != null
-				&& query.getParent().getChildIndex(query) != -1)
-			query.setQueryString(queryTextPane.getText());
-
-		query = newSelection;
+	public void selectedQueryChanged(QueryManager.Item query) {
+		this.query = query;
 		queryTextPane.setText(query != null ? query.getQueryString() : "");
 		resetTableModel(new String[0]);
 		txtSqlTranslation.setText("");
@@ -475,7 +450,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 			@Override
 			protected void onCompletion(String result, String sqlQuery) {
 				setSQLTranslation(sqlQuery);
-				TextQueryResultsDialog dialog = new TextQueryResultsDialog(editorKit.getWorkspace(),
+				QueryResultsSimpleDialog dialog = new QueryResultsSimpleDialog(editorKit.getWorkspace(),
 						"Intermediate Query",
 						result,
 						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
@@ -497,7 +472,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 				setSQLTranslation(sqlQuery);
 				resultTabbedPane.setSelectedIndex(1);
 				showActionResult(elapsedTimeMillis(), "Translated into SQL.");
-//				TextQueryResultsDialog dialog = new TextQueryResultsDialog(editorKit.getWorkspace(),
+//				QueryResultsSimpleDialog dialog = new QueryResultsSimpleDialog(editorKit.getWorkspace(),
 //						"SQL Translation",
 //						result,
 //						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));

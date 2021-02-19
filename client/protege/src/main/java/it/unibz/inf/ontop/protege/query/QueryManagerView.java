@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.views;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.protege.views;
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.panels.QueryManagerPanel;
-import it.unibz.inf.ontop.protege.panels.QueryManagerSelectionListener;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
@@ -66,11 +64,11 @@ public class QueryManagerView extends AbstractOWLViewComponent {
 		queryManagerViews.remove(this);
 	}
 
-	public void addSelectionListener(QueryManagerSelectionListener listener) {
+	public void addSelectionListener(QueryManagerPanelSelectionListener listener) {
 		panel.addQueryManagerSelectionListener(listener);
 	}
 
-	public void removeSelectionListener(QueryManagerSelectionListener listener) {
+	public void removeSelectionListener(QueryManagerPanelSelectionListener listener) {
 		panel.removeQueryManagerSelectionListener(listener);
 	}
 

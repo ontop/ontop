@@ -30,7 +30,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Query manager"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.QueryManagerView">
+			value="it.unibz.inf.ontop.protege.query.QueryManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -40,7 +40,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="SPARQL query editor"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.QueryInterfaceView">
+			value="it.unibz.inf.ontop.protege.query.QueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -64,7 +64,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop SPARQL"/>
 		<class
-			value="it.unibz.inf.ontop.protege.gui.tab.OntopSPARQLTab">
+			value="it.unibz.inf.ontop.protege.query.OntopSPARQLTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>

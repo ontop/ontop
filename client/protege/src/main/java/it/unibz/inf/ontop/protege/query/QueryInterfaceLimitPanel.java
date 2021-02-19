@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.panels;
+package it.unibz.inf.ontop.protege.query;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

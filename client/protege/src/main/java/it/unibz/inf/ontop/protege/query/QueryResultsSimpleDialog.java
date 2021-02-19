@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.dialogs;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -32,11 +32,11 @@ import java.awt.event.WindowEvent;
 
 import static java.awt.event.KeyEvent.VK_ESCAPE;
 
-public class TextQueryResultsDialog extends JDialog {
+public class QueryResultsSimpleDialog extends JDialog {
 
 	private static final long serialVersionUID = -200114540739796897L;
 	
-    public TextQueryResultsDialog(Workspace workspace, String title, String text, String processingTime) {
+    public QueryResultsSimpleDialog(Workspace workspace, String title, String text, String processingTime) {
         setTitle(title);
 
         setLayout(new BorderLayout());
@@ -59,7 +59,7 @@ public class TextQueryResultsDialog extends JDialog {
         Action closeAction = new AbstractAction("Close") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispatchEvent(new WindowEvent(TextQueryResultsDialog.this, WindowEvent.WINDOW_CLOSING));
+                dispatchEvent(new WindowEvent(QueryResultsSimpleDialog.this, WindowEvent.WINDOW_CLOSING));
             }
         };
 

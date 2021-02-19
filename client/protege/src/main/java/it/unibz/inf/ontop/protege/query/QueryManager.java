@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.core;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
@@ -116,7 +116,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("Cannot set a query string for a group / root.");
 
 			this.queryString = queryString;
-			listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
+			//listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
 		}
 
 		public Optional<Item> getChild(String id) {
@@ -127,7 +127,7 @@ public class QueryManager {
 			return Optional.empty();
 		}
 
-		public int getChildIndex(Item child) {
+		public int getIndexOfChild(Item child) {
 			return children.indexOf(child);
 		}
 
@@ -135,25 +135,15 @@ public class QueryManager {
 			return children.get(index);
 		}
 
-		public int getChildNumber() { return children.size(); }
+		public int getChildCount() { return children.size(); }
 
 		public List<Item> getChildren() { return Collections.unmodifiableList(children); }
 	}
 
 
+	private final List<QueryManagerEventListener> listeners = new ArrayList<>();
 
-	public interface EventListener  {
-
-		void inserted(Item entity, int indexInParent);
-
-		void removed(Item entity, int indexInParent);
-
-		void changed(Item query, int indexInParent);
-	}
-
-	private final List<EventListener> listeners = new ArrayList<>();
-
-	public void addListener(EventListener listener) {
+	public void addListener(QueryManagerEventListener listener) {
 		if (listener != null && !listeners.contains(listener))
 			listeners.add(listener);
 	}

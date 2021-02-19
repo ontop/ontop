@@ -1,8 +1,8 @@
-package it.unibz.inf.ontop.protege.gui.tab;
+package it.unibz.inf.ontop.protege.query;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,8 +20,10 @@ package it.unibz.inf.ontop.protege.gui.tab;
  * #L%
  */
 
-import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
+import javax.annotation.Nullable;
 
-public class OntopSPARQLTab extends OWLWorkspaceViewsTab {
-	private static final long	serialVersionUID	= -4896884983862745722L;
+public interface QueryManagerPanelSelectionListener {
+
+	void selectedQueryChanged(@Nullable QueryManager.Item entity);
+
 }
