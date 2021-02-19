@@ -98,8 +98,6 @@ public class RDB2RDFTest {
 			"tc0012a",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0012e",
-			// Should reject an invalid language tag
-			"tc0015b",
 			// Double + timezone was not expected to be added. Same for milliseconds.
 			"dg0016",
 			// Different XSD.DOUBLE lexical form. Modified version added.
