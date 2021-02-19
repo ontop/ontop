@@ -7,14 +7,32 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
-public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListener {
+public class QueryManagerTreeModel implements TreeModel {
     private final QueryManager queryManager;
 
     public QueryManagerTreeModel(QueryManager queryManager) {
         this.queryManager = queryManager;
-        queryManager.addListener(this);
+
+        queryManager.addListener(new QueryManager.EventListener() {
+            @Override
+            public void inserted(QueryManager.Item item, int indexInParent) {
+                createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesInserted);
+            }
+
+            @Override
+            public void removed(QueryManager.Item item, int indexInParent) {
+                createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesRemoved);
+            }
+
+            @Override
+            public void changed(QueryManager.Item item, int indexInParent) {
+                createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesChanged);
+            }
+        });
     }
 
     @Override
@@ -29,15 +47,13 @@ public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListe
     }
 
     @Override
-    public int getChildCount(Object parentO) {
-        QueryManager.Item parent = (QueryManager.Item)parentO;
-        return parent.getChildNumber();
+    public int getChildCount(Object parent) {
+        return ((QueryManager.Item)parent).getChildNumber();
     }
 
     @Override
     public boolean isLeaf(Object node) {
-        QueryManager.Item item = (QueryManager.Item)node;
-        return item.getChildNumber() == 0;
+        return ((QueryManager.Item)node).getChildNumber() == 0;
     }
 
     @Override
@@ -46,59 +62,31 @@ public class QueryManagerTreeModel implements TreeModel, QueryManager.EventListe
     }
 
     @Override
-    public int getIndexOfChild(Object parentO, Object childO) {
-        QueryManager.Item parent = (QueryManager.Item)parentO;
-        QueryManager.Item child = (QueryManager.Item)childO;
-        return parent.getChildIndex(child);
+    public int getIndexOfChild(Object parent, Object child) {
+        return ((QueryManager.Item)parent).getChildIndex((QueryManager.Item)child);
     }
 
     private final ArrayList<TreeModelListener> listeners = new ArrayList<>();
 
     @Override
-    public void addTreeModelListener(TreeModelListener l) {
-        if (l != null && !listeners.contains(l))
-            listeners.add(l);
+    public void addTreeModelListener(TreeModelListener listener) {
+        if (listener != null && !listeners.contains(listener))
+            listeners.add(listener);
     }
 
     @Override
-    public void removeTreeModelListener(TreeModelListener l) {
-        listeners.remove(l);
+    public void removeTreeModelListener(TreeModelListener listener) {
+        listeners.remove(listener);
     }
 
-    @Override
-    public void added(QueryManager.Item item, int indexInParent) {
-        listeners.forEach(l -> l.treeNodesInserted(createEvent(item, indexInParent)));
-    }
+    private void createEventAndNotify(QueryManager.Item item, int indexInParent, BiConsumer<TreeModelListener, TreeModelEvent> eventConsumer) {
+        List<QueryManager.Item> path = new LinkedList<>();
+        for (QueryManager.Item c = item.getParent(); c != null; c = c.getParent())
+            path.add(0, c); // the path starts from the root
 
-    @Override
-    public void removed(QueryManager.Item item, int indexInParent) {
-        listeners.forEach(l -> l.treeNodesRemoved(createEvent(item, indexInParent)));
-    }
-
-    @Override
-    public void changed(QueryManager.Item item, int indexInParent) {
-        listeners.forEach(l -> l.treeNodesChanged(createEvent(item, indexInParent)));
-    }
-
-    private TreeModelEvent createEvent(QueryManager.Item item, int indexInParent) {
-        Object parent = item.getParent();
-        return new TreeModelEvent(
-                this,
-                getPathToRoot(parent),
+        TreeModelEvent event = new TreeModelEvent(this, new TreePath(path.toArray()),
                 new int[]{ indexInParent }, new Object[]{ item });
-    }
 
-    private TreePath getPathToRoot(Object node) {
-        List<QueryManager.Item> reversedPath = new ArrayList<>();
-        QueryManager.Item current = (QueryManager.Item)node;
-        while (current != null) {
-            reversedPath.add(current);
-            current = current.getParent();
-        }
-        Object[] path = new Object[reversedPath.size()];
-        for (int i = path.length - 1; i >= 0; i--)
-            path[i] = reversedPath.get(path.length - 1 - i);
-
-        return new TreePath(path);
+        listeners.forEach(l -> eventConsumer.accept(l, event));
     }
 }

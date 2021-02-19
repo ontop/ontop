@@ -251,7 +251,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 	}
 
 	private void executeActionPerformed(ActionEvent evt) {
-		String query = getQuery();
+		String query = queryTextPane.getText();
 		if (query.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -278,12 +278,14 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 	}
 
 	@Override
-	public void selectedQueryChanged(QueryManager.Item query) {
-//		if (!this.queryId.isEmpty()) {
-//			QueryManager.Query previous = queryManager.getQuery(this.groupId, this.queryId);
-//			previous.setQueryString(queryTextPane.getText());
-//		}
-		this.query = query;
+	public void selectedQueryChanged(QueryManager.Item newSelection) {
+		if (query != null
+				/* has not been removed - the parent, which always exists, contains the query ID */
+				&& query.getParent() != null
+				&& query.getParent().getChildIndex(query) != -1)
+			query.setQueryString(queryTextPane.getText());
+
+		query = newSelection;
 		queryTextPane.setText(query != null ? query.getQueryString() : "");
 		resetTableModel(new String[0]);
 		txtSqlTranslation.setText("");
@@ -294,17 +296,13 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 	}
 
 	@Override
-	public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) throws OWLException {
+	public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) {
 		resetTableModel(new String[0]);
 	}
 
 	private void showActionResult(long time, String second) {
 		executionInfoLabel.setText("Execution time: " + DialogUtils.renderElapsedTime(time) + ". " + second);
 		executionInfoLabel.setOpaque(false);
-	}
-
-	private String getQuery() {
-		return queryTextPane.getText();
 	}
 
 	private DefaultTableModel resetTableModel(String[] columnNames) {
@@ -463,7 +461,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerSelection
 		if (!ontop.isPresent())
 			return;
 
-		OntopQuerySwingWorker<?, ?> worker = executor.apply(ontop.get(), getQuery());
+		OntopQuerySwingWorker<?, ?> worker = executor.apply(ontop.get(), queryTextPane.getText());
 		worker.execute();
 	}
 

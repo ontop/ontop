@@ -488,7 +488,7 @@ public class OBDAModelManager implements Disposable {
 
 	private class ProtegeQueryControllerListener implements QueryManager.EventListener {
 		@Override
-		public void added(QueryManager.Item group, int indexInParent) {
+		public void inserted(QueryManager.Item group, int indexInParent) {
 			triggerOntologyChanged();
 		}
 

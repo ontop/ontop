@@ -29,14 +29,12 @@ import it.unibz.inf.ontop.protege.utils.IconLoader;
 import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class QueryManagerPanel extends JPanel {
@@ -65,28 +63,45 @@ public class QueryManagerPanel extends JPanel {
 
         QueryManagerTreeModel model = new QueryManagerTreeModel(queryManager);
         treSavedQuery = new JTree(model);
-        treSavedQuery.setRootVisible(false);
         treSavedQuery.setCellRenderer(new DefaultTreeCellRenderer() {
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-                QueryManager.Item entity = (QueryManager.Item)value;
-                setText(entity.getID());
-                setIcon(entity.getQueryString() != null ? saved_query_icon : query_group_icon);
+                QueryManager.Item item = (QueryManager.Item)value;
+                setText(item.getID());
+                setIcon(item.isQuery() ? saved_query_icon : query_group_icon);
 
                 return this;
             }
         });
         treSavedQuery.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        treSavedQuery.getSelectionModel().addTreeSelectionListener(this::selectQueryNode);
+        treSavedQuery.getSelectionModel().addTreeSelectionListener(evt -> {
+            QueryManager.Item entity = (QueryManager.Item) evt.getPath().getLastPathComponent();
+            listeners.forEach(l -> l.selectedQueryChanged(entity.isQuery() ? entity : null));
+        });
 
         model.addTreeModelListener(new TreeModelListener() {
-            @Override public void treeNodesChanged(TreeModelEvent e) { selectAndScrollTo(getExtendedTreePath(e)); }
-            @Override public void treeNodesInserted(TreeModelEvent e) { selectAndScrollTo(getExtendedTreePath(e)); }
-            @Override public void treeNodesRemoved(TreeModelEvent e) { selectAndScrollTo(e.getTreePath()); }
-            @Override public void treeStructureChanged(TreeModelEvent e) { selectAndScrollTo(e.getTreePath()); }
+            @Override
+            public void treeNodesChanged(TreeModelEvent e) {
+            }
+            @Override
+            public void treeNodesInserted(TreeModelEvent e) {
+                selectAndScrollTo(e.getTreePath().pathByAddingChild(e.getChildren()[0]));
+            }
+            @Override
+            public void treeNodesRemoved(TreeModelEvent e) {
+                selectAndScrollTo(e.getTreePath());
+            }
+            @Override
+            public void treeStructureChanged(TreeModelEvent e) {
+                selectAndScrollTo(e.getTreePath());
+            }
+            private void selectAndScrollTo(TreePath treePath) {
+                treSavedQuery.setSelectionPath(treePath);
+                treSavedQuery.scrollPathToVisible(treePath);
+            }
         });
         add(new JScrollPane(treSavedQuery), BorderLayout.CENTER);
 
@@ -102,7 +117,7 @@ public class QueryManagerPanel extends JPanel {
         JButton removeButton = DialogUtils.getButton(
                 "Remove",
                 "minus.png",
-                "Remove the selected query",
+                "Remove the selected group or query",
                 this::cmdRemoveActionPerformed);
         controlPanel.add(removeButton);
 
@@ -120,14 +135,6 @@ public class QueryManagerPanel extends JPanel {
 	}
 
 
-    private void selectQueryNode(TreeSelectionEvent evt) {
-    	QueryManager.Item entity = (QueryManager.Item) evt.getPath().getLastPathComponent();
-    	if (entity.isQuery())
-    	    listeners.forEach(l -> l.selectedQueryChanged(entity));
-        else
-            listeners.forEach(l -> l.selectedQueryChanged(null));
-    }
-
     private void cmdAddActionPerformed(ActionEvent evt) {
 		NewQueryDialog dialog = new NewQueryDialog(this, queryManager);
 		dialog.setVisible(true);
@@ -138,31 +145,20 @@ public class QueryManagerPanel extends JPanel {
 		if (path == null)
 			return;
 
-        QueryManager.Item entity = (QueryManager.Item)path.getLastPathComponent();
-        if (entity.getParent() == null) // root cannot be removed
+        QueryManager.Item item = (QueryManager.Item) path.getLastPathComponent();
+        if (item.getParent() == null) // root cannot be removed
             return;
 
         if (JOptionPane.showConfirmDialog(this,
-                entity.isQuery()
-                        ? "This will delete query " + entity.getID() +  ".\nContinue? "
-                        : "This will delete group " + entity.getID() +  " (with all its queries).\nContinue?",
+                item.isQuery()
+                        ? "This will delete query " + item.getID() +  ".\nContinue? "
+                        : "This will delete group " + item.getID() +  " (with all its queries).\nContinue?",
                 "Delete confirmation",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
             return;
 
-        entity.getParent().removeChild(entity);
+        item.getParent().removeChild(item);
 	}
 
-    private TreePath getExtendedTreePath(TreeModelEvent e) {
-        Object[] path = e.getPath();
-        Object[] extendedPath = Arrays.copyOf(path, path.length + 1);
-        extendedPath[path.length] = e.getChildren()[0];
-        return new TreePath(extendedPath);
-    }
-
-    private void selectAndScrollTo(TreePath treePath) {
-        treSavedQuery.setSelectionPath(treePath);
-        treSavedQuery.scrollPathToVisible(treePath);
-    }
 }

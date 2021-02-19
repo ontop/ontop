@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class QueryManager {
 
-	private final Item root = new Item(null, "ROOT", null);
+	private final Item root = new Item(null, "Queries", null);
 
 	public Item getRoot() {
 		return root;
@@ -43,7 +43,7 @@ public class QueryManager {
 		@Nullable
 		private String queryString;
 
-		private Item(Item parent, @Nonnull String id, String queryString) {
+		private Item(@Nullable Item parent, @Nonnull String id, @Nullable  String queryString) {
 			this.parent = parent;
 			this.id = id;
 			this.queryString = queryString;
@@ -60,7 +60,7 @@ public class QueryManager {
 
 		@Override
 		public String toString() {
-			return "QME " + id + " WITH CHILDREN " + children;
+			return "QueryManager.Item " + id + " > " + children;
 		}
 
 		public Item addGroupChild(String id) {
@@ -74,7 +74,7 @@ public class QueryManager {
 			return addChild(id, queryString);
 		}
 
-		private Item addChild(String id, String queryString) {
+		private Item addChild(String id, @Nullable String queryString) {
 			if (id == null || id.isEmpty())
 				throw new IllegalArgumentException("The query ID cannot be null or blank.");
 
@@ -87,7 +87,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("The parent group already contains this group / query.");
 
 			children.add(item);
-			listeners.forEach(l -> l.added(item, children.size() - 1));
+			listeners.forEach(l -> l.inserted(item, children.size() - 1));
 			return item;
 		}
 
@@ -144,7 +144,7 @@ public class QueryManager {
 
 	public interface EventListener  {
 
-		void added(Item entity, int indexInParent);
+		void inserted(Item entity, int indexInParent);
 
 		void removed(Item entity, int indexInParent);
 
@@ -154,7 +154,7 @@ public class QueryManager {
 	private final List<EventListener> listeners = new ArrayList<>();
 
 	public void addListener(EventListener listener) {
-		if (!listeners.contains(listener))
+		if (listener != null && !listeners.contains(listener))
 			listeners.add(listener);
 	}
 
@@ -175,18 +175,17 @@ public class QueryManager {
 	 * The save/write operation.
 	 */
 	public String renderQueries()  {
-		return rendeItem(root);
+		return renderItem(root);
 	}
 
-	private static String rendeItem(Item item) {
-		if (item.isQuery())
-			return String.format(QUERY_ITEM_TAG, item.getID()) + "\n"
-					+ item.getQueryString().trim() + "\n";
-		else
-			return String.format(QUERY_GROUP_TAG, item.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
+	private static String renderItem(Item item) {
+		return item.isQuery()
+				? String.format(QUERY_ITEM_TAG, item.getID()) + "\n"
+					+ item.getQueryString().trim() + "\n"
+				: String.format(QUERY_GROUP_TAG, item.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
 					+ item.children.stream()
-					.map(QueryManager::rendeItem)
-					.collect(Collectors.joining("\n"))
+						.map(QueryManager::renderItem)
+						.collect(Collectors.joining("\n"))
 					+ END_COLLECTION_SYMBOL + "\n";
 	}
 
@@ -211,7 +210,7 @@ public class QueryManager {
 					else if (line.contains(QUERY_ITEM))
 						readQuery(lineNumberReader, null, getID(line));
 					else
-						throw new IOException("Expected a group or queryString tag");
+						throw new IOException("Expected group or query tag");
 				}
 			}
 		}
@@ -227,7 +226,7 @@ public class QueryManager {
 				if (line.contains(QUERY_ITEM))
 					readQuery(lineNumberReader, groupId, getID(line));
 				else
-					throw new IOException("Unexpected a queryString tag");
+					throw new IOException("Unexpected query tag");
 			}
 		}
 	}
@@ -259,12 +258,12 @@ public class QueryManager {
 
 	private static boolean isNotACommentOrEmptyLine(String line) {
 		return !line.isEmpty()
-				// A comment line is always started by semi-colon (after spaces)
+				// A comment line is always started by a semi-colon (after spaces)
 				&& !(line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0);
 	}
 
 	private static String getID(String line) {
-		// IDs are enclosed by a double quotation marks
+		// IDs are enclosed in double quotation marks
 		return line.substring(line.indexOf('\"') + 1, line.lastIndexOf('\"'));
 	}
 }
