@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
@@ -158,6 +159,7 @@ public class JsonSQLView extends JsonView {
     private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
         UniqueTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
 
         RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
         IQTree iqTree = iq.getTree();
@@ -168,7 +170,7 @@ public class JsonSQLView extends JsonView {
             builder.addAttribute(rawQuotedIqFactory.createAttributeID(v.getName()),
                     (DBTermType) uniqueTermTypeExtractor.extractUniqueTermType(v, iqTree)
                             // TODO: give the name of the view
-                            .orElseThrow(() -> new MetadataExtractionException("No type inferred for " + v + " in " + iq)),
+                            .orElseGet(dbTypeFactory::getAbstractRootDBType),
                     iqTree.getVariableNullability().isPossiblyNullable(v));
         }
         return builder;
