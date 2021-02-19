@@ -52,6 +52,8 @@ import java.util.stream.Stream;
 
 public class DialogUtils {
 
+	public static final String CANCEL_BUTTON_TEXT = UIManager.getString("OptionPane.cancelButtonText");
+	public static final String OK_BUTTON_TEXT = UIManager.getString("OptionPane.okButtonText");
 
 	public static boolean confirmation(Component parent, String message, String title) {
 		return JOptionPane.showConfirmDialog(
@@ -73,12 +75,23 @@ public class DialogUtils {
 	}
 
 	public static JButton getButton(OntopAbstractAction action) {
-		JButton button = new JButton(action.getName(), action.getIcon());
+		JButton button = new JButton(action);
 		button.setIconTextGap(5);
 		button.setMargin(new Insets(3, 7, 3, 7));
 		button.setToolTipText(action.getTooltip());
-		button.addActionListener(action);
 		return button;
+	}
+
+	public static JMenuItem getMenuItem(String text, ActionListener actionListener) {
+		JMenuItem menuItem = new JMenuItem(text);
+		menuItem.addActionListener(actionListener);
+		return menuItem;
+	}
+
+	public static JMenuItem getMenuItem(String text, ActionListener actionListener, boolean enabled) {
+		JMenuItem menuItem = getMenuItem(text, actionListener);
+		menuItem.setEnabled(enabled);
+		return menuItem;
 	}
 
 	public static DefaultTableModel createNonEditableTableModel(Object[] columnNames) {
@@ -92,6 +105,11 @@ public class DialogUtils {
 
 	public static final String HTML_TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
 
+	public static String htmlEscape(String s) {
+		return s.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				.replaceAll("\n", "<br>");
+	}
 
 	public static String renderElapsedTime(long millis) {
 		if (millis < 1_000)

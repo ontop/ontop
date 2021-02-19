@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class QueryManager {
 
@@ -46,7 +47,7 @@ public class QueryManager {
 		private Item(@Nullable Item parent, @Nonnull String id, @Nullable  String queryString) {
 			this.parent = parent;
 			this.id = id;
-			this.queryString = queryString;
+			this.queryString = queryString == null ? null : queryString.trim();
 		}
 
 		@Override
@@ -102,6 +103,17 @@ public class QueryManager {
 
 		public String getID() { return id; }
 
+		public void setID(String newId) {
+			if (parent == null)
+				throw new IllegalArgumentException("Cannot change the ID of the root");
+
+			if (parent.getChild(newId).isPresent())
+				throw new IllegalArgumentException("The parent group already contains this group / query.");
+
+			this.id = newId;
+			listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
+		}
+
 		public Item getParent() { return parent; }
 
 		public boolean isQuery() { return queryString != null; }
@@ -115,7 +127,7 @@ public class QueryManager {
 			if (!children.isEmpty() || parent == null)
 				throw new IllegalArgumentException("Cannot set a query string for a group / root.");
 
-			this.queryString = queryString;
+			this.queryString = queryString.trim();
 			//listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
 		}
 
@@ -165,94 +177,93 @@ public class QueryManager {
 	 * The save/write operation.
 	 */
 	public String renderQueries()  {
-		return renderItem(root);
+		return root.getChildren().stream()
+				.flatMap(QueryManager::renderItem)
+				.collect(Collectors.joining("\n"));
 	}
 
-	private static String renderItem(Item item) {
+	private static Stream<String> renderItem(Item item) {
 		return item.isQuery()
-				? String.format(QUERY_ITEM_TAG, item.getID()) + "\n"
-					+ item.getQueryString().trim() + "\n"
-				: String.format(QUERY_GROUP_TAG, item.getID()) + " " + START_COLLECTION_SYMBOL + "\n"
-					+ item.children.stream()
-						.map(QueryManager::renderItem)
-						.collect(Collectors.joining("\n"))
-					+ END_COLLECTION_SYMBOL + "\n";
+				? Stream.of(String.format(QUERY_ITEM_TAG, item.getID()), item.getQueryString())
+				: Stream.concat(Stream.concat(
+						Stream.of(String.format(QUERY_GROUP_TAG, item.getID()) + " " + START_COLLECTION_SYMBOL),
+						item.children.stream()
+							.flatMap(QueryManager::renderItem)),
+					Stream.of(END_COLLECTION_SYMBOL));
 	}
 
 	/**
-	 * The load/write operation
+	 * The load/read operation
 	 *
 	 * @param file
 	 *          The target file object from which the saved queries are loaded.
 	 * @throws IOException
 	 */
 	public void load(FileReader file) throws IOException {
-		// Clean the controller first before loading
 		root.children.clear();
-
 		LineNumberReader lineNumberReader = new LineNumberReader(file);
 		try {
-			String line;
-			while ((line = lineNumberReader.readLine()) != null) {
-				if (isNotACommentOrEmptyLine(line)) {
-					if (line.contains(QUERY_GROUP))
-						readGroup(lineNumberReader, getID(line));
-					else if (line.contains(QUERY_ITEM))
-						readQuery(lineNumberReader, null, getID(line));
-					else
-						throw new IOException("Expected group or query tag");
-				}
-			}
+			String lastLine = readGroup(lineNumberReader, root);
+			if (lastLine != null)
+				throw new IOException("Unexpected file contents");
 		}
 		catch (Exception e) {
 			throw new IOException(String.format("Invalid syntax at line: %s", lineNumberReader.getLineNumber()), e);
 		}
-	}
-
-	private void readGroup(LineNumberReader lineNumberReader, String groupId) throws IOException {
-		String line;
-		while (!(line = lineNumberReader.readLine()).equals(END_COLLECTION_SYMBOL)) {
-			if (isNotACommentOrEmptyLine(line)) {
-				if (line.contains(QUERY_ITEM))
-					readQuery(lineNumberReader, groupId, getID(line));
-				else
-					throw new IOException("Unexpected query tag");
-			}
+		finally {
+			lineNumberReader.close();
 		}
 	}
 
-	private void readQuery(LineNumberReader lineNumberReader, String groupId, String queryId) throws IOException {
-		if (queryId.isEmpty())
-			throw new IOException("Query ID is missing");
+	private String readGroup(LineNumberReader lineNumberReader, Item group) throws IOException {
+		String line;
+		while (!isEndOfGroup(line = lineNumberReader.readLine())) {
+			if (!isEmptyLineOrComment(line)) {
+				if (line.contains(QUERY_GROUP)) {
+					String groupId = extractItemId(line);
+					Item subGroup = group.addGroupChild(groupId);
+					String lastLine = readGroup(lineNumberReader, subGroup);
+					if (lastLine == null)
+						throw new IOException("Unexpected EOF");
+				}
+				else if (line.contains(QUERY_ITEM)) {
+					String queryId = extractItemId(line);
+					String queryString = readQueryString(lineNumberReader);
+					group.addQueryChild(queryId, queryString);
+				}
+				else
+					throw new IOException("Expected a group or a query tag");
+			}
+		}
+		return line;
+	}
 
+	private String readQueryString(LineNumberReader lineNumberReader) throws IOException {
 		StringBuilder buffer = new StringBuilder();
 		String line;
-		while ((line = lineNumberReader.readLine()) != null) {
-			if (line.contains(QUERY_ITEM)
-					|| line.contains(QUERY_GROUP)
-					|| line.contains(END_COLLECTION_SYMBOL))
-				break;
-
+		while (!isEndOfQuery(line = lineNumberReader.readLine())) {
 			lineNumberReader.mark(100000);
 			buffer.append(line).append("\n");
 		}
 		lineNumberReader.reset(); // rewind back to the start of the last line
-		String queryString = buffer.toString();
-
-		Item group = (groupId == null)
-				? root
-				: root.getChild(groupId).orElseGet(() -> root.addGroupChild(groupId));
-
-		group.addQueryChild(queryId, queryString);
+		return buffer.toString();
 	}
 
-	private static boolean isNotACommentOrEmptyLine(String line) {
-		return !line.isEmpty()
+	private static boolean isEndOfGroup(String line) {
+		return line == null || line.trim().startsWith(END_COLLECTION_SYMBOL);
+	}
+
+	private static boolean isEndOfQuery(String line) {
+		return isEndOfGroup(line) || line.contains(QUERY_ITEM) || line.contains(QUERY_GROUP);
+	}
+
+	private static boolean isEmptyLineOrComment(String line) {
+		return line.isEmpty()
 				// A comment line is always started by a semi-colon (after spaces)
-				&& !(line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0);
+				|| (line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0);
 	}
 
-	private static String getID(String line) {
+	private static String extractItemId(String line) {
 		// IDs are enclosed in double quotation marks
 		return line.substring(line.indexOf('\"') + 1, line.lastIndexOf('\"'));
 	}

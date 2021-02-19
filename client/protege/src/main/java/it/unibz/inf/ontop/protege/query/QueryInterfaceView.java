@@ -99,5 +99,4 @@ public class QueryInterfaceView extends AbstractOWLViewComponent {
         @Override
         public void dispose() { /* NO-OP */ }
     }
-
 }

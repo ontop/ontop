@@ -20,10 +20,15 @@ package it.unibz.inf.ontop.protege.query;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
+import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
+import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -31,36 +36,40 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
+
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.CANCEL_BUTTON_TEXT;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.OK_BUTTON_TEXT;
 
 public class QueryManagerPanel extends JPanel {
 
 	private static final long serialVersionUID = 6920100822784727963L;
 
-    static private final String PATH_SAVEDQUERY_ICON = "images/query_icon.png";
-    static private final String PATH_QUERYGROUP_ICON = "images/group_icon.png";
+    static private final String QUERY_ICON_PATH = "images/query_icon.png";
+    static private final String GROUP_ICON_PATH = "images/group_icon.png";
 
-    private final Icon saved_query_icon;
-    private final Icon query_group_icon;
+    private final Icon queryIcon;
+    private final Icon groupIcon;
 
     private final List<QueryManagerPanelSelectionListener> listeners = new ArrayList<>();
 
     private final QueryManager queryManager;
 
-    private final JTree treSavedQuery;
+    private final JTree queryManagerTree;
 
 	public QueryManagerPanel(QueryManager queryManager) {
         this.queryManager = queryManager;
 
-        saved_query_icon = IconLoader.getImageIcon(PATH_SAVEDQUERY_ICON);
-        query_group_icon = IconLoader.getImageIcon(PATH_QUERYGROUP_ICON);
+        queryIcon = IconLoader.getImageIcon(QUERY_ICON_PATH);
+        groupIcon = IconLoader.getImageIcon(GROUP_ICON_PATH);
 
         setLayout(new BorderLayout());
 
         QueryManagerTreeModel model = new QueryManagerTreeModel(queryManager);
-        treSavedQuery = new JTree(model);
-        treSavedQuery.setCellRenderer(new DefaultTreeCellRenderer() {
+        queryManagerTree = new JTree(model);
+        queryManagerTree.setCellRenderer(new DefaultTreeCellRenderer() {
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
@@ -68,21 +77,20 @@ public class QueryManagerPanel extends JPanel {
 
                 QueryManager.Item item = (QueryManager.Item)value;
                 setText(item.getID());
-                setIcon(item.isQuery() ? saved_query_icon : query_group_icon);
+                setIcon(item.isQuery() ? queryIcon : groupIcon);
 
                 return this;
             }
         });
-        treSavedQuery.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        treSavedQuery.getSelectionModel().addTreeSelectionListener(evt -> {
+        queryManagerTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        queryManagerTree.getSelectionModel().addTreeSelectionListener(evt -> {
             QueryManager.Item entity = (QueryManager.Item) evt.getPath().getLastPathComponent();
-            listeners.forEach(l -> l.selectedQueryChanged(entity.isQuery() ? entity : null));
+            listeners.forEach(l -> l.selectionChanged(entity.isQuery() ? entity : null));
         });
 
         model.addTreeModelListener(new TreeModelListener() {
             @Override
-            public void treeNodesChanged(TreeModelEvent e) {
-            }
+            public void treeNodesChanged(TreeModelEvent e) { /* NO-OP */ }
             @Override
             public void treeNodesInserted(TreeModelEvent e) {
                 selectAndScrollTo(e.getTreePath().pathByAddingChild(e.getChildren()[0]));
@@ -96,28 +104,36 @@ public class QueryManagerPanel extends JPanel {
                 selectAndScrollTo(e.getTreePath());
             }
             private void selectAndScrollTo(TreePath treePath) {
-                treSavedQuery.setSelectionPath(treePath);
-                treSavedQuery.scrollPathToVisible(treePath);
+                queryManagerTree.setSelectionPath(treePath);
+                queryManagerTree.scrollPathToVisible(treePath);
             }
         });
-        add(new JScrollPane(treSavedQuery), BorderLayout.CENTER);
+        add(new JScrollPane(queryManagerTree), BorderLayout.CENTER);
 
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.add(DialogUtils.getMenuItem("Add Query...", addQueryAction));
+        popupMenu.add(DialogUtils.getMenuItem("Add Group...", addGroupAction));
+        JMenuItem renameMenuItem = DialogUtils.getMenuItem("Rename Query/Group", renameAction, false);
+        popupMenu.add(renameMenuItem);
+        JMenuItem deleteMenuItem = DialogUtils.getMenuItem("Delete Query/Group", deleteAction, false);
+        popupMenu.add(deleteMenuItem);
+        queryManagerTree.setComponentPopupMenu(popupMenu);
 
-        JButton addButton = DialogUtils.getButton(
-                "Add",
-                "plus.png",
-                "Add a new query",
-                this::cmdAddActionPerformed);
-        controlPanel.add(addButton);
+        deleteAction.setEnabled(false);
 
-        JButton removeButton = DialogUtils.getButton(
-                "Remove",
-                "minus.png",
-                "Remove the selected group or query",
-                this::cmdRemoveActionPerformed);
-        controlPanel.add(removeButton);
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.LINE_AXIS));
 
+        controlPanel.add(DialogUtils.getButton(addQueryAction));
+        controlPanel.add(DialogUtils.getButton(addGroupAction));
+        controlPanel.add(DialogUtils.getButton(deleteAction));
+
+        queryManagerTree.getSelectionModel().addTreeSelectionListener(evt -> {
+            boolean nonEmptySelection = queryManagerTree.getSelectionPaths() != null;
+            renameMenuItem.setEnabled(nonEmptySelection);
+            deleteAction.setEnabled(nonEmptySelection);
+            deleteMenuItem.setEnabled(nonEmptySelection);
+        });
         add(controlPanel, BorderLayout.NORTH);
 	}
 
@@ -131,31 +147,175 @@ public class QueryManagerPanel extends JPanel {
 		    listeners.remove(listener);
 	}
 
+    private final OntopAbstractAction addQueryAction = new OntopAbstractAction(
+            "Query",
+            "plus.png",
+            "Create a new query") {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            QueryManager.Item group = getTargetForInsertion();
+            String id = showNewItemDialog(
+                    "New query ID:", "Create New Query", getUsedIDs(group));
+            if (id != null)
+                group.addQueryChild(id, "");
+        }
+    };
 
-    private void cmdAddActionPerformed(ActionEvent evt) {
-		NewQueryDialog dialog = new NewQueryDialog(this, queryManager);
-		dialog.setVisible(true);
-    }
+    private final OntopAbstractAction addGroupAction = new OntopAbstractAction(
+            "Group",
+            "plus.png",
+            "Create a new group") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            QueryManager.Item group = getTargetForInsertion();
+            String id = showNewItemDialog(
+                    "New group ID:", "Create New Group", getUsedIDs(group));
+            if (id != null)
+                group.addGroupChild(id);
+        }
+    };
 
-	private void cmdRemoveActionPerformed(ActionEvent evt) {
-		TreePath path = treSavedQuery.getSelectionPath();
-		if (path == null)
-			return;
+    private final OntopAbstractAction renameAction = new OntopAbstractAction(
+            "Rename",
+            null,
+            null) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TreePath path = queryManagerTree.getSelectionPath();
+            if (path == null)
+                return;
+
+            QueryManager.Item item = (QueryManager.Item)path.getLastPathComponent();
+            if (item.getParent() == null)
+                return;
+
+            String id = showNewItemDialog(
+                    "<html><b>New</b> ID for " + (item.isQuery() ? "query" : "group") + " \"" + DialogUtils.htmlEscape(item.getID()) + "\":</html>",
+                    "Rename " + (item.isQuery() ? "Query" : "Group") + " \"" + item.getID() + "\"",
+                    getUsedIDs(item.getParent()));
+            if (id != null)
+                item.setID(id);
+        }
+    };
+
+    private final OntopAbstractAction deleteAction = new OntopAbstractAction(
+            "Delete",
+            "minus.png",
+            "Delete selected group or query") {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            TreePath path = queryManagerTree.getSelectionPath();
+            if (path == null)
+                return;
+
+            QueryManager.Item item = (QueryManager.Item) path.getLastPathComponent();
+            if (item.getParent() == null) // root cannot be removed
+                return;
+
+            if (!confirmDelete(item))
+                return;
+
+            item.getParent().removeChild(item);
+        }
+    };
+
+
+    private QueryManager.Item getTargetForInsertion() {
+        TreePath path = queryManagerTree.getSelectionPath();
+        if (path == null)
+            return queryManager.getRoot();
 
         QueryManager.Item item = (QueryManager.Item) path.getLastPathComponent();
-        if (item.getParent() == null) // root cannot be removed
-            return;
+        return item.isQuery() ? item.getParent() : item;
+    }
 
-        if (JOptionPane.showConfirmDialog(this,
-                item.isQuery()
-                        ? "This will delete query " + item.getID() +  ".\nContinue? "
-                        : "This will delete group " + item.getID() +  " (with all its queries).\nContinue?",
+    private ImmutableSet<String> getUsedIDs(QueryManager.Item item) {
+	    return item.getChildren().stream()
+                .map(QueryManager.Item::getID)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private String showNewItemDialog(String labelString, String title, ImmutableSet<String> usedIDs) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+
+        JLabel label = new JLabel(labelString);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(label);
+
+        panel.add(Box.createVerticalStrut(10));
+
+        JTextField idField = new JTextField("");
+        idField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        idField.setColumns(40);
+        Border normalBorder = idField.getBorder();
+        Border errorBorder = BorderFactory.createLineBorder(Color.RED, 1);
+        panel.add(idField);
+
+        panel.add(Box.createVerticalStrut(10));
+
+        JLabel errorLabel = new JLabel("<html>&nbsp;</html>");
+        errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        errorLabel.setForeground(Color.RED);
+        errorLabel.setFont(errorLabel.getFont().deriveFont(AffineTransform.getScaleInstance(0.9, 0.9)));
+        panel.add(errorLabel);
+
+        panel.add(Box.createVerticalStrut(20));
+
+        // manual construction of the buttons is required to control their enabled status
+        JButton okButton = new JButton(OK_BUTTON_TEXT);
+        okButton.addActionListener(e ->
+                getOptionPane((JComponent)e.getSource()).setValue(okButton));
+        okButton.setEnabled(false);
+        JButton cancelButton = new JButton(CANCEL_BUTTON_TEXT);
+        cancelButton.addActionListener(e ->
+                getOptionPane((JComponent)e.getSource()).setValue(cancelButton));
+
+        idField.getDocument().addDocumentListener((SimpleDocumentListener) evt -> {
+            String id = idField.getText().trim();
+            if (id.isEmpty() || usedIDs.contains(id)) {
+                idField.setBorder(errorBorder);
+                errorLabel.setText(id.isEmpty()
+                        ? "ID cannot be empty."
+                        : "A query or a group with this ID already exists.");
+                okButton.setEnabled(false);
+            }
+            else {
+                idField.setBorder(normalBorder);
+                errorLabel.setText("<html>&nbsp;</html>");
+                okButton.setEnabled(true);
+            }
+        });
+
+        if (JOptionPane.showOptionDialog(null,
+                panel,
+                title,
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                IconLoader.getOntopIcon(),
+                new Object[] { okButton, cancelButton },
+                okButton) != JOptionPane.OK_OPTION)
+            return null;
+
+        return idField.getText().trim();
+    }
+
+    protected JOptionPane getOptionPane(JComponent parent) {
+        return  (parent instanceof JOptionPane)
+                ? (JOptionPane) parent
+                : getOptionPane((JComponent)parent.getParent());
+    }
+
+
+	private boolean confirmDelete(QueryManager.Item item) {
+        return JOptionPane.showConfirmDialog(null,
+                "<html>This will delete " + (item.isQuery() ?  "query" : "group") +
+                        " \""  + DialogUtils.htmlEscape(item.getID()) + "\"" +
+                        (item.getChildCount() == 0 ? "" : " along with all its queries and groups") + ".<br><br>" +
+                        "Do you wish to <b>continue</b>?<br></html>",
                 "Delete confirmation",
                 JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION)
-            return;
-
-        item.getParent().removeChild(item);
-	}
-
+                JOptionPane.WARNING_MESSAGE,
+                IconLoader.getOntopIcon()) == JOptionPane.YES_OPTION;
+    }
 }

@@ -24,6 +24,6 @@ import javax.annotation.Nullable;
 
 public interface QueryManagerPanelSelectionListener {
 
-	void selectedQueryChanged(@Nullable QueryManager.Item entity);
+	void selectionChanged(@Nullable QueryManager.Item entity);
 
 }

@@ -34,6 +34,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.CANCEL_BUTTON_TEXT;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.OK_BUTTON_TEXT;
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 import static java.awt.event.KeyEvent.*;
 
@@ -58,7 +60,7 @@ public class SelectPrefixesDialog extends JDialog {
 		setTitle("Select Prefixes for the Query");
 		setModal(true);
 
-		Action acceptAction = new AbstractAction("OK") {
+		Action acceptAction = new AbstractAction(OK_BUTTON_TEXT) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String directives = getDirectives();
@@ -84,7 +86,7 @@ public class SelectPrefixesDialog extends JDialog {
 			}
 		};
 
-		Action cancelAction = new AbstractAction("Cancel") {
+		Action cancelAction = new AbstractAction(CANCEL_BUTTON_TEXT) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dispatchEvent(new WindowEvent(SelectPrefixesDialog.this, WindowEvent.WINDOW_CLOSING));

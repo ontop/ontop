@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
-import it.unibz.inf.ontop.protege.utils.OWL2TurtleTranslator;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 import it.unibz.inf.ontop.protege.workers.ExportResultsToCSVSwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
@@ -82,12 +81,12 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
 		JPopupMenu sparqlPopupMenu = new JPopupMenu();
-		JMenuItem getIqMenuItem = new JMenuItem("View Intermediate Query...");
-		getIqMenuItem.addActionListener(evt -> getOntopAndExecute(getShowIqExecutor()));
+		JMenuItem getIqMenuItem = DialogUtils.getMenuItem("View Intermediate Query...",
+				evt -> getOntopAndExecute(getShowIqExecutor()));
 		sparqlPopupMenu.add(getIqMenuItem);
 
-		JMenuItem getSqlMenuItem = new JMenuItem("View SQL translation...");
-		getSqlMenuItem.addActionListener(evt -> getOntopAndExecute(getShowSqlExecutor()));
+		JMenuItem getSqlMenuItem = DialogUtils.getMenuItem("View SQL translation...",
+				evt -> getOntopAndExecute(getShowSqlExecutor()));
 		sparqlPopupMenu.add(getSqlMenuItem);
 
 		JPanel queryPanel = new JPanel(new BorderLayout());
@@ -99,7 +98,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
 		queryTextPane.getDocument().addDocumentListener((SimpleDocumentListener) e -> {
 			if (query != null)
-				query.setQueryString(queryTextPane.getText().trim());
+				query.setQueryString(queryTextPane.getText());
 		});
 		queryPanel.add(new JScrollPane(queryTextPane), BorderLayout.CENTER);
 
@@ -259,7 +258,10 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	}
 
 	@Override
-	public void selectedQueryChanged(QueryManager.Item query) {
+	public void selectionChanged(QueryManager.Item query) {
+		if (this.query == query)
+			return;
+
 		this.query = query;
 		queryTextPane.setText(query != null ? query.getQueryString() : "");
 		resetTableModel(new String[0]);
@@ -276,7 +278,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	}
 
 	private void showActionResult(long time, String second) {
-		executionInfoLabel.setText("Execution time: " + DialogUtils.renderElapsedTime(time) + ". " + second);
+		executionInfoLabel.setText("<html>Execution time: <b>" + DialogUtils.renderElapsedTime(time) + "</b>. " + second + "</html>");
 		executionInfoLabel.setOpaque(false);
 	}
 
@@ -321,7 +323,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(Boolean result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(), "Result: " + result + ".");
+				showActionResult(elapsedTimeMillis(), "Result: <b>" + result + "</b>.");
 				executionInfoLabel.setBackground(result ? Color.GREEN : Color.RED);
 				executionInfoLabel.setOpaque(true);
 				setSQLTranslation(sqlQuery);
@@ -336,7 +338,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected Void runQuery(OntopOWLStatement statement, String query) throws Exception {
-				OWL2TurtleTranslator owlTranslator = getOWL2TurtleTranslator();
+				TurtleRendererForOWL owlTranslator = getOWL2TurtleTranslator();
 				owlTranslator.getPrefixMap().entrySet().stream()
 						.map(e -> "@prefix " + e.getKey() + " " + e.getValue() + ".\n")
 						.forEach(this::publish);
@@ -361,7 +363,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(Void result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(), "OWL axioms produced: " + getCount() + ".");
+				showActionResult(elapsedTimeMillis(), "OWL axioms produced: <b>" + getCount() + "</b>.");
 				setSQLTranslation(sqlQuery);
 				exportButton.setEnabled(tableModel.getRowCount() > 0);
 			}
@@ -375,7 +377,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected Void runQuery(OntopOWLStatement statement, String query) throws Exception {
-				OWL2TurtleTranslator owlTranslator = getOWL2TurtleTranslator();
+				TurtleRendererForOWL owlTranslator = getOWL2TurtleTranslator();
 				setFetchSize(statement);
 				try (TupleOWLResultSet rs = statement.executeSelectQuery(query)) {
 					List<String> signature = rs.getSignature();
@@ -407,7 +409,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(Void result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(), "Solution mappings returned: " + getCount() + ".");
+				showActionResult(elapsedTimeMillis(), "Solution mappings returned: <b>" + getCount() + "</b>.");
 				setSQLTranslation(sqlQuery);
 				exportButton.setEnabled(tableModel.getRowCount() > 0);
 			}
@@ -421,8 +423,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		}
 	}
 
-	private OWL2TurtleTranslator getOWL2TurtleTranslator() {
-		return new OWL2TurtleTranslator(
+	private TurtleRendererForOWL getOWL2TurtleTranslator() {
+		return new TurtleRendererForOWL(
 				obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
 				showShortIriCheckBox.isSelected());
 	}
@@ -491,7 +493,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(Long result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(),"The number of results: " + result + ".");
+				showActionResult(elapsedTimeMillis(),"The number of results: <b>" + result + "</b>.");
 				setSQLTranslation(sqlQuery);
 			}
 		};

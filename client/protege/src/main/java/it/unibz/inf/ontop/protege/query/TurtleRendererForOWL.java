@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.utils;
+package it.unibz.inf.ontop.protege.query;
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -7,12 +7,12 @@ import org.semanticweb.owlapi.model.*;
 import java.util.Map;
 import java.util.Optional;
 
-public class OWL2TurtleTranslator {
+public class TurtleRendererForOWL {
 
 	private final PrefixManager prefixManager;
 	private final boolean shortenIRIs;
 
-	public OWL2TurtleTranslator(PrefixManager prefixManager, boolean shortenIRIs) {
+	public TurtleRendererForOWL(PrefixManager prefixManager, boolean shortenIRIs) {
 		// TODO: subclass AbstractPrefixManager
 		this.prefixManager = prefixManager;
 		this.shortenIRIs = shortenIRIs;

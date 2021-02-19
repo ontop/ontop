@@ -100,7 +100,7 @@ public class BootstrapAction extends ProtegeAction {
 				null) != JOptionPane.OK_OPTION)
 			return;
 
-		String baseIri0 = baseIriField.getText().trim();
+		String baseIri0 =	 baseIriField.getText().trim();
 		if (baseIri0.contains("#")) {
 			DialogUtils.showPrettyMessageDialog(getWorkspace(),
 					"Base IRIs cannot contain '#':\n" +
