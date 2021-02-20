@@ -59,12 +59,8 @@ public class QueryManagerPanel extends JPanel {
 	public QueryManagerPanel(QueryManager queryManager) {
         this.queryManager = queryManager;
 
-        addQueryAction.setAccelerator(VK_E, getCtrlMask());
-        addGroupAction.setAccelerator(VK_G, getCtrlMask());
         deleteAction.setEnabled(false);
-        deleteAction.setAccelerator(VK_BACK_SPACE, getCtrlMask());
         renameAction.setEnabled(false);
-        renameAction.setAccelerator(VK_U, getCtrlMask());
 
         setLayout(new BorderLayout());
 
@@ -76,13 +72,11 @@ public class QueryManagerPanel extends JPanel {
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
                 QueryManager.Item item = (QueryManager.Item)value;
                 setText(item.getID());
                 setIcon(item.isQuery() ? queryIcon : groupIcon);
-
                 return this;
             }
         });
@@ -148,7 +142,8 @@ public class QueryManagerPanel extends JPanel {
     private final OntopAbstractAction addQueryAction = new OntopAbstractAction(
             "Query",
             "plus.png",
-            "Create a new query") {
+            "Create a new query",
+            getKeyStrokeWithCtrlMask(VK_E)) {
         @Override
         public void actionPerformed(ActionEvent evt) {
             QueryManager.Item group = getTargetForInsertion();
@@ -160,7 +155,8 @@ public class QueryManagerPanel extends JPanel {
     private final OntopAbstractAction addGroupAction = new OntopAbstractAction(
             "Group",
             "plus.png",
-            "Create a new group") {
+            "Create a new group",
+            getKeyStrokeWithCtrlMask(VK_G)) {
         @Override
         public void actionPerformed(ActionEvent e) {
             QueryManager.Item group = getTargetForInsertion();
@@ -172,7 +168,8 @@ public class QueryManagerPanel extends JPanel {
     private final OntopAbstractAction renameAction = new OntopAbstractAction(
             "Rename",
             null,
-            null) {
+            null,
+            getKeyStrokeWithCtrlMask(VK_U)) {
         @Override
         public void actionPerformed(ActionEvent e) {
             TreePath path = queryManagerTree.getSelectionPath();
@@ -194,7 +191,8 @@ public class QueryManagerPanel extends JPanel {
     private final OntopAbstractAction deleteAction = new OntopAbstractAction(
             "Delete",
             "minus.png",
-            "Delete selected group or query") {
+            "Delete selected group or query",
+            getKeyStrokeWithCtrlMask(VK_BACK_SPACE)) {
         @Override
         public void actionPerformed(ActionEvent evt) {
             TreePath path = queryManagerTree.getSelectionPath();

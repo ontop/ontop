@@ -3,18 +3,21 @@ package it.unibz.inf.ontop.protege.utils;
 import javax.swing.*;
 
 public abstract class OntopAbstractAction extends AbstractAction {
-    public OntopAbstractAction(String name, String icon, String tooltip) {
+    public OntopAbstractAction(String name, String icon, String tooltip, KeyStroke accelerator) {
         super(name);
-        putValue(Action.SMALL_ICON, IconLoader.getImageIcon("images/" + icon));
-        putValue(Action.SHORT_DESCRIPTION, tooltip);
+        putValue(SMALL_ICON, IconLoader.getImageIcon("images/" + icon));
+        putValue(SHORT_DESCRIPTION, tooltip);
+        putValue(ACCELERATOR_KEY, accelerator);
     }
 
     public void setAccelerator(int keyCode, int modifiers) {
         putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(keyCode, modifiers));
     }
 
-    public String getName() { return (String)getValue(Action.NAME); }
-    public ImageIcon getIcon() { return (ImageIcon)getValue(Action.SMALL_ICON); }
+    public String getName() { return (String)getValue(NAME); }
+    public ImageIcon getIcon() { return (ImageIcon)getValue(SMALL_ICON); }
 
-    public String getTooltip() { return (String)getValue(Action.SHORT_DESCRIPTION); }
+    public String getTooltip() { return (String)getValue(SHORT_DESCRIPTION); }
+
+    public KeyStroke getAccelerator() { return (KeyStroke)getValue(ACCELERATOR_KEY); }
 }

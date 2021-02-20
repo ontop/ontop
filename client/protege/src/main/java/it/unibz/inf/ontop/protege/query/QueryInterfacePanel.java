@@ -54,6 +54,11 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.getKeyStrokeWithCtrlMask;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.setUpAccelerator;
+import static java.awt.event.KeyEvent.VK_ENTER;
+import static java.awt.event.KeyEvent.VK_P;
+
 public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSelectionListener, OWLOntologyChangeListener {
 
 	private static final long serialVersionUID = -5902798157183352944L;
@@ -90,7 +95,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		sparqlPopupMenu.add(getSqlMenuItem);
 
 		JPanel queryPanel = new JPanel(new BorderLayout());
-		queryPanel.setPreferredSize(new Dimension(400, 250));
+		//queryPanel.setPreferredSize(new Dimension(400, 250));
 		queryPanel.setMinimumSize(new Dimension(400, 250));
 
 		queryTextPane = new JTextPane();
@@ -128,18 +133,23 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		OntopAbstractAction prefixesAction = new OntopAbstractAction(
 				"Prefixes...",
 				"attach.png",
-				"Select prefixes to insert into the query") {
+				"Select prefixes to insert into the query",
+				getKeyStrokeWithCtrlMask(VK_P)) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane);
+				SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane.getText());
+				dialog.setLocationRelativeTo(QueryInterfacePanel.this);
 				dialog.setVisible(true);
+				dialog.getPrefixDirectives()
+						.ifPresent(s -> queryTextPane.setText(s + "\n" + queryTextPane.getText()));
 			}
 		};
 
 		OntopAbstractAction executeAction = new OntopAbstractAction(
 				"Execute",
 				"execute.png",
-				"Execute the query and display the results") {
+				"Execute the query and display the results",
+				getKeyStrokeWithCtrlMask(VK_ENTER)) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				executeActionPerformed(e);
@@ -182,12 +192,12 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 		resultTabbedPane = new JTabbedPane();
 		resultTabbedPane.setMinimumSize(new Dimension(400, 250));
-		resultTabbedPane.setPreferredSize(new Dimension(400, 250));
+		//resultTabbedPane.setPreferredSize(new Dimension(400, 250));
 
 		JPanel sparqlResultPanel = new JPanel(new BorderLayout());
 		resultTabbedPane.addTab("SPARQL results", sparqlResultPanel);
 
-		queryResultTable = new JTable(new DefaultTableModel(new String[] {"Results"}, 0));
+		queryResultTable = new JTable(new DefaultTableModel(new String[]{ "Results" }, 0));
 		JScrollPane scrollPane = new JScrollPane(queryResultTable);
 		sparqlResultPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -224,10 +234,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		setLayout(new BorderLayout());
 		add(splitPane, BorderLayout.CENTER);
 
-		InputMap inputMap = queryTextPane.getInputMap();
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), "execute");
-		ActionMap actionMap = queryTextPane.getActionMap();
-		actionMap.put("execute", executeAction);
+		setUpAccelerator(queryTextPane, executeAction);
+		setUpAccelerator(queryTextPane, prefixesAction);
 	}
 
 	private void executeActionPerformed(ActionEvent evt) {

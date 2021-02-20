@@ -38,10 +38,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -49,6 +46,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.awt.event.KeyEvent.*;
 
 public class DialogUtils {
 
@@ -78,7 +77,11 @@ public class DialogUtils {
 		JButton button = new JButton(action);
 		button.setIconTextGap(5);
 		button.setMargin(new Insets(3, 7, 3, 7));
-		button.setToolTipText(action.getTooltip());
+		if (button.getToolTipText() != null)
+			if (action.getAccelerator() == null)
+				button.setToolTipText(action.getTooltip());
+    		else
+				button.setToolTipText(action.getTooltip() + " (" + keyStroke2String(action.getAccelerator()) + ")");
 		return button;
 	}
 
@@ -95,8 +98,8 @@ public class DialogUtils {
 		return menuItem;
 	}
 
-	public static int getCtrlMask() {
-		return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+	public static KeyStroke getKeyStrokeWithCtrlMask(int keyCode) {
+		return KeyStroke.getKeyStroke(keyCode, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 	}
 
 	public static void setUpPopUpMenu(JComponent component, JPopupMenu popupMenu) {
@@ -105,14 +108,23 @@ public class DialogUtils {
 			Component current = popupMenu.getComponent(i);
 			if (current instanceof JMenuItem) {
 				JMenuItem menuItem = (JMenuItem) current;
-				KeyStroke keyStroke =  (KeyStroke) menuItem.getAction().getValue(Action.ACCELERATOR_KEY);
-				if (keyStroke != null) {
-					component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, menuItem.getText());
-					component.getActionMap().put(menuItem.getText(), menuItem.getAction());
-				}
+				setUpAccelerator(component, menuItem.getAction());
 			}
 		}
 		component.setComponentPopupMenu(popupMenu);
+	}
+
+	public static void setUpAccelerator(JComponent component, Action action) {
+		KeyStroke keyStroke =  (KeyStroke) action.getValue(Action.ACCELERATOR_KEY);
+		if (keyStroke != null) {
+			component.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyStroke, action.getValue(Action.NAME));
+			component.getActionMap().put(action.getValue(Action.NAME), action);
+		}
+	}
+
+	private static String keyStroke2String(KeyStroke keyStroke) {
+		return (keyStroke.getModifiers() == 0) ? "" : getKeyModifiersText(keyStroke.getModifiers())
+				+ getKeyText(keyStroke.getKeyCode());
 	}
 
 	public static JButton createStandardButton(String text, boolean enabled) {
