@@ -1,5 +1,6 @@
-package it.unibz.inf.ontop.protege.query;
+package it.unibz.inf.ontop.protege.query.worker;
 
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
@@ -36,39 +37,34 @@ public class TurtleRendererForOWL {
 		if (constant == null)
 			return "";
 
-		return constant instanceof OWLNamedIndividual
-				? getIRI(constant.toString())
-				: ToStringRenderer.getInstance().getRendering(constant);
-	}
+		if (constant instanceof OWLNamedIndividual) {
+			String iri = constant.toString();
+			return shortenIRIs ? prefixManager.getShortForm(iri) : iri;
+		}
 
-	private String renderAxiom(OWLObjectPropertyAssertionAxiom axiom) {
-		String subject = getIRI(axiom.getSubject().toString());
-		String predicate = getIRI(axiom.getProperty().toString());
-		String object = getIRI(axiom.getObject().toString());
-		return subject + " " + predicate + " " + object + ". \n";
+		return ToStringRenderer.getInstance().getRendering(constant);
 	}
 
 	private String renderAxiom(OWLClassAssertionAxiom axiom) {
-		String subject = getIRI(axiom.getIndividual().toString());
-		String object = getIRI(axiom.getClassExpression().toString());
-		return subject + " rdf:type " + object + ". \n";
+		return renderTriple(axiom.getIndividual(), IRI.create(RDF.TYPE.getIRIString()), axiom.getClassExpression());
+	}
+
+	private String renderAxiom(OWLObjectPropertyAssertionAxiom axiom) {
+		return renderTriple(axiom.getSubject(), axiom.getProperty(), axiom.getObject());
 	}
 
 	private String renderAxiom(OWLDataPropertyAssertionAxiom axiom) {
-		String subject = getIRI(axiom.getSubject().toString());
-		String predicate = getIRI(axiom.getProperty().toString());
-		String object = render(axiom.getObject());
-		return subject + " " + predicate + " " + object + ". \n";
+		return renderTriple(axiom.getSubject(), axiom.getProperty(), axiom.getObject());
 	}
 
 	private String renderAxiom(OWLAnnotationAssertionAxiom axiom) {
-		String subject = getIRI(axiom.getSubject().toString());
-		String predicate = getIRI(axiom.getProperty().toString());
-		String object = render(axiom.getValue());
-		return subject + " " + predicate + " " + object + ". \n";
+		return renderTriple(axiom.getSubject(), axiom.getProperty(), axiom.getValue());
 	}
 
-	private String getIRI(String iri) {
-		return shortenIRIs ? prefixManager.getShortForm(iri) : iri;
+	private String renderTriple(OWLObject subject, OWLObject predicate, OWLObject object) {
+		String subjectString = render(subject);
+		String predicateString = render(predicate);
+		String objectString = render(object);
+		return subjectString + " " + predicateString + " " + objectString + ". \n";
 	}
 }

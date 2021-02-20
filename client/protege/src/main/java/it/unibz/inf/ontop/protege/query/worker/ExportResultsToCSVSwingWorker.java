@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.workers;
+package it.unibz.inf.ontop.protege.query.worker;
 
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -13,10 +13,10 @@ import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 
 public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPercentageMonitor<Void, Void> {
@@ -46,18 +46,11 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
             setMaxTicks(data.size());
             startLoop(this::getCompletionPercentage, () -> String.format("%d%% completed.", getCompletionPercentage()));
 
-            for (Vector<Object> rows : data) {
-                StringBuilder line = new StringBuilder();
-                boolean needComma = false;
-                for (Object row : rows) {
-                    if (needComma) {
-                        line.append(",");
-                    }
-                    line.append(row);
-                    needComma = true;
-                }
-                line.append("\n");
-                writer.write(line.toString());
+            for (Vector<Object> row : data) {
+                String line = row.stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(",", "", "\n"));
+                writer.write(line);
                 writer.flush();
                 tick();
             }

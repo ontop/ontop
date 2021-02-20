@@ -85,10 +85,8 @@ public class DialogUtils {
 		return button;
 	}
 
-	public static JMenuItem getMenuItem(String text, ActionListener actionListener) {
-		JMenuItem menuItem = new JMenuItem(text);
-		menuItem.addActionListener(actionListener);
-		return menuItem;
+	public static JMenuItem getMenuItem(Action action) {
+		return new JMenuItem(action);
 	}
 
 	public static JMenuItem getMenuItem(String text, Action action) {
@@ -220,14 +218,13 @@ public class DialogUtils {
 
 
 	public static Optional<OntopProtegeReasoner> getOntopProtegeReasoner(EditorKit editorKit) {
-		Workspace workspace = editorKit.getWorkspace();
 		if (!(editorKit instanceof OWLEditorKit))
 			throw new MinorOntopInternalBugException("EditorKit is not an OWLEditorKit");
 
 		OWLEditorKit owlEditorKit = (OWLEditorKit)editorKit;
 		OWLReasoner reasoner = owlEditorKit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
 		if (!(reasoner instanceof OntopProtegeReasoner)) {
-			JOptionPane.showMessageDialog(workspace,
+			JOptionPane.showMessageDialog(editorKit.getWorkspace(),
 					"<html><b>Ontop reasoner</b> must be started before using this feature. To proceed<br><br>" +
 							HTML_TAB + " * select Ontop in the <b>\"Reasoner\"</b> menu and<br>" +
 							HTML_TAB + " * click <b>\"Start reasoner\"</b> in the same menu.<br></html>",

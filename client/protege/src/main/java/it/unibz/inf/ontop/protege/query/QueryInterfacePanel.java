@@ -29,10 +29,12 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import it.unibz.inf.ontop.protege.query.worker.TurtleRendererForOWL;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
+import it.unibz.inf.ontop.protege.utils.OntopReasonerAbstractAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
-import it.unibz.inf.ontop.protege.workers.ExportResultsToCSVSwingWorker;
+import it.unibz.inf.ontop.protege.query.worker.ExportResultsToCSVSwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorkerFactory;
 import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
@@ -52,12 +54,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.List;
-import java.util.Optional;
 
-import static it.unibz.inf.ontop.protege.utils.DialogUtils.getKeyStrokeWithCtrlMask;
-import static it.unibz.inf.ontop.protege.utils.DialogUtils.setUpAccelerator;
-import static java.awt.event.KeyEvent.VK_ENTER;
-import static java.awt.event.KeyEvent.VK_P;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
+import static java.awt.event.KeyEvent.*;
 
 public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSelectionListener, OWLOntologyChangeListener {
 
@@ -76,7 +75,6 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	private final JLabel executionInfoLabel;
 	private final JTable queryResultTable;
 	private final JTextArea txtSqlTranslation;
-	private final JButton exportButton;
 	private final JButton stopButton;
 
 	private final OWLEditorKit editorKit;
@@ -85,17 +83,19 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		this.editorKit = editorKit;
 		this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
-		JPopupMenu sparqlPopupMenu = new JPopupMenu();
-		JMenuItem getIqMenuItem = DialogUtils.getMenuItem("View Intermediate Query...",
-				evt -> getOntopAndExecute(getShowIqExecutor()));
-		sparqlPopupMenu.add(getIqMenuItem);
+		OntopReasonerAbstractAction viewIqAction = new OntopReasonerAbstractAction(
+				"View Intermediate Query...", null, null, null,
+				editorKit, this::getViewIqWorker);
 
-		JMenuItem getSqlMenuItem = DialogUtils.getMenuItem("View SQL translation...",
-				evt -> getOntopAndExecute(getShowSqlExecutor()));
-		sparqlPopupMenu.add(getSqlMenuItem);
+		OntopReasonerAbstractAction viewSqlAction = new OntopReasonerAbstractAction(
+				"View SQL translation...", null, null, null,
+				editorKit, this::getViewSqlWorker);
+
+		JPopupMenu sparqlPopupMenu = new JPopupMenu();
+		sparqlPopupMenu.add(getMenuItem(viewIqAction));
+		sparqlPopupMenu.add(getMenuItem(viewSqlAction));
 
 		JPanel queryPanel = new JPanel(new BorderLayout());
-		//queryPanel.setPreferredSize(new Dimension(400, 250));
 		queryPanel.setMinimumSize(new Dimension(400, 250));
 
 		queryTextPane = new JTextPane();
@@ -130,33 +130,15 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(0, 0, 0, 0), 0, 0));
 
-		OntopAbstractAction prefixesAction = new OntopAbstractAction(
-				"Prefixes...",
-				"attach.png",
-				"Select prefixes to insert into the query",
-				getKeyStrokeWithCtrlMask(VK_P)) {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane.getText());
-				dialog.setLocationRelativeTo(QueryInterfacePanel.this);
-				dialog.setVisible(true);
-				dialog.getPrefixDirectives()
-						.ifPresent(s -> queryTextPane.setText(s + "\n" + queryTextPane.getText()));
-			}
-		};
-
-		OntopAbstractAction executeAction = new OntopAbstractAction(
+		OntopReasonerAbstractAction executeAction = new OntopReasonerAbstractAction(
 				"Execute",
 				"execute.png",
 				"Execute the query and display the results",
-				getKeyStrokeWithCtrlMask(VK_ENTER)) {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				executeActionPerformed(e);
-			}
-		};
+				getKeyStrokeWithCtrlMask(VK_ENTER),
+				editorKit,
+				this::getExecuteWorker);
 
-		stopButton = DialogUtils.getButton(
+		stopButton = getButton(
 				"Stop",
 				"stop.png",
 				"Stop running the current query",
@@ -167,7 +149,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 						GridBagConstraints.CENTER, GridBagConstraints.NONE,
 						new Insets(0, 0, 0, 0), 0, 0));
 
-		executeButton = DialogUtils.getButton(executeAction);
+		executeButton = getButton(executeAction);
 		controlPanel.add(executeButton,
 				new GridBagConstraints(5, 0, 1, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.NONE,
@@ -180,8 +162,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		topControlPanel.setLayout(new BoxLayout(topControlPanel, BoxLayout.LINE_AXIS));
 		topControlPanel.add(new JLabel("SPARQL Query"));
 		topControlPanel.add(Box.createHorizontalGlue());
-		JButton prefixesButton = DialogUtils.getButton(prefixesAction);
-		topControlPanel.add(prefixesButton);
+		topControlPanel.add(getButton(prefixesAction));
 		queryPanel.add(topControlPanel, BorderLayout.NORTH);
 
 		JPanel resultsPanel = new JPanel(new BorderLayout());
@@ -192,7 +173,6 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 		resultTabbedPane = new JTabbedPane();
 		resultTabbedPane.setMinimumSize(new Dimension(400, 250));
-		//resultTabbedPane.setPreferredSize(new Dimension(400, 250));
 
 		JPanel sparqlResultPanel = new JPanel(new BorderLayout());
 		resultTabbedPane.addTab("SPARQL results", sparqlResultPanel);
@@ -202,27 +182,25 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		sparqlResultPanel.add(scrollPane, BorderLayout.CENTER);
 
 		JPanel controlBottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		exportButton = DialogUtils.getButton(
-				"Export to CSV...",
-				"export.png",
-				"Export the results to a CSV file",
-				this::exportActionPerformed);
-		exportButton.setEnabled(false);
-		controlBottomPanel.add(exportButton);
+		exportAction.setEnabled(false);
+		controlBottomPanel.add(getButton(exportAction));
 
 		sparqlResultPanel.add(controlBottomPanel, BorderLayout.SOUTH);
 
 		txtSqlTranslation = new JTextArea();
 		resultTabbedPane.addTab("SQL translation", new JScrollPane(txtSqlTranslation));
 
-		JPopupMenu menu = new JPopupMenu();
-		JMenuItem countResultsMenuItem = new JMenuItem("Count tuples");
-		countResultsMenuItem.addActionListener(evt -> getOntopAndExecute(getCountResultsExecutor()));
-		menu.add(countResultsMenuItem);
-		resultsPanel.setComponentPopupMenu(menu);
-		queryResultTable.setComponentPopupMenu(menu);
-		resultTabbedPane.setComponentPopupMenu(menu);
-		scrollPane.setComponentPopupMenu(menu);
+		OntopReasonerAbstractAction countResultsAction = new OntopReasonerAbstractAction(
+				"Count tuples", null, null, null,
+				editorKit, this::getCountResultsWorker);
+
+		JPopupMenu resultsPopupMenu = new JPopupMenu();
+		resultsPopupMenu.add(getMenuItem(countResultsAction));
+
+		resultsPanel.setComponentPopupMenu(resultsPopupMenu);
+		queryResultTable.setComponentPopupMenu(resultsPopupMenu);
+		resultTabbedPane.setComponentPopupMenu(resultsPopupMenu);
+		scrollPane.setComponentPopupMenu(resultsPopupMenu);
 
 		resultsPanel.add(resultTabbedPane, BorderLayout.CENTER);
 
@@ -236,33 +214,33 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 		setUpAccelerator(queryTextPane, executeAction);
 		setUpAccelerator(queryTextPane, prefixesAction);
+		setUpAccelerator(queryResultTable, exportAction);
 	}
 
-	private void executeActionPerformed(ActionEvent evt) {
+	private OntopQuerySwingWorker<?, ?> getExecuteWorker(OntopProtegeReasoner ontop) {
 		String query = queryTextPane.getText();
 		if (query.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
+			return null;
 		}
 		try {
 			SPARQLParser parser = new SPARQLParser();
 			ParsedQuery parsedQuery = parser.parseQuery(query, "http://example.org");
-			if (parsedQuery instanceof ParsedTupleQuery) {
-				getOntopAndExecute(getSelectQueryExecutor());
-			}
-			else if (parsedQuery instanceof ParsedBooleanQuery) {
-				getOntopAndExecute(getAskQueryExecutor());
-			}
-			else if (parsedQuery instanceof ParsedGraphQuery) {
-				getOntopAndExecute(getGraphQueryExecutor());
-			}
-			else {
-				JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
-			}
+			if (parsedQuery instanceof ParsedTupleQuery)
+				return getSelectQueryWorker(ontop);
+
+			if (parsedQuery instanceof ParsedBooleanQuery)
+				return getAskQueryWorker(ontop);
+
+			if (parsedQuery instanceof ParsedGraphQuery)
+				return getGraphQueryWorker(ontop);
+
+			JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
+		return null;
 	}
 
 	@Override
@@ -297,32 +275,53 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		queryResultTable.invalidate();
 		queryResultTable.repaint();
 
-		exportButton.setEnabled(false);
+		exportAction.setEnabled(false);
 		return tableModel;
 	}
 
+	private final OntopAbstractAction prefixesAction = new OntopAbstractAction(
+			"Prefixes...",
+			"attach.png",
+			"Select prefixes to insert into the query",
+			getKeyStrokeWithCtrlMask(VK_P)) {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane.getText());
+			dialog.setLocationRelativeTo(QueryInterfacePanel.this);
+			dialog.setVisible(true);
+			dialog.getPrefixDirectives()
+					.ifPresent(s -> queryTextPane.setText(s + "\n" + queryTextPane.getText()));
+		}
+	};
 
-	private void exportActionPerformed(ActionEvent evt) {
-		JFileChooser fileChooser = DialogUtils.getFileChooser(editorKit,
-				DialogUtils.getExtensionReplacer(".csv"));
+	private final OntopAbstractAction exportAction = new OntopAbstractAction(
+			"Export to CSV...",
+			"export.png",
+			"Export the results to a CSV file",
+			getKeyStrokeWithCtrlMask(VK_T)) {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JFileChooser fileChooser = DialogUtils.getFileChooser(editorKit,
+					DialogUtils.getExtensionReplacer(".csv"));
 
-		if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION)
-			return;
+			if (fileChooser.showSaveDialog(null) != JFileChooser.APPROVE_OPTION)
+				return;
 
-		File file = fileChooser.getSelectedFile();
-		if (!DialogUtils.confirmCanWrite(file, this, "Export to CSV"))
-			return;
+			File file = fileChooser.getSelectedFile();
+			if (!DialogUtils.confirmCanWrite(file, null, "Export to CSV"))
+				return;
 
-		ExportResultsToCSVSwingWorker worker = new ExportResultsToCSVSwingWorker(
-				this, file, (DefaultTableModel) queryResultTable.getModel());
-		worker.execute();
-	}
+			ExportResultsToCSVSwingWorker worker = new ExportResultsToCSVSwingWorker(
+					QueryInterfacePanel.this, file, (DefaultTableModel) queryResultTable.getModel());
+			worker.execute();
+		}
+	};
 
 
-	private OntopQuerySwingWorkerFactory<Boolean, Void> getAskQueryExecutor() {
+	private OntopQuerySwingWorker<Boolean, Void> getAskQueryWorker(OntopProtegeReasoner ontop) {
 		resetTableModel(new String[0]);
 
-		return (ontop, query) -> new OntopQuerySwingWorker<Boolean, Void>(ontop, query, getParent(),
+		return new OntopQuerySwingWorker<Boolean, Void>(ontop, queryTextPane.getText(), getParent(),
 						"Execute ASK Query", executeButton, stopButton, executionInfoLabel) {
 			@Override
 			protected Boolean runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -334,14 +333,14 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 				showActionResult(elapsedTimeMillis(), "Result: <b>" + result + "</b>.");
 				executionInfoLabel.setBackground(result ? Color.GREEN : Color.RED);
 				executionInfoLabel.setOpaque(true);
-				setSQLTranslation(sqlQuery);
+				txtSqlTranslation.setText(sqlQuery);
 			}
 		};
 	}
 
-	private OntopQuerySwingWorkerFactory<Void, String> getGraphQueryExecutor() {
-		DefaultTableModel tableModel = resetTableModel(new String[] {"RDF triples"});
-		return (ontop, query) -> new OntopQuerySwingWorker<Void, String>(ontop, query, getParent(),
+	private OntopQuerySwingWorker<Void, String> getGraphQueryWorker(OntopProtegeReasoner ontop) {
+		DefaultTableModel tableModel = resetTableModel(new String[] { "RDF triples" });
+		return new OntopQuerySwingWorker<Void, String>(ontop, queryTextPane.getText(), getParent(),
 						"Execute CONSTRUCT/DESCRIBE Query", executeButton, stopButton, executionInfoLabel) {
 
 			@Override
@@ -372,15 +371,16 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			@Override
 			protected void onCompletion(Void result, String sqlQuery) {
 				showActionResult(elapsedTimeMillis(), "OWL axioms produced: <b>" + getCount() + "</b>.");
-				setSQLTranslation(sqlQuery);
-				exportButton.setEnabled(tableModel.getRowCount() > 0);
+				txtSqlTranslation.setText(sqlQuery);
+				exportAction.setEnabled(tableModel.getRowCount() > 0);
 			}
 		};
 	}
 
-	private OntopQuerySwingWorkerFactory<Void, String[]> getSelectQueryExecutor() {
+	private OntopQuerySwingWorker<Void, String[]> getSelectQueryWorker(OntopProtegeReasoner ontop) {
 		DefaultTableModel tableModel = resetTableModel(new String[0]);
-		return (ontop, query) -> new OntopQuerySwingWorker<Void, String[]>(ontop, query, getParent(),
+
+		return new OntopQuerySwingWorker<Void, String[]>(ontop, queryTextPane.getText(), getParent(),
 						"Execute SELECT Query", executeButton, stopButton, executionInfoLabel) {
 
 			@Override
@@ -418,8 +418,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			@Override
 			protected void onCompletion(Void result, String sqlQuery) {
 				showActionResult(elapsedTimeMillis(), "Solution mappings returned: <b>" + getCount() + "</b>.");
-				setSQLTranslation(sqlQuery);
-				exportButton.setEnabled(tableModel.getRowCount() > 0);
+				txtSqlTranslation.setText(sqlQuery);
+				exportAction.setEnabled(tableModel.getRowCount() > 0);
 			}
 		};
 	}
@@ -437,21 +437,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 				showShortIriCheckBox.isSelected());
 	}
 
-	public void setSQLTranslation(String sql) {
-		txtSqlTranslation.setText(sql);
-	}
-
-	private void getOntopAndExecute(OntopQuerySwingWorkerFactory<?, ?> executor) {
-		Optional<OntopProtegeReasoner> ontop = DialogUtils.getOntopProtegeReasoner(editorKit);
-		if (!ontop.isPresent())
-			return;
-
-		OntopQuerySwingWorker<?, ?> worker = executor.apply(ontop.get(), queryTextPane.getText());
-		worker.execute();
-	}
-
-	private OntopQuerySwingWorkerFactory<String, Void> getShowIqExecutor() {
-		return (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, getParent(), "Rewriting query") {
+	private OntopQuerySwingWorker<String, Void> getViewIqWorker(OntopProtegeReasoner ontop) {
+		return new OntopQuerySwingWorker<String, Void>(ontop, queryTextPane.getText(), getParent(), "Rewriting query") {
 			@Override
 			protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
 				return statement.getRewritingRendering(query);
@@ -459,7 +446,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(String result, String sqlQuery) {
-				setSQLTranslation(sqlQuery);
+				txtSqlTranslation.setText(sqlQuery);
 				QueryResultsSimpleDialog dialog = new QueryResultsSimpleDialog(editorKit.getWorkspace(),
 						"Intermediate Query",
 						result,
@@ -469,8 +456,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		};
 	}
 
-	private OntopQuerySwingWorkerFactory<String, Void> getShowSqlExecutor() {
-		return (ontop, query) -> new OntopQuerySwingWorker<String, Void>(ontop, query, getParent(), "Rewriting query") {
+	private OntopQuerySwingWorker<String, Void> getViewSqlWorker(OntopProtegeReasoner ontop) {
+		return new OntopQuerySwingWorker<String, Void>(ontop, queryTextPane.getText(), getParent(), "Rewriting query") {
 
 			@Override
 			protected String runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -479,7 +466,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(String result, String sqlQuery) {
-				setSQLTranslation(sqlQuery);
+				txtSqlTranslation.setText(sqlQuery);
 				resultTabbedPane.setSelectedIndex(1);
 				showActionResult(elapsedTimeMillis(), "Translated into SQL.");
 //				QueryResultsSimpleDialog dialog = new QueryResultsSimpleDialog(editorKit.getWorkspace(),
@@ -491,8 +478,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		};
 	}
 
-	private OntopQuerySwingWorkerFactory<Long, Void> getCountResultsExecutor() {
-		return (ontop, query) -> new OntopQuerySwingWorker<Long, Void>(ontop, query, getParent(), "Counting results") {
+	private OntopQuerySwingWorker<Long, Void> getCountResultsWorker(OntopProtegeReasoner ontop) {
+		return new OntopQuerySwingWorker<Long, Void>(ontop, queryTextPane.getText(), getParent(), "Counting results") {
 
 			@Override
 			protected Long runQuery(OntopOWLStatement statement, String query) throws Exception {
@@ -502,7 +489,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			@Override
 			protected void onCompletion(Long result, String sqlQuery) {
 				showActionResult(elapsedTimeMillis(),"The number of results: <b>" + result + "</b>.");
-				setSQLTranslation(sqlQuery);
+				txtSqlTranslation.setText(sqlQuery);
 			}
 		};
 	}
