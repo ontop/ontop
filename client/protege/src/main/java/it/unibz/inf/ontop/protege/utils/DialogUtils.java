@@ -88,11 +88,48 @@ public class DialogUtils {
 		return menuItem;
 	}
 
-	public static JMenuItem getMenuItem(String text, ActionListener actionListener, boolean enabled) {
-		JMenuItem menuItem = getMenuItem(text, actionListener);
-		menuItem.setEnabled(enabled);
+	public static JMenuItem getMenuItem(String text, Action action) {
+		JMenuItem menuItem = new JMenuItem(action);
+		menuItem.setText(text);
+		menuItem.setIcon(null);
 		return menuItem;
 	}
+
+	public static int getCtrlMask() {
+		return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+	}
+
+	public static void setUpPopUpMenu(JComponent component, JPopupMenu popupMenu) {
+		int c = popupMenu.getComponentCount();
+		for (int i = 0; i < c; i++) {
+			Component current = popupMenu.getComponent(i);
+			if (current instanceof JMenuItem) {
+				JMenuItem menuItem = (JMenuItem) current;
+				KeyStroke keyStroke =  (KeyStroke) menuItem.getAction().getValue(Action.ACCELERATOR_KEY);
+				if (keyStroke != null) {
+					component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, menuItem.getText());
+					component.getActionMap().put(menuItem.getText(), menuItem.getAction());
+				}
+			}
+		}
+		component.setComponentPopupMenu(popupMenu);
+	}
+
+	public static JButton createStandardButton(String text, boolean enabled) {
+		JButton button = new JButton(text);
+		button.addActionListener(e ->
+				getOptionPaneParent((JComponent)e.getSource()).setValue(button));
+		button.setEnabled(enabled);
+		return button;
+	}
+
+	private static JOptionPane getOptionPaneParent(Container parent) {
+		return  (parent instanceof JOptionPane)
+				? (JOptionPane) parent
+				: getOptionPaneParent(parent.getParent());
+	}
+
+
 
 	public static DefaultTableModel createNonEditableTableModel(Object[] columnNames) {
 		return new DefaultTableModel(columnNames, 0) {

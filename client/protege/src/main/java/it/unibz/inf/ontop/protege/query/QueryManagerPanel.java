@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.query;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
@@ -39,9 +38,10 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static it.unibz.inf.ontop.protege.utils.DialogUtils.CANCEL_BUTTON_TEXT;
-import static it.unibz.inf.ontop.protege.utils.DialogUtils.OK_BUTTON_TEXT;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
+import static java.awt.event.KeyEvent.*;
 
 public class QueryManagerPanel extends JPanel {
 
@@ -49,9 +49,6 @@ public class QueryManagerPanel extends JPanel {
 
     static private final String QUERY_ICON_PATH = "images/query_icon.png";
     static private final String GROUP_ICON_PATH = "images/group_icon.png";
-
-    private final Icon queryIcon;
-    private final Icon groupIcon;
 
     private final List<QueryManagerPanelSelectionListener> listeners = new ArrayList<>();
 
@@ -62,14 +59,21 @@ public class QueryManagerPanel extends JPanel {
 	public QueryManagerPanel(QueryManager queryManager) {
         this.queryManager = queryManager;
 
-        queryIcon = IconLoader.getImageIcon(QUERY_ICON_PATH);
-        groupIcon = IconLoader.getImageIcon(GROUP_ICON_PATH);
+        addQueryAction.setAccelerator(VK_E, getCtrlMask());
+        addGroupAction.setAccelerator(VK_G, getCtrlMask());
+        deleteAction.setEnabled(false);
+        deleteAction.setAccelerator(VK_BACK_SPACE, getCtrlMask());
+        renameAction.setEnabled(false);
+        renameAction.setAccelerator(VK_U, getCtrlMask());
 
         setLayout(new BorderLayout());
 
         QueryManagerTreeModel model = new QueryManagerTreeModel(queryManager);
         queryManagerTree = new JTree(model);
         queryManagerTree.setCellRenderer(new DefaultTreeCellRenderer() {
+            private final Icon queryIcon = IconLoader.getImageIcon(QUERY_ICON_PATH);
+            private final Icon groupIcon = IconLoader.getImageIcon(GROUP_ICON_PATH);
+
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
@@ -111,30 +115,24 @@ public class QueryManagerPanel extends JPanel {
         add(new JScrollPane(queryManagerTree), BorderLayout.CENTER);
 
         JPopupMenu popupMenu = new JPopupMenu();
-        popupMenu.add(DialogUtils.getMenuItem("Add Query...", addQueryAction));
-        popupMenu.add(DialogUtils.getMenuItem("Add Group...", addGroupAction));
-        JMenuItem renameMenuItem = DialogUtils.getMenuItem("Rename Query/Group", renameAction, false);
-        popupMenu.add(renameMenuItem);
-        JMenuItem deleteMenuItem = DialogUtils.getMenuItem("Delete Query/Group", deleteAction, false);
-        popupMenu.add(deleteMenuItem);
-        queryManagerTree.setComponentPopupMenu(popupMenu);
-
-        deleteAction.setEnabled(false);
+        popupMenu.add(getMenuItem("Add Query...", addQueryAction));
+        popupMenu.add(getMenuItem("Add Group...", addGroupAction));
+        popupMenu.add(getMenuItem("Rename Query/Group", renameAction));
+        popupMenu.add(getMenuItem("Delete Query/Group", deleteAction));
+        setUpPopUpMenu(queryManagerTree, popupMenu);
 
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.LINE_AXIS));
-
-        controlPanel.add(DialogUtils.getButton(addQueryAction));
-        controlPanel.add(DialogUtils.getButton(addGroupAction));
-        controlPanel.add(DialogUtils.getButton(deleteAction));
+        controlPanel.add(getButton(addQueryAction));
+        controlPanel.add(getButton(addGroupAction));
+        controlPanel.add(getButton(deleteAction));
+        add(controlPanel, BorderLayout.NORTH);
 
         queryManagerTree.getSelectionModel().addTreeSelectionListener(evt -> {
             boolean nonEmptySelection = queryManagerTree.getSelectionPaths() != null;
-            renameMenuItem.setEnabled(nonEmptySelection);
+            renameAction.setEnabled(nonEmptySelection);
             deleteAction.setEnabled(nonEmptySelection);
-            deleteMenuItem.setEnabled(nonEmptySelection);
         });
-        add(controlPanel, BorderLayout.NORTH);
 	}
 
 	public void addQueryManagerSelectionListener(QueryManagerPanelSelectionListener listener) {
@@ -154,10 +152,8 @@ public class QueryManagerPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent evt) {
             QueryManager.Item group = getTargetForInsertion();
-            String id = showNewItemDialog(
-                    "New query ID:", "Create New Query", getUsedIDs(group));
-            if (id != null)
-                group.addQueryChild(id, "");
+            showNewItemDialog("New query ID:", "Create New Query", getUsedIDs(group))
+                    .ifPresent(id -> group.addQueryChild(id, ""));
         }
     };
 
@@ -168,10 +164,8 @@ public class QueryManagerPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             QueryManager.Item group = getTargetForInsertion();
-            String id = showNewItemDialog(
-                    "New group ID:", "Create New Group", getUsedIDs(group));
-            if (id != null)
-                group.addGroupChild(id);
+            showNewItemDialog("New group ID:", "Create New Group", getUsedIDs(group))
+                    .ifPresent(group::addGroupChild);
         }
     };
 
@@ -189,12 +183,11 @@ public class QueryManagerPanel extends JPanel {
             if (item.getParent() == null)
                 return;
 
-            String id = showNewItemDialog(
-                    "<html><b>New</b> ID for " + (item.isQuery() ? "query" : "group") + " \"" + DialogUtils.htmlEscape(item.getID()) + "\":</html>",
+            showNewItemDialog("<html><b>New</b> ID for " + (item.isQuery() ? "query" : "group") +
+                            " \"" + htmlEscape(item.getID()) + "\":</html>",
                     "Rename " + (item.isQuery() ? "Query" : "Group") + " \"" + item.getID() + "\"",
-                    getUsedIDs(item.getParent()));
-            if (id != null)
-                item.setID(id);
+                    getUsedIDs(item.getParent()))
+                    .ifPresent(item::setID);
         }
     };
 
@@ -235,18 +228,15 @@ public class QueryManagerPanel extends JPanel {
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private String showNewItemDialog(String labelString, String title, ImmutableSet<String> usedIDs) {
+    private Optional<String> showNewItemDialog(String labelString, String title, ImmutableSet<String> usedIDs) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 
-        JLabel label = new JLabel(labelString);
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(label);
+        panel.add(new JLabel(labelString));
 
         panel.add(Box.createVerticalStrut(10));
 
         JTextField idField = new JTextField("");
-        idField.setAlignmentX(Component.LEFT_ALIGNMENT);
         idField.setColumns(40);
         Border normalBorder = idField.getBorder();
         Border errorBorder = BorderFactory.createLineBorder(Color.RED, 1);
@@ -255,7 +245,6 @@ public class QueryManagerPanel extends JPanel {
         panel.add(Box.createVerticalStrut(10));
 
         JLabel errorLabel = new JLabel("<html>&nbsp;</html>");
-        errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         errorLabel.setForeground(Color.RED);
         errorLabel.setFont(errorLabel.getFont().deriveFont(AffineTransform.getScaleInstance(0.9, 0.9)));
         panel.add(errorLabel);
@@ -263,13 +252,8 @@ public class QueryManagerPanel extends JPanel {
         panel.add(Box.createVerticalStrut(20));
 
         // manual construction of the buttons is required to control their enabled status
-        JButton okButton = new JButton(OK_BUTTON_TEXT);
-        okButton.addActionListener(e ->
-                getOptionPane((JComponent)e.getSource()).setValue(okButton));
-        okButton.setEnabled(false);
-        JButton cancelButton = new JButton(CANCEL_BUTTON_TEXT);
-        cancelButton.addActionListener(e ->
-                getOptionPane((JComponent)e.getSource()).setValue(cancelButton));
+        JButton okButton = createStandardButton(OK_BUTTON_TEXT, false);
+        JButton cancelButton = createStandardButton(CANCEL_BUTTON_TEXT, true);
 
         idField.getDocument().addDocumentListener((SimpleDocumentListener) evt -> {
             String id = idField.getText().trim();
@@ -295,22 +279,15 @@ public class QueryManagerPanel extends JPanel {
                 IconLoader.getOntopIcon(),
                 new Object[] { okButton, cancelButton },
                 okButton) != JOptionPane.OK_OPTION)
-            return null;
+            return Optional.empty();
 
-        return idField.getText().trim();
+        return Optional.of(idField.getText().trim());
     }
-
-    protected JOptionPane getOptionPane(JComponent parent) {
-        return  (parent instanceof JOptionPane)
-                ? (JOptionPane) parent
-                : getOptionPane((JComponent)parent.getParent());
-    }
-
 
 	private boolean confirmDelete(QueryManager.Item item) {
         return JOptionPane.showConfirmDialog(null,
                 "<html>This will delete " + (item.isQuery() ?  "query" : "group") +
-                        " \""  + DialogUtils.htmlEscape(item.getID()) + "\"" +
+                        " \""  + htmlEscape(item.getID()) + "\"" +
                         (item.getChildCount() == 0 ? "" : " along with all its queries and groups") + ".<br><br>" +
                         "Do you wish to <b>continue</b>?<br></html>",
                 "Delete confirmation",

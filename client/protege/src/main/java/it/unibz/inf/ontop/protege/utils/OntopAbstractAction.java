@@ -9,6 +9,10 @@ public abstract class OntopAbstractAction extends AbstractAction {
         putValue(Action.SHORT_DESCRIPTION, tooltip);
     }
 
+    public void setAccelerator(int keyCode, int modifiers) {
+        putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(keyCode, modifiers));
+    }
+
     public String getName() { return (String)getValue(Action.NAME); }
     public ImageIcon getIcon() { return (ImageIcon)getValue(Action.SMALL_ICON); }
 
