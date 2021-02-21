@@ -121,11 +121,7 @@ public class SelectPrefixesDialog extends JDialog {
 		setUpAccelerator(getRootPane(), selectAllAction);
 		setUpAccelerator(getRootPane(), selectNoneAction);
 		setUpAccelerator(getRootPane(), cancelAction);
-
 		getRootPane().setDefaultButton(acceptButton);
-
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		pack();
 	}
 
 	private final OntopAbstractAction acceptAction = new OntopAbstractAction(OK_BUTTON_TEXT,
@@ -139,15 +135,7 @@ public class SelectPrefixesDialog extends JDialog {
 		}
 	};
 
-	private final OntopAbstractAction cancelAction = new OntopAbstractAction(CANCEL_BUTTON_TEXT,
-			null,
-			null,
-			KeyStroke.getKeyStroke(VK_ESCAPE, 0)) {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			dispatchEvent(new WindowEvent(SelectPrefixesDialog.this, WindowEvent.WINDOW_CLOSING));
-		}
-	};
+	private final OntopAbstractAction cancelAction = getStandardCloseWindowAction(CANCEL_BUTTON_TEXT, this);
 
 	private final OntopAbstractAction selectAllAction = new OntopAbstractAction(
 			"Select All",

@@ -252,8 +252,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getMutablePrefixManager(), queryTextPane.getText());
-			dialog.setLocationRelativeTo(QueryInterfacePanel.this);
-			dialog.setVisible(true);
+			setLocationRelativeToProtegeAndOpen(editorKit, dialog);
 			dialog.getPrefixDirectives()
 					.ifPresent(s -> queryTextPane.setText(s + "\n" + queryTextPane.getText()));
 		}
@@ -435,8 +434,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 						"Intermediate Query",
 						result,
 						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
-				DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
-				dialog.setVisible(true);
+				setLocationRelativeToProtegeAndOpen(editorKit, dialog);
 			}
 		};
 	}

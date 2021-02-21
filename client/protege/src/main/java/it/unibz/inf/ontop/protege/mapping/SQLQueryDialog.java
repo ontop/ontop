@@ -28,10 +28,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 import static java.awt.event.KeyEvent.*;
+
+// TODO: select column width automatically
 
 public class SQLQueryDialog extends JDialog {
 
@@ -45,17 +46,23 @@ public class SQLQueryDialog extends JDialog {
 	private final OBDADataSource datasource;
 
 	private final OntopAbstractAction executeSqlQueryAction = new OntopAbstractAction(
-			"Execute SQL Query",
+			"Execute",
 			"execute.png",
 			"Execute the SQL query",
 			getKeyStrokeWithCtrlMask(VK_ENTER)) {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			executeSqlQuery();
+			ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
+					SQLQueryDialog.this,
+					datasource,
+					sourceQueryTextPane.getText().trim(),
+					MAX_ROWS,
+					sqlQueryResultTable::setModel);
+			worker.execute();
 		}
 	};
 
-	private final OntopAbstractAction closeDialogAction = getStandardCloseWindowAction(OK_BUTTON_TEXT, SQLQueryDialog.this);
+	private final OntopAbstractAction closeAction = getStandardCloseWindowAction(OK_BUTTON_TEXT, SQLQueryDialog.this);
 
 	public SQLQueryDialog(OBDADataSource datasource, String query) {
 		this.datasource = datasource;
@@ -76,7 +83,7 @@ public class SQLQueryDialog extends JDialog {
 		sourceQueryTextPane = new JTextPane();
 		sourceQueryTextPane.setDocument(new SQLQueryStyledDocument());
 		sourceQueryTextPane.setText(query);
-		sourceQueryTextPane.setPreferredSize(new Dimension(650, 250));
+		sourceQueryTextPane.setPreferredSize(new Dimension(650, 200));
 
 		sourceQueryPanel.add(new JScrollPane(sourceQueryTextPane),
 				new GridBagConstraints(0, 1, 2, 1, 1, 1,
@@ -91,7 +98,6 @@ public class SQLQueryDialog extends JDialog {
 
 		sqlQueryResultTable = new JTable();
 		sqlQueryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		sourceQueryTextPane.setPreferredSize(new Dimension(650, 250));
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				sourceQueryPanel,
@@ -101,27 +107,19 @@ public class SQLQueryDialog extends JDialog {
 		mainPanel.add(splitPane, BorderLayout.CENTER);
 
 		JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		controlPanel.add(getButton(closeDialogAction));
+		JButton closeButton = getButton(closeAction);
+		controlPanel.add(closeButton);
 		mainPanel.add(controlPanel, BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);
 
 		setUpAccelerator(sourceQueryTextPane, executeSqlQueryAction);
 		setUpAccelerator(mainPanel, executeSqlQueryAction);
-		setUpAccelerator(mainPanel, closeDialogAction);
+		setUpAccelerator(mainPanel, closeAction);
+		getRootPane().setDefaultButton(closeButton);
 
-		setSize(700, 600);
+		setPreferredSize(new Dimension(700, 600));
 
-		executeSqlQuery();
-	}
-
-	private void executeSqlQuery() {
-		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
-				this,
-				datasource,
-				sourceQueryTextPane.getText().trim(),
-				MAX_ROWS,
-				sqlQueryResultTable::setModel);
-		worker.execute();
+		executeSqlQueryAction.actionPerformed(null);
 	}
 }

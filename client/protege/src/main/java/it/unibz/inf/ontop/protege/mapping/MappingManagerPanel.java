@@ -24,6 +24,8 @@ import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.worker.ValidationSwingWorker;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.utils.IDGenerator;
+import org.protege.editor.core.editorkit.EditorKit;
+import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -35,6 +37,7 @@ public class MappingManagerPanel extends JPanel {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
+	private final OWLEditorKit editorKit;
     private final MappingFilteredListModel model;
     private final JList<TriplesMap> mappingList;
 
@@ -48,7 +51,8 @@ public class MappingManagerPanel extends JPanel {
 	 *
 	 * @param obdaModelManager
 	 */
-	public MappingManagerPanel(OBDAModelManager obdaModelManager) {
+	public MappingManagerPanel(OWLEditorKit editorKit, OBDAModelManager obdaModelManager) {
+        this.editorKit = editorKit;
 
         setLayout(new BorderLayout());
 
@@ -65,9 +69,7 @@ public class MappingManagerPanel extends JPanel {
                 EditMappingDialog dialog = new EditMappingDialog(
                         obdaModelManager,
                         IDGenerator.getNextUniqueID("MAPID-"));
-                //DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
-                dialog.setLocationRelativeTo(MappingManagerPanel.this);
-                dialog.setVisible(true);
+                DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
             }
         };
 
@@ -105,9 +107,7 @@ public class MappingManagerPanel extends JPanel {
                 EditMappingDialog dialog = new EditMappingDialog(
                         obdaModelManager,
                         mappingList.getSelectedValue());
-                //DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
-                dialog.setLocationRelativeTo(MappingManagerPanel.this);
-                dialog.setVisible(true);
+                DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
             }
         };
         editAction.setEnabled(false);
@@ -130,9 +130,7 @@ public class MappingManagerPanel extends JPanel {
                 SQLQueryDialog dialog = new SQLQueryDialog(
                         obdaModelManager.getDatasource(),
                         mappingList.getSelectedValue().getSqlQuery());
-                //DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
-                dialog.setLocationRelativeTo(MappingManagerPanel.this);
-                dialog.setVisible(true);
+                DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
             }
         };
         executeSQLAction.setEnabled(false);

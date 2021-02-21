@@ -168,10 +168,11 @@ public class EditMappingDialog extends JDialog {
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(4, 10, 0, 0), 0, 0));
 
-		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		buttonsPanel.add(getButton(saveAction));
-		buttonsPanel.add(getButton(cancelAction));
-		mainPanel.add(buttonsPanel,
+		JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JButton saveButton = getButton(saveAction);
+		controlPanel.add(saveButton);
+		controlPanel.add(getButton(cancelAction));
+		mainPanel.add(controlPanel,
 				new GridBagConstraints(0, 3, 2, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(0, 0, 10, 4), 0, 0));
@@ -181,8 +182,9 @@ public class EditMappingDialog extends JDialog {
 		setUpAccelerator(mainPanel, saveAction);
 		setUpAccelerator(mainPanel, cancelAction);
 		setUpAccelerator(mainPanel, executeSqlQueryAction);
+		getRootPane().setDefaultButton(saveButton);
 
-		setSize(700, 600);
+		setPreferredSize(new Dimension(700, 600));
 	}
 
 	private final OntopAbstractAction saveAction;

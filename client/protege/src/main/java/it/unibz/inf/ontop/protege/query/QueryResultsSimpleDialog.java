@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.protege.query;
 
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
-import org.protege.editor.core.ProtegeManager;
-import org.protege.editor.core.ui.workspace.Workspace;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -36,7 +34,9 @@ import static it.unibz.inf.ontop.protege.utils.DialogUtils.setUpAccelerator;
 public class QueryResultsSimpleDialog extends JDialog {
 
 	private static final long serialVersionUID = -200114540739796897L;
-	
+
+    private final OntopAbstractAction closeAction = DialogUtils.getStandardCloseWindowAction("Close", this);
+
     public QueryResultsSimpleDialog(String title, String text, String processingTime) {
         setTitle(title);
 
@@ -46,18 +46,14 @@ public class QueryResultsSimpleDialog extends JDialog {
         JPanel mainPanel = new JPanel(new BorderLayout(0, 5));
 
         JTextArea textArea = new JTextArea(text);
-        textArea.setColumns(20);
         textArea.setEditable(false);
-        textArea.setRows(5);
-        textArea.setWrapStyleWord(true);
         textArea.setFont(new Font("Dialog", Font.PLAIN, 12));
+        textArea.setWrapStyleWord(true);
         mainPanel.add(new JScrollPane(textArea), BorderLayout.CENTER);
 
         mainPanel.add(new JLabel(processingTime), BorderLayout.SOUTH);
 
         add(mainPanel, BorderLayout.CENTER);
-
-        OntopAbstractAction closeAction = DialogUtils.getStandardCloseWindowAction("Close", this);
 
         JPanel controlPanel = new JPanel(new FlowLayout());
         JButton closeButton = getButton(closeAction);
@@ -67,6 +63,6 @@ public class QueryResultsSimpleDialog extends JDialog {
         setUpAccelerator(getRootPane(), closeAction);
         getRootPane().setDefaultButton(closeButton);
 
-        //setMinimumSize(new Dimension(700, 550));
+        setPreferredSize(new Dimension(700, 600));
     }
 }

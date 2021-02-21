@@ -55,11 +55,12 @@ public class DialogUtils {
 	public static final String CANCEL_BUTTON_TEXT = UIManager.getString("OptionPane.cancelButtonText");
 	public static final String OK_BUTTON_TEXT = UIManager.getString("OptionPane.okButtonText");
 
-	public static void setLocationRelativeToProtege(EditorKit editorKit, JDialog dialog) {
+	public static void setLocationRelativeToProtegeAndOpen(EditorKit editorKit, JDialog dialog) {
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.pack();
 		JFrame protegeFrame = ProtegeManager.getInstance().getFrame(editorKit.getWorkspace());
 		dialog.setLocationRelativeTo(protegeFrame);
+		dialog.setVisible(true);
 	}
 
 	public static boolean confirmation(Component parent, String message, String title) {
