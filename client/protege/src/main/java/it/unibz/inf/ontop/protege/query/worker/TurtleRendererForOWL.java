@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.protege.query.worker;
 
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,8 +22,6 @@ public class TurtleRendererForOWL {
 		this.shortenIRIs = shortenIRIs;
 	}
 
-	public Map<String, String> getPrefixMap() { return prefixManager.getPrefixMap(); }
-
 	public Optional<String> render(OWLAxiom axiom) {
 		if (axiom instanceof OWLClassAssertionAxiom)
 			return Optional.of(renderAxiom((OWLClassAssertionAxiom)axiom));
@@ -33,11 +34,28 @@ public class TurtleRendererForOWL {
 		return Optional.empty();
 	}
 
-	public String render(OWLObject constant) {
+	public String[] render(OWLBindingSet bs, String[] signature) throws OWLException {
+		String[] row = new String[signature.length];
+		for (int j = 0; j < signature.length; j++) {
+			String variableName = signature[j];
+			OWLObject constant = bs.getOWLPropertyAssertionObject(variableName);
+			row[j] = render(constant);
+		}
+		return row;
+	}
+
+	public String[] renderPrefixMap() {
+		return prefixManager.getPrefixMap().entrySet().stream()
+				.map(e -> "@prefix " + e.getKey() + " " + e.getValue() + ".")
+				.collect(ImmutableCollectors.toList())
+				.toArray(new String[0]);
+	}
+
+	private String render(OWLObject constant) {
 		if (constant == null)
 			return "";
 
-		if (constant instanceof OWLNamedIndividual) {
+		if (constant instanceof OWLNamedIndividual || constant instanceof IRI) {
 			String iri = constant.toString();
 			return shortenIRIs ? prefixManager.getShortForm(iri) : iri;
 		}

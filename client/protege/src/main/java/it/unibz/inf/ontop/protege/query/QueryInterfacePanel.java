@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
-import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -36,14 +35,12 @@ import it.unibz.inf.ontop.protege.utils.OntopReasonerAbstractAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 import it.unibz.inf.ontop.protege.query.worker.ExportResultsToCSVSwingWorker;
 import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
-import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorkerFactory;
 import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
 import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 
@@ -58,13 +55,17 @@ import java.util.List;
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 import static java.awt.event.KeyEvent.*;
 
+/*
+    TODO: apply shorten IRI on the fly to the result
+    TODO: stop / ask if stopping is required when switching between queries
+ */
+
 public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSelectionListener, OWLOntologyChangeListener {
 
 	private static final long serialVersionUID = -5902798157183352944L;
 
+	private final OWLEditorKit editorKit;
 	private final OBDAModelManager obdaModelManager;
-
-	private QueryManager.Item query;
 
 	private final QueryInterfaceLimitPanel limitPanel;
 	private final JCheckBox showShortIriCheckBox;
@@ -77,7 +78,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	private final JTextArea txtSqlTranslation;
 	private final JButton stopButton;
 
-	private final OWLEditorKit editorKit;
+	private QueryManager.Item query;
 
 	public QueryInterfacePanel(OWLEditorKit editorKit) {
 		this.editorKit = editorKit;
@@ -217,32 +218,6 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		setUpAccelerator(queryResultTable, exportAction);
 	}
 
-	private OntopQuerySwingWorker<?, ?> getExecuteWorker(OntopProtegeReasoner ontop) {
-		String query = queryTextPane.getText();
-		if (query.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-			return null;
-		}
-		try {
-			SPARQLParser parser = new SPARQLParser();
-			ParsedQuery parsedQuery = parser.parseQuery(query, "http://example.org");
-			if (parsedQuery instanceof ParsedTupleQuery)
-				return getSelectQueryWorker(ontop);
-
-			if (parsedQuery instanceof ParsedBooleanQuery)
-				return getAskQueryWorker(ontop);
-
-			if (parsedQuery instanceof ParsedGraphQuery)
-				return getGraphQueryWorker(ontop);
-
-			JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
-		}
-		catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		}
-		return null;
-	}
-
 	@Override
 	public void selectionChanged(QueryManager.Item query) {
 		if (this.query == query)
@@ -251,32 +226,21 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		this.query = query;
 		queryTextPane.setText(query != null ? query.getQueryString() : "");
 		resetTableModel(new String[0]);
-		txtSqlTranslation.setText("");
 		//executeButton.setEnabled(true);
 		//stopButton.setEnabled(false);
-		executionInfoLabel.setText("<html>&nbsp</html>");
+		showStatus("<html>&nbsp</html>", "");
+	}
+
+	private void showStatus(String status, String sqlQuery) {
+		executionInfoLabel.setText(status);
 		executionInfoLabel.setOpaque(false);
+		txtSqlTranslation.setText(sqlQuery);
+		exportAction.setEnabled(queryResultTable.getRowCount() > 0);
 	}
 
 	@Override
 	public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) {
 		resetTableModel(new String[0]);
-	}
-
-	private void showActionResult(long time, String second) {
-		executionInfoLabel.setText("<html>Execution time: <b>" + DialogUtils.renderElapsedTime(time) + "</b>. " + second + "</html>");
-		executionInfoLabel.setOpaque(false);
-	}
-
-	private DefaultTableModel resetTableModel(String[] columnNames) {
-		queryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(columnNames);
-		queryResultTable.setModel(tableModel);
-		queryResultTable.invalidate();
-		queryResultTable.repaint();
-
-		exportAction.setEnabled(false);
-		return tableModel;
 	}
 
 	private final OntopAbstractAction prefixesAction = new OntopAbstractAction(
@@ -318,6 +282,99 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 	};
 
 
+	private OntopQuerySwingWorker<?, ?> getExecuteWorker(OntopProtegeReasoner ontop) {
+		String query = queryTextPane.getText();
+		if (query.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Query editor cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		try {
+			SPARQLParser parser = new SPARQLParser();
+			ParsedQuery parsedQuery = parser.parseQuery(query, "http://example.org");
+			if (parsedQuery instanceof ParsedTupleQuery)
+				return getSelectQueryWorker(ontop);
+
+			if (parsedQuery instanceof ParsedGraphQuery)
+				return getGraphQueryWorker(ontop);
+
+			if (parsedQuery instanceof ParsedBooleanQuery)
+				return getAskQueryWorker(ontop);
+
+			JOptionPane.showMessageDialog(this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Error parsing SPARQL query: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		return null;
+	}
+
+	private OntopQuerySwingWorker<Void, String[]> getSelectQueryWorker(OntopProtegeReasoner ontop) {
+		DefaultTableModel tableModel = resetTableModel(new String[0]);
+
+		return new OntopQuerySwingWorker<Void, String[]>(ontop, queryTextPane.getText(), getParent(),
+				"Execute SELECT Query", executeButton, stopButton, executionInfoLabel) {
+
+			@Override
+			protected Void runQuery(OntopOWLStatement statement, String query) throws Exception {
+				TurtleRendererForOWL renderer = setFetchSizeAndGetTurtleRenderer(statement);
+				try (TupleOWLResultSet rs = statement.executeSelectQuery(query)) {
+					String[] signature = rs.getSignature().toArray(new String[0]);
+					SwingUtilities.invokeLater(() -> {
+						tableModel.setColumnIdentifiers(signature);
+						queryResultTable.revalidate();
+					});
+					while (rs.hasNext()) {
+						publish(renderer.render(rs.next(), signature));
+						tick();
+					}
+				}
+				return null;
+			}
+
+			@Override
+			protected void process(java.util.List<String[]> chunks) {
+				chunks.forEach(tableModel::addRow);
+			}
+
+			@Override
+			protected void onCompletion(Void result, String sqlQuery) {
+				showStatus(formatStatus(elapsedTimeMillis(), "Solution mappings returned: <b>" + getCount() + "</b>."), sqlQuery);
+			}
+		};
+	}
+
+	private OntopQuerySwingWorker<Void, String> getGraphQueryWorker(OntopProtegeReasoner ontop) {
+		DefaultTableModel tableModel = resetTableModel(new String[] { "RDF triples" });
+		return new OntopQuerySwingWorker<Void, String>(ontop, queryTextPane.getText(), getParent(),
+				"Execute CONSTRUCT/DESCRIBE Query", executeButton, stopButton, executionInfoLabel) {
+
+			@Override
+			protected Void runQuery(OntopOWLStatement statement, String query) throws Exception {
+				TurtleRendererForOWL renderer = setFetchSizeAndGetTurtleRenderer(statement);
+				publish(renderer.renderPrefixMap());
+				publish("");
+				try (GraphOWLResultSet rs = statement.executeGraphQuery(query)) {
+					while (rs.hasNext()) {
+						renderer.render(rs.next())
+								.ifPresent(this::publish);
+						tick();
+					}
+				}
+				return null;
+			}
+
+			@Override
+			protected void process(java.util.List<String> chunks) {
+				chunks.forEach(c -> tableModel.addRow(new String[] { c }));
+			}
+
+			@Override
+			protected void onCompletion(Void result, String sqlQuery) {
+				showStatus(formatStatus(elapsedTimeMillis(), "OWL axioms produced: <b>" + getCount() + "</b>."), sqlQuery);
+			}
+		};
+	}
+
 	private OntopQuerySwingWorker<Boolean, Void> getAskQueryWorker(OntopProtegeReasoner ontop) {
 		resetTableModel(new String[0]);
 
@@ -330,111 +387,37 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(Boolean result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(), "Result: <b>" + result + "</b>.");
+				showStatus(formatStatus(elapsedTimeMillis(), "Result: <b>" + result + "</b>."), sqlQuery);
 				executionInfoLabel.setBackground(result ? Color.GREEN : Color.RED);
 				executionInfoLabel.setOpaque(true);
-				txtSqlTranslation.setText(sqlQuery);
 			}
 		};
 	}
 
-	private OntopQuerySwingWorker<Void, String> getGraphQueryWorker(OntopProtegeReasoner ontop) {
-		DefaultTableModel tableModel = resetTableModel(new String[] { "RDF triples" });
-		return new OntopQuerySwingWorker<Void, String>(ontop, queryTextPane.getText(), getParent(),
-						"Execute CONSTRUCT/DESCRIBE Query", executeButton, stopButton, executionInfoLabel) {
+	private DefaultTableModel resetTableModel(String[] columnNames) {
+		queryResultTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+		DefaultTableModel tableModel = DialogUtils.createNonEditableTableModel(columnNames);
+		queryResultTable.setModel(tableModel);
+		queryResultTable.invalidate();
+		queryResultTable.repaint();
 
-			@Override
-			protected Void runQuery(OntopOWLStatement statement, String query) throws Exception {
-				TurtleRendererForOWL owlTranslator = getOWL2TurtleTranslator();
-				owlTranslator.getPrefixMap().entrySet().stream()
-						.map(e -> "@prefix " + e.getKey() + " " + e.getValue() + ".\n")
-						.forEach(this::publish);
-				publish("\n");
-
-				setFetchSize(statement);
-				try (GraphOWLResultSet rs = statement.executeGraphQuery(query)) {
-					while (rs.hasNext()) {
-						owlTranslator.render(rs.next())
-								.ifPresent(this::publish);
-						tick();
-					}
-				}
-				return null;
-			}
-
-			@Override
-			protected void process(java.util.List<String> chunks) {
-				for (String row : chunks)
-					tableModel.addRow(new String[] { row });
-			}
-
-			@Override
-			protected void onCompletion(Void result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(), "OWL axioms produced: <b>" + getCount() + "</b>.");
-				txtSqlTranslation.setText(sqlQuery);
-				exportAction.setEnabled(tableModel.getRowCount() > 0);
-			}
-		};
+		exportAction.setEnabled(false);
+		return tableModel;
 	}
 
-	private OntopQuerySwingWorker<Void, String[]> getSelectQueryWorker(OntopProtegeReasoner ontop) {
-		DefaultTableModel tableModel = resetTableModel(new String[0]);
-
-		return new OntopQuerySwingWorker<Void, String[]>(ontop, queryTextPane.getText(), getParent(),
-						"Execute SELECT Query", executeButton, stopButton, executionInfoLabel) {
-
-			@Override
-			protected Void runQuery(OntopOWLStatement statement, String query) throws Exception {
-				TurtleRendererForOWL owlTranslator = getOWL2TurtleTranslator();
-				setFetchSize(statement);
-				try (TupleOWLResultSet rs = statement.executeSelectQuery(query)) {
-					List<String> signature = rs.getSignature();
-					SwingUtilities.invokeLater(() -> {
-						tableModel.setColumnIdentifiers(signature.toArray());
-						queryResultTable.revalidate();
-					});
-					int columns = signature.size();
-					while (rs.hasNext()) {
-						String[] row = new String[columns];
-						OWLBindingSet bs = rs.next();
-						for (int j = 0; j < columns; j++) {
-							String variableName = signature.get(j);
-							OWLObject constant = bs.getOWLPropertyAssertionObject(variableName);
-							row[j] = owlTranslator.render(constant);
-						}
-						publish(row);
-						tick();
-					}
-				}
-				return null;
-			}
-
-			@Override
-			protected void process(java.util.List<String[]> chunks) {
-				for (String[] row : chunks)
-					tableModel.addRow(row);
-			}
-
-			@Override
-			protected void onCompletion(Void result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(), "Solution mappings returned: <b>" + getCount() + "</b>.");
-				txtSqlTranslation.setText(sqlQuery);
-				exportAction.setEnabled(tableModel.getRowCount() > 0);
-			}
-		};
-	}
-
-	private void setFetchSize(OntopOWLStatement statement) throws OntopOWLException {
+	private TurtleRendererForOWL setFetchSizeAndGetTurtleRenderer(OntopOWLStatement statement) throws OntopOWLException {
 		if (!limitPanel.isFetchAllSelected()) {
 			DefaultOntopOWLStatement defaultOntopOWLStatement = (DefaultOntopOWLStatement) statement;
 			defaultOntopOWLStatement.setMaxRows(limitPanel.getFetchSize());
 		}
-	}
-
-	private TurtleRendererForOWL getOWL2TurtleTranslator() {
 		return new TurtleRendererForOWL(
 				obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
 				showShortIriCheckBox.isSelected());
+	}
+
+	private static String formatStatus(long time, String message) {
+		return"<html>Execution time: <b>" + DialogUtils.renderElapsedTime(time) + "</b>." +
+				" " + message + "</html>";
 	}
 
 	private OntopQuerySwingWorker<String, Void> getViewIqWorker(OntopProtegeReasoner ontop) {
@@ -466,14 +449,8 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(String result, String sqlQuery) {
-				txtSqlTranslation.setText(sqlQuery);
 				resultTabbedPane.setSelectedIndex(1);
-				showActionResult(elapsedTimeMillis(), "Translated into SQL.");
-//				QueryResultsSimpleDialog dialog = new QueryResultsSimpleDialog(editorKit.getWorkspace(),
-//						"SQL Translation",
-//						result,
-//						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
-//				dialog.setVisible(true);
+				showStatus(formatStatus(elapsedTimeMillis(), "Translated into SQL."), sqlQuery);
 			}
 		};
 	}
@@ -488,8 +465,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 
 			@Override
 			protected void onCompletion(Long result, String sqlQuery) {
-				showActionResult(elapsedTimeMillis(),"The number of results: <b>" + result + "</b>.");
-				txtSqlTranslation.setText(sqlQuery);
+				showStatus(formatStatus(elapsedTimeMillis(),"The number of results: <b>" + result + "</b>."), sqlQuery);
 			}
 		};
 	}
