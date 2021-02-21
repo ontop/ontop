@@ -33,13 +33,11 @@ import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.protege.utils.DialogUtils.HTML_TAB;
-import static it.unibz.inf.ontop.protege.utils.DialogUtils.getButton;
-import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 import static java.awt.event.KeyEvent.*;
-import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 
 public class EditMappingDialog extends JDialog {
 
@@ -66,8 +64,6 @@ public class EditMappingDialog extends JDialog {
 	private static final int DEFAULT_TOOLTIP_DISMISS_DELAY = ToolTipManager.sharedInstance().getDismissDelay();
 	private static final int ERROR_TOOLTIP_INITIAL_DELAY = 100;
 	private static final int ERROR_TOOLTIP_DISMISS_DELAY = 9000;
-
-	private final Action saveMappingAction;
 
 	private boolean allComponentsNonEmpty = false, isValid = false;
 
@@ -97,24 +93,11 @@ public class EditMappingDialog extends JDialog {
 		this.obdaModelManager = obdaModelManager;
 		this.id = id;
 
-		saveMappingAction = new AbstractAction(buttonText) {
+		saveAction = new OntopAbstractAction(buttonText, null, null,
+				getKeyStrokeWithCtrlMask(VK_ENTER)) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				saveMapping();
-			}
-		};
-
-		Action cancelAction = new AbstractAction("Cancel") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}
-		};
-
-		Action executeSqlQueryAction = new AbstractAction("Test SQL") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				executeSqlQuery();
+				saveTriplesMap();
 			}
 		};
 
@@ -164,15 +147,11 @@ public class EditMappingDialog extends JDialog {
 		sqlQueryResultTable.setFocusable(false);
 		sqlQueryResultPanel.add(new JScrollPane(sqlQueryResultTable), BorderLayout.CENTER);
 
-		JSplitPane sqlSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				sourceQueryPanel,
-				sqlQueryResultPanel);
+		JSplitPane sqlSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sourceQueryPanel, sqlQueryResultPanel);
 		sqlSplitPane.setResizeWeight(0.6);
 		sqlSplitPane.setOneTouchExpandable(true);
 
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				targetQueryPanel,
-				sqlSplitPane);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, targetQueryPanel, sqlSplitPane);
 		splitPane.setResizeWeight(0.5);
 		splitPane.setOneTouchExpandable(true);
 
@@ -182,12 +161,7 @@ public class EditMappingDialog extends JDialog {
 						new Insets(0, 10, 0, 10), 0, 0));
 
 		JPanel testSqlQueryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JButton testSqlQueryButton = getButton(
-				"<html>E<u>x</u>ecute the SQL query</html>",
-				"execute.png",
-				"Execute the SQL query in the SQL query text pane\nand display the first " + MAX_ROWS + " results in the table.",
-				executeSqlQueryAction);
-		testSqlQueryPanel.add(testSqlQueryButton);
+		testSqlQueryPanel.add(getButton(executeSqlQueryAction));
 		testSqlQueryPanel.add(new JLabel("(" + MAX_ROWS + " rows)"));
 		mainPanel.add(testSqlQueryPanel,
 				new GridBagConstraints(0, 2, 2, 1, 0, 0,
@@ -195,25 +169,41 @@ public class EditMappingDialog extends JDialog {
 						new Insets(4, 10, 0, 0), 0, 0));
 
 		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		buttonsPanel.add(new JButton(saveMappingAction));
-		buttonsPanel.add(new JButton(cancelAction));
+		buttonsPanel.add(getButton(saveAction));
+		buttonsPanel.add(getButton(cancelAction));
 		mainPanel.add(buttonsPanel,
 				new GridBagConstraints(0, 3, 2, 1, 0, 0,
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(0, 0, 10, 4), 0, 0));
 
-		InputMap inputMap = mainPanel.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		inputMap.put(KeyStroke.getKeyStroke(VK_X, CTRL_DOWN_MASK), "execute");
-		inputMap.put(KeyStroke.getKeyStroke(VK_ENTER, CTRL_DOWN_MASK), "save");
-		ActionMap actionMap = mainPanel.getActionMap();
-		actionMap.put("execute", executeSqlQueryAction);
-		actionMap.put("save", saveMappingAction);
-
 		setContentPane(mainPanel);
 
+		setUpAccelerator(mainPanel, saveAction);
+		setUpAccelerator(mainPanel, cancelAction);
+		setUpAccelerator(mainPanel, executeSqlQueryAction);
+
 		setSize(700, 600);
-		DialogUtils.installEscapeCloseOperation(this);
 	}
+
+	private final OntopAbstractAction saveAction;
+
+	private final OntopAbstractAction cancelAction = getStandardCloseWindowAction(CANCEL_BUTTON_TEXT, EditMappingDialog.this);
+
+	private final OntopAbstractAction executeSqlQueryAction = new OntopAbstractAction("Execute the SQL query",
+			"execute.png",
+			"Execute the SQL query in the SQL query text pane\nand display the first " + MAX_ROWS + " results in the table",
+			getKeyStrokeWithCtrlMask(VK_E)) {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
+					EditMappingDialog.this,
+					obdaModelManager.getDatasource(),
+					sourceQueryTextPane.getText().trim(),
+					MAX_ROWS,
+					sqlQueryResultTable::setModel);
+			worker.execute();
+		}
+	};
 
 	private void setKeyboardShortcuts(JTextComponent component) {
 		component.setFocusTraversalKeys(
@@ -232,7 +222,7 @@ public class EditMappingDialog extends JDialog {
 				&& !targetQueryTextPane.getText().trim().isEmpty()
 				&& !sourceQueryTextPane.getText().trim().isEmpty();
 
-		saveMappingAction.setEnabled(isValid && allComponentsNonEmpty);
+		saveAction.setEnabled(isValid && allComponentsNonEmpty);
 	}
 
 	private void targetValidation() {
@@ -243,7 +233,7 @@ public class EditMappingDialog extends JDialog {
 			if (iris.isEmpty()) {
 				if (!isValid) {
 					isValid = true;
-					saveMappingAction.setEnabled(allComponentsNonEmpty);
+					saveAction.setEnabled(allComponentsNonEmpty);
 					targetQueryTextPane.setToolTipText(null);
 					targetQueryTextPane.setBorder(defaultBorder);
 					toolTipManager.setInitialDelay(DEFAULT_TOOLTIP_INITIAL_DELAY);
@@ -269,17 +259,12 @@ public class EditMappingDialog extends JDialog {
 		targetQueryTextPane.setBorder(errorBorder);
 		toolTipManager.setInitialDelay(ERROR_TOOLTIP_INITIAL_DELAY);
 		toolTipManager.setDismissDelay(ERROR_TOOLTIP_DISMISS_DELAY);
-		targetQueryTextPane.setToolTipText("<html><body>" +
-				error.replace("<", "&lt;")
-						.replace(">", "&gt;")
-						.replace("\n", "<br>")
-						.replace("\t", HTML_TAB)
-				+ "</body></html>");
+		targetQueryTextPane.setToolTipText("<html><body>" + htmlEscape(error) + "</body></html>");
 		isValid = false;
-		saveMappingAction.setEnabled(false);
+		saveAction.setEnabled(false);
 	}
 
-	private void saveMapping() {
+	private void saveTriplesMap() {
 		try {
 			String newId = mappingIdField.getText().trim();
 			String target = targetQueryTextPane.getText();
@@ -290,23 +275,13 @@ public class EditMappingDialog extends JDialog {
 			else
 				obdaModelManager.getTriplesMapCollection().update(id, newId, source, target);
 
-			dispose();
+			dispatchEvent(new WindowEvent(EditMappingDialog.this, WindowEvent.WINDOW_CLOSING));
 		}
 		catch (DuplicateTriplesMapException e) {
-			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
+			JOptionPane.showMessageDialog(this, "Error while inserting triples map: ID " + e.getMessage() + " is already taken");
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage());
+			JOptionPane.showMessageDialog(this, "Error while inserting triples map: " + e.getMessage());
 		}
-	}
-
-	private void executeSqlQuery() {
-		ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
-				this,
-				obdaModelManager.getDatasource(),
-				sourceQueryTextPane.getText().trim(),
-				MAX_ROWS,
-				sqlQueryResultTable::setModel);
-		worker.execute();
 	}
 }

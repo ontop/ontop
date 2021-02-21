@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.mapping;
  */
 
 import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.mapping.worker.ValidationSwingWorker;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
@@ -64,6 +65,7 @@ public class MappingManagerPanel extends JPanel {
                 EditMappingDialog dialog = new EditMappingDialog(
                         obdaModelManager,
                         IDGenerator.getNextUniqueID("MAPID-"));
+                //DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
                 dialog.setLocationRelativeTo(MappingManagerPanel.this);
                 dialog.setVisible(true);
             }
@@ -103,6 +105,7 @@ public class MappingManagerPanel extends JPanel {
                 EditMappingDialog dialog = new EditMappingDialog(
                         obdaModelManager,
                         mappingList.getSelectedValue());
+                //DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
                 dialog.setLocationRelativeTo(MappingManagerPanel.this);
                 dialog.setVisible(true);
             }
@@ -127,6 +130,7 @@ public class MappingManagerPanel extends JPanel {
                 SQLQueryDialog dialog = new SQLQueryDialog(
                         obdaModelManager.getDatasource(),
                         mappingList.getSelectedValue().getSqlQuery());
+                //DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
                 dialog.setLocationRelativeTo(MappingManagerPanel.this);
                 dialog.setVisible(true);
             }

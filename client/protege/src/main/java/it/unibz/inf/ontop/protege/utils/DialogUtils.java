@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import it.unibz.inf.ontop.protege.mapping.EditMappingDialog;
+import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLException;
@@ -53,6 +55,13 @@ public class DialogUtils {
 	public static final String CANCEL_BUTTON_TEXT = UIManager.getString("OptionPane.cancelButtonText");
 	public static final String OK_BUTTON_TEXT = UIManager.getString("OptionPane.okButtonText");
 
+	public static void setLocationRelativeToProtege(EditorKit editorKit, JDialog dialog) {
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.pack();
+		JFrame protegeFrame = ProtegeManager.getInstance().getFrame(editorKit.getWorkspace());
+		dialog.setLocationRelativeTo(protegeFrame);
+	}
+
 	public static boolean confirmation(Component parent, String message, String title) {
 		return JOptionPane.showConfirmDialog(
 				parent,
@@ -61,6 +70,16 @@ public class DialogUtils {
 				JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
 				IconLoader.getOntopIcon()) == JOptionPane.YES_OPTION;
+	}
+
+	public static OntopAbstractAction getStandardCloseWindowAction(String text, Window source) {
+		return new OntopAbstractAction(text, null, null,
+				KeyStroke.getKeyStroke(VK_ESCAPE, 0)) {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				source.dispatchEvent(new WindowEvent(source, WindowEvent.WINDOW_CLOSING));
+			}
+		};
 	}
 
 	public static JButton getButton(String text, String icon, String tooltip, ActionListener actionListener) {
@@ -154,6 +173,7 @@ public class DialogUtils {
 	public static String htmlEscape(String s) {
 		return s.replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;")
+				.replaceAll("\t", HTML_TAB)
 				.replaceAll("\n", "<br>");
 	}
 

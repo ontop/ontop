@@ -84,7 +84,7 @@ public class ExecuteSQLQuerySwingWorker extends SwingWorkerWithCompletionPercent
         catch (CancellationException | InterruptedException ignore) {
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(dialog, dialog.getTitle(), "Error executing SQL sqlQuery: " + sqlQuery, LOGGER, e, dataSource);
+            DialogUtils.showErrorDialog(dialog, dialog.getTitle(), "Error executing SQL Query: " + sqlQuery, LOGGER, e, dataSource);
         }
     }
 }

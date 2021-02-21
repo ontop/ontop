@@ -130,7 +130,8 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         map.clear();
         prefixManager = new MutablePrefixManager(ontology);
 
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+        // TODO: fix - makes Protege fail on opening
+        //mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
 
 

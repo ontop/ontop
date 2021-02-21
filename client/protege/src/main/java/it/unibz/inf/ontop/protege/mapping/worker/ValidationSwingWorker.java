@@ -1,10 +1,11 @@
-package it.unibz.inf.ontop.protege.mapping;
+package it.unibz.inf.ontop.protege.mapping.worker;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.mapping.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
@@ -81,7 +82,6 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
                     report.sqlErrorMessage,
                     report.invalidPlaceholders);
         }
-
     }
 
     @Override

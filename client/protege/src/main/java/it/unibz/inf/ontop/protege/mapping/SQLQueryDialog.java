@@ -44,7 +44,7 @@ public class SQLQueryDialog extends JDialog {
 
 	private final OBDADataSource datasource;
 
-	OntopAbstractAction executeSqlQueryAction = new OntopAbstractAction(
+	private final OntopAbstractAction executeSqlQueryAction = new OntopAbstractAction(
 			"Execute SQL Query",
 			"execute.png",
 			"Execute the SQL query",
@@ -55,13 +55,7 @@ public class SQLQueryDialog extends JDialog {
 		}
 	};
 
-	OntopAbstractAction closeDialogAction = new OntopAbstractAction(OK_BUTTON_TEXT, null, null,
-			KeyStroke.getKeyStroke(VK_ESCAPE, 0)) {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			dispatchEvent(new WindowEvent(SQLQueryDialog.this, WindowEvent.WINDOW_CLOSING));
-		}
-	};
+	private final OntopAbstractAction closeDialogAction = getStandardCloseWindowAction(OK_BUTTON_TEXT, SQLQueryDialog.this);
 
 	public SQLQueryDialog(OBDADataSource datasource, String query) {
 		this.datasource = datasource;

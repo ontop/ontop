@@ -431,10 +431,11 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			@Override
 			protected void onCompletion(String result, String sqlQuery) {
 				txtSqlTranslation.setText(sqlQuery);
-				QueryResultsSimpleDialog dialog = new QueryResultsSimpleDialog(editorKit.getWorkspace(),
+				QueryResultsSimpleDialog dialog = new QueryResultsSimpleDialog(
 						"Intermediate Query",
 						result,
 						"Processing time: " + DialogUtils.renderElapsedTime(elapsedTimeMillis()));
+				DialogUtils.setLocationRelativeToProtege(editorKit, dialog);
 				dialog.setVisible(true);
 			}
 		};

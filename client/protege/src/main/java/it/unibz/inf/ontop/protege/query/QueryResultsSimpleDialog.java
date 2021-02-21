@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.protege.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.core.ui.workspace.Workspace;
 
@@ -27,16 +29,15 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
 
-import static java.awt.event.KeyEvent.VK_ESCAPE;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.getButton;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.setUpAccelerator;
 
 public class QueryResultsSimpleDialog extends JDialog {
 
 	private static final long serialVersionUID = -200114540739796897L;
 	
-    public QueryResultsSimpleDialog(Workspace workspace, String title, String text, String processingTime) {
+    public QueryResultsSimpleDialog(String title, String text, String processingTime) {
         setTitle(title);
 
         setLayout(new BorderLayout());
@@ -56,30 +57,16 @@ public class QueryResultsSimpleDialog extends JDialog {
 
         add(mainPanel, BorderLayout.CENTER);
 
-        Action closeAction = new AbstractAction("Close") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispatchEvent(new WindowEvent(QueryResultsSimpleDialog.this, WindowEvent.WINDOW_CLOSING));
-            }
-        };
+        OntopAbstractAction closeAction = DialogUtils.getStandardCloseWindowAction("Close", this);
 
         JPanel controlPanel = new JPanel(new FlowLayout());
-        JButton closeButton = new JButton(closeAction);
+        JButton closeButton = getButton(closeAction);
         controlPanel.add(closeButton);
         add(controlPanel, BorderLayout.SOUTH);
 
-        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        inputMap.put(KeyStroke.getKeyStroke(VK_ESCAPE, 0), "cancel");
-        ActionMap actionMap = getRootPane().getActionMap();
-        actionMap.put("cancel", closeAction);
-
+        setUpAccelerator(getRootPane(), closeAction);
         getRootPane().setDefaultButton(closeButton);
 
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
-        setMinimumSize(new Dimension(700, 550));
-        pack();
-        JFrame protegeFrame = ProtegeManager.getInstance().getFrame(workspace);
-        setLocationRelativeTo(protegeFrame);
+        //setMinimumSize(new Dimension(700, 550));
     }
 }
