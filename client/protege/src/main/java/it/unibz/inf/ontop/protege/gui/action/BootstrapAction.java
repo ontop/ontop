@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
@@ -69,7 +70,7 @@ public class BootstrapAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent evt) {
 
 		OBDAModelManager modelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-		MutablePrefixManager prefixManager = modelManager.getTriplesMapCollection().getMutablePrefixManager();
+		MutablePrefixManager prefixManager = modelManager.getMutablePrefixManager();
 
 		String defaultBaseIRI = prefixManager.getDefaultIriPrefix()
 				.replace("#", "/");

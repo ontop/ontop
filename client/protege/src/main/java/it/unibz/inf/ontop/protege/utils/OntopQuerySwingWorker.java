@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.workers;
+package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
-import it.unibz.inf.ontop.protege.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.tab;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L
@@ -22,6 +22,6 @@ package it.unibz.inf.ontop.protege.gui.tab;
 
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 
-public class OntopMappingsTab extends OWLWorkspaceViewsTab {
+public class OntopMappingTab extends OWLWorkspaceViewsTab {
 	private static final long	serialVersionUID	= -4896884982262745722L;
 }

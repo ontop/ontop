@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.TriplesMap;
+import it.unibz.inf.ontop.protege.mapping.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import org.protege.editor.core.ui.action.ProtegeAction;

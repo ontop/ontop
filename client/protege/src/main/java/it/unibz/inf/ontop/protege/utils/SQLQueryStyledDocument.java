@@ -73,10 +73,13 @@ public class SQLQueryStyledDocument extends DefaultStyledDocument {
 				.map(c -> "[" + Character.toUpperCase(c) + Character.toLowerCase(c) + "]")
 				.collect(Collectors.joining("", "(", ")"));
 		String input = getText(0, getLength()).replaceAll(pattern, keyword.toUpperCase());
+		int total = input.length();
 		int index, offset = 0;
 		while ((index = input.indexOf(keyword, offset)) != -1) {
-			offset = index + length + 1;
-			setCharacterAttributes(index, length, boldStyle, false);
+			offset = index + length;
+			if ((index == 0 || Character.isWhitespace(input.charAt(index - 1))) &&
+					(offset >= total || Character.isWhitespace(input.charAt(offset))))
+				setCharacterAttributes(index, length, boldStyle, false);
 		}
 	}
 }

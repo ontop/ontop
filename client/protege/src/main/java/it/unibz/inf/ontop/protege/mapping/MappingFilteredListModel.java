@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.models;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L
@@ -23,8 +23,6 @@ package it.unibz.inf.ontop.protege.gui.models;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
-import it.unibz.inf.ontop.protege.core.TriplesMapCollection;
-import it.unibz.inf.ontop.protege.core.TriplesMap;
 
 import javax.annotation.Nullable;
 import javax.swing.*;

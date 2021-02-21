@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.panels;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L
@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.panels;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.SQLQueryStyledDocument;
 import it.unibz.inf.ontop.protege.utils.TargetQueryStyledDocument;
 
@@ -33,7 +32,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 
-public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
+public class MappingListRenderer extends JPanel implements ListCellRenderer<TriplesMap> {
 
 	private final TargetQueryStyledDocument trgQueryDocument;
 	private final JTextPane mapTextPane;
@@ -42,7 +41,6 @@ public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 	private final JLabel statusLabel;
 	private final JPanel statusPanel;
 	private final JPanel mainPanel;
-	private final JPanel renderingComponent;
 
 	private final Font plainFont;
 	private final int plainFontHeight;
@@ -72,6 +70,7 @@ public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 	private static final int STATUS_WIDTH = 2;
 
 	public MappingListRenderer(OBDAModelManager obdaModelManager) {
+		super(new SpringLayout());
 
 		mapTextPane = new JTextPane();
 		mapTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
@@ -113,13 +112,12 @@ public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 		mainPanelPluStatus.setBorder(BorderFactory.createLineBorder(new Color(192, 192, 192), BORDER));
 		mainPanelPluStatus.setOpaque(true);
 
-		SpringLayout layout = new SpringLayout();
-		renderingComponent = new JPanel(layout);
-		renderingComponent.add(mainPanelPluStatus);
-		layout.putConstraint(SpringLayout.WEST, mainPanel, PADDING, SpringLayout.WEST, renderingComponent);
-		layout.putConstraint(SpringLayout.NORTH, mainPanel, PADDING, SpringLayout.NORTH, renderingComponent);
+		SpringLayout layout = (SpringLayout)getLayout();
+		add(mainPanelPluStatus);
+		layout.putConstraint(SpringLayout.WEST, mainPanel, PADDING, SpringLayout.WEST, this);
+		layout.putConstraint(SpringLayout.NORTH, mainPanel, PADDING, SpringLayout.NORTH, this);
 
-		renderingComponent.setOpaque(false);
+		setOpaque(false);
 
 		plainFont = TargetQueryStyledDocument.TARGET_QUERY_FONT;
 		plainFontHeight = trgQueryTextPane.getFontMetrics(plainFont).getHeight();
@@ -156,7 +154,7 @@ public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 		setAttributes(trgQueryTextPane, isSelected ? selectionForeground : foreground,false);
 
 		srcQueryTextPane.setText(triplesMap.getSqlQuery());
-		renderingComponent.setToolTipText(triplesMap.getSqlErrorMessage());
+		setToolTipText(triplesMap.getSqlErrorMessage());
 		setAttributes(srcQueryTextPane, isSelected ? selectionForeground : foreground,false);
 
 		mapTextPane.setText(triplesMap.getId());
@@ -167,11 +165,6 @@ public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 
 		statusPanel.setBackground(VALIDITY_BACKGROUND.get(triplesMap.getStatus()));
 		mainPanel.setBackground(isSelected ? SELECTION_BACKGROUND_COLOR : BACKGROUND_COLOR);
-
-		int preferredWidth = list.getParent().getWidth();
-		if (preferredWidth == 0) { // JViewport returns 0 when not visible (?)
-			preferredWidth = list.getParent().getParent().getWidth();
-		}
 
 		/*
 		 * Now we compute the sizes of each of the components, including the text
@@ -184,6 +177,11 @@ public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 		 * the target query (to compute the number of lines using FontMetrics instead
 		 * of "maxChars".
 		 */
+		int preferredWidth = list.getParent().getWidth();
+		if (preferredWidth == 0) { // JViewport returns 0 when not visible (?)
+			preferredWidth = list.getParent().getParent().getWidth();
+		}
+
 		int mainPanelWidth = preferredWidth - 2 * BORDER - 2 * PADDING - plainFontWidth * STATUS_WIDTH;
 		int textWidth = mainPanelWidth - 2 * MARGIN;
 		int minTextHeight = plainFontHeight + 2 * SEPARATOR;
@@ -201,10 +199,10 @@ public class MappingListRenderer implements ListCellRenderer<TriplesMap> {
 		int totalHeight = minTextHeight + textSourceHeight + textTargetHeight + 2 * BORDER;
 		mainPanel.setPreferredSize(new Dimension(mainPanelWidth, totalHeight));
 		statusLabel.setPreferredSize(new Dimension(STATUS_WIDTH * plainFontWidth, totalHeight));
-		renderingComponent.setPreferredSize(new Dimension(preferredWidth, totalHeight + 2 * PADDING));
+		setPreferredSize(new Dimension(preferredWidth, totalHeight + 2 * PADDING));
 
-		renderingComponent.revalidate();
-		return renderingComponent;
+		revalidate();
+		return this;
 	}
 
 	/*

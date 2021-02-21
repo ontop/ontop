@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.panels;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L
@@ -21,11 +21,7 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.protege.core.*;
-import it.unibz.inf.ontop.protege.gui.dialogs.EditMappingDialog;
-import it.unibz.inf.ontop.protege.gui.dialogs.SQLQueryDialog;
-import it.unibz.inf.ontop.protege.gui.models.*;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.protege.workers.ValidationSwingWorker;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
 import javax.swing.*;
@@ -56,9 +52,7 @@ public class MappingManagerPanel extends JPanel {
         setLayout(new BorderLayout());
 
         mappingList = new JList<>();
-        // Setting up the mappings tree
         mappingList.setCellRenderer(new MappingListRenderer(obdaModelManager));
-        mappingList.setFixedCellWidth(-1);
         mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         add(new JScrollPane(mappingList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,

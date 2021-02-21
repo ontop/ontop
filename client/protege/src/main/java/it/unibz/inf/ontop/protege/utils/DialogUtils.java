@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.protege.core.DuplicateTriplesMapException;
+import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -31,7 +31,6 @@ import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.protege.editor.core.editorkit.EditorKit;
-import org.protege.editor.core.ui.workspace.Workspace;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 

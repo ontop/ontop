@@ -17,7 +17,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping editor"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.MappingsManagerView">
+			value="it.unibz.inf.ontop.protege.mapping.MappingManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -52,7 +52,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop Mappings"/>
 		<class
-			value="it.unibz.inf.ontop.protege.gui.tab.OntopMappingsTab">
+			value="it.unibz.inf.ontop.protege.mapping.OntopMappingTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>

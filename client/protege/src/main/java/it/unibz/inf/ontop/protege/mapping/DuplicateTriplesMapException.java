@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.core;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L

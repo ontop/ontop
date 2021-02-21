@@ -31,10 +31,10 @@ import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.query.worker.TurtleRendererForOWL;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
-import it.unibz.inf.ontop.protege.utils.OntopReasonerAbstractAction;
+import it.unibz.inf.ontop.protege.utils.OntopReasonerAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 import it.unibz.inf.ontop.protege.query.worker.ExportResultsToCSVSwingWorker;
-import it.unibz.inf.ontop.protege.workers.OntopQuerySwingWorker;
+import it.unibz.inf.ontop.protege.utils.OntopQuerySwingWorker;
 import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
 import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -58,6 +58,7 @@ import static java.awt.event.KeyEvent.*;
 /*
     TODO: apply shorten IRI on the fly to the result
     TODO: stop / ask if stopping is required when switching between queries
+    TODO: parse SPARQL while editing and highlight error location
  */
 
 public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSelectionListener, OWLOntologyChangeListener {
@@ -84,11 +85,11 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		this.editorKit = editorKit;
 		this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
-		OntopReasonerAbstractAction viewIqAction = new OntopReasonerAbstractAction(
+		OntopReasonerAction viewIqAction = new OntopReasonerAction(
 				"View Intermediate Query...", null, null, null,
 				editorKit, this::getViewIqWorker);
 
-		OntopReasonerAbstractAction viewSqlAction = new OntopReasonerAbstractAction(
+		OntopReasonerAction viewSqlAction = new OntopReasonerAction(
 				"View SQL translation...", null, null, null,
 				editorKit, this::getViewSqlWorker);
 
@@ -131,7 +132,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 						GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 						new Insets(0, 0, 0, 0), 0, 0));
 
-		OntopReasonerAbstractAction executeAction = new OntopReasonerAbstractAction(
+		OntopReasonerAction executeAction = new OntopReasonerAction(
 				"Execute",
 				"execute.png",
 				"Execute the query and display the results",
@@ -191,7 +192,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		txtSqlTranslation = new JTextArea();
 		resultTabbedPane.addTab("SQL translation", new JScrollPane(txtSqlTranslation));
 
-		OntopReasonerAbstractAction countResultsAction = new OntopReasonerAbstractAction(
+		OntopReasonerAction countResultsAction = new OntopReasonerAction(
 				"Count tuples", null, null, null,
 				editorKit, this::getCountResultsWorker);
 
@@ -250,7 +251,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			getKeyStrokeWithCtrlMask(VK_P)) {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(), queryTextPane.getText());
+			SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getMutablePrefixManager(), queryTextPane.getText());
 			dialog.setLocationRelativeTo(QueryInterfacePanel.this);
 			dialog.setVisible(true);
 			dialog.getPrefixDirectives()
@@ -411,7 +412,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			defaultOntopOWLStatement.setMaxRows(limitPanel.getFetchSize());
 		}
 		return new TurtleRendererForOWL(
-				obdaModelManager.getTriplesMapCollection().getMutablePrefixManager(),
+				obdaModelManager.getMutablePrefixManager(),
 				showShortIriCheckBox.isSelected());
 	}
 

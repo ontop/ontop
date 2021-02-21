@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.core;
+package it.unibz.inf.ontop.protege.mapping;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -49,22 +50,19 @@ import java.util.stream.Stream;
  */
 public class TriplesMapCollection implements Iterable<TriplesMap> {
 
-    public interface Listener {
-        void triplesMapCollectionChanged();
-    }
-
     private Map<String, TriplesMap> map = new LinkedHashMap<>();
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
 
-    private final List<Listener> mappingListeners = new ArrayList<>();
-
     private final SQLPPMappingFactory ppMappingFactory;
     private final TermFactory termFactory;
+    private final TargetQueryParserFactory targetQueryParserFactory;
+
     final TargetAtomFactory targetAtomFactory;
     final SubstitutionFactory substitutionFactory;
-    private final TargetQueryParserFactory targetQueryParserFactory;
     final SQLPPSourceQueryFactory sourceQueryFactory;
+
+    private final List<TriplesMapCollectionListener> mappingListeners = new ArrayList<>();
 
     public TriplesMapCollection(OWLOntology ontology,
                                 SQLPPMappingFactory ppMappingFactory,
@@ -84,11 +82,10 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     }
 
 
-    public void addMappingsListener(Listener listener) {
-        if (!mappingListeners.contains(listener))
+    public void addMappingsListener(TriplesMapCollectionListener listener) {
+        if (listener != null && !mappingListeners.contains(listener))
             mappingListeners.add(listener);
     }
-
 
 
     public SQLPPMapping generatePPMapping() {
@@ -101,8 +98,16 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                 prefixManager);
     }
 
+    /**
+     *  NOTE: adds prefixes to the current prefixManager
+     *
+     * @param mappingReader
+     * @param properties
+     * @throws InvalidMappingException
+     * @throws MappingIOException
+     */
 
-    public void parseMapping(Reader mappingReader, Properties properties) throws InvalidMappingException, MappingIOException {
+    public void load(Reader mappingReader, Properties properties) throws InvalidMappingException, MappingIOException {
 
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopMappingReader(mappingReader)
@@ -118,8 +123,16 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                 .map(m -> new TriplesMap(m, this))
                 .collect(toIndexedTripleMaps());
 
-        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
+
+    public void reset(OWLOntology ontology) {
+        map.clear();
+        prefixManager = new MutablePrefixManager(ontology);
+
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+    }
+
 
     /**
      * DO NOT CACHE: A NEW INSTANCE IS CREATED FOR EACH ONTOLOGY
@@ -146,7 +159,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(m -> m.renamePredicate(predicateIri, replacementTerm))
                     .collect(toIndexedTripleMaps());
 
-            mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+            mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
         }
     }
 
@@ -159,16 +172,17 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(Optional::get)
                     .collect(toIndexedTripleMaps());
 
-            mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+            mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
         }
     }
 
+    public void add(String id, String sqlQuery, String target) throws DuplicateTriplesMapException, TargetQueryParserException {
+        if (map.containsKey(id))
+            throw new DuplicateTriplesMapException(ImmutableList.of(id));
 
-    public void reset(OWLOntology ontology) {
-        map.clear();
-        prefixManager = new MutablePrefixManager(ontology);
+        map.put(id, new TriplesMap(id, sqlQuery, parseTargetQuery(target), this));
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
-
 
     public void addAll(ImmutableList<SQLPPTriplesMap> list) throws DuplicateTriplesMapException {
 
@@ -183,15 +197,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         if (!duplicateIds.isEmpty())
             throw new DuplicateTriplesMapException(duplicateIds);
 
-        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
-    }
-
-    public void add(String id, String sqlQuery, String target) throws DuplicateTriplesMapException, TargetQueryParserException {
-        if (map.containsKey(id))
-            throw new DuplicateTriplesMapException(ImmutableList.of(id));
-
-        map.put(id, new TriplesMap(id, sqlQuery, parseTargetQuery(target), this));
-        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
 
     public void duplicate(String id) {
@@ -201,7 +207,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
         String newId = generateFreshId(id);
         map.put(newId, triplesMap.createDuplicate(newId));
-        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
 
     private String generateFreshId(String id) {
@@ -230,14 +236,14 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(m -> m.getId().equals(id) ? replacement : m)
                     .collect(toIndexedTripleMaps());
         }
-        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
 
     public void remove(String id) {
         if (map.remove(id) == null)
             throw new MinorOntopInternalBugException("Triples map not found: " + id);
 
-        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
 
     public void setStatus(String id, TriplesMap.Status status, String sqlErrorMessage, ImmutableList<String> invalidPlaceholders) {
@@ -258,7 +264,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
             triplesMap.setInvalidPlaceholders(invalidPlaceholders);
         }
-        mappingListeners.forEach(Listener::triplesMapCollectionChanged);
+        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
     }
 
     private static Collector<TriplesMap, ?, LinkedHashMap<String, TriplesMap>> toIndexedTripleMaps() {

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.dialogs;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L
@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.mapping.worker.ExecuteSQLQuerySwingWorker;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.protege.workers.ExecuteSQLQuerySwingWorker;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nullable;
@@ -251,7 +251,7 @@ public class EditMappingDialog extends JDialog {
 				}
 				return;
 			}
-			MutablePrefixManager prefixManager = obdaModelManager.getTriplesMapCollection().getMutablePrefixManager();
+			MutablePrefixManager prefixManager = obdaModelManager.getMutablePrefixManager();
 			error = iris.stream()
 					.map(IRI::getIRIString)
 					.map(prefixManager::getShortForm)

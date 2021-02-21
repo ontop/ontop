@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
@@ -156,7 +158,7 @@ public class OBDAModelManager implements Disposable {
 					OWLOntologyID newID = ((SetOntologyID) change).getNewOntologyID();
 					log.debug("Ontology ID changed\nOld ID: {}\nNew ID: {}", ((SetOntologyID) change).getOriginalOntologyID(), newID);
 
-					triplesMapCollection.getMutablePrefixManager().updateOntologyID(newID);
+					getMutablePrefixManager().updateOntologyID(newID);
 				}
 				else if (change instanceof RemoveAxiom) {
 					OWLAxiom axiom = change.getAxiom();
@@ -211,6 +213,7 @@ public class OBDAModelManager implements Disposable {
 
 	public OntologySignature getCurrentVocabulary() { return currentMutableVocabulary; }
 
+	public MutablePrefixManager getMutablePrefixManager() { return triplesMapCollection.getMutablePrefixManager(); }
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
 		// TODO: clean up code - this one is called from the event dispatch thread
@@ -293,7 +296,7 @@ public class OBDAModelManager implements Disposable {
 					java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
 
 					optionalDataSourceProperties.ifPresent(configurationManager::loadProperties);
-					triplesMapCollection.parseMapping(new StringReader(converter.getRestOfFile()), configurationManager.snapshotProperties());
+					triplesMapCollection.load(new StringReader(converter.getRestOfFile()), configurationManager.snapshotProperties());
 				}
 				catch (Exception ex) {
 					throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());

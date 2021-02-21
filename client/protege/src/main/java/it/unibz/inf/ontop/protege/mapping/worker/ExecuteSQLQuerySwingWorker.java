@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.workers;
+package it.unibz.inf.ontop.protege.mapping.worker;
 
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;

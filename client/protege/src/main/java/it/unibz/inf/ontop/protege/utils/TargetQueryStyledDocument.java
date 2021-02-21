@@ -221,7 +221,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
     }
 
     private void highlight(IRI iri, SimpleAttributeSet attributeSet) throws BadLocationException {
-        PrefixManager prefixManager = obdaModelManager.getTriplesMapCollection().getMutablePrefixManager();
+        PrefixManager prefixManager = obdaModelManager.getMutablePrefixManager();
         String rendered = prefixManager.getShortForm(iri.getIRIString());
         highlight(rendered, attributeSet);
     }

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.dialogs;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L
@@ -22,16 +22,16 @@ package it.unibz.inf.ontop.protege.gui.dialogs;
 
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.protege.workers.ExecuteSQLQuerySwingWorker;
+import it.unibz.inf.ontop.protege.mapping.worker.ExecuteSQLQuerySwingWorker;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 
-import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 import static java.awt.event.KeyEvent.*;
-import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 
 public class SQLQueryDialog extends JDialog {
 
@@ -44,15 +44,27 @@ public class SQLQueryDialog extends JDialog {
 
 	private final OBDADataSource datasource;
 
+	OntopAbstractAction executeSqlQueryAction = new OntopAbstractAction(
+			"Execute SQL Query",
+			"execute.png",
+			"Execute the SQL query",
+			getKeyStrokeWithCtrlMask(VK_ENTER)) {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			executeSqlQuery();
+		}
+	};
+
+	OntopAbstractAction closeDialogAction = new OntopAbstractAction(OK_BUTTON_TEXT, null, null,
+			KeyStroke.getKeyStroke(VK_ESCAPE, 0)) {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			dispatchEvent(new WindowEvent(SQLQueryDialog.this, WindowEvent.WINDOW_CLOSING));
+		}
+	};
+
 	public SQLQueryDialog(OBDADataSource datasource, String query) {
 		this.datasource = datasource;
-
-		Action executeSqlQueryAction = new AbstractAction("Execute SQL Query") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				executeSqlQuery();
-			}
-		};
 
 		setTitle("SQL Query Result");
 		setModal(true);
@@ -78,11 +90,7 @@ public class SQLQueryDialog extends JDialog {
 						new Insets(0,0,0,0), 0, 0));
 
 		sourceQueryPanel.add(
-				DialogUtils.getButton(
-						"<html>E<u>x</u>ecute SQL query</html>",
-						"execute.png",
-						"Execute the SQL query",
-						executeSqlQueryAction),
+				getButton(executeSqlQueryAction),
 				new GridBagConstraints(1, 2, 1, 1, 0, 0,
 						GridBagConstraints.EAST, GridBagConstraints.NONE,
 						new Insets(4,0,4,0), 0, 0));
@@ -99,23 +107,16 @@ public class SQLQueryDialog extends JDialog {
 		mainPanel.add(splitPane, BorderLayout.CENTER);
 
 		JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		controlPanel.add(new JButton(new AbstractAction("OK") {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				}));
+		controlPanel.add(getButton(closeDialogAction));
 		mainPanel.add(controlPanel, BorderLayout.SOUTH);
 
 		setContentPane(mainPanel);
 
-		InputMap inputMap = mainPanel.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		inputMap.put(KeyStroke.getKeyStroke(VK_X, CTRL_DOWN_MASK), "execute");
-		ActionMap actionMap = mainPanel.getActionMap();
-		actionMap.put("execute", executeSqlQueryAction);
+		setUpAccelerator(sourceQueryTextPane, executeSqlQueryAction);
+		setUpAccelerator(mainPanel, executeSqlQueryAction);
+		setUpAccelerator(mainPanel, closeDialogAction);
 
 		setSize(700, 600);
-		DialogUtils.installEscapeCloseOperation(this);
 
 		executeSqlQuery();
 	}

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.core;
+package it.unibz.inf.ontop.protege.mapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -31,6 +30,7 @@ public class TriplesMap {
 
     private final SQLPPTriplesMap sqlppTriplesMap;
     private final TriplesMapCollection triplesMapCollection;
+
     private Status status;
     private String sqlErrorMessage;
     private ImmutableList<String> invalidPlaceholders = ImmutableList.of();
@@ -70,10 +70,10 @@ public class TriplesMap {
 
 
 
-    SQLPPTriplesMap asSQLPPTriplesMap() { return sqlppTriplesMap; }
+    public SQLPPTriplesMap asSQLPPTriplesMap() { return sqlppTriplesMap; }
 
 
-    TriplesMap createDuplicate(String newId) {
+    public TriplesMap createDuplicate(String newId) {
         TriplesMap copy = new TriplesMap(
                 new OntopNativeSQLPPTriplesMap(
                         newId, sqlppTriplesMap.getSourceQuery(), sqlppTriplesMap.getTargetAtoms()),
@@ -91,6 +91,15 @@ public class TriplesMap {
                 triplesMapCollection);
     }
 
+    public TriplesMap renamePredicate(IRI removedIri, IRIConstant newIri) {
+        return containsIri(removedIri)
+                ? updateTargetAtoms(sqlppTriplesMap.getTargetAtoms().stream()
+                .map(a -> containsIri(a, removedIri)
+                        ? renamePredicate(a, newIri, triplesMapCollection.targetAtomFactory, triplesMapCollection.substitutionFactory)
+                        : a)
+                .collect(ImmutableCollectors.toList()))
+                : this; // has not changed
+    }
 
     private static TargetAtom renamePredicate(TargetAtom a, ImmutableTerm newIri, TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory) {
         DistinctVariableOnlyDataAtom projectionAtom = a.getProjectionAtom();
@@ -110,16 +119,6 @@ public class TriplesMap {
                         .collect(ImmutableCollectors.toMap()));
 
         return targetAtomFactory.getTargetAtom(projectionAtom, newSubstitution);
-    }
-
-    public TriplesMap renamePredicate(IRI removedIri, IRIConstant newIri) {
-        return containsIri(removedIri)
-                ? updateTargetAtoms(sqlppTriplesMap.getTargetAtoms().stream()
-                        .map(a -> containsIri(a, removedIri)
-                                ? renamePredicate(a, newIri, triplesMapCollection.targetAtomFactory, triplesMapCollection.substitutionFactory)
-                                : a)
-                .collect(ImmutableCollectors.toList()))
-                : this; // has not changed
     }
 
     public boolean containsIri(IRI iri) {
@@ -147,7 +146,6 @@ public class TriplesMap {
 
         return Optional.of(this); // has not changed
     }
-
 }
 
 

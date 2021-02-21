@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.views;
+package it.unibz.inf.ontop.protege.mapping;
 
 /*
  * #%L
@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.views;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
-import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -32,7 +31,7 @@ import org.semanticweb.owlapi.model.OWLEntity;
 
 import java.awt.*;
 
-public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, OWLSelectionModelListener {
+public class MappingManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, OWLSelectionModelListener {
 
 	private static final long serialVersionUID = 1790921396564256165L;
 
