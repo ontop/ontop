@@ -111,7 +111,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("The parent group already contains this group / query.");
 
 			this.id = newId;
-			listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
+			listeners.forEach(l -> l.renamed(this, parent.children.indexOf(this)));
 		}
 
 		public Item getParent() { return parent; }
@@ -128,7 +128,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("Cannot set a query string for a group / root.");
 
 			this.queryString = queryString.trim();
-			//listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
+			listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
 		}
 
 		public Optional<Item> getChild(String id) {

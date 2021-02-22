@@ -6,5 +6,7 @@ public interface QueryManagerEventListener {
 
     void removed(QueryManager.Item entity, int indexInParent);
 
+    void renamed(QueryManager.Item query, int indexInParent);
+
     void changed(QueryManager.Item query, int indexInParent);
 }

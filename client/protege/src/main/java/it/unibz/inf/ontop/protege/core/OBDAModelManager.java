@@ -42,7 +42,6 @@ public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
-	private static final IRI ONTOLOGY_UPDATE_TRIGGER = IRI.create("http://www.unibz.it/inf/obdaplugin#RandomClass6677841155");
 
 
 	private final OWLEditorKit owlEditorKit;
@@ -126,6 +125,10 @@ public class OBDAModelManager implements Disposable {
 				triggerOntologyChanged();
 			}
 			@Override
+			public void renamed(QueryManager.Item group, int indexInParent) {
+				triggerOntologyChanged();
+			}
+			@Override
 			public void changed(QueryManager.Item group, int indexInParent) {
 				triggerOntologyChanged();
 			}
@@ -162,31 +165,25 @@ public class OBDAModelManager implements Disposable {
 				}
 				else if (change instanceof RemoveAxiom) {
 					OWLAxiom axiom = change.getAxiom();
-					// renaming
 					if (idx + 1 < changes.size() && changes.get(idx + 1) instanceof AddAxiom) {
+						// renaming
 						OWLAxiom nextAxiom = changes.get(idx + 1).getAxiom();
 						if (axiom instanceof OWLDeclarationAxiom && nextAxiom instanceof OWLDeclarationAxiom) {
-							OWLEntity entity = ((OWLDeclarationAxiom) axiom).getEntity();
-							OWLEntity nextEntity = ((OWLDeclarationAxiom) nextAxiom).getEntity();
-							renamings.put(entity, nextEntity);
+							renamings.put(((OWLDeclarationAxiom) axiom).getEntity(),
+									((OWLDeclarationAxiom) nextAxiom).getEntity());
 						}
 					}
 					else if (axiom instanceof OWLDeclarationAxiom) {
-						OWLEntity entity = ((OWLDeclarationAxiom) axiom).getEntity();
-						// Hack: this has been done just to trigger a change in the ontology
-						if (!entity.getIRI().equals(ONTOLOGY_UPDATE_TRIGGER))
-							removals.add(entity);
+						removals.add(((OWLDeclarationAxiom) axiom).getEntity());
 					}
 				}
 			}
 
-			for (Map.Entry<OWLEntity, OWLEntity> e : renamings.entrySet()) {
+			for (Map.Entry<OWLEntity, OWLEntity> e : renamings.entrySet())
 				triplesMapCollection.renamePredicate(getIRI(e.getKey()), getIRI(e.getValue()));
-			}
 
-			for (OWLEntity removede : removals) {
-				triplesMapCollection.removePredicate(getIRI(removede));
-			}
+			for (OWLEntity entity : removals)
+				triplesMapCollection.removePredicate(getIRI(entity));
 		}
 	}
 
@@ -417,38 +414,16 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	/***
-	 * Protege won't trigger a save action unless it detects that the
-	 * currently open OWLOntology has changed. The OBDA plugin requires that
-	 * protege triggers a save action also in the case when only the OBDA model
-	 * has changed. To accomplish this, this method will "fake" an
-	 * ontology change by inserting and removing a class into the OWLModel.
-	 */
 	private void triggerOntologyChanged() {
-		if (loadingData) {
+		if (loadingData)
 			return;
-		}
+
 		OWLModelManager owlModelManager = owlEditorKit.getModelManager();
 		OWLOntology ontology = owlModelManager.getActiveOntology();
-		if (ontology == null) {
+		if (ontology == null)
 			return;
-		}
 
-		try {
-			OWLDataFactory owlDatafactory = owlModelManager.getOWLDataFactory();
-			OWLClass newClass = owlDatafactory.getOWLClass(ONTOLOGY_UPDATE_TRIGGER);
-			OWLAxiom axiom = owlDatafactory.getOWLDeclarationAxiom(newClass);
-
-			owlModelManager.applyChange(new AddAxiom(ontology, axiom));
-			owlModelManager.applyChange(new RemoveAxiom(ontology, axiom));
-		}
-		catch (Exception e) {
-			LOGGER.warn("Exception forcing an ontology change. " +
-							"Your OWL model might contain a new class that " +
-							"you need to remove manually: {}", ONTOLOGY_UPDATE_TRIGGER);
-			LOGGER.warn(e.getMessage());
-			LOGGER.debug(e.getMessage(), e);
-		}
+		owlModelManager.setDirty(ontology);
 	}
 
 	/***

@@ -20,16 +20,16 @@ public class QueryManagerTreeModel implements TreeModel {
             public void inserted(QueryManager.Item item, int indexInParent) {
                 createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesInserted);
             }
-
             @Override
             public void removed(QueryManager.Item item, int indexInParent) {
                 createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesRemoved);
             }
-
             @Override
-            public void changed(QueryManager.Item item, int indexInParent) {
+            public void renamed(QueryManager.Item item, int indexInParent) {
                 createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesChanged);
             }
+            @Override
+            public void changed(QueryManager.Item item, int indexInParent) { /* NO-OP */ }
         });
     }
 
