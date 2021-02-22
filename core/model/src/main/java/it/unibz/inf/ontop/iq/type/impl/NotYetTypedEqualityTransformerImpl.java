@@ -1,8 +1,9 @@
-package it.unibz.inf.ontop.spec.mapping.transformer.impl;
+package it.unibz.inf.ontop.iq.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -13,7 +14,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -23,14 +24,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class MappingEqualityTransformerImpl implements MappingEqualityTransformer {
+public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTransformer {
 
     private final IQTreeTransformer expressionTransformer;
 
     @Inject
-    protected MappingEqualityTransformerImpl(UniqueTermTypeExtractor typeExtractor,
-                                             CoreSingletons coreSingletons) {
-        this.expressionTransformer = new ExpressionTransformer(typeExtractor, coreSingletons);
+    protected NotYetTypedEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
+                                                 UniqueTermTypeExtractor typeExtractor,
+                                                 TermFactory termFactory,
+                                                 SubstitutionFactory substitutionFactory) {
+        this.expressionTransformer = new ExpressionTransformer(iqFactory,
+                                                                typeExtractor,
+                                                                termFactory,
+                                                                substitutionFactory);
     }
 
     @Override
@@ -45,11 +51,14 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
         private final TermFactory termFactory;
         private final SubstitutionFactory substitutionFactory;
 
-        protected ExpressionTransformer(UniqueTermTypeExtractor typeExtractor, CoreSingletons coreSingletons) {
-            super(coreSingletons);
+        protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
+                                        UniqueTermTypeExtractor typeExtractor,
+                                        TermFactory termFactory,
+                                        SubstitutionFactory substitutionFactory) {
+            super(iqFactory);
             this.typeExtractor = typeExtractor;
-            this.termFactory = coreSingletons.getTermFactory();
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+            this.termFactory = termFactory;
+            this.substitutionFactory = substitutionFactory;
         }
 
         @Override

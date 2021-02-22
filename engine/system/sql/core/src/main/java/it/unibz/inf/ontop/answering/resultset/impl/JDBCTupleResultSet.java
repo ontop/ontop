@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -29,10 +30,11 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
                               ImmutableSortedSet<Variable> sqlSignature,
                               ImmutableMap<Variable, DBTermType> sqlTypeMap,
                               ConstructionNode constructionNode,
-                              DistinctVariableOnlyDataAtom answerAtom,
-                              QueryLogger queryLogger, TermFactory termFactory,
+                              DistinctVariableOnlyDataAtom answerAtom, QueryLogger queryLogger,
+                              @Nullable OntopConnectionCloseable statementClosingCB,
+                              TermFactory termFactory,
                               SubstitutionFactory substitutionFactory) {
-        super(rs, answerAtom.getArguments(),queryLogger);
+        super(rs, answerAtom.getArguments(),queryLogger, statementClosingCB);
         this.sqlSignature = sqlSignature;
         this.sqlTypeMap = sqlTypeMap;
         this.substitutionFactory = substitutionFactory;
@@ -42,7 +44,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
 
 
     @Override
-    protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException {
+    protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException, OntopResultConversionException {
         //builder (+loop) in order to throw checked exception
         final ImmutableMap.Builder<Variable, Constant> builder = ImmutableMap.builder();
         Iterator<Variable> it = sqlSignature.iterator();
@@ -59,7 +61,11 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
         } catch (SQLException e) {
             throw buildConnectionException(e);
         }
-        return new SQLOntopBindingSet(computeBindingMap(substitutionFactory.getSubstitution(builder.build())));
+        try {
+            return new SQLOntopBindingSet(computeBindingMap(substitutionFactory.getSubstitution(builder.build())));
+        } catch (Exception e) {
+            throw new OntopResultConversionException(e);
+        }
     }
 
     private Constant convertToConstant(@Nullable String jdbcValue, DBTermType termType) {
@@ -68,11 +74,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
         return termFactory.getDBConstant(jdbcValue, termType);
     }
 
-    private OntopBinding[] computeBindingMap(
-            // ImmutableList<Variable> signature,
-            ImmutableSubstitution<Constant> sqlVar2Constant
-            // ImmutableSubstitution<ImmutableTerm> sparqlVar2Term
-    ) {
+    private OntopBinding[] computeBindingMap(ImmutableSubstitution<Constant> sqlVar2Constant) {
         ImmutableSubstitution<ImmutableTerm> composition = sqlVar2Constant.composeWith(sparqlVar2Term);
         //this can be improved and simplified
         return signature.stream()

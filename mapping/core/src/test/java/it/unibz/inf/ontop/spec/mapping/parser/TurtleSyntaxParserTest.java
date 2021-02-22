@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -82,18 +81,18 @@ public class TurtleSyntaxParserTest {
 		return TARGET_ATOM_FACTORY.getQuadTargetAtom(s, p, o, g);
 	}
 
-	private static ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> template, Variable v1) {
+	private static ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<Template.Component> template, Variable v1) {
 		return TERM_FACTORY.getIRIFunctionalTerm(template,
 				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
 	}
 
-	private static ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<TemplateComponent> template, Variable v1, Variable v2) {
+	private static ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<Template.Component> template, Variable v1, Variable v2) {
 		return TERM_FACTORY.getIRIFunctionalTerm(template,
 				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1),
 				TERM_FACTORY.getPartiallyDefinedToStringCast(v2)));
 	}
 
-	private static ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<TemplateComponent> template, Variable v1) {
+	private static ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<Template.Component> template, Variable v1) {
 		return TERM_FACTORY.getBnodeFunctionalTerm(template,
 				ImmutableList.of(TERM_FACTORY.getPartiallyDefinedToStringCast(v1)));
 	}

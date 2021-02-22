@@ -54,6 +54,7 @@ public interface DBTermType extends TermType {
         FLOAT_DOUBLE,
         BOOLEAN,
         DATETIME,
+        UUID,
         OTHER
     }
 }

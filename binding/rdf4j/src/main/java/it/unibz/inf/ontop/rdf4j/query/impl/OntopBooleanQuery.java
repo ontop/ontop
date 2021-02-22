@@ -30,10 +30,12 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 	public boolean evaluate() throws QueryEvaluationException {
 		AskQuery query = factory.createAskQuery(getQueryString(), getParsedQuery(), bindings);
 
-		try (OntopStatement stm = conn.createStatement();
-			 BooleanResultSet rs = stm.execute(query, getHttpHeaders())) {
-			return rs.getValue();
-
+		try (OntopStatement stm = conn.createStatement()) {
+			if(this.queryTimeout > 0)
+				stm.setQueryTimeout(this.queryTimeout);
+			try (BooleanResultSet rs = stm.execute(query, getHttpHeaders())) {
+				return rs.getValue();
+			}
 		} catch (OntopConnectionException | OntopQueryAnsweringException e) {
 			throw new QueryEvaluationException(e);
 		}

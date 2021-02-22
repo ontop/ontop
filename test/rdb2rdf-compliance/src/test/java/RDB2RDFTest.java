@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
@@ -86,8 +87,6 @@ public class RDB2RDFTest {
 			"tc0005a",
 			// Different XSD.DOUBLE lexical form; was expecting the engineering notation. Modified version added.
 			"tc0005b",
-			// Expect an exception when processing the mapping (non-IRI for named graph) TODO: throw it
-			"tc0007h",
 			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
 			"tc0009d",
 			// Modified (different XSD.DOUBLE lexical form)
@@ -99,8 +98,6 @@ public class RDB2RDFTest {
 			"tc0012a",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0012e",
-			// Should reject an invalid language tag
-			"tc0015b",
 			// Double + timezone was not expected to be added. Same for milliseconds.
 			"dg0016",
 			// Different XSD.DOUBLE lexical form. Modified version added.
@@ -114,11 +111,7 @@ public class RDB2RDFTest {
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"tc0018a",
 			// Should create an IRI based on a column and the base IRI. TODO: support the base IRI in R2RML
-			"tc0019a",
-			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
-			"tc0019b",
-			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
-			"tc0020b"
+			"tc0019a"
 	);
 
 	private static List<String> FAILURES = Lists.newArrayList();
@@ -428,6 +421,17 @@ public class RDB2RDFTest {
 				System.out.println(msg);
 
 				fail(msg);
+			}
+		}
+		catch (QueryEvaluationException e) {
+			if (e.getCause() != null && e.getCause() instanceof OntopResultConversionException) {
+				if (outputExpected) {
+					e.printStackTrace();
+					fail("Unexpected result conversion exception: " + e.getMessage());
+				}
+			}
+			else {
+				fail("Unexpected exception: " + e.getMessage());
 			}
 		}
 		finally {

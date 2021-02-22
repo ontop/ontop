@@ -894,9 +894,12 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to SIMILAR (PostgreSQL)
+	@Test
 	public void testRegexPostgresSimilarTo() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = parse("SELECT * FROM pet WHERE 'abc' SIMILAR TO 'abc'");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test

@@ -45,6 +45,8 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 		try
 		{
 			OntopStatement stm = conn.createStatement();
+			if (this.queryTimeout > 0)
+				stm.setQueryTimeout(this.queryTimeout);
 			GraphResultSet res = stm.execute(query, getHttpHeaders());
 			return new IteratingGraphQueryResult(Collections.emptyMap(), new OntopCloseableStatementIteration(res.iterator()));
 		} catch (Exception e) {

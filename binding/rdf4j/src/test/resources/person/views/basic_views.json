@@ -3,6 +3,7 @@
     {
       "name": ["\"views\"", "\"persons\""],
       "baseRelation": ["\"person\""],
+      "filterExpression": "",
       "columns": {
         "added": [
           {
@@ -16,6 +17,10 @@
           {
             "name": "\"nullifItaly\"",
             "expression": "NULLIF(\"country\",'it')"
+          },
+          {
+            "name": "\"region\"",
+            "expression": "\"locality\""
           }
         ],
         "hidden": [

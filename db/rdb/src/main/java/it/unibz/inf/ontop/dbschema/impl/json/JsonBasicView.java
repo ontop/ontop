@@ -20,13 +20,12 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
@@ -60,6 +59,8 @@ public class JsonBasicView extends JsonView {
     @Nonnull
     public final List<String> baseRelation;
     @Nonnull
+    public final String filterExpression;
+    @Nonnull
     public final UniqueConstraints uniqueConstraints;
     @Nonnull
     public final OtherFunctionalDependencies otherFunctionalDependencies;
@@ -71,12 +72,14 @@ public class JsonBasicView extends JsonView {
     @JsonCreator
     public JsonBasicView(@JsonProperty("columns") Columns columns, @JsonProperty("name") List<String> name,
                          @JsonProperty("baseRelation") List<String> baseRelation,
+                         @JsonProperty("filterExpression") String filterExpression,
                          @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                          @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
                          @JsonProperty("foreignKeys") ForeignKeys foreignKeys) {
         super(name);
         this.columns = columns;
         this.baseRelation = baseRelation;
+        this.filterExpression = filterExpression;
         this.uniqueConstraints = uniqueConstraints;
         this.otherFunctionalDependencies = otherFunctionalDependencies;
         this.foreignKeys = foreignKeys;
@@ -144,14 +147,35 @@ public class JsonBasicView extends JsonView {
 
         ImmutableMap<Integer, Variable> parentArgumentMap = createParentArgumentMap(addedVariables, parentDefinition,
                 coreSingletons.getCoreUtilsFactory());
+
+        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
+                createConstructionSubstitution(projectedVariables, parentDefinition,
+                        parentArgumentMap, dbParameters);
+
         ExtensionalDataNode parentDataNode = iqFactory.createExtensionalDataNode(parentDefinition, parentArgumentMap);
 
-        ConstructionNode constructionNode = createConstructionNode(projectedVariables, parentDefinition,
-                parentArgumentMap, dbParameters);
+        ConstructionNode constructionNode = normalization.generateTopConstructionNode()
+                // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
+                // It may be eliminated by the IQ normalization
+                .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
 
-        IQTree iqTree = iqFactory.createUnaryIQTree(
-                constructionNode,
-                parentDataNode);
+        ImmutableList<ImmutableExpression> filterConditions;
+        try {
+            filterConditions = filterExpression != null && !filterExpression.isEmpty()
+                ? extractFilter(parentArgumentMap, parentDefinition, quotedIdFactory, coreSingletons)
+                : ImmutableList.of();
+            } catch (JSQLParserException e) {
+                throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
+        }
+
+        IQTree updatedParentDataNode = filterConditions.stream()
+                .reduce(termFactory::getConjunction)
+                .map(iqFactory::createFilterNode)
+                .map(f -> updateParentDataNode(normalization,
+                        iqFactory.createUnaryIQTree(f, parentDataNode)))
+                .orElse(updateParentDataNode(normalization, parentDataNode));
+
+        IQTree iqTree = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
 
         AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
         DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
@@ -214,15 +238,21 @@ public class JsonBasicView extends JsonView {
 
     }
 
-    private ConstructionNode createConstructionNode(ImmutableList<Variable> projectedVariables,
-                                                    NamedRelationDefinition parentDefinition,
-                                                    ImmutableMap<Integer, Variable> parentArgumentMap,
-                                                    DBParameters dbParameters) throws MetadataExtractionException {
+    private IQTree updateParentDataNode(ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization,
+                                        IQTree parentIQTree) {
+
+        return normalization.updateChild(parentIQTree);
+    }
+
+    private ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization createConstructionSubstitution(
+            ImmutableList<Variable> projectedVariables,
+            NamedRelationDefinition parentDefinition,
+            ImmutableMap<Integer, Variable> parentArgumentMap,
+            DBParameters dbParameters) throws MetadataExtractionException {
 
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
         TermFactory termFactory = coreSingletons.getTermFactory();
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
@@ -242,9 +272,12 @@ public class JsonBasicView extends JsonView {
             }
         }
 
-        return iqFactory.createConstructionNode(
-                ImmutableSet.copyOf(projectedVariables),
-                substitutionFactory.getSubstitution(substitutionMapBuilder.build()));
+        ConstructionSubstitutionNormalizer substitutionNormalizer = dbParameters.getCoreSingletons()
+                .getConstructionSubstitutionNormalizer();
+
+        return substitutionNormalizer.normalizeSubstitution(
+                substitutionFactory.getSubstitution(substitutionMapBuilder.build()),
+                ImmutableSet.copyOf(projectedVariables));
     }
 
     private ImmutableTerm extractExpression(String partialExpression,
@@ -256,6 +289,23 @@ public class JsonBasicView extends JsonView {
         SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
         net.sf.jsqlparser.expression.Expression exp = ((SelectExpressionItem) si).getExpression();
         return parser.parseTerm(exp, new RAExpressionAttributes(parentAttributeMap, null));
+    }
+
+    private ImmutableList<ImmutableExpression> extractFilter(ImmutableMap<Integer, Variable> parentArgumentMap,
+                                                             NamedRelationDefinition parentDefinition,
+                                                             QuotedIDFactory quotedIdFactory,
+                                                             CoreSingletons coreSingletons) throws JSQLParserException {
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap = parentArgumentMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> new QualifiedAttributeID(null, parentDefinition.getAttributes().get(e.getKey()).getID()),
+                        Map.Entry::getValue));
+        String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
+        ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
+        Statement statement = CCJSqlParserUtil.parse(sqlQuery);
+        PlainSelect plainSelect = ((PlainSelect) ((Select) statement).getSelectBody());
+        return plainSelect.getWhere() == null
+                ? ImmutableList.of()
+                : parser.parseBooleanExpression(plainSelect.getWhere(), new RAExpressionAttributes(parentAttributeMap, null));
     }
 
     private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {

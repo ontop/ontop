@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -33,6 +34,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final OntopModelSettings settings;
     private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
     private final QueryTransformerFactory queryTransformerFactory;
+    private final NotYetTypedEqualityTransformer notYetTypedEqualityTransformer;
 
     @Inject
     private CoreSingletonsImpl(TermFactory termFactory, TypeFactory typeFactory,
@@ -43,7 +45,8 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
                                OntopModelSettings settings,
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
-                               QueryTransformerFactory queryTransformerFactory) {
+                               QueryTransformerFactory queryTransformerFactory,
+                               NotYetTypedEqualityTransformer notYetTypedEqualityTransformer) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
@@ -57,6 +60,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.settings = settings;
         this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
         this.queryTransformerFactory = queryTransformerFactory;
+        this.notYetTypedEqualityTransformer = notYetTypedEqualityTransformer;
     }
 
     @Override
@@ -122,5 +126,10 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public ConstructionSubstitutionNormalizer getConstructionSubstitutionNormalizer() {
         return constructionSubstitutionNormalizer;
+    }
+
+    @Override
+    public NotYetTypedEqualityTransformer getNotYetTypedEqualityTransformer() {
+        return notYetTypedEqualityTransformer;
     }
 }

@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OntopSystemSettingsImpl extends OntopReformulationSettingsImpl implements OntopSystemSettings {
 
@@ -35,17 +37,20 @@ public class OntopSystemSettingsImpl extends OntopReformulationSettingsImpl impl
     }
 
     @Override
-    public Optional<Integer> getHttpMaxAge() {
-        return getInteger(HTTP_CACHE_MAX_AGE);
-    }
-
-    @Override
-    public Optional<Integer> getHttpStaleWhileRevalidate() {
-        return getInteger(HTTP_CACHE_STALE_WHILE_REVALIDATE);
-    }
-
-    @Override
-    public Optional<Integer> getHttpStaleIfError() {
-        return getInteger(HTTP_CACHE_STALE_IF_ERROR);
+    public Optional<String> getHttpCacheControl() {
+        String cacheControl = getProperty(HTTP_CACHE_CONTROL)
+                // Former configuration (to be removed in a future version)
+                .orElseGet(() ->
+                        Stream.of(getInteger(HTTP_CACHE_MAX_AGE)
+                                        .map(i -> "max-age=" + i),
+                                getInteger(HTTP_CACHE_STALE_WHILE_REVALIDATE)
+                                        .map(i -> "stale-while-revalidate=" + i),
+                                getInteger(HTTP_CACHE_STALE_IF_ERROR)
+                                        .map(i -> "stale-if-error=" + i))
+                                .flatMap(e -> e.map(Stream::of)
+                                        .orElseGet(Stream::empty))
+                                .collect(Collectors.joining(", ")));
+        return Optional.of(cacheControl)
+                .filter(s -> !s.isEmpty());
     }
 }

@@ -47,7 +47,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClassicABoxAssertionTestPositiveNoRangeTest.class);
 
-	private final OWLStatement st;
+	private final OWLConnection conn;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();
@@ -61,8 +61,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest  {
 			reasoner = factory.createReasoner(siLoader.getConfiguration());
 		}
 
-		OWLConnection conn = reasoner.getConnection();
-		st = conn.createStatement();
+		conn = reasoner.getConnection();
 	}
 
 	private static final String prefix =
@@ -74,13 +73,15 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest  {
 	private int executeQuery(String q) throws OWLException {
 		String query = prefix + " " + q;
 
-		try (TupleOWLResultSet res = st.executeSelectQuery(query)) {
+		try(OWLStatement st = conn.createStatement();
+			TupleOWLResultSet res = st.executeSelectQuery(query)) {
 			int count = 0;
 			while (res.hasNext()) {
-				OWLBindingSet bindingSet = res.next();
+				final OWLBindingSet bindingSet = res.next();
 				LOGGER.info(bindingSet.toString());
 				count += 1;
 			}
+			res.close();
 			return count;
 		}
 	}
