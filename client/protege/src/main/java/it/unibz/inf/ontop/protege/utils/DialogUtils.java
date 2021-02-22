@@ -133,15 +133,17 @@ public class DialogUtils {
 
 	public static void setUpAccelerator(JComponent component, Action action) {
 		KeyStroke keyStroke =  (KeyStroke) action.getValue(Action.ACCELERATOR_KEY);
-		if (keyStroke != null) {
-			component.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyStroke, action.getValue(Action.NAME));
-			component.getActionMap().put(action.getValue(Action.NAME), action);
-		}
+		if (keyStroke != null)
+			setUpAccelerator(component, action, keyStroke);
+	}
+
+	public static void setUpAccelerator(JComponent component, Action action, KeyStroke keyStroke) {
+		component.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(keyStroke, action.getValue(Action.NAME));
+		component.getActionMap().put(action.getValue(Action.NAME), action);
 	}
 
 	private static String keyStroke2String(KeyStroke keyStroke) {
-		return (keyStroke.getModifiers() == 0) ? "" : getKeyModifiersText(keyStroke.getModifiers())
-				+ getKeyText(keyStroke.getKeyCode());
+		return getKeyModifiersText(keyStroke.getModifiers()) + getKeyText(keyStroke.getKeyCode());
 	}
 
 	public static JButton createStandardButton(String text, boolean enabled) {

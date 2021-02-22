@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.worker.ValidationSwingWorker;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.utils.IDGenerator;
-import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
@@ -33,10 +32,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
+import static java.awt.event.KeyEvent.VK_A;
+import static java.awt.event.KeyEvent.VK_N;
+
 public class MappingManagerPanel extends JPanel {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
+	private final OBDAModelManager obdaModelManager;
 	private final OWLEditorKit editorKit;
     private final MappingFilteredListModel model;
     private final JList<TriplesMap> mappingList;
@@ -53,6 +57,7 @@ public class MappingManagerPanel extends JPanel {
 	 */
 	public MappingManagerPanel(OWLEditorKit editorKit, OBDAModelManager obdaModelManager) {
         this.editorKit = editorKit;
+        this.obdaModelManager = obdaModelManager;
 
         setLayout(new BorderLayout());
 
@@ -62,109 +67,21 @@ public class MappingManagerPanel extends JPanel {
         add(new JScrollPane(mappingList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
-
-        Action newAction = new AbstractAction("New triples map...") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                EditMappingDialog dialog = new EditMappingDialog(
-                        obdaModelManager,
-                        IDGenerator.getNextUniqueID("MAPID-"));
-                DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
-            }
-        };
-
-        Action removeAction = new AbstractAction("Remove triples maps") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!removeConfirm(mappingList.getSelectedValuesList()))
-                    return;
-
-                TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
-                for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
-                    triplesMapCollection.remove(triplesMap.getId());
-
-                mappingList.clearSelection();
-            }
-        };
-        removeAction.setEnabled(false);
-
-        Action copyAction = new AbstractAction("Copy triples maps") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!copyConfirm(mappingList.getSelectedValuesList()))
-                    return;
-
-                TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
-                for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
-                    triplesMapCollection.duplicate(triplesMap.getId());
-            }
-        };
-        copyAction.setEnabled(false);
-
-        Action editAction = new AbstractAction("Edit triples map...") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                EditMappingDialog dialog = new EditMappingDialog(
-                        obdaModelManager,
-                        mappingList.getSelectedValue());
-                DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
-            }
-        };
-        editAction.setEnabled(false);
-
-        Action validateAction = new AbstractAction("Validate triples maps") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ValidationSwingWorker worker = new ValidationSwingWorker(
-                        MappingManagerPanel.this,
-                        mappingList.getSelectedValuesList(),
-                        obdaModelManager);
-                worker.execute();
-            }
-        };
-        validateAction.setEnabled(false);
-
-        Action executeSQLAction = new AbstractAction("Execute source SQL...") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SQLQueryDialog dialog = new SQLQueryDialog(
-                        obdaModelManager.getDatasource(),
-                        mappingList.getSelectedValue().getSqlQuery());
-                DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
-            }
-        };
-        executeSQLAction.setEnabled(false);
+        mappingList.addListSelectionListener(evt -> setActionEnabled());
 
         JPanel buttonsPanel = new JPanel(new GridBagLayout());
 
-        buttonsPanel.add(
-                DialogUtils.getButton(
-                        "New...",
-                        "plus.png",
-                        "Create a new triples map",
-                        newAction),
+        buttonsPanel.add(getButton(newAction),
                 new GridBagConstraints(0, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        JButton removeButton = DialogUtils.getButton(
-                "Remove",
-                "minus.png",
-                "Remove the selected triples maps",
-                removeAction);
-        removeButton.setEnabled(false);
-        buttonsPanel.add(removeButton,
+        buttonsPanel.add(getButton(removeAction),
                 new GridBagConstraints(1, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        JButton copyButton = DialogUtils.getButton(
-                "Copy",
-                "copy.png",
-                "Make a duplicate copy of the selected triples maps (with fresh IDs)",
-                copyAction);
-        copyButton.setEnabled(false);
-        buttonsPanel.add(copyButton,
+        buttonsPanel.add(getButton(copyAction),
                 new GridBagConstraints(2, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
@@ -174,22 +91,12 @@ public class MappingManagerPanel extends JPanel {
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        buttonsPanel.add(
-                DialogUtils.getButton(
-                        "Select all",
-                        "select-all.png",
-                        null,
-                        evt -> mappingList.setSelectionInterval(0, mappingList.getModel().getSize() - 1)),
+        buttonsPanel.add(getButton(selectAllAction),
                 new GridBagConstraints(7, 0, 1, 1, 0, 0,
                         GridBagConstraints.EAST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        buttonsPanel.add(
-                DialogUtils.getButton(
-                        "Select none",
-                        "select-none.png",
-                        null,
-                        evt -> mappingList.clearSelection()),
+        buttonsPanel.add(getButton(selectNoneAction),
                 new GridBagConstraints(8, 0, 1, 1, 0, 0,
                         GridBagConstraints.EAST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
@@ -214,8 +121,7 @@ public class MappingManagerPanel extends JPanel {
                 new GridBagConstraints(3, 0, 1, 1, 1, 0,
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
-        filterField.getDocument().addDocumentListener((SimpleDocumentListener)
-                            e ->  processFilterAction());
+        filterField.getDocument().addDocumentListener((SimpleDocumentListener) e ->  processFilterAction());
 
         filterCheckbox = new JCheckBox("Enable filter");
         filterCheckbox.setEnabled(false);
@@ -228,38 +134,22 @@ public class MappingManagerPanel extends JPanel {
         add(extraButtonsPanel, BorderLayout.SOUTH);
 
         JPopupMenu menu = new JPopupMenu();
-        menu.add(new JMenuItem(newAction));
-        menu.add(new JMenuItem(removeAction));
-        menu.add(new JMenuItem(copyAction));
-        menu.add(new JMenuItem(editAction));
+        menu.add(getMenuItem("New triples map...", newAction));
+        menu.add(getMenuItem("Remove triples maps", removeAction));
+        menu.add(getMenuItem("Copy triples maps", copyAction));
+        menu.add(getMenuItem(editAction));
         menu.addSeparator();
-        menu.add(new JMenuItem(validateAction));
-        menu.add(new JMenuItem(executeSQLAction));
+        menu.add(getMenuItem(validateAction));
+        menu.add(getMenuItem(executeSQLAction));
         mappingList.setComponentPopupMenu(menu);
 
-        mappingList.addListSelectionListener(evt -> {
-            List<TriplesMap> selectionList = mappingList.getSelectedValuesList();
-            removeAction.setEnabled(!selectionList.isEmpty());
-            removeButton.setEnabled(!selectionList.isEmpty());
-            copyAction.setEnabled(!selectionList.isEmpty());
-            copyButton.setEnabled(!selectionList.isEmpty());
-            validateAction.setEnabled(!selectionList.isEmpty());
+        setActionEnabled();
 
-            editAction.setEnabled(selectionList.size() == 1);
-            executeSQLAction.setEnabled(selectionList.size() == 1);
-        });
-
-        InputMap inputMap = mappingList.getInputMap();
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "remove");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), "remove");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), "add");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "edit");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "edit");
-
-        ActionMap actionMap = mappingList.getActionMap();
-        actionMap.put("remove", removeAction);
-        actionMap.put("add", newAction);
-        actionMap.put("edit", editAction);
+        setUpAccelerator(mappingList, newAction);
+        setUpAccelerator(mappingList, removeAction);
+        setUpAccelerator(mappingList, removeAction, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+        setUpAccelerator(mappingList, editAction);
+        setUpAccelerator(mappingList, editAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
 
         mappingList.addMouseListener(new MouseAdapter() {
             @Override
@@ -281,6 +171,119 @@ public class MappingManagerPanel extends JPanel {
             }
         });
         mappingList.setModel(model);
+    }
+
+    private final OntopAbstractAction newAction = new OntopAbstractAction(
+            "New...",
+            "plus.png",
+            "Create a new triples map",
+            KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0)) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            EditMappingDialog dialog = new EditMappingDialog(
+                    obdaModelManager,
+                    IDGenerator.getNextUniqueID("MAPID-"));
+            DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
+        }
+    };
+
+    private final OntopAbstractAction removeAction = new OntopAbstractAction(
+            "Remove",
+            "minus.png",
+            "Remove selected triples maps",
+            KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0)) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (!removeConfirm(mappingList.getSelectedValuesList()))
+                return;
+
+            TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
+            for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
+                triplesMapCollection.remove(triplesMap.getId());
+
+            mappingList.clearSelection();
+        }
+    };
+
+    private final OntopAbstractAction copyAction = new OntopAbstractAction(
+            "Copy",
+            "copy.png",
+            "Make a duplicate copy of the selected triples maps (with fresh IDs)",
+            null) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (!copyConfirm(mappingList.getSelectedValuesList()))
+                return;
+
+            TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
+            for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
+                triplesMapCollection.duplicate(triplesMap.getId());
+        }
+    };
+
+    private final OntopAbstractAction editAction = new OntopAbstractAction("Edit triples map...",
+            null, null, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            EditMappingDialog dialog = new EditMappingDialog(
+                    obdaModelManager,
+                    mappingList.getSelectedValue());
+            DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
+        }
+    };
+
+    private final OntopAbstractAction validateAction = new OntopAbstractAction("Validate triples maps",
+            null,null, null) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ValidationSwingWorker worker = new ValidationSwingWorker(
+                    MappingManagerPanel.this,
+                    mappingList.getSelectedValuesList(),
+                    obdaModelManager);
+            worker.execute();
+        }
+    };
+
+    private final OntopAbstractAction executeSQLAction = new OntopAbstractAction("Execute source SQL...",
+            null, null, null) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            SQLQueryDialog dialog = new SQLQueryDialog(
+                    obdaModelManager.getDatasource(),
+                    mappingList.getSelectedValue().getSqlQuery());
+            DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
+        }
+    };
+
+
+    private final OntopAbstractAction selectAllAction = new OntopAbstractAction("Select all",
+            "select-all.png",
+            "Select all triples maps",
+            getKeyStrokeWithCtrlMask(VK_A)) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            mappingList.setSelectionInterval(0, mappingList.getModel().getSize() - 1);
+        }
+    };
+
+    private final OntopAbstractAction selectNoneAction = new OntopAbstractAction("Select none",
+            "select-none.png",
+            "Deselect all triples maps",
+            getKeyStrokeWithCtrlMask(VK_N)) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            mappingList.clearSelection();
+        }
+    };
+
+    private void setActionEnabled() {
+        List<TriplesMap> selectionList = mappingList.getSelectedValuesList();
+        removeAction.setEnabled(!selectionList.isEmpty());
+        copyAction.setEnabled(!selectionList.isEmpty());
+        validateAction.setEnabled(!selectionList.isEmpty());
+
+        editAction.setEnabled(selectionList.size() == 1);
+        executeSQLAction.setEnabled(selectionList.size() == 1);
     }
 
     /**
