@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.protege.jdbc;
 
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
@@ -17,13 +19,14 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Optional;
 
-import static java.awt.event.KeyEvent.*;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.getButton;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.setUpAccelerator;
 import static javax.swing.SwingConstants.TOP;
 
-public class JDBCDriverEditSettingsDialog extends JDialog {
+public class JdbcDriverEditSettingsDialog extends JDialog {
     private static final long serialVersionUID = -8958695683502439830L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCDriverEditSettingsDialog.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcDriverEditSettingsDialog.class);
 
     private final ServiceTracker<?,?> jdbcRegistryTracker;
     private final Preferences prefs;
@@ -35,16 +38,16 @@ public class JDBCDriverEditSettingsDialog extends JDialog {
 
     private File defaultDir;
 
-    private JDBCDriverInfo result;
+    private JdbcDriverInfo result;
     
     private static final int GAP = 2;
 
-    public JDBCDriverEditSettingsDialog(Container parent, ServiceTracker<?,?> jdbcRegistryTracker) {
+    public JdbcDriverEditSettingsDialog(Container parent, ServiceTracker<?,?> jdbcRegistryTracker) {
 
         this.jdbcRegistryTracker = jdbcRegistryTracker;
 
-        prefs = PreferencesManager.getInstance().getPreferencesForSet(JDBCPreferencesPanel.PREFERENCES_SET, JDBCPreferencesPanel.DEFAULT_DRIVER_DIR);
-        String dirName = prefs.getString(JDBCPreferencesPanel.DEFAULT_DRIVER_DIR, null);
+        prefs = PreferencesManager.getInstance().getPreferencesForSet(JdbcPreferencesPanel.PREFERENCES_SET, JdbcPreferencesPanel.DEFAULT_DRIVER_DIR);
+        String dirName = prefs.getString(JdbcPreferencesPanel.DEFAULT_DRIVER_DIR, null);
         if (dirName != null) {
             defaultDir = new File(dirName);
             if (!defaultDir.exists())
@@ -89,7 +92,6 @@ public class JDBCDriverEditSettingsDialog extends JDialog {
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-
         mainPanel.add(new JLabel("Driver file (jar):"),
                 new GridBagConstraints(0, 2, 1, 1, 0, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.NONE,
@@ -101,21 +103,7 @@ public class JDBCDriverEditSettingsDialog extends JDialog {
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        Action browseAction = new AbstractAction("Browse") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc  = new JFileChooser(defaultDir);
-                if (fc.showOpenDialog(JDBCDriverEditSettingsDialog.this) != JFileChooser.APPROVE_OPTION)
-                    return;
-
-                File file = fc.getSelectedFile();
-                fileField.setText(file.getPath());
-                defaultDir = file.getParentFile();
-                prefs.putString(JDBCPreferencesPanel.DEFAULT_DRIVER_DIR, defaultDir.getAbsolutePath());
-            }
-        };
-
-        mainPanel.add(new JButton(browseAction),
+        mainPanel.add(getButton(browseAction),
                 new GridBagConstraints(2, 2, 1, 1, 0, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.NONE,
                         new Insets(0, 0, 0, 0), 0, 0));
@@ -130,44 +118,19 @@ public class JDBCDriverEditSettingsDialog extends JDialog {
 
         add(mainPanel, BorderLayout.CENTER);
 
-        Action cancelAction = new AbstractAction("Cancel") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                result = null;
-                dispatchEvent(new WindowEvent(JDBCDriverEditSettingsDialog.this, WindowEvent.WINDOW_CLOSING));
-            }
-        };
-
-        Action okAction = new AbstractAction("OK") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                registerDriverInfoAndClose(
-                        nameField.getText(),
-                        (String) classField.getSelectedItem(),
-                        new File(fileField.getText()));
-            }
-        };
+        OntopAbstractAction cancelAction = DialogUtils.getStandardCloseWindowAction(DialogUtils.CANCEL_BUTTON_TEXT, this);
 
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton cancelButton = new JButton(cancelAction);
-        controlPanel.add(cancelButton);
-        JButton okButton = new JButton(okAction);
+        controlPanel.add(getButton(cancelAction));
+        JButton okButton = getButton(okAction);
         controlPanel.add(okButton);
         add(controlPanel, BorderLayout.SOUTH);
 
-        InputMap inputMap = mainPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        inputMap.put(KeyStroke.getKeyStroke(VK_ESCAPE, 0), "cancel");
-        ActionMap actionMap = mainPanel.getActionMap();
-        actionMap.put("cancel", cancelAction);
-
         getRootPane().setDefaultButton(okButton);
-
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        pack();
-        setLocationRelativeTo(parent);
+        setUpAccelerator(getRootPane(), cancelAction);
     }
 
-    public JDBCDriverEditSettingsDialog(Container parent, ServiceTracker<?,?> jdbcRegistryTracker, JDBCDriverInfo info) {
+    public JdbcDriverEditSettingsDialog(Container parent, ServiceTracker<?,?> jdbcRegistryTracker, JdbcDriverInfo info) {
         this(parent, jdbcRegistryTracker);
 
         nameField.setText(info.getDescription());
@@ -175,6 +138,29 @@ public class JDBCDriverEditSettingsDialog extends JDialog {
         fileField.setText(info.getDriverPath());
     }
 
+    private final OntopAbstractAction browseAction = new OntopAbstractAction("Browse", null, null, null) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser fc  = new JFileChooser(defaultDir);
+            if (fc.showOpenDialog(JdbcDriverEditSettingsDialog.this) != JFileChooser.APPROVE_OPTION)
+                return;
+
+            File file = fc.getSelectedFile();
+            fileField.setText(file.getPath());
+            defaultDir = file.getParentFile();
+            prefs.putString(JdbcPreferencesPanel.DEFAULT_DRIVER_DIR, defaultDir.getAbsolutePath());
+        }
+    };
+
+    private final OntopAbstractAction okAction = new OntopAbstractAction(DialogUtils.OK_BUTTON_TEXT, null, null, null) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            registerDriverInfoAndClose(
+                    nameField.getText(),
+                    (String) classField.getSelectedItem(),
+                    new File(fileField.getText()));
+        }
+    };
 
     private void registerDriverInfoAndClose(String description, String className, File file) {
         try {
@@ -183,7 +169,7 @@ public class JDBCDriverEditSettingsDialog extends JDialog {
                 JdbcRegistry registry = (JdbcRegistry) o;
                 try {
                     registry.addJdbcDriver(className, file.toURI().toURL());
-                    result = new JDBCDriverInfo(description, className, file);
+                    result = new JdbcDriverInfo(description, className, file);
                     dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
                 }
                 catch (JdbcRegistryException e) {
@@ -201,8 +187,7 @@ public class JDBCDriverEditSettingsDialog extends JDialog {
         }
     }
 
-    public Optional<JDBCDriverInfo> showDialog() {
-        setVisible(true);
+    public Optional<JdbcDriverInfo> getDriverInfo() {
         return Optional.ofNullable(result);
     }
 }

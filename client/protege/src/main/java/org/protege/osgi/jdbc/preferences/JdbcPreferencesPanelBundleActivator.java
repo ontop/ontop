@@ -1,7 +1,7 @@
 package org.protege.osgi.jdbc.preferences;
 
-import it.unibz.inf.ontop.protege.jdbc.JDBCDriverInfo;
-import it.unibz.inf.ontop.protege.jdbc.JDBCDriverTableModel;
+import it.unibz.inf.ontop.protege.jdbc.JdbcDriverInfo;
+import it.unibz.inf.ontop.protege.jdbc.JdbcDriverTableModel;
 import org.osgi.framework.*;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class JdbcPreferencesPanelBundleActivator implements BundleActivator {
 		if (sr != null) {
 			JdbcRegistry registry = context.getService(sr);
 			try {
-				for (JDBCDriverInfo driver : JDBCDriverTableModel.getDriverInfoFromPreferences()) {
+				for (JdbcDriverInfo driver : JdbcDriverTableModel.getDriverInfoFromPreferences()) {
 					try {
 						registry.addJdbcDriver(driver.getClassName(), driver.getDriverURL());
 					}

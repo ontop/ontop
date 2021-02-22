@@ -82,15 +82,6 @@ public class DialogUtils {
 		};
 	}
 
-	public static JButton getButton(String text, String icon, String tooltip, ActionListener actionListener) {
-		JButton button = new JButton(text, IconLoader.getImageIcon("images/" + icon));
-		button.setIconTextGap(5);
-		button.setMargin(new Insets(3, 7, 3, 7));
-		button.setToolTipText(tooltip);
-		button.addActionListener(actionListener);
-		return button;
-	}
-
 	public static JButton getButton(OntopAbstractAction action) {
 		JButton button = new JButton(action);
 		button.setIconTextGap(5);

@@ -140,11 +140,13 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 				editorKit,
 				this::getExecuteWorker);
 
-		stopButton = getButton(
+		stopButton = getButton(new OntopAbstractAction(
 				"Stop",
 				"stop.png",
 				"Stop running the current query",
-				null);
+				null) {
+			@Override public void actionPerformed(ActionEvent e) {  /* NO-OP */ }
+		});
 		stopButton.setEnabled(false);
 		controlPanel.add(stopButton,
 				new GridBagConstraints(4, 0, 1, 1, 0, 0,

@@ -141,15 +141,12 @@ public class MappingManagerPanel extends JPanel {
         menu.addSeparator();
         menu.add(getMenuItem(validateAction));
         menu.add(getMenuItem(executeSQLAction));
-        mappingList.setComponentPopupMenu(menu);
+        setUpPopUpMenu(mappingList, menu);
+        // additional accelerators
+        setUpAccelerator(mappingList, removeAction, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+        setUpAccelerator(mappingList, editAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
 
         setActionEnabled();
-
-        setUpAccelerator(mappingList, newAction);
-        setUpAccelerator(mappingList, removeAction);
-        setUpAccelerator(mappingList, removeAction, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-        setUpAccelerator(mappingList, editAction);
-        setUpAccelerator(mappingList, editAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
 
         mappingList.addMouseListener(new MouseAdapter() {
             @Override

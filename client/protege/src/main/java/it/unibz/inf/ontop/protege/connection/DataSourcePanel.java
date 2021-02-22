@@ -22,8 +22,8 @@ package it.unibz.inf.ontop.protege.connection;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.protege.jdbc.JDBCDriverInfo;
-import it.unibz.inf.ontop.protege.jdbc.JDBCDriverTableModel;
+import it.unibz.inf.ontop.protege.jdbc.JdbcDriverInfo;
+import it.unibz.inf.ontop.protege.jdbc.JdbcDriverTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -102,8 +102,8 @@ public class DataSourcePanel extends JPanel implements DataSourceListener {
 
         ImmutableList<String> options = Stream.concat(
                 Stream.of("select or type the JDBC Driver class..."),
-                JDBCDriverTableModel.getDriverInfoFromPreferences().stream()
-                        .map(JDBCDriverInfo::getClassName))
+                JdbcDriverTableModel.getDriverInfoFromPreferences().stream()
+                        .map(JdbcDriverInfo::getClassName))
                 .collect(ImmutableCollectors.toList());
 
         jdbcDriverComboBox = new JComboBox<>(new DefaultComboBoxModel<>(options.toArray(new String[0])));

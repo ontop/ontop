@@ -160,7 +160,7 @@
     <extension id="jdbc.prefs"
                point="org.protege.editor.core.application.preferencespanel">
         <label value="JDBC Drivers"/>
-        <class value="it.unibz.inf.ontop.protege.jdbc.JDBCPreferencesPanel"/>
+        <class value="it.unibz.inf.ontop.protege.jdbc.JdbcPreferencesPanel"/>
     </extension>
 
 </plugin>
