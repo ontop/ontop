@@ -66,7 +66,7 @@ public class OntopConfigurationManager {
         File propertyFile = new File(URI.create(owlName + PROPERTY_EXT));
         if (propertyFile.exists()) {
             userSettings.load(new FileReader(propertyFile));
-            loadDataSource(obdaModelManager.getDatasource(), userSettings);
+            copyDataSourceParametersFromUserSettings();
         }
     }
 
@@ -107,18 +107,19 @@ public class OntopConfigurationManager {
      */
     public void loadProperties(Properties properties) {
         userSettings.putAll(properties);
-        loadDataSource(obdaModelManager.getDatasource(), userSettings);
+        copyDataSourceParametersFromUserSettings();
     }
 
-    private static void loadDataSource(DataSource datasource, Properties properties) {
+    private void copyDataSourceParametersFromUserSettings() {
+        DataSource datasource = obdaModelManager.getDatasource();
         datasource.set(
-                Optional.ofNullable(properties.getProperty(JDBC_URL))
+                Optional.ofNullable(userSettings.getProperty(JDBC_URL))
                         .orElseGet(datasource::getURL),
-                Optional.ofNullable(properties.getProperty(JDBC_USER))
+                Optional.ofNullable(userSettings.getProperty(JDBC_USER))
                         .orElseGet(datasource::getUsername),
-                Optional.ofNullable(properties.getProperty(JDBC_PASSWORD))
+                Optional.ofNullable(userSettings.getProperty(JDBC_PASSWORD))
                         .orElseGet(datasource::getPassword),
-                Optional.ofNullable(properties.getProperty(JDBC_DRIVER))
+                Optional.ofNullable(userSettings.getProperty(JDBC_DRIVER))
                         .orElseGet(datasource::getDriver));
     }
 }

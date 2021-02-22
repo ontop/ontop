@@ -47,6 +47,7 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 		throw e;
 	}
 
+	@Nonnull
 	@Override
 	public OntopProtegeReasoner createReasoner(@Nonnull OWLOntology ontology) {
 		UnsupportedOperationException e = new UnsupportedOperationException("A configuration is required");

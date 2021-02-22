@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.protege.core;
 
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
@@ -30,7 +29,8 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
         super(rootOntology, configuration, BufferingMode.BUFFERING);
-        owlapiTranslator = configuration.getOWLAPITranslator();
+
+        owlapiTranslator = configuration.getOntopConfiguration().getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
 
         reasoner = factory.createReasoner(rootOntology, configuration);
         configurationManager = configuration.getOntopConfigurationManager();
@@ -325,16 +325,5 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
         ClassifiedTBox tBox = mergeOntology.tbox();
 
         return new OntopOWLEmptyEntitiesChecker(tBox, owlConnection);
-    }
-
-    /**
-     * Replaces the owl connection with a new one
-     * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
-     * @return The old connection: The caller must close this connection
-     */
-    public OWLConnection replaceConnection() {
-        OWLConnection oldconn = this.owlConnection;
-        owlConnection = reasoner.getConnection();
-        return oldconn;
     }
 }

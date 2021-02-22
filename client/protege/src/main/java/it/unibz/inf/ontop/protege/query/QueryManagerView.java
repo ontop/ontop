@@ -45,7 +45,7 @@ public class QueryManagerView extends AbstractOWLViewComponent {
 		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 
 		setLayout(new BorderLayout());
-		panel = new QueryManagerPanel(obdaModelManager.getQueryController());
+		panel = new QueryManagerPanel(obdaModelManager.getQueryManager());
 		add(panel, BorderLayout.CENTER);
 
 		List<QueryManagerView> queryManagerViews = getList(getOWLEditorKit());

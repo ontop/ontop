@@ -22,12 +22,8 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.parameters.Imports;
