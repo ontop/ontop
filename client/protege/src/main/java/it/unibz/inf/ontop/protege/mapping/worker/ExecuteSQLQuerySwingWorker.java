@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.protege.mapping.worker;
 
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
@@ -24,10 +24,10 @@ public class ExecuteSQLQuerySwingWorker extends SwingWorkerWithCompletionPercent
     private final Dialog dialog;
     private final String sqlQuery;
     private final int maxRows;
-    private final OBDADataSource dataSource;
+    private final DataSource dataSource;
     private final Consumer<DefaultTableModel> tableModelConsumer;
 
-    public ExecuteSQLQuerySwingWorker(Dialog dialog, OBDADataSource dataSource, String sqlQuery, int maxRows, Consumer<DefaultTableModel> tableModelConsumer) {
+    public ExecuteSQLQuerySwingWorker(Dialog dialog, DataSource dataSource, String sqlQuery, int maxRows, Consumer<DefaultTableModel> tableModelConsumer) {
         super(dialog, "<html><h3>Executing SQL Query:</h3></html>");
         this.dialog = dialog;
         this.dataSource = dataSource;

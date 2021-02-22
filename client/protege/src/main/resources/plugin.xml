@@ -7,7 +7,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Connection parameters"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.DatasourcesManagerView">
+			value="it.unibz.inf.ontop.protege.connection.DataSourceView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -160,7 +160,7 @@
     <extension id="jdbc.prefs"
                point="org.protege.editor.core.application.preferencespanel">
         <label value="JDBC Drivers"/>
-        <class value="org.protege.osgi.jdbc.preferences.JDBCPreferencesPanel"/>
+        <class value="it.unibz.inf.ontop.protege.jdbc.JDBCPreferencesPanel"/>
     </extension>
 
 </plugin>

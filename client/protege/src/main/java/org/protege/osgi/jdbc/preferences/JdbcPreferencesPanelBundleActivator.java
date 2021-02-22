@@ -1,19 +1,25 @@
 package org.protege.osgi.jdbc.preferences;
 
+import it.unibz.inf.ontop.protege.jdbc.JDBCDriverInfo;
+import it.unibz.inf.ontop.protege.jdbc.JDBCDriverTableModel;
 import org.osgi.framework.*;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JDBCPreferencesPanelBundleActivator implements BundleActivator {
+/**
+ * Do not move from the org.protege.osgi.jdbc.preferences package
+ */
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCPreferencesPanelBundleActivator.class);
+public class JdbcPreferencesPanelBundleActivator implements BundleActivator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcPreferencesPanelBundleActivator.class);
 
 	private static BundleContext context;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		JDBCPreferencesPanelBundleActivator.context = context;
+		JdbcPreferencesPanelBundleActivator.context = context;
 
 		ServiceReference<JdbcRegistry> sr = context.getServiceReference(JdbcRegistry.class);
 		if (sr != null) {
@@ -31,7 +37,7 @@ public class JDBCPreferencesPanelBundleActivator implements BundleActivator {
 
     @Override
 	public void stop(BundleContext context) {
-		JDBCPreferencesPanelBundleActivator.context = null;
+		JdbcPreferencesPanelBundleActivator.context = null;
 	}
 
 	public static BundleContext getContext() {

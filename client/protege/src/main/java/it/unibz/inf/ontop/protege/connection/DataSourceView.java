@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.views;
+package it.unibz.inf.ontop.protege.connection;
 
 /*
  * #%L
@@ -20,43 +20,40 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.panels.ConnectionParametersPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 
-public class DatasourcesManagerView extends AbstractOWLViewComponent {
+public class DataSourceView extends AbstractOWLViewComponent {
 
 	private static final long serialVersionUID = -4515710047558710080L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DatasourcesManagerView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceView.class);
 
-	private ConnectionParametersPanel editor;
+	private DataSourcePanel panel;
 
-	private OBDADataSource datasource;
+	private DataSource datasource;
 
 	@Override
 	protected void initialiseOWLView()  {
 		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 		datasource = obdaModelManager.getDatasource();
 
-		editor = new ConnectionParametersPanel(datasource);
+		panel = new DataSourcePanel(datasource);
 		setLayout(new BorderLayout());
-		add(editor, BorderLayout.NORTH);
+		add(panel, BorderLayout.NORTH);
 
-		datasource.addListener(editor);
-		datasource.fireChanged();
+		datasource.addListener(panel);
 
-		LOGGER.debug("Datasource browser initialized");
+		LOGGER.debug("DataSource browser initialized");
 	}
 
 	@Override
 	protected void disposeOWLView() {
-		datasource.removeListener(editor);
+		datasource.removeListener(panel);
 	}
 }

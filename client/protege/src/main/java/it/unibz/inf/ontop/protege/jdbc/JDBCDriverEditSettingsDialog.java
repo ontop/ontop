@@ -1,12 +1,10 @@
-package it.unibz.inf.ontop.protege.gui.dialogs;
+package it.unibz.inf.ontop.protege.jdbc;
 
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.osgi.jdbc.JdbcRegistry;
 import org.protege.osgi.jdbc.JdbcRegistryException;
-import org.protege.osgi.jdbc.preferences.JDBCDriverInfo;
-import org.protege.osgi.jdbc.preferences.JDBCPreferencesPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,9 @@
-package org.protege.osgi.jdbc.preferences;
+package it.unibz.inf.ontop.protege.jdbc;
 
-import it.unibz.inf.ontop.protege.gui.dialogs.JDBCDriverEditSettingsDialog;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+import org.protege.osgi.jdbc.preferences.JdbcPreferencesPanelBundleActivator;
 import org.protege.osgi.jdbc.JdbcRegistry;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class JDBCPreferencesPanel extends OWLPreferencesPanel {
 
     @Override
     public void initialise() throws Exception {
-        BundleContext context = JDBCPreferencesPanelBundleActivator.getContext();
+        BundleContext context = JdbcPreferencesPanelBundleActivator.getContext();
         jdbcRegistryTracker = new ServiceTracker<>(context, JdbcRegistry.class.getName(), null);
 
         setPreferredSize(new Dimension(620, 300));

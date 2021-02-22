@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.query.QueryManager;
@@ -40,7 +41,7 @@ import java.util.*;
 public class OBDAModelManager implements Disposable {
 
 	// Mutable
-	private final OBDADataSource source = new OBDADataSource();
+	private final DataSource source = new DataSource();
 	// Mutable and replaced after reset
 	private final OntologySignature currentMutableVocabulary = new OntologySignature();
 
@@ -132,7 +133,7 @@ public class OBDAModelManager implements Disposable {
 		return rdfFactory;
 	}
 
-	public OBDADataSource getDatasource() {
+	public DataSource getDatasource() {
 		return source;
 	}
 

@@ -1,4 +1,4 @@
-package org.protege.osgi.jdbc.preferences;
+package it.unibz.inf.ontop.protege.jdbc;
 
 import java.io.File;
 import java.net.MalformedURLException;

@@ -23,9 +23,8 @@ package it.unibz.inf.ontop.protege.utils;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
-import it.unibz.inf.ontop.protege.mapping.EditMappingDialog;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -280,7 +279,7 @@ public class DialogUtils {
 		}
 	}
 
-	public static void showErrorDialog(Component parent, String title, String message, Logger log, ExecutionException e, OBDADataSource datasource) {
+	public static void showErrorDialog(Component parent, String title, String message, Logger log, ExecutionException e, DataSource datasource) {
 		Throwable cause = e.getCause();
 		if (cause instanceof SQLException && datasource != null) {
 			JOptionPane.showMessageDialog(parent,

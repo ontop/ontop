@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.annotation.Nonnull;
@@ -50,7 +51,7 @@ public class OntopConfigurationManager {
         this.settings.putAll(settings);
         this.userSettings.clear();
 
-        obdaModelManager.getDatasource().reset();
+        obdaModelManager.getDatasource().set("", "", "", "");
     }
 
     public void loadNewConfiguration(String owlName) throws IOException {
@@ -109,19 +110,15 @@ public class OntopConfigurationManager {
         loadDataSource(obdaModelManager.getDatasource(), userSettings);
     }
 
-    private static void loadDataSource(OBDADataSource datasource, Properties properties) {
-        Optional.ofNullable(properties.getProperty(JDBC_USER))
-                .ifPresent(datasource::setUsername);
-
-        Optional.ofNullable(properties.getProperty(JDBC_PASSWORD))
-                .ifPresent(datasource::setPassword);
-
-        Optional.ofNullable(properties.getProperty(JDBC_DRIVER))
-                .ifPresent(datasource::setDriver);
-
-        Optional.ofNullable(properties.getProperty(JDBC_URL))
-                .ifPresent(datasource::setURL);
-
-        datasource.fireChanged();
+    private static void loadDataSource(DataSource datasource, Properties properties) {
+        datasource.set(
+                Optional.ofNullable(properties.getProperty(JDBC_URL))
+                        .orElseGet(datasource::getURL),
+                Optional.ofNullable(properties.getProperty(JDBC_USER))
+                        .orElseGet(datasource::getUsername),
+                Optional.ofNullable(properties.getProperty(JDBC_PASSWORD))
+                        .orElseGet(datasource::getPassword),
+                Optional.ofNullable(properties.getProperty(JDBC_DRIVER))
+                        .orElseGet(datasource::getDriver));
     }
 }

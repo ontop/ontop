@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -93,7 +94,7 @@ public class R2RMLExportAction extends ProtegeAction {
                 DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
             }
             catch (ExecutionException e) {
-                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (OBDADataSource) null);
+                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (DataSource) null);
             }
         }
     }

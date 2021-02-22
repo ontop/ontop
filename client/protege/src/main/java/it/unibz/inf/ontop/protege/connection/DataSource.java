@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.core;
+package it.unibz.inf.ontop.protege.connection;
 
 /*
  * #%L
@@ -25,86 +25,65 @@ import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 
+import javax.annotation.Nonnull;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-public class OBDADataSource {
+public class DataSource {
 
 	private final URI id;
 	private String driver = "", url = "", username = "", password = "";
 
-	private final List<Listener> listeners = new ArrayList<>();
+	private final List<DataSourceListener> listeners = new ArrayList<>();
 
-	public interface Listener {
-		void obdaDataSourceChanged();
-	}
-
-	public OBDADataSource() {
+	public DataSource() {
 		this.id = URI.create(UUID.randomUUID().toString());
 	}
 
-	public void addListener(Listener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeListener(Listener listener) {
-		listeners.remove(listener);
-	}
-
+	@Nonnull
 	public String getDriver() {
 		return driver;
 	}
 
+	@Nonnull
 	public String getUsername() {
 		return username;
 	}
 
+	@Nonnull
 	public String getPassword() {
 		return password;
 	}
 
+	@Nonnull
 	public String getURL() {
 		return url;
 	}
 
-	public void reset() {
-		driver = "";
-		url = "";
-		username = "";
-		password = "";
-	}
-
-	public void fireChanged() {
-		listeners.forEach(Listener::obdaDataSourceChanged);
-	}
-
-	public void setUsername(String username) {
-		Objects.requireNonNull(username);
-		this.username = username;
-	}
-
-	public void setPassword(String password) {
-		Objects.requireNonNull(password);
-		this.password = password;
-	}
-
-	public void setDriver(String driver) {
-		Objects.requireNonNull(driver);
-		this.driver = driver;
-	}
-
-	public void setURL(String url) {
+	public void set(String url, String username, String password, String driver) {
 		Objects.requireNonNull(url);
+		Objects.requireNonNull(username);
+		Objects.requireNonNull(password);
+		Objects.requireNonNull(driver);
+
+		boolean changed = !this.url.equals(url) || !this.username.equals(username)
+					|| !this.password.equals(password) || !this.driver.equals(driver);
+
 		this.url = url;
+		this.username = username;
+		this.password = password;
+		this.driver = driver;
+
+		if (changed)
+			listeners.forEach(DataSourceListener::dataSourceChanged);
 	}
 
 	public Connection getConnection() throws SQLException {
 		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 		return man.getConnection(url, username, password);
 	}
-
 
 	public Properties asProperties() {
 		Properties p = new Properties();
@@ -116,12 +95,12 @@ public class OBDADataSource {
 		return p;
 	}
 
-	@Override
-	public String toString() {
-		return "DatasourceURI=" + id + "\n" +
-				OntopSQLCoreSettings.JDBC_URL + "=" + url + "\n" +
-				OntopSQLCoreSettings.JDBC_DRIVER + "=" + driver + "\n" +
-				OntopSQLCredentialSettings.JDBC_USER + "=" + username + "\n" +
-				OntopSQLCredentialSettings.JDBC_PASSWORD + "=" + password + "\n";
+	public void addListener(DataSourceListener listener) {
+		if (listener != null && !listeners.contains(listener))
+			listeners.add(listener);
+	}
+
+	public void removeListener(DataSourceListener listener) {
+		listeners.remove(listener);
 	}
 }

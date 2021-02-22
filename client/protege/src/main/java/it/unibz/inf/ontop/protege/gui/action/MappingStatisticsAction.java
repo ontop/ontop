@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.mapping.TriplesMap;
@@ -90,7 +90,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 		statisticsPanel.add(new JScrollPane(triplesCountTable), BorderLayout.CENTER);
 
 		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-		OBDADataSource source = obdaModelManager.getDatasource();
+		DataSource source = obdaModelManager.getDatasource();
 		SwingWorker<Integer, TriplesMapInfo> worker = new SwingWorker<Integer, TriplesMapInfo>() {
 
 			@Override

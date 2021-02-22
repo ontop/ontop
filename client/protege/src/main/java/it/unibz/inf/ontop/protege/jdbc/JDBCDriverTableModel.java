@@ -1,4 +1,4 @@
-package org.protege.osgi.jdbc.preferences;
+package it.unibz.inf.ontop.protege.jdbc;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;

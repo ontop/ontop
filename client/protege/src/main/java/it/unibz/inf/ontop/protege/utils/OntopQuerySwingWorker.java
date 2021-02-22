@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +97,7 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
             progressMonitor.setStatus("Query processing was cancelled.");
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(parent, title, title + " error.", LOGGER, e, (OBDADataSource)null);
+            DialogUtils.showErrorDialog(parent, title, title + " error.", LOGGER, e, (DataSource)null);
         }
         catch (Exception e) {
             DialogUtils.showQuickErrorDialog(parent, e, title + " error.");

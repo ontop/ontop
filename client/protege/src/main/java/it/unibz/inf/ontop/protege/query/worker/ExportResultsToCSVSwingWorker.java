@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.protege.query.worker;
 
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
@@ -74,7 +74,7 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
         catch (CancellationException | InterruptedException ignore) {
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (OBDADataSource)null);
+            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (DataSource)null);
         }
     }
 }

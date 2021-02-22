@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.mapping;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.protege.mapping.worker.ExecuteSQLQuerySwingWorker;
 
@@ -43,7 +43,7 @@ public class SQLQueryDialog extends JDialog {
 	private final JTable sqlQueryResultTable;
 	private final JTextPane sourceQueryTextPane;
 
-	private final OBDADataSource datasource;
+	private final DataSource datasource;
 
 	private final OntopAbstractAction executeSqlQueryAction = new OntopAbstractAction(
 			"Execute",
@@ -64,7 +64,7 @@ public class SQLQueryDialog extends JDialog {
 
 	private final OntopAbstractAction closeAction = getStandardCloseWindowAction(OK_BUTTON_TEXT, SQLQueryDialog.this);
 
-	public SQLQueryDialog(OBDADataSource datasource, String query) {
+	public SQLQueryDialog(DataSource datasource, String query) {
 		this.datasource = datasource;
 
 		setTitle("SQL Query Result");
