@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.action;
+package it.unibz.inf.ontop.protege.action;
 
 
 import com.google.common.collect.ImmutableMap;
@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithTimeIntervalMonitor;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
@@ -93,7 +92,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
         JLabel info = new JLabel("<html><br><b>The operation may take some time " +
                 "and may require a lot of memory.<br>Use the command-line tool " +
                 "when data volume is too high.</b><br></html> ");
-        info.setIcon(IconLoader.getImageIcon("images/alert.png"));
+        info.setIcon(DialogUtils.getImageIcon("images/alert.png"));
 
         JPanel radioAddPanel = new JPanel(new BorderLayout());
         radioAddPanel.add(radioAdd, BorderLayout.NORTH);
@@ -115,20 +114,17 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
                 DIALOG_TITLE,
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
-                IconLoader.getOntopIcon(),
+                DialogUtils.getOntopIcon(),
                 null,
                 null) != JOptionPane.OK_OPTION)
             return;
 
         if (radioAdd.isSelected()) {
-            if (JOptionPane.showConfirmDialog(getWorkspace(),
+            if (!DialogUtils.confirmation(getWorkspace(),
                     "<html>The plugin will materialize triples and insert them into the current ontology.<br>"
                             + "The operation may take some time and may require a lot of memory if the database is large.<br><br>"
                             + "Do you wish to <b>continue</b>?<br></html>",
-                    "Materialize the RDF Graph?",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
+                    "Materialize the RDF Graph?"))
                 return;
 
             MaterializeToOntologyWorker worker = new MaterializeToOntologyWorker();
@@ -203,15 +199,13 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
         public void done() {
             try {
                 complete();
-                JOptionPane.showMessageDialog(getWorkspace(),
+                DialogUtils.showInfoDialog(getWorkspace(),
                         "<html><h3>RDF Graph materialization completed.</h3><br>" +
                                 HTML_TAB + "<b>" + getCount() + "</b> triples materialized and stored in<br>" +
                                 HTML_TAB + HTML_TAB + file.getPath() + ".<br>" +
                                 HTML_TAB + "<b>" + vocabularySize + "</b> ontology classes and properties used.<br>" +
                                 HTML_TAB + "Elapsed time: <b>" + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + "</b>.<br></html>",
-                        DIALOG_TITLE,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        IconLoader.getOntopIcon());
+                        DIALOG_TITLE);
             }
             catch (CancellationException | InterruptedException e) {
                 try {
@@ -270,14 +264,12 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
         public void done() {
             try {
                 complete();
-                JOptionPane.showMessageDialog(getWorkspace(),
+                DialogUtils.showInfoDialog(getWorkspace(),
                         "<html><h3>RDF Graph materialization completed.</h3><br>" +
                                 HTML_TAB + "<b>" + getCount() + "</b> triples materialized.<br>" +
                                 HTML_TAB + "<b>" + vocabularySize + "</b> ontology classes and properties used.<br>" +
                                 HTML_TAB + "Elapsed time: <b>" + DialogUtils.renderElapsedTime(elapsedTimeMillis()) + "</b>.<br></html>",
-                        DIALOG_TITLE,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        IconLoader.getOntopIcon());
+                        DIALOG_TITLE);
             }
             catch (CancellationException | InterruptedException e) {
                 DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);

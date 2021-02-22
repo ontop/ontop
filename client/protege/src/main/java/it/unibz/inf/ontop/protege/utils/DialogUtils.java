@@ -51,6 +51,23 @@ import static java.awt.event.KeyEvent.*;
 
 public class DialogUtils {
 
+
+	/**
+	 * Returns an ImageIcon, or null if the path was invalid.
+	 */
+	public static ImageIcon getImageIcon(String path) {
+		java.net.URL imgURL = DialogUtils.class.getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL);
+		} else {
+			return null;
+		}
+	}
+
+	public static ImageIcon getOntopIcon() {
+		return getImageIcon("images/ontop-logo.png");
+	}
+
 	public static final String CANCEL_BUTTON_TEXT = UIManager.getString("OptionPane.cancelButtonText");
 	public static final String OK_BUTTON_TEXT = UIManager.getString("OptionPane.okButtonText");
 
@@ -69,7 +86,7 @@ public class DialogUtils {
 				title,
 				JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
-				IconLoader.getOntopIcon()) == JOptionPane.YES_OPTION;
+				getOntopIcon()) == JOptionPane.YES_OPTION;
 	}
 
 	public static OntopAbstractAction getStandardCloseWindowAction(String text, Window source) {
@@ -212,7 +229,7 @@ public class DialogUtils {
 				title,
 				JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
-				IconLoader.getOntopIcon()) == JOptionPane.YES_OPTION;
+				getOntopIcon()) == JOptionPane.YES_OPTION;
 	}
 
 	private static final int MAX_CHARACTERS_PER_LINE_COUNT = 150;
@@ -353,17 +370,7 @@ public class DialogUtils {
 		});
 	}
 
-	private static final KeyStroke escapeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-	public static final String dispatchWindowClosingActionMapKey = "com.spodding.tackline.dispatch:WINDOW_CLOSING";
-
-	public static void installEscapeCloseOperation(JDialog dialog) {
-		JRootPane root = dialog.getRootPane();
-		root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeStroke, dispatchWindowClosingActionMapKey);
-		root.getActionMap().put(dispatchWindowClosingActionMapKey, new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING));
-			}
-		});
+	public static void showInfoDialog(Component parent, String message, String title) {
+		JOptionPane.showMessageDialog(parent, message, title, JOptionPane.INFORMATION_MESSAGE, getOntopIcon());
 	}
 }

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.action;
+package it.unibz.inf.ontop.protege.action;
 
 /*
  * #%L
@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.mapping.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,8 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 
 public class MappingStatisticsAction extends ProtegeAction {
 
@@ -144,12 +147,13 @@ public class MappingStatisticsAction extends ProtegeAction {
 		worker.execute();
 
 		JPanel commandPanel = new JPanel(new FlowLayout());
-		JButton closeButton = new JButton("Close");
-		closeButton.addActionListener(evt ->
-				dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING)));
+
+		OntopAbstractAction closeAction = getStandardCloseWindowAction("Close", dialog);
+		JButton closeButton = getButton(closeAction);
 		commandPanel.add(closeButton);
 
-		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setUpAccelerator(dialog.getRootPane(), closeAction);
+		dialog.getRootPane().setDefaultButton(closeButton);
 		dialog.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -161,10 +165,8 @@ public class MappingStatisticsAction extends ProtegeAction {
 		dialog.add(statisticsPanel, BorderLayout.CENTER);
 		dialog.add(commandPanel, BorderLayout.SOUTH);
 
-		dialog.setSize(520, 400);
-		dialog.setLocationRelativeTo(getWorkspace());
-		DialogUtils.installEscapeCloseOperation(dialog);
-		dialog.setVisible(true);
+		dialog.setPreferredSize(new Dimension(520, 400));
+		DialogUtils.setLocationRelativeToProtegeAndOpen(getEditorKit(), dialog);
 	}
 
 	private static TriplesMapInfo retrieveInfo(TriplesMap triplesMap, Statement st) {

@@ -5,7 +5,7 @@ import javax.swing.*;
 public abstract class OntopAbstractAction extends AbstractAction {
     public OntopAbstractAction(String name, String icon, String tooltip, KeyStroke accelerator) {
         super(name);
-        putValue(SMALL_ICON, IconLoader.getImageIcon("images/" + icon));
+        putValue(SMALL_ICON, DialogUtils.getImageIcon("images/" + icon));
         putValue(SHORT_DESCRIPTION, tooltip);
         putValue(ACCELERATOR_KEY, accelerator);
     }

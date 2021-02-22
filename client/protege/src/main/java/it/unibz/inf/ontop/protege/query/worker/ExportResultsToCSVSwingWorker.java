@@ -2,12 +2,10 @@ package it.unibz.inf.ontop.protege.query.worker;
 
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.BufferedWriter;
@@ -65,11 +63,9 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
         try {
             complete();
 
-            JOptionPane.showMessageDialog(parent,
+            DialogUtils.showInfoDialog(parent,
                     "<html><h3>Export to CSV file is complete.</h3><br></html>",
-                    DIALOG_TITLE,
-                    JOptionPane.INFORMATION_MESSAGE,
-                    IconLoader.getOntopIcon());
+                    DIALOG_TITLE);
         }
         catch (CancellationException | InterruptedException ignore) {
         }

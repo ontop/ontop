@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.mapping.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.List;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -95,12 +93,10 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
                     : "<b>" + invalidTriplesMapCount + "</b> triples map" + (invalidTriplesMapCount > 1 ? "s" : "") + " (out of <b>" +
                     triplesMapList.size() + "</b>) have been found invalid.";
 
-            JOptionPane.showMessageDialog(parent,
+            DialogUtils.showInfoDialog(parent,
                     "<html><h3>Validation of the triples maps is complete.</h3><br>" +
                             HTML_TAB + message + "<br></html>",
-                    DIALOG_TITLE,
-                    JOptionPane.INFORMATION_MESSAGE,
-                    IconLoader.getOntopIcon());
+                    DIALOG_TITLE);
         }
         catch (CancellationException | InterruptedException ignore) {
         }

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.action;
+package it.unibz.inf.ontop.protege.action;
 
 /*
  * #%L
@@ -21,13 +21,11 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.Optional;
 
@@ -50,20 +48,16 @@ public class InconsistencyCheckAction extends ProtegeAction {
 			boolean isConsistent = ontop.isQuestConsistent();
 			LOGGER.debug("Consistency checking returned: " + isConsistent);
 			if (isConsistent) {
-				JOptionPane.showMessageDialog(getWorkspace(),
+				DialogUtils.showInfoDialog(getWorkspace(),
 						"Your ontology is consistent! Top job!",
-						DIALOG_TITlE,
-						JOptionPane.INFORMATION_MESSAGE,
-						IconLoader.getOntopIcon());
+						DIALOG_TITlE);
 			}
 			else {
-				JOptionPane.showMessageDialog(getWorkspace(),
+				DialogUtils.showInfoDialog(getWorkspace(),
 						"Your ontology is not consistent.\n" +
 								"The axiom causing inconsistency is:\n" +
 								ontop.getInconsistentAxiom(),
-						DIALOG_TITlE,
-						JOptionPane.INFORMATION_MESSAGE,
-						IconLoader.getOntopIcon());
+						DIALOG_TITlE);
 			}
 		}
 		catch (Throwable e) {

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.action;
+package it.unibz.inf.ontop.protege.action;
 
 /*
  * #%L
@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.gui.action;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.protege.core.*;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -52,12 +51,9 @@ public class R2RMLImportAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
-		if (JOptionPane.showConfirmDialog(getWorkspace(),
+		if (!DialogUtils.confirmation(getWorkspace(),
 				"<html>The imported mappings will be appended to the existing data source.<br><br>Do you wish to <b>continue</b>?<br></html>",
-				DIALOG_TITLE,
-				JOptionPane.YES_NO_OPTION,
-				JOptionPane.QUESTION_MESSAGE,
-				IconLoader.getOntopIcon()) != JOptionPane.YES_OPTION)
+				DIALOG_TITLE))
 			return;
 
 		JFileChooser fc = DialogUtils.getFileChooser(getEditorKit(), null);
@@ -97,13 +93,11 @@ public class R2RMLImportAction extends ProtegeAction {
 		public void done() {
 			try {
 				Map.Entry<Integer, Integer> result = complete();
-				JOptionPane.showMessageDialog(getWorkspace(),
+				DialogUtils.showInfoDialog(getWorkspace(),
 						"<html><h3>Import of R2RML mapping is complete.</h3><br>" +
 								HTML_TAB + "<b>" + result.getKey() + "</b> triples maps inserted into the mapping.<br>" +
 								HTML_TAB + "<b>" + result.getValue() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
-						DIALOG_TITLE,
-						JOptionPane.INFORMATION_MESSAGE,
-						IconLoader.getOntopIcon());
+						DIALOG_TITLE);
 			}
 			catch (CancellationException | InterruptedException e) {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);

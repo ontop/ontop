@@ -50,7 +50,7 @@ public class DialogProgressMonitor extends AbstractProgressMonitor {
             pane = new JOptionPane(new Object[] { message, noteLabel, progressBar },
                     JOptionPane.INFORMATION_MESSAGE,
                     JOptionPane.DEFAULT_OPTION,
-                    IconLoader.getOntopIcon(),
+                    DialogUtils.getOntopIcon(),
                     new Object[] { cancelOption },
                     null);
 

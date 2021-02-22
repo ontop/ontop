@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.action;
+package it.unibz.inf.ontop.protege.action;
 
 /*
  * #%L
@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.*;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithMonitor;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.R2RMLMappingSerializer;
@@ -84,11 +83,9 @@ public class R2RMLExportAction extends ProtegeAction {
         public void done() {
             try {
                 complete();
-                JOptionPane.showMessageDialog(getWorkspace(),
+                DialogUtils.showInfoDialog(getWorkspace(),
                         "<html><h3>Export of R2RML mapping is complete.</h3><br></html>",
-                        DIALOG_TITLE,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        IconLoader.getOntopIcon());
+                        DIALOG_TITLE);
             }
             catch (CancellationException | InterruptedException e) {
                 DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);

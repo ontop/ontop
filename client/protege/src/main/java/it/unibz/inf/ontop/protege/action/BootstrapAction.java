@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.action;
+package it.unibz.inf.ontop.protege.action;
 
 /*
  * #%L
@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
@@ -96,12 +95,12 @@ public class BootstrapAction extends ProtegeAction {
 				DIALOG_TITLE,
 				JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
-				IconLoader.getOntopIcon(),
+				DialogUtils.getOntopIcon(),
 				null,
 				null) != JOptionPane.OK_OPTION)
 			return;
 
-		String baseIri0 =	 baseIriField.getText().trim();
+		String baseIri0 = baseIriField.getText().trim();
 		if (baseIri0.contains("#")) {
 			DialogUtils.showPrettyMessageDialog(getWorkspace(),
 					"Base IRIs cannot contain '#':\n" +
@@ -191,13 +190,11 @@ public class BootstrapAction extends ProtegeAction {
 		public void done() {
 			try {
 				Map.Entry<Integer, Integer> result = complete();
-				JOptionPane.showMessageDialog(getWorkspace(),
+				DialogUtils.showInfoDialog(getWorkspace(),
 						"<html><h3>Bootstrapping the ontology and mapping is complete.</h3><br>" +
 								HTML_TAB + "<b>" + result.getKey() + "</b> triples maps inserted into the mapping.<br>" +
 								HTML_TAB + "<b>" + result.getValue() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
-						DIALOG_TITLE,
-						JOptionPane.INFORMATION_MESSAGE,
-						IconLoader.getOntopIcon());
+						DIALOG_TITLE);
 			}
 			catch (CancellationException | InterruptedException e) {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.query;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.protege.utils.IconLoader;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -67,8 +67,8 @@ public class QueryManagerPanel extends JPanel {
         QueryManagerTreeModel model = new QueryManagerTreeModel(queryManager);
         queryManagerTree = new JTree(model);
         queryManagerTree.setCellRenderer(new DefaultTreeCellRenderer() {
-            private final Icon queryIcon = IconLoader.getImageIcon(QUERY_ICON_PATH);
-            private final Icon groupIcon = IconLoader.getImageIcon(GROUP_ICON_PATH);
+            private final Icon queryIcon = DialogUtils.getImageIcon(QUERY_ICON_PATH);
+            private final Icon groupIcon = DialogUtils.getImageIcon(GROUP_ICON_PATH);
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
@@ -274,7 +274,7 @@ public class QueryManagerPanel extends JPanel {
                 title,
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
-                IconLoader.getOntopIcon(),
+                DialogUtils.getOntopIcon(),
                 new Object[] { okButton, cancelButton },
                 okButton) != JOptionPane.OK_OPTION)
             return Optional.empty();
@@ -283,14 +283,11 @@ public class QueryManagerPanel extends JPanel {
     }
 
 	private boolean confirmDelete(QueryManager.Item item) {
-        return JOptionPane.showConfirmDialog(null,
+        return DialogUtils.confirmation(null,
                 "<html>This will delete " + (item.isQuery() ?  "query" : "group") +
                         " \""  + htmlEscape(item.getID()) + "\"" +
                         (item.getChildCount() == 0 ? "" : " along with all its queries and groups") + ".<br><br>" +
                         "Do you wish to <b>continue</b>?<br></html>",
-                "Delete confirmation",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-                IconLoader.getOntopIcon()) == JOptionPane.YES_OPTION;
+                "Delete confirmation");
     }
 }

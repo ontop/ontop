@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.preferences;
+package it.unibz.inf.ontop.protege.quest;
 
 /*
  * #%L
@@ -89,7 +89,6 @@ public class QuestPreferencesPanel extends OWLPreferencesPanel {
 		setLayout(new BorderLayout());
 		add(configPanel, BorderLayout.CENTER);
 
-		setMinimumSize(new Dimension(620, 300));
 		setPreferredSize(new Dimension(620, 300));
 	}
 

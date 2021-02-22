@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.gui.action;
+package it.unibz.inf.ontop.protege.action;
 
 /*
  * #%L
@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import org.apache.commons.rdf.api.IRI;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -40,6 +41,8 @@ import java.awt.event.WindowEvent;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 
 public class EmptyEntitiesCheckAction extends ProtegeAction {
 
@@ -152,12 +155,12 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 		worker.execute();
 
 		JPanel commandPanel = new JPanel(new FlowLayout());
-		JButton closeButton = new JButton("Close");
-		closeButton.addActionListener(evt ->
-				dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING)));
+		OntopAbstractAction closeAction = getStandardCloseWindowAction("Close", dialog);
+		JButton closeButton = getButton(closeAction);
 		commandPanel.add(closeButton);
 
-		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setUpAccelerator(dialog.getRootPane(), closeAction);
+		dialog.getRootPane().setDefaultButton(closeButton);
 		dialog.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -169,10 +172,8 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 		dialog.add(emptiesPanel, BorderLayout.CENTER);
 		dialog.add(commandPanel, BorderLayout.SOUTH);
 
-		dialog.setSize(520, 400);
-		dialog.setLocationRelativeTo(getWorkspace());
-		DialogUtils.installEscapeCloseOperation(dialog);
-		dialog.setVisible(true);
+		dialog.setPreferredSize(new Dimension(520, 400));
+		DialogUtils.setLocationRelativeToProtegeAndOpen(getEditorKit(), dialog);
 	}
 
 	@Override
