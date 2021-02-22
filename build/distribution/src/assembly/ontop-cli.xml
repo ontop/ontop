@@ -7,14 +7,14 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<directory>${project.basedir}/../../licenses</directory>
+			<directory>${maven.multiModuleProjectDirectory}/licenses</directory>
 			<outputDirectory>/copyright</outputDirectory>
 			<includes>
 				<include>*</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../../build/distribution/src/main/resources/log
+			<directory>${maven.multiModuleProjectDirectory}/build/distribution/src/main/resources/log
 			</directory>
 			<outputDirectory>/log</outputDirectory>
 			<includes>
@@ -23,7 +23,7 @@
 			</includes>
 		</fileSet>
         <fileSet>
-            <directory>${project.basedir}/../../client/cli/src/main/resources/
+            <directory>${maven.multiModuleProjectDirectory}/client/cli/src/main/resources/
             </directory>
             <outputDirectory>/</outputDirectory>
             <includes>
@@ -31,7 +31,7 @@
             </includes>
         </fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../../engine/owlapi/src/main/resources/
+			<directory>${maven.multiModuleProjectDirectory}/engine/owlapi/src/main/resources/
 			</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>

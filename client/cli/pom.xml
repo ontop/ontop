@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <artifactId>ontop-client</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
+        <artifactId>ontop-client</artifactId>
         <version>4.1.0-beta-1-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ontop-cli</artifactId>
 
@@ -13,35 +16,27 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-owlapi</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdf4j</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-mapping-sql-all</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-system-sql-owlapi</artifactId>
-            <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-endpoint</artifactId>
-            <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline-help-bash</artifactId>
@@ -53,26 +48,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-<!--    &lt;!&ndash; easy testing &ndash;&gt;-->
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>add-dependencies-for-IDEA</id>-->
-<!--            <activation>-->
-<!--                <property>-->
-<!--                    <name>idea.version</name>-->
-<!--                </property>-->
-<!--            </activation>-->
-
-<!--            <dependencies>-->
-<!--                <dependency>-->
-<!--                    <groupId>org.postgresql</groupId>-->
-<!--                    <artifactId>postgresql</artifactId>-->
-<!--                    <scope>compile</scope>-->
-<!--                </dependency>-->
-<!--            </dependencies>-->
-<!--        </profile>-->
-<!--    </profiles>-->
 
     <build>
         <plugins>
@@ -90,4 +65,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
