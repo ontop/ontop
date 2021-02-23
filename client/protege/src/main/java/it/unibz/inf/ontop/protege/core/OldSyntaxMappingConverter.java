@@ -63,7 +63,7 @@ public class OldSyntaxMappingConverter {
 
     //return the extracted obda data source
 
-    public Optional<Properties> getOBDADataSourceProperties()  {
+    public Optional<Properties> getDataSourceProperties()  {
         return Optional.ofNullable(dataSourceProperties);
     }
 

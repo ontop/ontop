@@ -41,7 +41,7 @@ public class DataSourceView extends AbstractOWLViewComponent {
 	@Override
 	protected void initialiseOWLView()  {
 		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
-		datasource = obdaModelManager.getDatasource();
+		datasource = obdaModelManager.getDataSource();
 
 		panel = new DataSourcePanel(datasource);
 		setLayout(new BorderLayout());

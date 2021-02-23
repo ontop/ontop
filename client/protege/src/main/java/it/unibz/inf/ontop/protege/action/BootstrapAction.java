@@ -30,12 +30,11 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -123,7 +122,7 @@ public class BootstrapAction extends ProtegeAction {
 		private final String baseIri;
 		private final JDBCMetadataProviderFactory metadataProviderFactory;
 		private final DirectMappingEngine directMappingEngine;
-		private final OntopStandaloneSQLSettings settings;
+		private final DataSource datasource;
 
 		private final AtomicInteger currentMappingIndex;
 
@@ -134,9 +133,9 @@ public class BootstrapAction extends ProtegeAction {
 			this.baseIri = baseIri;
 
 			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-			OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
-			this.settings = configuration.getSettings();
+			datasource = obdaModelManager.getDataSource();
 
+			OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
 			Injector injector = configuration.getInjector();
 			this.metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 			this.directMappingEngine = injector.getInstance(DirectMappingEngine.class);
@@ -152,8 +151,7 @@ public class BootstrapAction extends ProtegeAction {
 
 			final ImmutableMetadata metadata;
 
-			JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
-			try (Connection conn = connectionManager.getConnection(settings)) {
+			try (Connection conn = datasource.getConnection()) {
 
 				MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
 				ImmutableList<RelationID> relationIds = metadataProvider.getRelationIDs();
@@ -200,7 +198,7 @@ public class BootstrapAction extends ProtegeAction {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
 			catch (ExecutionException e) {
-				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, settings);
+				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, datasource);
 			}
 		}
 	}

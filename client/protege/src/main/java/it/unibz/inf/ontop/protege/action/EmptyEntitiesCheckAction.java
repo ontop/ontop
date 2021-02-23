@@ -148,7 +148,7 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 				}
 				catch (ExecutionException e) {
 					dialog.dispose();
-					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModelManager.getDatasource());
+					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModelManager.getDataSource());
 				}
 			}
 		};

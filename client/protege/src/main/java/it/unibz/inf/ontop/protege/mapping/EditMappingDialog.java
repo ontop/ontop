@@ -199,7 +199,7 @@ public class EditMappingDialog extends JDialog {
 		public void actionPerformed(ActionEvent e) {
 			ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
 					EditMappingDialog.this,
-					obdaModelManager.getDatasource(),
+					obdaModelManager.getDataSource(),
 					sourceQueryTextPane.getText().trim(),
 					MAX_ROWS,
 					sqlQueryResultTable::setModel);

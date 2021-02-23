@@ -33,7 +33,7 @@ public class OntologySignature {
 
 	private OWLOntology ontology;
 
-	public void setOntology(OWLOntology ontology) {
+	public void reset(OWLOntology ontology) {
 		this.ontology = ontology;
 	}
 

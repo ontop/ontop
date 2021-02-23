@@ -271,22 +271,6 @@ public class DialogUtils {
 				JOptionPane.WARNING_MESSAGE);
 	}
 
-	public static void showErrorDialog(Component parent, String title, String message, Logger log, ExecutionException e, OntopStandaloneSQLSettings settings) {
-		Throwable cause = e.getCause();
-		if (cause instanceof SQLException && settings != null) {
-			JOptionPane.showMessageDialog(parent,
-					"<html><b>Error connecting to the database:</b> " + cause.getMessage() + ".<br><br>" +
-							HTML_TAB + "JDBC driver: " + settings.getJdbcDriver() + "<br>" +
-							HTML_TAB + "Connection URL: " + settings.getJdbcUrl() + "<br>" +
-							HTML_TAB + "Username: " + settings.getJdbcUser() + "</html>",
-					title,
-					JOptionPane.ERROR_MESSAGE);
-		}
-		else {
-			DialogUtils.showSeeLogErrorDialog(parent, title, message, log, cause);
-		}
-	}
-
 	public static void showErrorDialog(Component parent, String title, String message, Logger log, ExecutionException e, DataSource datasource) {
 		Throwable cause = e.getCause();
 		if (cause instanceof SQLException && datasource != null) {

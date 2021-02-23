@@ -93,7 +93,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 		statisticsPanel.add(new JScrollPane(triplesCountTable), BorderLayout.CENTER);
 
 		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-		DataSource source = obdaModelManager.getDatasource();
+		DataSource source = obdaModelManager.getDataSource();
 		SwingWorker<Integer, TriplesMapInfo> worker = new SwingWorker<Integer, TriplesMapInfo>() {
 
 			@Override

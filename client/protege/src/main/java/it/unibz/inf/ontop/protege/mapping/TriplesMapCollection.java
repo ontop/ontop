@@ -1,28 +1,30 @@
 package it.unibz.inf.ontop.protege.mapping;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.*;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.Reader;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -50,6 +52,8 @@ import java.util.stream.Stream;
  */
 public class TriplesMapCollection implements Iterable<TriplesMap> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TriplesMapCollection.class);
+    
     private Map<String, TriplesMap> map = new LinkedHashMap<>();
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
@@ -101,22 +105,10 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     /**
      *  NOTE: adds prefixes to the current prefixManager
      *
-     * @param mappingReader
-     * @param properties
-     * @throws InvalidMappingException
-     * @throws MappingIOException
      */
 
-    public void load(Reader mappingReader, Properties properties) throws InvalidMappingException, MappingIOException {
+    private void load(SQLPPMapping ppMapping) {
 
-        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-                .nativeOntopMappingReader(mappingReader)
-                .properties(properties)
-                .build();
-
-        SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
-
-        SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
         ppMapping.getPrefixManager().getPrefixMap().forEach((k, v) -> prefixManager.addPrefix(k, v));
 
         map = ppMapping.getTripleMaps().stream()
@@ -282,7 +274,30 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
     public int size() { return map.size(); }
 
-    public boolean isEmpty() { return map.isEmpty(); }
-
     public Stream<TriplesMap> stream() { return map.values().stream(); }
+    
+    
+    public void store(File obdaFile) throws IOException {
+        if (!map.isEmpty()) {
+            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
+            writer.write(obdaFile, generatePPMapping());
+            LOGGER.info("mapping file saved to {}", obdaFile);
+        }
+        else {
+            Files.deleteIfExists(obdaFile.toPath());
+        }
+    }
+
+    public void load(File obdaFile, OBDAModelManager obdaModelManager) throws Exception {
+        try (Reader reader = new FileReader(obdaFile)) {
+            OldSyntaxMappingConverter converter = new OldSyntaxMappingConverter(reader, obdaFile.getName());
+
+            converter.getDataSourceProperties().ifPresent(obdaModelManager.getDataSource()::update);
+
+            load(obdaModelManager.parseOBDA(converter.getRestOfFile()));
+        }
+        catch (Exception ex) {
+            throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
+        }
+    }
 }

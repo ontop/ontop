@@ -2,7 +2,10 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
@@ -15,8 +18,9 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
@@ -35,19 +39,18 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.net.URI;
-import java.nio.file.Files;
 import java.util.*;
 
 public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
-
+	public static final String PROPERTY_EXT = ".properties"; // The default property file extension.
 
 	private final OWLEditorKit owlEditorKit;
 
 	// mutable
-	private final DataSource source = new DataSource();
+	private final DataSource datasource = new DataSource();
 	// mutable
 	private final TriplesMapCollection triplesMapCollection;
 	// Mutable: the ontology inside is replaced
@@ -134,7 +137,7 @@ public class OBDAModelManager implements Disposable {
 			}
 		});
 
-		source.addListener(this::triggerOntologyChanged);
+		datasource.addListener(this::triggerOntologyChanged);
 
 		DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
 		configurationManager = new OntopConfigurationManager(this, settings);
@@ -206,8 +209,8 @@ public class OBDAModelManager implements Disposable {
 		return rdfFactory;
 	}
 
-	public DataSource getDatasource() {
-		return source;
+	public DataSource getDataSource() {
+		return datasource;
 	}
 
 	public TriplesMapCollection getTriplesMapCollection() {
@@ -271,11 +274,13 @@ public class OBDAModelManager implements Disposable {
 
 		lastKnownOntologyId = id;
 
-		triplesMapCollection.reset(ontology);
-		currentMutableVocabulary.setOntology(ontology);
+		currentMutableVocabulary.reset(ontology);
 
-		DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
-		configurationManager.reset(settings);
+		triplesMapCollection.reset(ontology);
+
+		configurationManager.reset(OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit));
+
+		datasource.reset();
 
 		ProtegeOWLReasonerInfo factory = owlModelManager.getOWLReasonerManager().getCurrentReasonerFactory();
 		if (factory instanceof OntopReasonerInfo) {
@@ -296,28 +301,10 @@ public class OBDAModelManager implements Disposable {
 
 			File obdaFile = new File(URI.create(owlName + OBDA_EXT));
 			if (obdaFile.exists()) {
-				configurationManager.loadNewConfiguration(owlName);
-
-				try (Reader mappingReader = new FileReader(obdaFile)) {
-					OldSyntaxMappingConverter converter = new OldSyntaxMappingConverter(mappingReader, obdaFile.getName());
-					java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
-
-					optionalDataSourceProperties.ifPresent(configurationManager::loadProperties);
-					triplesMapCollection.load(new StringReader(converter.getRestOfFile()), configurationManager.snapshotProperties());
-				}
-				catch (Exception ex) {
-					throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
-				}
-
-				File queriesFile = new File(URI.create(owlName + QUERY_EXT));
-				if (queriesFile.exists()) {
-					try (FileReader reader = new FileReader(queriesFile)) {
-						queryManager.load(reader);
-					}
-					catch (Exception ex) {
-						throw new Exception("Exception occurred while loading query document: " + queriesFile + "\n\n" + ex.getMessage());
-					}
-				}
+				configurationManager.load(owlName);
+				datasource.load(new File(URI.create(owlName + PROPERTY_EXT)));
+				triplesMapCollection.load(obdaFile, this); // can update datasource!
+				queryManager.load(new File(URI.create(owlName + QUERY_EXT)));
 			}
 			else {
 				LOGGER.warn("No OBDA model was loaded because no .obda file exists in the same location as the .owl file");
@@ -335,58 +322,24 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private void handleOntologySaved() {
+		OWLModelManager owlModelManager = owlEditorKit.getModelManager();
+		IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(owlModelManager.getActiveOntology());
+		String owlName = getOwlName(documentIRI);
+		if (owlName == null)
+			return;
+
 		try {
-			OWLModelManager owlModelManager = owlEditorKit.getModelManager();
-			IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(owlModelManager.getActiveOntology());
-			String owlName = getOwlName(documentIRI);
-			if (owlName == null)
-				return;
-
-			File obdaFile = new File(URI.create(owlName + OBDA_EXT));
-			if (!triplesMapCollection.isEmpty()) {
-				OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
-				writer.write(obdaFile, triplesMapCollection.generatePPMapping());
-				LOGGER.info("mapping file saved to {}", obdaFile);
-			}
-			else {
-				Files.deleteIfExists(obdaFile.toPath());
-			}
-
-			File queriesFile = new File(URI.create(owlName + QUERY_EXT));
-			if (queryManager.getRoot().getChildCount() != 0) {
-				try (FileWriter writer = new FileWriter(queriesFile)) {
-					writer.write(queryManager.renderQueries());
-				}
-				catch (IOException e) {
-					throw new IOException(String.format("Error while saving the queries to file located at %s.\n" +
-							"Make sure you have the write permission at the location specified.", queriesFile.getAbsolutePath()));
-				}
-				LOGGER.info("query file saved to {}", queriesFile);
-			}
-			else {
-				Files.deleteIfExists(queriesFile.toPath());
-			}
-
-			File propertyFile = new File(URI.create(owlName + OntopConfigurationManager.PROPERTY_EXT));
-			Properties properties = configurationManager.snapshotUserProperties();
-			// Generate a property file iff there is at least one property that is not "jdbc.name"
-			if (properties.entrySet().stream()
-					.anyMatch(e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
-							!e.getValue().equals(""))){
-				try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
-					properties.store(outputStream, null);
-				}
-				LOGGER.info("Property file saved to {}", propertyFile.toPath());
-			}
-			else {
-				Files.deleteIfExists(propertyFile.toPath());
-			}
+			triplesMapCollection.store(new File(URI.create(owlName + OBDA_EXT)));
+			queryManager.store(new File(URI.create(owlName + QUERY_EXT)));
+			datasource.store(new File(URI.create(owlName + PROPERTY_EXT)));
 		}
 		catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			Exception newException = new Exception(
-					"Error saving the OBDA file. Closing Protege now can result in losing changes in your data sources or mappings. Please resolve the issue that prevents saving in the current location, or do \"Save as..\" to save in an alternative location. \n\nThe error message was: \n"
-							+ e.getMessage());
+					"Error saving the OBDA file. Closing Protege now can result in losing changes " +
+							"in your data sources or mappings. Please resolve the issue that prevents " +
+							"saving in the current location, or do \"Save as..\" to save in an alternative location. \n\n" +
+							"The error message was: \n"  + e.getMessage());
 			DialogUtils.showQuickErrorDialog(null, newException, "Error saving OBDA file");
 			triggerOntologyChanged();
 		}
@@ -458,11 +411,15 @@ public class OBDAModelManager implements Disposable {
 				.buildOntopSQLOWLAPIConfiguration(modelManager.getActiveOntology());
 	}
 
-	public OntopMappingSQLAllConfiguration getConfigurationForR2RML(File file) {
-		return OntopMappingSQLAllConfiguration.defaultBuilder()
-				.properties(source.asProperties())
-				.r2rmlMappingFile(file)
-				.build();
+	public SQLPPMapping parseR2RML(File file) throws MappingException {
+		OntopMappingSQLAllConfiguration configuration = configurationManager.buildR2RMLConfiguration(datasource, file);
+		return configuration.loadProvidedPPMapping();
+	}
+
+	public SQLPPMapping parseOBDA(String mapping) throws MappingIOException, InvalidMappingException {
+		Reader mappingReader = new StringReader(mapping);
+		SQLMappingParser mappingParser = configurationManager.getSQLMappingParser(datasource, mappingReader);
+		return mappingParser.parse(mappingReader);
 	}
 
 	public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {

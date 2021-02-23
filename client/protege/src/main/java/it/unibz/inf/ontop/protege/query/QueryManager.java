@@ -20,14 +20,20 @@ package it.unibz.inf.ontop.protege.query;
  * #L%
  */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class QueryManager {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(QueryManager.class);
 
 	private final Item root = new Item(null, "Queries", null);
 
@@ -173,13 +179,23 @@ public class QueryManager {
 
 	private static final String COMMENT_SYMBOL = ";";
 
-	/**
-	 * The save/write operation.
-	 */
-	public String renderQueries()  {
-		return root.getChildren().stream()
-				.flatMap(QueryManager::renderItem)
-				.collect(Collectors.joining("\n"));
+
+	public void store(File queriesFile) throws IOException {
+		if (root.getChildCount() != 0) {
+			try (FileWriter writer = new FileWriter(queriesFile)) {
+				writer.write(root.getChildren().stream()
+						.flatMap(QueryManager::renderItem)
+						.collect(Collectors.joining("\n")));
+			}
+			catch (IOException e) {
+				throw new IOException(String.format("Error while saving the queries to file located at %s.\n" +
+						"Make sure you have the write permission at the location specified.", queriesFile.getAbsolutePath()));
+			}
+			LOGGER.info("query file saved to {}", queriesFile);
+		}
+		else {
+			Files.deleteIfExists(queriesFile.toPath());
+		}
 	}
 
 	private static Stream<String> renderItem(Item item) {
@@ -192,26 +208,23 @@ public class QueryManager {
 					Stream.of(END_COLLECTION_SYMBOL));
 	}
 
-	/**
-	 * The load/read operation
-	 *
-	 * @param file
-	 *          The target file object from which the saved queries are loaded.
-	 * @throws IOException
-	 */
-	public void load(FileReader file) throws IOException {
-		root.children.clear();
-		LineNumberReader lineNumberReader = new LineNumberReader(file);
-		try {
-			String lastLine = readGroup(lineNumberReader, root);
-			if (lastLine != null)
-				throw new IOException("Unexpected file contents");
-		}
-		catch (Exception e) {
-			throw new IOException(String.format("Invalid syntax at line: %s", lineNumberReader.getLineNumber()), e);
-		}
-		finally {
-			lineNumberReader.close();
+	public void load(File queriesFile) throws IOException {
+		if (queriesFile.exists()) {
+			root.children.clear();
+			try (FileReader reader = new FileReader(queriesFile)) {
+				LineNumberReader lineNumberReader = new LineNumberReader(reader);
+				try {
+					String lastLine = readGroup(lineNumberReader, root);
+					if (lastLine != null)
+						throw new IOException("Unexpected file contents");
+				}
+				catch (Exception e) {
+					throw new IOException(String.format("Invalid syntax at line: %s", lineNumberReader.getLineNumber()), e);
+				}
+			}
+			catch (IOException ex) {
+				throw new IOException("Exception occurred while loading query document: " + queriesFile + "\n\n" + ex.getMessage());
+			}
 		}
 	}
 

@@ -246,7 +246,7 @@ public class MappingManagerPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             SQLQueryDialog dialog = new SQLQueryDialog(
-                    obdaModelManager.getDatasource(),
+                    obdaModelManager.getDataSource(),
                     mappingList.getSelectedValue().getSqlQuery());
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }

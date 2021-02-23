@@ -47,7 +47,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
         setMaxTicks(triplesMapList.size());
         startLoop(this::getCompletionPercentage, () -> String.format("%d%% completed.", getCompletionPercentage()));
 
-        try (Connection conn = obdaModelManager.getDatasource().getConnection();
+        try (Connection conn = obdaModelManager.getDataSource().getConnection();
              Statement statement = conn.createStatement()) {
             statement.setMaxRows(1);
             for (TriplesMap triplesMap : triplesMapList) {
@@ -101,7 +101,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
         catch (CancellationException | InterruptedException ignore) {
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, obdaModelManager.getDatasource());
+            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, obdaModelManager.getDataSource());
         }
     }
 

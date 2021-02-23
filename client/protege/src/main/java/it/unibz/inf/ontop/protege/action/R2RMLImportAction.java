@@ -79,8 +79,7 @@ public class R2RMLImportAction extends ProtegeAction {
 		protected Map.Entry<Integer, Integer> doInBackground() throws Exception {
 			start("initializing...");
 			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-			SQLPPMapping parsedModel = obdaModelManager.getConfigurationForR2RML(file)
-					.loadProvidedPPMapping();
+			SQLPPMapping parsedModel = obdaModelManager.parseR2RML(file);
 
 			ImmutableList<SQLPPTriplesMap> tripleMaps = parsedModel.getTripleMaps();
 			endLoop("inserting into the current mapping...");
@@ -104,7 +103,7 @@ public class R2RMLImportAction extends ProtegeAction {
 			}
 			catch (ExecutionException e) {
 				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e,
-						OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getDatasource());
+						OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getDataSource());
 			}
 		}
 	}
