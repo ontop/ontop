@@ -8,14 +8,13 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.MetadataLookup;
-import it.unibz.inf.ontop.dbschema.MetadataProvider;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -38,6 +37,9 @@ import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.Connection;
 import java.util.Map;
 import java.util.Optional;
@@ -70,6 +72,16 @@ public class OntopOBDAToR2RML implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Nullable // optional
     private String propertiesFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-d", "--db-metadata"}, title = "db-metadata file",
+            description = "User-supplied db-metadata file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbMetadataFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-v", "--ontop-views"}, title = "Ontop view file",
+            description = "User-supplied view file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String ontopViewFile;
 
     @Option(type = OptionType.COMMAND, name = {"--force"}, title = "Force the conversion",
             description = "Force the conversion in the absence of DB metadata", arity = 0)
@@ -108,25 +120,49 @@ public class OntopOBDAToR2RML implements OntopCommand {
         try {
             SQLPPMapping ppMapping = config.loadProvidedPPMapping();
 
-            if (!Strings.isNullOrEmpty(propertiesFile)) {
-                try (Connection connection = LocalJDBCConnectionUtils.createConnection(config.getSettings())) {
-                    JDBCMetadataProviderFactory metadataProviderFactory = config.getInjector().getInstance(JDBCMetadataProviderFactory.class);
+            Injector injector = config.getInjector();
 
-                    MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
-                    //MetadataProvider withImplicitConstraintsMetadataProvider =
-                    //        implicitDBConstraintExtractor.extract(constraintFile, dbMetadataProvider);
-
-                    CachingMetadataLookup metadataLookup = new CachingMetadataLookup(dbMetadataProvider);
-                    OntopNativeMappingIdentifierNormalizer normalizer = new OntopNativeMappingIdentifierNormalizer(config, metadataLookup);
-
-                    SQLPPMappingFactory sqlppMappingFactory = config.getInjector().getInstance(SQLPPMappingFactory.class);
-                    ppMapping = sqlppMappingFactory.createSQLPreProcessedMapping(
-                            ppMapping.getTripleMaps().stream()
-                                    .map(normalizer::normalize)
-                                    .collect(ImmutableCollectors.toList()),
-                            ppMapping.getPrefixManager());
+            final MetadataProvider dbMetadataProvider;
+            if (!Strings.isNullOrEmpty(dbMetadataFile)) {
+                try (Reader dbMetadataReader = new FileReader(dbMetadataFile)) {
+                    dbMetadataProvider = injector.getInstance(SerializedMetadataProvider.Factory.class)
+                            .getMetadataProvider(dbMetadataReader);
                 }
             }
+            else if (!Strings.isNullOrEmpty(propertiesFile)) {
+                try (Connection connection = LocalJDBCConnectionUtils.createConnection(config.getSettings())) {
+                    JDBCMetadataProviderFactory metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
+
+                    dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
+                }
+            }
+            else
+                dbMetadataProvider = null;
+
+            if (dbMetadataProvider != null) {
+
+                // DB metadata + view metadata
+                final MetadataProvider metadataProvider;
+                if (!Strings.isNullOrEmpty(ontopViewFile)) {
+                    try(Reader viewReader = new FileReader(ontopViewFile)) {
+                        metadataProvider = injector.getInstance(OntopViewMetadataProvider.Factory.class)
+                                .getMetadataProvider(dbMetadataProvider, viewReader);
+                    }
+                }
+                else
+                    metadataProvider = dbMetadataProvider;
+
+                CachingMetadataLookup metadataLookup = new CachingMetadataLookup(metadataProvider);
+                OntopNativeMappingIdentifierNormalizer normalizer = new OntopNativeMappingIdentifierNormalizer(config, metadataLookup);
+
+                SQLPPMappingFactory sqlppMappingFactory = config.getInjector().getInstance(SQLPPMappingFactory.class);
+                ppMapping = sqlppMappingFactory.createSQLPreProcessedMapping(
+                        ppMapping.getTripleMaps().stream()
+                                .map(normalizer::normalize)
+                                .collect(ImmutableCollectors.toList()),
+                        ppMapping.getPrefixManager());
+            }
+
             else if (force == null) {
                 System.err.println("Access to DB metadata is required by default to respect column quoting rules of R2RML.\n" +
                         "Please provide a properties file containing the info to connect to the database\n." +
