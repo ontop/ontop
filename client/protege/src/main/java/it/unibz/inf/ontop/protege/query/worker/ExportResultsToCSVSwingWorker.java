@@ -38,13 +38,13 @@ public class ExportResultsToCSVSwingWorker extends SwingWorkerWithCompletionPerc
     protected Void doInBackground() throws Exception {
         start("initializing...");
 
-        Vector<Vector<Object>> data = tableModel.getDataVector();
+        Vector<Vector> data = tableModel.getDataVector();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
             setMaxTicks(data.size());
             startLoop(this::getCompletionPercentage, () -> String.format("%d%% completed.", getCompletionPercentage()));
 
-            for (Vector<Object> row : data) {
+            for (Vector<?> row : data) {
                 String line = row.stream()
                         .map(Object::toString)
                         .collect(Collectors.joining(",", "", "\n"));
