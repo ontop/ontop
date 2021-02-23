@@ -81,6 +81,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <repo.clojars>false</repo.clojars>
         <repo.ontop>false</repo.ontop>
+        <assembly.cli.skip>true</assembly.cli.skip>
+        <assembly.webapps.skip>true</assembly.webapps.skip>
+        <assembly.protege.skip>true</assembly.protege.skip>
+        <bundle.protege.phase>none</bundle.protege.phase>
+        <metadata.git.skip>true</metadata.git.skip>
+        <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
 
         <!-- For org.codehaus.mojo:license-maven-plugin -->
         <license.licenseName>apache_v2</license.licenseName>
@@ -89,6 +95,7 @@
         <!-- Plugin versions -->
         <antlr4-maven-plugin.version>4.8-1</antlr4-maven-plugin.version>
         <formatter-maven-plugin.version>2.14.0</formatter-maven-plugin.version>
+        <git-commit-id-plugin-version>4.0.3</git-commit-id-plugin-version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
@@ -109,6 +116,7 @@
         <maven-surefire-report-plugin.version>3.0.0-M5</maven-surefire-report-plugin.version>
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
         <sortpom-maven-plugin.version>2.13.1</sortpom-maven-plugin.version>
+        <spring-boot-maven-plugin.version>2.3.2.RELEASE</spring-boot-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
         <airline.version>2.8.0</airline.version>
@@ -1142,18 +1150,34 @@
     </repositories>
 
     <build>
+        <defaultGoal>package</defaultGoal>
         <finalName>${finalName}</finalName>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven-enforcer-plugin.version}</version>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-maven-plugin</artifactId>
+                    <version>${antlr4-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>net.revelc.code.formatter</groupId>
+                    <artifactId>formatter-maven-plugin</artifactId>
+                    <version>${formatter-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>${git-commit-id-plugin-version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${maven-bundle-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1162,13 +1186,38 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven-enforcer-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${maven-gpg-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
                     <version>${maven-install-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${maven-assembly-plugin.version}</version>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1182,33 +1231,8 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-report-plugin</artifactId>
-                    <version>${maven-surefire-report-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>${maven-site-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>${maven-deploy-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${maven-javadoc-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${maven-release-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1217,23 +1241,23 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>${maven-site-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
-                    <version>${maven-bundle-plugin.version}</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>${maven-gpg-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${maven-release-plugin.version}</version>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>${maven-surefire-report-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1241,19 +1265,14 @@
                     <version>${maven-war-plugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.antlr</groupId>
-                    <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>${antlr4-maven-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>net.revelc.code.formatter</groupId>
-                    <artifactId>formatter-maven-plugin</artifactId>
-                    <version>${formatter-maven-plugin.version}</version>
-                </plugin>
-                <plugin>
                     <groupId>com.github.ekryd.sortpom</groupId>
                     <artifactId>sortpom-maven-plugin</artifactId>
                     <version>${sortpom-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -1336,56 +1355,90 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-git-metadata</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${metadata.git.skip}</skip>
+                            <dotGitDirectory>${maven.multiModuleProjectDirectory}/.git</dotGitDirectory>
+                            <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                            <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                            <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                            <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
     <profiles>
+        <!-- Manually activated profiles to control generated artifacts (call via mvn -Pname)
+             - cli      generates ontop-cli zip, performing minimal processing
+             - protege  generates ontop-protege-xyz files, performing minimal processing
+             - webapps  generates ontop-webapps zip, performing minimal processing
+             - release  generates all artifacts above in preparation to a release -->
         <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>cli</id>
+            <properties>
+                <metadata.git.skip>true</metadata.git.skip>
+                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <assembly.cli.skip>false</assembly.cli.skip>
+                <maven.war.skip>true</maven.war.skip>
+            </properties>
         </profile>
         <profile>
-            <id>doclint-java8-disable</id>
-            <activation>
-                <jdk>[1.8,</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <doclint>none</doclint>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>protege</id>
+            <properties>
+                <metadata.git.skip>true</metadata.git.skip>
+                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <assembly.protege.skip>false</assembly.protege.skip>
+                <bundle.protege.phase>package</bundle.protege.phase>
+                <maven.war.skip>true</maven.war.skip>
+            </properties>
         </profile>
+        <profile>
+            <id>webapps</id>
+            <properties>
+                <metadata.git.skip>true</metadata.git.skip>
+                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <assembly.webapps.skip>false</assembly.webapps.skip>
+                <maven.war.skip>false</maven.war.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>release</id>
+            <properties>
+                <metadata.git.skip>false</metadata.git.skip>
+                <metadata.buildInfo.phase>prepare-package</metadata.buildInfo.phase>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
+                <maven.test.skip>false</maven.test.skip>
+                <assembly.cli.skip>false</assembly.cli.skip>
+                <assembly.webapps.skip>false</assembly.webapps.skip>
+                <assembly.protege.skip>false</assembly.protege.skip>
+                <bundle.protege.phase>package</bundle.protege.phase>
+                <maven.war.skip>false</maven.war.skip>
+            </properties>
+        </profile>
+
+        <!-- Manually activated profile to autoformat pom.xml files (call via mvn -Pformat) -->
         <profile>
             <id>format</id>
             <build>
+                <defaultGoal>process-sources</defaultGoal>
                 <plugins>
                     <plugin>
                         <groupId>com.github.ekryd.sortpom</groupId>
@@ -1430,8 +1483,87 @@
             </build>
         </profile>
 
+        <!-- Manually activated profile to sign (GPG) artifacts to be deployed -->
         <profile>
-            <id>main-resources</id>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Automatically activated profile for turning off Javadoc doclint on JDK8 -->
+        <profile>
+            <id>__auto_doclint_java8_disable__</id>
+            <activation>
+                <jdk>[1.8,</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <doclint>none</doclint>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Automatically activated profile for generating META-INF/build-info.properties, if
+             ${metadat.buildInfo.phase} != 'none' and if directory src/main/java exists -->
+        <profile>
+            <id>buildinfo</id>
+            <activation>
+                <file>
+                    <exists>src/main/java</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>${metadata.buildInfo.phase}</phase>
+                                <goals>
+                                    <goal>build-info</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Automatically activated profiles to auto-configure standard resource directories:
+             - src/main/resources           filtering=${filter.main.resources}
+             - src/test/resources           filtering=${filter.test.resources}
+             - src/main/resources-filtered  filtering=true
+             - src/test/resources-filtered  filtering=true -->
+        <profile>
+            <id>__auto_main_resources__</id>
             <activation>
                 <file>
                     <exists>src/main/resources</exists>
@@ -1447,7 +1579,7 @@
             </build>
         </profile>
         <profile>
-            <id>main-resources-filtered</id>
+            <id>__auto_main_resources_filtered__</id>
             <activation>
                 <file>
                     <exists>src/main/resources-filtered</exists>
@@ -1463,7 +1595,7 @@
             </build>
         </profile>
         <profile>
-            <id>test-resources</id>
+            <id>__auto_test_resources__</id>
             <activation>
                 <file>
                     <exists>src/test/resources</exists>
@@ -1479,7 +1611,7 @@
             </build>
         </profile>
         <profile>
-            <id>test-resources-filtered</id>
+            <id>__auto_test_resources_filtered__</id>
             <activation>
                 <file>
                     <exists>src/test/resources-filtered</exists>

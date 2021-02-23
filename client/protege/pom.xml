@@ -467,73 +467,68 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.felix</groupId>
-                        <artifactId>maven-bundle-plugin</artifactId>
-                        <extensions>true</extensions>
-                        <executions>
-                            <execution>
-                                <id>attach-protege-bundle</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>bundle</goal>
-                                </goals>
-                                <configuration>
-                                    <classifier>bundle</classifier>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>attach-protege-bundle</id>
+                        <phase>${bundle.protege.phase}</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>bundle</classifier>
 
-                                    <!-- The following is the set of instructions of how pack the bundle and how to create the
-                                         MANIFEST.MF for the bundle. The configuration does 3 things.
+                            <!-- The following is the set of instructions of how pack the bundle and how to create the
+                                 MANIFEST.MF for the bundle. The configuration does 3 things.
 
-                                        1. It makes sure that the "tight" dependencies are not packed as jars, but as .class files
-                                           (inline). It makes sure that all the runtime dependencies are packed as jars.
+                                 1. It makes sure that the "tight" dependencies are not packed as jars, but as .class files
+                                    (inline). It makes sure that all the runtime dependencies are packed as jars.
 
-                                        2. It makes sure all the protege plugin resources are packed (plugin.xml, tabs*.xml, etc).
+                                 2. It makes sure all the protege plugin resources are packed (plugin.xml, tabs*.xml, etc).
 
-                                        3. It makes sure the META-INF/MANIFEST.MF for OSGi bundles is created with the correct imports,
-                                           exports and classpath.
-                                    -->
+                                 3. It makes sure the META-INF/MANIFEST.MF for OSGi bundles is created with the correct imports,
+                                    exports and classpath.
+                            -->
 
-                                    <instructions>
-                                        <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
-                                        <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
-                                        as .classes (uncompressed, no jars) and the rest is packed as .jars -->
-                                        <Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.inf.ontop.protege.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
+                            <instructions>
+                                <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+                                <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
+                                     as .classes (uncompressed, no jars) and the rest is packed as .jars -->
+                                <Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.inf.ontop.protege.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
 
-                                        <!-- necessary for protege plugins -->
-                                        <Bundle-Category>protege</Bundle-Category>
+                                <!-- necessary for protege plugins -->
+                                <Bundle-Category>protege</Bundle-Category>
 
-                                        <Bundle-ContactAddress>gh.xiao@gmail.com</Bundle-ContactAddress>
-                                        <Bundle-DocURL>${project.url}</Bundle-DocURL>
-                                        <Bundle-Name>Ontop OBDA Protégé plugin</Bundle-Name>
-                                        <Bundle-Description>${project.description}</Bundle-Description>
-                                        <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
-                                        <Implementation-Version>${project.version}</Implementation-Version>
-                                        <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties</Update-Url>
+                                <Bundle-ContactAddress>gh.xiao@gmail.com</Bundle-ContactAddress>
+                                <Bundle-DocURL>${project.url}</Bundle-DocURL>
+                                <Bundle-Name>Ontop OBDA Protégé plugin</Bundle-Name>
+                                <Bundle-Description>${project.description}</Bundle-Description>
+                                <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties</Update-Url>
 
-                                        <Export-Package>
-                                            <!-- No need to export any package -->
-                                        </Export-Package>
+                                <Export-Package>
+                                    <!-- No need to export any package -->
+                                </Export-Package>
 
-                                        <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*;-split-package:=merge-last</Import-Package>
+                                <Import-Package>!javax.xml.bind.annotation.adapters,!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,!com.github.luben.zstd,!org.brotli.dec,!org.tukaani.xz,!com.github.jsonldjava.*,!com.google.appengine.api,!com.google.apphosting.api,!com.google.common.util.concurrent.internal,!com.google.errorprone.annotations,!com.google.errorprone.annotations.concurrent,!com.google.inject.internal.asm.util,!io.micrometer.core.instrument,!org.antlr.v4.gui,!org.apache.jena.ext.com.google.appengine.api,!org.apache.jena.ext.com.google.appengine.api.utils,!org.apache.jena.ext.com.google.apphosting.api,!org.apache.jena.ext.com.google.errorprone.annotations,!org.apache.jena.ext.com.google.errorprone.annotations.concurrent,!org.apache.logging.log4j,!org.apache.logging.log4j.core,!org.apache.logging.log4j.core.config,!org.apache.logging.log4j.core.config.properties,!org.eclipse.rdf4j.rio.trigstar,*;-split-package:=merge-last</Import-Package>
 
-                                        <!-- The name of the plugin for OSGi dependencies. It has to be singleton
-                                            or protege wont load it -->
-                                        <Bundle-SymbolicName>${symbolic.name};singleton:=true</Bundle-SymbolicName>
+                                <!-- The name of the plugin for OSGi dependencies. It has to be singleton
+                                     or protege wont load it -->
+                                <Bundle-SymbolicName>${symbolic.name};singleton:=true</Bundle-SymbolicName>
 
-                                        <Bundle-Activator>org.protege.osgi.jdbc.JdbcBundleActivator</Bundle-Activator>
-                                    </instructions>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+                                <Bundle-Activator>org.protege.osgi.jdbc.JdbcBundleActivator</Bundle-Activator>
+                            </instructions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
