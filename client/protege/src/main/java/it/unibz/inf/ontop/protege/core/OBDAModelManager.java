@@ -107,13 +107,10 @@ public class OBDAModelManager implements Disposable {
 		TargetQueryParserFactory targetQueryParserFactory = defaultInjector.getInstance(TargetQueryParserFactory.class);
 		SQLPPSourceQueryFactory sourceQueryFactory = defaultInjector.getInstance(SQLPPSourceQueryFactory.class);
 
-		OWLModelManager modelManager = owlEditorKit.getModelManager();
-		modelManager.addListener(modelManagerListener);
+		getModelManager().addListener(modelManagerListener);
+		getOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener());
 
-		OWLOntologyManager mmgr = modelManager.getOWLOntologyManager();
-		mmgr.addOntologyChangeListener(new OntologyRefactoringListener());
-
-		triplesMapCollection = new TriplesMapCollection(modelManager.getActiveOntology(), ppMappingFactory, termFactory,
+		triplesMapCollection = new TriplesMapCollection(getActiveOntology(), ppMappingFactory, termFactory,
 				targetAtomFactory, substitutionFactory, targetQueryParserFactory, sourceQueryFactory);
 
 		triplesMapCollection.addMappingsListener(this::triggerOntologyChanged);
@@ -139,8 +136,35 @@ public class OBDAModelManager implements Disposable {
 
 		datasource.addListener(this::triggerOntologyChanged);
 
-		DisposableProperties settings = OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
-		configurationManager = new OntopConfigurationManager(this, settings);
+		configurationManager = new OntopConfigurationManager(this, OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit));
+	}
+
+	/***
+	 * Called from ModelManager dispose method since this object is setup as the
+	 * APIController.class.getName() property with the put method.
+	 */
+	@Override
+	public void dispose() {
+		try {
+			getModelManager().removeListener(modelManagerListener);
+			connectionManager.dispose();
+		}
+		catch (Exception e) {
+			LOGGER.warn(e.getMessage());
+		}
+	}
+
+
+	private OWLModelManager getModelManager() {
+		return owlEditorKit.getModelManager();
+	}
+
+	private OWLOntology getActiveOntology() {
+		return getModelManager().getActiveOntology();
+	}
+
+	private OWLOntologyManager getOntologyManager() {
+		return getModelManager().getOWLOntologyManager();
 	}
 
 	/***
@@ -188,11 +212,12 @@ public class OBDAModelManager implements Disposable {
 			for (OWLEntity entity : removals)
 				triplesMapCollection.removePredicate(getIRI(entity));
 		}
+
+		private org.apache.commons.rdf.api.IRI getIRI(OWLEntity entity) {
+			return rdfFactory.createIRI(entity.getIRI().toString());
+		}
 	}
 
-	private org.apache.commons.rdf.api.IRI getIRI(OWLEntity entity) {
-		return rdfFactory.createIRI(entity.getIRI().toString());
-	}
 
 
 	public void addListener(OBDAModelManagerListener listener) {
@@ -224,6 +249,7 @@ public class OBDAModelManager implements Disposable {
 	public OntologySignature getCurrentVocabulary() { return currentMutableVocabulary; }
 
 	public MutablePrefixManager getMutablePrefixManager() { return triplesMapCollection.getMutablePrefixManager(); }
+
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
 		// TODO: clean up code - this one is called from the event dispatch thread
@@ -266,8 +292,7 @@ public class OBDAModelManager implements Disposable {
 	 * When the active ontology is new (first one or differs from the last one)
 	 */
 	private void handleNewActiveOntology() {
-		OWLModelManager owlModelManager = owlEditorKit.getModelManager();
-		OWLOntology ontology = owlModelManager.getActiveOntology();
+		OWLOntology ontology = getActiveOntology();
 		OWLOntologyID id = ontology.getOntologyID();
 		if (id.equals(lastKnownOntologyId))
 			return;
@@ -282,7 +307,7 @@ public class OBDAModelManager implements Disposable {
 
 		datasource.reset();
 
-		ProtegeOWLReasonerInfo factory = owlModelManager.getOWLReasonerManager().getCurrentReasonerFactory();
+		ProtegeOWLReasonerInfo factory = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 		if (factory instanceof OntopReasonerInfo) {
 			OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
 			questfactory.setConfigurationGenerator(configurationManager);
@@ -293,9 +318,7 @@ public class OBDAModelManager implements Disposable {
 	private void handleOntologyLoadedAndReLoaded() {
 		loadingData = true; // flag on
 		try {
-			OWLModelManager owlModelManager = owlEditorKit.getModelManager();
-			IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(owlModelManager.getActiveOntology());
-			String owlName = getOwlName(documentIRI);
+			String owlName = getActiveOntologyOwlFilename();
 			if (owlName == null)
 				return;
 
@@ -322,9 +345,7 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private void handleOntologySaved() {
-		OWLModelManager owlModelManager = owlEditorKit.getModelManager();
-		IRI documentIRI = owlModelManager.getOWLOntologyManager().getOntologyDocumentIRI(owlModelManager.getActiveOntology());
-		String owlName = getOwlName(documentIRI);
+		String owlName = getActiveOntologyOwlFilename();
 		if (owlName == null)
 			return;
 
@@ -345,10 +366,11 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private static String getOwlName(IRI documentIRI) {
-		if (!UIUtil.isLocalFile(documentIRI.toURI())) {
+	private String getActiveOntologyOwlFilename() {
+		IRI documentIRI = getOntologyManager().getOntologyDocumentIRI(getActiveOntology());
+
+		if (!UIUtil.isLocalFile(documentIRI.toURI()))
 			return null;
-		}
 
 		String owlDocumentIriString = documentIRI.toString();
 		int i = owlDocumentIriString.lastIndexOf(".");
@@ -371,44 +393,30 @@ public class OBDAModelManager implements Disposable {
 		if (loadingData)
 			return;
 
-		OWLModelManager owlModelManager = owlEditorKit.getModelManager();
-		OWLOntology ontology = owlModelManager.getActiveOntology();
+		OWLOntology ontology = getActiveOntology();
 		if (ontology == null)
 			return;
 
-		owlModelManager.setDirty(ontology);
-	}
-
-	/***
-	 * Called from ModelManager dispose method since this object is setup as the
-	 * APIController.class.getName() property with the put method.
-	 */
-	@Override
-	public void dispose() {
-		try {
-			owlEditorKit.getModelManager().removeListener(modelManagerListener);
-			connectionManager.dispose();
-		}
-		catch (Exception e) {
-			LOGGER.warn(e.getMessage());
-		}
+		getModelManager().setDirty(ontology);
 	}
 
 	public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateTriplesMapException {
 		getTriplesMapCollection().addAll(triplesMaps);
 
-		OWLModelManager modelManager = owlEditorKit.getModelManager();
 		return MappingOntologyUtils.extractAndInsertDeclarationAxioms(
-				modelManager.getActiveOntology(),
+				getActiveOntology(),
 				triplesMaps,
 				typeFactory,
 				bootstraped);
 	}
 
+	public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {
+		getOntologyManager().addAxioms(getActiveOntology(), axioms);
+	}
+
+
 	public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
-		OWLModelManager modelManager = owlEditorKit.getModelManager();
-		return configurationManager
-				.buildOntopSQLOWLAPIConfiguration(modelManager.getActiveOntology());
+		return configurationManager.buildOntopSQLOWLAPIConfiguration(getActiveOntology());
 	}
 
 	public SQLPPMapping parseR2RML(File file) throws MappingException {
@@ -420,11 +428,5 @@ public class OBDAModelManager implements Disposable {
 		Reader mappingReader = new StringReader(mapping);
 		SQLMappingParser mappingParser = configurationManager.getSQLMappingParser(datasource, mappingReader);
 		return mappingParser.parse(mappingReader);
-	}
-
-	public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {
-		OWLModelManager modelManager = owlEditorKit.getModelManager();
-		OWLOntologyManager ontologyManager = modelManager.getOWLOntologyManager();
-		ontologyManager.addAxioms(modelManager.getActiveOntology(), axioms);
 	}
 }
