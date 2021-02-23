@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 /**
  * TODO: find a better name
@@ -22,6 +23,7 @@ public interface VariableNullability {
 
     /**
      * NB: for variables outside its scope, returns true (as it does not know anything about them)
+     * TODO: stop tolerating variables outside its scope and throw an exception if it happens (inconsistent with nullable groups)!
      */
     boolean isPossiblyNullable(Variable variable);
 
@@ -46,6 +48,13 @@ public interface VariableNullability {
                                ImmutableSet<Variable> projectedVariables);
 
     VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
+
+    /**
+     * Returns a new VariableNullability.
+     *
+     * Treats the external variables (outside the scope) as independently nullable.
+     */
+    VariableNullability extendToExternalVariables(Stream<Variable> possiblyExternalVariables);
 
     default ImmutableSet<Variable> getNullableVariables() {
         return getNullableGroups().stream()

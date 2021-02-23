@@ -22,12 +22,11 @@ package it.unibz.inf.ontop.protege.gui;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.apache.commons.rdf.api.IRI;
 
 public class MapItem {
 
-	private PredicateItem predicateItem;
+	private final PredicateItem predicateItem;
 	private String targetMapping = "";
 	private FunctionSymbol dataType;
 
@@ -79,10 +78,7 @@ public class MapItem {
 		if (predicateItem == null) {
 			return false;
 		}
-		if (targetMapping.isEmpty()) {
-			return false;
-		}
-		return true;
+		return !targetMapping.isEmpty();
 	}
 
 	@Override

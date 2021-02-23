@@ -23,7 +23,7 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
+    public NamedRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
         return provider.getRelation(relationId);
     }
 
@@ -33,7 +33,7 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         provider.insertIntegrityConstraints(relation, metadataLookup);
     }
 }

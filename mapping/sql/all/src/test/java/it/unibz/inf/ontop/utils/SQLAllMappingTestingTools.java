@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -26,6 +26,7 @@ public class SQLAllMappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
+    public static final CoreSingletons CORE_SINGLETONS;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -42,10 +43,11 @@ public class SQLAllMappingTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
+        CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
     }
 
     public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
-        return new OfflineMetadataProviderBuilder(TYPE_FACTORY);
+        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS);
     }
 
 }

@@ -9,10 +9,10 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-import it.unibz.inf.ontop.utils.querymanager.QueryController;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.querymanager.QueryIOManager;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +73,6 @@ public class LeftJoinMultipleMatchingTest {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
-        OWLStatement st = conn.createStatement();
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
@@ -85,20 +84,22 @@ public class LeftJoinMultipleMatchingTest {
                 log.debug("Executing query: {}", query.getID());
                 log.debug("Query: \n{}", query.getQuery());
 
-                long start = System.nanoTime();
-                TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
-                long end = System.nanoTime();
+                try(OWLStatement st = conn.createStatement()) {
+                    long start = System.nanoTime();
+                    TupleOWLResultSet res = st.executeSelectQuery(query.getQuery());
+                    long end = System.nanoTime();
 
-                double time = (end - start) / 1000;
+                    double time = (end - start) / 1000;
 
-                int count = 0;
-                while (res.hasNext()) {
-                    res.next();
-                    count += 1;
+                    int count = 0;
+                    while (res.hasNext()) {
+                        res.next();
+                        count += 1;
+                    }
+                    log.debug("Total result: {}", count);
+                    assertFalse(count == 0);
+                    log.debug("Elapsed time: {} ms", time);
                 }
-                log.debug("Total result: {}", count);
-                assertFalse(count == 0);
-                log.debug("Elapsed time: {} ms", time);
             }
         }
     }

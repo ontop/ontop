@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
@@ -46,7 +47,10 @@ public class OWLConstructDescribeTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, new Properties())) {
+		Properties properties = new Properties();
+		properties.setProperty(OntopReformulationSettings.INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE, "true");
+
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, properties)) {
 			OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 			reasoner = factory.createReasoner(loader.getConfiguration());
 			conn = reasoner.getConnection();
@@ -96,11 +100,17 @@ public class OWLConstructDescribeTest {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p2> <http://example.org/A>}";
 		Assert.assertEquals(1, countResult(query));
 	}
-	
+
 	@Test
 	public void testDescribeVar2() throws Exception {
 		String query = "DESCRIBE ?x WHERE {?x <http://www.semanticweb.org/ontologies/test#p1> ?y}";
 		Assert.assertEquals(2, countResult(query));
+	}
+
+	@Test
+	public void testDescribeVar3() throws Exception {
+		String query = "DESCRIBE ?x ?y WHERE {<http://example.org/C> ?x ?y }";
+		Assert.assertEquals(0, countResult(query));
 	}
 	
 	@Test

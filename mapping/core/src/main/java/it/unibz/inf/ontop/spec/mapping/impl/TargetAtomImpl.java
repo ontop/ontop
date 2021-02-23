@@ -68,4 +68,12 @@ public class TargetAtomImpl implements TargetAtom {
         return atom.toString() + " with " + substitution.toString();
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof TargetAtomImpl) {
+            TargetAtomImpl targetAtom = (TargetAtomImpl)other;
+            return this.atom.equals(targetAtom.atom) && this.substitution.equals(targetAtom.substitution);
+        }
+        return false;
+    }
 }

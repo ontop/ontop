@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.predefined.impl;
 
+import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
+
 import com.github.jsonldjava.core.DocumentLoader;
 import com.github.jsonldjava.utils.JsonUtils;
 import com.google.common.cache.Cache;
@@ -15,7 +17,7 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQuery;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
@@ -44,13 +46,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper.createStatement;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefinedQueryEngine {
@@ -331,7 +330,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
         try (
                 OntopConnection conn = ontopEngine.getConnection();
                 OntopStatement stm = conn.createStatement();
-                SimpleGraphResultSet res = stm.executeConstructQuery(constructTemplate, executableQuery, queryLogger)
+                GraphResultSet res = stm.executeConstructQuery(constructTemplate, executableQuery, queryLogger)
         ){
             byte[] salt = new byte[20];
             random.nextBytes(salt);

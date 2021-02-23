@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -117,7 +118,7 @@ public class OntopMaterializerTest {
 		graph = termFactory.getConstantIRI(graphIRI);
     }
 
-	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
+	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder<?>> createAndInitConfiguration() {
 		return OntopStandaloneSQLConfiguration.defaultBuilder()
 				.jdbcUrl(url)
 				.jdbcUser(username)
@@ -238,12 +239,13 @@ public class OntopMaterializerTest {
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
-				"http://schools.com/person/{}-{}",
+				Template.builder().addSeparator("http://schools.com/person/")
+						.addColumn().addSeparator("-").addColumn().build(),
 				ImmutableList.of(
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));
 
-		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getVariable("schooluri"), true);
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable("schooluri")));
 
 		RDFDatatype stringDatatype = xsdStringDt;
 
@@ -266,12 +268,13 @@ public class OntopMaterializerTest {
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
 		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
-				"http://schools.com/person/{}-{}",
+				Template.builder().addSeparator("http://schools.com/person/")
+						.addColumn().addSeparator("-").addColumn().build(),
 				ImmutableList.of(
 					termFactory.getVariable("fn"),
 					termFactory.getVariable("ln")));
 
-		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getVariable("schooluri"), true);
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable("schooluri")));
 
 		RDFDatatype stringDatatype = xsdStringDt;
 

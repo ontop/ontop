@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -280,7 +281,7 @@ public interface TermFactory {
 	 *            the name of the variable.
 	 * @return the variable object.
 	 */
-	public Variable getVariable(String name);
+	Variable getVariable(String name);
 
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
 
@@ -291,14 +292,14 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**
-	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 * @param term is a variable or a cast variable
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableTerm term);
 
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<Template.Component> iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
 
 	/**
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
@@ -307,11 +308,11 @@ public interface TermFactory {
 												 ImmutableList<DBConstant> arguments);
 
 	/**
-	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 * @param term is a variable or a cast variable
 	 */
-	ImmutableFunctionalTerm getBnodeFunctionalTerm(Variable variable, boolean temporaryCastToString);
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableTerm term);
 
-	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<Template.Component> bnodeTemplate,
 												   ImmutableList<? extends ImmutableTerm> arguments);
 
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);
@@ -561,4 +562,38 @@ public interface TermFactory {
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
 
 	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
+
+	// Topological functions
+	ImmutableTerm getDBSTWithin(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTContains(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCrosses(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTDisjoint(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTEquals(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTIntersects(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTOverlaps(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTTouches(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCoveredBy(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTCovers(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTContainsProperly(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	// Non-topological and common form functions
+	ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid);
+	ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1);
+	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
+	ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBIntersection(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBBoundary(ImmutableTerm arg1);
+	ImmutableTerm getDBConvexHull(ImmutableTerm arg1);
+	ImmutableTerm getDBDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBEnvelope(ImmutableTerm arg1);
+	ImmutableTerm getDBSymDifference(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);
+	ImmutableTerm getDBRelateMatrix(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBGetSRID(ImmutableTerm arg1);
+	ImmutableTerm getDBAsText(ImmutableTerm arg1);
+	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+
 }

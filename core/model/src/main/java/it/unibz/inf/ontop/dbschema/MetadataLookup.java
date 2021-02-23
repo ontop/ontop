@@ -10,7 +10,7 @@ public interface MetadataLookup {
      * @param id
      * @throws MetadataExtractionException if the relation is not found
      */
-    DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
+    NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
 
     QuotedIDFactory getQuotedIDFactory();
 }

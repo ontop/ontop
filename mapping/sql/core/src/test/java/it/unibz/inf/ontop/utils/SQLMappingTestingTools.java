@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -28,7 +27,7 @@ public class SQLMappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
-    public static final SQLPPMappingConverterImpl LEGACY_SQL_PP_MAPPING_CONVERTER;
+    public static final SQLPPMappingConverterImpl SQLPP_MAPPING_CONVERTER;
     public static final SQLPPSourceQueryFactory SOURCE_QUERY_FACTORY;
 
     static {
@@ -54,11 +53,11 @@ public class SQLMappingTestingTools {
 
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
-        LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(SQLPPMappingConverterImpl.class);
+        SQLPP_MAPPING_CONVERTER = injector.getInstance(SQLPPMappingConverterImpl.class);
         SOURCE_QUERY_FACTORY = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
     public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
-        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS.getTypeFactory());
+        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS);
     }
 }

@@ -6,14 +6,14 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 
 import java.util.stream.Collectors;
 
-public class DatabaseTableDefinition extends AbstractDatabaseRelationDefinition {
+public class DatabaseTableDefinition extends AbstractNamedRelationDefinition {
 
     /**
      *
      * @param allIds
      * @param builder
      */
-    DatabaseTableDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
+    public DatabaseTableDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
         super(allIds, builder);
     }
 

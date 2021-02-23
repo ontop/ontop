@@ -305,8 +305,8 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 	}
 
 	private String getDefaultNamespace() {
-		String defaultNamespace = prefixManager.getDefaultPrefix();
-		return prefixManager.getShortForm(defaultNamespace, false);
+		String defaultNamespace = prefixManager.getDefaultIriPrefix();
+		return prefixManager.getShortForm(defaultNamespace);
 	}
 
 	//

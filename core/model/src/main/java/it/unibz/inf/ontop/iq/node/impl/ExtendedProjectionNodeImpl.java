@@ -24,7 +24,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private final ImmutableUnificationTools unificationTools;
     protected final ConstructionNodeTools constructionNodeTools;
     private final ImmutableSubstitutionTools substitutionTools;
-    private final TermFactory termFactory;
+    protected final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
@@ -59,11 +59,18 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                                                           ConstructionNodeImpl.PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
                                                           Optional<ImmutableExpression> constraint) throws EmptyTreeException {
 
-        VariableNullability dummyVariableNullability = coreUtilsFactory.createDummyVariableNullability(
-                child.getVariables().stream());
+        Optional<ImmutableExpression> descendingConstraint;
+        if (constraint.isPresent()) {
+            ImmutableExpression initialConstraint = constraint.get();
 
-        Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
-                constraint, dummyVariableNullability);
+            VariableNullability extendedVariableNullability = child.getVariableNullability()
+                    .extendToExternalVariables(initialConstraint.getVariableStream());
+
+            descendingConstraint = computeChildConstraint(tauFPropagationResults.theta, initialConstraint,
+                    extendedVariableNullability);
+        }
+        else
+            descendingConstraint = Optional.empty();
 
         return Optional.of(tauFPropagationResults.delta)
                 .filter(delta -> !delta.isEmpty())
@@ -86,8 +93,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, getVariables());
 
-        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getNonFunctionalTermFragment();
-        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getGroundFunctionalTermFragment();
+        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getFragment(NonFunctionalTerm.class);
+        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getFragment(GroundFunctionalTerm.class);
 
         try {
             ConstructionNodeImpl.PropagationResults<NonFunctionalTerm> tauCPropagationResults = propagateTauC(tauC, child);
@@ -128,7 +135,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * ---------------
          */
 
-        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.getNonFunctionalTermFragment();
+        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.getFragment(NonFunctionalTerm.class);
 
         // Projected variables after propagating tauC
         ImmutableSet<Variable> vC = constructionNodeTools.computeNewProjectedVariables(tauC, projectedVariables);
@@ -149,7 +156,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          * deltaC to thetaF
          * ---------------
          */
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFunctionalTermFragment();
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFragment(ImmutableFunctionalTerm.class);
 
         ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
@@ -170,7 +177,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                 thetaFBar::apply,
                 thetaF, thetaFBar,
                 projectedVariables);
-        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getNonFunctionalTermFragment();
+        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getFragment(NonFunctionalTerm.class);
 
         Optional<ImmutableExpression> f = computeF(m, thetaFBar, gamma, newDeltaC);
 
@@ -240,8 +247,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
         try {
-            Optional<ImmutableExpression> childConstraint = computeChildConstraint(getSubstitution(), Optional.of(constraint),
-                    child.getVariableNullability());
+            Optional<ImmutableExpression> childConstraint = computeChildConstraint(getSubstitution(), constraint,
+                    child.getVariableNullability().extendToExternalVariables(constraint.getVariableStream()));
             IQTree newChild = childConstraint
                     .map(child::propagateDownConstraint)
                     .orElse(child);
@@ -253,21 +260,17 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
     private Optional<ImmutableExpression> computeChildConstraint(ImmutableSubstitution<? extends ImmutableTerm> theta,
-                                                                 Optional<ImmutableExpression> initialConstraint,
-                                                                 VariableNullability childVariableNullability)
+                                                                 ImmutableExpression initialConstraint,
+                                                                 VariableNullability variableNullabilityForConstraint)
             throws EmptyTreeException {
 
-        Optional<ImmutableExpression.Evaluation> descendingConstraintResults = initialConstraint
-                .map(theta::applyToBooleanExpression)
-                .map(exp -> exp.evaluate(childVariableNullability));
+        ImmutableExpression.Evaluation descendingConstraintResults = theta.applyToBooleanExpression(initialConstraint)
+                .evaluate(variableNullabilityForConstraint);
 
-        if (descendingConstraintResults
-                .filter(ImmutableExpression.Evaluation::isEffectiveFalse)
-                .isPresent())
+        if (descendingConstraintResults.isEffectiveFalse())
             throw new EmptyTreeException();
 
-        return descendingConstraintResults
-                .flatMap(ImmutableExpression.Evaluation::getExpression);
+        return descendingConstraintResults.getExpression();
     }
 
     /**

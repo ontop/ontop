@@ -70,7 +70,7 @@ public interface UniqueConstraint extends FunctionalDependency {
 	 * @return
 	 */
 
-	static Builder builder(DatabaseRelationDefinition relation, String name) {
+	static Builder builder(NamedRelationDefinition relation, String name) {
 		return UniqueConstraintImpl.builder(relation, name);
 	}
 
@@ -82,13 +82,13 @@ public interface UniqueConstraint extends FunctionalDependency {
 	 * @return
 	 */
 
-	static Builder primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
+	static Builder primaryKeyBuilder(NamedRelationDefinition relation, String name) {
 		return UniqueConstraintImpl.primaryKeyBuilder(relation, name);
 	}
 
 
 	static void primaryKeyOf(Attribute attribute) {
-		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute.getRelation();
+		NamedRelationDefinition relation = (NamedRelationDefinition)attribute.getRelation();
 		primaryKeyBuilder(relation, "PK")
 				.addDeterminant(attribute.getIndex()).build();
 	}
@@ -97,7 +97,7 @@ public interface UniqueConstraint extends FunctionalDependency {
 		if (attribute1.getRelation() != attribute2.getRelation())
 			throw new IllegalArgumentException();
 
-		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute1.getRelation();
+		NamedRelationDefinition relation = (NamedRelationDefinition)attribute1.getRelation();
 
 		primaryKeyBuilder(relation, "PK")
 				.addDeterminant(attribute1.getIndex())

@@ -91,7 +91,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     private ImmutableTerm transformDefinition(ImmutableTerm rdfTerm, IQTree childTree) {
         if (rdfTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm rdfTermDefinition = (ImmutableFunctionalTerm) rdfTerm;
-            ImmutableTerm uncastLexicalTerm = uncast(rdfTermDefinition.getTerm(0));
+            ImmutableTerm uncastLexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfTermDefinition.getTerm(0));
             ImmutableTerm rdfTypeTerm = rdfTermDefinition.getTerm(1);
 
             Optional<DBTermType> dbType = extractInputDBType(uncastLexicalTerm, childTree);
@@ -107,17 +107,6 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         }
         else
             throw new IllegalArgumentException("Was expecting an ImmutableFunctionalTerm or a Constant");
-    }
-
-    /**
-     * Uncast the term only if it is temporally cast
-     */
-    private ImmutableTerm uncast(ImmutableTerm term) {
-        return (term instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol)
-                && (((DBTypeConversionFunctionSymbol) ((ImmutableFunctionalTerm) term).getFunctionSymbol()).isTemporary())
-                ? ((ImmutableFunctionalTerm) term).getTerm(0)
-                : term;
     }
 
     private Optional<DBTermType> extractInputDBType(ImmutableTerm uncastLexicalTerm, IQTree childTree) {
@@ -164,8 +153,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
-            if ((functionSymbol instanceof DBTypeConversionFunctionSymbol) &&
-                    ((DBTypeConversionFunctionSymbol) functionSymbol).isTemporary()) {
+            if (DBTypeConversionFunctionSymbol.isTemporary(functionSymbol)) {
                 DBTypeConversionFunctionSymbol castFunctionSymbol = (DBTypeConversionFunctionSymbol) functionSymbol;
                 if (functionSymbol.getArity() != 1)
                     throw new MinorOntopInternalBugException("The casting function was expected to be unary");

@@ -72,14 +72,19 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
      */
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty,
+                Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                         Supplier<Optional<File>> mappingFileSupplier,
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
-                                        Supplier<Optional<File>> constraintFileSupplier)
+                                        Supplier<Optional<File>> constraintFileSupplier,
+                                        Supplier<Optional<File>> dbMetadataFileSupplier,
+                                        Supplier<Optional<Reader>> dbMetadataReaderSupplier,
+                                        Supplier<Optional<File>> ontopViewFileSupplier,
+                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -87,7 +92,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                 mappingFileSupplier,
                 mappingReaderSupplier,
                 mappingGraphSupplier,
-                constraintFileSupplier
+                constraintFileSupplier,
+                dbMetadataFileSupplier,
+                dbMetadataReaderSupplier,
+                ontopViewFileSupplier,
+                ontopViewReaderSupplier
         );
     }
 
@@ -118,6 +127,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
+            // The parser is in charge of closing the reader
             return Optional.of(parser.parse(optionalMappingReader.get()));
         }
         Optional<Graph> optionalMappingGraph = mappingGraphSupplier.get();

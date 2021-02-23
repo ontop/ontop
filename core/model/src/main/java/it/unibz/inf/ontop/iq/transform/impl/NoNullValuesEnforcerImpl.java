@@ -102,7 +102,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
             ImmutableSubstitution<ImmutableTerm> initialSubstitution = rootNode.getSubstitution();
 
-            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.getFunctionalTermFragment().getImmutableMap().entrySet().stream()
+            ImmutableMap<Variable, FunctionalTermSimplification> updatedEntryMap = initialSubstitution.getFragment(ImmutableFunctionalTerm.class).getImmutableMap().entrySet().stream()
                     .filter(e -> nonNullVariables.contains(e.getKey()))
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,

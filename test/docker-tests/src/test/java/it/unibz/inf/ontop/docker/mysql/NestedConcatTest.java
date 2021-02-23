@@ -13,10 +13,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class NestedConcatTest extends AbstractVirtualModeTest {
 
-
-    static final String owlfile = "/mysql/nestedconcat/test.owl";
-    static final String obdafile = "/mysql/nestedconcat/test.obda";
-    static final String propertyfile = "/mysql/nestedconcat/test.properties";
+    private static final String owlfile = "/mysql/nestedconcat/test.owl";
+    private static final String obdafile = "/mysql/nestedconcat/test.obda";
+    private static final String propertyfile = "/mysql/nestedconcat/test.properties";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;
@@ -59,8 +58,5 @@ public class NestedConcatTest extends AbstractVirtualModeTest {
                             "LIMIT 1";
 
         runQuery(sparqlQuery);
-
-
-
     }
 }

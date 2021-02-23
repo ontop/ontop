@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -52,29 +53,19 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     /**
      * TODO: explain
      */
-    protected static class SameTermSelfJoinTransformer extends AbstractDiscardedVariablesTransformer {
+    protected static class SameTermSelfJoinTransformer extends AbstractBelowDistinctTransformer {
 
-        private final IQTreeTransformer lookForDistinctTransformer;
-        private final OptimizationSingletons optimizationSingletons;
         private final IntermediateQueryFactory iqFactory;
         private final TermFactory termFactory;
         private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
-        protected SameTermSelfJoinTransformer(ImmutableSet<Variable> discardedVariables,
-                                              IQTreeTransformer lookForDistinctTransformer,
+        protected SameTermSelfJoinTransformer(IQTreeTransformer lookForDistinctTransformer,
                                               OptimizationSingletons optimizationSingletons) {
-            super(discardedVariables, lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
-            this.lookForDistinctTransformer = lookForDistinctTransformer;
-            this.optimizationSingletons = optimizationSingletons;
+            super(lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             iqFactory = coreSingletons.getIQFactory();
             termFactory = coreSingletons.getTermFactory();
             requiredExtensionalDataNodeExtractor = optimizationSingletons.getRequiredExtensionalDataNodeExtractor();
-        }
-
-        @Override
-        protected AbstractDiscardedVariablesTransformer update(ImmutableSet<Variable> newDiscardedVariables) {
-            return new SameTermSelfJoinTransformer(newDiscardedVariables, lookForDistinctTransformer, optimizationSingletons);
         }
 
         /**
@@ -83,8 +74,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
          * Only removes some children that are extensional data nodes
          */
         @Override
-        protected Optional<IQTree> furtherSimplifyInnerJoinChildren(ImmutableList<ImmutableSet<Variable>> discardedVariablesPerChild,
-                                                                    Optional<ImmutableExpression> optionalFilterCondition,
+        protected Optional<IQTree> furtherSimplifyInnerJoinChildren(Optional<ImmutableExpression> optionalFilterCondition,
                                                                     ImmutableList<IQTree> partiallySimplifiedChildren) {
             //Mutable
             final List<IQTree> currentChildren = Lists.newArrayList(partiallySimplifiedChildren);
@@ -92,7 +82,6 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                     .boxed()
                     .filter(i -> isDetectedAsRedundant(
                             currentChildren.get(i),
-                            discardedVariablesPerChild.get(i),
                             IntStream.range(0, partiallySimplifiedChildren.size())
                                     .filter(j -> j!= i)
                                     .boxed()
@@ -103,40 +92,38 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             ImmutableSet<Variable> variablesToFilterNulls = IntStream.range(0, partiallySimplifiedChildren.size())
                     .filter(i -> currentChildren.get(i).getRootNode() instanceof TrueNode)
                     .boxed()
-                    .map(i -> Sets.difference(partiallySimplifiedChildren.get(i).getVariables(),
-                            discardedVariablesPerChild.get(i)))
+                    .map(i -> partiallySimplifiedChildren.get(i).getVariables())
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toSet());
 
-            return Optional.of(variablesToFilterNulls)
-                    // If no variable to filter, no change, returns empty
-                    .filter(vs -> !vs.isEmpty())
-                    .map(vs -> vs.stream()
-                            .map(termFactory::getDBIsNotNull))
-                    .map(s -> optionalFilterCondition
-                            .map(f -> Stream.concat(Stream.of(f), s))
-                            .orElse(s))
-                    .flatMap(termFactory::getConjunction)
+            Optional<ImmutableExpression> expression = termFactory.getConjunction(
+                    Stream.concat(
+                            variablesToFilterNulls.stream().map(termFactory::getDBIsNotNull),
+                            optionalFilterCondition.map(Stream::of).orElseGet(Stream::empty)));
+
+            InnerJoinNode innerJoinNode = expression
                     .map(iqFactory::createInnerJoinNode)
-                    // NB: will be normalized later on
-                    .map(n -> iqFactory.createNaryIQTree(n, ImmutableList.copyOf(currentChildren)));
+                    .orElseGet(iqFactory::createInnerJoinNode);
+
+            // NB: will be normalized later on
+            return Optional.of(iqFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(currentChildren)));
+
         }
 
         /**
          * Should not return any false positive
          */
-        boolean isDetectedAsRedundant(IQTree child, ImmutableSet<Variable> discardedVariables, Stream<IQTree> otherChildren) {
+        boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildren) {
             return Optional.of(child)
                     .filter(c -> c instanceof ExtensionalDataNode)
                     .map(c -> (ExtensionalDataNode) c)
                     .filter(d1 -> otherChildren
                             .flatMap(t -> t.acceptVisitor(requiredExtensionalDataNodeExtractor))
-                            .anyMatch(d2 -> isDetectedAsRedundant(d1, d2, discardedVariables)))
+                            .anyMatch(d2 -> isDetectedAsRedundant(d1, d2)))
                     .isPresent();
         }
 
-        private boolean isDetectedAsRedundant(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode,
-                                              ImmutableSet<Variable> discardedVariables) {
+        private boolean isDetectedAsRedundant(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode) {
             if (!dataNode.getRelationDefinition().equals(otherDataNode.getRelationDefinition()))
                 return false;
 
@@ -149,21 +136,9 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             Sets.SetView<Integer> allIndexes = Sets.union(firstIndexes, otherIndexes);
             Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, otherIndexes);
 
-            ImmutableList<? extends VariableOrGroundTerm> differentArguments = allIndexes.stream()
+            return allIndexes.stream()
                     .filter(i -> !(commonIndexes.contains(i) && argumentMap.get(i).equals(otherArgumentMap.get(i))))
-                    .flatMap(i -> Optional.ofNullable(argumentMap.get(i))
-                            .map(Stream::of)
-                            .orElseGet(Stream::empty))
-                    .collect(ImmutableCollectors.toList());
-
-            // There must be at least one match
-            if (differentArguments.size() == allIndexes.size())
-                return false;
-
-            /*
-             * All the non-matching arguments of the atom must be discarded variables
-             */
-            return discardedVariables.containsAll(differentArguments);
+                    .noneMatch(argumentMap::containsKey);
         }
     }
 }

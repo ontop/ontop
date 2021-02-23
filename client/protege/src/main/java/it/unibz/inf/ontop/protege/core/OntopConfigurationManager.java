@@ -30,10 +30,14 @@ public class OntopConfigurationManager {
     @Nullable
     private File implicitDBConstraintFile;
 
+    @Nullable
+    private File dbMetadataFile;
+
     OntopConfigurationManager(@Nonnull OBDAModel obdaModel, @Nonnull DisposableProperties internalSettings) {
         this.obdaModel = obdaModel;
         this.settings = internalSettings;
         this.implicitDBConstraintFile = null;
+        this.dbMetadataFile = null;
         this.userSettings = new DisposableProperties();
     }
 
@@ -59,6 +63,9 @@ public class OntopConfigurationManager {
         Optional.ofNullable(implicitDBConstraintFile)
                 .ifPresent(builder::basicImplicitConstraintFile);
 
+        Optional.ofNullable(dbMetadataFile)
+                .ifPresent(builder::dbMetadataFile);
+
         builder.ontology(currentOntology);
 
         return builder.build();
@@ -72,6 +79,11 @@ public class OntopConfigurationManager {
         this.implicitDBConstraintFile = null;
     }
 
+    void setDBMetadataFile(File dbMetadataFile) {
+        this.dbMetadataFile = dbMetadataFile;
+    }
+
+    void clearDBMetadataFile() { this.dbMetadataFile = null; }
     /**
      * Loads the properties in the global settings and in data source.
      */

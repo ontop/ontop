@@ -87,14 +87,14 @@ public class BootstrapGenerator {
         }
 
         final String baseURI = (baseURI0 == null || baseURI0.isEmpty())
-            ? ppMapping.getPrefixManager().getDefaultPrefix()
+            ? ppMapping.getPrefixManager().getDefaultIriPrefix()
             : DirectMappingEngine.fixBaseURI(baseURI0);
 
         MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
         // this operation is EXPENSIVE
-        ImmutableList<DatabaseRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
+        ImmutableList<NamedRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
 
-        Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+        Map<NamedRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
 
         ImmutableList<SQLPPTriplesMap> newTriplesMap = relations.stream()

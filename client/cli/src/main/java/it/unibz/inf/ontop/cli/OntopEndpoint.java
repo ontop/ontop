@@ -76,6 +76,12 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
         if (this.constraintFile != null)
             argList.add("--constraint=" + this.constraintFile);
 
+        if (this.dbMetadataFile != null)
+            argList.add("--db-metadata=" + this.dbMetadataFile);
+
+        if (this.ontopViewFile != null)
+            argList.add("--ontop-views=" + this.ontopViewFile);
+
         if (this.portalFile != null)
             argList.add("--portal=" + this.portalFile);
 

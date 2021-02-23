@@ -13,7 +13,7 @@ import static it.unibz.inf.ontop.OntopModelTestingTools.createMetadataProviderBu
 
 public class WrongForeignKeyTest {
     private static final QuotedIDFactory ID_FACTORY;
-    private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
+    private static final NamedRelationDefinition table1Def, table2Def, table3Def;
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();

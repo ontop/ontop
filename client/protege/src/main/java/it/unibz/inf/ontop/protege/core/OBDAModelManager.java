@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.querymanager.*;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -17,7 +18,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.querymanager.*;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
@@ -37,10 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.*;
@@ -51,6 +48,7 @@ public class OBDAModelManager implements Disposable {
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
 	private static final String PROPERTY_EXT = ".properties"; // The default property file extension.
 	private static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
+	private static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
 	private final OWLEditorKit owlEditorKit;
 
@@ -482,6 +480,7 @@ public class OBDAModelManager implements Disposable {
 			loadVocabularyAndDefaultPrefix(obdaModel, mmgr.getOntologies(), ontology);
 
 			configurationManager.clearImplicitDBConstraintFile();
+			configurationManager.clearDBMetadataFile();
 			DisposableProperties settings = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
 			configurationManager.resetProperties(settings.clone());
 
@@ -513,14 +512,19 @@ public class OBDAModelManager implements Disposable {
 				String queryDocumentIri = owlName + QUERY_EXT;
 				String propertyFilePath = owlName + PROPERTY_EXT;
 				String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
+				String dbMetadataFilePath = owlName + DBMETADATA_EXT;
 
 				File obdaFile = new File(URI.create(obdaDocumentIri));
 				File queryFile = new File(URI.create(queryDocumentIri));
 				File propertyFile = new File(URI.create(propertyFilePath));
 				File implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
+				File dbMetadataFile = new File(URI.create(dbMetadataFilePath));
 
-				if(implicitDBConstraintFile.exists())
+				if (implicitDBConstraintFile.exists())
 					configurationManager.setImplicitDBConstraintFile(implicitDBConstraintFile);
+
+				if(dbMetadataFile.exists())
+					configurationManager.setDBMetadataFile(dbMetadataFile);
 
 				/*cd
 				 * Loads the properties (and the data source)
@@ -530,19 +534,14 @@ public class OBDAModelManager implements Disposable {
 				}
 
 				if (obdaFile.exists()) {
-					try {
-						//convert old syntax OBDA file
-						Reader mappingReader = new FileReader(obdaFile);
-						OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(new FileReader(obdaFile), obdaFile.getName());
+					try (Reader mappingReader = new FileReader(obdaFile)) {
+						OldSyntaxMappingConverter converter = new OldSyntaxMappingConverter(mappingReader, obdaFile.getName());
 						java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
 
 						if (optionalDataSourceProperties.isPresent()) {
 							configurationManager.loadProperties(optionalDataSourceProperties.get());
-							mappingReader = converter.getOutputReader();
 						}
-						// Load the OBDA model
-						obdaModel.parseMapping(mappingReader, configurationManager.snapshotProperties());
-
+						obdaModel.parseMapping(new StringReader(converter.getRestOfFile()), configurationManager.snapshotProperties());
 					}
 					catch (Exception ex) {
 						throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
@@ -566,15 +565,14 @@ public class OBDAModelManager implements Disposable {
 					ImmutableList<TargetAtom> tq = mapping.getTargetAtoms();
 					final ImmutableList<org.apache.commons.rdf.api.IRI> invalidIRIs = TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary());
 					if (!invalidIRIs.isEmpty()) {
-						final StringBuilder stringBuilder = new StringBuilder();
+						StringBuilder stringBuilder = new StringBuilder();
 						stringBuilder.append("Found an invalid target query: \n  ");
 						stringBuilder.append("mappingId:\t").append(mapping.getId());
 						if (mapping.getOptionalTargetString().isPresent()) {
 							stringBuilder.append("\n  target:\t").append(mapping.getOptionalTargetString().get());
 						}
 						stringBuilder.append("\n  predicates not declared in the ontology: ").append(invalidIRIs);
-						final String message = stringBuilder.toString();
-						throw new Exception(message);
+						throw new Exception(stringBuilder.toString());
 					}
 				}
 			}
@@ -610,8 +608,8 @@ public class OBDAModelManager implements Disposable {
 				File obdaFile = new File(URI.create(obdaDocumentIri));
 				if(obdaModel.hasTripleMaps()) {
 					SQLPPMapping ppMapping = obdaModel.generatePPMapping();
-					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
-					writer.save(obdaFile);
+					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
+					writer.write(obdaFile, ppMapping);
 					log.info("mapping file saved to {}", obdaFile);
 				} else {
 					Files.deleteIfExists(obdaFile.toPath());

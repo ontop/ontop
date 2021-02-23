@@ -10,19 +10,19 @@ import java.util.*;
 public class CachingMetadataLookup implements MetadataLookup {
 
     private final MetadataProvider provider;
-    private final Map<RelationID, DatabaseRelationDefinition> map = new HashMap<>();
+    private final Map<RelationID, NamedRelationDefinition> map = new HashMap<>();
 
     public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; }
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
-        DatabaseRelationDefinition relation = map.get(relationId);
+    public NamedRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
+        NamedRelationDefinition relation = map.get(relationId);
         if (relation != null)
             return relation;
 
-        DatabaseRelationDefinition retrievedRelation = provider.getRelation(relationId);
+        NamedRelationDefinition retrievedRelation = provider.getRelation(relationId);
         for (RelationID retrievedId : retrievedRelation.getAllIDs()) {
-            DatabaseRelationDefinition prev = map.put(retrievedId, retrievedRelation);
+            NamedRelationDefinition prev = map.put(retrievedId, retrievedRelation);
             if (prev != null)
                 throw new MetadataExtractionException("Clashing relation IDs: " + retrievedId + " and " + relationId);
         }
@@ -38,9 +38,9 @@ public class CachingMetadataLookup implements MetadataLookup {
     public ImmutableMetadata extractImmutableMetadata() throws MetadataExtractionException {
 
         ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(getQuotedIDFactory(), ImmutableMap.copyOf(map));
-        ImmutableList<DatabaseRelationDefinition> list = lookup.getRelations();
+        ImmutableList<NamedRelationDefinition> list = lookup.getRelations();
 
-        for (DatabaseRelationDefinition relation : list)
+        for (NamedRelationDefinition relation : list)
             provider.insertIntegrityConstraints(relation, lookup);
 
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
