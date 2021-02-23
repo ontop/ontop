@@ -31,9 +31,9 @@ public class OntopConfigurationManager {
     @Nullable
     private File dbMetadataFile;
 
-    OntopConfigurationManager(@Nonnull OBDAModelManager obdaModelManager, @Nonnull DisposableProperties internalSettings) {
+    OntopConfigurationManager(@Nonnull OBDAModelManager obdaModelManager) {
         this.obdaModelManager = obdaModelManager;
-        this.settings.putAll(internalSettings);
+        this.settings.putAll(obdaModelManager.getStandardProperties());
         this.implicitDBConstraintFile = null;
         this.dbMetadataFile = null;
     }
@@ -79,11 +79,13 @@ public class OntopConfigurationManager {
                 .build();
     }
 
-    public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology currentOntology) {
+    public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology ontology) {
+
+        OBDAModel obdaModel = obdaModelManager.getOBDAModel(ontology);
 
         OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .properties(union(settings, obdaModelManager.getDataSource()))
-                .ppMapping(obdaModelManager.getTriplesMapCollection().generatePPMapping());
+                .properties(union(settings, obdaModel.getDataSource()))
+                .ppMapping(obdaModel.getTriplesMapCollection().generatePPMapping());
 
         Optional.ofNullable(implicitDBConstraintFile)
                 .ifPresent(builder::basicImplicitConstraintFile);
@@ -91,7 +93,7 @@ public class OntopConfigurationManager {
         Optional.ofNullable(dbMetadataFile)
                 .ifPresent(builder::dbMetadataFile);
 
-        builder.ontology(currentOntology);
+        builder.ontology(obdaModel.getOntology());
 
         return builder.build();
     }

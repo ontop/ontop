@@ -45,9 +45,9 @@ public class R2RMLImportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(R2RMLImportAction.class);
-
 	private static final String DIALOG_TITLE = "R2RML Import";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(R2RMLImportAction.class);
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
@@ -68,22 +68,23 @@ public class R2RMLImportAction extends ProtegeAction {
 	private class R2RMLImportWorker extends SwingWorkerWithMonitor<Map.Entry<Integer, Integer>, Void> {
 
 		private final File file;
+		private final OBDAModel obdaModel;
 
 		R2RMLImportWorker(File file) {
 			super(getWorkspace(),
 					"<html><h3>Importing R2RML mapping:</h3></html>", true);
 			this.file = file;
+			this.obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 		}
 
 		@Override
 		protected Map.Entry<Integer, Integer> doInBackground() throws Exception {
 			start("initializing...");
-			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-			SQLPPMapping parsedModel = obdaModelManager.parseR2RML(file);
+			SQLPPMapping parsedModel = obdaModel.parseR2RML(file);
 
 			ImmutableList<SQLPPTriplesMap> tripleMaps = parsedModel.getTripleMaps();
 			endLoop("inserting into the current mapping...");
-			Set<OWLDeclarationAxiom> axioms = obdaModelManager.insertTriplesMaps(tripleMaps, false);
+			Set<OWLDeclarationAxiom> axioms = obdaModel.insertTriplesMaps(tripleMaps, false);
 			end();
 			return Maps.immutableEntry(tripleMaps.size(), axioms.size());
 		}
@@ -102,8 +103,7 @@ public class R2RMLImportAction extends ProtegeAction {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
 			catch (ExecutionException e) {
-				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e,
-						OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit()).getDataSource());
+				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, obdaModel.getDataSource());
 			}
 		}
 	}

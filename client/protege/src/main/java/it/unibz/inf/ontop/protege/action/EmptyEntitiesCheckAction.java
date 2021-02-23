@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.action;
 
 import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
@@ -92,14 +92,14 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 		listsPanel.add(new JScrollPane(tblPropertyCount));
 		emptiesPanel.add(listsPanel, BorderLayout.CENTER);
 
-		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+		OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 
 		SwingWorker<String, EmptyEntityInfo> worker = new SwingWorker<String, EmptyEntityInfo>() {
 
 			@Override
 			protected String doInBackground() {
 				OntopOWLEmptyEntitiesChecker checker = reasoner.get().getEmptyEntitiesChecker();
-				PrefixManager prefixManager = obdaModelManager.getMutablePrefixManager();
+				PrefixManager prefixManager = obdaModel.getMutablePrefixManager();
 				int emptyClasses = 0;
 				for (IRI iri : checker.emptyClasses()) {
 					if (isCancelled())
@@ -148,7 +148,7 @@ public class EmptyEntitiesCheckAction extends ProtegeAction {
 				}
 				catch (ExecutionException e) {
 					dialog.dispose();
-					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModelManager.getDataSource());
+					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModel.getDataSource());
 				}
 			}
 		};

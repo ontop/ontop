@@ -50,14 +50,9 @@ public class MappingManagerPanel extends JPanel {
 
     private static final int GAP = 2;
 
-    /**
-	 * Creates a new panel.
-	 *
-	 * @param obdaModelManager
-	 */
-	public MappingManagerPanel(OWLEditorKit editorKit, OBDAModelManager obdaModelManager) {
+	public MappingManagerPanel(OWLEditorKit editorKit) {
         this.editorKit = editorKit;
-        this.obdaModelManager = obdaModelManager;
+        this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
         setLayout(new BorderLayout());
 
@@ -157,14 +152,14 @@ public class MappingManagerPanel extends JPanel {
             }
         });
 
-        model = new MappingFilteredListModel(obdaModelManager.getTriplesMapCollection());
+        model = new MappingFilteredListModel(obdaModelManager);
         model.addListDataListener(new ListDataListener() {
             @Override public void intervalRemoved(ListDataEvent e) { updateMappingSize(); }
             @Override public void intervalAdded(ListDataEvent e) { updateMappingSize(); }
             @Override public void contentsChanged(ListDataEvent e) { updateMappingSize(); }
             private void updateMappingSize() {
                 mappingStatusLabel.setText("<html>Mapping size: <b>" +
-                        obdaModelManager.getTriplesMapCollection().size() + "</b></html>");
+                        obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection().size() + "</b></html>");
             }
         });
         mappingList.setModel(model);
@@ -178,7 +173,7 @@ public class MappingManagerPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             EditMappingDialog dialog = new EditMappingDialog(
-                    obdaModelManager,
+                    obdaModelManager.getCurrentOBDAModel(),
                     IDGenerator.getNextUniqueID("MAPID-"));
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }
@@ -194,7 +189,7 @@ public class MappingManagerPanel extends JPanel {
             if (!removeConfirm(mappingList.getSelectedValuesList()))
                 return;
 
-            TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
+            TriplesMapCollection triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
             for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
                 triplesMapCollection.remove(triplesMap.getId());
 
@@ -212,7 +207,7 @@ public class MappingManagerPanel extends JPanel {
             if (!copyConfirm(mappingList.getSelectedValuesList()))
                 return;
 
-            TriplesMapCollection triplesMapCollection = obdaModelManager.getTriplesMapCollection();
+            TriplesMapCollection triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
             for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
                 triplesMapCollection.duplicate(triplesMap.getId());
         }
@@ -223,7 +218,7 @@ public class MappingManagerPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             EditMappingDialog dialog = new EditMappingDialog(
-                    obdaModelManager,
+                    obdaModelManager.getCurrentOBDAModel(),
                     mappingList.getSelectedValue());
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }
@@ -236,7 +231,7 @@ public class MappingManagerPanel extends JPanel {
             ValidationSwingWorker worker = new ValidationSwingWorker(
                     MappingManagerPanel.this,
                     mappingList.getSelectedValuesList(),
-                    obdaModelManager);
+                    obdaModelManager.getCurrentOBDAModel());
             worker.execute();
         }
     };
@@ -246,7 +241,7 @@ public class MappingManagerPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             SQLQueryDialog dialog = new SQLQueryDialog(
-                    obdaModelManager.getDataSource(),
+                    obdaModelManager.getCurrentOBDAModel().getDataSource(),
                     mappingList.getSelectedValue().getSqlQuery());
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }

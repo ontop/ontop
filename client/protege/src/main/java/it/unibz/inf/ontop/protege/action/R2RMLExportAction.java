@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithMonitor;
@@ -61,20 +60,21 @@ public class R2RMLExportAction extends ProtegeAction {
 
     private class R2RMLExportWorker extends SwingWorkerWithMonitor<Void, Void> {
 	    private final File file;
+	    private final OBDAModel obdaModel;
 
         protected R2RMLExportWorker(File file) {
             super(getWorkspace(),
                     "<html><h3>Exporting R2RML mapping:</h3></html>", true);
             this.file = file;
+            this.obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
         }
 
         @Override
         protected Void doInBackground() throws Exception {
             start("initializing...");
-            OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModelManager.getRdfFactory());
+            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModel.getRdfFactory());
             endLoop("writing to file...");
-            writer.write(file, obdaModelManager.getTriplesMapCollection().generatePPMapping());
+            writer.write(file, obdaModel.getTriplesMapCollection().generatePPMapping());
             end();
             return null;
         }
@@ -91,7 +91,7 @@ public class R2RMLExportAction extends ProtegeAction {
                 DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
             }
             catch (ExecutionException e) {
-                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, (DataSource) null);
+                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, obdaModel.getDataSource());
             }
         }
     }

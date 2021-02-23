@@ -20,12 +20,10 @@ package it.unibz.inf.ontop.protege.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.mapping.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.slf4j.Logger;
@@ -92,17 +90,15 @@ public class MappingStatisticsAction extends ProtegeAction {
 		triplesCountTable.getColumnModel().getColumn(1).setMaxWidth(100);
 		statisticsPanel.add(new JScrollPane(triplesCountTable), BorderLayout.CENTER);
 
-		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-		DataSource source = obdaModelManager.getDataSource();
+		OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 		SwingWorker<Integer, TriplesMapInfo> worker = new SwingWorker<Integer, TriplesMapInfo>() {
 
 			@Override
 			protected Integer doInBackground() throws Exception {
-				JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-				try (Connection c = man.getConnection(source.getURL(), source.getUsername(), source.getPassword());
+				try (Connection c = obdaModel.getDataSource().getConnection();
 					 Statement st = c.createStatement()) {
 					int total = 0;
-					for (TriplesMap map : obdaModelManager.getTriplesMapCollection()) {
+					for (TriplesMap map : obdaModel.getTriplesMapCollection()) {
 						if (isCancelled())
 							break;
 
@@ -140,7 +136,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 				}
 				catch (ExecutionException e) {
 					dialog.dispose();
-					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, source);
+					DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + "error.", LOGGER, e, obdaModel.getDataSource());
 				}
 			}
 		};

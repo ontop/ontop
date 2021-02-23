@@ -90,7 +90,7 @@ public class DataSource {
 		this.driver = driver;
 
 		if (changed)
-			listeners.forEach(DataSourceListener::dataSourceChanged);
+			listeners.forEach(l -> l.dataSourceChanged(this));
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -129,11 +129,6 @@ public class DataSource {
 	public void update(Properties p) {
 		properties.putAll(p);
 		updateDataSourceParametersFromUserSettings();
-	}
-
-	public void reset() {
-		properties.clear();
-		set("", "", "", "");
 	}
 
 	public void store(File propertyFile) throws IOException {

@@ -5,9 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
-import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithTimeIntervalMonitor;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
@@ -66,7 +65,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
             TURTLE, writer -> new NTriplesWriter(writer)
                     .set(BasicWriterSettings.PRETTY_PRINT, false));
 
-    private final Logger log = LoggerFactory.getLogger(RDFGraphMaterializationAction.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(RDFGraphMaterializationAction.class);
 
     @Override
     public void actionPerformed(ActionEvent evt) {
@@ -149,8 +148,8 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
     private class MaterializeToFileWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Void> {
         private final File file;
         private final Function<Writer, RDFHandler> handlerFactory;
+        private final OBDAModel obdaModel;
 
-        private DataSource datasource;
         private long vocabularySize;
 
         MaterializeToFileWorker(File file, Function<Writer, RDFHandler> handlerFactory) {
@@ -159,17 +158,15 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
                     100);
             this.file = file;
             this.handlerFactory = handlerFactory;
+            this.obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
         }
 
         @Override
         protected Void doInBackground() throws Exception {
             start("initializing...");
 
-            OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-            datasource = obdaModelManager.getDataSource();
-
             RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
-                    obdaModelManager.getConfigurationForOntology(),
+                    obdaModel.getConfigurationForOntology(),
                     MaterializationParams.defaultBuilder().build());
             MaterializationGraphQuery query = materializer.materialize();
 
@@ -215,31 +212,29 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
                 DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
             }
             catch (ExecutionException e) {
-                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", log, e, datasource);
+                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", LOGGER, e, obdaModel.getDataSource());
             }
         }
     }
 
     private class MaterializeToOntologyWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Void> {
 
-        private DataSource datasource;
+        private final OBDAModel obdaModel;
         private long vocabularySize;
 
         MaterializeToOntologyWorker() {
             super(getWorkspace(),
                     "<html><h3>RDF Graph materialization:</h3></html>",
                     100);
+            obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
         }
 
         @Override
         protected Void doInBackground() throws Exception {
             start("initializing...");
 
-            OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-            datasource = obdaModelManager.getDataSource();
-
             OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
-                    obdaModelManager.getConfigurationForOntology(),
+                    obdaModel.getConfigurationForOntology(),
                     MaterializationParams.defaultBuilder().build());
 
             startLoop(() -> 50, () -> String.format("%d triples materialized...", getCount()));
@@ -252,7 +247,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
                 vocabularySize = graphResultSet.getSelectedVocabulary().size();
             }
             endLoop("storing " + getCount() + " triples in the ontology...");
-            obdaModelManager.addAxiomsToOntology(setAxioms);
+            obdaModel.addAxiomsToOntology(setAxioms);
             end();
             return null;
         }
@@ -272,7 +267,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
                 DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
             }
 			catch (ExecutionException e) {
-                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", log, e, datasource);
+                DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, "RDF Graph materialization error.", LOGGER, e, obdaModel.getDataSource());
             }
         }
     }

@@ -241,7 +241,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 		exportAction.setEnabled(queryResultTable.getRowCount() > 0);
 	}
 
-	@Override
+	@Override // see QueryManagerView
 	public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) {
 		resetTableModel(new String[0]);
 	}
@@ -253,7 +253,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			getKeyStrokeWithCtrlMask(VK_P)) {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getMutablePrefixManager(), queryTextPane.getText());
+			SelectPrefixesDialog dialog = new SelectPrefixesDialog(obdaModelManager.getCurrentOBDAModel().getMutablePrefixManager(), queryTextPane.getText());
 			setLocationRelativeToProtegeAndOpen(editorKit, dialog);
 			dialog.getPrefixDirectives()
 					.ifPresent(s -> queryTextPane.setText(s + "\n" + queryTextPane.getText()));
@@ -413,7 +413,7 @@ public class QueryInterfacePanel extends JPanel implements QueryManagerPanelSele
 			defaultOntopOWLStatement.setMaxRows(limitPanel.getFetchSize());
 		}
 		return new TurtleRendererForOWL(
-				obdaModelManager.getMutablePrefixManager(),
+				obdaModelManager.getCurrentOBDAModel().getMutablePrefixManager(),
 				showShortIriCheckBox.isSelected());
 	}
 

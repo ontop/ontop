@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.mapping.TriplesMap;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
@@ -28,15 +28,15 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
     
     private final Component parent;
     private final List<TriplesMap> triplesMapList;
-    private final OBDAModelManager obdaModelManager;
+    private final OBDAModel obdaModel;
     private int invalidTriplesMapCount;
 
     private static final String DIALOG_TITLE = "Triples Maps Validation";
 
-    public ValidationSwingWorker(Component parent, List<TriplesMap> triplesMapList, OBDAModelManager obdaModelManager) {
+    public ValidationSwingWorker(Component parent, List<TriplesMap> triplesMapList, OBDAModel obdaModel) {
         super(parent, "<html><h3>Validating Triples Maps:</h3></html>");
         this.parent = parent;
-        this.obdaModelManager = obdaModelManager;
+        this.obdaModel = obdaModel;
         this.triplesMapList = triplesMapList;
     }
 
@@ -47,7 +47,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
         setMaxTicks(triplesMapList.size());
         startLoop(this::getCompletionPercentage, () -> String.format("%d%% completed.", getCompletionPercentage()));
 
-        try (Connection conn = obdaModelManager.getDataSource().getConnection();
+        try (Connection conn = obdaModel.getDataSource().getConnection();
              Statement statement = conn.createStatement()) {
             statement.setMaxRows(1);
             for (TriplesMap triplesMap : triplesMapList) {
@@ -74,7 +74,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
             if (report.status == TriplesMap.Status.INVALID)
                 invalidTriplesMapCount++;
 
-            obdaModelManager.getTriplesMapCollection().setStatus(
+            obdaModel.getTriplesMapCollection().setStatus(
                     report.id,
                     report.status,
                     report.sqlErrorMessage,
@@ -101,7 +101,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
         catch (CancellationException | InterruptedException ignore) {
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, obdaModelManager.getDataSource());
+            DialogUtils.showErrorDialog(parent, DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, obdaModel.getDataSource());
         }
     }
 

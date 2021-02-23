@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -56,7 +56,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     
     private Map<String, TriplesMap> map = new LinkedHashMap<>();
     // Mutable and replaced after reset
-    private MutablePrefixManager prefixManager;
+    private final MutablePrefixManager prefixManager;
 
     private final SQLPPMappingFactory ppMappingFactory;
     private final TermFactory termFactory;
@@ -75,6 +75,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                                 SubstitutionFactory substitutionFactory,
                                 TargetQueryParserFactory targetQueryParserFactory,
                                 SQLPPSourceQueryFactory sourceQueryFactory) {
+
         this.prefixManager = new MutablePrefixManager(ontology);
 
         this.ppMappingFactory = ppMappingFactory;
@@ -102,36 +103,6 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                 prefixManager);
     }
 
-    /**
-     *  NOTE: adds prefixes to the current prefixManager
-     *
-     */
-
-    private void load(SQLPPMapping ppMapping) {
-
-        ppMapping.getPrefixManager().getPrefixMap().forEach((k, v) -> prefixManager.addPrefix(k, v));
-
-        map = ppMapping.getTripleMaps().stream()
-                .map(m -> new TriplesMap(m, this))
-                .collect(toIndexedTripleMaps());
-
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
-    }
-
-    public void reset(OWLOntology ontology) {
-        map.clear();
-        prefixManager = new MutablePrefixManager(ontology);
-
-        // TODO: fix - makes Protege fail on opening
-        //mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
-    }
-
-
-    /**
-     * DO NOT CACHE: A NEW INSTANCE IS CREATED FOR EACH ONTOLOGY
-     * @return
-     */
-
     public MutablePrefixManager getMutablePrefixManager() {
         return prefixManager;
     }
@@ -152,7 +123,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(m -> m.renamePredicate(predicateIri, replacementTerm))
                     .collect(toIndexedTripleMaps());
 
-            mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+            mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
         }
     }
 
@@ -165,7 +136,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(Optional::get)
                     .collect(toIndexedTripleMaps());
 
-            mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+            mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
         }
     }
 
@@ -174,7 +145,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
             throw new DuplicateTriplesMapException(ImmutableList.of(id));
 
         map.put(id, new TriplesMap(id, sqlQuery, parseTargetQuery(target), this));
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void addAll(ImmutableList<SQLPPTriplesMap> list) throws DuplicateTriplesMapException {
@@ -190,7 +161,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         if (!duplicateIds.isEmpty())
             throw new DuplicateTriplesMapException(duplicateIds);
 
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void duplicate(String id) {
@@ -200,7 +171,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
         String newId = generateFreshId(id);
         map.put(newId, triplesMap.createDuplicate(newId));
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
     }
 
     private String generateFreshId(String id) {
@@ -229,14 +200,14 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(m -> m.getId().equals(id) ? replacement : m)
                     .collect(toIndexedTripleMaps());
         }
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void remove(String id) {
         if (map.remove(id) == null)
             throw new MinorOntopInternalBugException("Triples map not found: " + id);
 
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void setStatus(String id, TriplesMap.Status status, String sqlErrorMessage, ImmutableList<String> invalidPlaceholders) {
@@ -257,7 +228,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
             triplesMap.setInvalidPlaceholders(invalidPlaceholders);
         }
-        mappingListeners.forEach(TriplesMapCollectionListener::triplesMapCollectionChanged);
+        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
     }
 
     private static Collector<TriplesMap, ?, LinkedHashMap<String, TriplesMap>> toIndexedTripleMaps() {
@@ -275,8 +246,33 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     public int size() { return map.size(); }
 
     public Stream<TriplesMap> stream() { return map.values().stream(); }
-    
-    
+
+
+    /**
+     *  CAN BE CALLED ONLY ONCE: ADDS TO THE CURRENT PREFIX MANAGER
+     */
+
+    public void load(File obdaFile, OBDAModel obdaModel) throws Exception {
+        try (Reader reader = new FileReader(obdaFile)) {
+            OldSyntaxMappingConverter converter = new OldSyntaxMappingConverter(reader, obdaFile.getName());
+
+            converter.getDataSourceProperties().ifPresent(obdaModel.getDataSource()::update);
+
+            SQLPPMapping ppMapping = obdaModel.parseOBDA(converter.getRestOfFile());
+
+            ppMapping.getPrefixManager().getPrefixMap().forEach(prefixManager::addPrefix);
+
+            map = ppMapping.getTripleMaps().stream()
+                    .map(m -> new TriplesMap(m, this))
+                    .collect(toIndexedTripleMaps());
+
+            mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+        }
+        catch (Exception ex) {
+            throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
+        }
+    }
+
     public void store(File obdaFile) throws IOException {
         if (!map.isEmpty()) {
             OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
@@ -285,19 +281,6 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         }
         else {
             Files.deleteIfExists(obdaFile.toPath());
-        }
-    }
-
-    public void load(File obdaFile, OBDAModelManager obdaModelManager) throws Exception {
-        try (Reader reader = new FileReader(obdaFile)) {
-            OldSyntaxMappingConverter converter = new OldSyntaxMappingConverter(reader, obdaFile.getName());
-
-            converter.getDataSourceProperties().ifPresent(obdaModelManager.getDataSource()::update);
-
-            load(obdaModelManager.parseOBDA(converter.getRestOfFile()));
-        }
-        catch (Exception ex) {
-            throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
         }
     }
 }

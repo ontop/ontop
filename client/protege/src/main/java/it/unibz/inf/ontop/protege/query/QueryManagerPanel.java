@@ -21,10 +21,13 @@ package it.unibz.inf.ontop.protege.query;
  */
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -52,19 +55,17 @@ public class QueryManagerPanel extends JPanel {
 
     private final List<QueryManagerPanelSelectionListener> listeners = new ArrayList<>();
 
-    private final QueryManager queryManager;
-
     private final JTree queryManagerTree;
 
-	public QueryManagerPanel(QueryManager queryManager) {
-        this.queryManager = queryManager;
+	public QueryManagerPanel(OWLEditorKit editorKit) {
+        OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
         deleteAction.setEnabled(false);
         renameAction.setEnabled(false);
 
         setLayout(new BorderLayout());
 
-        QueryManagerTreeModel model = new QueryManagerTreeModel(queryManager);
+        QueryManagerTreeModel model = new QueryManagerTreeModel(obdaModelManager);
         queryManagerTree = new JTree(model);
         queryManagerTree.setCellRenderer(new DefaultTreeCellRenderer() {
             private final Icon queryIcon = DialogUtils.getImageIcon(QUERY_ICON_PATH);
@@ -214,7 +215,7 @@ public class QueryManagerPanel extends JPanel {
     private QueryManager.Item getTargetForInsertion() {
         TreePath path = queryManagerTree.getSelectionPath();
         if (path == null)
-            return queryManager.getRoot();
+            return (QueryManager.Item)queryManagerTree.getModel().getRoot();
 
         QueryManager.Item item = (QueryManager.Item) path.getLastPathComponent();
         return item.isQuery() ? item.getParent() : item;

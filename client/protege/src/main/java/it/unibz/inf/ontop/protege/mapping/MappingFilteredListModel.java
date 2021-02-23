@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.mapping;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -31,25 +32,29 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
-	private final TriplesMapCollection triplesMapCollection;
+	private final OBDAModelManager obdaModelManager;
 	@Nullable
 	private String filter;
 
-	public MappingFilteredListModel(TriplesMapCollection triplesMapCollection) {
-		this.triplesMapCollection = triplesMapCollection;
+	public MappingFilteredListModel(OBDAModelManager obdaModelManager) {
+		this.obdaModelManager = obdaModelManager;
 		this.filter = null;
-		triplesMapCollection.addMappingsListener(() ->
-				fireContentsChanged(triplesMapCollection, 0, getSize()));
+		obdaModelManager.addMappingsListener(s -> fireContentsChanged(s, 0, getSize()));
+		obdaModelManager.addListener(() -> fireContentsChanged(getCurrent(), 0, getSize()));
+	}
+
+	private TriplesMapCollection getCurrent() {
+		return obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
 	}
 
 	public void setFilter(@Nullable String filter) {
 		this.filter = filter;
-		fireContentsChanged(triplesMapCollection, 0, getSize());
+		fireContentsChanged(getCurrent(), 0, getSize());
 	}
 
 	@Override
 	public int getSize() {
-		return (int) triplesMapCollection.stream()
+		return (int) getCurrent().stream()
 				.filter(this::isIncludedByFilter)
 				.count();
 	}
@@ -57,7 +62,7 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
 	@Override
 	public TriplesMap getElementAt(int index) {
 		int filteredCount = -1;
-		for (TriplesMap triplesMap : triplesMapCollection) {
+		for (TriplesMap triplesMap : getCurrent()) {
 			if (isIncludedByFilter(triplesMap))
 				filteredCount++;
 

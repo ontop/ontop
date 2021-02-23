@@ -42,19 +42,19 @@ public class QueryManagerView extends AbstractOWLViewComponent {
 
 	@Override
 	protected void initialiseOWLView()  {
-		OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
+		OWLEditorKit editorKit = getOWLEditorKit();
 
 		setLayout(new BorderLayout());
-		panel = new QueryManagerPanel(obdaModelManager.getQueryManager());
+		panel = new QueryManagerPanel(editorKit);
 		add(panel, BorderLayout.CENTER);
 
-		List<QueryManagerView> queryManagerViews = getList(getOWLEditorKit());
+		List<QueryManagerView> queryManagerViews = getList(editorKit);
 		if (queryManagerViews.isEmpty())
-			queryManagerViews = new QueryManagerViewsList(getOWLEditorKit());
+			queryManagerViews = new QueryManagerViewsList(editorKit);
 
 		queryManagerViews.add(this);
 
-		for (QueryInterfaceView queryInterfaceView : QueryInterfaceView.getList(getOWLEditorKit()))
+		for (QueryInterfaceView queryInterfaceView : QueryInterfaceView.getList(editorKit))
 			addSelectionListener(queryInterfaceView.getSelectionListener());
 	}
 

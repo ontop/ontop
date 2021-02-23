@@ -48,7 +48,7 @@ public class EditMappingDialog extends JDialog {
 	@Nullable
 	private final String id; // null means creating a new mapping
 
-	private final OBDAModelManager obdaModelManager;
+	private final OBDAModel obdaModel;
 
 	private final TargetQueryStyledDocument targetQueryDocument;
 
@@ -67,14 +67,14 @@ public class EditMappingDialog extends JDialog {
 
 	private boolean allComponentsNonEmpty = false, isValid = false;
 
-	public EditMappingDialog(OBDAModelManager obdaModelManager, String id) {
-		this(obdaModelManager, null, "New Triples Map", "Create");
+	public EditMappingDialog(OBDAModel obdaModel, String id) {
+		this(obdaModel, null, "New Triples Map", "Create");
 
 		mappingIdField.setText(id);
 	}
 
-	public EditMappingDialog(OBDAModelManager obdaModelManager, TriplesMap triplesMap) {
-		this(obdaModelManager, triplesMap.getId(), "Edit Triples Map", "Update");
+	public EditMappingDialog(OBDAModel obdaModel, TriplesMap triplesMap) {
+		this(obdaModel, triplesMap.getId(), "Edit Triples Map", "Update");
 
 		mappingIdField.setText(triplesMap.getId());
 		sourceQueryTextPane.setText(triplesMap.getSqlQuery());
@@ -89,8 +89,8 @@ public class EditMappingDialog extends JDialog {
 		targetValidation();
 	}
 
-	private EditMappingDialog(OBDAModelManager obdaModelManager, String id, String title, String buttonText) {
-		this.obdaModelManager = obdaModelManager;
+	private EditMappingDialog(OBDAModel obdaModel, String id, String title, String buttonText) {
+		this.obdaModel = obdaModel;
 		this.id = id;
 
 		saveAction = new OntopAbstractAction(buttonText, null, null,
@@ -128,7 +128,7 @@ public class EditMappingDialog extends JDialog {
 		targetQueryTextPane.setBorder(defaultBorder);
 		Timer timer = new Timer(1000, e -> targetValidation());
 		timer.setRepeats(false);
-		targetQueryDocument = new TargetQueryStyledDocument(obdaModelManager, d -> timer.restart());
+		targetQueryDocument = new TargetQueryStyledDocument(obdaModel.getObdaModelManager(), d -> timer.restart());
 		targetQueryTextPane.setDocument(targetQueryDocument);
 		setKeyboardShortcuts(targetQueryTextPane);
 		targetQueryPanel.add(new JScrollPane(targetQueryTextPane), BorderLayout.CENTER);
@@ -199,7 +199,7 @@ public class EditMappingDialog extends JDialog {
 		public void actionPerformed(ActionEvent e) {
 			ExecuteSQLQuerySwingWorker worker = new ExecuteSQLQuerySwingWorker(
 					EditMappingDialog.this,
-					obdaModelManager.getDataSource(),
+					obdaModel.getDataSource(),
 					sourceQueryTextPane.getText().trim(),
 					MAX_ROWS,
 					sqlQueryResultTable::setModel);
@@ -243,7 +243,7 @@ public class EditMappingDialog extends JDialog {
 				}
 				return;
 			}
-			MutablePrefixManager prefixManager = obdaModelManager.getMutablePrefixManager();
+			MutablePrefixManager prefixManager = obdaModel.getMutablePrefixManager();
 			error = iris.stream()
 					.map(IRI::getIRIString)
 					.map(prefixManager::getShortForm)
@@ -273,9 +273,9 @@ public class EditMappingDialog extends JDialog {
 			String source = sourceQueryTextPane.getText().trim();
 
 			if (id == null)
-				obdaModelManager.getTriplesMapCollection().add(newId, source, target);
+				obdaModel.getTriplesMapCollection().add(newId, source, target);
 			else
-				obdaModelManager.getTriplesMapCollection().update(id, newId, source, target);
+				obdaModel.getTriplesMapCollection().update(id, newId, source, target);
 
 			dispatchEvent(new WindowEvent(EditMappingDialog.this, WindowEvent.WINDOW_CLOSING));
 		}

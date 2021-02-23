@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
@@ -97,6 +96,14 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			throw new RuntimeException("Cannot find OBDAEditorKitSynchronizerPlugin");
 
 		return ((OBDAEditorKitSynchronizerPlugin)object).obdaModelManager;
+	}
+
+	public static OBDAModel getCurrentOBDAModel(EditorKit editorKit) {
+		Disposable object = editorKit.get(OBDAEditorKitSynchronizerPlugin.class.getName());
+		if (!(object instanceof OBDAEditorKitSynchronizerPlugin))
+			throw new RuntimeException("Cannot find OBDAEditorKitSynchronizerPlugin");
+
+		return (((OBDAEditorKitSynchronizerPlugin)object).obdaModelManager).getCurrentOBDAModel();
 	}
 
 	public static DisposableProperties getProperties(EditorKit editorKit) {

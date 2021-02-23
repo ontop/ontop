@@ -43,8 +43,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent {
 
     @Override
     protected void initialiseOWLView() {
+        OWLEditorKit editorKit = getOWLEditorKit();
+
         setLayout(new BorderLayout());
-        panel = new QueryInterfacePanel(getOWLEditorKit());
+        panel = new QueryInterfacePanel(editorKit);
         add(panel, BorderLayout.CENTER);
 
         getOWLModelManager().addOntologyChangeListener(panel);
@@ -53,14 +55,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent {
            its selector is listened by all other instances of query view in this editor kit.
            Also, we make this new instance listen
            to the selection of all other query selectors in the views. */
-        List<QueryInterfaceView> queryInterfaceViews = getList(getOWLEditorKit());
+        List<QueryInterfaceView> queryInterfaceViews = getList(editorKit);
         if (queryInterfaceViews.isEmpty())
-            queryInterfaceViews = new QueryInterfaceViewsList(getOWLEditorKit());
+            queryInterfaceViews = new QueryInterfaceViewsList(editorKit);
 
         queryInterfaceViews.add(this);
 
         // Registering the current query view with ALL existing query manager views
-        for (QueryManagerView queryInterfaceView : QueryManagerView.getList(getOWLEditorKit()))
+        for (QueryManagerView queryInterfaceView : QueryManagerView.getList(editorKit))
             queryInterfaceView.addSelectionListener(getSelectionListener());
 
         LOGGER.debug("Ontop QueryInterfaceView initialized");

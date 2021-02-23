@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.protege.query;
 
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -10,12 +12,19 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public class QueryManagerTreeModel implements TreeModel {
-    private final QueryManager queryManager;
+    private final OBDAModelManager obdaModelManager;
 
-    public QueryManagerTreeModel(QueryManager queryManager) {
-        this.queryManager = queryManager;
+    public QueryManagerTreeModel(OBDAModelManager obdaModelManager) {
+        this.obdaModelManager = obdaModelManager;
 
-        queryManager.addListener(new QueryManagerEventListener() {
+        obdaModelManager.addListener(() -> {
+            TreeModelEvent event = new TreeModelEvent(this,
+                    new TreePath(new Object[]{getRoot()}),
+                    null, new Object[]{ getRoot() });
+
+            listeners.forEach(l -> l.treeStructureChanged(event));});
+
+        obdaModelManager.addQueryManagerListener(new QueryManagerEventListener() {
             @Override
             public void inserted(QueryManager.Item item, int indexInParent) {
                 createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesInserted);
@@ -34,12 +43,12 @@ public class QueryManagerTreeModel implements TreeModel {
     }
 
     @Override
-    public Object getRoot() {
-        return queryManager.getRoot();
+    public QueryManager.Item getRoot() {
+        return obdaModelManager.getCurrentOBDAModel().getQueryManager().getRoot();
     }
 
     @Override
-    public Object getChild(Object parentO, int index) {
+    public QueryManager.Item getChild(Object parentO, int index) {
         QueryManager.Item parent = (QueryManager.Item)parentO;
         if (index < 0 || index >= parent.getChildCount())
             return null;

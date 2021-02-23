@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.*;
-import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
@@ -67,8 +66,8 @@ public class BootstrapAction extends ProtegeAction {
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 
-		OBDAModelManager modelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-		MutablePrefixManager prefixManager = modelManager.getMutablePrefixManager();
+		OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
+		MutablePrefixManager prefixManager = obdaModel.getMutablePrefixManager();
 
 		String defaultBaseIRI = prefixManager.getDefaultIriPrefix()
 				.replace("#", "/");
@@ -132,16 +131,15 @@ public class BootstrapAction extends ProtegeAction {
 
 			this.baseIri = baseIri;
 
-			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
-			datasource = obdaModelManager.getDataSource();
+			OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
+			datasource = obdaModel.getDataSource();
 
-			OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationForOntology();
+			OntopSQLOWLAPIConfiguration configuration = obdaModel.getConfigurationForOntology();
 			Injector injector = configuration.getInjector();
 			this.metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 			this.directMappingEngine = injector.getInstance(DirectMappingEngine.class);
 
-			TriplesMapCollection obdaModel = obdaModelManager.getTriplesMapCollection();
-			this.currentMappingIndex = new AtomicInteger(obdaModel.size() + 1);
+			this.currentMappingIndex = new AtomicInteger(obdaModel.getTriplesMapCollection().size() + 1);
 		}
 
 		@Override
@@ -177,9 +175,9 @@ public class BootstrapAction extends ProtegeAction {
 			}
 
 			endLoop("");
-			OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getEditorKit());
+			OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 			ImmutableList<SQLPPTriplesMap> triplesMaps = builder.build();
-			Set<OWLDeclarationAxiom> axioms = obdaModelManager.insertTriplesMaps(triplesMaps, true);
+			Set<OWLDeclarationAxiom> axioms = obdaModel.insertTriplesMaps(triplesMaps, true);
 			end();
 			return Maps.immutableEntry(triplesMaps.size(), axioms.size());
 		}

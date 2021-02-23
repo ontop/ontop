@@ -22,10 +22,14 @@ package it.unibz.inf.ontop.protege.connection;
 
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.jdbc.JdbcDriverInfo;
 import it.unibz.inf.ontop.protege.jdbc.JdbcDriverTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -38,11 +42,11 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 import static java.awt.event.KeyEvent.VK_T;
 
-public class DataSourcePanel extends JPanel implements DataSourceListener {
+public class DataSourcePanel extends JPanel implements DataSourceListener, OBDAModelManagerListener {
 
     private static final long serialVersionUID = 3506358479342412849L;
 
-    private final DataSource datasource;
+    private final OBDAModelManager obdaModelManager;
 
     private final JLabel connectionStatusLabel;
     private final JPasswordField passwordField;
@@ -52,10 +56,10 @@ public class DataSourcePanel extends JPanel implements DataSourceListener {
 
     private boolean dataSourceChangedNotification = false, documentChangeNotification = false;
 
-    public DataSourcePanel(DataSource datasource) {
+    public DataSourcePanel(OWLEditorKit editorKit) {
         super(new GridBagLayout());
 
-        this.datasource = datasource;
+        this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
         setBorder(new EmptyBorder(20,40,20, 40));
 
@@ -127,7 +131,7 @@ public class DataSourcePanel extends JPanel implements DataSourceListener {
                         new Insets(10, 0, 10, 0), 0, 0));
 
         setUpAccelerator(this, testAction);
-        dataSourceChanged();
+        activeOntologyChanged();
     }
 
     private final OntopAbstractAction testAction = new OntopAbstractAction("Test Connection",
@@ -140,7 +144,7 @@ public class DataSourcePanel extends JPanel implements DataSourceListener {
             connectionStatusLabel.setForeground(Color.BLACK);
             connectionStatusLabel.setText("Establishing connection...");
 
-            try (Connection ignored = datasource.getConnection()) {
+            try (Connection ignored = obdaModelManager.getCurrentOBDAModel().getDataSource().getConnection()) {
                 connectionStatusLabel.setForeground(Color.GREEN.darker());
                 connectionStatusLabel.setText("Connection is OK");
             }
@@ -158,8 +162,14 @@ public class DataSourcePanel extends JPanel implements DataSourceListener {
         }
     };
 
-    @Override
-    public void dataSourceChanged() {
+    @Override // see DataSourceView
+    public void activeOntologyChanged() {
+        dataSourceChanged(obdaModelManager.getCurrentOBDAModel().getDataSource());
+    }
+
+    @Override // see DataSourceView
+    public void dataSourceChanged(DataSource datasource) {
+
         testAction.setEnabled(!datasource.getURL().isEmpty() && !datasource.getDriver().isEmpty());
 
         if (documentChangeNotification)
@@ -203,7 +213,8 @@ public class DataSourcePanel extends JPanel implements DataSourceListener {
         else
             showError("");
 
-        datasource.set(jdbcUrlField.getText(), usernameField.getText(), new String(password), driver);
+        obdaModelManager.getCurrentOBDAModel().getDataSource()
+                .set(jdbcUrlField.getText(), usernameField.getText(), new String(password), driver);
         documentChangeNotification = false;
     }
 
@@ -211,4 +222,5 @@ public class DataSourcePanel extends JPanel implements DataSourceListener {
         connectionStatusLabel.setForeground(Color.RED);
         connectionStatusLabel.setText(s);
     }
+
 }

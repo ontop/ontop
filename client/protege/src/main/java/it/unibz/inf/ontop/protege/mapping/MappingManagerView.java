@@ -42,7 +42,7 @@ public class MappingManagerView extends AbstractOWLViewComponent implements OBDA
 	protected void initialiseOWLView() {
 		OWLEditorKit editorKit = getOWLEditorKit();
 		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
-		mappingPanel = new MappingManagerPanel(editorKit, obdaModelManager);
+		mappingPanel = new MappingManagerPanel(editorKit);
 
 		setLayout(new BorderLayout());
 		add(mappingPanel, BorderLayout.CENTER);

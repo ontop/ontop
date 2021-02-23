@@ -114,7 +114,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
 
     private ImmutableSet<IRI> validateTargetAtom(TargetAtom atom) throws BadLocationException {
         ImmutableSet.Builder<IRI> unrecognisedIRIsBuilder = ImmutableSet.builder();
-        OntologySignature vocabulary = obdaModelManager.getCurrentVocabulary();
+        OntologySignature vocabulary = obdaModelManager.getCurrentOBDAModel().getOntologySignature();
 
         ImmutableList<ImmutableTerm> substitutedTerms = atom.getSubstitutedTerms();
         RDFAtomPredicate atomPredicate = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
@@ -177,7 +177,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         try {
             String input = getText(0, getLength());
             if (!input.isEmpty())
-                return obdaModelManager.getTriplesMapCollection().parseTargetQuery(input);
+                return obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection().parseTargetQuery(input);
         }
         catch (TargetQueryParserException e) {
             if (e.getLine() > 0) {
@@ -221,7 +221,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
     }
 
     private void highlight(IRI iri, SimpleAttributeSet attributeSet) throws BadLocationException {
-        PrefixManager prefixManager = obdaModelManager.getMutablePrefixManager();
+        PrefixManager prefixManager = obdaModelManager.getCurrentOBDAModel().getMutablePrefixManager();
         String rendered = prefixManager.getShortForm(iri.getIRIString());
         highlight(rendered, attributeSet);
     }
