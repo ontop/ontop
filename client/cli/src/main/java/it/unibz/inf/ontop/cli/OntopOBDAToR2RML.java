@@ -36,11 +36,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -115,61 +113,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
         }
 
         OntopSQLOWLAPIConfiguration config = configBuilder.build();
-        R2RMLMappingSerializer converter = new R2RMLMappingSerializer(config.getRdfFactory());
 
         try {
-            SQLPPMapping ppMapping = config.loadProvidedPPMapping();
+            SQLPPMapping ppMapping = extractAndNormalizePPMapping(config);
 
-            Injector injector = config.getInjector();
-
-            final MetadataProvider dbMetadataProvider;
-            if (!Strings.isNullOrEmpty(dbMetadataFile)) {
-                try (Reader dbMetadataReader = new FileReader(dbMetadataFile)) {
-                    dbMetadataProvider = injector.getInstance(SerializedMetadataProvider.Factory.class)
-                            .getMetadataProvider(dbMetadataReader);
-                }
-            }
-            else if (!Strings.isNullOrEmpty(propertiesFile)) {
-                try (Connection connection = LocalJDBCConnectionUtils.createConnection(config.getSettings())) {
-                    JDBCMetadataProviderFactory metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
-
-                    dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
-                }
-            }
-            else
-                dbMetadataProvider = null;
-
-            if (dbMetadataProvider != null) {
-
-                // DB metadata + view metadata
-                final MetadataProvider metadataProvider;
-                if (!Strings.isNullOrEmpty(ontopViewFile)) {
-                    try(Reader viewReader = new FileReader(ontopViewFile)) {
-                        metadataProvider = injector.getInstance(OntopViewMetadataProvider.Factory.class)
-                                .getMetadataProvider(dbMetadataProvider, viewReader);
-                    }
-                }
-                else
-                    metadataProvider = dbMetadataProvider;
-
-                CachingMetadataLookup metadataLookup = new CachingMetadataLookup(metadataProvider);
-                OntopNativeMappingIdentifierNormalizer normalizer = new OntopNativeMappingIdentifierNormalizer(config, metadataLookup);
-
-                SQLPPMappingFactory sqlppMappingFactory = config.getInjector().getInstance(SQLPPMappingFactory.class);
-                ppMapping = sqlppMappingFactory.createSQLPreProcessedMapping(
-                        ppMapping.getTripleMaps().stream()
-                                .map(normalizer::normalize)
-                                .collect(ImmutableCollectors.toList()),
-                        ppMapping.getPrefixManager());
-            }
-
-            else if (force == null) {
-                System.err.println("Access to DB metadata is required by default to respect column quoting rules of R2RML.\n" +
-                        "Please provide a properties file containing the info to connect to the database\n." +
-                        "Specify the option --force to bypass this requirement.");
-                System.exit(2);
-            }
-
+            R2RMLMappingSerializer converter = new R2RMLMappingSerializer(config.getRdfFactory());
             converter.write(new File(outputMappingFile), ppMapping);
             System.out.println("R2RML mapping file " + outputMappingFile + " written!");
         }
@@ -177,6 +125,73 @@ public class OntopOBDAToR2RML implements OntopCommand {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private SQLPPMapping extractAndNormalizePPMapping(OntopSQLOWLAPIConfiguration config) throws Exception {
+        SQLPPMapping ppMapping = config.loadProvidedPPMapping();
+
+        if (!Strings.isNullOrEmpty(dbMetadataFile)) {
+            return normalizeWithDBMetadataFile(ppMapping, config);
+        }
+        else if (!Strings.isNullOrEmpty(propertiesFile)) {
+            return normalizeByConnectingToDB(ppMapping, config);
+        }
+        else if (force != null) {
+            return ppMapping;
+        }
+        else {
+            System.err.println("Access to DB metadata is required by default to respect column quoting rules of R2RML.\n" +
+                    "Please provide a properties file containing the info to connect to the database.\n" +
+                    "Specify the option --force to bypass this requirement.");
+            System.exit(2);
+            // Not reached
+            return null;
+        }
+    }
+
+    private SQLPPMapping normalizeWithDBMetadataFile(SQLPPMapping ppMapping, OntopSQLOWLAPIConfiguration config) throws IOException, MetadataExtractionException {
+        try (Reader dbMetadataReader = new FileReader(dbMetadataFile)) {
+            MetadataProvider dbMetadataProvider = config.getInjector().getInstance(SerializedMetadataProvider.Factory.class)
+                    .getMetadataProvider(dbMetadataReader);
+
+            return normalize(ppMapping, dbMetadataProvider, config);
+        }
+    }
+
+    private SQLPPMapping normalizeByConnectingToDB(SQLPPMapping ppMapping, OntopSQLOWLAPIConfiguration config) throws MetadataExtractionException, SQLException, IOException {
+        try (Connection connection = LocalJDBCConnectionUtils.createConnection(config.getSettings())) {
+            JDBCMetadataProviderFactory metadataProviderFactory = config.getInjector().getInstance(JDBCMetadataProviderFactory.class);
+
+            DBMetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
+
+            return normalize(ppMapping, dbMetadataProvider, config);
+        }
+    }
+
+    private SQLPPMapping normalize(SQLPPMapping ppMapping, MetadataProvider dbMetadataProvider, OntopSQLOWLAPIConfiguration config)
+            throws IOException, MetadataExtractionException {
+        Injector injector = config.getInjector();
+
+        // DB metadata + view metadata
+        final MetadataProvider metadataProvider;
+        if (!Strings.isNullOrEmpty(ontopViewFile)) {
+            try(Reader viewReader = new FileReader(ontopViewFile)) {
+                metadataProvider = injector.getInstance(OntopViewMetadataProvider.Factory.class)
+                        .getMetadataProvider(dbMetadataProvider, viewReader);
+            }
+        }
+        else
+            metadataProvider = dbMetadataProvider;
+
+        CachingMetadataLookup metadataLookup = new CachingMetadataLookup(metadataProvider);
+        OntopNativeMappingIdentifierNormalizer normalizer = new OntopNativeMappingIdentifierNormalizer(config, metadataLookup);
+
+        SQLPPMappingFactory sqlppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
+        return sqlppMappingFactory.createSQLPreProcessedMapping(
+                ppMapping.getTripleMaps().stream()
+                        .map(normalizer::normalize)
+                        .collect(ImmutableCollectors.toList()),
+                ppMapping.getPrefixManager());
     }
 
     private static class OntopNativeMappingIdentifierNormalizer {
