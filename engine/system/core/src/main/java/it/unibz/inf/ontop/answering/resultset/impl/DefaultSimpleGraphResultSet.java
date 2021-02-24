@@ -136,10 +136,9 @@ public class DefaultSimpleGraphResultSet implements GraphResultSet {
 					}
 				}
 			} catch (OntopResultConversionException e) {
-				if (excludeInvalidTriples)
-					e.printStackTrace();
-				else
+				if (!excludeInvalidTriples)
 					throw e;
+				// TODO: inform the query logger that a triple has been excluded
 			}
 		}
 
