@@ -98,6 +98,7 @@
         <maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
@@ -115,6 +116,7 @@
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
         <sortpom-maven-plugin.version>2.13.1</sortpom-maven-plugin.version>
         <spring-boot-maven-plugin.version>2.3.2.RELEASE</spring-boot-maven-plugin.version>
+        <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
         <airline.version>2.8.0</airline.version>
@@ -1153,6 +1155,11 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>${versions-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
                     <version>${antlr4-maven-plugin.version}</version>
@@ -1221,6 +1228,15 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven-dependency-plugin.version}</version>
+                    <configuration>
+                        <ignoreDirect>false</ignoreDirect>
+                        <outputXML>true</outputXML>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
                 </plugin>
@@ -1228,15 +1244,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>${maven-enforcer-plugin.version}</version>
-                    <configuration>
-                        <rules>
-                            <requireMavenVersion>
-                                <version>3.6.0</version>
-                            </requireMavenVersion>
-                            <dependencyConvergence>
-                            </dependencyConvergence>
-                        </rules>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1345,6 +1352,17 @@
                         <goals>
                             <goal>enforce</goal>
                         </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <!-- This must be specified here and not in pluginManagement,
+                                         or the versions plugin will not pick up the constraint -->
+                                    <version>3.6.0</version>
+                                </requireMavenVersion>
+                                <dependencyConvergence>
+                                </dependencyConvergence>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -1410,20 +1428,8 @@
         <!-- NOTE: profiles declared later take precedence in case of property/setting clashes,
              so do not reorder the profiles listed below (or anyway take this aspect into account) -->
 
-        <!-- Manually activated profile to generate build/distribution/target/THIRD-PARTY.txt
-             Can be invoked via mvn -Pthirdparty. Can be combined with other manual profiles. -->
-        <profile>
-            <id>thirdparty</id>
-            <build>
-                <defaultGoal>generate-resources</defaultGoal>
-            </build>
-            <properties>
-                <thirdparty.skip>false</thirdparty.skip>
-            </properties>
-        </profile>
-
         <!-- Manually activated profile to autoformat pom.xml files.
-             Can be invoked via mvn -Pformat. Can be combined with other manual profiles. -->
+             Can be invoked via mvn -Pformat, possibly combined with other manual profiles. -->
         <profile>
             <id>format</id>
             <build>
@@ -1458,6 +1464,84 @@
                                         <include>**/pom.xml</include>
                                     </includes>
                                 </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Manually activated profile to generate build/distribution/target/THIRD-PARTY.txt
+             Can be invoked via mvn -Pthirdparty, possibly combined with other manual profiles. -->
+        <profile>
+            <id>thirdparty</id>
+            <build>
+                <defaultGoal>generate-resources</defaultGoal>
+            </build>
+            <properties>
+                <thirdparty.skip>false</thirdparty.skip>
+            </properties>
+        </profile>
+
+        <!-- Manually activated profile running various analysis plugins on the project.
+             Can be invoked via mvn -Panalyze, possibly combined with other manual profiles.
+             Can be extended with further plugins. Currently running:
+             - dependency:analyze-dep-mgt
+             - dependency:analyze-duplicate
+             - dependency:analyze-only
+             - versions:display-plugin-updates (root module only)
+             - versions:display-dependency-updates (root module only) -->
+        <profile>
+            <id>analyze</id>
+
+            <build>
+                <defaultGoal>process-test-classes</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>display-plugin-updates</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>display-plugin-updates</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>display-dependency-updates</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>display-dependency-updates</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <inherited>false</inherited>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>analyze-dep-mgt</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>analyze-dep-mgt</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>analyze-duplicate</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>analyze-duplicate</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>analyze-only</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>analyze-only</goal>
+                                </goals>
                             </execution>
                         </executions>
                     </plugin>
