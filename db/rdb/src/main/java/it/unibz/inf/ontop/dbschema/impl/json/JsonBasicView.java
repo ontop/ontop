@@ -337,9 +337,10 @@ public class JsonBasicView extends JsonView {
         List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations, idFactory);
 
         for (AddUniqueConstraints addUC : list) {
-            FunctionalDependency.Builder builder = addUC.isPrimaryKey
-                    ? UniqueConstraint.primaryKeyBuilder(relation, addUC.name)
-                    : UniqueConstraint.builder(relation, addUC.name);
+            if (addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
+
+            FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, addUC.name);
+
             JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
             builder.build();
         }
@@ -392,9 +393,8 @@ public class JsonBasicView extends JsonView {
                         i.getDeterminants().stream()
                                 .map(c -> c.getID().getSQLRendering())
                                 .collect(Collectors.toList()),
-                        // If no PK defined in added columns keep parent PK
-                        i.isPrimaryKey() && addUniqueConstraints.stream()
-                                .noneMatch(k -> k.isPrimaryKey)
+                        // PK by default false
+                        false
                             ))
                 .collect(Collectors.toList());
 
@@ -601,7 +601,6 @@ public class JsonBasicView extends JsonView {
         public final String name;
         @Nonnull
         public final List<String> determinants;
-        @Nonnull
         public final Boolean isPrimaryKey;
 
 

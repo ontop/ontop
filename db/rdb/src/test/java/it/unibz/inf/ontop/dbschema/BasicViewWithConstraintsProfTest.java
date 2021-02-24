@@ -40,21 +40,6 @@ public class BasicViewWithConstraintsProfTest {
         assertEquals(ImmutableSet.of("position", "a_id"), constraints);
     }
 
-    /**
-     * Switch PK from parent to added column. Parent PK becomes standard unique constraint.
-     */
-    @Test
-    public void testProfPKChange() throws Exception {
-        Map<String, Boolean> constraints = viewDefinitions.stream()
-                .map(RelationDefinition::getUniqueConstraints)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toMap(UniqueConstraint::getName, UniqueConstraint::isPrimaryKey));
-
-        Map<String, Boolean> otherMap = ImmutableMap.of("student_position_id", true,
-                                                        "academic_pkey",false);
-        assertEquals(otherMap, constraints);
-    }
-
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
             throws Exception {
