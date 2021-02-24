@@ -16,6 +16,7 @@
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <assembly.appendAssemblyId>false</assembly.appendAssemblyId>
+        <assembly.attach>false</assembly.attach>
     </properties>
 
     <dependencies>

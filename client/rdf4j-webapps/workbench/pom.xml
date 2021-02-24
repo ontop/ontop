@@ -15,6 +15,9 @@
 
     <properties>
         <finalName>rdf4j-workbench</finalName>
+        <!-- disable install and deploy in case war generation is disabled too -->
+        <maven.install.skip>${maven.war.skip}</maven.install.skip>
+        <maven.deploy.skip>${maven.war.skip}</maven.deploy.skip>
     </properties>
 
     <dependencies>

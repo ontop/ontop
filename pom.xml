@@ -85,6 +85,7 @@
         <assembly.webapps.skip>true</assembly.webapps.skip>
         <assembly.protege.skip>true</assembly.protege.skip>
         <bundle.protege.phase>none</bundle.protege.phase>
+        <maven.war.skip>false</maven.war.skip>
         <metadata.git.skip>true</metadata.git.skip>
         <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
         <thirdparty.skip>true</thirdparty.skip>
