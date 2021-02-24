@@ -87,15 +87,13 @@
         <bundle.protege.phase>none</bundle.protege.phase>
         <metadata.git.skip>true</metadata.git.skip>
         <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
-
-        <!-- For org.codehaus.mojo:license-maven-plugin -->
-        <license.licenseName>apache_v2</license.licenseName>
-        <license.roots>src/main/java,src/test/java</license.roots>
+        <thirdparty.skip>true</thirdparty.skip>
 
         <!-- Plugin versions -->
         <antlr4-maven-plugin.version>4.8-1</antlr4-maven-plugin.version>
         <formatter-maven-plugin.version>2.14.0</formatter-maven-plugin.version>
         <git-commit-id-plugin-version>4.0.3</git-commit-id-plugin-version>
+        <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
@@ -1163,11 +1161,39 @@
                     <groupId>net.revelc.code.formatter</groupId>
                     <artifactId>formatter-maven-plugin</artifactId>
                     <version>${formatter-maven-plugin.version}</version>
+                    <configuration>
+                        <configXmlFile>${maven.multiModuleProjectDirectory}/build/settings/xml.properties</configXmlFile>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
                     <version>${git-commit-id-plugin-version}</version>
+                    <configuration>
+                        <dotGitDirectory>${maven.multiModuleProjectDirectory}/.git</dotGitDirectory>
+                        <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                        <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                        <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                        <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>${license-maven-plugin.version}</version>
+                    <configuration>
+                        <licenseName>apache_v2</licenseName>
+                        <roots>src/main/java,src/test/java</roots>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                        <fileTemplate>${maven.multiModuleProjectDirectory}/build/settings/THIRD-PARTY.template.ftl</fileTemplate>
+                        <missingFile>${maven.multiModuleProjectDirectory}/build/settings/THIRD-PARTY.missing.properties</missingFile>
+                        <overrideUrl>file:${maven.multiModuleProjectDirectory}/build/settings/THIRD-PARTY.override.properties</overrideUrl>
+                        <!-- License IDs from https://spdx.org/licenses/ (WITH exception-id from https://spdx.org/licenses/exceptions-index.html) -->
+                        <licenseMergesUrl>file:${maven.multiModuleProjectDirectory}/build/settings/THIRD-PARTY.merges</licenseMergesUrl>
+                        <includedScopes>compile,runtime</includedScopes>
+                        <includedTypes>jar</includedTypes>
+                        <excludedGroups>it\.unibz\.inf\.ontop</excludedGroups>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1188,6 +1214,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1198,6 +1228,15 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>${maven-enforcer-plugin.version}</version>
+                    <configuration>
+                        <rules>
+                            <requireMavenVersion>
+                                <version>3.6.0</version>
+                            </requireMavenVersion>
+                            <dependencyConvergence>
+                            </dependencyConvergence>
+                        </rules>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1213,6 +1252,14 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven-jar-plugin.version}</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1268,6 +1315,12 @@
                     <groupId>com.github.ekryd.sortpom</groupId>
                     <artifactId>sortpom-maven-plugin</artifactId>
                     <version>${sortpom-maven-plugin.version}</version>
+                    <configuration>
+                        <createBackupFile>false</createBackupFile>
+                        <nrOfIndentSpace>4</nrOfIndentSpace>
+                        <keepTimestamp>true</keepTimestamp>
+                        <keepBlankLines>true</keepBlankLines>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
@@ -1280,10 +1333,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -1296,29 +1345,12 @@
                         <goals>
                             <goal>enforce</goal>
                         </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>3.6.0</version>
-                                </requireMavenVersion>
-                                <dependencyConvergence>
-                                </dependencyConvergence>
-                            </rules>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
@@ -1367,11 +1399,6 @@
                         </goals>
                         <configuration>
                             <skip>${metadata.git.skip}</skip>
-                            <dotGitDirectory>${maven.multiModuleProjectDirectory}/.git</dotGitDirectory>
-                            <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                            <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-                            <failOnNoGitDirectory>false</failOnNoGitDirectory>
-                            <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
                         </configuration>
                     </execution>
                 </executions>
@@ -1380,61 +1407,23 @@
     </build>
 
     <profiles>
-        <!-- Manually activated profiles to control generated artifacts (call via mvn -Pname)
-             - cli      generates ontop-cli zip, performing minimal processing
-             - protege  generates ontop-protege-xyz files, performing minimal processing
-             - webapps  generates ontop-webapps zip, performing minimal processing
-             - release  generates all artifacts above in preparation to a release -->
+        <!-- NOTE: profiles declared later take precedence in case of property/setting clashes,
+             so do not reorder the profiles listed below (or anyway take this aspect into account) -->
+
+        <!-- Manually activated profile to generate build/distribution/target/THIRD-PARTY.txt
+             Can be invoked via mvn -Pthirdparty. Can be combined with other manual profiles. -->
         <profile>
-            <id>cli</id>
+            <id>thirdparty</id>
+            <build>
+                <defaultGoal>generate-resources</defaultGoal>
+            </build>
             <properties>
-                <metadata.git.skip>true</metadata.git.skip>
-                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <maven.test.skip>true</maven.test.skip>
-                <assembly.cli.skip>false</assembly.cli.skip>
-                <maven.war.skip>true</maven.war.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>protege</id>
-            <properties>
-                <metadata.git.skip>true</metadata.git.skip>
-                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <maven.test.skip>true</maven.test.skip>
-                <assembly.protege.skip>false</assembly.protege.skip>
-                <bundle.protege.phase>package</bundle.protege.phase>
-                <maven.war.skip>true</maven.war.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>webapps</id>
-            <properties>
-                <metadata.git.skip>true</metadata.git.skip>
-                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <maven.test.skip>true</maven.test.skip>
-                <assembly.webapps.skip>false</assembly.webapps.skip>
-                <maven.war.skip>false</maven.war.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>release</id>
-            <properties>
-                <metadata.git.skip>false</metadata.git.skip>
-                <metadata.buildInfo.phase>prepare-package</metadata.buildInfo.phase>
-                <maven.javadoc.skip>false</maven.javadoc.skip>
-                <maven.test.skip>false</maven.test.skip>
-                <assembly.cli.skip>false</assembly.cli.skip>
-                <assembly.webapps.skip>false</assembly.webapps.skip>
-                <assembly.protege.skip>false</assembly.protege.skip>
-                <bundle.protege.phase>package</bundle.protege.phase>
-                <maven.war.skip>false</maven.war.skip>
+                <thirdparty.skip>false</thirdparty.skip>
             </properties>
         </profile>
 
-        <!-- Manually activated profile to autoformat pom.xml files (call via mvn -Pformat) -->
+        <!-- Manually activated profile to autoformat pom.xml files.
+             Can be invoked via mvn -Pformat. Can be combined with other manual profiles. -->
         <profile>
             <id>format</id>
             <build>
@@ -1450,12 +1439,6 @@
                                 <goals>
                                     <goal>sort</goal>
                                 </goals>
-                                <configuration>
-                                    <createBackupFile>false</createBackupFile>
-                                    <nrOfIndentSpace>4</nrOfIndentSpace>
-                                    <keepTimestamp>true</keepTimestamp>
-                                    <keepBlankLines>true</keepBlankLines>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -1470,7 +1453,6 @@
                                     <goal>format</goal>
                                 </goals>
                                 <configuration>
-                                    <configXmlFile>${maven.multiModuleProjectDirectory}/build/settings/pom.properties</configXmlFile>
                                     <sourceDirectory>.</sourceDirectory>
                                     <includes>
                                         <include>**/pom.xml</include>
@@ -1481,6 +1463,72 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- Manually activated profiles to control generated artifacts (call via mvn -Pname)
+             - cli      generates build/distribution/target/ontop-cli-VERSION.zip
+             - protege  generates build/distribution/target/ontop-protege-bundle-PLATFORM-VERSION.zip files
+             - webapps  generates build/distribution/target/ontop-webapps-VERSION.zip
+             - release  generates all artifacts above, with testing, javadoc and jar metadata -->
+        <profile>
+            <id>cli</id>
+            <build>
+                <defaultGoal>package</defaultGoal>
+            </build>
+            <properties>
+                <metadata.git.skip>true</metadata.git.skip>
+                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <assembly.cli.skip>false</assembly.cli.skip>
+                <maven.war.skip>true</maven.war.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>protege</id>
+            <build>
+                <defaultGoal>package</defaultGoal>
+            </build>
+            <properties>
+                <metadata.git.skip>true</metadata.git.skip>
+                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <assembly.protege.skip>false</assembly.protege.skip>
+                <bundle.protege.phase>package</bundle.protege.phase>
+                <maven.war.skip>true</maven.war.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>webapps</id>
+            <build>
+                <defaultGoal>package</defaultGoal>
+            </build>
+            <properties>
+                <metadata.git.skip>true</metadata.git.skip>
+                <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <assembly.webapps.skip>false</assembly.webapps.skip>
+                <maven.war.skip>false</maven.war.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <defaultGoal>package</defaultGoal>
+            </build>
+            <properties>
+                <metadata.git.skip>false</metadata.git.skip>
+                <metadata.buildInfo.phase>prepare-package</metadata.buildInfo.phase>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
+                <maven.test.skip>false</maven.test.skip>
+                <assembly.cli.skip>false</assembly.cli.skip>
+                <assembly.webapps.skip>false</assembly.webapps.skip>
+                <assembly.protege.skip>false</assembly.protege.skip>
+                <bundle.protege.phase>package</bundle.protege.phase>
+                <maven.war.skip>false</maven.war.skip>
+            </properties>
         </profile>
 
         <!-- Manually activated profile to sign (GPG) artifacts to be deployed -->
