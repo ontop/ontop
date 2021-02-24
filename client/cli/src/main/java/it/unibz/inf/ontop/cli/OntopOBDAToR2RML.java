@@ -8,14 +8,13 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.MetadataLookup;
-import it.unibz.inf.ontop.dbschema.MetadataProvider;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -37,8 +36,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
 import javax.annotation.Nullable;
-import java.io.File;
+import java.io.*;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -70,6 +70,16 @@ public class OntopOBDAToR2RML implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Nullable // optional
     private String propertiesFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-d", "--db-metadata"}, title = "db-metadata file",
+            description = "User-supplied db-metadata file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbMetadataFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-v", "--ontop-views"}, title = "Ontop view file",
+            description = "User-supplied view file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String ontopViewFile;
 
     @Option(type = OptionType.COMMAND, name = {"--force"}, title = "Force the conversion",
             description = "Force the conversion in the absence of DB metadata", arity = 0)
@@ -103,37 +113,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
         }
 
         OntopSQLOWLAPIConfiguration config = configBuilder.build();
-        R2RMLMappingSerializer converter = new R2RMLMappingSerializer(config.getRdfFactory());
 
         try {
-            SQLPPMapping ppMapping = config.loadProvidedPPMapping();
+            SQLPPMapping ppMapping = extractAndNormalizePPMapping(config);
 
-            if (!Strings.isNullOrEmpty(propertiesFile)) {
-                try (Connection connection = LocalJDBCConnectionUtils.createConnection(config.getSettings())) {
-                    JDBCMetadataProviderFactory metadataProviderFactory = config.getInjector().getInstance(JDBCMetadataProviderFactory.class);
-
-                    MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
-                    //MetadataProvider withImplicitConstraintsMetadataProvider =
-                    //        implicitDBConstraintExtractor.extract(constraintFile, dbMetadataProvider);
-
-                    CachingMetadataLookup metadataLookup = new CachingMetadataLookup(dbMetadataProvider);
-                    OntopNativeMappingIdentifierNormalizer normalizer = new OntopNativeMappingIdentifierNormalizer(config, metadataLookup);
-
-                    SQLPPMappingFactory sqlppMappingFactory = config.getInjector().getInstance(SQLPPMappingFactory.class);
-                    ppMapping = sqlppMappingFactory.createSQLPreProcessedMapping(
-                            ppMapping.getTripleMaps().stream()
-                                    .map(normalizer::normalize)
-                                    .collect(ImmutableCollectors.toList()),
-                            ppMapping.getPrefixManager());
-                }
-            }
-            else if (force == null) {
-                System.err.println("Access to DB metadata is required by default to respect column quoting rules of R2RML.\n" +
-                        "Please provide a properties file containing the info to connect to the database\n." +
-                        "Specify the option --force to bypass this requirement.");
-                System.exit(2);
-            }
-
+            R2RMLMappingSerializer converter = new R2RMLMappingSerializer(config.getRdfFactory());
             converter.write(new File(outputMappingFile), ppMapping);
             System.out.println("R2RML mapping file " + outputMappingFile + " written!");
         }
@@ -141,6 +125,73 @@ public class OntopOBDAToR2RML implements OntopCommand {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private SQLPPMapping extractAndNormalizePPMapping(OntopSQLOWLAPIConfiguration config) throws Exception {
+        SQLPPMapping ppMapping = config.loadProvidedPPMapping();
+
+        if (!Strings.isNullOrEmpty(dbMetadataFile)) {
+            return normalizeWithDBMetadataFile(ppMapping, config);
+        }
+        else if (!Strings.isNullOrEmpty(propertiesFile)) {
+            return normalizeByConnectingToDB(ppMapping, config);
+        }
+        else if (force != null) {
+            return ppMapping;
+        }
+        else {
+            System.err.println("Access to DB metadata is required by default to respect column quoting rules of R2RML.\n" +
+                    "Please provide a properties file containing the info to connect to the database.\n" +
+                    "Specify the option --force to bypass this requirement.");
+            System.exit(2);
+            // Not reached
+            return null;
+        }
+    }
+
+    private SQLPPMapping normalizeWithDBMetadataFile(SQLPPMapping ppMapping, OntopSQLOWLAPIConfiguration config) throws IOException, MetadataExtractionException {
+        try (Reader dbMetadataReader = new FileReader(dbMetadataFile)) {
+            MetadataProvider dbMetadataProvider = config.getInjector().getInstance(SerializedMetadataProvider.Factory.class)
+                    .getMetadataProvider(dbMetadataReader);
+
+            return normalize(ppMapping, dbMetadataProvider, config);
+        }
+    }
+
+    private SQLPPMapping normalizeByConnectingToDB(SQLPPMapping ppMapping, OntopSQLOWLAPIConfiguration config) throws MetadataExtractionException, SQLException, IOException {
+        try (Connection connection = LocalJDBCConnectionUtils.createConnection(config.getSettings())) {
+            JDBCMetadataProviderFactory metadataProviderFactory = config.getInjector().getInstance(JDBCMetadataProviderFactory.class);
+
+            DBMetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
+
+            return normalize(ppMapping, dbMetadataProvider, config);
+        }
+    }
+
+    private SQLPPMapping normalize(SQLPPMapping ppMapping, MetadataProvider dbMetadataProvider, OntopSQLOWLAPIConfiguration config)
+            throws IOException, MetadataExtractionException {
+        Injector injector = config.getInjector();
+
+        // DB metadata + view metadata
+        final MetadataProvider metadataProvider;
+        if (!Strings.isNullOrEmpty(ontopViewFile)) {
+            try(Reader viewReader = new FileReader(ontopViewFile)) {
+                metadataProvider = injector.getInstance(OntopViewMetadataProvider.Factory.class)
+                        .getMetadataProvider(dbMetadataProvider, viewReader);
+            }
+        }
+        else
+            metadataProvider = dbMetadataProvider;
+
+        CachingMetadataLookup metadataLookup = new CachingMetadataLookup(metadataProvider);
+        OntopNativeMappingIdentifierNormalizer normalizer = new OntopNativeMappingIdentifierNormalizer(config, metadataLookup);
+
+        SQLPPMappingFactory sqlppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
+        return sqlppMappingFactory.createSQLPreProcessedMapping(
+                ppMapping.getTripleMaps().stream()
+                        .map(normalizer::normalize)
+                        .collect(ImmutableCollectors.toList()),
+                ppMapping.getPrefixManager());
     }
 
     private static class OntopNativeMappingIdentifierNormalizer {

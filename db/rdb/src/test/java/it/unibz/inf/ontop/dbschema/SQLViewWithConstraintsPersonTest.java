@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.dbschema;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
@@ -10,25 +8,24 @@ import org.junit.Test;
 
 import java.io.FileReader;
 import java.io.Reader;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
-public class BasicViewWithConstraintsProfTest {
-    private static final String VIEW_FILE = "src/test/resources/prof/prof-basic-views-with-constraints.json";
-    private static final String DBMETADATA_FILE = "src/test/resources/prof/prof_with_constraints.db-extract.json";
+public class SQLViewWithConstraintsPersonTest {
+    private static final String VIEW_FILE = "src/test/resources/person/sql_views_with_constraints.json";
+    private static final String DBMETADATA_FILE = "src/test/resources/person/person_with_constraints.db-extract.json";
 
     ImmutableSet<OntopViewDefinition> viewDefinitions = loadViewDefinitions(VIEW_FILE, DBMETADATA_FILE);
 
-    public BasicViewWithConstraintsProfTest() throws Exception {
+    public SQLViewWithConstraintsPersonTest() throws Exception {
     }
 
     /**
-     * Constraint involving a hidden column is not inherited from parent
+     * Both the parent "id" and added "status" constraints are present in the views
      */
     @Test
-    public void testProfUniqueConstraintOnHiddenColumns() throws Exception {
+    public void testPersonAddUniqueConstraint() throws Exception {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
@@ -37,7 +34,39 @@ public class BasicViewWithConstraintsProfTest {
                 .map(v -> v.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableSet.of("position", "a_id"), constraints);
+        assertEquals(ImmutableSet.of("status"), constraints);
+    }
+
+    /**
+     * The dependent of the FD is correctly added by a viewfile
+     */
+    @Test
+    public void testPersonAddFunctionalDependencyDependent() throws Exception {
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
+                .flatMap(Collection::stream)
+                .map(FunctionalDependency::getDependents)
+                .flatMap(Collection::stream)
+                .map(d -> d.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertEquals(ImmutableSet.of("status"), otherFD);
+    }
+
+    /**
+     * The determinant of the FD is correctly added by a viewfile
+     */
+    @Test
+    public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
+        ImmutableSet<String> otherFD = viewDefinitions.stream()
+                .map(RelationDefinition::getOtherFunctionalDependencies)
+                .flatMap(Collection::stream)
+                .map(FunctionalDependency::getDeterminants)
+                .flatMap(Collection::stream)
+                .map(d -> d.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertEquals(ImmutableSet.of("id"), otherFD);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
