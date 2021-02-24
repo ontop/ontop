@@ -337,7 +337,7 @@ public class JsonBasicView extends JsonView {
         List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations, idFactory);
 
         for (AddUniqueConstraints addUC : list) {
-            if (addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
+            if (addUC.isPrimaryKey != null && addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
 
             FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, addUC.name);
 
