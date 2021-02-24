@@ -243,7 +243,7 @@ public class EditMappingDialog extends JDialog {
 				}
 				return;
 			}
-			MutablePrefixManager prefixManager = obdaModel.getMutablePrefixManager();
+			OntologyPrefixManager prefixManager = obdaModel.getMutablePrefixManager();
 			error = iris.stream()
 					.map(IRI::getIRIString)
 					.map(prefixManager::getShortForm)

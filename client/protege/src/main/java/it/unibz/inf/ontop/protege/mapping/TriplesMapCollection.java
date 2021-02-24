@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
+import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.*;
@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSeriali
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +58,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     
     private Map<String, TriplesMap> map = new LinkedHashMap<>();
     // Mutable and replaced after reset
-    private final MutablePrefixManager prefixManager;
+    private final OntologyPrefixManager prefixManager;
 
     private final SQLPPMappingFactory ppMappingFactory;
     private final TermFactory termFactory;
@@ -71,9 +70,9 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
     private final List<TriplesMapCollectionListener> mappingListeners = new ArrayList<>();
 
-    public TriplesMapCollection(OWLOntology ontology) {
+    public TriplesMapCollection(OntologyPrefixManager prefixManager) {
 
-        this.prefixManager = new MutablePrefixManager(ontology);
+        this.prefixManager = prefixManager;
 
         /*
          * TODO: avoid using Default injector
@@ -94,6 +93,10 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
+    /**
+     * No need to remove listeners - this is handled by OBDAModelManager
+     * @param listener
+     */
 
     public void addMappingsListener(TriplesMapCollectionListener listener) {
         if (listener != null && !mappingListeners.contains(listener))
@@ -111,7 +114,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                 prefixManager);
     }
 
-    public MutablePrefixManager getMutablePrefixManager() {
+    OntologyPrefixManager getMutablePrefixManager() {
         return prefixManager;
     }
 

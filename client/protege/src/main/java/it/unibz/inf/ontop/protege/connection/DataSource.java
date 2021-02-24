@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.connection;
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
-import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.core.JDBCConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +45,15 @@ public class DataSource {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSource.class);
 	
 	private final Properties properties = new Properties();
+	private final JDBCConnectionManager connectionManager;
 
 	private final URI id;
 	private String driver = "", url = "", username = "", password = "";
 
 	private final List<DataSourceListener> listeners = new ArrayList<>();
 
-	public DataSource() {
+	public DataSource(JDBCConnectionManager connectionManager) {
+		this.connectionManager = connectionManager;
 		this.id = URI.create(UUID.randomUUID().toString());
 	}
 
@@ -94,8 +96,7 @@ public class DataSource {
 	}
 
 	public Connection getConnection() throws SQLException {
-		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-		return man.getConnection(url, username, password);
+		return connectionManager.getConnection(url, username, password);
 	}
 
 	public Properties asProperties() {
@@ -109,16 +110,17 @@ public class DataSource {
 		return p;
 	}
 
+	/**
+	 * No need to remove listeners - this is handled by OBDAModelManager
+	 * @param listener
+	 */
 	public void addListener(DataSourceListener listener) {
 		if (listener != null && !listeners.contains(listener))
 			listeners.add(listener);
 	}
 
-	public void removeListener(DataSourceListener listener) {
-		listeners.remove(listener);
-	}
-
 	public void load(File propertyFile) throws IOException {
+		properties.clear();
 		if (propertyFile.exists())
 			try (FileReader reader = new FileReader(propertyFile)) {
 				properties.load(reader);
@@ -126,26 +128,12 @@ public class DataSource {
 			}
 	}
 
+	/**
+	 * possibly called after load() to override settings from the OBDA file
+	*/
 	public void update(Properties p) {
 		properties.putAll(p);
 		updateDataSourceParametersFromUserSettings();
-	}
-
-	public void store(File propertyFile) throws IOException {
-		Properties properties = asProperties();
-
-		// Generate a property file iff there is at least one property that is not "jdbc.name"
-		if (properties.entrySet().stream()
-				.anyMatch(e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
-						!e.getValue().equals(""))){
-			try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
-				properties.store(outputStream, null);
-			}
-			LOGGER.info("Property file saved to {}", propertyFile.toPath());
-		}
-		else {
-			Files.deleteIfExists(propertyFile.toPath());
-		}
 	}
 
 	private void updateDataSourceParametersFromUserSettings() {
@@ -158,4 +146,23 @@ public class DataSource {
 				Optional.ofNullable(properties.getProperty(JDBC_DRIVER))
 						.orElseGet(this::getDriver));
 	}
+
+
+	public void store(File propertyFile) throws IOException {
+		Properties properties = asProperties();
+
+		// Generate a property file iff there is at least one property that is not "jdbc.name"
+		if (properties.entrySet().stream()
+				.anyMatch(e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
+						!e.getValue().equals(""))) {
+			try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
+				properties.store(outputStream, null);
+			}
+			LOGGER.info("Property file saved to {}", propertyFile.toPath());
+		}
+		else {
+			Files.deleteIfExists(propertyFile.toPath());
+		}
+	}
+
 }

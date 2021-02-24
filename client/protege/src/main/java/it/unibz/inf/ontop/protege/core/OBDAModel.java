@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.connection.DataSource;
@@ -12,7 +10,6 @@ import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
-import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -33,14 +30,14 @@ public class OBDAModel {
 
     private final OWLOntology ontology;
 
-    // mutable
-    private final DataSource datasource = new DataSource();
-    // mutable
+    // the next 3 components are fully mutable and OBDAModel listens on them
+    private final DataSource datasource;
     private final TriplesMapCollection triplesMapCollection;
-    // Mutable: the ontology inside is replaced
+    private final QueryManager queryManager;
+
+    // these 2 components are immutable
+    private final OntologyPrefixManager prefixManager; // can extend the list of the ontology prefixes!
     private final OntologySignature signature;
-    // mutable
-    private final QueryManager queryManager = new QueryManager();
 
     private final OntopConfigurationManager configurationManager;
 
@@ -51,34 +48,36 @@ public class OBDAModel {
         this.ontology = ontology;
         this.obdaModelManager = obdaModelManager;
 
+        datasource = new DataSource(obdaModelManager.getConnectionManager());
+        datasource.addListener(s -> setOntologyDirtyFlag());
+
         configurationManager = new OntopConfigurationManager(obdaModelManager, obdaModelManager.getStandardProperties());
 
-        triplesMapCollection = new TriplesMapCollection(ontology);
-
         signature = new OntologySignature(ontology);
+        prefixManager = new OntologyPrefixManager(ontology);
 
-        triplesMapCollection.addMappingsListener(s -> triggerOntologyChanged());
+        triplesMapCollection = new TriplesMapCollection(prefixManager);
+        triplesMapCollection.addMappingsListener(s -> setOntologyDirtyFlag());
 
+        queryManager = new QueryManager();
         queryManager.addListener(new QueryManagerEventListener() {
             @Override
             public void inserted(QueryManager.Item group, int indexInParent) {
-                triggerOntologyChanged();
+                setOntologyDirtyFlag();
             }
             @Override
             public void removed(QueryManager.Item group, int indexInParent) {
-                triggerOntologyChanged();
+                setOntologyDirtyFlag();
             }
             @Override
             public void renamed(QueryManager.Item group, int indexInParent) {
-                triggerOntologyChanged();
+                setOntologyDirtyFlag();
             }
             @Override
             public void changed(QueryManager.Item group, int indexInParent) {
-                triggerOntologyChanged();
+                setOntologyDirtyFlag();
             }
         });
-
-        datasource.addListener(s -> triggerOntologyChanged());
     }
 
     public OWLOntology getOntology() { return ontology; }
@@ -97,23 +96,23 @@ public class OBDAModel {
 
     public OntologySignature getOntologySignature() { return signature; }
 
-    public MutablePrefixManager getMutablePrefixManager() { return triplesMapCollection.getMutablePrefixManager(); }
+    public OntologyPrefixManager getMutablePrefixManager() { return prefixManager; }
 
     public OBDAModelManager getObdaModelManager() { return obdaModelManager; }
 
     public OntopConfigurationManager getConfigurationManager() { return configurationManager; }
 
     public void load() throws Exception {
-        String owlName = getActiveOntologyOwlFilename();
-        if (owlName == null)
+        String owlFilename = getOwlFilename();
+        if (owlFilename == null)
             return;
 
-        File obdaFile = new File(URI.create(owlName + OBDA_EXT));
+        File obdaFile = fileOf(owlFilename, OBDA_EXT);
         if (obdaFile.exists()) {
-            configurationManager.load(owlName);
-            datasource.load(new File(URI.create(owlName + PROPERTY_EXT)));
+            configurationManager.load(owlFilename);
+            datasource.load(fileOf(owlFilename, PROPERTY_EXT));
             triplesMapCollection.load(obdaFile, this); // can update datasource!
-            queryManager.load(new File(URI.create(owlName + QUERY_EXT)));
+            queryManager.load(fileOf(owlFilename, QUERY_EXT));
             obdaModelManager.getModelManager().setClean(ontology);
         }
         else {
@@ -122,23 +121,23 @@ public class OBDAModel {
     }
 
     public void store() throws IOException {
-        String owlName = getActiveOntologyOwlFilename();
-        if (owlName == null)
+        String owlFilename = getOwlFilename();
+        if (owlFilename == null)
             return;
 
         try {
-            triplesMapCollection.store(new File(URI.create(owlName + OBDA_EXT)));
-            queryManager.store(new File(URI.create(owlName + QUERY_EXT)));
-            datasource.store(new File(URI.create(owlName + PROPERTY_EXT)));
+            triplesMapCollection.store(fileOf(owlFilename, OBDA_EXT));
+            queryManager.store(fileOf(owlFilename, QUERY_EXT));
+            datasource.store(fileOf(owlFilename, PROPERTY_EXT));
         }
         catch (Exception e) {
-            triggerOntologyChanged();
+            setOntologyDirtyFlag();
             throw e;
         }
     }
 
-    private String getActiveOntologyOwlFilename() {
-        IRI documentIRI = obdaModelManager.getOntologyManager().getOntologyDocumentIRI(ontology);
+    private String getOwlFilename() {
+        IRI documentIRI = ontology.getOWLOntologyManager().getOntologyDocumentIRI(ontology);
 
         if (!UIUtil.isLocalFile(documentIRI.toURI()))
             return null;
@@ -148,9 +147,11 @@ public class OBDAModel {
         return owlDocumentIriString.substring(0, i);
     }
 
+    private static File fileOf(String owlFileName, String extension) {
+        return new File(URI.create(owlFileName + extension));
+    }
 
-
-    private void triggerOntologyChanged() {
+    private void setOntologyDirtyFlag() {
         obdaModelManager.getModelManager().setDirty(ontology);
     }
 
@@ -163,7 +164,7 @@ public class OBDAModel {
     }
 
     public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {
-        obdaModelManager.getOntologyManager().addAxioms(ontology, axioms);
+        ontology.getOWLOntologyManager().addAxioms(ontology, axioms);
     }
 
 

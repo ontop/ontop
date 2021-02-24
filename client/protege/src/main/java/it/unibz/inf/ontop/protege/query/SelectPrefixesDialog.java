@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.query;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
+import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 
 import javax.swing.*;
@@ -55,7 +55,7 @@ public class SelectPrefixesDialog extends JDialog {
 	 * @param queryString query
 	 */
 
-	public SelectPrefixesDialog(MutablePrefixManager prefixManager, String queryString) {
+	public SelectPrefixesDialog(OntologyPrefixManager prefixManager, String queryString) {
 		prefixMap = prefixManager.getPrefixMap();
 
 		setTitle("Select Prefixes for the Query");

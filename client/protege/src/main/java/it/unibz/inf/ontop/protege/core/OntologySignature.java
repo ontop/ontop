@@ -30,35 +30,36 @@ import org.semanticweb.owlapi.model.parameters.Imports;
 
 
 public class OntologySignature {
-
+	
+	private static final Imports IMPORTS = Imports.INCLUDED;
+	
 	private final OWLOntology ontology;
 
 	public OntologySignature(OWLOntology ontology) {
 		this.ontology = ontology;
 	}
 
-	private static org.semanticweb.owlapi.model.IRI convert(IRI iri) {
-		return org.semanticweb.owlapi.model.IRI.create(iri.getIRIString());
-	}
-
 	public boolean containsClass(IRI iri) {
-		return ontology.containsClassInSignature(convert(iri), Imports.INCLUDED);
+		return ontology.containsClassInSignature(convert(iri), IMPORTS);
 	}
 
 	public boolean containsObjectProperty(IRI iri) {
-		return ontology.containsObjectPropertyInSignature(convert(iri), Imports.INCLUDED);
+		return ontology.containsObjectPropertyInSignature(convert(iri), IMPORTS);
 	}
 
 	public boolean containsDataProperty(IRI iri) {
-		return ontology.containsDataPropertyInSignature(convert(iri), Imports.INCLUDED);
+		return ontology.containsDataPropertyInSignature(convert(iri),IMPORTS);
 	}
 
 	public boolean containsAnnotationProperty(IRI iri) {
-		return ontology.containsAnnotationPropertyInSignature(convert(iri), Imports.INCLUDED);
+		return ontology.containsAnnotationPropertyInSignature(convert(iri), IMPORTS);
 	}
 
 	public boolean isBuiltinProperty(IRI iri) {
 		return iri.equals(OWL.SAME_AS) || iri.equals(Ontop.CANONICAL_IRI);
 	}
 
+	private static org.semanticweb.owlapi.model.IRI convert(IRI iri) {
+		return org.semanticweb.owlapi.model.IRI.create(iri.getIRIString());
+	}
 }

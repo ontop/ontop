@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.connection.DataSourceListener;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
@@ -9,7 +10,6 @@ import it.unibz.inf.ontop.protege.mapping.TriplesMapCollectionListener;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.owl.OWLEditorKit;
@@ -33,10 +33,10 @@ public class OBDAModelManager implements Disposable {
 
 	private final List<OBDAModelManagerListener> obdaManagerListeners = new ArrayList<>();
 
-	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
-
 	private final OWLModelManagerListener modelManagerListener = new OBDAPluginOWLModelManagerListener();
+	private final OWLOntologyChangeListener ontologyManagerListener = new OntologyRefactoringListener();
 
+	private final JDBCConnectionManager connectionManager;
 	private final Map<OWLOntologyID, OBDAModel> obdaModels = new HashMap<>();
 
 	@Nullable
@@ -47,9 +47,10 @@ public class OBDAModelManager implements Disposable {
 	public OBDAModelManager(OWLEditorKit editorKit) {
 		this.owlEditorKit = editorKit;
 
-		getModelManager().addListener(modelManagerListener);
-		getOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener());
+		connectionManager = new JDBCConnectionManager();
 
+		getModelManager().addListener(modelManagerListener);
+		getModelManager().getOWLOntologyManager().addOntologyChangeListener(ontologyManagerListener);
 
 		/*
 		 * TODO: avoid using Default injector
@@ -72,16 +73,16 @@ public class OBDAModelManager implements Disposable {
 	 */
 	@Override
 	public void dispose() {
-		try {
-			getModelManager().removeListener(modelManagerListener);
-			connectionManager.dispose();
-		}
-		catch (Exception e) {
-			LOGGER.warn(e.getMessage());
-		}
+		getModelManager().getOWLOntologyManager().removeOntologyChangeListener(ontologyManagerListener);
+		getModelManager().removeListener(modelManagerListener);
+		connectionManager.dispose();
 	}
 
+	@Nonnull
 	public OBDAModel getCurrentOBDAModel() {
+		if (currentObdaModel == null)
+			throw new MinorOntopInternalBugException("No current OBDA Model");
+
 		return currentObdaModel;
 	}
 
@@ -115,8 +116,8 @@ public class OBDAModelManager implements Disposable {
 		return owlEditorKit.getModelManager();
 	}
 
-	OWLOntologyManager getOntologyManager() {
-		return getModelManager().getOWLOntologyManager();
+	JDBCConnectionManager getConnectionManager() {
+		return connectionManager;
 	}
 
 	OBDAModel getOBDAModel(OWLOntology ontology) {
@@ -286,7 +287,7 @@ public class OBDAModelManager implements Disposable {
 
 	private void ontologyLoaded() {
 		try {
-			currentObdaModel.load();
+			getCurrentOBDAModel().load();
 		}
 		catch (Exception e) {
 			LOGGER.error(e.getMessage());
@@ -300,7 +301,7 @@ public class OBDAModelManager implements Disposable {
 
 	private void ontologySaved() {
 		try {
-			currentObdaModel.store();
+			getCurrentOBDAModel().store();
 		}
 		catch (Exception e) {
 			LOGGER.error(e.getMessage());

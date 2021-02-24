@@ -161,6 +161,10 @@ public class QueryManager {
 
 	private final List<QueryManagerEventListener> listeners = new ArrayList<>();
 
+	/**
+	 * No need to remove listeners - this is handled by OBDAModelManager
+	 * @param listener
+	 */
 	public void addListener(QueryManagerEventListener listener) {
 		if (listener != null && !listeners.contains(listener))
 			listeners.add(listener);

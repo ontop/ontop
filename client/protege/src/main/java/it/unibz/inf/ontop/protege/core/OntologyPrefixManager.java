@@ -31,41 +31,39 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
 
 /**
- * This PrefixManager is meant to 'wrap' Protege's prefix manager. That way any
- * prefix defined in Protege are transparently passed to all OBDA lib classes.
+ * This PrefixManager wraps Protege's prefix manager.
+ * Any prefixes defined in Protege are transparently passed to all OBDA lib classes.
  */
-public class MutablePrefixManager extends AbstractPrefixManager {
+
+public class OntologyPrefixManager extends AbstractPrefixManager {
 
     private final PrefixDocumentFormat owlmapper;
 
 	private final boolean hasExplicitDefaultPrefixNamespace;
 
-	public MutablePrefixManager(OWLOntology ontology) {
+	public OntologyPrefixManager(@Nonnull OWLOntology ontology) {
 		this.owlmapper = PrefixUtilities.getPrefixOWLOntologyFormat(ontology);
 
-		if (ontology != null) {
-			OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
-					ontology,
-					ontology.getOWLOntologyManager().getOntologyFormat(ontology));
+		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
+				ontology,
+				Objects.requireNonNull(ontology.getOWLOntologyManager().getOntologyFormat(ontology)));
 
-			if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
-					.anyMatch(p -> p.equals(""))) {
-				String prefix = nsm.getNamespaceForPrefix("");
-				hasExplicitDefaultPrefixNamespace = true;
-				addPrefix(PrefixManager.DEFAULT_PREFIX, prefix);
-			}
-			else {
-				hasExplicitDefaultPrefixNamespace = false;
-				generateDefaultPrefixNamespaceIfPossible(ontology.getOntologyID());
-			}
+		if (StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
+				.anyMatch(p -> p.equals(""))) {
+			String prefix = nsm.getNamespaceForPrefix("");
+			hasExplicitDefaultPrefixNamespace = true;
+			addPrefix(PrefixManager.DEFAULT_PREFIX, prefix);
 		}
-		else
+		else {
 			hasExplicitDefaultPrefixNamespace = false;
+			generateDefaultPrefixNamespaceIfPossible(ontology.getOntologyID());
+		}
 	}
 
 	public void updateOntologyID(OWLOntologyID newID) {
@@ -85,17 +83,17 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
-		com.google.common.base.Optional<org.semanticweb.owlapi.model.IRI> ontologyIRI = ontologyID.getOntologyIRI();
-		if (ontologyIRI.isPresent()) {
-			String prefixUri = ontologyIRI.get().toString();
-			if (!prefixUri.endsWith("#") && !prefixUri.endsWith("/")) {
-				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
-				if (!prefixUri.endsWith(defaultSeparator))  {
-					prefixUri += defaultSeparator;
-				}
+		if (!ontologyID.getOntologyIRI().isPresent())
+			return;
+
+		String prefixUri = ontologyID.getOntologyIRI().get().toString();
+		if (!prefixUri.endsWith("#") && !prefixUri.endsWith("/")) {
+			String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
+			if (!prefixUri.endsWith(defaultSeparator))  {
+				prefixUri += defaultSeparator;
 			}
-			addPrefix(PrefixManager.DEFAULT_PREFIX, prefixUri);
 		}
+		addPrefix(PrefixManager.DEFAULT_PREFIX, prefixUri);
 	}
 
 

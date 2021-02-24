@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.action;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
@@ -31,7 +30,6 @@ import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -68,7 +66,7 @@ public class BootstrapAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent evt) {
 
 		OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
-		MutablePrefixManager prefixManager = obdaModel.getMutablePrefixManager();
+		OntologyPrefixManager prefixManager = obdaModel.getMutablePrefixManager();
 
 		String defaultBaseIRI = prefixManager.getDefaultIriPrefix()
 				.replace("#", "/");
