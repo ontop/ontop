@@ -36,9 +36,7 @@ public class JsonUniqueConstraint extends JsonOpenObject {
     }
 
     public void insert(NamedRelationDefinition relation, QuotedIDFactory idFactory) throws MetadataExtractionException {
-            FunctionalDependency.Builder builder = isPrimaryKey
-                    ? UniqueConstraint.primaryKeyBuilder(relation, name)
-                    : UniqueConstraint.builder(relation, name);
+            FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, name);
 
             JsonMetadata.deserializeAttributeList(idFactory, determinants, builder::addDeterminant);
             builder.build();
