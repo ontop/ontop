@@ -43,6 +43,7 @@ public class TeiidDBMetadataProvider extends AbstractDBMetadataProvider {
     @Override
     protected String getRelationCatalog(RelationID id) {
         String catalog = id.getComponents().toString();
+        // TODO
         return null;
     }
 

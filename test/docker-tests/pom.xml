@@ -98,6 +98,7 @@
             <artifactId>teiid</artifactId>
             <classifier>jdbc</classifier>
             <version>15.0.1</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
