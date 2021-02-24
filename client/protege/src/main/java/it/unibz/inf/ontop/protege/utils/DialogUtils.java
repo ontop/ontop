@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.utils;
  */
 
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
@@ -232,15 +231,8 @@ public class DialogUtils {
 				getOntopIcon()) == JOptionPane.YES_OPTION;
 	}
 
-	private static final int MAX_CHARACTERS_PER_LINE_COUNT = 150;
-
 	public static void showPrettyMessageDialog(Component parent, Object message, String title, int type) {
-		JOptionPane narrowPane = new JOptionPane(message, type) {
-			@Override
-			public int getMaxCharactersPerLineCount() {
-				return MAX_CHARACTERS_PER_LINE_COUNT;
-			}
-		};
+		JOptionPane narrowPane = new JOptionPane(message, type);
 		JDialog errorDialog = narrowPane.createDialog(parent, title);
 		errorDialog.setVisible(true);
 	}
@@ -275,7 +267,7 @@ public class DialogUtils {
 		Throwable cause = e.getCause();
 		if (cause instanceof SQLException && datasource != null) {
 			JOptionPane.showMessageDialog(parent,
-					"<html><b>Error connecting to the database:</b> " + cause.getMessage() + ".<br><br>" +
+					"<html><b>Error connecting to the database:</b> " + htmlEscape(cause.getMessage()) + ".<br><br>" +
 							HTML_TAB + "JDBC driver: " + datasource.getDriver() + "<br>" +
 							HTML_TAB + "Connection URL: " + datasource.getURL() + "<br>" +
 							HTML_TAB + "Username: " + datasource.getUsername() + "</html>",
@@ -295,7 +287,7 @@ public class DialogUtils {
 			Throwable owlExceptionCause = owlException.getCause();
 			JOptionPane.showMessageDialog(parent,
 					"<html><b>Error executing SPARQL query.</b><br><br>" +
-							HTML_TAB + owlExceptionCause.getMessage() + "</b>.<br></html>",
+							HTML_TAB + htmlEscape(owlExceptionCause.getMessage()) + "</b>.<br></html>",
 					title,
 					JOptionPane.ERROR_MESSAGE);
 		}
@@ -310,12 +302,7 @@ public class DialogUtils {
 				e.getMessage() + "\n" +
 				"For more information, see the log.";
 
-		JOptionPane narrowPane = new JOptionPane(text, JOptionPane.ERROR_MESSAGE) {
-			@Override
-			public int getMaxCharactersPerLineCount() {
-				return MAX_CHARACTERS_PER_LINE_COUNT;
-			}
-		};
+		JOptionPane narrowPane = new JOptionPane(text, JOptionPane.ERROR_MESSAGE);
 		JDialog errorDialog = narrowPane.createDialog(parent, title);
 		errorDialog.setModal(true);
 		errorDialog.setVisible(true);
