@@ -1,12 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <artifactId>ontop-rdf4j-webapps</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
+        <artifactId>ontop-rdf4j-webapps</artifactId>
         <version>4.1.0-beta-1-SNAPSHOT</version>
     </parent>
+
     <artifactId>ontop-rdf4j-config-sql</artifactId>
-    <name>ontop-rdf4j-sql</name>
     <description>This is the SQL dependent rdf4j API implementation based on Ontop</description>
 
     <dependencies>
@@ -26,20 +30,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <artifactId>ontop-rdf4j</artifactId>
             <groupId>${project.groupId}</groupId>
-            <version>${project.version}</version>
+            <artifactId>ontop-rdf4j</artifactId>
         </dependency>
         <dependency>
-            <artifactId>ontop-system-sql-owlapi</artifactId>
             <groupId>${project.groupId}</groupId>
-            <version>${project.version}</version>
+            <artifactId>ontop-system-sql-owlapi</artifactId>
         </dependency>
-
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>owlapi-apibinding</artifactId>
         </dependency>
+
         <!-- These will download some of the sources -->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
@@ -49,7 +51,6 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryresultio-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryparser-api</artifactId>
@@ -58,12 +59,10 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryparser-sparql</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryalgebra-evaluation</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryresultio-text</artifactId>
@@ -90,12 +89,10 @@
             <groupId>eu.optique-project</groupId>
             <artifactId>r2rml-api-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>eu.optique-project</groupId>
             <artifactId>r2rml-api-rdf4j-binding</artifactId>
         </dependency>
-
     </dependencies>
 
 </project>
