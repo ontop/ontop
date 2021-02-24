@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -18,10 +19,12 @@ public class OfflineMetadataProviderBuilder {
     private final DBTypeFactory dbTypeFactory;
     private final QuotedIDFactory idFactory;
     private final ImmutableList.Builder<NamedRelationDefinition> listBuilder = ImmutableList.builder();
+    private final CoreSingletons coreSingletons;
 
-     public OfflineMetadataProviderBuilder(TypeFactory typeFactory) {
+    public OfflineMetadataProviderBuilder(CoreSingletons coreSingletons) {
+        this.coreSingletons = coreSingletons;
         this.idFactory = new SQLStandardQuotedIDFactory();
-        this.dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
     }
 
     public NamedRelationDefinition createDatabaseRelation(ImmutableList<RelationID> allIds, RelationDefinition.AttributeListBuilder builder) {
@@ -106,6 +109,11 @@ public class OfflineMetadataProviderBuilder {
             @Override
             public DBTypeFactory getDBTypeFactory() {
                 return dbTypeFactory;
+            }
+
+            @Override
+            public CoreSingletons getCoreSingletons() {
+                return coreSingletons;
             }
 
             @Override

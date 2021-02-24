@@ -1,15 +1,22 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <parent>
-        <artifactId>ontop-core</artifactId>
-        <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.1.0-beta-1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>it.unibz.inf.ontop</groupId>
+        <artifactId>ontop-core</artifactId>
+        <version>4.1.0-beta-1-SNAPSHOT</version>
+    </parent>
+
     <artifactId>ontop-model</artifactId>
-    <packaging>jar</packaging>
-    <name>ontop-model</name>
+
+    <properties>
+        <!-- filtering currently not used -->
+        <filter.main.resources>true</filter.main.resources>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -19,15 +26,10 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-rdf-rdf4j</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.antlr</groupId>-->
-            <!--<artifactId>antlr</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -71,21 +73,14 @@
             <groupId>io.mikael</groupId>
             <artifactId>urlbuilder</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.locationtech.proj4j</groupId>
+            <artifactId>proj4j</artifactId>
+        </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
-
     </dependencies>
 
-
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-    </build>
 </project>

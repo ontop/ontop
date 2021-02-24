@@ -1,15 +1,12 @@
 package it.unibz.inf.ontop.protege.core;
 
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
-import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
-import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -30,13 +27,13 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private OntopOWLConnection owlConnection;
     private final OWLAPITranslatorOWL2QL owlapiTranslator;
 
-
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
         super(rootOntology, configuration, BufferingMode.BUFFERING);
-        this.owlapiTranslator = configuration.getOWLAPITranslator();
+
+        owlapiTranslator = configuration.getOntopConfiguration().getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
 
         reasoner = factory.createReasoner(rootOntology, configuration);
-        this.configurationManager = configuration.getOntopConfigurationManager();
+        configurationManager = configuration.getOntopConfigurationManager();
         owlConnection = reasoner.getConnection();
     }
 
@@ -65,13 +62,11 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
         super.flush();
         try {
             reasoner = factory.createReasoner(configurationManager.buildOntopSQLOWLAPIConfiguration(getRootOntology()));
-        } catch (OWLOntologyCreationException e) {
+        }
+        catch (OWLOntologyCreationException e) {
             e.printStackTrace();
         }
-
-
     }
-
 
     @Override
     public void interrupt() {
@@ -106,7 +101,6 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     @Override
     public boolean isConsistent() {
         return true;
-
     }
 
 
@@ -322,25 +316,14 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     /**
      * Methods to get the empty concepts and roles in the ontology using the given mappings.
      * It generates SPARQL queries to check for entities.
-     * @return QuestOWLEmptyEntitiesChecker class to get empty concepts and roles
+     * @return OntopOWLEmptyEntitiesChecker class to get empty concepts and roles
      * @throws Exception
      */
-    public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
+    public OntopOWLEmptyEntitiesChecker getEmptyEntitiesChecker() {
         OWLOntology rootOntology = getRootOntology();
         Ontology mergeOntology = owlapiTranslator.translateAndClassify(rootOntology);
         ClassifiedTBox tBox = mergeOntology.tbox();
 
-        return new QuestOWLEmptyEntitiesChecker(tBox, owlConnection);
-    }
-
-    /**
-     * Replaces the owl connection with a new one
-     * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
-     * @return The old connection: The caller must close this connection
-     */
-    public OWLConnection replaceConnection() throws OntopConnectionException {
-        OWLConnection oldconn = this.owlConnection;
-        owlConnection = reasoner.getConnection();
-        return oldconn;
+        return new OntopOWLEmptyEntitiesChecker(tBox, owlConnection);
     }
 }

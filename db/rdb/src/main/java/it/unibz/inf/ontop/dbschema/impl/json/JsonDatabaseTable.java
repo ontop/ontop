@@ -86,21 +86,19 @@ public class JsonDatabaseTable extends JsonOpenObject {
         return new DatabaseTableDefinition(allIDs, attributeListBuilder);
     }
 
-    public void insertIntegrityConstraints(MetadataLookup lookup) throws MetadataExtractionException {
-        DatabaseTableDefinition relation = (DatabaseTableDefinition)lookup.getRelation(
-                JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), name));
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup lookupForFk) throws MetadataExtractionException {
 
         for (JsonUniqueConstraint uc: uniqueConstraints)
-            uc.insert(relation, lookup.getQuotedIDFactory());
+            uc.insert(relation, lookupForFk.getQuotedIDFactory());
 
         for (JsonFunctionalDependency fd: otherFunctionalDependencies)
-            fd.insert(relation, lookup.getQuotedIDFactory());
+            fd.insert(relation, lookupForFk.getQuotedIDFactory());
 
         for (JsonForeignKey fk : foreignKeys) {
             if (!fk.from.relation.equals(this.name))
                 throw new MetadataExtractionException("Table names mismatch: " + name + " != " + fk.from.relation);
 
-            fk.insert(relation, lookup);
+            fk.insert(relation, lookupForFk);
         }
     }
 

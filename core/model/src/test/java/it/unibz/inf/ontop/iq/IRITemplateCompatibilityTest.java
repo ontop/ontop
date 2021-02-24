@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -121,7 +120,7 @@ public class IRITemplateCompatibilityTest {
                 Template.builder().addSeparator("http://example.org/level0/").addColumn().build(), 1));
     }
 
-    private boolean areCompatible(ImmutableList<TemplateComponent> template1, int arity1, ImmutableList<TemplateComponent> template2, int arity2) {
+    private boolean areCompatible(ImmutableList<Template.Component> template1, int arity1, ImmutableList<Template.Component> template2, int arity2) {
         ImmutableFunctionalTerm term1 = createIRIFunctionalTerm(template1, arity1, "x");
         ImmutableFunctionalTerm term2 = createIRIFunctionalTerm(template2, arity2, "y");
 
@@ -136,7 +135,7 @@ public class IRITemplateCompatibilityTest {
         return res1;
     }
 
-    private ImmutableFunctionalTerm createIRIFunctionalTerm(ImmutableList<TemplateComponent> template, int arity, String variablePrefix) {
+    private ImmutableFunctionalTerm createIRIFunctionalTerm(ImmutableList<Template.Component> template, int arity, String variablePrefix) {
         ImmutableList<Variable> arguments = IntStream.range(0, arity)
                 .mapToObj(i -> TERM_FACTORY.getVariable(variablePrefix + i))
                 .collect(ImmutableCollectors.toList());

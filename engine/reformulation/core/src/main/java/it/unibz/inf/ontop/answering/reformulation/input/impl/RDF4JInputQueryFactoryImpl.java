@@ -2,14 +2,18 @@ package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 
 public class RDF4JInputQueryFactoryImpl implements RDF4JInputQueryFactory {
 
+    private final OntopReformulationSettings settings;
+
     @Inject
-    private RDF4JInputQueryFactoryImpl() {
+    private RDF4JInputQueryFactoryImpl(OntopReformulationSettings settings) {
+        this.settings = settings;
     }
 
     @Override
@@ -29,6 +33,6 @@ public class RDF4JInputQueryFactoryImpl implements RDF4JInputQueryFactory {
 
     @Override
     public RDF4JDescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery, BindingSet bindings) {
-        return new RDF4JDescribeQueryImpl(parsedQuery, queryString, bindings);
+        return new RDF4JDescribeQueryImpl(parsedQuery, queryString, bindings, settings.isFixedObjectIncludedInDescribe());
     }
 }

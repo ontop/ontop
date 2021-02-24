@@ -117,15 +117,13 @@ public class S_Equivalences_NewDAGTest extends TestCase{
 	}
 	
 	private static <T> boolean coincide(Set<Equivalences<T>> setd1, Set<Equivalences<T>> setd2) {
-		Set<T> set2 = new HashSet<T>();
-		Iterator<Equivalences<T>> it1 =setd2.iterator();
-		while (it1.hasNext()) {
-			set2.addAll(it1.next().getMembers());	
+		Set<T> set2 = new HashSet<>();
+		for (Equivalences<T> ts : setd2) {
+			set2.addAll(ts.getMembers());
 		}
-		Set<T> set1 = new HashSet<T>();
-		Iterator<Equivalences<T>> it2 =setd1.iterator();
-		while (it2.hasNext()) {
-			set1.addAll(it2.next().getMembers());	
+		Set<T> set1 = new HashSet<>();
+		for (Equivalences<T> ts : setd1) {
+			set1.addAll(ts.getMembers());
 		}
 		return set2.equals(set1);
 		

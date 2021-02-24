@@ -271,9 +271,6 @@ public class QueryLoggerImpl implements QueryLogger {
             return;
         unblockedResulSetTime = System.currentTimeMillis();
 
-        if (reformulationTime == -1)
-            throw new IllegalStateException("Reformulation should have been declared as finished");
-
         if (isDecompositionEnabled) {
 
             StringWriter stringWriter = new StringWriter();
@@ -296,7 +293,9 @@ public class QueryLoggerImpl implements QueryLogger {
     }
 
     protected void writeResultSetUnblockedSpecificFields(JsonGenerator js) throws IOException {
-        js.writeNumberField(EXECUTION_BEFORE_UNBLOCKING_DURATION_KEY, unblockedResulSetTime - reformulationTime);
+        // For DESCRIBE, reformulation time is not provided
+        if (reformulationTime != -1)
+            js.writeNumberField(EXECUTION_BEFORE_UNBLOCKING_DURATION_KEY, unblockedResulSetTime - reformulationTime);
     }
 
     @Override
@@ -333,7 +332,9 @@ public class QueryLoggerImpl implements QueryLogger {
     }
 
     protected void writeLastResultRetrievedSpecificFields(JsonGenerator js, long lastResultFetchedTime, long resultCount) throws IOException {
-        js.writeNumberField(EXECUTION_AND_FETCHING_DURATION_KEY, lastResultFetchedTime - reformulationTime);
+        // For DESCRIBE, reformulation time is not provided
+        if (reformulationTime != -1)
+            js.writeNumberField(EXECUTION_AND_FETCHING_DURATION_KEY, lastResultFetchedTime - reformulationTime);
         js.writeNumberField(TOTAL_DURATION_KEY, lastResultFetchedTime - creationTime);
         js.writeNumberField(RESULT_COUNT_KEY, resultCount);
     }
@@ -417,6 +418,10 @@ public class QueryLoggerImpl implements QueryLogger {
             js.writeObjectFieldStart(PAYLOAD_KEY);
             js.writeStringField(QUERY_ID_KEY, queryId.toString());
             js.writeStringField(EXCEPTION_KEY, e.getMessage());
+            if (sparqlQueryString != null)
+                js.writeStringField(SPARQL_QUERY_KEY, sparqlQueryString);
+            if (reformulatedQuery != null)
+                js.writeStringField(REFORMULATED_QUERY_KEY, reformulatedQuery.toString());
             js.writeEndObject();
             js.writeEndObject();
         } catch (IOException ex) {
@@ -441,8 +446,9 @@ public class QueryLoggerImpl implements QueryLogger {
             js.writeStringField(APPLICATION_KEY, applicationName);
             js.writeObjectFieldStart(PAYLOAD_KEY);
             js.writeStringField(QUERY_ID_KEY, queryId.toString());
-            //noinspection ConstantConditions
-            writeReformulationSpecificFields(reformulatedQuery, wasReformulationCached, js);
+            if (reformulatedQuery != null)
+                //noinspection ConstantConditions
+                writeReformulationSpecificFields(reformulatedQuery, wasReformulationCached, js);
             writeResultSetUnblockedSpecificFields(js);
             writeLastResultRetrievedSpecificFields(js, lastResultFetchedTime, resultCount);
             js.writeEndObject();

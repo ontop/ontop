@@ -26,9 +26,9 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
-import junit.framework.TestCase;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -45,9 +45,11 @@ import java.util.List;
 import org.apache.commons.rdf.api.IRI;
 
 import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
-public class DAGTest extends TestCase {
+public class DAGTest {
 
 	public final static Logger log = LoggerFactory.getLogger(DAGTest.class);
 
@@ -59,9 +61,8 @@ public class DAGTest extends TestCase {
 
 	private static final RDF rdf = new SimpleRDF();
 
-	public List<List<Description>> get_results(ClassifiedTBox reasoner, String resname) throws Exception {
-		String resfile = owlloc + resname + ".si";
-		File results = new File(resfile);
+	private List<List<Description>> get_results(ClassifiedTBox reasoner, String resname) throws Exception {
+		File results = new File(owlloc + resname + ".si");
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -167,51 +168,44 @@ public class DAGTest extends TestCase {
 			}
 		}
 		
-		System.out.println(classes);
-		System.out.println(roles);
 		assertEquals(exp_idx.get(0).size(), classes.size());
 		assertEquals(exp_idx.get(1).size(), roles.size());
 
 		for (Description node : exp_idx.get(0)) {
-			classes.contains(node);
+			assertTrue(classes.contains(node));
 		}
 		for (Description node : exp_idx.get(1)) {
-			roles.contains(node);
+			assertTrue(roles.contains(node));
 		}
 	}
 
+	@Test
 	public void test_1_0_0() throws Exception {
-		String testname = "test_1_0_0";
-		test_dag_index_nodes(testname);
+		test_dag_index_nodes("test_1_0_0");
 	}
 
+	@Test
 	public void test_1_0_1() throws Exception {
-		String testname = "test_1_0_1";
-		test_dag_index_nodes(testname);
+		test_dag_index_nodes("test_1_0_1");
 	}
 
+	@Test
 	public void test_1_1_0() throws Exception {
-		String testname = "test_1_1_0";
-		test_dag_index_nodes(testname);
+		test_dag_index_nodes("test_1_1_0");
 	}
 
+	@Test
 	public void test_1_2_0() throws Exception {
-		String testname = "test_1_2_0";
-		test_dag_index_nodes(testname);
+		test_dag_index_nodes("test_1_2_0");
 	}
 
+	@Test
 	public void test_1_3_0() throws Exception {
-		String testname = "test_1_3_0";
-		test_dag_index_nodes(testname);
+		test_dag_index_nodes("test_1_3_0");
 	}
 
-	// public void test_1_4_0() throws Exception {
-	// String testname = "test_1_4_0";
-	// test_dag_index_nodes(testname);
-	// }
-
+	@Test
 	public void test_1_5_0() throws Exception {
-		String testname = "test_1_5_0";
-		test_dag_index_nodes(testname);
+		test_dag_index_nodes("test_1_5_0");
 	}
 }

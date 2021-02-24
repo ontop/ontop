@@ -11,6 +11,11 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
 
     boolean isPostProcessingAvoided();
 
+    /**
+     * If false, makes the query fail when an invalid triple is detected.
+     */
+    boolean areInvalidTriplesExcludedFromResultSet();
+
     boolean isQueryLoggingEnabled();
     boolean isQueryTemplateExtractionEnabled();
     boolean isSparqlQueryIncludedIntoQueryLog();
@@ -19,6 +24,13 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     boolean areTablesIncludedIntoQueryLog();
     boolean isQueryLoggingDecompositionEnabled();
     boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive();
+
+    /**
+     * Returns true if the pattern "?s ?p <describedIRI>" should also be
+     * considered while answering a DESCRIBE query.
+     *
+     */
+    boolean isFixedObjectIncludedInDescribe();
 
     ImmutableSet<String> getHttpHeaderNamesToLog();
 
@@ -32,8 +44,10 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     //--------------------------
 
     String EXISTENTIAL_REASONING = "ontop.existentialReasoning";
+    @Deprecated
     String DISTINCT_RESULTSET = "ontop.distinctResultSet";
     String AVOID_POST_PROCESSING = "ontop.avoidPostProcessing";
+    String EXCLUDE_INVALID_TRIPLES_FROM_RESULT_SET = "ontop.excludeInvalidTriplesFromResultSet";
     String QUERY_CACHE_MAX_SIZE = "ontop.cache.query.size";
     String QUERY_LOGGING = "ontop.queryLogging";
     // Needed for logging
@@ -50,4 +64,6 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     String QUERY_TEMPLATE_EXTRACTION = "ontop.queryLogging.extractQueryTemplate";
     String QUERY_LOGGING_DECOMPOSITION = "ontop.queryLogging.decomposition";
     String QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE = "ontop.queryLogging.decompositionAndMergingMutuallyExclusive";
+
+    String INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE = "ontop.includeFixedObjectPositionInDescribe";
 }

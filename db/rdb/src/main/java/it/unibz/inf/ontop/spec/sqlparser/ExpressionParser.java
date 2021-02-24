@@ -214,7 +214,7 @@ public class ExpressionParser {
             if (str.startsWith("0x"))
                 value = Long.parseLong(str.substring(2), 16);
             else if (str.toUpperCase().startsWith("X'")) // MySQL syntax
-                value =Long.parseLong(str.substring(2, str.length() - 1), 16);
+                value = Long.parseLong(str.substring(2, str.length() - 1), 16);
             else
                 throw new UnsupportedOperationException("Invalid HEX" + str);
 
@@ -431,7 +431,9 @@ public class ExpressionParser {
                 else if (column.equals(idfac.createAttributeID("false")))
                     result = termFactory.getDBBooleanConstant(false);
                 else
-                    throw new InvalidSelectQueryRuntimeException("Unable to find attribute name ", expression);
+                    throw new InvalidSelectQueryRuntimeException("Unable to find attribute "
+                            + expression
+                            + " (available attributes are " + attributes.asMap().keySet() + ")", expression);
             }
             else {
                 // if it is an attribute name (qualified or not)
@@ -565,7 +567,15 @@ public class ExpressionParser {
         @Override
         // expression1 [NOT] SIMILAR TO expression2 [ESCAPE escape]
         public void visit(SimilarToExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("SIMILAR TO is not supported", expression);
+            if (expression.getEscape() != null)
+                throw new UnsupportedSelectQueryRuntimeException("SIMILAR TO with escape is not not supported", expression);
+
+            if (expression.isNot())
+                process(expression, (t1, t2) -> termFactory.getDBNot(
+                            termFactory.getImmutableExpression(dbFunctionSymbolFactory.getDBSimilarTo(), t1, t2)));
+            else
+                process(expression, (t1, t2) -> termFactory.getImmutableExpression(
+                        dbFunctionSymbolFactory.getDBSimilarTo(), t1, t2));
         }
 
         @Override

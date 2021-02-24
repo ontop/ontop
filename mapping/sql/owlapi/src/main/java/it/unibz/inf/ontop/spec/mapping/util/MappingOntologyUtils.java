@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.util;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
@@ -10,12 +11,11 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Isolated from class {@link DirectMappingEngine} (bootstrap), because
@@ -23,16 +23,23 @@ import java.util.stream.Stream;
  */
 public class MappingOntologyUtils {
 
-    public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager,
-                                                                    Stream<TargetAtom> targetAtoms,
-                                                                    TypeFactory typeFactory,
-                                                                    boolean bootstrappedMapping) {
+    public static ImmutableSet<OWLDeclarationAxiom> extractAndInsertDeclarationAxioms(OWLOntology ontology,
+                                                                             ImmutableList<? extends SQLPPTriplesMap> tripleMaps,
+                                                                             TypeFactory typeFactory,
+                                                                             boolean bootstrappedMapping) {
 
-        OWLDataFactory dataFactory = manager.getOWLDataFactory();
-        return targetAtoms
+        OWLOntologyManager manager = ontology.getOWLOntologyManager();
+        OWLDataFactory dataFactory = ontology.getOWLOntologyManager().getOWLDataFactory();
+
+        ImmutableSet<OWLDeclarationAxiom> declarationAxioms =
+                tripleMaps.stream()
+                        .flatMap(ax -> ax.getTargetAtoms().stream())
                 .map(ta -> extractEntity(ta, dataFactory, typeFactory, bootstrappedMapping))
                 .map(dataFactory::getOWLDeclarationAxiom)
                 .collect(ImmutableCollectors.toSet());
+
+        manager.addAxioms(ontology, declarationAxioms);
+        return declarationAxioms;
     }
 
     private static OWLEntity extractEntity(TargetAtom targetAtom, OWLDataFactory dataFactory,

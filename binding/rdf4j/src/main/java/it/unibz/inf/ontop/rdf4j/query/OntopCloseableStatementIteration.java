@@ -47,11 +47,7 @@ public class OntopCloseableStatementIteration extends AbstractCloseableIteration
 
     @Override
     public void remove() throws QueryEvaluationException {
-        try {
-            iterator.remove();
-        } catch (OntopConnectionException e) {
-            throw new QueryEvaluationException(e);
-        }
+        throw new UnsupportedOperationException("Ontop is a read-only system.");
     }
 
     @Override

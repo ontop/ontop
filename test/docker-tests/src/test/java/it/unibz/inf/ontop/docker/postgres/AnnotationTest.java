@@ -52,20 +52,18 @@ public class AnnotationTest extends AbstractVirtualModeTest {
         REASONER.dispose();
     }
 
-
     @Test
     public void testAnnotationInOntology() throws Exception {
-
-        String query = Joiner.on("\n").join(
-                CharStreams.readLines(new FileReader("src/test/resources/pgsql/annotation/q1.q")));
+        String query =
+                "PREFIX xsd:\t<http://www.w3.org/2001/XMLSchema#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT *\n" +
+                "{ ?x rdfs:comment \"NT MGI.\"^^xsd:string . }";
 
         log.debug("Executing query: ");
         log.debug("Query: \n{}", query);
 
         countResults(76, query);
     }
-
-
-
 }
 

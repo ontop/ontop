@@ -21,5 +21,5 @@ public abstract class RDFFactCloseableIterator implements OntopCloseableIterator
         }
     }
 
-    protected void handleClose() throws OntopConnectionException {}
+    protected abstract void handleClose() throws OntopConnectionException;
 }

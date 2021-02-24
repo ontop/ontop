@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.template.Template;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -119,7 +118,7 @@ public class OntopMaterializerTest {
 		graph = termFactory.getConstantIRI(graphIRI);
     }
 
-	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
+	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder<?>> createAndInitConfiguration() {
 		return OntopStandaloneSQLConfiguration.defaultBuilder()
 				.jdbcUrl(url)
 				.jdbcUser(username)

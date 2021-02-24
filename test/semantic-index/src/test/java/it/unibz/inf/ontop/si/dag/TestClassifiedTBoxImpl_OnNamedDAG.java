@@ -216,7 +216,7 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 		}
 
 		public ImmutableSet<Equivalences<T>> getDirectSuper(T node) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (T target : Graphs.successorListOf(dag, node)) {
 
@@ -236,8 +236,8 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 
 			T node = v.getRepresentative();
 			
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
-			BreadthFirstIterator<T, DefaultEdge>  iterator = new BreadthFirstIterator<T, DefaultEdge>(dag, node);
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
+			BreadthFirstIterator<T, DefaultEdge>  iterator = new BreadthFirstIterator<>(dag, node);
 
 			while (iterator.hasNext()) {
 				T parent = iterator.next();
@@ -258,13 +258,11 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 
 		@Override
 		public ImmutableSet<T> getSubRepresentatives(T v) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public T getCanonicalForm(T v) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}

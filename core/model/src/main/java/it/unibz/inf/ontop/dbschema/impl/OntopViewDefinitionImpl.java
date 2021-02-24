@@ -13,7 +13,7 @@ public class OntopViewDefinitionImpl extends AbstractNamedRelationDefinition imp
     private final int level;
     private final IQ iq;
 
-    OntopViewDefinitionImpl(ImmutableList<RelationID> allIds, AttributeListBuilder builder,
+    public OntopViewDefinitionImpl(ImmutableList<RelationID> allIds, AttributeListBuilder builder,
                             IQ iqWithTemporaryAtomPredicate, int level, CoreSingletons coreSingletons) {
         super(allIds, builder);
         this.iq = replaceAtomPredicate(getAtomPredicate(), iqWithTemporaryAtomPredicate, coreSingletons);

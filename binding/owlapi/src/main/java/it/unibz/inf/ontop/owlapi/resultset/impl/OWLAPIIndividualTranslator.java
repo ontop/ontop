@@ -90,50 +90,13 @@ public class OWLAPIIndividualTranslator {
 			return null;
 		}
 
-		TermType type = v.getType();
-		if (!(type instanceof RDFDatatype))
-			// TODO: throw a proper exception
-			throw new IllegalStateException("A ValueConstant given to OWLAPI must have a RDF datatype");
-		RDFDatatype datatype = (RDFDatatype) type;
-
-		if (datatype.getLanguageTag().isPresent()) {
-			return dataFactory.getOWLLiteral(value, datatype.getLanguageTag().get().getFullString());
+		RDFDatatype type = v.getType();
+		if (type.getLanguageTag().isPresent()) {
+			return dataFactory.getOWLLiteral(value, type.getLanguageTag().get().getFullString());
 		} 
 		else {
-			OWLDatatype owlDatatype = new OWLDatatypeImpl(IRI.create(datatype.getIRI().getIRIString()));
-			if (owlDatatype != null)
-				return dataFactory.getOWLLiteral(value, owlDatatype);
-			else 
-				throw new IllegalArgumentException(datatype.toString());
-		}
-	}
-
-	public OWLAnnotationSubject translateAnnotationSubject(ObjectConstant subject, byte[] salt) {
-		if (subject instanceof IRIConstant)
-			return IRI.create(((IRIConstant) subject).getIRI().getIRIString());
-		else if (subject instanceof BNode)
-			return dataFactory.getOWLAnonymousIndividual(((BNode) subject).getAnonymizedLabel(salt));
-		else
-			throw new UnexceptedAssertionTermException(subject);
-
-	}
-
-	public OWLAnnotationValue translateAnnotationValue(Constant constant, byte[] salt) {
-		if (constant instanceof RDFLiteralConstant)
-			return translate((RDFLiteralConstant) constant);
-		else if (constant instanceof IRIConstant)
-			return IRI.create(((IRIConstant) constant).getIRI().getIRIString());
-		else if (constant instanceof BNode)
-			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getAnonymizedLabel(salt));
-		else
-			throw new UnexceptedAssertionTermException(constant);
-	}
-
-
-
-	private static class UnexceptedAssertionTermException extends OntopInternalBugException {
-		UnexceptedAssertionTermException(Constant term) {
-			super("Unexpected term in an assertion (cannot be converted to OWLAPI): " + term);
+			OWLDatatype owlDatatype = new OWLDatatypeImpl(IRI.create(type.getIRI().getIRIString()));
+			return dataFactory.getOWLLiteral(value, owlDatatype);
 		}
 	}
 }

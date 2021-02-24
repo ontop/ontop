@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -31,7 +31,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
-    private final MappingEqualityTransformer mappingEqualityTransformer;
+    private final NotYetTypedEqualityTransformer mappingEqualityTransformer;
     private final IQTree2NativeNodeGenerator nativeNodeGenerator;
     private final OntopSQLCredentialSettings settings;
 
@@ -39,7 +39,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private MetaMappingExpanderImpl(SubstitutionFactory substitutionFactory,
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory,
-                                    MappingEqualityTransformer mappingEqualityTransformer,
+                                    NotYetTypedEqualityTransformer mappingEqualityTransformer,
                                     IQTree2NativeNodeGenerator nativeNodeGenerator,
                                     OntopSQLCredentialSettings settings) {
         this.substitutionFactory = substitutionFactory;

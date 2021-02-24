@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.*;
@@ -17,8 +18,8 @@ public class DefaultDBMetadataProvider extends AbstractDBMetadataProvider {
     private static final int CATALOG_INDEX = 2;
 
     @AssistedInject
-    DefaultDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, DefaultDBMetadataProvider::getQuotedIDFactory, typeFactory);
+    DefaultDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        super(connection, DefaultDBMetadataProvider::getQuotedIDFactory, coreSingletons);
     }
 
     @Override

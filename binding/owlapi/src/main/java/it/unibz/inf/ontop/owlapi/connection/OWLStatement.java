@@ -7,8 +7,10 @@ import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
 import org.semanticweb.owlapi.model.OWLException;
 
 /***
- * A Statement to execute queries over a OntopOWLConnection. The logic of this
- * statement is equivalent to that of JDBC's Statements.
+ * A Statement to execute queries over a OntopOWLConnection.
+ *
+ * RESTRICTION: By contrast with JDBC statements, an OWLStatement accepts AT MOST ONE query execution.
+ * It cannot be reused.
  *
  * <p>
  * <strong>Performance</strong> Note that you should not create multiple

@@ -39,19 +39,19 @@ public class InconsistencyCheckingTest {
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
-	String prefix = "http://www.example.org/";
-	OWLClass c1 = Class(IRI.create(prefix + "Male"));
-	OWLClass c2 = Class(IRI.create(prefix + "Female"));
-	
-	OWLObjectProperty r1 = ObjectProperty(IRI.create(prefix + "hasMother"));
-	OWLObjectProperty r2 = ObjectProperty(IRI.create(prefix + "hasFather"));
-	
-	OWLDataProperty d1 = DataProperty(IRI.create(prefix + "hasAgeFirst"));
-	OWLDataProperty d2 = DataProperty(IRI.create(prefix + "hasAge"));
+	private static final String prefix = "http://www.example.org/";
+	private final OWLClass c1 = Class(IRI.create(prefix + "Male"));
+	private final OWLClass c2 = Class(IRI.create(prefix + "Female"));
 
-	OWLNamedIndividual a = NamedIndividual(IRI.create(prefix + "a"));
-	OWLNamedIndividual b = NamedIndividual(IRI.create(prefix + "b"));
-	OWLNamedIndividual c = NamedIndividual(IRI.create(prefix + "c"));
+	private final OWLObjectProperty r1 = ObjectProperty(IRI.create(prefix + "hasMother"));
+	private final OWLObjectProperty r2 = ObjectProperty(IRI.create(prefix + "hasFather"));
+
+	private final OWLDataProperty d1 = DataProperty(IRI.create(prefix + "hasAgeFirst"));
+	private final OWLDataProperty d2 = DataProperty(IRI.create(prefix + "hasAge"));
+
+	private final OWLNamedIndividual a = NamedIndividual(IRI.create(prefix + "a"));
+	private final OWLNamedIndividual b = NamedIndividual(IRI.create(prefix + "b"));
+	private final OWLNamedIndividual c = NamedIndividual(IRI.create(prefix + "c"));
 	
 	@Before
 	public void setUp() throws Exception {

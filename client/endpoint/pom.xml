@@ -1,65 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>ontop-client</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
+        <artifactId>ontop-client</artifactId>
         <version>4.1.0-beta-1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
     </parent>
 
     <artifactId>ontop-endpoint</artifactId>
-    <name>ontop-endpoint</name>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <version>${spring-boot.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>it.unibz.inf.ontop</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdf4j</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>it.unibz.inf.ontop</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-system-sql-owlapi</artifactId>
-            <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryresultio-sparqljson</artifactId>
@@ -68,7 +55,6 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-rdfjson</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.moandjiezana.toml</groupId>
             <artifactId>toml4j</artifactId>
@@ -78,34 +64,5 @@
             <artifactId>gson</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.springframework.boot</groupId>-->
-                <!--<artifactId>spring-boot-maven-plugin</artifactId>-->
-                <!--<version>${spring-boot.version}</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<goals>-->
-                            <!--<goal>repackage</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-        </plugins>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources-filtered</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-    </build>
-
 
 </project>

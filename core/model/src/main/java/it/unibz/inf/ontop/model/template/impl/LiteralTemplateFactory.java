@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.template.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -53,7 +53,7 @@ public class LiteralTemplateFactory extends AbstractTemplateFactory {
     }
 
     @Override
-    public NonVariableTerm getTemplate(ImmutableList<TemplateComponent> components) {
+    public NonVariableTerm getTemplateTerm(ImmutableList<Template.Component> components) {
         switch (components.size()) {
             case 0:
                 return getConstant("");
@@ -75,7 +75,7 @@ public class LiteralTemplateFactory extends AbstractTemplateFactory {
         if (functionalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
             return functionalTerm.getTerms().stream()
                     .map(DBTypeConversionFunctionSymbol::uncast)
-                    .map(this::termToTemplateComponentString)
+                    .map(TemplateParser::termToTemplateComponentString)
                     .collect(Collectors.joining());
 
         throw new IllegalArgumentException("Invalid term type (DBConcat is expected): " + functionalTerm);

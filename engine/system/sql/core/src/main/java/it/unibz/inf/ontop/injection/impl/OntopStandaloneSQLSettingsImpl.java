@@ -39,6 +39,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean areInvalidTriplesExcludedFromResultSet() {
+        return systemSettings.areInvalidTriplesExcludedFromResultSet();
+    }
+
+    @Override
     public boolean isQueryLoggingEnabled() {
         return getRequiredBoolean(QUERY_LOGGING);
     }
@@ -76,6 +81,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     @Override
     public boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive() {
         return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE);
+    }
+
+    @Override
+    public boolean isFixedObjectIncludedInDescribe() {
+        return getRequiredBoolean(INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE);
     }
 
     @Override
@@ -134,17 +144,7 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public Optional<Integer> getHttpMaxAge() {
-        return systemSettings.getHttpMaxAge();
-    }
-
-    @Override
-    public Optional<Integer> getHttpStaleWhileRevalidate() {
-        return systemSettings.getHttpStaleWhileRevalidate();
-    }
-
-    @Override
-    public Optional<Integer> getHttpStaleIfError() {
-        return systemSettings.getHttpStaleIfError();
+    public Optional<String> getHttpCacheControl() {
+        return systemSettings.getHttpCacheControl();
     }
 }

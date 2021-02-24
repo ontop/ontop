@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.iq.tools.impl.IQ2CQ;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;

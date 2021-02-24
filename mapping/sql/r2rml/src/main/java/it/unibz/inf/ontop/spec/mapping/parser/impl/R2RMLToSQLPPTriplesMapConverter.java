@@ -330,7 +330,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		}
 
 		protected NonVariableTerm onTemplate(String template) {
-			return templateFactory.getTemplate(templateFactory.getComponents(template));
+			return templateFactory.getTemplateTerm(templateFactory.getComponents(template));
 		}
 
 		public NonVariableTerm extract(T termMap) {

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.template.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.template.TemplateComponent;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -24,7 +24,7 @@ public class IRITemplateFactory extends ObjectTemplateFactory {
     }
 
     @Override
-    public NonVariableTerm getTemplate(ImmutableList<TemplateComponent> components) {
+    public NonVariableTerm getTemplateTerm(ImmutableList<Template.Component> components) {
         int size = components.size();
         if (size == 0)
             return getConstant("");

@@ -1,13 +1,20 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <artifactId>ontop-test</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-		<version>4.1.0-beta-1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+        <artifactId>ontop-test</artifactId>
+        <version>4.1.0-beta-1-SNAPSHOT</version>
     </parent>
+
     <artifactId>ontop-sparql-compliance</artifactId>
-    <name>ontop-sparql-compliance</name>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -25,12 +32,10 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdf4j</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-semantic-index</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
@@ -39,7 +44,6 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <!-- scope>test</scope -->
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
@@ -53,29 +57,15 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-sparql-testsuite</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryparser-serql</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

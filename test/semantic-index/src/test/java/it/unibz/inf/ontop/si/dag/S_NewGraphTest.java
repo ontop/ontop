@@ -34,10 +34,8 @@ public class S_NewGraphTest  extends TestCase{
 	Logger log = LoggerFactory.getLogger(S_NewGraphTest.class);
 
 	public void testCreation() throws Exception {
-		String classowlfile = "src/test/resources/dag-tests-1.owl";
 		String roleowlfile = "src/test/resources/test/dag/test-role-hierarchy.owl";
 		
-		String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
 		log.info("Loading ontology");
 
 		// Loading the OWL file
@@ -47,47 +45,20 @@ public class S_NewGraphTest  extends TestCase{
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());
 		log.debug("classes {}", r.getClassGraph());
-//		
+
 		log.info("From graph to dag");
-		System.out.println(r);
+		log.debug(r.toString());
 		
 		log.info("See information");
-		System.out.println(r.classesDAG());
-		System.out.println(r.objectPropertiesDAG());
-		//System.out.println(r.getDAG());
-		
-//		log.info("See relations");
-//		ClassifiedTBoxImpl tbox= new ClassifiedTBoxImpl(dag);
-//		for (Description d: dag.vertexSet()){
-//		System.out.println("parents "+d+" "+tbox.getDirectParents(d));
-//		System.out.println("children "+d+" "+tbox.getDirectChildren(d));
-//		
-//		log.info("Descendants");
-//		System.out.println("descendants "+d+ " "+tbox.getDescendants(d));
-//		
-//		log.info("Ancestors");
-//		System.out.println("ancestors "+d+" "+ tbox.getAncestors(d));
-//		}
+		log.debug(r.classesDAG().toString());
+		log.debug(r.objectPropertiesDAG().toString());
+
 		log.info("Get named dag");
 		
 		log.info("See information named DAG");
-		System.out.println(r.classesDAG());
-		System.out.println(r.objectPropertiesDAG());
-		System.out.println(SemanticIndexBuilder.getNamedDAG(r.classesDAG()));
-		System.out.println(SemanticIndexBuilder.getNamedDAG(r.objectPropertiesDAG()));
-		
-//		log.info("See relations named DAG");
-//		ClassifiedTBoxImpl tbox2= new ClassifiedTBoxImpl(dag);
-//		for (Description d2: dag.vertexSet()){
-//		System.out.println("parents "+d2+" "+tbox2.getDirectParents(d2));
-//		System.out.println("children "+d2+" "+tbox2.getDirectChildren(d2));
-//		
-//		log.info("Descendants namedDAG");
-//		System.out.println("descendants "+d2+" "+tbox2.getDescendants(d2));
-//		
-//		log.info("Ancestors namedDAG");
-//		System.out.println("ancestors "+d2+" "+ tbox2.getAncestors(d2));
-//		
-//		}
+		log.debug(r.classesDAG().toString());
+		log.debug(r.objectPropertiesDAG().toString());
+		log.debug(SemanticIndexBuilder.getNamedDAG(r.classesDAG()).toString());
+		log.debug(SemanticIndexBuilder.getNamedDAG(r.objectPropertiesDAG()).toString());
 	}
 }

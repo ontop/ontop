@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 /**
@@ -16,6 +17,8 @@ public interface DBParameters {
     QuotedIDFactory getQuotedIDFactory();
 
     DBTypeFactory getDBTypeFactory();
+
+    CoreSingletons getCoreSingletons();
 
     String getDriverName();
 

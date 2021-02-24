@@ -22,7 +22,7 @@ import java.security.SecureRandom;
 public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 
 	private final OntopRDFMaterializer materializer;
-	private RDF rdfFactory;
+	private final RDF rdfFactory;
 
 	public DefaultOntopOWLAPIMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
 		materializer = new DefaultOntopRDFMaterializer(configuration, materializationParams);

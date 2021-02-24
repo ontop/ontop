@@ -92,7 +92,7 @@ public class IRITemplatesTest {
     /**
      * Functional term corresponding to the lexical term
      */
-    private ImmutableFunctionalTerm createIRITemplateFunctionalTerm(ImmutableList<TemplateComponent> iriTemplate,
+    private ImmutableFunctionalTerm createIRITemplateFunctionalTerm(ImmutableList<Template.Component> iriTemplate,
                                                                     ImmutableList<? extends ImmutableTerm> arguments) {
         return (ImmutableFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(iriTemplate, arguments).getTerm(0);
     }

@@ -29,7 +29,6 @@ public class SQLConnection implements OntopConnection {
 
 	private final QueryReformulator queryProcessor;
 	private Connection conn;
-	private final InputQueryFactory inputQueryFactory;
 	private final TermFactory termFactory;
 	private final SubstitutionFactory substitutionFactory;
 	private final OntopSystemSQLSettings settings;
@@ -41,14 +40,12 @@ public class SQLConnection implements OntopConnection {
 
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
-						 InputQueryFactory inputQueryFactory, TermFactory termFactory,
-						 RDF rdfFactory, SubstitutionFactory substitutionFactory,
-			 			 JDBCStatementInitializer statementInitializer,
+						 TermFactory termFactory, RDF rdfFactory, SubstitutionFactory substitutionFactory,
+						 JDBCStatementInitializer statementInitializer,
 						 OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
-		this.inputQueryFactory = inputQueryFactory;
 		this.termFactory = termFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.statementInitializer = statementInitializer;
@@ -76,7 +73,8 @@ public class SQLConnection implements OntopConnection {
 			return new SQLQuestStatement(
 					this.queryProcessor,
 					statementInitializer.createAndInitStatement(conn),
-					inputQueryFactory, termFactory, rdfFactory, substitutionFactory, settings);
+					statementInitializer,
+					termFactory, rdfFactory, substitutionFactory, settings);
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);
 		}
