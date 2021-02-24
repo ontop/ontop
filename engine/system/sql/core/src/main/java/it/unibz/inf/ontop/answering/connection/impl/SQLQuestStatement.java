@@ -239,7 +239,8 @@ public class SQLQuestStatement extends QuestStatement {
             queryLogger.declareResultSetUnblockedAndSerialize();
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments(), queryLogger);
         }
-        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory);
+        return new DefaultSimpleGraphResultSet(tuples, constructTemplate, termFactory, rdfFactory,
+                settings.areInvalidTriplesExcludedFromResultSet());
     }
 
     private NativeNode extractNativeNode(IQ executableQuery) throws EmptyQueryException {
