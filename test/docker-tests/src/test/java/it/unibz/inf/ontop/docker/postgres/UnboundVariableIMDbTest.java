@@ -46,7 +46,8 @@ public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 
 	@Test
 	public void testIMDBSeries() throws Exception {
-		String query = "PREFIX : <http://www.seriology.org/seriology#> SELECT DISTINCT ?p WHERE { ?p a :Series . } LIMIT 10";
+		String query = "PREFIX : <http://www.seriology.org/seriology#>\n" +
+				"SELECT DISTINCT ?p WHERE { ?p a :Series . } LIMIT 10";
 		countResults(10, query);
 	}
 }

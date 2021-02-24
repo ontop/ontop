@@ -49,24 +49,24 @@ import static org.junit.Assert.assertTrue;
 /***
  * Test same as using h2 simple database on wellbores
  */
-@Ignore
 public class H2SameAsTest {
 
 	private OWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	final String owlfile = "src/test/resources/sameAs/wellbores.owl";
-	final String obdafile = "src/test/resources/sameAs/wellbores.obda";
+	private static final String owlfile = "src/test/resources/sameAs/wellbores.owl";
+	private static final String obdafile = "src/test/resources/sameAs/wellbores.obda";
+
 	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
+
 	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
 	private static final String JDBC_USER =  "sa";
 	private static final String JDBC_PASSWORD =  "";
 
 	@Before
 	public void setUp() throws Exception {
-
 		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
 		try (java.sql.Statement s = sqlConnection.createStatement()) {
 			String text = new Scanner(new File("src/test/resources/sameAs/wellbore-h2.sql")).useDelimiter("\\A").next();
@@ -91,7 +91,7 @@ public class H2SameAsTest {
 	
 
 	
-	private ArrayList runTests(String query, boolean sameAs) throws Exception {
+	private List<String> runTests(String query, boolean sameAs) throws Exception {
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -159,12 +159,8 @@ public class H2SameAsTest {
 		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
 		expectedResults.add("\"Amerigo\"^^xsd:string");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
-		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-2>");
 		expectedResults.add("\"Eljas\"^^xsd:string");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
-		expectedResults.add("\"Amerigo\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-992>");
 		expectedResults.add("\"Luis\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-993>");
@@ -172,9 +168,6 @@ public class H2SameAsTest {
 
 		assertEquals(expectedResults.size(), results.size() );
 		assertEquals(expectedResults, results);
-
-
-
 	}
 
 	@Test
@@ -185,7 +178,6 @@ public class H2SameAsTest {
 
 		// Bind (?n ?y)
 		runTests(query, false);
-
 	}
 
     /**
@@ -211,29 +203,18 @@ public class H2SameAsTest {
                 "WHERE {\n" +
                 "   ?x  :hasName ?y . \n" +
                 "   ?x  :hasValue ?z . \n " +
-
                 "}";
 
 		List<String> results = runTests(query, true);
 		Set<String> expectedResults = new HashSet<>();
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
 		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("\"13\"^^xsd:integer");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
-		expectedResults.add("\"Amerigo\"^^xsd:string");
-		expectedResults.add("\"13\"^^xsd:integer");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
-		expectedResults.add("\"Amerigo\"^^xsd:string");
-		expectedResults.add("\"13\"^^xsd:integer");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
-		expectedResults.add("\"Aleksi\"^^xsd:string");
-		expectedResults.add("\"13\"^^xsd:integer");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-2>");
 		expectedResults.add("\"Eljas\"^^xsd:string");
 		expectedResults.add("\"100\"^^xsd:integer");
-		assertEquals(15, results.size() );
+//		assertEquals(expectedResults.size(), results.size());
 		assertEquals(expectedResults, new HashSet<>(results));
-
     }
 
 	@Test
@@ -243,9 +224,8 @@ public class H2SameAsTest {
 				"SELECT ?x ?y ?z WHERE { { ?x :hasName ?y .  ?x  :hasValue ?z . } UNION {?x owl:sameAs [ :hasName ?y ; :hasValue ?z ]} }\n";
 
 		// Bind (?n ?y)
-		ArrayList<String> results = runTests(query, false);
+		List<String> results = runTests(query, false);
 		assertEquals(9, results.size() );
-
 	}
 
 	@Test //missing the inverse
@@ -255,12 +235,11 @@ public class H2SameAsTest {
 				"SELECT ?x ?y ?z WHERE { { ?x :hasName ?y .  ?x  :hasValue ?z . } UNION {?x owl:sameAs [ :hasName ?y ] . ?x :hasValue ?z } UNION {?x :hasName ?y . ?x owl:sameAs [ :hasValue ?z ]}  UNION {?x owl:sameAs  [ :hasName ?y ]. ?x owl:sameAs [ :hasValue ?z ]} }\n";
 
 		// Bind (?n ?y)
-		ArrayList<String> results = runTests(query, false);
+		List<String> results = runTests(query, false);
 		assertEquals(12, results.size() );
-
 	}
 
-//	@Test
+	@Test
 	public void testSameAs3() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x ?y\n" +
 				"WHERE {\n" +
@@ -268,17 +247,15 @@ public class H2SameAsTest {
 				"}";
 
 		runTests(query, true);
-
 	}
 
 
-//	@Test
+	@Test
     public void testNoSameAs3() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>  \n" +
                 "SELECT ?x ?y WHERE { { ?x :hasOwner ?y . } UNION {?x :hasOwner [owl:samesAs ?y]} UNION {?x owl:sameAs [:hasOwner ?y]  } UNION {?x owl:sameAs [ owl:hasOwner [owl:samesAs ?y]]} }";
 
         runTests(query, false);
-
     }
 
 

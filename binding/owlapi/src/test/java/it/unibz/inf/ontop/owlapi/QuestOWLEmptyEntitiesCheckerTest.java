@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
-import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
@@ -31,15 +31,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
@@ -53,24 +47,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class QuestOWLEmptyEntitiesCheckerTest {
 
-	private OWLConnection conn;
-	private Connection connection;
-
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	private ClassifiedTBox onto;
 
 	private static final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
 	private static final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
 
-	// final String owlFileName =
-	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	// final String obdaFileName =
-	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
-
-	private List<IRI> emptyConcepts = new ArrayList<>();
-	private List<IRI> emptyRoles = new ArrayList<>();
-
+	private ClassifiedTBox onto;
 	private OntopOWLReasoner reasoner;
+	private OWLConnection conn;
+	private Connection connection;
 
 	@Before
 	public void setUp() throws Exception {
@@ -112,16 +97,14 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	 */
 	@Test
 	public void testEmptyConcepts() {
-
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<IRI> iterator = empties.iEmptyConcepts();
-		while (iterator.hasNext()){
-			emptyConcepts.add(iterator.next());
+		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, conn);
+		List<IRI> emptyConcepts = new ArrayList<>();
+		for (IRI iri : empties.emptyClasses()){
+			emptyConcepts.add(iri);
 		}
 
 		log.info("Empty concept/s: " + emptyConcepts);
 		assertEquals(1, emptyConcepts.size());
-		assertEquals(1, empties.getEConceptsSize());
 	}
 
 	/**
@@ -129,14 +112,13 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	 */
 	@Test
 	public void testEmptyRoles() {
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<IRI> iterator = empties.iEmptyRoles();
-		while (iterator.hasNext()){
-			emptyRoles.add(iterator.next());
+		OntopOWLEmptyEntitiesChecker empties = new OntopOWLEmptyEntitiesChecker(onto, conn);
+		List<IRI> emptyRoles = new ArrayList<>();
+		for (IRI iri : empties.emptyProperties()) {
+			emptyRoles.add(iri);
 		}
 
 		log.info("Empty role/s: " + emptyRoles);
 		assertEquals(2, emptyRoles.size());
-		assertEquals(2, empties.getERolesSize());
 	}
 }
