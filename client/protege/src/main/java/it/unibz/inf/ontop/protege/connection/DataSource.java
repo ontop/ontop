@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.connection;
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.protege.utils.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class DataSource {
 	private final URI id;
 	private String driver = "", url = "", username = "", password = "";
 
-	private final List<DataSourceListener> listeners = new ArrayList<>();
+	private final EventListenerList<DataSourceListener> listeners = new EventListenerList<>();
 
 	public DataSource() {
 		this.connectionManager = new JDBCConnectionManager();
@@ -95,7 +96,7 @@ public class DataSource {
 		this.driver = driver;
 
 		if (changed)
-			listeners.forEach(l -> l.dataSourceChanged(this));
+			listeners.fire(l -> l.dataSourceChanged(this));
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -118,8 +119,7 @@ public class DataSource {
 	 * @param listener
 	 */
 	public void addListener(DataSourceListener listener) {
-		if (listener != null && !listeners.contains(listener))
-			listeners.add(listener);
+		listeners.add(listener);
 	}
 
 	public void load(File propertyFile) throws IOException {

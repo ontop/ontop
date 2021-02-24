@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.connection;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.jdbc.JdbcDriverInfo;
@@ -42,7 +43,7 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 import static java.awt.event.KeyEvent.VK_T;
 
-public class DataSourcePanel extends JPanel implements DataSourceListener, OBDAModelManagerListener {
+public class DataSourcePanel extends JPanel implements OBDAModelManagerListener {
 
     private static final long serialVersionUID = 3506358479342412849L;
 
@@ -54,7 +55,7 @@ public class DataSourcePanel extends JPanel implements DataSourceListener, OBDAM
     private final JComboBox<String> jdbcDriverComboBox;
     private final JTextField jdbcUrlField;
 
-    private boolean dataSourceChangedNotification = false, documentChangeNotification = false;
+    private boolean fetchingInfo = false;
 
     public DataSourcePanel(OWLEditorKit editorKit) {
         super(new GridBagLayout());
@@ -131,7 +132,7 @@ public class DataSourcePanel extends JPanel implements DataSourceListener, OBDAM
                         new Insets(10, 0, 10, 0), 0, 0));
 
         setUpAccelerator(this, testAction);
-        activeOntologyChanged();
+        activeOntologyChanged(obdaModelManager.getCurrentOBDAModel());
     }
 
     private final OntopAbstractAction testAction = new OntopAbstractAction("Test Connection",
@@ -163,19 +164,10 @@ public class DataSourcePanel extends JPanel implements DataSourceListener, OBDAM
     };
 
     @Override // see DataSourceView
-    public void activeOntologyChanged() {
-        dataSourceChanged(obdaModelManager.getCurrentOBDAModel().getDataSource());
-    }
+    public void activeOntologyChanged(OBDAModel obdaModel) {
+        DataSource datasource = obdaModel.getDataSource();
 
-    @Override // see DataSourceView
-    public void dataSourceChanged(DataSource datasource) {
-
-        testAction.setEnabled(!datasource.getURL().isEmpty() && !datasource.getDriver().isEmpty());
-
-        if (documentChangeNotification)
-            return;
-
-        dataSourceChangedNotification = true;
+        fetchingInfo = true;
         String driver = datasource.getDriver();
         if (driver.isEmpty())
             jdbcDriverComboBox.setSelectedIndex(0);
@@ -185,16 +177,15 @@ public class DataSourcePanel extends JPanel implements DataSourceListener, OBDAM
         usernameField.setText(datasource.getUsername());
         passwordField.setText(datasource.getPassword());
         jdbcUrlField.setText(datasource.getURL());
-        connectionStatusLabel.setText("");
+        fetchingInfo = false;
 
-        dataSourceChangedNotification = false;
+        documentChange();
     }
 
     private void documentChange() {
-        if (dataSourceChangedNotification)
+        if (fetchingInfo)
             return;
 
-        documentChangeNotification = true;
         char[] password = passwordField.getPassword();
         String driver = jdbcDriverComboBox.getSelectedIndex() == 0 ? "" : (String) jdbcDriverComboBox.getSelectedItem();
 
@@ -213,14 +204,14 @@ public class DataSourcePanel extends JPanel implements DataSourceListener, OBDAM
         else
             showError("");
 
-        obdaModelManager.getCurrentOBDAModel().getDataSource()
-                .set(jdbcUrlField.getText(), usernameField.getText(), new String(password), driver);
-        documentChangeNotification = false;
+        DataSource datasource = obdaModelManager.getCurrentOBDAModel().getDataSource();
+        datasource.set(jdbcUrlField.getText(), usernameField.getText(), new String(password), driver);
+
+        testAction.setEnabled(!datasource.getURL().isEmpty() && !datasource.getDriver().isEmpty());
     }
 
     private void showError(String s) {
         connectionStatusLabel.setForeground(Color.RED);
         connectionStatusLabel.setText(s);
     }
-
 }

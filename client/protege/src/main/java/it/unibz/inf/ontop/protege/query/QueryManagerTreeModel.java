@@ -17,9 +17,9 @@ public class QueryManagerTreeModel implements TreeModel {
     public QueryManagerTreeModel(OBDAModelManager obdaModelManager) {
         this.obdaModelManager = obdaModelManager;
 
-        obdaModelManager.addListener(() -> {
+        obdaModelManager.addListener(m -> {
             TreeModelEvent event = new TreeModelEvent(this,
-                    new TreePath(new Object[]{getRoot()}),
+                    new TreePath(new Object[]{ getRoot() }),
                     null, new Object[]{ getRoot() });
 
             listeners.forEach(l -> l.treeStructureChanged(event));});
@@ -38,7 +38,7 @@ public class QueryManagerTreeModel implements TreeModel {
                 createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesChanged);
             }
             @Override
-            public void changed(QueryManager.Item item, int indexInParent) { /* NO-OP */ }
+            public void changed(QueryManager.Item query, int indexInParent) { /* NO-OP */ }
         });
     }
 

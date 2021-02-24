@@ -57,24 +57,24 @@ public class OBDAModel {
         prefixManager = new OntologyPrefixManager(ontology);
 
         triplesMapCollection = new TriplesMapCollection(prefixManager);
-        triplesMapCollection.addMappingsListener(s -> setOntologyDirtyFlag());
+        triplesMapCollection.addListener(s -> setOntologyDirtyFlag());
 
         queryManager = new QueryManager();
         queryManager.addListener(new QueryManagerEventListener() {
             @Override
-            public void inserted(QueryManager.Item group, int indexInParent) {
+            public void inserted(QueryManager.Item item, int indexInParent) {
                 setOntologyDirtyFlag();
             }
             @Override
-            public void removed(QueryManager.Item group, int indexInParent) {
+            public void removed(QueryManager.Item item, int indexInParent) {
                 setOntologyDirtyFlag();
             }
             @Override
-            public void renamed(QueryManager.Item group, int indexInParent) {
+            public void renamed(QueryManager.Item item, int indexInParent) {
                 setOntologyDirtyFlag();
             }
             @Override
-            public void changed(QueryManager.Item group, int indexInParent) {
+            public void changed(QueryManager.Item query, int indexInParent) {
                 setOntologyDirtyFlag();
             }
         });

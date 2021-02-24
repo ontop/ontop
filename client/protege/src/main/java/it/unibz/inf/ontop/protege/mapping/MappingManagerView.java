@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.mapping;
  */
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import org.protege.editor.owl.OWLEditorKit;
@@ -58,7 +59,7 @@ public class MappingManagerView extends AbstractOWLViewComponent implements OBDA
 	}
 
 	@Override
-	public void activeOntologyChanged() {
+	public void activeOntologyChanged(OBDAModel obdaModel) {
 		mappingPanel.setFilter("");
 	}
 

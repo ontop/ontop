@@ -5,12 +5,12 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.connection.DataSourceListener;
-import it.unibz.inf.ontop.protege.connection.JDBCConnectionManager;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollectionListener;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.EventListenerList;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.owl.OWLEditorKit;
@@ -32,7 +32,7 @@ public class OBDAModelManager implements Disposable {
 
 	private final OWLEditorKit owlEditorKit;
 
-	private final List<OBDAModelManagerListener> obdaManagerListeners = new ArrayList<>();
+	private final EventListenerList<OBDAModelManagerListener> listeners = new EventListenerList<>();
 
 	private final OWLModelManagerListener modelManagerListener = new OBDAPluginOWLModelManagerListener();
 	private final OWLOntologyChangeListener ontologyManagerListener = new OntologyRefactoringListener();
@@ -84,25 +84,22 @@ public class OBDAModelManager implements Disposable {
 		return currentObdaModel;
 	}
 
-	private final List<QueryManagerEventListener> queryManagerEventListeners = new ArrayList<>();
+	private final EventListenerList<QueryManagerEventListener> queryManagerEventListeners = new EventListenerList<>();
 
 	public void addQueryManagerListener(QueryManagerEventListener listener) {
-		if (listener != null && !queryManagerEventListeners.contains(listener))
-			queryManagerEventListeners.add(listener);
+		queryManagerEventListeners.add(listener);
 	}
 
-	private final List<TriplesMapCollectionListener> triplesMapCollectionListeners = new ArrayList<>();
+	private final EventListenerList<TriplesMapCollectionListener> triplesMapCollectionListeners = new EventListenerList<>();
 
 	public void addMappingsListener(TriplesMapCollectionListener listener) {
-		if (listener != null && !triplesMapCollectionListeners.contains(listener))
-			triplesMapCollectionListeners.add(listener);
+		triplesMapCollectionListeners.add(listener);
 	}
 
-	private final List<DataSourceListener> dataSourceListeners = new ArrayList<>();
+	private final EventListenerList<DataSourceListener> dataSourceListeners = new EventListenerList<>();
 
 	public void addDataSourceListener(DataSourceListener listener) {
-		if (listener != null && !dataSourceListeners.contains(listener))
-			dataSourceListeners.add(listener);
+		dataSourceListeners.add(listener);
 	}
 
 	public void removeDataSourceListener(DataSourceListener listener) {
@@ -186,11 +183,11 @@ public class OBDAModelManager implements Disposable {
 
 
 	public void addListener(OBDAModelManagerListener listener) {
-		obdaManagerListeners.add(listener);
+		listeners.add(listener);
 	}
 
 	public void removeListener(OBDAModelManagerListener listener) {
-		obdaManagerListeners.remove(listener);
+		listeners.remove(listener);
 	}
 
 
@@ -236,24 +233,24 @@ public class OBDAModelManager implements Disposable {
 
 	private OBDAModel createObdaModel(OWLOntology ontology) {
 		OBDAModel obdaModel = new OBDAModel(ontology, this);
-		obdaModel.getDataSource().addListener(s -> dataSourceListeners.forEach(l -> l.dataSourceChanged(s)));
-		obdaModel.getTriplesMapCollection().addMappingsListener(s -> triplesMapCollectionListeners.forEach(l -> l.triplesMapCollectionChanged(s)));
+		obdaModel.getDataSource().addListener(s -> dataSourceListeners.fire(l -> l.dataSourceChanged(s)));
+		obdaModel.getTriplesMapCollection().addListener(s -> triplesMapCollectionListeners.fire(l -> l.triplesMapCollectionChanged(s)));
 		obdaModel.getQueryManager().addListener(new QueryManagerEventListener() {
 			@Override
 			public void inserted(QueryManager.Item entity, int indexInParent) {
-				queryManagerEventListeners.forEach(l -> l.inserted(entity, indexInParent));
+				queryManagerEventListeners.fire(l -> l.inserted(entity, indexInParent));
 			}
 			@Override
 			public void removed(QueryManager.Item entity, int indexInParent) {
-				queryManagerEventListeners.forEach(l -> l.removed(entity, indexInParent));
+				queryManagerEventListeners.fire(l -> l.removed(entity, indexInParent));
 			}
 			@Override
-			public void renamed(QueryManager.Item query, int indexInParent) {
-				queryManagerEventListeners.forEach(l -> l.renamed(query, indexInParent));
+			public void renamed(QueryManager.Item entity, int indexInParent) {
+				queryManagerEventListeners.fire(l -> l.renamed(entity, indexInParent));
 			}
 			@Override
 			public void changed(QueryManager.Item query, int indexInParent) {
-				queryManagerEventListeners.forEach(l -> l.changed(query, indexInParent));
+				queryManagerEventListeners.fire(l -> l.changed(query, indexInParent));
 			}
 		});
 		obdaModels.put(ontology.getOntologyID(), obdaModel);
@@ -276,7 +273,7 @@ public class OBDAModelManager implements Disposable {
 			reasonerInfo.setConfigurationGenerator(currentObdaModel.getConfigurationManager());
 		}
 
-		fireActiveOntologyChanged();
+		listeners.fire(l -> l.activeOntologyChanged(getCurrentOBDAModel()));
 	}
 
 	private void ontologyLoaded() {
@@ -289,7 +286,7 @@ public class OBDAModelManager implements Disposable {
 			DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
 		}
 		finally {
-			fireActiveOntologyChanged();
+			listeners.fire(l -> l.activeOntologyChanged(getCurrentOBDAModel()));
 		}
 	}
 
@@ -305,18 +302,6 @@ public class OBDAModelManager implements Disposable {
 							"saving in the current location, or do \"Save as..\" to save in an alternative location. \n\n" +
 							"The error message was: \n"  + e.getMessage());
 			DialogUtils.showQuickErrorDialog(null, newException, "Error saving OBDA file");
-		}
-	}
-
-	private void fireActiveOntologyChanged() {
-		for (OBDAModelManagerListener listener : obdaManagerListeners) {
-			try {
-				listener.activeOntologyChanged();
-			}
-			catch (Exception e) {
-				LOGGER.debug("Badly behaved listener: {}", listener.getClass().toString());
-				LOGGER.debug(e.getMessage(), e);
-			}
 		}
 	}
 }

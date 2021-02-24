@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.utils.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +95,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("The parent group already contains this group / query.");
 
 			children.add(item);
-			listeners.forEach(l -> l.inserted(item, children.size() - 1));
+			listeners.fire(l -> l.inserted(item, children.size() - 1));
 			return item;
 		}
 
@@ -104,7 +105,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("Cannot find the child");
 
 			children.remove(item);
-			listeners.forEach(l -> l.removed(item, indexInParent));
+			listeners.fire(l -> l.removed(item, indexInParent));
 		}
 
 		public String getID() { return id; }
@@ -117,7 +118,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("The parent group already contains this group / query.");
 
 			this.id = newId;
-			listeners.forEach(l -> l.renamed(this, parent.children.indexOf(this)));
+			listeners.fire(l -> l.renamed(this, parent.children.indexOf(this)));
 		}
 
 		public Item getParent() { return parent; }
@@ -134,7 +135,7 @@ public class QueryManager {
 				throw new IllegalArgumentException("Cannot set a query string for a group / root.");
 
 			this.queryString = queryString.trim();
-			listeners.forEach(l -> l.changed(this, parent.children.indexOf(this)));
+			listeners.fire(l -> l.changed(this, parent.children.indexOf(this)));
 		}
 
 		public Optional<Item> getChild(String id) {
@@ -159,15 +160,14 @@ public class QueryManager {
 	}
 
 
-	private final List<QueryManagerEventListener> listeners = new ArrayList<>();
+	private final EventListenerList<QueryManagerEventListener> listeners = new EventListenerList<>();
 
 	/**
 	 * No need to remove listeners - this is handled by OBDAModelManager
 	 * @param listener
 	 */
 	public void addListener(QueryManagerEventListener listener) {
-		if (listener != null && !listeners.contains(listener))
-			listeners.add(listener);
+		listeners.add(listener);
 	}
 
 

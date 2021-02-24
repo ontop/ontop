@@ -40,7 +40,7 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
 		this.obdaModelManager = obdaModelManager;
 		this.filter = null;
 		obdaModelManager.addMappingsListener(s -> fireContentsChanged(s, 0, getSize()));
-		obdaModelManager.addListener(() -> fireContentsChanged(getCurrent(), 0, getSize()));
+		obdaModelManager.addListener(m -> fireContentsChanged(m.getTriplesMapCollection(), 0, getSize()));
 	}
 
 	private TriplesMapCollection getCurrent() {

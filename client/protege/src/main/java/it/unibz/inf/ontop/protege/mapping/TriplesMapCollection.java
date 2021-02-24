@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OldSyntaxMappingConverter;
+import it.unibz.inf.ontop.protege.utils.EventListenerList;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -68,7 +69,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     final SubstitutionFactory substitutionFactory;
     final SQLPPSourceQueryFactory sourceQueryFactory;
 
-    private final List<TriplesMapCollectionListener> mappingListeners = new ArrayList<>();
+    private final EventListenerList<TriplesMapCollectionListener> listeners = new EventListenerList<>();
 
     public TriplesMapCollection(OntologyPrefixManager prefixManager) {
 
@@ -98,9 +99,8 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
      * @param listener
      */
 
-    public void addMappingsListener(TriplesMapCollectionListener listener) {
-        if (listener != null && !mappingListeners.contains(listener))
-            mappingListeners.add(listener);
+    public void addListener(TriplesMapCollectionListener listener) {
+        listeners.add(listener);
     }
 
 
@@ -134,7 +134,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(m -> m.renamePredicate(predicateIri, replacementTerm))
                     .collect(toIndexedTripleMaps());
 
-            mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+            listeners.fire(l -> l.triplesMapCollectionChanged(this));
         }
     }
 
@@ -147,7 +147,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(Optional::get)
                     .collect(toIndexedTripleMaps());
 
-            mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+            listeners.fire(l -> l.triplesMapCollectionChanged(this));
         }
     }
 
@@ -156,7 +156,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
             throw new DuplicateTriplesMapException(ImmutableList.of(id));
 
         map.put(id, new TriplesMap(id, sqlQuery, parseTargetQuery(target), this));
-        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+        listeners.fire(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void addAll(ImmutableList<SQLPPTriplesMap> list) throws DuplicateTriplesMapException {
@@ -172,7 +172,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         if (!duplicateIds.isEmpty())
             throw new DuplicateTriplesMapException(duplicateIds);
 
-        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+        listeners.fire(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void duplicate(String id) {
@@ -182,7 +182,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
         String newId = generateFreshId(id);
         map.put(newId, triplesMap.createDuplicate(newId));
-        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+        listeners.fire(l -> l.triplesMapCollectionChanged(this));
     }
 
     private String generateFreshId(String id) {
@@ -211,14 +211,14 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(m -> m.getId().equals(id) ? replacement : m)
                     .collect(toIndexedTripleMaps());
         }
-        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+        listeners.fire(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void remove(String id) {
         if (map.remove(id) == null)
             throw new MinorOntopInternalBugException("Triples map not found: " + id);
 
-        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+        listeners.fire(l -> l.triplesMapCollectionChanged(this));
     }
 
     public void setStatus(String id, TriplesMap.Status status, String sqlErrorMessage, ImmutableList<String> invalidPlaceholders) {
@@ -239,7 +239,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
             triplesMap.setInvalidPlaceholders(invalidPlaceholders);
         }
-        mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+        listeners.fire(l -> l.triplesMapCollectionChanged(this));
     }
 
     private static Collector<TriplesMap, ?, LinkedHashMap<String, TriplesMap>> toIndexedTripleMaps() {
@@ -280,7 +280,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
                     .map(m -> new TriplesMap(m, this))
                     .collect(toIndexedTripleMaps());
 
-            mappingListeners.forEach(l -> l.triplesMapCollectionChanged(this));
+            listeners.fire(l -> l.triplesMapCollectionChanged(this));
         }
         catch (Exception ex) {
             throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());

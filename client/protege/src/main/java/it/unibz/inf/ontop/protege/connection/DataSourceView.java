@@ -37,7 +37,6 @@ public class DataSourceView extends AbstractOWLViewComponent {
 	private DataSourcePanel panel;
 	private OBDAModelManager obdaModelManager;
 
-
 	@Override
 	protected void initialiseOWLView()  {
 		panel = new DataSourcePanel(getOWLEditorKit());
@@ -45,7 +44,6 @@ public class DataSourceView extends AbstractOWLViewComponent {
 		add(panel, BorderLayout.NORTH);
 
 		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
-		obdaModelManager.addDataSourceListener(panel);
 		obdaModelManager.addListener(panel);
 
 		LOGGER.debug("DataSource browser initialized");
@@ -53,7 +51,6 @@ public class DataSourceView extends AbstractOWLViewComponent {
 
 	@Override
 	protected void disposeOWLView() {
-		obdaModelManager.removeDataSourceListener(panel);
 		obdaModelManager.removeListener(panel);
 	}
 }
