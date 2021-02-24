@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.query.QueryManager;
-import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
+import it.unibz.inf.ontop.protege.query.QueryManagerListener;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -60,7 +60,7 @@ public class OBDAModel {
         triplesMapCollection.addListener(s -> setOntologyDirtyFlag());
 
         queryManager = new QueryManager();
-        queryManager.addListener(new QueryManagerEventListener() {
+        queryManager.addListener(new QueryManagerListener() {
             @Override
             public void inserted(QueryManager.Item item, int indexInParent) {
                 setOntologyDirtyFlag();

@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.protege.query;
 
-public interface QueryManagerEventListener {
+public interface QueryManagerListener {
 
     void inserted(QueryManager.Item entity, int indexInParent);
 

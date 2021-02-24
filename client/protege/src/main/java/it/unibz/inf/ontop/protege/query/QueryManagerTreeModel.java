@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.protege.query;
 
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.utils.EventListenerList;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -11,35 +14,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class QueryManagerTreeModel implements TreeModel {
+public class QueryManagerTreeModel implements TreeModel, OBDAModelManagerListener, QueryManagerListener {
     private final OBDAModelManager obdaModelManager;
 
     public QueryManagerTreeModel(OBDAModelManager obdaModelManager) {
         this.obdaModelManager = obdaModelManager;
-
-        obdaModelManager.addListener(m -> {
-            TreeModelEvent event = new TreeModelEvent(this,
-                    new TreePath(new Object[]{ getRoot() }),
-                    null, new Object[]{ getRoot() });
-
-            listeners.forEach(l -> l.treeStructureChanged(event));});
-
-        obdaModelManager.addQueryManagerListener(new QueryManagerEventListener() {
-            @Override
-            public void inserted(QueryManager.Item item, int indexInParent) {
-                createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesInserted);
-            }
-            @Override
-            public void removed(QueryManager.Item item, int indexInParent) {
-                createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesRemoved);
-            }
-            @Override
-            public void renamed(QueryManager.Item item, int indexInParent) {
-                createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesChanged);
-            }
-            @Override
-            public void changed(QueryManager.Item query, int indexInParent) { /* NO-OP */ }
-        });
     }
 
     @Override
@@ -81,18 +60,35 @@ public class QueryManagerTreeModel implements TreeModel {
         return ((QueryManager.Item)parent).getIndexOfChild((QueryManager.Item)child);
     }
 
-    private final ArrayList<TreeModelListener> listeners = new ArrayList<>();
+    private final EventListenerList<TreeModelListener> listeners = new EventListenerList<>();
 
     @Override
     public void addTreeModelListener(TreeModelListener listener) {
-        if (listener != null && !listeners.contains(listener))
-            listeners.add(listener);
+        listeners.add(listener);
     }
 
     @Override
     public void removeTreeModelListener(TreeModelListener listener) {
         listeners.remove(listener);
     }
+
+    @Override
+    public void inserted(QueryManager.Item item, int indexInParent) {
+        createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesInserted);
+    }
+
+    @Override
+    public void removed(QueryManager.Item item, int indexInParent) {
+        createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesRemoved);
+    }
+
+    @Override
+    public void renamed(QueryManager.Item item, int indexInParent) {
+        createEventAndNotify(item, indexInParent, TreeModelListener::treeNodesChanged);
+    }
+
+    @Override
+    public void changed(QueryManager.Item query, int indexInParent) { /* NO-OP */ }
 
     private void createEventAndNotify(QueryManager.Item item, int indexInParent, BiConsumer<TreeModelListener, TreeModelEvent> eventConsumer) {
         List<QueryManager.Item> path = new LinkedList<>();
@@ -102,6 +98,14 @@ public class QueryManagerTreeModel implements TreeModel {
         TreeModelEvent event = new TreeModelEvent(this, new TreePath(path.toArray()),
                 new int[]{ indexInParent }, new Object[]{ item });
 
-        listeners.forEach(l -> eventConsumer.accept(l, event));
+        listeners.fire(l -> eventConsumer.accept(l, event));
+    }
+
+    @Override
+    public void activeOntologyChanged(OBDAModel obdaModel) {
+        TreeModelEvent event = new TreeModelEvent(this, new TreePath(new Object[]{ getRoot() }),
+                null, new Object[]{ getRoot() });
+
+        listeners.fire(l -> l.treeStructureChanged(event));
     }
 }

@@ -4,11 +4,10 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.protege.connection.DataSourceListener;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollectionListener;
 import it.unibz.inf.ontop.protege.query.QueryManager;
-import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
+import it.unibz.inf.ontop.protege.query.QueryManagerListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.EventListenerList;
 import org.apache.commons.rdf.api.RDF;
@@ -31,8 +30,6 @@ public class OBDAModelManager implements Disposable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OBDAModelManager.class);
 
 	private final OWLEditorKit owlEditorKit;
-
-	private final EventListenerList<OBDAModelManagerListener> listeners = new EventListenerList<>();
 
 	private final OWLModelManagerListener modelManagerListener = new OBDAPluginOWLModelManagerListener();
 	private final OWLOntologyChangeListener ontologyManagerListener = new OntologyRefactoringListener();
@@ -84,12 +81,18 @@ public class OBDAModelManager implements Disposable {
 		return currentObdaModel;
 	}
 
-	private final EventListenerList<QueryManagerEventListener> queryManagerEventListeners = new EventListenerList<>();
+	// QueryManagerListener
+	private final EventListenerList<QueryManagerListener> queryManagerEventListeners = new EventListenerList<>();
 
-	public void addQueryManagerListener(QueryManagerEventListener listener) {
+	public void addQueryManagerListener(QueryManagerListener listener) {
 		queryManagerEventListeners.add(listener);
 	}
 
+	public void removeQueryManagerListener(QueryManagerListener listener) {
+		queryManagerEventListeners.remove(listener);
+	}
+
+	// TriplesMapCollectionListener
 	private final EventListenerList<TriplesMapCollectionListener> triplesMapCollectionListeners = new EventListenerList<>();
 
 	public void addMappingListener(TriplesMapCollectionListener listener) {
@@ -99,6 +102,19 @@ public class OBDAModelManager implements Disposable {
 	public void removeMappingListener(TriplesMapCollectionListener listener) {
 		triplesMapCollectionListeners.remove(listener);
 	}
+
+	// OBDAModelManagerListener
+	private final EventListenerList<OBDAModelManagerListener> listeners = new EventListenerList<>();
+
+	public void addListener(OBDAModelManagerListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(OBDAModelManagerListener listener) {
+		listeners.remove(listener);
+	}
+
+
 
 
 	OWLModelManager getModelManager() {
@@ -176,15 +192,6 @@ public class OBDAModelManager implements Disposable {
 	}
 
 
-	public void addListener(OBDAModelManagerListener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeListener(OBDAModelManagerListener listener) {
-		listeners.remove(listener);
-	}
-
-
 
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
@@ -229,7 +236,7 @@ public class OBDAModelManager implements Disposable {
 		OBDAModel obdaModel = new OBDAModel(ontology, this);
 		//obdaModel.getDataSource().addListener(s -> dataSourceListeners.fire(l -> l.dataSourceChanged(s)));
 		obdaModel.getTriplesMapCollection().addListener(s -> triplesMapCollectionListeners.fire(l -> l.triplesMapCollectionChanged(s)));
-		obdaModel.getQueryManager().addListener(new QueryManagerEventListener() {
+		obdaModel.getQueryManager().addListener(new QueryManagerListener() {
 			@Override
 			public void inserted(QueryManager.Item entity, int indexInParent) {
 				queryManagerEventListeners.fire(l -> l.inserted(entity, indexInParent));

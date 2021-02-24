@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.query;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
 import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
@@ -56,6 +57,7 @@ public class QueryManagerPanel extends JPanel {
     private final List<QueryManagerPanelSelectionListener> listeners = new ArrayList<>();
 
     private final JTree queryManagerTree;
+    private final QueryManagerTreeModel model;
 
 	public QueryManagerPanel(OWLEditorKit editorKit) {
         OBDAModelManager obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
@@ -65,7 +67,7 @@ public class QueryManagerPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        QueryManagerTreeModel model = new QueryManagerTreeModel(obdaModelManager);
+        model = new QueryManagerTreeModel(obdaModelManager);
         queryManagerTree = new JTree(model);
         queryManagerTree.setCellRenderer(new DefaultTreeCellRenderer() {
             private final Icon queryIcon = DialogUtils.getImageIcon(QUERY_ICON_PATH);
@@ -130,7 +132,11 @@ public class QueryManagerPanel extends JPanel {
         });
 	}
 
-	public void addQueryManagerSelectionListener(QueryManagerPanelSelectionListener listener) {
+	OBDAModelManagerListener getOBDAModelManagerListener() { return model; }
+
+    QueryManagerListener getQueryManagerListener() { return model; }
+
+    public void addQueryManagerSelectionListener(QueryManagerPanelSelectionListener listener) {
 		if (listener != null && !listeners.contains(listener))
 		    listeners.add(listener);
 	}

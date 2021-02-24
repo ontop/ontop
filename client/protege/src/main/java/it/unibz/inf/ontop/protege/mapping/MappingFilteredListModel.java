@@ -23,12 +23,14 @@ package it.unibz.inf.ontop.protege.mapping;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 
-public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
+public class MappingFilteredListModel extends AbstractListModel<TriplesMap> implements TriplesMapCollectionListener {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
@@ -39,8 +41,6 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
 	public MappingFilteredListModel(OBDAModelManager obdaModelManager) {
 		this.obdaModelManager = obdaModelManager;
 		this.filter = null;
-		obdaModelManager.addMappingsListener(s -> fireContentsChanged(s, 0, getSize()));
-		obdaModelManager.addListener(m -> fireContentsChanged(m.getTriplesMapCollection(), 0, getSize()));
 	}
 
 	private TriplesMapCollection getCurrent() {
@@ -96,5 +96,10 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap>  {
 		}
 		else
 			return false;
+	}
+
+	@Override
+	public void triplesMapCollectionChanged(TriplesMapCollection triplesMapCollection) {
+		fireContentsChanged(triplesMapCollection, 0, getSize());
 	}
 }

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -39,14 +40,19 @@ public class QueryManagerView extends AbstractOWLViewComponent {
 	private static final long serialVersionUID = 1L;
 	
 	private QueryManagerPanel panel;
+	private OBDAModelManager obdaModelManager;
 
 	@Override
 	protected void initialiseOWLView()  {
 		OWLEditorKit editorKit = getOWLEditorKit();
+		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
 		setLayout(new BorderLayout());
 		panel = new QueryManagerPanel(editorKit);
 		add(panel, BorderLayout.CENTER);
+
+		obdaModelManager.addQueryManagerListener(panel.getQueryManagerListener());
+		obdaModelManager.addListener(panel.getOBDAModelManagerListener());
 
 		List<QueryManagerView> queryManagerViews = getList(editorKit);
 		if (queryManagerViews.isEmpty())
@@ -62,6 +68,10 @@ public class QueryManagerView extends AbstractOWLViewComponent {
 	protected void disposeOWLView() {
 		List<QueryManagerView> queryManagerViews = getList(getOWLEditorKit());
 		queryManagerViews.remove(this);
+
+		obdaModelManager.removeQueryManagerListener(panel.getQueryManagerListener());
+		obdaModelManager.removeListener(panel.getOBDAModelManagerListener());
+
 	}
 
 	public void addSelectionListener(QueryManagerPanelSelectionListener listener) {

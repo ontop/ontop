@@ -285,7 +285,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
     @Override
     public void activeOntologyChanged(OBDAModel obdaModel) {
         setFilter("");
-        applyFilter();
+        applyFilter(); // forced update
     }
     /**
      * any change of the filter will trigger the model update via processFilterAction()

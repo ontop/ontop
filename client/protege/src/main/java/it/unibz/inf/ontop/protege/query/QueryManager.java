@@ -160,13 +160,13 @@ public class QueryManager {
 	}
 
 
-	private final EventListenerList<QueryManagerEventListener> listeners = new EventListenerList<>();
+	private final EventListenerList<QueryManagerListener> listeners = new EventListenerList<>();
 
 	/**
 	 * No need to remove listeners - this is handled by OBDAModelManager
 	 * @param listener
 	 */
-	public void addListener(QueryManagerEventListener listener) {
+	public void addListener(QueryManagerListener listener) {
 		listeners.add(listener);
 	}
 
