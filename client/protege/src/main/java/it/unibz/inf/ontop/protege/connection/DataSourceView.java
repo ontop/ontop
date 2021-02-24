@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.connection;
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +35,18 @@ public class DataSourceView extends AbstractOWLViewComponent {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceView.class);
 
-	private DataSourcePanel panel;
 	private OBDAModelManager obdaModelManager;
+	private DataSourcePanel panel;
 
 	@Override
 	protected void initialiseOWLView()  {
-		panel = new DataSourcePanel(getOWLEditorKit());
+		OWLEditorKit editorKit = getOWLEditorKit();
+		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
+
+		panel = new DataSourcePanel(editorKit);
 		setLayout(new BorderLayout());
 		add(panel, BorderLayout.NORTH);
 
-		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(getOWLEditorKit());
 		obdaModelManager.addListener(panel);
 
 		LOGGER.debug("DataSource browser initialized");

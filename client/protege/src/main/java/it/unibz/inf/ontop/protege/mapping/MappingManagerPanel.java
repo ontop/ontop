@@ -36,7 +36,7 @@ import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
 import static java.awt.event.KeyEvent.VK_A;
 import static java.awt.event.KeyEvent.VK_N;
 
-public class MappingManagerPanel extends JPanel {
+public class MappingManagerPanel extends JPanel implements OBDAModelManagerListener {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
@@ -116,11 +116,11 @@ public class MappingManagerPanel extends JPanel {
                 new GridBagConstraints(3, 0, 1, 1, 1, 0,
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
-        filterField.getDocument().addDocumentListener((SimpleDocumentListener) e ->  processFilterAction());
+        filterField.getDocument().addDocumentListener((SimpleDocumentListener) e ->  applyFilter());
 
         filterCheckbox = new JCheckBox("Enable filter");
         filterCheckbox.setEnabled(false);
-        filterCheckbox.addItemListener(evt -> processFilterAction());
+        filterCheckbox.addItemListener(evt -> applyFilter());
         extraButtonsPanel.add(filterCheckbox,
                 new GridBagConstraints(4, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
@@ -164,6 +164,10 @@ public class MappingManagerPanel extends JPanel {
         });
         mappingList.setModel(model);
     }
+
+
+    TriplesMapCollectionListener getTriplesMapCollectionListener() { return model; }
+
 
     private final OntopAbstractAction newAction = new OntopAbstractAction(
             "New...",
@@ -278,6 +282,11 @@ public class MappingManagerPanel extends JPanel {
         executeSQLAction.setEnabled(selectionList.size() == 1);
     }
 
+    @Override
+    public void activeOntologyChanged(OBDAModel obdaModel) {
+        setFilter("");
+        applyFilter();
+    }
     /**
      * any change of the filter will trigger the model update via processFilterAction()
      * @param filter
@@ -286,7 +295,7 @@ public class MappingManagerPanel extends JPanel {
         filterField.setText(filter);
     }
 
-    private void processFilterAction() {
+    private void applyFilter() {
         String filterText = filterField.getText().trim();
         filterCheckbox.setEnabled(!filterText.isEmpty());
 

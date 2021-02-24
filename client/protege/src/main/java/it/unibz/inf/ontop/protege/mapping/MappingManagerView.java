@@ -21,9 +21,7 @@ package it.unibz.inf.ontop.protege.mapping;
  */
 
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -32,42 +30,40 @@ import org.semanticweb.owlapi.model.OWLEntity;
 
 import java.awt.*;
 
-public class MappingManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, OWLSelectionModelListener {
+public class MappingManagerView extends AbstractOWLViewComponent implements OWLSelectionModelListener {
 
 	private static final long serialVersionUID = 1790921396564256165L;
 
 	private OBDAModelManager obdaModelManager;
-	private MappingManagerPanel mappingPanel;
+	private MappingManagerPanel panel;
 
 	@Override
 	protected void initialiseOWLView() {
 		OWLEditorKit editorKit = getOWLEditorKit();
 		obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
-		mappingPanel = new MappingManagerPanel(editorKit);
 
+		panel = new MappingManagerPanel(editorKit);
 		setLayout(new BorderLayout());
-		add(mappingPanel, BorderLayout.CENTER);
+		add(panel, BorderLayout.CENTER);
 
-		obdaModelManager.addListener(this);
+		obdaModelManager.addListener(panel);
 		getOWLWorkspace().getOWLSelectionModel().addListener(this);
+		obdaModelManager.addMappingListener(panel.getTriplesMapCollectionListener());
 	}
 
 	@Override
 	protected void disposeOWLView() {
+		obdaModelManager.removeMappingListener(panel.getTriplesMapCollectionListener());
 		getOWLWorkspace().getOWLSelectionModel().removeListener(this);
-		obdaModelManager.removeListener(this);
+		obdaModelManager.removeListener(panel);
 	}
 
-	@Override
-	public void activeOntologyChanged(OBDAModel obdaModel) {
-		mappingPanel.setFilter("");
-	}
 
 	@Override
 	public void selectionChanged() {
 		OWLEntity entity = getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
 		if (entity != null)
-			mappingPanel.setFilter(getFilter(entity));
+			panel.setFilter(getFilter(entity));
 	}
 
 	private static String getFilter(OWLEntity entity) {

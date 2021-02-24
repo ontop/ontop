@@ -92,18 +92,12 @@ public class OBDAModelManager implements Disposable {
 
 	private final EventListenerList<TriplesMapCollectionListener> triplesMapCollectionListeners = new EventListenerList<>();
 
-	public void addMappingsListener(TriplesMapCollectionListener listener) {
+	public void addMappingListener(TriplesMapCollectionListener listener) {
 		triplesMapCollectionListeners.add(listener);
 	}
 
-	private final EventListenerList<DataSourceListener> dataSourceListeners = new EventListenerList<>();
-
-	public void addDataSourceListener(DataSourceListener listener) {
-		dataSourceListeners.add(listener);
-	}
-
-	public void removeDataSourceListener(DataSourceListener listener) {
-		dataSourceListeners.remove(listener);
+	public void removeMappingListener(TriplesMapCollectionListener listener) {
+		triplesMapCollectionListeners.remove(listener);
 	}
 
 
@@ -233,7 +227,7 @@ public class OBDAModelManager implements Disposable {
 
 	private OBDAModel createObdaModel(OWLOntology ontology) {
 		OBDAModel obdaModel = new OBDAModel(ontology, this);
-		obdaModel.getDataSource().addListener(s -> dataSourceListeners.fire(l -> l.dataSourceChanged(s)));
+		//obdaModel.getDataSource().addListener(s -> dataSourceListeners.fire(l -> l.dataSourceChanged(s)));
 		obdaModel.getTriplesMapCollection().addListener(s -> triplesMapCollectionListeners.fire(l -> l.triplesMapCollectionChanged(s)));
 		obdaModel.getQueryManager().addListener(new QueryManagerEventListener() {
 			@Override

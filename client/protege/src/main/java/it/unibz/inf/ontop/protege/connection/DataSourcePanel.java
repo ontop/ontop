@@ -158,7 +158,8 @@ public class DataSourcePanel extends JPanel implements OBDAModelManagerListener 
                         HTML_TAB +"<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>"
                         : "";
 
-                showError(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
+                connectionStatusLabel.setForeground(Color.RED);
+                connectionStatusLabel.setText(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
             }
         }
     };
@@ -184,34 +185,34 @@ public class DataSourcePanel extends JPanel implements OBDAModelManagerListener 
 
     private void documentChange() {
         if (fetchingInfo)
-            return;
+            return;  // do nothing if changes are in activeOntologyChanged
 
         char[] password = passwordField.getPassword();
         String driver = jdbcDriverComboBox.getSelectedIndex() == 0 ? "" : (String) jdbcDriverComboBox.getSelectedItem();
 
+        connectionStatusLabel.setForeground(Color.RED);
         if (jdbcUrlField.getText().endsWith(" "))
-            showError("<html>Warning:<br>Connection URL ends with a space, which can cause connection problems.</html>");
+            connectionStatusLabel.setText("<html>Warning:<br>Connection URL ends with a space, " +
+                    "which can cause connection problems.</html>");
 
         else if (usernameField.getText().endsWith(" "))
-            showError("<html>Warning:<br>Database username ends with a space, which can cause connection problems.</html>");
+            connectionStatusLabel.setText("<html>Warning:<br>Database username ends with a space, " +
+                    "which can cause connection problems.</html>");
 
         else if (password.length > 0 && password[password.length - 1] == ' ')
-            showError("<html>Warning:<br>Database password ends with a space, which can cause connection problems.</html>");
+            connectionStatusLabel.setText("<html>Warning:<br>Database password ends with a space, " +
+                    "which can cause connection problems.</html>");
 
         else if (driver.endsWith(" "))
-            showError("<html>Warning:<br>JDBC driver class ends with a space, which can cause connection problems.</html>");
+            connectionStatusLabel.setText("<html>Warning:<br>JDBC driver class ends with a space, " +
+                    "which can cause connection problems.</html>");
 
         else
-            showError("");
+            connectionStatusLabel.setText("");
 
         DataSource datasource = obdaModelManager.getCurrentOBDAModel().getDataSource();
         datasource.set(jdbcUrlField.getText(), usernameField.getText(), new String(password), driver);
 
         testAction.setEnabled(!datasource.getURL().isEmpty() && !datasource.getDriver().isEmpty());
-    }
-
-    private void showError(String s) {
-        connectionStatusLabel.setForeground(Color.RED);
-        connectionStatusLabel.setText(s);
     }
 }
