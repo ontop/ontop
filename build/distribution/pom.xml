@@ -107,7 +107,7 @@
                                     <version>${protege.version}</version>
                                     <classifier>os-x</classifier>
                                     <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-os-x/</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/unpack/protege-desktop-macos/</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>edu.stanford.protege</groupId>
@@ -225,7 +225,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>attach-protege-bundle-os-x</id>
+                        <id>attach-protege-bundle-macos</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -233,9 +233,9 @@
                         <configuration>
                             <skipAssembly>${assembly.protege.skip}</skipAssembly>
                             <descriptors>
-                                <descriptor>src/assembly/ontop-protege-bundle-os-x.xml</descriptor>
+                                <descriptor>src/assembly/ontop-protege-bundle-macos.xml</descriptor>
                             </descriptors>
-                            <finalName>ontop-protege-bundle-os-x-${project.version}</finalName>
+                            <finalName>ontop-protege-bundle-macos-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <assembly>
-	<id>protege-bundle-os-x</id>
+	<id>protege-bundle-macos</id>
 	<formats>
 		<format>zip</format>
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<directory>${project.build.directory}/unpack/protege-desktop-os-x/Protege-${protege.version}</directory>
+			<directory>${project.build.directory}/unpack/protege-desktop-macos/Protege-${protege.version}</directory>
 			<outputDirectory>/Protege-${protege.version}/</outputDirectory>
 		</fileSet>
 	</fileSets>
