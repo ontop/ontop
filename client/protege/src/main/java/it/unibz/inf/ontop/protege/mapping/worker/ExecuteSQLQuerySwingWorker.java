@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.protege.mapping.worker;
 
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.core.JDBCConnectionManager;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

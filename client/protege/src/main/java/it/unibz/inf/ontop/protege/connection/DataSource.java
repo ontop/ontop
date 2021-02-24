@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.connection;
 
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
-import it.unibz.inf.ontop.protege.core.JDBCConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +51,13 @@ public class DataSource {
 
 	private final List<DataSourceListener> listeners = new ArrayList<>();
 
-	public DataSource(JDBCConnectionManager connectionManager) {
-		this.connectionManager = connectionManager;
+	public DataSource() {
+		this.connectionManager = new JDBCConnectionManager();
 		this.id = URI.create(UUID.randomUUID().toString());
+	}
+
+	public void dispose() {
+		connectionManager.dispose();
 	}
 
 	@Nonnull

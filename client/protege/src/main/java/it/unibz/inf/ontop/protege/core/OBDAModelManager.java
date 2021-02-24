@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.connection.DataSourceListener;
+import it.unibz.inf.ontop.protege.connection.JDBCConnectionManager;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollectionListener;
 import it.unibz.inf.ontop.protege.query.QueryManager;
@@ -36,7 +37,6 @@ public class OBDAModelManager implements Disposable {
 	private final OWLModelManagerListener modelManagerListener = new OBDAPluginOWLModelManagerListener();
 	private final OWLOntologyChangeListener ontologyManagerListener = new OntologyRefactoringListener();
 
-	private final JDBCConnectionManager connectionManager;
 	private final Map<OWLOntologyID, OBDAModel> obdaModels = new HashMap<>();
 
 	@Nullable
@@ -46,8 +46,6 @@ public class OBDAModelManager implements Disposable {
 
 	public OBDAModelManager(OWLEditorKit editorKit) {
 		this.owlEditorKit = editorKit;
-
-		connectionManager = new JDBCConnectionManager();
 
 		getModelManager().addListener(modelManagerListener);
 		getModelManager().getOWLOntologyManager().addOntologyChangeListener(ontologyManagerListener);
@@ -75,7 +73,7 @@ public class OBDAModelManager implements Disposable {
 	public void dispose() {
 		getModelManager().getOWLOntologyManager().removeOntologyChangeListener(ontologyManagerListener);
 		getModelManager().removeListener(modelManagerListener);
-		connectionManager.dispose();
+		obdaModels.values().forEach(OBDAModel::dispose);
 	}
 
 	@Nonnull
@@ -114,10 +112,6 @@ public class OBDAModelManager implements Disposable {
 
 	OWLModelManager getModelManager() {
 		return owlEditorKit.getModelManager();
-	}
-
-	JDBCConnectionManager getConnectionManager() {
-		return connectionManager;
 	}
 
 	OBDAModel getOBDAModel(OWLOntology ontology) {

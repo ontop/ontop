@@ -48,7 +48,7 @@ public class OBDAModel {
         this.ontology = ontology;
         this.obdaModelManager = obdaModelManager;
 
-        datasource = new DataSource(obdaModelManager.getConnectionManager());
+        datasource = new DataSource();
         datasource.addListener(s -> setOntologyDirtyFlag());
 
         configurationManager = new OntopConfigurationManager(obdaModelManager, obdaModelManager.getStandardProperties());
@@ -78,6 +78,10 @@ public class OBDAModel {
                 setOntologyDirtyFlag();
             }
         });
+    }
+
+    void dispose() {
+        datasource.dispose();
     }
 
     public OWLOntology getOntology() { return ontology; }
