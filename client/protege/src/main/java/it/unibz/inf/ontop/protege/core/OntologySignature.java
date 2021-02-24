@@ -31,9 +31,9 @@ import org.semanticweb.owlapi.model.parameters.Imports;
 
 public class OntologySignature {
 
-	private OWLOntology ontology;
+	private final OWLOntology ontology;
 
-	public void reset(OWLOntology ontology) {
+	public OntologySignature(OWLOntology ontology) {
 		this.ontology = ontology;
 	}
 

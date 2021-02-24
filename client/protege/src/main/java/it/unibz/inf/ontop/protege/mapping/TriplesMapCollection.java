@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.protege.mapping;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.term.IRIConstant;
@@ -11,6 +13,7 @@ import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.*;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -68,22 +71,27 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
     private final List<TriplesMapCollectionListener> mappingListeners = new ArrayList<>();
 
-    public TriplesMapCollection(OWLOntology ontology,
-                                SQLPPMappingFactory ppMappingFactory,
-                                TermFactory termFactory,
-                                TargetAtomFactory targetAtomFactory,
-                                SubstitutionFactory substitutionFactory,
-                                TargetQueryParserFactory targetQueryParserFactory,
-                                SQLPPSourceQueryFactory sourceQueryFactory) {
+    public TriplesMapCollection(OWLOntology ontology) {
 
         this.prefixManager = new MutablePrefixManager(ontology);
 
-        this.ppMappingFactory = ppMappingFactory;
-        this.termFactory = termFactory;
-        this.targetAtomFactory = targetAtomFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.targetQueryParserFactory = targetQueryParserFactory;
-        this.sourceQueryFactory = sourceQueryFactory;
+        /*
+         * TODO: avoid using Default injector
+         */
+        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
+                .jdbcDriver("")
+                .jdbcUrl("")
+                .jdbcUser("")
+                .jdbcPassword("")
+                .build();
+
+        Injector injector = configuration.getInjector();
+        ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
+        termFactory = injector.getInstance(TermFactory.class);
+        targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
+        substitutionFactory = injector.getInstance(SubstitutionFactory.class);
+        targetQueryParserFactory = injector.getInstance(TargetQueryParserFactory.class);
+        sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
 
@@ -258,7 +266,10 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
             converter.getDataSourceProperties().ifPresent(obdaModel.getDataSource()::update);
 
-            SQLPPMapping ppMapping = obdaModel.parseOBDA(converter.getRestOfFile());
+            Reader mappingReader = new StringReader(converter.getRestOfFile());
+            SQLMappingParser mappingParser = obdaModel.getConfigurationManager()
+                    .getSQLMappingParser(obdaModel.getDataSource(), mappingReader);
+            SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
 
             ppMapping.getPrefixManager().getPrefixMap().forEach(prefixManager::addPrefix);
 

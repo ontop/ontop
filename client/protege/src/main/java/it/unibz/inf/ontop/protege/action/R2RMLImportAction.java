@@ -22,7 +22,9 @@ package it.unibz.inf.ontop.protege.action;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -65,7 +67,7 @@ public class R2RMLImportAction extends ProtegeAction {
 		worker.execute();
 	}
 
-	private class R2RMLImportWorker extends SwingWorkerWithMonitor<Map.Entry<Integer, Integer>, Void> {
+	private class R2RMLImportWorker extends SwingWorkerWithMonitor<ImmutableList<SQLPPTriplesMap>, Void> {
 
 		private final File file;
 		private final OBDAModel obdaModel;
@@ -78,26 +80,32 @@ public class R2RMLImportAction extends ProtegeAction {
 		}
 
 		@Override
-		protected Map.Entry<Integer, Integer> doInBackground() throws Exception {
+		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
 			start("initializing...");
-			SQLPPMapping parsedModel = obdaModel.parseR2RML(file);
+			OntopMappingSQLAllConfiguration configuration = obdaModel.getConfigurationManager()
+					.buildR2RMLConfiguration(obdaModel.getDataSource(), file);
+			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
 
-			ImmutableList<SQLPPTriplesMap> tripleMaps = parsedModel.getTripleMaps();
-			endLoop("inserting into the current mapping...");
-			Set<OWLDeclarationAxiom> axioms = obdaModel.insertTriplesMaps(tripleMaps, false);
+			ImmutableList<SQLPPTriplesMap> triplesMaps = parsedModel.getTripleMaps();
+			endLoop("");
 			end();
-			return Maps.immutableEntry(tripleMaps.size(), axioms.size());
+			return triplesMaps;
 		}
 
 		@Override
 		public void done() {
 			try {
-				Map.Entry<Integer, Integer> result = complete();
+				ImmutableList<SQLPPTriplesMap> triplesMaps = complete();
+				// TODO: move back to doInBackground?
+				Set<OWLDeclarationAxiom> axioms = obdaModel.insertTriplesMaps(triplesMaps, false);
 				DialogUtils.showInfoDialog(getWorkspace(),
 						"<html><h3>Import of R2RML mapping is complete.</h3><br>" +
-								HTML_TAB + "<b>" + result.getKey() + "</b> triples maps inserted into the mapping.<br>" +
-								HTML_TAB + "<b>" + result.getValue() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
+								HTML_TAB + "<b>" + triplesMaps.size() + "</b> triples maps inserted into the mapping.<br>" +
+								HTML_TAB + "<b>" + axioms.size() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
 						DIALOG_TITLE);
+			}
+			catch (DuplicateTriplesMapException e) {
+				LOGGER.error("Internal error:", e);
 			}
 			catch (CancellationException | InterruptedException e) {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);

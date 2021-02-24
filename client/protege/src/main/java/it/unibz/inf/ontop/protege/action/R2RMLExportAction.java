@@ -72,7 +72,7 @@ public class R2RMLExportAction extends ProtegeAction {
         @Override
         protected Void doInBackground() throws Exception {
             start("initializing...");
-            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModel.getRdfFactory());
+            R2RMLMappingSerializer writer = new R2RMLMappingSerializer(obdaModel.getConfigurationForOntology().getRdfFactory());
             endLoop("writing to file...");
             writer.write(file, obdaModel.getTriplesMapCollection().generatePPMapping());
             end();

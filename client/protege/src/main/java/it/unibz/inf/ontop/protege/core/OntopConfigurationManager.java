@@ -31,19 +31,11 @@ public class OntopConfigurationManager {
     @Nullable
     private File dbMetadataFile;
 
-    OntopConfigurationManager(@Nonnull OBDAModelManager obdaModelManager) {
+    OntopConfigurationManager(@Nonnull OBDAModelManager obdaModelManager, DisposableProperties standardProperties) {
         this.obdaModelManager = obdaModelManager;
-        this.settings.putAll(obdaModelManager.getStandardProperties());
+        this.settings.putAll(standardProperties);
         this.implicitDBConstraintFile = null;
         this.dbMetadataFile = null;
-    }
-
-    public void reset(DisposableProperties settings) {
-        this.implicitDBConstraintFile = null;
-        this.dbMetadataFile = null;
-
-        this.settings.clear();
-        this.settings.putAll(settings);
     }
 
     public void load(String owlName) {
@@ -86,6 +78,21 @@ public class OntopConfigurationManager {
         OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .properties(union(settings, obdaModel.getDataSource()))
                 .ppMapping(obdaModel.getTriplesMapCollection().generatePPMapping());
+
+        Optional.ofNullable(implicitDBConstraintFile)
+                .ifPresent(builder::basicImplicitConstraintFile);
+
+        Optional.ofNullable(dbMetadataFile)
+                .ifPresent(builder::dbMetadataFile);
+
+        builder.ontology(obdaModel.getOntology());
+
+        return builder.build();
+    }
+
+    public OntopSQLOWLAPIConfiguration getBasicConfiguration(OBDAModel obdaModel) {
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .properties(union(settings, obdaModel.getDataSource()));
 
         Optional.ofNullable(implicitDBConstraintFile)
                 .ifPresent(builder::basicImplicitConstraintFile);

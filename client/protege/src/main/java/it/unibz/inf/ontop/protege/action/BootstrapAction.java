@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.SwingWorkerWithCompletionPercentageMonitor;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
@@ -116,12 +117,12 @@ public class BootstrapAction extends ProtegeAction {
 		worker.execute();
 	}
 
-	private class BootstrapWorker extends SwingWorkerWithCompletionPercentageMonitor<Map.Entry<Integer, Integer>, Void> {
+	private class BootstrapWorker extends SwingWorkerWithCompletionPercentageMonitor<ImmutableList<SQLPPTriplesMap>, Void> {
 
 		private final String baseIri;
 		private final JDBCMetadataProviderFactory metadataProviderFactory;
 		private final DirectMappingEngine directMappingEngine;
-		private final DataSource datasource;
+		private final OBDAModel obdaModel;
 
 		private final AtomicInteger currentMappingIndex;
 
@@ -131,8 +132,7 @@ public class BootstrapAction extends ProtegeAction {
 
 			this.baseIri = baseIri;
 
-			OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
-			datasource = obdaModel.getDataSource();
+			obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 
 			OntopSQLOWLAPIConfiguration configuration = obdaModel.getConfigurationForOntology();
 			Injector injector = configuration.getInjector();
@@ -143,14 +143,13 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		@Override
-		protected Map.Entry<Integer, Integer> doInBackground() throws Exception {
+		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
 
 			start("initializing...");
 
 			final ImmutableMetadata metadata;
 
-			try (Connection conn = datasource.getConnection()) {
-
+			try (Connection conn = obdaModel.getDataSource().getConnection()) {
 				MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
 				ImmutableList<RelationID> relationIds = metadataProvider.getRelationIDs();
 
@@ -175,28 +174,31 @@ public class BootstrapAction extends ProtegeAction {
 			}
 
 			endLoop("");
-			OBDAModel obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 			ImmutableList<SQLPPTriplesMap> triplesMaps = builder.build();
-			Set<OWLDeclarationAxiom> axioms = obdaModel.insertTriplesMaps(triplesMaps, true);
 			end();
-			return Maps.immutableEntry(triplesMaps.size(), axioms.size());
+			return triplesMaps;
 		}
 
 		@Override
 		public void done() {
 			try {
-				Map.Entry<Integer, Integer> result = complete();
+				ImmutableList<SQLPPTriplesMap> triplesMaps = complete();
+				// TODO: move back to doInBackground?
+				Set<OWLDeclarationAxiom> axioms = obdaModel.insertTriplesMaps(triplesMaps, true);
 				DialogUtils.showInfoDialog(getWorkspace(),
 						"<html><h3>Bootstrapping the ontology and mapping is complete.</h3><br>" +
-								HTML_TAB + "<b>" + result.getKey() + "</b> triples maps inserted into the mapping.<br>" +
-								HTML_TAB + "<b>" + result.getValue() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
+								HTML_TAB + "<b>" + triplesMaps.size() + "</b> triples maps inserted into the mapping.<br>" +
+								HTML_TAB + "<b>" + axioms.size() + "</b> declaration axioms (re)inserted into the ontology.<br></html>",
 						DIALOG_TITLE);
+			}
+			catch (DuplicateTriplesMapException e) {
+				LOGGER.error("Internal error:", e);
 			}
 			catch (CancellationException | InterruptedException e) {
 				DialogUtils.showCancelledActionDialog(getWorkspace(), DIALOG_TITLE);
 			}
 			catch (ExecutionException e) {
-				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, datasource);
+				DialogUtils.showErrorDialog(getWorkspace(), DIALOG_TITLE, DIALOG_TITLE + " error.", LOGGER, e, obdaModel.getDataSource());
 			}
 		}
 	}

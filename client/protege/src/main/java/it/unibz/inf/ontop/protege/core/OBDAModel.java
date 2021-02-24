@@ -2,27 +2,16 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerEventListener;
-import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
-import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.semanticweb.owlapi.model.*;
@@ -31,8 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.net.URI;
 import java.util.*;
 
@@ -51,55 +38,24 @@ public class OBDAModel {
     // mutable
     private final TriplesMapCollection triplesMapCollection;
     // Mutable: the ontology inside is replaced
-    private final OntologySignature signature = new OntologySignature();
+    private final OntologySignature signature;
     // mutable
     private final QueryManager queryManager = new QueryManager();
 
     private final OntopConfigurationManager configurationManager;
 
-
     private final OBDAModelManager obdaModelManager;
 
-    private final SQLPPMappingFactory ppMappingFactory;
-    private final TypeFactory typeFactory;
-    private final TermFactory termFactory;
-    private final TargetAtomFactory targetAtomFactory;
-    private final SubstitutionFactory substitutionFactory;
-    private final TargetQueryParserFactory targetQueryParserFactory;
-    private final SQLPPSourceQueryFactory sourceQueryFactory;
-    private final RDF rdfFactory;
-
-    OBDAModel(OWLOntology ontology,
-              OBDAModelManager obdaModelManager) {
+    OBDAModel(OWLOntology ontology, OBDAModelManager obdaModelManager) {
 
         this.ontology = ontology;
         this.obdaModelManager = obdaModelManager;
 
-        /*
-         * TODO: avoid using Default injector
-         */
-        Injector defaultInjector = OntopMappingSQLAllConfiguration.defaultBuilder()
-                .jdbcDriver("")
-                .jdbcUrl("")
-                .jdbcUser("")
-                .jdbcPassword("")
-                .build().getInjector();
+        configurationManager = new OntopConfigurationManager(obdaModelManager, obdaModelManager.getStandardProperties());
 
-        rdfFactory = defaultInjector.getInstance(RDF.class);
-        typeFactory = defaultInjector.getInstance(TypeFactory.class);
-        ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
-        termFactory = defaultInjector.getInstance(TermFactory.class);
-        targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
-        substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
-        targetQueryParserFactory = defaultInjector.getInstance(TargetQueryParserFactory.class);
-        sourceQueryFactory = defaultInjector.getInstance(SQLPPSourceQueryFactory.class);
+        triplesMapCollection = new TriplesMapCollection(ontology);
 
-        configurationManager = new OntopConfigurationManager(obdaModelManager);
-
-        triplesMapCollection = new TriplesMapCollection(ontology, ppMappingFactory, termFactory,
-                targetAtomFactory, substitutionFactory, targetQueryParserFactory, sourceQueryFactory);
-
-        signature.reset(ontology);
+        signature = new OntologySignature(ontology);
 
         triplesMapCollection.addMappingsListener(s -> triggerOntologyChanged());
 
@@ -147,8 +103,6 @@ public class OBDAModel {
 
     public OntopConfigurationManager getConfigurationManager() { return configurationManager; }
 
-    public RDF getRdfFactory() { return rdfFactory; }
-
     public void load() throws Exception {
         String owlName = getActiveOntologyOwlFilename();
         if (owlName == null)
@@ -160,6 +114,7 @@ public class OBDAModel {
             datasource.load(new File(URI.create(owlName + PROPERTY_EXT)));
             triplesMapCollection.load(obdaFile, this); // can update datasource!
             queryManager.load(new File(URI.create(owlName + QUERY_EXT)));
+            obdaModelManager.getModelManager().setClean(ontology);
         }
         else {
             LOGGER.warn("No OBDA model was loaded because no .obda file exists in the same location as the .owl file");
@@ -200,13 +155,11 @@ public class OBDAModel {
     }
 
     public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateTriplesMapException {
-        getTriplesMapCollection().addAll(triplesMaps);
+        OntopSQLOWLAPIConfiguration configuration = configurationManager.getBasicConfiguration(this);
+        TypeFactory typeFactory = configuration.getTypeFactory();
 
-        return MappingOntologyUtils.extractAndInsertDeclarationAxioms(
-                ontology,
-                triplesMaps,
-                typeFactory,
-                bootstraped);
+        getTriplesMapCollection().addAll(triplesMaps);
+        return MappingOntologyUtils.extractAndInsertDeclarationAxioms(ontology, triplesMaps, typeFactory, bootstraped);
     }
 
     public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {
@@ -217,17 +170,4 @@ public class OBDAModel {
     public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
         return configurationManager.buildOntopSQLOWLAPIConfiguration(ontology);
     }
-
-    public SQLPPMapping parseR2RML(File file) throws MappingException {
-        OntopMappingSQLAllConfiguration configuration = configurationManager.buildR2RMLConfiguration(datasource, file);
-        return configuration.loadProvidedPPMapping();
-    }
-
-    public SQLPPMapping parseOBDA(String mapping) throws MappingIOException, InvalidMappingException {
-        Reader mappingReader = new StringReader(mapping);
-        SQLMappingParser mappingParser = configurationManager.getSQLMappingParser(datasource, mappingReader);
-        return mappingParser.parse(mappingReader);
-    }
-
-
 }

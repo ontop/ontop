@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.connection.DataSourceListener;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollectionListener;
@@ -35,23 +35,35 @@ public class OBDAModelManager implements Disposable {
 
 	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
-	/***
-	 * This is the instance responsible for listening for Protege ontology
-	 * events (loading/saving/changing ontology)
-	 */
 	private final OWLModelManagerListener modelManagerListener = new OBDAPluginOWLModelManagerListener();
 
 	private final Map<OWLOntologyID, OBDAModel> obdaModels = new HashMap<>();
-	private OBDAModel currentObdaModel;
 
 	@Nullable
-	private OWLOntologyID lastKnownOntologyId;
+	private OBDAModel currentObdaModel;
+
+	private final RDF rdfFactory;
 
 	public OBDAModelManager(OWLEditorKit editorKit) {
 		this.owlEditorKit = editorKit;
 
 		getModelManager().addListener(modelManagerListener);
 		getOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener());
+
+
+		/*
+		 * TODO: avoid using Default injector
+		 */
+		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
+				.jdbcDriver("")
+				.jdbcUrl("")
+				.jdbcUser("")
+				.jdbcPassword("")
+				.build();
+
+		Injector defaultInjector = configuration.getInjector();
+
+		rdfFactory = defaultInjector.getInstance(RDF.class);
 	}
 
 	/***
@@ -73,21 +85,21 @@ public class OBDAModelManager implements Disposable {
 		return currentObdaModel;
 	}
 
-	private final ArrayList<QueryManagerEventListener> queryManagerEventListeners = new ArrayList<>();
+	private final List<QueryManagerEventListener> queryManagerEventListeners = new ArrayList<>();
 
 	public void addQueryManagerListener(QueryManagerEventListener listener) {
 		if (listener != null && !queryManagerEventListeners.contains(listener))
 			queryManagerEventListeners.add(listener);
 	}
 
-	private final ArrayList<TriplesMapCollectionListener> triplesMapCollectionListeners = new ArrayList<>();
+	private final List<TriplesMapCollectionListener> triplesMapCollectionListeners = new ArrayList<>();
 
 	public void addMappingsListener(TriplesMapCollectionListener listener) {
 		if (listener != null && !triplesMapCollectionListeners.contains(listener))
 			triplesMapCollectionListeners.add(listener);
 	}
 
-	private final ArrayList<DataSourceListener> dataSourceListeners = new ArrayList<>();
+	private final List<DataSourceListener> dataSourceListeners = new ArrayList<>();
 
 	public void addDataSourceListener(DataSourceListener listener) {
 		if (listener != null && !dataSourceListeners.contains(listener))
@@ -107,9 +119,10 @@ public class OBDAModelManager implements Disposable {
 		return getModelManager().getOWLOntologyManager();
 	}
 
-	public OBDAModel getOBDAModel(OWLOntology ontology) {
+	OBDAModel getOBDAModel(OWLOntology ontology) {
 		return obdaModels.get(ontology.getOntologyID());
 	}
+
 	/***
 	 * This ontology change listener has some heuristics to determine if the
 	 * user is refactoring the ontology. In particular, this listener will try
@@ -168,7 +181,7 @@ public class OBDAModelManager implements Disposable {
 		}
 
 		private org.apache.commons.rdf.api.IRI getIRI(OWLDeclarationAxiom axiom) {
-			return getCurrentOBDAModel().getRdfFactory().createIRI(axiom.getEntity().getIRI().toString());
+			return rdfFactory.createIRI(axiom.getEntity().getIRI().toString());
 		}
 	}
 
@@ -189,34 +202,28 @@ public class OBDAModelManager implements Disposable {
 
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
-		// TODO: clean up code - this one is called from the event dispatch thread
 		@Override
 		public void handleChange(OWLModelManagerChangeEvent event) {
 			LOGGER.debug(event.getType().name());
-			LOGGER.debug("CURRENT ACTiVE: " + getModelManager().getActiveOntologies());
 			switch (event.getType()) {
-				case ABOUT_TO_CLASSIFY: // starting reasoner
-					break;
-
-				case ONTOLOGY_CLASSIFIED: // reasoner started
+				case ONTOLOGY_CREATED: // fired before ACTIVE_ONTOLOGY_CHANGED
+					ontologyCreated();
 					break;
 
 				case ACTIVE_ONTOLOGY_CHANGED:
-					handleNewActiveOntology();
+					activeOntologyChanged();
 					break;
 
-				case ONTOLOGY_LOADED: // first, ACTIVE_ONT_CHANGED
-					handleOntologyLoaded();
+				case ONTOLOGY_LOADED: // fired after ACTIVE_ONTOLOGY_CHANGED
+					ontologyLoaded();
 					break;
 
 				case ONTOLOGY_SAVED:
-					handleOntologySaved();
+					ontologySaved();
 					break;
 
-				case ONTOLOGY_CREATED: // when a new one is created, followed by ACTIVE_ONT_CHANGED
-					handleOntologyCreated();
-					break;
-
+				case ABOUT_TO_CLASSIFY:
+				case ONTOLOGY_CLASSIFIED:
 				case ONTOLOGY_RELOADED:
 				case ENTITY_RENDERER_CHANGED:
 				case REASONER_CHANGED:
@@ -227,7 +234,7 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private void handleOntologyCreated() {
+	private void ontologyCreated() {
 		OWLOntology ontology = getModelManager().getActiveOntology();
 		createObdaModel(ontology);
 	}
@@ -258,30 +265,26 @@ public class OBDAModelManager implements Disposable {
 		return obdaModel;
 	}
 
-	/**
-	 * When the active ontology is new (first one or differs from the last one)
-	 */
-	private void handleNewActiveOntology() {
+	private void activeOntologyChanged() {
 		OWLOntology ontology = getModelManager().getActiveOntology();
-		OWLOntologyID id = ontology.getOntologyID();
-		System.out.println("ACTiVE " + id + " FROM " + obdaModels.keySet());
-		currentObdaModel = obdaModels.computeIfAbsent(id, i -> createObdaModel(ontology));
+		OBDAModel obdaModel = obdaModels.computeIfAbsent(ontology.getOntologyID(),
+				i -> createObdaModel(ontology));
 
-		if (id.equals(lastKnownOntologyId))
+		if (obdaModel == currentObdaModel)
 			return;
 
-		lastKnownOntologyId = id;
+		currentObdaModel = obdaModel;
 
-		ProtegeOWLReasonerInfo factory = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
-		if (factory instanceof OntopReasonerInfo) {
-			OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
-			questfactory.setConfigurationGenerator(currentObdaModel.getConfigurationManager());
+		ProtegeOWLReasonerInfo protegeOWLReasonerInfo = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
+		if (protegeOWLReasonerInfo instanceof OntopReasonerInfo) {
+			OntopReasonerInfo reasonerInfo = (OntopReasonerInfo) protegeOWLReasonerInfo;
+			reasonerInfo.setConfigurationGenerator(currentObdaModel.getConfigurationManager());
 		}
 
-		fireActiveOBDAModelChange();
+		fireActiveOntologyChanged();
 	}
 
-	private void handleOntologyLoaded() {
+	private void ontologyLoaded() {
 		try {
 			currentObdaModel.load();
 		}
@@ -291,11 +294,11 @@ public class OBDAModelManager implements Disposable {
 			DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
 		}
 		finally {
-			fireActiveOBDAModelChange();
+			fireActiveOntologyChanged();
 		}
 	}
 
-	private void handleOntologySaved() {
+	private void ontologySaved() {
 		try {
 			currentObdaModel.store();
 		}
@@ -310,7 +313,7 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private void fireActiveOBDAModelChange() {
+	private void fireActiveOntologyChanged() {
 		for (OBDAModelManagerListener listener : obdaManagerListeners) {
 			try {
 				listener.activeOntologyChanged();
@@ -321,5 +324,4 @@ public class OBDAModelManager implements Disposable {
 			}
 		}
 	}
-
 }
