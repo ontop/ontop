@@ -25,12 +25,15 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - `ONTOP_PORTAL_FILE` (optional). Corresponds to the argument `--portal`.
 - `ONTOP_DEV_MODE` (optional). Corresponds to the argument `--dev`.
 - `ONTOP_LAZY_INIT` (optional). Corresponds to the argument `--lazy`.
+- `ONTOP_PREDEFINED_CONFIG` (optional). Corresponds to the argument `--predefined-config`.
+- `ONTOP_PREDEFINED_QUERIES` (optional). Corresponds to the argument `--predefined-queries`.
+- `ONTOP_CONTEXTS` (optional). Corresponds to the argument `--contexts`.
 - `ONTOP_DEBUG` (optional). Uses debug for logback.
 - `ONTOP_JAVA_ARGS` (optional). Allows to set arbitrary Java arguments. Added in 4.1.0.
 - `ONTOP_FILE_ENCODING` (optional). File encoding. By default, set to "UTF-8". Added in 4.1.0.
 
 ## Tutorial
 
-A complete tutorial is provided on the Ontop Website: https://ontop-vkg.org/tutorial/endpoint/endpoint-docker.html
+A tutorial is provided on the Ontop Website: https://ontop-vkg.org/tutorial/endpoint/endpoint-docker
 
 
