@@ -153,9 +153,7 @@ public class DataSourcePanel extends JPanel implements OBDAModelManagerListener 
                 String help = (e.getMessage().startsWith("No suitable driver"))
                         ? "<br><br>" +
                         "HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drivers\" tab.<br>" +
-                        HTML_TAB + "(Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...)<br>" +
-                        "More information is on the Wiki:<br>" +
-                        HTML_TAB +"<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>"
+                        HTML_TAB + "(Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...)" 
                         : "";
 
                 connectionStatusLabel.setForeground(Color.RED);
