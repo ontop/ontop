@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 
@@ -46,12 +47,13 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
         super(connection, idFactoryProvider, coreSingletons);
         try {
             String[] defaultRelationComponents = defaultsFactory.getDefaultRelationIdComponents(connection);
-            if (defaultRelationComponents == null || defaultRelationComponents[SCHEMA_INDEX] == null)
-                throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
+            if (defaultRelationComponents == null || defaultRelationComponents.length < CATALOG_INDEX + 1
+                    || defaultRelationComponents[SCHEMA_INDEX] == null)
+                throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete " + Arrays.toString(defaultRelationComponents));
             if (defaultRelationComponents[CATALOG_INDEX] == null)
-                throw new MetadataExtractionException("Unable to obtain the default catalog: make sure the connection URL is complete");
-            
-            RelationID id = rawIdFactory.createRelationID();
+                throw new MetadataExtractionException("Unable to obtain the default catalog: make sure the connection URL is complete " + Arrays.toString(defaultRelationComponents));
+
+            RelationID id = rawIdFactory.createRelationID(defaultRelationComponents);
             defaultCatalog = id.getComponents().get(CATALOG_INDEX);
             defaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
