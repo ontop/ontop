@@ -24,7 +24,7 @@ public class LanguageTagImpl implements LanguageTag {
             this.prefix = locale.getLanguage();
             if (prefix.length() < 2 || prefix.length() > 3)
                 // language not well-formed (required for RDF)
-                throw new IllegalStateException("Invalid language tag found: " + fullString);
+                throw new IllegalStateException("Invalid language tag found: " + fullString + ". The language prefix can only have 2 or 3 chars.");
             
             this.optionalSuffix = Optional.of(locale.getCountry())
                     .filter(v -> !v.isEmpty())
