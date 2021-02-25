@@ -1609,7 +1609,6 @@
                 <maven.javadoc.skip>false</maven.javadoc.skip>
                 <maven.test.skip>false</maven.test.skip>
                 <assembly.cli.skip>false</assembly.cli.skip>
-                <assembly.webapps.skip>false</assembly.webapps.skip>
                 <assembly.protege.skip>false</assembly.protege.skip>
                 <bundle.protege.phase>package</bundle.protege.phase>
                 <maven.war.skip>false</maven.war.skip>
