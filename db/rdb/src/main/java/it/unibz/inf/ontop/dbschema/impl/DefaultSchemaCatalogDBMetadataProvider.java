@@ -45,17 +45,19 @@ public abstract class DefaultSchemaCatalogDBMetadataProvider extends AbstractDBM
                                            CoreSingletons coreSingletons, DefaultRelationIdComponentsFactory defaultsFactory) throws MetadataExtractionException {
         super(connection, idFactoryProvider, coreSingletons);
         try {
-            RelationID id = rawIdFactory.createRelationID(defaultsFactory.getDefaultRelationIdComponents(connection));
+            String[] defaultRelationComponents = defaultsFactory.getDefaultRelationIdComponents(connection);
+            if (defaultRelationComponents == null || defaultRelationComponents[SCHEMA_INDEX] == null)
+                throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
+            if (defaultRelationComponents[CATALOG_INDEX] == null)
+                throw new MetadataExtractionException("Unable to obtain the default catalog: make sure the connection URL is complete");
+            
+            RelationID id = rawIdFactory.createRelationID();
             defaultCatalog = id.getComponents().get(CATALOG_INDEX);
             defaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
-        if (defaultSchema == null)
-            throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
-        if (defaultCatalog == null)
-            throw new MetadataExtractionException("Unable to obtain the default catalog: make sure the connection URL is complete");
     }
 
 

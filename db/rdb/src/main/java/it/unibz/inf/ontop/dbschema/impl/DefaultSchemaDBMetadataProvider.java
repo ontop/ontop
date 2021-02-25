@@ -37,14 +37,16 @@ public abstract class DefaultSchemaDBMetadataProvider extends AbstractDBMetadata
     DefaultSchemaDBMetadataProvider(Connection connection, QuotedIDFactoryFactory idFactoryProvider, CoreSingletons coreSingletons, DefaultRelationIdComponentsFactory defaultsFactory) throws MetadataExtractionException {
         super(connection, idFactoryProvider, coreSingletons);
         try {
-            RelationID id = rawIdFactory.createRelationID(defaultsFactory.getDefaultRelationIdComponents(connection));
+            String[] defaultSchemaName = defaultsFactory.getDefaultRelationIdComponents(connection);
+            if (defaultSchemaName == null || defaultSchemaName[SCHEMA_INDEX] == null)
+                throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
+
+            RelationID id = rawIdFactory.createRelationID(defaultSchemaName);
             defaultSchema = id.getComponents().get(SCHEMA_INDEX);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
-        if (defaultSchema == null)
-            throw new MetadataExtractionException("Unable to obtain the default schema: make sure the connection URL is complete");
     }
 
     @Override
