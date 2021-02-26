@@ -13,7 +13,6 @@
     <artifactId>ontop-rdb2rdf-compliance</artifactId>
 
     <properties>
-        <repo.ontop>true</repo.ontop>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
