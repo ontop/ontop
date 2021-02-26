@@ -185,7 +185,7 @@
         <osgi.version>6.0.0</osgi.version>
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
-        <sesame.version>2.7.16</sesame.version>
+        <sesame.version>4.1.2</sesame.version>
     </properties>
 
     <dependencyManagement>
