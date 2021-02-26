@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.mapping;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
@@ -27,6 +28,7 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.*;
 
@@ -35,19 +37,19 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap> impl
 	private static final long serialVersionUID = 2317408823037931358L;
 	
 	private final OBDAModelManager obdaModelManager;
-	@Nullable
-	private String filter;
+	@Nonnull
+	private ImmutableList<String> filter;
 
 	public MappingFilteredListModel(OBDAModelManager obdaModelManager) {
 		this.obdaModelManager = obdaModelManager;
-		this.filter = null;
+		this.filter = ImmutableList.of();
 	}
 
 	private TriplesMapCollection getCurrent() {
 		return obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
 	}
 
-	public void setFilter(@Nullable String filter) {
+	public void setFilter(@Nonnull ImmutableList<String> filter) {
 		this.filter = filter;
 		fireContentsChanged(getCurrent(), 0, getSize());
 	}
@@ -73,29 +75,31 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap> impl
 	}
 
 	private boolean isIncludedByFilter(TriplesMap triplesMap) {
-		return filter == null
+		return filter.isEmpty()
 				|| triplesMap.getTargetAtoms().stream()
 						.flatMap(a -> a.getSubstitutedTerms().stream())
-						.anyMatch(a -> match(filter, a));
+						.anyMatch(this::match);
 	}
 
-	private static boolean match(String keyword, ImmutableTerm term) {
+	private boolean match(ImmutableTerm term) {
 		if (term instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm functionTerm = (ImmutableFunctionalTerm) term;
-			if (functionTerm.getFunctionSymbol().toString().contains(keyword)) { // match found!
+			if (match(functionTerm.getFunctionSymbol().toString()))
 				return true;
-			}
+
 			// Recursive
 			return functionTerm.getTerms().stream()
-					.anyMatch(t -> match(keyword, t));
-//        } else if (term instanceof Variable) {
-//            return ((Variable) term).getName().contains(keyword); // match found!
+					.anyMatch(this::match);
 		}
 		else if (term instanceof RDFConstant) {
-			return ((RDFConstant) term).getValue().contains(keyword); // match found!
+			return match(((RDFConstant) term).getValue());
 		}
 		else
 			return false;
+	}
+
+	private boolean match(String s) {
+		return filter.stream().anyMatch(s::contains);
 	}
 
 	@Override

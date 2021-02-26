@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.mapping;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.worker.ValidationSwingWorker;
 import it.unibz.inf.ontop.protege.utils.*;
@@ -106,7 +107,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        extraButtonsPanel.add(new JLabel("Search:"),
+        extraButtonsPanel.add(new JLabel("Search (any of):"),
                 new GridBagConstraints(2, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, 30, GAP, GAP), 0, 0));
@@ -124,7 +125,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         extraButtonsPanel.add(filterCheckbox,
                 new GridBagConstraints(4, 0, 1, 1, 0, 0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(GAP, GAP, GAP, 20), 0, 0));
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
         filterField.addActionListener(evt -> filterCheckbox.setSelected(true));
         add(extraButtonsPanel, BorderLayout.SOUTH);
@@ -164,6 +165,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
             }
         });
         mappingList.setModel(model);
+        model.triplesMapCollectionChanged(obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection());
     }
 
 
@@ -300,7 +302,18 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         String filterText = filterField.getText().trim();
         filterCheckbox.setEnabled(!filterText.isEmpty());
 
-        model.setFilter(filterCheckbox.isSelected() && filterCheckbox.isEnabled() ? filterText : null);
+        model.setFilter(filterCheckbox.isSelected() && filterCheckbox.isEnabled()
+                ? getFilter(filterText)
+                : ImmutableList.of());
+    }
+
+    private ImmutableList<String> getFilter(String filterText) {
+        ImmutableList.Builder<String> builder = ImmutableList.builder();
+        for (String c : filterText.split("\\s+")) {
+            String filter = c.endsWith(";") ? c.substring(0, c.length() - 1).trim() : c;
+            builder.add(filter);
+        }
+        return builder.build();
     }
 
     private boolean copyConfirm(List<TriplesMap> selection) {
