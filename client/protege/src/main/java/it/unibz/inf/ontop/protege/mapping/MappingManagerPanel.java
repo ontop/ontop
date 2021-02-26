@@ -126,6 +126,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, 20), 0, 0));
 
+        filterField.addActionListener(evt -> filterCheckbox.setSelected(true));
         add(extraButtonsPanel, BorderLayout.SOUTH);
 
         JPopupMenu menu = new JPopupMenu();
