@@ -23,6 +23,7 @@ public class OntopConfigurationManager {
     public static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
     private final OBDAModelManager obdaModelManager;
+    // settings are loaded once in the constructor and not modified afterwards
     private final Properties settings = new Properties();
 
     @Nullable
@@ -38,14 +39,25 @@ public class OntopConfigurationManager {
         this.dbMetadataFile = null;
     }
 
+    public void clear() {
+        this.implicitDBConstraintFile = null;
+        this.dbMetadataFile = null;
+    }
+
+    /**
+        Can be called twice in a row without clear(), at least for now.
+     */
+
     public void load(String owlName) {
         File implicitDBConstraintFile = new File(URI.create(owlName + DBPREFS_EXT));
-        if (implicitDBConstraintFile.exists())
-            this.implicitDBConstraintFile = implicitDBConstraintFile;
+        this.implicitDBConstraintFile = implicitDBConstraintFile.exists()
+                ? implicitDBConstraintFile
+                : null;
 
         File dbMetadataFile = new File(URI.create(owlName + DBMETADATA_EXT));
-        if (dbMetadataFile.exists())
-            this.dbMetadataFile = dbMetadataFile;
+        this.dbMetadataFile = dbMetadataFile.exists()
+                ? dbMetadataFile
+                : null;
     }
 
     private static Properties union(Properties settings, DataSource datasource) {

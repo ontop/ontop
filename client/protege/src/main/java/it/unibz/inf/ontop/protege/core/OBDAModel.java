@@ -106,6 +106,17 @@ public class OBDAModel {
 
     public OntopConfigurationManager getConfigurationManager() { return configurationManager; }
 
+    public void clear() {
+        configurationManager.clear();
+        datasource.clear();
+        triplesMapCollection.clear();
+        queryManager.clear();
+    }
+
+    /**
+        should not be called twice in a row without clear() in between
+     */
+
     public void load() throws Exception {
         String owlFilename = getOwlFilename();
         if (owlFilename == null)

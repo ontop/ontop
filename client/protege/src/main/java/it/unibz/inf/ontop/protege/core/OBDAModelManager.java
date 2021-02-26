@@ -208,7 +208,8 @@ public class OBDAModelManager implements Disposable {
 					break;
 
 				case ONTOLOGY_LOADED: // fired after ACTIVE_ONTOLOGY_CHANGED
-					ontologyLoaded();
+				case ONTOLOGY_RELOADED:
+					ontologyLoadedReloaded();
 					break;
 
 				case ONTOLOGY_SAVED:
@@ -217,7 +218,6 @@ public class OBDAModelManager implements Disposable {
 
 				case ABOUT_TO_CLASSIFY:
 				case ONTOLOGY_CLASSIFIED:
-				case ONTOLOGY_RELOADED:
 				case ENTITY_RENDERER_CHANGED:
 				case REASONER_CHANGED:
 				case ONTOLOGY_VISIBILITY_CHANGED:
@@ -277,8 +277,9 @@ public class OBDAModelManager implements Disposable {
 		listeners.fire(l -> l.activeOntologyChanged(getCurrentOBDAModel()));
 	}
 
-	private void ontologyLoaded() {
+	private void ontologyLoadedReloaded() {
 		try {
+			getCurrentOBDAModel().clear();
 			getCurrentOBDAModel().load();
 		}
 		catch (Exception e) {
