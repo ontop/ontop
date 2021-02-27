@@ -114,8 +114,18 @@ public class DataSource {
 		return p;
 	}
 
+	public void clear() {
+		properties.clear();
+		driver = "";
+		url = "";
+		username = "";
+		password = "";
+	}
+
 	/**
-	 * No need to remove listeners - this is handled by OBDAModelManager
+	 * Should not be called twice in a row without clear() in between.
+	 *
+	 * No need to remove listeners - this is handled by OBDAModelManager.
 	 * @param listener
 	 */
 	public void addListener(DataSourceListener listener) {
@@ -123,7 +133,6 @@ public class DataSource {
 	}
 
 	public void load(File propertyFile) throws IOException {
-		properties.clear();
 		if (propertyFile.exists())
 			try (FileReader reader = new FileReader(propertyFile)) {
 				properties.load(reader);

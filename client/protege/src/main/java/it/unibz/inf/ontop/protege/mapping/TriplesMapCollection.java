@@ -58,7 +58,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TriplesMapCollection.class);
     
     private Map<String, TriplesMap> map = new LinkedHashMap<>();
-    // Mutable and replaced after reset
+    // reflects the ontology prefix manager
     private final OntologyPrefixManager prefixManager;
 
     private final SQLPPMappingFactory ppMappingFactory;
@@ -259,8 +259,16 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     public Stream<TriplesMap> stream() { return map.values().stream(); }
 
 
+    public void clear() {
+        map.clear();
+    }
+
     /**
-     *  CAN BE CALLED ONLY ONCE: ADDS TO THE CURRENT PREFIX MANAGER
+     *  Assumes that the file exists.
+     *
+     *  Adds mapping prefixes to the current ontology prefixes
+     *  but calling it twice in a row is safe
+     *  provided that the ontology has been reloaded too
      */
 
     public void load(File obdaFile, OBDAModel obdaModel) throws Exception {

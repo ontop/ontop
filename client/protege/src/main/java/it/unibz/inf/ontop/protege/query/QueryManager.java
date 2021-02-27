@@ -212,9 +212,16 @@ public class QueryManager {
 					Stream.of(END_COLLECTION_SYMBOL));
 	}
 
+	public void clear() {
+		root.children.clear();
+	}
+
+	/**
+	 * Should not be called twice in a row without clear() in between.
+	 */
+
 	public void load(File queriesFile) throws IOException {
 		if (queriesFile.exists()) {
-			root.children.clear();
 			try (FileReader reader = new FileReader(queriesFile)) {
 				LineNumberReader lineNumberReader = new LineNumberReader(reader);
 				try {
