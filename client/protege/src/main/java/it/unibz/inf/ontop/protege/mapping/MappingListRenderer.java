@@ -141,15 +141,16 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 	}
 
 
-	private void setAttributes(JTextPane pane, SimpleAttributeSet attibutes, boolean replace) {
+	private void setAttributes(JTextPane pane, SimpleAttributeSet attributes, boolean replace) {
 		StyledDocument doc = pane.getStyledDocument();
-		doc.setParagraphAttributes(0, doc.getLength(), attibutes, replace);
+		doc.setParagraphAttributes(0, doc.getLength(), attributes, replace);
 	}
 
 	@Override
 	public Component getListCellRendererComponent(JList<? extends TriplesMap> list, TriplesMap triplesMap, int index, boolean isSelected, boolean cellHasFocus) {
 
 		trgQueryDocument.setInvalidPlaceholders(triplesMap.getInvalidPlaceholders());
+		trgQueryDocument.setSelected(isSelected);
 		trgQueryTextPane.setText(triplesMap.getTargetRendering());
 		setAttributes(trgQueryTextPane, isSelected ? selectionForeground : foreground,false);
 
