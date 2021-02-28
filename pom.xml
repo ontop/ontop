@@ -40,6 +40,10 @@
             <name>Benjamin Cogrel</name>
         </developer>
         <developer>
+            <id>fracorco</id>
+            <name>Francesco Corcoglioniti</name>
+        </developer>
+        <developer>
             <id>juliencorman</id>
             <name>Julien Corman</name>
         </developer>
@@ -50,6 +54,14 @@
         <developer>
             <id>tirrolo</id>
             <name>Davide Lanti</name>
+        </developer>
+        <developer>
+            <id>alpano-on</id>
+            <name>Albulen Pano</name>
+        </developer>
+        <developer>
+            <id>skomlaebri</id>
+            <name>Sarah Komla-Ebri</name>
         </developer>
     </developers>
 
