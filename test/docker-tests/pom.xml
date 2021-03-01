@@ -102,7 +102,7 @@
             <groupId>org.teiid</groupId>
             <artifactId>teiid</artifactId>
             <classifier>jdbc</classifier>
-            <version>15.0.1</version>
+            <version>16.0.0</version>
             <scope>test</scope>
         </dependency>
 
