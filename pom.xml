@@ -154,7 +154,7 @@
         <jsr305.version>3.0.2</jsr305.version>
         <junit.version>4.13.1</junit.version>
         <logback.version>1.2.3</logback.version>
-        <opencsv.version>4.6</opencsv.version>
+        <opencsv.version>5.3</opencsv.version>
         <owlapi.version>4.5.19</owlapi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege.version>5.5.0</protege.version>
