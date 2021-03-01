@@ -305,10 +305,12 @@ public class R2RMLToSQLPPTriplesMapConverter {
 
 
 	private <T extends TermMap> NonVariableTerm extract(ImmutableMap<IRI, TermMapFactory<T, ? extends TemplateFactory>> map, T termMap) {
-		return map.computeIfAbsent(termMap.getTermType(), k -> {
+		TermMapFactory<T, ? extends TemplateFactory> termMapFactory = map.get(termMap.getTermType());
+		if (termMapFactory == null) {
 			throw new R2RMLParsingBugException("Was expecting one of " + map.keySet() +
-						" when encountered " + termMap);
-		}).extract(termMap);
+					" when encountered " + termMap);
+		}
+		return termMapFactory.extract(termMap);
 	}
 
 	/*
@@ -353,7 +355,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		@Override
 		protected NonVariableTerm onConstant(RDFTerm constant) {
 			return templateFactory.getConstant(
-							R2RMLVocabulary.resolveIri(constant.toString(), baseIri));
+					R2RMLVocabulary.resolveIri(((IRI)constant).getIRIString(), baseIri));
 		}
 		@Override
 		protected NonVariableTerm onTemplate(String template) {

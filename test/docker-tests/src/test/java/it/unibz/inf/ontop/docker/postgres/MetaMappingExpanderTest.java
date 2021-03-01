@@ -42,33 +42,13 @@ public class MetaMappingExpanderTest extends AbstractVirtualModeTest {
 
     @Test
     public void testQuery() throws Exception {
-
-        /*
-		 * Get the book information that is stored in the database
-		 */
-//        String sparqlQuery = "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
-//                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-//                "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
-//                "select *\n" +
-//                "where {\n" +
-//                "?x rdf:type :Amphora .\n" +
-//                "?x :hasProductionPlace ?pl .\n" +
-//                "?pl rdf:type :Place .\n" +
-//                "?pl dcterms:title \"La Corregidora\" .\n" +
-//                "?pl :hasLatitude ?lat .\n" +
-//                "?pl :hasLongitude ?long\n" +
-//                "}\n" +
-//                "limit 50\n";
-        String sparqlQuery = "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
+        countResults(1, "PREFIX : <http://www.semanticweb.org/ontologies/2015/1/EPNet-ONTOP_Ontology#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
                 "select ?x\n" +
                 "where {\n" +
                 "?x rdf:type :AmphoraSection4-4 .\n" +
                 "}\n" +
-                "limit 5\n";
-
-        runQuery(sparqlQuery);
-
-        }
+                "limit 5\n");
+    }
 }

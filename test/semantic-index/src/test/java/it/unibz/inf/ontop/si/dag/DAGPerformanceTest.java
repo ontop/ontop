@@ -36,15 +36,13 @@ import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR;
 
 public class DAGPerformanceTest extends TestCase {
 
-	Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
+	private final Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
 
-	final int size = 1000;
-	final int maxdepth = 10;
+	private static final int size = 1000;
+	private static final int maxdepth = 10;
 
-	private class LevelRange {
-		int min = 0;
-		int max = 0;
-		int width = 0;
+	private static class LevelRange {
+		final int min, max, width;
 
 		public LevelRange(int min, int max) {
 			this.min = min;
@@ -78,22 +76,16 @@ public class DAGPerformanceTest extends TestCase {
 		LevelRange[] ranges = new LevelRange[10];
 		for (int depth = 0; depth < maxdepth; depth++) {
 			int width = (int) ((Math.log10(depth + 1)) * size);
-			LevelRange r = null;
-			if (depth == 0) {
-				r = new LevelRange(0, width);
-			} else {
-				r = new LevelRange(ranges[depth - 1].max, width);
-			}
+			LevelRange r = (depth == 0)
+				? new LevelRange(0, width)
+				: new LevelRange(ranges[depth - 1].max, width);
 			ranges[depth] = r;
 		}
 		LevelRange[] corrected = new LevelRange[9];
 		for (int depth = 0; depth < 9; depth++) {
-			LevelRange r2 = null;
-			if (depth == 0) {
-				r2 = new LevelRange(0, ranges[9 - depth].width);
-			} else {
-				r2 = new LevelRange(corrected[depth - 1].max, (corrected[depth - 1].max) + ranges[9 - depth].width);
-			}
+			LevelRange r2 = (depth == 0)
+				? new LevelRange(0, ranges[9 - depth].width)
+				: new LevelRange(corrected[depth - 1].max, (corrected[depth - 1].max) + ranges[9 - depth].width);
 			corrected[depth] = r2;
 		}
 		log.info("Creating axioms");
@@ -165,22 +157,16 @@ public class DAGPerformanceTest extends TestCase {
 		LevelRange[] ranges = new LevelRange[10];
 		for (int depth = 0; depth < maxdepth; depth++) {
 			int width = (int) ((Math.log10(depth + 1)) * size);
-			LevelRange r = null;
-			if (depth == 0) {
-				r = new LevelRange(0, width);
-			} else {
-				r = new LevelRange(ranges[depth - 1].max, width);
-			}
+			LevelRange r = (depth == 0)
+				? new LevelRange(0, width)
+				: new LevelRange(ranges[depth - 1].max, width);
 			ranges[depth] = r;
 		}
 		LevelRange[] corrected = new LevelRange[9];
 		for (int depth = 0; depth < 9; depth++) {
-			LevelRange r2 = null;
-			if (depth == 0) {
-				r2 = new LevelRange(0, ranges[9 - depth].width);
-			} else {
-				r2 = new LevelRange(corrected[depth - 1].max, (corrected[depth - 1].max) + ranges[9 - depth].width);
-			}
+			LevelRange r2 = (depth == 0)
+				? new LevelRange(0, ranges[9 - depth].width)
+				: new LevelRange(corrected[depth - 1].max, (corrected[depth - 1].max) + ranges[9 - depth].width);
 			corrected[depth] = r2;
 		}
 		log.info("Creating axioms");
@@ -252,22 +238,16 @@ public class DAGPerformanceTest extends TestCase {
 		LevelRange[] ranges = new LevelRange[10];
 		for (int depth = 0; depth < maxdepth; depth++) {
 			int width = (int) ((Math.log10(depth + 1)) * size);
-			LevelRange r = null;
-			if (depth == 0) {
-				r = new LevelRange(0, width);
-			} else {
-				r = new LevelRange(ranges[depth - 1].max, width);
-			}
+			LevelRange r = (depth == 0)
+				? new LevelRange(0, width)
+				: new LevelRange(ranges[depth - 1].max, width);
 			ranges[depth] = r;
 		}
 		LevelRange[] corrected = new LevelRange[9];
 		for (int depth = 0; depth < 9; depth++) {
-			LevelRange r2 = null;
-			if (depth == 0) {
-				r2 = new LevelRange(0, ranges[9 - depth].width);
-			} else {
-				r2 = new LevelRange(corrected[depth - 1].max, (corrected[depth - 1].max) + ranges[9 - depth].width);
-			}
+			LevelRange r2 = (depth == 0)
+				? new LevelRange(0, ranges[9 - depth].width)
+				: new LevelRange(corrected[depth - 1].max, (corrected[depth - 1].max) + ranges[9 - depth].width);
 			corrected[depth] = r2;
 		}
 

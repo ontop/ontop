@@ -51,6 +51,11 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
+    public boolean areInvalidTriplesExcludedFromResultSet() {
+        return getRequiredBoolean(EXCLUDE_INVALID_TRIPLES_FROM_RESULT_SET);
+    }
+
+    @Override
     public boolean isQueryLoggingEnabled() {
         return getRequiredBoolean(QUERY_LOGGING);
     }

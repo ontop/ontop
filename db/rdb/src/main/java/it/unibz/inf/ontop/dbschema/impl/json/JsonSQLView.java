@@ -91,6 +91,12 @@ public class JsonSQLView extends JsonView {
     public void insertIntegrityConstraints(NamedRelationDefinition relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
                                            MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
+        QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
+
+        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added);
+
+        insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added);
+
     }
 
 
@@ -176,6 +182,40 @@ public class JsonSQLView extends JsonView {
         return builder;
     }
 
+    private void insertUniqueConstraints(NamedRelationDefinition relation,
+                                         QuotedIDFactory idFactory,
+                                         List<JsonSQLView.AddUniqueConstraints> addUniqueConstraints)
+            throws MetadataExtractionException {
+
+        for (JsonSQLView.AddUniqueConstraints addUC : addUniqueConstraints) {
+            if (addUC.isPrimaryKey != null && addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
+            FunctionalDependency.Builder builder = UniqueConstraint.builder(relation, addUC.name);
+            JsonMetadata.deserializeAttributeList(idFactory, addUC.determinants, builder::addDeterminant);
+            builder.build();
+        }
+    }
+
+    private void insertFunctionalDependencies(NamedRelationDefinition relation,
+                                              QuotedIDFactory idFactory,
+                                              List<JsonSQLView.AddFunctionalDependency> addFunctionalDependencies)
+            throws MetadataExtractionException {
+
+        for (JsonSQLView.AddFunctionalDependency addFD : addFunctionalDependencies) {
+            FunctionalDependency.Builder builder = FunctionalDependency.defaultBuilder(relation);
+
+            try {
+                JsonMetadata.deserializeAttributeList(idFactory, addFD.determinants, builder::addDeterminant);
+                JsonMetadata.deserializeAttributeList(idFactory, addFD.dependents, builder::addDependent);
+                builder.build();
+            }
+            catch (MetadataExtractionException e) {
+                throw new MetadataExtractionException(String.format(
+                        "Cannot find attribute for Functional Dependency %s", addFD.determinants));
+            }
+        }
+
+    }
+
     @JsonPropertyOrder({
             "added"
     })
@@ -199,7 +239,6 @@ public class JsonSQLView extends JsonView {
         public final String name;
         @Nonnull
         public final List<String> determinants;
-        @Nonnull
         public final Boolean isPrimaryKey;
 
 
