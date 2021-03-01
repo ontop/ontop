@@ -131,26 +131,20 @@
 
     <repositories>
         <repository>
-            <!-- for 3rd party JDBC drivers -->
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>bolzano-nexus-public</id>
-            <url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
-        </repository>
-        <repository>
-            <!-- for monetdb -->
+            <!--
+                For 3rd party JDBC drivers:
+                - madgit.adp:adp-jdbc:0.1.2
+                - monetdb:monetdb-jdbc:11.19.15
+                - com.dremio.jdbc:dremio-jdbc:1.4.4
+            -->
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>clojars.org</id>
-            <url>http://clojars.org/repo</url>
+            <id>third-party-jars</id>
+            <url>https://raw.githubusercontent.com/fracorco/third-party-jars/master/releases/</url>
         </repository>
     </repositories>
 
