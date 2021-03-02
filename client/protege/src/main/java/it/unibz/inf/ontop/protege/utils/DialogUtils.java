@@ -180,10 +180,48 @@ public class DialogUtils {
 	public static final String HTML_TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
 
 	public static String htmlEscape(String s) {
-		return s.replaceAll("<", "&lt;")
+		return wrapLongLines(s)
+				.replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;")
 				.replaceAll("\t", HTML_TAB)
 				.replaceAll("\n", "<br>");
+	}
+
+	private static final int LINE_WIDTH = 100;
+
+	private static String wrapLongLines(String s) {
+		if (s.length() < LINE_WIDTH)
+			return s;
+		StringBuffer sb = new StringBuffer();
+		int offset = 0;
+		while (offset < s.length()) {
+			int pos = s.indexOf('\n');
+			if (pos == -1)
+				pos = s.length() - 1;
+			String line = s.substring(offset, pos + 1);
+			if (line.length() < LINE_WIDTH)
+				sb.append(line);
+			else {
+				int spaceOffset = 0;
+				while (spaceOffset < line.length()) {
+					int spacePosition = line.lastIndexOf(' ', spaceOffset + LINE_WIDTH);
+					if (spacePosition == -1)
+						spacePosition = line.indexOf(' ', spaceOffset + LINE_WIDTH);
+					if (spacePosition == -1)
+						spacePosition = line.length();
+					if (spacePosition > spaceOffset + LINE_WIDTH * 1.2)
+						spacePosition = Math.min(spaceOffset + LINE_WIDTH, line.length());
+					sb.append(line, spaceOffset, spacePosition).append("\n");
+
+					// new offset does not include any spaces
+					spaceOffset = spacePosition;
+					while (spaceOffset < line.length() && line.charAt(spaceOffset) == ' ')
+						spaceOffset++;
+				}
+			}
+			offset = pos + 1;
+		}
+		return sb.toString();
 	}
 
 	public static String renderElapsedTime(long millis) {
@@ -267,7 +305,7 @@ public class DialogUtils {
 		Throwable cause = e.getCause();
 		if (cause instanceof SQLException && datasource != null) {
 			JOptionPane.showMessageDialog(parent,
-					"<html><b>Error connecting to the database:</b> " + htmlEscape(cause.getMessage()) + ".<br><br>" +
+					"<html><b>Error connecting to the database:</b> " + htmlEscape(cause.getMessage()) + "<br><br>" +
 							HTML_TAB + "JDBC driver: " + datasource.getDriver() + "<br>" +
 							HTML_TAB + "Connection URL: " + datasource.getURL() + "<br>" +
 							HTML_TAB + "Username: " + datasource.getUsername() + "</html>",
@@ -287,7 +325,7 @@ public class DialogUtils {
 			Throwable owlExceptionCause = owlException.getCause();
 			JOptionPane.showMessageDialog(parent,
 					"<html><b>Error executing SPARQL query.</b><br><br>" +
-							HTML_TAB + htmlEscape(owlExceptionCause.getMessage()) + "</b>.<br></html>",
+							HTML_TAB + htmlEscape(owlExceptionCause.getMessage()) + "<br></html>",
 					title,
 					JOptionPane.ERROR_MESSAGE);
 		}

@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.swing.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.htmlEscape;
 
 /**
  * Wrapper around OntopProtegeReasoner for use in the ontop Protege plugin
@@ -25,7 +26,7 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 
 	private void handleError(Exception e){
 		DialogUtils.showPrettyMessageDialog(null,
-				"Error during reasoner initialization: " + e,
+				"<html><b>Error during reasoner initialization:</b><br>" + htmlEscape(e.getMessage()) + "</html>",
 				"Ontop Initialization Error",
 				JOptionPane.ERROR_MESSAGE);
 	}
