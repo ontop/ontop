@@ -192,36 +192,37 @@ public class DialogUtils {
 	private static String wrapLongLines(String s) {
 		if (s.length() < LINE_WIDTH)
 			return s;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int offset = 0;
 		while (offset < s.length()) {
 			int pos = s.indexOf('\n');
 			if (pos == -1)
 				pos = s.length() - 1;
 			String line = s.substring(offset, pos + 1);
-			if (line.length() < LINE_WIDTH)
-				sb.append(line);
-			else {
-				int spaceOffset = 0;
-				while (spaceOffset < line.length()) {
-					int spacePosition = line.lastIndexOf(' ', spaceOffset + LINE_WIDTH);
-					if (spacePosition == -1)
-						spacePosition = line.indexOf(' ', spaceOffset + LINE_WIDTH);
-					if (spacePosition == -1)
-						spacePosition = line.length();
-					if (spacePosition > spaceOffset + LINE_WIDTH * 1.2)
-						spacePosition = Math.min(spaceOffset + LINE_WIDTH, line.length());
-					sb.append(line, spaceOffset, spacePosition).append("\n");
-
-					// new offset does not include any spaces
-					spaceOffset = spacePosition;
-					while (spaceOffset < line.length() && line.charAt(spaceOffset) == ' ')
-						spaceOffset++;
-				}
-			}
+			splitAndAppend(sb, line);
 			offset = pos + 1;
 		}
 		return sb.toString();
+	}
+
+	private static void splitAndAppend(StringBuilder sb, String line) {
+		while (line.length() >= LINE_WIDTH) {
+			int pos = line.lastIndexOf(' ', LINE_WIDTH);
+			if (pos == -1)
+				pos = line.indexOf(' ', LINE_WIDTH);
+			if (pos == -1)
+				pos = line.length();
+			if (pos > LINE_WIDTH * 1.2)
+				pos = LINE_WIDTH; // safe because line.length >= pos > LINE_WIDTH * 1.2
+			sb.append(line, 0, pos).append("\n");
+
+			while (pos < line.length() && line.charAt(pos) == ' ')
+				pos++; // skip all spaces (if any)
+
+			line = line.substring(pos);
+		}
+		if (!line.isEmpty())
+			sb.append(line);
 	}
 
 	public static String renderElapsedTime(long millis) {

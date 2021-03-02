@@ -261,7 +261,7 @@ public class EditMappingDialog extends JDialog {
 		targetQueryTextPane.setBorder(errorBorder);
 		toolTipManager.setInitialDelay(ERROR_TOOLTIP_INITIAL_DELAY);
 		toolTipManager.setDismissDelay(ERROR_TOOLTIP_DISMISS_DELAY);
-		targetQueryTextPane.setToolTipText("<html><body>" + htmlEscape(error) + "</body></html>");
+		targetQueryTextPane.setToolTipText("<html>" + htmlEscape(error) + "</html>");
 		isValid = false;
 		saveAction.setEnabled(false);
 	}

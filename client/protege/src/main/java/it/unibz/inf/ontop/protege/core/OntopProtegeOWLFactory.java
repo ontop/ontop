@@ -26,7 +26,7 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 
 	private void handleError(Exception e){
 		DialogUtils.showPrettyMessageDialog(null,
-				"<html><b>Error during reasoner initialization:</b><br>" + htmlEscape(e.getMessage()) + "</html>",
+				"<html><h3>Error during reasoner initialization.</h3>" + htmlEscape(e.getMessage()) + "</html>",
 				"Ontop Initialization Error",
 				JOptionPane.ERROR_MESSAGE);
 	}
