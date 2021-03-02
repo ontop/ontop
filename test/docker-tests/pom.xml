@@ -143,8 +143,8 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>third-party-jars</id>
-            <url>https://raw.githubusercontent.com/fracorco/third-party-jars/master/releases/</url>
+            <id>ontop-maven-repo</id>
+            <url>https://raw.githubusercontent.com/ontop/ontop-maven-repo/master/repository/</url>
         </repository>
     </repositories>
 
