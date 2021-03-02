@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -285,13 +286,26 @@ public class DialogUtils {
 		OWLReasoner reasoner = owlEditorKit.getModelManager().getOWLReasonerManager().getCurrentReasoner();
 		if (!(reasoner instanceof OntopProtegeReasoner)) {
 			JOptionPane.showMessageDialog(editorKit.getWorkspace(),
-					"<html><b>Ontop reasoner</b> must be started before using this feature. To proceed<br><br>" +
+					"<html><b>Ontop reasoner</b> must be started before using this feature.<br><br>To proceed<br><br>" +
 							HTML_TAB + " * select Ontop in the <b>\"Reasoner\"</b> menu and<br>" +
 							HTML_TAB + " * click <b>\"Start reasoner\"</b> in the same menu.<br></html>",
 					"Warning",
 					JOptionPane.WARNING_MESSAGE);
 			return Optional.empty();
 		}
+		if (LoggerFactory.getLogger(DialogUtils.class).isDebugEnabled()) {
+			if (JOptionPane.showConfirmDialog(editorKit.getWorkspace(),
+					"<html><b>Prot&eacute;g&eacute;</b> may become unresponsive due to the large number of <b>DEBUG</b> Ontop log entries.<br><br>" +
+							"If you wish to proceed, select <b>OK</b>.<br><br>" +
+							"Otherwise, lower the <b>Log level</b> in Log Preferences.<br></html>",
+					"Warning",
+					JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					getOntopIcon()) != JOptionPane.OK_OPTION)
+
+				return Optional.empty();
+		}
+
 		return Optional.of((OntopProtegeReasoner)reasoner);
 	}
 

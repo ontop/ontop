@@ -198,6 +198,7 @@ public class OBDAModelManager implements Disposable {
 		@Override
 		public void handleChange(OWLModelManagerChangeEvent event) {
 			LOGGER.debug(event.getType().name());
+			setUpReasonerInfo();
 			switch (event.getType()) {
 				case ONTOLOGY_CREATED: // fired before ACTIVE_ONTOLOGY_CHANGED
 					ontologyCreated();
@@ -217,9 +218,6 @@ public class OBDAModelManager implements Disposable {
 					break;
 
 				case REASONER_CHANGED:
-					setUpReasonerInfo();
-					break;
-
 				case ABOUT_TO_CLASSIFY:
 				case ONTOLOGY_CLASSIFIED:
 				case ENTITY_RENDERER_CHANGED:
@@ -234,9 +232,7 @@ public class OBDAModelManager implements Disposable {
 		ProtegeOWLReasonerInfo protegeOWLReasonerInfo = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 		if (protegeOWLReasonerInfo instanceof OntopReasonerInfo) {
 			OntopReasonerInfo reasonerInfo = (OntopReasonerInfo) protegeOWLReasonerInfo;
-			addListener(reasonerInfo);
-			if (currentObdaModel != null)
-				reasonerInfo.activeOntologyChanged(currentObdaModel);
+			reasonerInfo.setOBDAModelManager(this);
 		}
 	}
 

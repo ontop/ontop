@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
-import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +29,15 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
     private OntopOWLStatement statement;
 
     protected OntopQuerySwingWorker(OntopProtegeReasoner ontop, String query, Component parent, String title) {
-        this(ontop, query, parent, title, new DialogProgressMonitor(parent, "<html><h3>" + title + "</h3></html>", true));
+        this(ontop, query, parent, title, new ProgressMonitorDialogComponent(parent, "<html><h3>" + title + "</h3></html>", true));
     }
 
     protected OntopQuerySwingWorker(OntopProtegeReasoner ontop, String query, Component parent, String title, JButton startButton, JButton stopButton, JLabel statusLabel) {
-        this(ontop, query, parent, title, new EmbeddedProgressMonitor(startButton, stopButton, statusLabel));
+        this(ontop, query, parent, title, new ProgressMonitorEmbeddedComponent(startButton, stopButton, statusLabel));
     }
 
-    protected OntopQuerySwingWorker(OntopProtegeReasoner ontop, String query, Component parent, String title, AbstractProgressMonitor progressMonitor) {
-        super(progressMonitor, MONITOR_UPDATE_INTERVAL);
+    protected OntopQuerySwingWorker(OntopProtegeReasoner ontop, String query, Component parent, String title, ProgressMonitorComponent component) {
+        super(component, MONITOR_UPDATE_INTERVAL);
 
         this.parent = parent;
         this.title = title;
@@ -94,10 +93,10 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
             onCompletion(result.getKey(), result.getValue());
         }
         catch (CancellationException | InterruptedException ignore) {
-            progressMonitor.setStatus("Query processing was cancelled.");
+            progressMonitor.getComponent().onProgress(100, "Query processing was cancelled.");
         }
         catch (ExecutionException e) {
-            DialogUtils.showErrorDialog(parent, title, title + " error.", LOGGER, e, (DataSource)null);
+            DialogUtils.showErrorDialog(parent, title, title + " error.", LOGGER, e, null);
         }
         catch (Exception e) {
             DialogUtils.showQuickErrorDialog(parent, e, title + " error.");
