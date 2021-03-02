@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 
-public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
+public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo implements OBDAModelManagerListener {
 
 
 	private OntopConfigurationManager configurationGenerator;
@@ -50,7 +50,8 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		return new OntopProtegeOWLConfiguration(configurationGenerator.buildOntopSQLOWLAPIConfiguration(activeOntology), monitor, configurationGenerator);
     }
 
-	public void setConfigurationGenerator(OntopConfigurationManager configurationGenerator) {
-		this.configurationGenerator = configurationGenerator;
+	@Override
+	public void activeOntologyChanged(OBDAModel obdaModel) {
+		this.configurationGenerator = obdaModel.getConfigurationManager();
 	}
 }

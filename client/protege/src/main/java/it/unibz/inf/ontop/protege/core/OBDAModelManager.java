@@ -216,14 +216,27 @@ public class OBDAModelManager implements Disposable {
 					ontologySaved();
 					break;
 
+				case REASONER_CHANGED:
+					setUpReasonerInfo();
+					break;
+
 				case ABOUT_TO_CLASSIFY:
 				case ONTOLOGY_CLASSIFIED:
 				case ENTITY_RENDERER_CHANGED:
-				case REASONER_CHANGED:
 				case ONTOLOGY_VISIBILITY_CHANGED:
 				case ENTITY_RENDERING_CHANGED:
 					break;
 			}
+		}
+	}
+
+	private void setUpReasonerInfo() {
+		ProtegeOWLReasonerInfo protegeOWLReasonerInfo = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
+		if (protegeOWLReasonerInfo instanceof OntopReasonerInfo) {
+			OntopReasonerInfo reasonerInfo = (OntopReasonerInfo) protegeOWLReasonerInfo;
+			addListener(reasonerInfo);
+			if (currentObdaModel != null)
+				reasonerInfo.activeOntologyChanged(currentObdaModel);
 		}
 	}
 
@@ -267,12 +280,6 @@ public class OBDAModelManager implements Disposable {
 			return;
 
 		currentObdaModel = obdaModel;
-
-		ProtegeOWLReasonerInfo protegeOWLReasonerInfo = getModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
-		if (protegeOWLReasonerInfo instanceof OntopReasonerInfo) {
-			OntopReasonerInfo reasonerInfo = (OntopReasonerInfo) protegeOWLReasonerInfo;
-			reasonerInfo.setConfigurationGenerator(currentObdaModel.getConfigurationManager());
-		}
 
 		listeners.fire(l -> l.activeOntologyChanged(getCurrentOBDAModel()));
 	}
