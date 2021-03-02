@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -30,8 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SQLGeneratorImpl implements NativeQueryGenerator {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGeneratorImpl.class);
-    private static final boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLGeneratorImpl.class);
     private final DBParameters dbParameters;
     private final IntermediateQueryFactory iqFactory;
     private final UnionFlattener unionFlattener;
@@ -79,12 +79,10 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             return query;
 
         IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(query);
-        if (IS_DEBUG_ENABLED)
-            log.debug("After lifting the RDF types:\n" + rdfTypeLiftedIQ);
+        LOGGER.debug("After lifting the RDF types:\n{}\n", rdfTypeLiftedIQ);
 
         IQ liftedIQ = functionLifter.optimize(rdfTypeLiftedIQ);
-        if (IS_DEBUG_ENABLED)
-            log.debug("After lifting the post-processable function symbols :\n" + liftedIQ);
+        LOGGER.debug("After lifting the post-processable function symbols:\n{}\n", liftedIQ);
 
         PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(liftedIQ, avoidPostProcessing);
 
@@ -108,26 +106,22 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private IQTree normalizeSubTree(IQTree subTree, VariableGenerator variableGenerator) {
 
         IQTree sliceLiftedTree = liftSlice(subTree);
-        if (IS_DEBUG_ENABLED)
-            log.debug("New query after lifting the slice: \n" + sliceLiftedTree);
+        LOGGER.debug("New query after lifting the slice:\n{}\n", sliceLiftedTree);
 
         // TODO: check if still needed
         IQTree flattenSubTree = unionFlattener.optimize(sliceLiftedTree, variableGenerator);
-        if (IS_DEBUG_ENABLED)
-            log.debug("New query after flattening the union: \n" + flattenSubTree);
+        LOGGER.debug("New query after flattening the union:\n{}\n", flattenSubTree);
 
         IQTree pushedDownSubTree = pushDownTransformer.transform(flattenSubTree);
-        if (IS_DEBUG_ENABLED)
-            log.debug("New query after pushing down: \n" + pushedDownSubTree);
+        LOGGER.debug("New query after pushing down:\n{}\n", pushedDownSubTree);
 
         IQTree treeAfterPullOut = optimizerFactory.createEETransformer(variableGenerator).transform(pushedDownSubTree);
-        if (IS_DEBUG_ENABLED)
-            log.debug("Query tree after pulling out equalities: \n" + treeAfterPullOut);
+        LOGGER.debug("Query tree after pulling out equalities:\n{}\n", treeAfterPullOut);
 
         // Dialect specific
         IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterPullOut, variableGenerator);
-        if (IS_DEBUG_ENABLED)
-            log.debug("New query after the dialect-specific extra normalization: \n" + afterDialectNormalization);
+        LOGGER.debug("New query after the dialect-specific extra normalization:\n{}\n", afterDialectNormalization);
+
         return afterDialectNormalization;
     }
 
