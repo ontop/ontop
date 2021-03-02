@@ -88,7 +88,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		try {
 			LOGGER.debug("SPARQL query:\n{}\n", inputQuery.getInputString());
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
-			LOGGER.debug("Parsed query converted into IQ (after normalization):\n{}", convertedIQ);
+			LOGGER.debug("Parsed query converted into IQ (after normalization):\n{}\n", convertedIQ);
 
 			queryLogger.setSparqlIQ(convertedIQ);
 
@@ -102,7 +102,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
-                	LOGGER.debug("Reformulation time: {} ms", System.currentTimeMillis() - beginning);
+                	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
 					return unfoldedIQ;
 				}
 
@@ -117,7 +117,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
-				LOGGER.debug("Reformulation time: {} ms", System.currentTimeMillis() - beginning);
+				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
 				return executableQuery;
 			}
             catch (OntopReformulationException e) {

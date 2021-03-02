@@ -39,7 +39,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
 
-        LOGGER.debug("New lifted query: \n{}", liftedQuery);
+        LOGGER.debug("New lifted query:\n{}\n", liftedQuery);
 
         IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
