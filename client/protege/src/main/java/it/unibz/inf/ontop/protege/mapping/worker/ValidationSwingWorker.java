@@ -88,7 +88,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
             complete();
             String message = invalidTriplesMapCount == 0
                     ? (triplesMapList.size() == 1
-                    ? "The only triples map has been found valid."
+                    ? "The only triples map selected has been found valid."
                     : "All <b>" + triplesMapList.size() + "</b> triples map have been found valid.")
                     : "<b>" + invalidTriplesMapCount + "</b> triples map" + (invalidTriplesMapCount > 1 ? "s" : "") + " (out of <b>" +
                     triplesMapList.size() + "</b>) have been found invalid.";
