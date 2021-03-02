@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -13,7 +12,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>4.1.0-beta-1-SNAPSHOT</version>
+    <version>4.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://ontop-vkg.org/</url>
 
@@ -40,6 +39,10 @@
             <name>Benjamin Cogrel</name>
         </developer>
         <developer>
+            <id>fracorco</id>
+            <name>Francesco Corcoglioniti</name>
+        </developer>
+        <developer>
             <id>juliencorman</id>
             <name>Julien Corman</name>
         </developer>
@@ -50,6 +53,14 @@
         <developer>
             <id>tirrolo</id>
             <name>Davide Lanti</name>
+        </developer>
+        <developer>
+            <id>alpano-on</id>
+            <name>Albulen Pano</name>
+        </developer>
+        <developer>
+            <id>skomlaebri</id>
+            <name>Sarah Komla-Ebri</name>
         </developer>
     </developers>
 
@@ -1246,6 +1257,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -1275,9 +1287,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -1289,6 +1303,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -1301,6 +1316,7 @@
             <plugin>
                 <!-- explicitly define maven-deploy-plugin after to force exec order -->
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>deploy</id>

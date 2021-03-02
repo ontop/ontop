@@ -33,12 +33,14 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
     private final SimpleAttributeSet annotationPropertyStyle = new SimpleAttributeSet();
     private final SimpleAttributeSet individualStyle = new SimpleAttributeSet();
     private final SimpleAttributeSet templateArgumentStyle = new SimpleAttributeSet();
+    private final SimpleAttributeSet selectedTemplateArgumentStyle = new SimpleAttributeSet();
     private final SimpleAttributeSet errorStyle = new SimpleAttributeSet();
 
     private final OBDAModelManager obdaModelManager;
     private final Consumer<TargetQueryStyledDocument> validationCallback;
 
     private ImmutableList<String> invalidPlaceholders = ImmutableList.of();
+    private boolean isSelected = false;
 
     public TargetQueryStyledDocument(OBDAModelManager obdaModelManager, Consumer<TargetQueryStyledDocument> validationCallback) {
         this.obdaModelManager = obdaModelManager;
@@ -68,6 +70,9 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         StyleConstants.setBold(templateArgumentStyle, true);
         StyleConstants.setForeground(templateArgumentStyle, new Color(97, 66, 151));
 
+        StyleConstants.setBold(selectedTemplateArgumentStyle, true);
+        StyleConstants.setForeground(selectedTemplateArgumentStyle, Color.LIGHT_GRAY);
+
         StyleConstants.setForeground(errorStyle, Color.RED);
         StyleConstants.setBold(errorStyle, true);
         StyleConstants.setUnderline(errorStyle, true);
@@ -87,6 +92,10 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
 
     public void setInvalidPlaceholders(ImmutableList<String> invalidPlaceholders) {
         this.invalidPlaceholders = invalidPlaceholders;
+    }
+
+    public void setSelected(boolean isSelected) {
+        this.isSelected = isSelected;
     }
 
     public ImmutableSet<IRI> validate() throws TargetQueryParserException {
@@ -210,7 +219,9 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
             String input = getText(0, getLength());
             for (Variable v : template.get().getVariables()) {
                 String arg = "{" + v.getName() + "}";
-                SimpleAttributeSet style = invalidPlaceholders.contains(v.getName()) ? errorStyle : templateArgumentStyle;
+                SimpleAttributeSet style = invalidPlaceholders.contains(v.getName())
+                        ? errorStyle
+                        : (isSelected ? selectedTemplateArgumentStyle : templateArgumentStyle);
                 int p, po = 0;
                 while ((p = input.indexOf(arg, po)) != -1) {
                     setCharacterAttributes(p + 1, arg.length() - 2, style, false);
