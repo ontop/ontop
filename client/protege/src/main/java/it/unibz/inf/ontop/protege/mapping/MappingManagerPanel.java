@@ -34,8 +34,7 @@ import java.awt.event.*;
 import java.util.List;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_N;
+import static java.awt.event.KeyEvent.*;
 
 public class MappingManagerPanel extends JPanel implements OBDAModelManagerListener {
 
@@ -82,8 +81,13 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
+        buttonsPanel.add(getButton(validateAction),
+                new GridBagConstraints(3, 0, 1, 1, 0, 0,
+                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
+
         buttonsPanel.add(new JPanel(), // stretchable panel
-                new GridBagConstraints(3, 0, 1, 1, 1, 0,
+                new GridBagConstraints(4, 0, 1, 1, 1, 0,
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
@@ -136,7 +140,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         menu.add(getMenuItem("Copy triples maps", copyAction));
         menu.add(getMenuItem(editAction));
         menu.addSeparator();
-        menu.add(getMenuItem(validateAction));
+        menu.add(getMenuItem("Validate triples maps", validateAction));
         menu.add(getMenuItem(executeSQLAction));
         setUpPopUpMenu(mappingList, menu);
         // additional accelerators
@@ -231,8 +235,11 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         }
     };
 
-    private final OntopAbstractAction validateAction = new OntopAbstractAction("Validate triples maps",
-            null,null, null) {
+    private final OntopAbstractAction validateAction = new OntopAbstractAction(
+            "Validate",
+            "validate.png",
+            "Validate selected triples maps",
+            getKeyStrokeWithCtrlMask(VK_V)) {
         @Override
         public void actionPerformed(ActionEvent e) {
             ValidationSwingWorker worker = new ValidationSwingWorker(
