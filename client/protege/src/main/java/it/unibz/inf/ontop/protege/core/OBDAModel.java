@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.*;
 
 public class OBDAModel implements TriplesMapFactory {
@@ -292,7 +293,7 @@ public class OBDAModel implements TriplesMapFactory {
 
         Properties properties = new Properties();
         properties.putAll(settings);
-        properties.putAll(datasource.asProperties());
+        properties.putAll(datasource.asProperties()); // can possibly override the settings
 
         builder.properties(properties);
 

@@ -28,9 +28,13 @@
 
 		<VSNode splits="1.0">
 			<CNode>
-				<Component label="Datasource manager">
+				<Component label="Connection parameters">
 					<Property id="pluginId"
 						value="it.unibz.inf.ontop.protege.DatasourcesManagerViewComponent" />
+				</Component>
+				<Component label="Ontop properties">
+					<Property id="pluginId"
+							  value="it.unibz.inf.ontop.protege.OntopPropertiesViewComponent" />
 				</Component>
 				<Component label="Mapping manager">
 					<Property id="pluginId"

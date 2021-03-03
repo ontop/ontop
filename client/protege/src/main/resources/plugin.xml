@@ -13,6 +13,16 @@
 		<category value="ontop"/>
 	</extension>
 
+	<extension id="OntopPropertiesViewComponent"
+			   point="org.protege.editor.core.application.ViewComponent">
+		<label value="Ontop properties"/>
+		<class
+				value="it.unibz.inf.ontop.protege.connection.OntopPropertiesView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="ontop"/>
+	</extension>
+
 	<extension id="MappingsManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping editor"/>
