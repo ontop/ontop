@@ -45,7 +45,7 @@ License
 The Ontop framework is available under the Apache License, Version 2.0
 
 ```
-  Copyright (C) 2009 - 2020 Free University of Bozen-Bolzano
+  Copyright (C) 2009 - 2021 Free University of Bozen-Bolzano
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
