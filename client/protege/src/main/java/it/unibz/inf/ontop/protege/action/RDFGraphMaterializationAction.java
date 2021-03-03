@@ -167,7 +167,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
             start("initializing...");
 
             RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
-                    obdaModel.getConfigurationForOntology(),
+                    obdaModel.getOntopConfiguration(),
                     MaterializationParams.defaultBuilder().build());
             MaterializationGraphQuery query = materializer.materialize();
 
@@ -235,7 +235,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
             start("initializing...");
 
             OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
-                    obdaModel.getConfigurationForOntology(),
+                    obdaModel.getOntopConfiguration(),
                     MaterializationParams.defaultBuilder().build());
 
             startLoop(() -> 50, () -> String.format("%d triples materialized...", getCount()));

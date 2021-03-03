@@ -20,6 +20,6 @@ public class OntopProtegeOWLConfiguration extends SimpleConfiguration {
 
     @Nonnull
     public OntopSQLOWLAPIConfiguration getOntopConfiguration(OWLOntology rootOntology) {
-        return obdaModelManager.getOBDAModel(rootOntology).getConfigurationForOntology();
+        return obdaModelManager.getOBDAModel(rootOntology).getOntopConfiguration();
     }
 }

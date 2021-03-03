@@ -7,13 +7,11 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -29,20 +27,22 @@ public class TriplesMap {
     }
 
     private final SQLPPTriplesMap sqlppTriplesMap;
-    private final TriplesMapCollection triplesMapCollection;
+    private final OntologyPrefixManager prefixManager;
+    private final TriplesMapFactory factory;
 
     private Status status;
     private String sqlErrorMessage;
     private ImmutableList<String> invalidPlaceholders = ImmutableList.of();
 
-    public TriplesMap(SQLPPTriplesMap sqlppTriplesMap, TriplesMapCollection triplesMapCollection) {
+    public TriplesMap(SQLPPTriplesMap sqlppTriplesMap, OntologyPrefixManager prefixManager, TriplesMapFactory factory) {
         this.sqlppTriplesMap = sqlppTriplesMap;
-        this.triplesMapCollection = triplesMapCollection;
+        this.prefixManager = prefixManager;
+        this.factory = factory;
         this.status = Status.NOT_VALIDATED;
     }
 
-    public TriplesMap(String id, String sqlQuery, ImmutableList<TargetAtom> targetQuery, TriplesMapCollection triplesMapCollection) {
-        this(new OntopNativeSQLPPTriplesMap(id, triplesMapCollection.getSourceQueryFactory().createSourceQuery(sqlQuery), targetQuery), triplesMapCollection);
+    public TriplesMap(String id, String sqlQuery, ImmutableList<TargetAtom> targetQuery,  OntologyPrefixManager prefixManager, TriplesMapFactory factory) {
+        this(new OntopNativeSQLPPTriplesMap(id, factory.getSourceQuery(sqlQuery), targetQuery), prefixManager, factory);
     }
 
     public String getId() { return sqlppTriplesMap.getId(); }
@@ -52,7 +52,7 @@ public class TriplesMap {
     public ImmutableList<TargetAtom> getTargetAtoms() { return sqlppTriplesMap.getTargetAtoms(); }
 
     public String getTargetRendering() {
-        TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(triplesMapCollection.getMutablePrefixManager());
+        TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
         return targetQueryRenderer.encode(sqlppTriplesMap.getTargetAtoms());
     }
 
@@ -77,7 +77,7 @@ public class TriplesMap {
         TriplesMap copy = new TriplesMap(
                 new OntopNativeSQLPPTriplesMap(
                         newId, sqlppTriplesMap.getSourceQuery(), sqlppTriplesMap.getTargetAtoms()),
-                triplesMapCollection);
+                prefixManager, factory);
         copy.status = this.status;
         copy.sqlErrorMessage = this.sqlErrorMessage;
         copy.invalidPlaceholders = this.invalidPlaceholders;
@@ -88,20 +88,20 @@ public class TriplesMap {
         return new TriplesMap(
                 new OntopNativeSQLPPTriplesMap(
                         sqlppTriplesMap.getId(), sqlppTriplesMap.getSourceQuery(), targetAtoms),
-                triplesMapCollection);
+                prefixManager, factory);
     }
 
-    public TriplesMap renamePredicate(IRI removedIri, IRIConstant newIri) {
+    public TriplesMap renamePredicate(IRI removedIri, IRI newIri) {
         return containsIri(removedIri)
                 ? updateTargetAtoms(sqlppTriplesMap.getTargetAtoms().stream()
                 .map(a -> containsIri(a, removedIri)
-                        ? renamePredicate(a, newIri, triplesMapCollection.getTargetAtomFactory(), triplesMapCollection.getSubstitutionFactory())
+                        ? renamePredicate(a, newIri, factory)
                         : a)
                 .collect(ImmutableCollectors.toList()))
                 : this; // has not changed
     }
 
-    private static TargetAtom renamePredicate(TargetAtom a, ImmutableTerm newIri, TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory) {
+    private static TargetAtom renamePredicate(TargetAtom a, IRI newIri, TriplesMapFactory factory) {
         DistinctVariableOnlyDataAtom projectionAtom = a.getProjectionAtom();
         RDFAtomPredicate predicate = (RDFAtomPredicate) projectionAtom.getPredicate();
 
@@ -111,14 +111,13 @@ public class TriplesMap {
 
         Map.Entry<Variable, ImmutableTerm> newEntry = Maps.immutableEntry(
                 predicateVariable,
-                newIri);
+                factory.getConstantIRI(newIri));  // we build a ground term for the IRI
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
+        return factory.getTargetAtom(
+                projectionAtom,
                 a.getSubstitution().getImmutableMap().entrySet().stream()
                         .map(e -> e.getKey().equals(predicateVariable) ? newEntry : e)
                         .collect(ImmutableCollectors.toMap()));
-
-        return targetAtomFactory.getTargetAtom(projectionAtom, newSubstitution);
     }
 
     public boolean containsIri(IRI iri) {

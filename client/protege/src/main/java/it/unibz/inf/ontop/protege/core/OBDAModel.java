@@ -1,32 +1,58 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
+import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.connection.DataSource;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapFactory;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerListener;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 
-public class OBDAModel {
+public class OBDAModel implements TriplesMapFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OBDAModel.class);
 
     private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
     private static final String QUERY_EXT = ".q"; // The default query file extension.
     public static final String PROPERTY_EXT = ".properties"; // The default property file extension.
+    public static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
+    public static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
     private final OWLOntology ontology;
 
@@ -39,9 +65,25 @@ public class OBDAModel {
     private final OntologyPrefixManager prefixManager; // can extend the list of the ontology prefixes!
     private final OntologySignature signature;
 
-    private final OntopConfigurationManager configurationManager;
-
     private final OBDAModelManager obdaModelManager;
+
+    // settings are loaded once in the constructor and not modified afterwards
+    private final Properties settings = new Properties();
+
+    @Nullable
+    private File implicitDBConstraintFile;
+
+    @Nullable
+    private File dbMetadataFile;
+
+    private SQLPPMappingFactory ppMappingFactory;
+    private TermFactory termFactory;
+    private TargetQueryParserFactory targetQueryParserFactory;
+    private TargetAtomFactory targetAtomFactory;
+    private SubstitutionFactory substitutionFactory;
+    private SQLPPSourceQueryFactory sourceQueryFactory;
+    private TypeFactory typeFactory;
+
 
     OBDAModel(OWLOntology ontology, OBDAModelManager obdaModelManager) {
 
@@ -50,8 +92,11 @@ public class OBDAModel {
 
         datasource = new DataSource();
         datasource.addListener(s -> setOntologyDirtyFlag());
+        datasource.addListener(s -> resetFactories());
 
-        configurationManager = new OntopConfigurationManager(this, obdaModelManager.getStandardProperties());
+        this.settings.putAll(obdaModelManager.getStandardProperties());
+        this.implicitDBConstraintFile = null;
+        this.dbMetadataFile = null;
 
         signature = new OntologySignature(ontology);
         prefixManager = new OntologyPrefixManager(ontology);
@@ -78,25 +123,57 @@ public class OBDAModel {
                 setOntologyDirtyFlag();
             }
         });
+
+        resetFactories();
     }
 
     void dispose() {
         datasource.dispose();
     }
 
-    public OWLOntology getOntology() { return ontology; }
+    private void resetFactories() {
+        OntopMappingSQLAllConfiguration configuration = constructBuilder(OntopSQLOWLAPIConfiguration.defaultBuilder())
+                .ontology(ontology)
+                .build();
+        typeFactory = configuration.getTypeFactory();
+        termFactory = configuration.getTermFactory();
 
-    public DataSource getDataSource() {
-        return datasource;
+        Injector injector = configuration.getInjector();
+        ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
+        targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
+        substitutionFactory = injector.getInstance(SubstitutionFactory.class);
+        targetQueryParserFactory = injector.getInstance(TargetQueryParserFactory.class);
+        sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
-    public TriplesMapCollection getTriplesMapCollection() {
-        return triplesMapCollection;
+    public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableMap<Variable, ImmutableTerm> map) {
+        return targetAtomFactory.getTargetAtom(projectionAtom, substitutionFactory.getSubstitution(map));
     }
 
-    public QueryManager getQueryManager() {
-        return queryManager;
+    public IRIConstant getConstantIRI(org.apache.commons.rdf.api.IRI iri) {
+        return termFactory.getConstantIRI(iri);
     }
+
+    public SQLPPSourceQuery getSourceQuery(String query) {
+        return sourceQueryFactory.createSourceQuery(query);
+    }
+
+    public ImmutableList<TargetAtom> getTargetQuery(String target) throws TargetQueryParserException {
+        return targetQueryParserFactory.createParser(prefixManager).parse(target);
+    }
+
+    public SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPTriplesMap> triplesMaps) {
+        // TODO: put an immutable copy of prefixManager
+        return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps, prefixManager);
+    }
+
+
+
+    public DataSource getDataSource() { return datasource; }
+
+    public TriplesMapCollection getTriplesMapCollection() { return triplesMapCollection; }
+
+    public QueryManager getQueryManager() { return queryManager; }
 
     public OntologySignature getOntologySignature() { return signature; }
 
@@ -104,11 +181,11 @@ public class OBDAModel {
 
     public OBDAModelManager getObdaModelManager() { return obdaModelManager; }
 
-    public OntopConfigurationManager getConfigurationManager() { return configurationManager; }
-
 
     public void clear() {
-        configurationManager.clear();
+        implicitDBConstraintFile = null;
+        dbMetadataFile = null;
+
         datasource.clear();
         triplesMapCollection.clear();
         queryManager.clear();
@@ -125,7 +202,16 @@ public class OBDAModel {
 
         File obdaFile = fileOf(owlFilename, OBDA_EXT);
         if (obdaFile.exists()) {
-            configurationManager.load(owlFilename);
+            File implicitDBConstraintFile = fileOf(owlFilename, DBPREFS_EXT);
+            this.implicitDBConstraintFile = implicitDBConstraintFile.exists()
+                    ? implicitDBConstraintFile
+                    : null;
+
+            File dbMetadataFile = fileOf(owlFilename, DBMETADATA_EXT);
+            this.dbMetadataFile = dbMetadataFile.exists()
+                    ? dbMetadataFile
+                    : null;
+
             datasource.load(fileOf(owlFilename, PROPERTY_EXT));
             triplesMapCollection.load(obdaFile, this); // can update datasource!
             queryManager.load(fileOf(owlFilename, QUERY_EXT));
@@ -173,7 +259,7 @@ public class OBDAModel {
 
     public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateTriplesMapException {
         triplesMapCollection.addAll(triplesMaps);
-        return MappingOntologyUtils.extractAndInsertDeclarationAxioms(ontology, triplesMaps, triplesMapCollection.getTypeFactory(), bootstraped);
+        return MappingOntologyUtils.extractAndInsertDeclarationAxioms(ontology, triplesMaps, typeFactory, bootstraped);
     }
 
     public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {
@@ -181,7 +267,42 @@ public class OBDAModel {
     }
 
 
-    public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
-        return configurationManager.buildOntopSQLOWLAPIConfiguration();
+    public SQLPPMapping parseNativeMapping(Reader mappingReader) throws MappingException {
+        return constructBuilder(OntopMappingSQLAllConfiguration.defaultBuilder())
+                .nativeOntopMappingReader(mappingReader)
+                .build()
+                .loadProvidedPPMapping();
     }
+
+    public SQLPPMapping parseR2RMLMapping(File file) throws MappingException {
+        return constructBuilder(OntopMappingSQLAllConfiguration.defaultBuilder())
+                .r2rmlMappingFile(file)
+                .build()
+                .loadProvidedPPMapping();
+    }
+
+    public OntopSQLOWLAPIConfiguration getOntopConfiguration() {
+        return constructBuilder(OntopSQLOWLAPIConfiguration.defaultBuilder())
+                .ppMapping(triplesMapCollection.generatePPMapping())
+                .ontology(ontology)
+                .build();
+    }
+
+    private <B extends OntopMappingSQLAllConfiguration.Builder<?>> B constructBuilder(B builder) {
+
+        Properties properties = new Properties();
+        properties.putAll(settings);
+        properties.putAll(datasource.asProperties());
+
+        builder.properties(properties);
+
+        Optional.ofNullable(implicitDBConstraintFile)
+                .ifPresent(builder::basicImplicitConstraintFile);
+
+        Optional.ofNullable(dbMetadataFile)
+                .ifPresent(builder::dbMetadataFile);
+
+        return builder;
+    }
+
 }

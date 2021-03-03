@@ -132,8 +132,7 @@ public class BootstrapAction extends ProtegeAction {
 
 			obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 
-			OntopSQLOWLAPIConfiguration configuration = obdaModel.getConfigurationForOntology();
-			Injector injector = configuration.getInjector();
+			Injector injector = obdaModel.getOntopConfiguration().getInjector();
 			this.metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 			this.directMappingEngine = injector.getInstance(DirectMappingEngine.class);
 

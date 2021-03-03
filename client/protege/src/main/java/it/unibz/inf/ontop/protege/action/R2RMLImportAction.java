@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.protege.action;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
 import it.unibz.inf.ontop.protege.utils.*;
@@ -36,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -82,10 +79,7 @@ public class R2RMLImportAction extends ProtegeAction {
 		@Override
 		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
 			start("initializing...");
-			OntopMappingSQLAllConfiguration configuration = obdaModel.getConfigurationManager()
-					.buildR2RMLConfiguration(file);
-			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
-
+			SQLPPMapping parsedModel = obdaModel.parseR2RMLMapping(file);
 			ImmutableList<SQLPPTriplesMap> triplesMaps = parsedModel.getTripleMaps();
 			endLoop("");
 			end();
