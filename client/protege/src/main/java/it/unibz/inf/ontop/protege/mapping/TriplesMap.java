@@ -42,7 +42,7 @@ public class TriplesMap {
     }
 
     public TriplesMap(String id, String sqlQuery, ImmutableList<TargetAtom> targetQuery, TriplesMapCollection triplesMapCollection) {
-        this(new OntopNativeSQLPPTriplesMap(id, triplesMapCollection.sourceQueryFactory.createSourceQuery(sqlQuery), targetQuery), triplesMapCollection);
+        this(new OntopNativeSQLPPTriplesMap(id, triplesMapCollection.getSourceQueryFactory().createSourceQuery(sqlQuery), targetQuery), triplesMapCollection);
     }
 
     public String getId() { return sqlppTriplesMap.getId(); }
@@ -95,7 +95,7 @@ public class TriplesMap {
         return containsIri(removedIri)
                 ? updateTargetAtoms(sqlppTriplesMap.getTargetAtoms().stream()
                 .map(a -> containsIri(a, removedIri)
-                        ? renamePredicate(a, newIri, triplesMapCollection.targetAtomFactory, triplesMapCollection.substitutionFactory)
+                        ? renamePredicate(a, newIri, triplesMapCollection.getTargetAtomFactory(), triplesMapCollection.getSubstitutionFactory())
                         : a)
                 .collect(ImmutableCollectors.toList()))
                 : this; // has not changed

@@ -23,6 +23,7 @@ public class BasicProgressMonitor {
             COMPLETED -close-> CLOSED
             CANCELLED -close-> CLOSED
             CLOSED -close-> CLOSED
+            LIVE -close-> CLOSED (after any exception in the worker thread)
      */
 
     private static final int INIT = 0;
@@ -111,12 +112,7 @@ public class BasicProgressMonitor {
      */
 
     public final void close() {
-        synchronized(this) {
-            if (state == LIVE)
-                throw new IllegalArgumentException("Cannot make a LIVE monitor CLOSED");
-
-            state = CLOSED;
-        }
+        state = CLOSED;
         SwingUtilities.invokeLater(component::onClose);
     }
 

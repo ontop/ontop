@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.protege.utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 
 public class ProgressMonitorDialogComponent implements ProgressMonitorComponent {
 
@@ -42,8 +41,6 @@ public class ProgressMonitorDialogComponent implements ProgressMonitorComponent 
             if (!progressMonitor.isLive())
                 return;
 
-            JFrame frame = getFrame(parent);
-
             if (dialog != null)
                 throw new IllegalArgumentException("Cannot open the same monitor twice");
 
@@ -68,6 +65,7 @@ public class ProgressMonitorDialogComponent implements ProgressMonitorComponent 
 
             cancelOption.addActionListener(evt -> progressMonitor.cancel());
 
+            Frame frame = getFrame(parent);
             dialog = new JDialog(frame, UIManager.getString("DialogProgressMonitor.progressText"), true);
             dialog.setContentPane(pane);
             dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -79,9 +77,9 @@ public class ProgressMonitorDialogComponent implements ProgressMonitorComponent 
         dialog.setVisible(true); // HOLDS THE DISPATCH THREAD
     }
 
-    private static JFrame getFrame(Component component) {
-        if (component instanceof JFrame)
-            return (JFrame) component;
+    private static Frame getFrame(Component component) {
+        if (component instanceof Frame)
+            return (Frame) component;
 
         return getFrame(component.getParent());
     }

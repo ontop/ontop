@@ -320,7 +320,8 @@ public class DialogUtils {
 		Throwable cause = e.getCause();
 		if (cause instanceof SQLException && datasource != null) {
 			JOptionPane.showMessageDialog(parent,
-					"<html><b>Error connecting to the database:</b> " + htmlEscape(cause.getMessage()) + "<br><br>" +
+					"<html><h3>Error connecting to the database</h3>"
+							+ htmlEscape(cause.getMessage()) + "<br><br>" +
 							HTML_TAB + "JDBC driver: " + datasource.getDriver() + "<br>" +
 							HTML_TAB + "Connection URL: " + datasource.getURL() + "<br>" +
 							HTML_TAB + "Username: " + datasource.getUsername() + "</html>",

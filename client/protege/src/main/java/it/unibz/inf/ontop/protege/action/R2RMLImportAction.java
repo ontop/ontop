@@ -83,7 +83,7 @@ public class R2RMLImportAction extends ProtegeAction {
 		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
 			start("initializing...");
 			OntopMappingSQLAllConfiguration configuration = obdaModel.getConfigurationManager()
-					.buildR2RMLConfiguration(obdaModel.getDataSource(), file);
+					.buildR2RMLConfiguration(file);
 			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
 
 			ImmutableList<SQLPPTriplesMap> triplesMaps = parsedModel.getTripleMaps();

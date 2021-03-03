@@ -69,7 +69,7 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 	@Override
 	public OntopProtegeReasoner createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try {
-			checkArgument(config instanceof OntopProtegeOWLConfiguration, "config %s is not an instance of OntopProtegeOWLConfiguration", config);
+			checkArgument(config instanceof OntopProtegeOWLConfiguration, "Config %s is not an instance of OntopProtegeOWLConfiguration", config);
 			return new OntopProtegeReasoner(ontology, (OntopProtegeOWLConfiguration) config);
 		}
 		catch (Exception e){

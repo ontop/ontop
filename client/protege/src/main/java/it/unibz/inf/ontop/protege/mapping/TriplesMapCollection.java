@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OldSyntaxMappingConverter;
@@ -61,30 +62,27 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     // reflects the ontology prefix manager
     private final OntologyPrefixManager prefixManager;
 
-    private final SQLPPMappingFactory ppMappingFactory;
-    private final TermFactory termFactory;
-    private final TargetQueryParserFactory targetQueryParserFactory;
+    private final OBDAModel obdaModel;
 
-    final TargetAtomFactory targetAtomFactory;
-    final SubstitutionFactory substitutionFactory;
-    final SQLPPSourceQueryFactory sourceQueryFactory;
+    private SQLPPMappingFactory ppMappingFactory;
+    private TermFactory termFactory;
+    private TargetQueryParserFactory targetQueryParserFactory;
+    private TargetAtomFactory targetAtomFactory;
+    private SubstitutionFactory substitutionFactory;
+    private SQLPPSourceQueryFactory sourceQueryFactory;
+    private TypeFactory typeFactory;
 
     private final EventListenerList<TriplesMapCollectionListener> listeners = new EventListenerList<>();
 
-    public TriplesMapCollection(OntologyPrefixManager prefixManager) {
+    public TriplesMapCollection(OBDAModel obdaModel) {
+        this.obdaModel = obdaModel;
+        this.prefixManager = obdaModel.getMutablePrefixManager();
+        obdaModel.getDataSource().addListener(s -> resetFactories());
+        resetFactories();
+    }
 
-        this.prefixManager = prefixManager;
-
-        /*
-         * TODO: avoid using Default injector
-         */
-        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-                .jdbcDriver("")
-                .jdbcUrl("")
-                .jdbcUser("")
-                .jdbcPassword("")
-                .build();
-
+    private void resetFactories() {
+        OntopMappingSQLAllConfiguration configuration = obdaModel.getConfigurationManager().getBasicConfiguration();
         Injector injector = configuration.getInjector();
         ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
         termFactory = injector.getInstance(TermFactory.class);
@@ -92,7 +90,25 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
         substitutionFactory = injector.getInstance(SubstitutionFactory.class);
         targetQueryParserFactory = injector.getInstance(TargetQueryParserFactory.class);
         sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
+        typeFactory = configuration.getTypeFactory();
     }
+
+    TargetAtomFactory getTargetAtomFactory() {
+        return targetAtomFactory;
+    }
+
+    SubstitutionFactory getSubstitutionFactory() {
+        return substitutionFactory;
+    }
+
+    SQLPPSourceQueryFactory getSourceQueryFactory() {
+        return sourceQueryFactory;
+    }
+
+    public TypeFactory getTypeFactory() {
+        return typeFactory;
+    }
+
 
     /**
      * No need to remove listeners - this is handled by OBDAModelManager
@@ -279,7 +295,7 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
 
             Reader mappingReader = new StringReader(converter.getRestOfFile());
             SQLMappingParser mappingParser = obdaModel.getConfigurationManager()
-                    .getSQLMappingParser(obdaModel.getDataSource(), mappingReader);
+                    .getSQLMappingParser(mappingReader);
             SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
 
             ppMapping.getPrefixManager().getPrefixMap().forEach(prefixManager::addPrefix);

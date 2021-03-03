@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -29,7 +28,6 @@ import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 
 public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
-
 
 	private OBDAModelManager obdaModelManager;
 	private final OntopProtegeOWLFactory factory = new OntopProtegeOWLFactory();
@@ -46,11 +44,7 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
 	@Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
-		OWLOntology activeOntology = getOWLModelManager().getActiveOntology();
-		OntopConfigurationManager configurationGenerator = obdaModelManager.getCurrentOBDAModel().getConfigurationManager();
-		return new OntopProtegeOWLConfiguration(
-				configurationGenerator.buildOntopSQLOWLAPIConfiguration(activeOntology), monitor,
-				configurationGenerator);
+		return new OntopProtegeOWLConfiguration(obdaModelManager, monitor);
     }
 
 	public void setOBDAModelManager(OBDAModelManager obdaModelManager) {

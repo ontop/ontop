@@ -61,6 +61,7 @@ public class QuestOWLFactory implements OntopOWLFactory {
     /**
      * TODO: should we really support this method?
      */
+    @Nonnull
     @Override
     public OWLReasoner createReasoner(@Nonnull OWLOntology ontology) {
         throw new UnsupportedOperationException("A configuration is required");

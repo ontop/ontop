@@ -51,12 +51,12 @@ public class OBDAModel {
         datasource = new DataSource();
         datasource.addListener(s -> setOntologyDirtyFlag());
 
-        configurationManager = new OntopConfigurationManager(obdaModelManager, obdaModelManager.getStandardProperties());
+        configurationManager = new OntopConfigurationManager(this, obdaModelManager.getStandardProperties());
 
         signature = new OntologySignature(ontology);
         prefixManager = new OntologyPrefixManager(ontology);
 
-        triplesMapCollection = new TriplesMapCollection(prefixManager);
+        triplesMapCollection = new TriplesMapCollection(this);
         triplesMapCollection.addListener(s -> setOntologyDirtyFlag());
 
         queryManager = new QueryManager();
@@ -105,6 +105,7 @@ public class OBDAModel {
     public OBDAModelManager getObdaModelManager() { return obdaModelManager; }
 
     public OntopConfigurationManager getConfigurationManager() { return configurationManager; }
+
 
     public void clear() {
         configurationManager.clear();
@@ -171,11 +172,8 @@ public class OBDAModel {
     }
 
     public Set<OWLDeclarationAxiom> insertTriplesMaps(ImmutableList<SQLPPTriplesMap> triplesMaps, boolean bootstraped) throws DuplicateTriplesMapException {
-        OntopSQLOWLAPIConfiguration configuration = configurationManager.getBasicConfiguration(this);
-        TypeFactory typeFactory = configuration.getTypeFactory();
-
-        getTriplesMapCollection().addAll(triplesMaps);
-        return MappingOntologyUtils.extractAndInsertDeclarationAxioms(ontology, triplesMaps, typeFactory, bootstraped);
+        triplesMapCollection.addAll(triplesMaps);
+        return MappingOntologyUtils.extractAndInsertDeclarationAxioms(ontology, triplesMaps, triplesMapCollection.getTypeFactory(), bootstraped);
     }
 
     public void addAxiomsToOntology(Set<? extends OWLAxiom> axioms) {
@@ -184,6 +182,6 @@ public class OBDAModel {
 
 
     public OntopSQLOWLAPIConfiguration getConfigurationForOntology() {
-        return configurationManager.buildOntopSQLOWLAPIConfiguration(ontology);
+        return configurationManager.buildOntopSQLOWLAPIConfiguration();
     }
 }
