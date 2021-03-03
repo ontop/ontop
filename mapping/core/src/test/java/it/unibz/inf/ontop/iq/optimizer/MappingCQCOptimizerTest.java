@@ -32,11 +32,11 @@ public class MappingCQCOptimizerTest {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition company = builder.createDatabaseRelation("company",
+        NamedRelationDefinition company = builder.createDatabaseRelation("company",
             "cmpNpdidCompany", integerType, false,
             "cmpShortName", integerType, false);
 
-        DatabaseRelationDefinition companyReserves = builder.createDatabaseRelation("company_reserves",
+        NamedRelationDefinition companyReserves = builder.createDatabaseRelation("company_reserves",
             "cmpShare", integerType, false,
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
@@ -96,18 +96,18 @@ public class MappingCQCOptimizerTest {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition addressTable = builder.createDatabaseRelation("address",
+        NamedRelationDefinition addressTable = builder.createDatabaseRelation("address",
             "address_id", integerType, false,
             "address", integerType, false);
         RelationPredicate address = addressTable.getAtomPredicate();
 
-        DatabaseRelationDefinition storeTable = builder.createDatabaseRelation("store",
+        NamedRelationDefinition storeTable = builder.createDatabaseRelation("store",
             "store_id", integerType, false,
             "address_id", integerType, false,
             "manager_staff_id", integerType, false);
         RelationPredicate store = storeTable.getAtomPredicate();
 
-        DatabaseRelationDefinition staffTable = builder.createDatabaseRelation("staff",
+        NamedRelationDefinition staffTable = builder.createDatabaseRelation("staff",
             "staff_id", integerType, false,
             "address_id", integerType, false,
             "store_id", integerType, false);

@@ -1,26 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
-/*
- * #%L
- * ontop-quest-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
@@ -37,11 +16,13 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 
 public class OntopTupleQueryResult implements TupleQueryResult {
 
+	private final byte[] salt;
 	TupleResultSet res;
 	List<String> signature;
 	Set<String> bindingNames;
 	
-	public OntopTupleQueryResult(TupleResultSet res, List<String> signature){
+	public OntopTupleQueryResult(TupleResultSet res, List<String> signature, byte[] salt){
+		this.salt = salt;
 		if(res == null)
 			throw new NullPointerException();
 		this.res = res;
@@ -70,7 +51,7 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	@Override
 	public BindingSet next() throws QueryEvaluationException {
         try {
-            return new OntopRDF4JBindingSet(res.next());
+            return new OntopRDF4JBindingSet(res.next(), salt);
         } catch (OntopConnectionException | OntopResultConversionException e) {
             throw new QueryEvaluationException(e);
 		}
@@ -92,7 +73,7 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	
 
 	private Binding createBinding(String bindingName, OntopBindingSet set) {
-		OntopRDF4JBindingSet bset = new OntopRDF4JBindingSet(set);
+		OntopRDF4JBindingSet bset = new OntopRDF4JBindingSet(set, salt);
 		return bset.getBinding(bindingName);
 	}
 

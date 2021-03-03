@@ -181,7 +181,6 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-//        return String.format("REPLACE( <value:text>, <from:text>, <to:text> )CAST(%s AS TIMESTAMPTZ)", termConverter.apply(terms.get(0)));
       return   String.format("REPLACE(FORMATDATE(\'yyyy-MM-dd HH:mm:ss.SSSSSSXXX\', %s), \' \', \'T\')", termConverter.apply(terms.get(0)));
     }
 

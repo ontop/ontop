@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.ontology.impl;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
@@ -8,14 +10,16 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl.rdfsLiteral;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class TopBotInClassifiedTBoxTest {
 
-    private RDF rdfFactory = new SimpleRDF();
+    private final RDF rdfFactory = new SimpleRDF();
+    private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
     @Test
     public void topClass() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         builder.addSubClassOfAxiom(ClassImpl.owlThing, a);
         Ontology ontology = builder.build();
@@ -28,7 +32,7 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void bottomClass() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         builder.addSubClassOfAxiom(a, ClassImpl.owlNothing);
         Ontology ontology = builder.build();
@@ -36,12 +40,12 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
     public void noTopBottomClass() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         OClass b = builder.declareClass(rdfFactory.createIRI("http://b"));
         builder.addSubClassOfAxiom(b, a);
@@ -57,7 +61,7 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void topObjectProperty() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         ObjectPropertyExpression a = builder.declareObjectProperty(rdfFactory.createIRI("http://a"));
         builder.addSubPropertyOfAxiom(ObjectPropertyExpressionImpl.owlTopObjectProperty, a);
         Ontology ontology = builder.build();
@@ -71,7 +75,7 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void topObjectPropertyDomain() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         OClass b = builder.declareClass(rdfFactory.createIRI("http://b"));
         builder.addSubClassOfAxiom(ObjectPropertyExpressionImpl.owlTopObjectProperty.getDomain(), a);
@@ -88,7 +92,7 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void topObjectPropertyRange() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         builder.addSubClassOfAxiom(ObjectPropertyExpressionImpl.owlTopObjectProperty.getRange(), a);
         Ontology ontology = builder.build();
@@ -101,19 +105,19 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void botObjectProperty() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         ObjectPropertyExpression a = builder.declareObjectProperty(rdfFactory.createIRI("http://a"));
         builder.addSubPropertyOfAxiom(ObjectPropertyExpressionImpl.owlBottomObjectProperty, a);
         Ontology ontology = builder.build();
 
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ObjectPropertyExpression> bot = tbox.objectPropertiesDAG().getVertex(ObjectPropertyExpressionImpl.owlBottomObjectProperty);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
     public void botObjectPropertyDomain() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         builder.addSubClassOfAxiom(a, ObjectPropertyExpressionImpl.owlBottomObjectProperty.getDomain());
         Ontology ontology = builder.build();
@@ -121,12 +125,12 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
     public void botObjectPropertyRange() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         builder.addSubClassOfAxiom(a, ObjectPropertyExpressionImpl.owlBottomObjectProperty.getRange());
         Ontology ontology = builder.build();
@@ -134,13 +138,13 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
 
     @Test
     public void noTopBottomObjectProperty() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         ObjectPropertyExpression a = builder.declareObjectProperty(rdfFactory.createIRI("http://a"));
         ObjectPropertyExpression b = builder.declareObjectProperty(rdfFactory.createIRI("http://b"));
         builder.addSubPropertyOfAxiom(b, a);
@@ -160,7 +164,7 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void topDataProperty() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         DataPropertyExpression a = builder.declareDataProperty(rdfFactory.createIRI("http://a"));
         builder.addSubPropertyOfAxiom(DataPropertyExpressionImpl.owlTopDataProperty, a);
         Ontology ontology = builder.build();
@@ -173,7 +177,7 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void topDataPropertyDomain() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         builder.addSubClassOfAxiom(DataPropertyExpressionImpl.owlTopDataProperty.getDomainRestriction(rdfsLiteral), a);
         Ontology ontology = builder.build();
@@ -186,19 +190,19 @@ public class TopBotInClassifiedTBoxTest {
 
     @Test
     public void botDataProperty() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         DataPropertyExpression a = builder.declareDataProperty(rdfFactory.createIRI("http://a"));
         builder.addSubPropertyOfAxiom(DataPropertyExpressionImpl.owlBottomDataProperty, a);
         Ontology ontology = builder.build();
 
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<DataPropertyExpression> bot = tbox.dataPropertiesDAG().getVertex(DataPropertyExpressionImpl.owlBottomDataProperty);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
     public void botDataPropertyDomain() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         OClass a = builder.declareClass(rdfFactory.createIRI("http://a"));
         builder.addSubClassOfAxiom(a,
                 DataPropertyExpressionImpl.owlBottomDataProperty.getDomainRestriction(rdfsLiteral));
@@ -207,12 +211,12 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
     public void noTopBottomDataProperty() throws InconsistentOntologyException {
-        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
         DataPropertyExpression a = builder.declareDataProperty(rdfFactory.createIRI("http://a"));
         DataPropertyExpression b = builder.declareDataProperty(rdfFactory.createIRI("http://b"));
         builder.addSubPropertyOfAxiom(b, a);

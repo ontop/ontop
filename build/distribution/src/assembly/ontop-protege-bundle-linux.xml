@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<assembly>
+	<id>protege-bundle-linux</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>${project.build.directory}/unpack/protege-desktop-linux/Protege-${protege.version}</directory>
+			<outputDirectory>/Protege-${protege.version}/</outputDirectory>
+		</fileSet>
+	</fileSets>
+	<files>
+		<file>
+			<source>${project.build.directory}/it.unibz.inf.ontop.protege-${project.version}.jar</source>
+			<outputDirectory>/Protege-${protege.version}/plugins/</outputDirectory>
+		</file>
+	</files>
+</assembly>

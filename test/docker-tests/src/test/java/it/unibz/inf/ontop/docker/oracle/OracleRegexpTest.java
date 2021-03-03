@@ -48,20 +48,21 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	}
 
 
-	private String runTest(OWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(String query, boolean hasResult) throws Exception {
 		String retval;
-		TupleOWLResultSet rs = st.executeSelectQuery(query);
-		if(hasResult){
-			assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
-            OWLIndividual ind1 = bindingSet.getOWLIndividual("country")	 ;
-			retval = ind1.toString();
-		} else {
-			assertFalse(rs.hasNext());
-			retval = "";
+		try (OWLStatement st = createStatement();
+			 TupleOWLResultSet rs = st.executeSelectQuery(query)) {
+			if (hasResult) {
+				assertTrue(rs.hasNext());
+				final OWLBindingSet bindingSet = rs.next();
+				OWLIndividual ind1 = bindingSet.getOWLIndividual("country");
+				retval = ind1.toString();
+			} else {
+				assertFalse(rs.hasNext());
+				retval = "";
+			}
+			return retval;
 		}
-
-		return retval;
 	}
 
 	/**
@@ -70,9 +71,7 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	 */
 	@Test
 	public void testSparql2OracleRegex() throws Exception {
-		OWLStatement st = null;
 		try {
-			st = createStatement();
 
 			String[] queries = {
 					"'E[a-z]*t'", 
@@ -84,7 +83,7 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 					};
 			for (String regex : queries){
 				String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :Country; :name ?country_name . FILTER regex(?country_name, " + regex + ")}";
-				String countryName = runTest(st, query, true);
+				String countryName = runTest(query, true);
 				assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt>");
 			}
 			String[] wrongs = {
@@ -94,14 +93,11 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 					};
 			for (String regex : wrongs){
 				String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :Country; :name ?country_name . FILTER regex(?country_name, " + regex + ")}";
-				String countryName = runTest(st, query, false);
+				String countryName = runTest(query, false);
 				assertEquals(countryName, "");
 			}
 		} catch (Exception e) {
 			throw e;
-		} finally {
-			if (st != null)
-				st.close();
 		}
 	}
 

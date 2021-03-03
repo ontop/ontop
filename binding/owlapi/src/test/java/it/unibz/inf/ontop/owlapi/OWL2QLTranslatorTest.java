@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
@@ -37,6 +39,7 @@ public class OWL2QLTranslatorTest {
 	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
 
 	private static final RDF rdfFactory = new SimpleRDF();
+	private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 	
 	@Test
 	public void test_R1_2() throws Exception {
@@ -405,7 +408,7 @@ public class OWL2QLTranslatorTest {
 
     @Test
 	public void test_R6() {
-		OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
+		OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory, TERM_FACTORY);
 		
 		ObjectPropertyExpression top = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#topObjectProperty"));
 		ObjectPropertyExpression topInv = top.getInverse();

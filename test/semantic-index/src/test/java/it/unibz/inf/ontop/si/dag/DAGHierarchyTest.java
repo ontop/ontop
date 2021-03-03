@@ -36,13 +36,13 @@ public class DAGHierarchyTest extends TestCase {
 	 * A -> B, B -> {E, F}, {C, D} -> {E, F} with A, B, C, D, E, F are atomic
 	 * concepts.
 	 */
-	private final String inputFile1 = "src/test/resources/test/dag/test-class-hierarchy.owl";
+	private static final String inputFile1 = "src/test/resources/test/dag/test-class-hierarchy.owl";
 
 	/**
 	 * P -> Q, Q -> {T, U}, {R, S} -> {T, U} with P, Q, R, S, T, U are atomic
 	 * roles.
 	 */
-	private final String inputFile2 = "src/test/resources/test/dag/test-role-hierarchy.owl";
+	private static final String inputFile2 = "src/test/resources/test/dag/test-role-hierarchy.owl";
 	
 	private static <T> int sizeOf(Set<Equivalences<T>> set) {
 		int size = 0;

@@ -17,11 +17,9 @@ public class OntopExtractDBMetadataTest {
 
     @Test
     public void testOntopExtractDBMetadata(){
-        String[] argv = {"extract-db-metadata",
+        Ontop.main("extract-db-metadata",
                 "-p", "src/test/resources/books/exampleBooks.properties",
-                "-o", "src/test/resources/output/exampleBooks-metadata.json"
-        };
-        Ontop.main(argv);
+                "-o", "src/test/resources/output/exampleBooks-metadata.json");
     }
 
 

@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.json.JsonMetadata;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.spec.dbschema.tools.DBMetadataExtractorAndSerializer;
@@ -34,8 +35,8 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
             ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(metadataProvider);
 
             ObjectMapper mapper = new ObjectMapper();
-            String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);
-            return jsonString;
+            JsonMetadata jsonMetadata = new JsonMetadata(metadata);
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMetadata);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException("Connection problem while extracting the metadata.\n" + e);

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;

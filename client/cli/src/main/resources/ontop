@@ -21,5 +21,9 @@ if [ -z "${ONTOP_JAVA_ARGS}" ]; then
   ONTOP_JAVA_ARGS="-Xmx512m"
 fi
 
-${JAVA} ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dlogback.configurationFile="${ONTOP_HOME}/log/logback.xml" -Dlogging.config="${ONTOP_HOME}/log/logback.xml" \
+if [ -z "${ONTOP_FILE_ENCODING}" ]; then
+  ONTOP_FILE_ENCODING="UTF-8"
+fi
+
+${JAVA} ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogback.configurationFile="${ONTOP_HOME}/log/logback.xml" -Dlogging.config="${ONTOP_HOME}/log/logback.xml" \
  it.unibz.inf.ontop.cli.Ontop $@

@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
@@ -187,10 +188,10 @@ public class PushUpBooleanExpressionOptimizerTest {
         ExtensionalDataNode dataNode2 = createExtensionalDataNode (TABLE1_AR2, ImmutableList.of(X, Y));
         ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(Z));
 
-        queryBuilder1.init(projectionAtom, joinNode1);
+        queryBuilder1.init(projectionAtom, leftJoinNode);
+        queryBuilder1.addChild(leftJoinNode, joinNode1, LEFT);
+        queryBuilder1.addChild(joinNode1, dataNode2);
         queryBuilder1.addChild(joinNode1, dataNode1);
-        queryBuilder1.addChild(joinNode1, leftJoinNode);
-        queryBuilder1.addChild(leftJoinNode, dataNode2, LEFT);
         queryBuilder1.addChild(leftJoinNode, dataNode3, RIGHT);
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -558,13 +559,11 @@ public class PushUpBooleanExpressionOptimizerTest {
 
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
-        String uriTemplateString = "http://example.org/ds1/";
-        for (VariableOrGroundTerm argument : arguments) {
-            uriTemplateString = uriTemplateString.toString() + "{}";
-        }
-        ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-        builder.add(arguments);
-        return TERM_FACTORY.getIRIFunctionalTerm(uriTemplateString, builder.build());
+        Template.Builder builder = Template.builder();
+        builder.addSeparator("http://example.org/ds1/");
+        for (VariableOrGroundTerm argument : arguments)
+            builder.addColumn();
+        return TERM_FACTORY.getIRIFunctionalTerm(builder.build(), ImmutableList.copyOf(arguments));
     }
 
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {

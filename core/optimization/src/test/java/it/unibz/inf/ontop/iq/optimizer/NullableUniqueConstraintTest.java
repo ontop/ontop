@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 
 public class NullableUniqueConstraintTest {
 
-    private static final DatabaseRelationDefinition TABLE1;
-    private static final DatabaseRelationDefinition TABLE2;
+    private static final NamedRelationDefinition TABLE1;
+    private static final NamedRelationDefinition TABLE2;
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
 

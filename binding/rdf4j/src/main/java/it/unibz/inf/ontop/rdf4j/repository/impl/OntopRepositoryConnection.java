@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.repository.impl;
 
-
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQuery;
@@ -8,13 +8,10 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
+import it.unibz.inf.ontop.rdf4j.query.impl.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.NamespaceImpl;
@@ -245,29 +242,15 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 
         //execute construct query
         try {
-            List<Statement> list = new LinkedList<Statement>();
-
             if (contexts.length == 0 || (contexts.length > 0 && contexts[0] == null)) {
                 GraphQuery query = prepareGraphQuery(QueryLanguage.SPARQL,
                         queryString.toString());
                 GraphQueryResult result = query.evaluate();
-
-                // System.out.println("result: "+result.hasNext());
-                while (result.hasNext())
-                    list.add(result.next());
-                // result.close();
+                return new RepositoryResult<>(new CloseableIteratorIteration<>(result.iterator()));
             }
-            CloseableIteration<Statement, RepositoryException> iter = new CloseableIteratorIteration<Statement, RepositoryException>(
-                    list.iterator());
-            RepositoryResult<Statement> repoResult = new RepositoryResult<Statement>(iter);
-
-            return repoResult;
-        } catch (MalformedQueryException e) {
+            return new RepositoryResult<>(new CloseableIteratorIteration<>());
+        } catch (MalformedQueryException | QueryEvaluationException e) {
             throw new RepositoryException(e);
-
-        } catch (QueryEvaluationException e) {
-            throw new RepositoryException(e);
-
         }
     }
 
@@ -336,6 +319,11 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     @Override
     public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString,
                                             String baseIRI) throws RepositoryException, MalformedQueryException {
+        return prepareBooleanQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
+    }
+
+    public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString,
+                String baseIRI, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException, MalformedQueryException {
         //Prepares true/false queries.
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
@@ -345,7 +333,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
                 : baseIRI.isEmpty() ? null : baseIRI;
 
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
-        return new OntopBooleanQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory, settings);
+        return new OntopBooleanQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
     }
 
     @Override
@@ -358,8 +346,14 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     }
 
     @Override
+    public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString, String baseIRI)
+            throws RepositoryException, MalformedQueryException {
+        return prepareGraphQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
+    }
+
     public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString,
-                                        String baseIRI) throws RepositoryException, MalformedQueryException {
+                                        String baseIRI, ImmutableMultimap<String, String> httpHeaders)
+            throws RepositoryException, MalformedQueryException {
         //Prepares queries that produce RDF graphs.
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
@@ -369,7 +363,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
                 : baseIRI.isEmpty() ? null : baseIRI;
 
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
-        return new OntopGraphQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory, settings);
+        return new OntopGraphQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
 
     }
 
@@ -379,11 +373,25 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         //Prepares a query for evaluation on this repository (optional operation).
         //In case the query contains relative IRIs that need to be resolved against
         //an external base IRI, one should use prepareQuery(QueryLanguage, String, String) instead.
-        return prepareQuery(ql, query, null);
+        return prepareTupleQuery(ql, query, null, ImmutableMultimap.of());
+    }
+
+    public Query prepareQuery(QueryLanguage ql, String query, ImmutableMultimap<String, String> httpHeaders)
+            throws RepositoryException, MalformedQueryException {
+        //Prepares a query for evaluation on this repository (optional operation).
+        //In case the query contains relative IRIs that need to be resolved against
+        //an external base IRI, one should use prepareQuery(QueryLanguage, String, String) instead.
+        return prepareQuery(ql, query, null, httpHeaders);
     }
 
     @Override
     public Query prepareQuery(QueryLanguage ql, String queryString, String baseIRI)
+            throws RepositoryException, MalformedQueryException {
+        return prepareQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
+    }
+
+    public Query prepareQuery(QueryLanguage ql, String queryString, String baseIRI,
+                              ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException, MalformedQueryException {
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected! ");
@@ -393,11 +401,11 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         LOGGER.debug(String.format("Parsing time: %d ms", System.currentTimeMillis() - beforeParsing));
 
         if (q instanceof ParsedTupleQuery)
-            return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
+            return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else if (q instanceof ParsedBooleanQuery)
-            return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
+            return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else if (q instanceof ParsedGraphQuery)
-            return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
+            return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
         else
             throw new MalformedQueryException("Unrecognized query type. " + queryString);
     }
@@ -413,8 +421,14 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     }
 
     @Override
-    public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString,
-                                        String baseIRI) throws RepositoryException, MalformedQueryException {
+    public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString, String baseIRI)
+            throws RepositoryException, MalformedQueryException {
+        return prepareTupleQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
+    }
+
+    public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString, String baseIRI,
+                                        ImmutableMultimap<String, String> httpHeaders)
+            throws RepositoryException, MalformedQueryException {
         //Prepares a query that produces sets of value tuples.
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected!");
@@ -424,7 +438,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
                 : baseIRI.isEmpty() ? null : baseIRI;
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
 
-        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory, settings);
+        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, httpHeaders, inputQueryFactory, settings);
     }
 
     @Override

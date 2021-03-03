@@ -71,16 +71,19 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
             ImmutableTerm typeTerm = computeTypeTerm(subLexicalTerms, typeTerms, termFactory, variableNullability);
             ImmutableTerm lexicalTerm = computeLexicalTerm(subLexicalTerms, typeTerms, termFactory, typeTerm);
 
-            Optional<ImmutableExpression> condition = inputTypeErrorEvaluation.getExpression();
+            Optional<ImmutableExpression> inputErrorCondition = inputTypeErrorEvaluation.getExpression();
+
+            ImmutableExpression nonNullLexicalTermCondition = termFactory.getDBIsNotNull(lexicalTerm);
+
+            ImmutableExpression typeCondition = inputErrorCondition
+                    .map(c -> termFactory.getConjunction(c, nonNullLexicalTermCondition))
+                    .orElse(nonNullLexicalTermCondition);
 
             return termFactory.getRDFFunctionalTerm(
-                    condition
+                    inputErrorCondition
                         .map(c -> (ImmutableTerm) termFactory.getIfElseNull(c, lexicalTerm))
                         .orElse(lexicalTerm),
-                    condition
-                            .map(c -> (ImmutableTerm) termFactory.getIfElseNull(c, typeTerm))
-                            .orElse(typeTerm))
-                    .simplify(variableNullability);
+                    termFactory.getIfElseNull(typeCondition, typeTerm));
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);

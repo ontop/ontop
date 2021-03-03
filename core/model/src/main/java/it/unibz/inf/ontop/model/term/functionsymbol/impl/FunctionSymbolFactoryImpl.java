@@ -10,10 +10,47 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBufferFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDistanceFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofIntersectionFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofBoundaryFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofConvexHullFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofDifferenceFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEnvelopeFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSymDifferenceFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofUnionFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRelateFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofGetSRIDFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfWithinFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfContainsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfCrossesFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfDisjointFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfEqualsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfOverlapsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfIntersectsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofSfTouchesFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhContainsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhCoveredByFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhCoversFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhDisjointFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhEqualsFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhInsideFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhMeetFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofEhOverlapFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8DcFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8EqFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8EcFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppiFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8PoFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppiFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.GEOF;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +73,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, SPARQLFunctionSymbol> coalesceMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> distinctSparqlGroupConcatMap;
     private final Map<String, SPARQLAggregationFunctionSymbol> nonDistinctSparqlGroupConcatMap;
+    // TODO: use a cache with a limited budget
+    private final Map<IRI, SPARQLFunctionSymbol> sparqlIRIMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
@@ -48,6 +87,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
     private final DBTermType dbStringType;
+    private final SPARQLFunctionSymbol iriNoBaseFunctionSymbol;
 
     /**
      * Created in init()
@@ -78,6 +118,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.coalesceMap = new ConcurrentHashMap<>();
         this.distinctSparqlGroupConcatMap = new ConcurrentHashMap<>();
         this.nonDistinctSparqlGroupConcatMap = new ConcurrentHashMap<>();
+        this.sparqlIRIMap = new ConcurrentHashMap<>();
         this.isAMap = new ConcurrentHashMap<>();
         this.lexicalInequalityFunctionSymbolMap = new ConcurrentHashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
@@ -94,6 +135,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.lexicalEBVFunctionSymbol = new LexicalEBVFunctionSymbolImpl(dbStringType, metaRDFType, dbBooleanType);
         this.notYetTypedEqualityFunctionSymbol = new NotYetTypedEqualityFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbBooleanType);
+
+        this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(),
+                typeFactory.getXsdStringDatatype(), typeFactory.getIRITermType());
     }
 
     @Inject
@@ -108,6 +152,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         RDFDatatype xsdDecimal = typeFactory.getXsdDecimalDatatype();
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
+        RDFDatatype xsdDouble = typeFactory.getXsdDoubleDatatype();
+        RDFDatatype wktLiteral = typeFactory.getWktLiteralDatatype();
+        RDFDatatype xsdAnyUri = typeFactory.getXsdAnyUri();
+        RDFDatatype xsdAnySimpleType = typeFactory.getXsdAnyUri();
         RDFDatatype rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
         RDFTermType abstractRDFType = typeFactory.getAbstractRDFTermType();
         ObjectRDFType bnodeType = typeFactory.getBlankNodeType();
@@ -127,7 +175,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new LcaseSPARQLFunctionSymbolImpl(xsdString),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_ENCODE_FOR_URI", XPathFunction.ENCODE_FOR_URI,
                         xsdString, xsdString, true,
-                        TermFactory::getR2RMLIRISafeEncodeFunctionalTerm),
+                        TermFactory::getDBEncodeForURI),
                 new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
@@ -210,14 +258,89 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_TZ", SPARQL.TZ,
                 xsdDatetime, xsdString, false, TermFactory::getDBTz),
+                new UnaryBnodeSPARQLFunctionSymbolImpl(xsdString, bnodeType),
                 new NowSPARQLFunctionSymbolImpl(xsdDatetime),
+                new IfSPARQLFunctionSymbolImpl(xsdBoolean, abstractRDFType),
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
                 new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
-                new MinBasedSampleSPARQLFunctionSymbol(typeFactory));
+                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
+                /*
+                 * Geo SF relation Functions
+                 */
+                new GeofSfEqualsFunctionSymbolImpl(GEOF.SF_EQUALS, wktLiteral, xsdBoolean),
+                new GeofSfDisjointFunctionSymbolImpl(GEOF.SF_DISJOINT, wktLiteral, xsdBoolean),
+                new GeofSfIntersectsFunctionSymbolImpl(GEOF.SF_INTERSECTS, wktLiteral, xsdBoolean),
+                new GeofSfTouchesFunctionSymbolImpl(GEOF.SF_TOUCHES, wktLiteral, xsdBoolean),
+                new GeofSfCrossesFunctionSymbolImpl(GEOF.SF_CROSSES, wktLiteral, xsdBoolean),
+                new GeofSfWithinFunctionSymbolImpl(GEOF.SF_WITHIN, wktLiteral, xsdBoolean),
+                new GeofSfContainsFunctionSymbolImpl(GEOF.SF_CONTAINS, wktLiteral, xsdBoolean),
+                new GeofSfOverlapsFunctionSymbolImpl(GEOF.SF_OVERLAPS, wktLiteral, xsdBoolean),
+
+                /*
+                 * Geo Egenhofer relation Functions
+                 */
+                new GeofEhEqualsFunctionSymbolImpl(GEOF.EH_EQUALS, wktLiteral, xsdBoolean),
+                new GeofEhDisjointFunctionSymbolImpl(GEOF.EH_DISJOINT, wktLiteral, xsdBoolean),
+                new GeofEhMeetFunctionSymbolImpl(GEOF.EH_MEET, wktLiteral, xsdBoolean),
+                new GeofEhOverlapFunctionSymbolImpl(GEOF.EH_OVERLAP, wktLiteral, xsdBoolean),
+                new GeofEhCoversFunctionSymbolImpl(GEOF.EH_COVERS, wktLiteral, xsdBoolean),
+                new GeofEhCoveredByFunctionSymbolImpl(GEOF.EH_COVEREDBY, wktLiteral, xsdBoolean),
+                new GeofEhInsideFunctionSymbolImpl(GEOF.EH_INSIDE, wktLiteral, xsdBoolean),
+                new GeofEhContainsFunctionSymbolImpl(GEOF.EH_CONTAINS, wktLiteral, xsdBoolean),
+                /*
+                 * Geo Egenhofer Functions
+                 */
+
+                /*
+                 * Geo RCC8 relation Functions
+                 */
+                new GeofRcc8EqFunctionSymbolImpl(GEOF.RCC8_EQ, wktLiteral, xsdBoolean),
+                new GeofRcc8DcFunctionSymbolImpl(GEOF.RCC8_DC, wktLiteral, xsdBoolean),
+                new GeofRcc8EcFunctionSymbolImpl(GEOF.RCC8_EC, wktLiteral, xsdBoolean),
+                new GeofRcc8PoFunctionSymbolImpl(GEOF.RCC8_PO, wktLiteral, xsdBoolean),
+                new GeofRcc8TppFunctionSymbolImpl(GEOF.RCC8_TPP, wktLiteral, xsdBoolean),
+                new GeofRcc8TppiFunctionSymbolImpl(GEOF.RCC8_TPPI, wktLiteral, xsdBoolean),
+                new GeofRcc8NtppFunctionSymbolImpl(GEOF.RCC8_NTPP, wktLiteral, xsdBoolean),
+                new GeofRcc8NtppiFunctionSymbolImpl(GEOF.RCC8_NTPPI, wktLiteral, xsdBoolean),
+                /*
+                 * Geo RCC8 Functions
+                 */
+
+                /*
+                 * Geo Properties
+                 */
+                /*new GeoDimensionFunctionSymbolImpl(GEOF.DIMENSION, wktLiteral, xsdInteger),
+                new GeoCoordinateDimensionFunctionSymbolImpl(GEOF.COORDINATEDIMENSION, wktLiteral, xsdInteger),
+                //new GeoSpatialDimensionFunctionSymbolImpl(GEOF.SPATIALDIMENSION, wktLiteral, xsdInteger),
+                new GeoIsEmptyFunctionSymbolImpl(GEOF.ISSIMPLE, wktLiteral, xsdBoolean),
+                new GeoIsSimpleFunctionSymbolImpl(GEOF.ISEMPTY, wktLiteral, xsdBoolean),*/
+                //new GeoHasSerializationFunctionSymbolImpl(GEOF.HASSERIALIZATION, wktLiteral, iriType),
+                /*
+                 * Geo Properties
+                 */
+
+                /*
+                 * Geo Non-Topological Functions
+                 */
+                new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
+                new GeofBufferFunctionSymbolImpl(GEOF.BUFFER, wktLiteral, xsdDecimal, iriType),
+                new GeofIntersectionFunctionSymbolImpl(GEOF.INTERSECTION, wktLiteral),
+                new GeofBoundaryFunctionSymbolImpl(GEOF.BOUNDARY, wktLiteral),
+                new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral),
+                new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral),
+                new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral),
+                //new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, xsdDecimal),
+                new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, xsdAnyUri),
+                new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType),
+                new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
+                new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean),
+                //new GeofRelateMatrixFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString)
+                new GeofRelateFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString)
+        );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
 
@@ -330,10 +453,15 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 return Optional.of(createSPARQLStrUUIDFunctionSymbol());
             case SPARQL.COALESCE:
                 return getSPARQLCoalesceFunctionSymbol(arity);
+            case SPARQL.BNODE:
+                if (arity == 0)
+                    return Optional.of(createZeroArySPARQLBnodeFunctionSymbol());
+                // Otherwise, default case
             default:
                 return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
         }
     }
+
 
     @Override
     public Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName, int arity) {
@@ -345,6 +473,18 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         return isDistinct
                 ? distinctSparqlGroupConcatMap.computeIfAbsent(separator, s -> createSPARQLGroupConcat(s, true))
                 : nonDistinctSparqlGroupConcatMap.computeIfAbsent(separator, s -> createSPARQLGroupConcat(s, false));
+    }
+
+    @Override
+    public synchronized SPARQLFunctionSymbol getIRIFunctionSymbol(IRI baseIRI) {
+        return sparqlIRIMap.computeIfAbsent(baseIRI, b -> new IriSPARQLFunctionSymbolImpl(b,
+                typeFactory.getAbstractRDFTermType(), typeFactory.getXsdStringDatatype(),
+                typeFactory.getIRITermType()));
+    }
+
+    @Override
+    public SPARQLFunctionSymbol getIRIFunctionSymbol() {
+        return iriNoBaseFunctionSymbol;
     }
 
     protected SPARQLAggregationFunctionSymbol createSPARQLGroupConcat(String separator, boolean isDistinct) {
@@ -371,6 +511,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 ? Optional.empty()
                 : Optional.of(coalesceMap
                 .computeIfAbsent(arity, a -> new CoalesceSPARQLFunctionSymbolImpl(a, typeFactory.getAbstractRDFTermType())));
+    }
+
+    private SPARQLFunctionSymbol createZeroArySPARQLBnodeFunctionSymbol() {
+        return new ZeroAryBnodeSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getBlankNodeType());
     }
 
     /**
@@ -437,4 +581,5 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
     }
+
 }

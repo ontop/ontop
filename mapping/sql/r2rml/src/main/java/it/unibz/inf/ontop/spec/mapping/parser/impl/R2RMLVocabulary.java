@@ -25,17 +25,23 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  */
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.eclipse.rdf4j.common.net.ParsedIRI;
+
 
 public class R2RMLVocabulary {
 
     /**
-	 * Returns true if the passed string is a resource.
+	 * Returns true if the passed string is an absolute IRI (possibly a template).
 	 *
      */
-    public static boolean isResourceString(String resource) {
-		return 	resource.startsWith("http://")
-				|| resource.startsWith("https://")
-				|| resource.startsWith("urn:");
+    public static boolean isAbsolute(String resource) {
+		int index = resource.indexOf('{');
+    	String prefix = index >= 0 ? resource.substring(0, index) : resource;
+		try {
+			return ParsedIRI.create(prefix).isAbsolute();
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -43,9 +49,9 @@ public class R2RMLVocabulary {
 	 * to make it into a valid URI.
 	 *
      */
-    public static String prefixUri(String resource) {
-		if ( !isResourceString(resource)) {
-			return "http://example.com/base/" + resource;
+    public static String resolveIri(String resource, String baseIRI) {
+		if ( !isAbsolute(resource)) {
+			return baseIRI + resource;
 		} else {
 			return resource;
 		}

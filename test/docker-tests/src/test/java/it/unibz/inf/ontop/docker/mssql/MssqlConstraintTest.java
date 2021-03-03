@@ -28,10 +28,7 @@ public class MssqlConstraintTest extends AbstractConstraintTest {
 
 	private static final String propertyFile = "/mssql/dbconstraints-mssql.properties";
 
-
-
 	public MssqlConstraintTest(String method) {
 		super(method, propertyFile);
 	}
-
 }

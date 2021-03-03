@@ -22,58 +22,20 @@ package it.unibz.inf.ontop.protege.core;
 
 import org.protege.editor.core.Disposable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.protege.core.impl.DeprecatedConstants.*;
-
 /**
- * Mutable
+ * Properties need to be Disposable to store them in an EditorKit
  */
+
 public class DisposableProperties extends Properties implements Disposable {
 
-	private static final long	serialVersionUID	= -1699795366967423089L;
-
-	public DisposableProperties() {
-	}
-
-	public DisposableProperties(Properties properties) {
-		putAll(properties);
-	}
+	private static final long serialVersionUID = -1699795366967423089L;
 
 	@Override
-    public void dispose() {
-
-	}
-
-	public List<String> getReformulationPlatformPreferencesKeys(){
-		ArrayList<String> keys = new ArrayList<String>();
-//		keys.add(REFORMULATION_TECHNIQUE);
-		keys.add(ABOX_MODE);
-		keys.add(DBTYPE);
-//		keys.add(DATA_LOCATION);
-		keys.add(OBTAIN_FROM_ONTOLOGY);
-		keys.add(OBTAIN_FROM_MAPPINGS);
-//		keys.add(OPTIMIZE_EQUIVALENCES);
-//		keys.add(QUERY_ONTOLOGY_ANNOTATIONS);
-//		keys.add(OPTIMIZE_TBOX_SIGMA);
-//		keys.add(CREATE_TEST_MAPPINGS);
-
-		return keys;
-	}
-
-	@Override
-	public DisposableProperties clone() {
-		return new DisposableProperties(this);
-	}
+    public void dispose() { /* NO-OP */ }
 
 	public boolean getBoolean(String key) {
 		return Boolean.parseBoolean(getProperty(key));
-	}
-
-	public Optional<String> getOptionalProperty(String key) {
-		return Optional.ofNullable(getProperty(key));
 	}
 }

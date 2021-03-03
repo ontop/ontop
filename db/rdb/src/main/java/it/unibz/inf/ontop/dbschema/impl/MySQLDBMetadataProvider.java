@@ -2,38 +2,27 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
-
-    private final QuotedID defaultDatabase;
+public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
 
     @AssistedInject
-    MySQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, getIDFactory(connection), typeFactory);
-        defaultDatabase = retrieveDefaultSchema("SELECT DATABASE()");
-    }
-
-    private static QuotedIDFactory getIDFactory(Connection connection) throws MetadataExtractionException {
-        try {
-            return new MySQLQuotedIDFactory(connection.getMetaData().storesMixedCaseIdentifiers());
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
-    }
-
-    @Override
-    protected QuotedID getDefaultSchema() {
-        return defaultDatabase;
+    MySQLDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        super(connection,
+                metadata -> metadata.storesMixedCaseIdentifiers()
+                    ? new MySQLCaseSensitiveTableNamesQuotedIDFactory()
+                    : new MySQLCaseNotSensitiveTableNamesQuotedIDFactory(),
+                coreSingletons,
+                c -> new String[] { c.getCatalog(), "DUMMY" });
+        //        "SELECT DATABASE() AS TABLE_SCHEM");
+        // https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
     }
 
 
@@ -41,23 +30,13 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     // <https://github.com/ontop/ontop/issues/270>
 
     @Override
-    protected String getRelationCatalog(RelationID relationID) { return getEffectiveRelationSchema(relationID).getName(); }
+    protected String getRelationCatalog(RelationID relationID) { return super.getRelationSchema(relationID); }
 
     @Override
     protected String getRelationSchema(RelationID relationID) { return null; }
 
     @Override
-    protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "TABLE_CAT","TABLE_NAME");
-    }
-
-    @Override
-    protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "PKTABLE_CAT", "PKTABLE_NAME");
-    }
-
-    @Override
-    protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
-        return getRelationID(rs, "FKTABLE_CAT", "FKTABLE_NAME");
+    protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
+        return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(tableNameColumn));
     }
 }

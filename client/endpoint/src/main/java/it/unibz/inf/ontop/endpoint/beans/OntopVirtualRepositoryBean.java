@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.endpoint.beans;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -12,12 +13,16 @@ import org.springframework.stereotype.Component;
 public class OntopVirtualRepositoryBean {
 
     @Bean
-    private OntopVirtualRepository setupVirtualRepository(@Value("${mapping}") String mappings,
-                                                          @Value("${ontology:#{null}}") String ontology,
-                                                          @Value("${xml-catalog:#{null}}") String xmlCatalog,
-                                                          @Value("${properties}") String properties,
-                                                          @Value("${constraint:#{null}}") String constraint,
-                                                          @Value("${lazy:false}") boolean lazy) throws RepositoryException {
+    private OntopSystemConfiguration setupOntopConfiguration(@Value("${mapping}") String mappings,
+                                                             @Value("${ontology:#{null}}") String ontology,
+                                                             @Value("${xml-catalog:#{null}}") String xmlCatalog,
+                                                             @Value("${properties}") String properties,
+                                                             @Value("${constraint:#{null}}") String constraint,
+                                                             @Value("${db-metadata:#{null}}") String dbMetadata,
+                                                             @Value("${ontop-views:#{null}}") String ontopViews,
+                                                             @Value("${db-user:#{null}}") String dbUser,
+                                                             @Value("${db-password:#{null}}") String dbPassword,
+                                                             @Value("${db-url:#{null}}") String dbUrl) throws RepositoryException {
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .propertyFile(properties);
 
@@ -32,10 +37,31 @@ public class OntopVirtualRepositoryBean {
         if ((xmlCatalog != null) && (!xmlCatalog.isEmpty()))
             builder.xmlCatalogFile(xmlCatalog);
 
-        if (constraint !=null && !constraint.isEmpty())
+        if (constraint != null && !constraint.isEmpty())
             builder.basicImplicitConstraintFile(constraint);
 
-        OntopSQLOWLAPIConfiguration configuration = builder.build();
+        if (dbMetadata !=null && !dbMetadata.isEmpty())
+            builder.dbMetadataFile(dbMetadata);
+
+        if (ontopViews !=null && !ontopViews.isEmpty())
+            builder.ontopViewFile(ontopViews);
+
+        if (dbUser != null && !dbUser.isEmpty())
+            builder.jdbcUser(dbUser);
+
+        // NB: might be empty
+        if (dbPassword != null)
+            builder.jdbcPassword(dbPassword);
+
+        if (dbUrl != null && !dbUrl.isEmpty())
+            builder.jdbcUrl(dbUrl);
+
+        return builder.build();
+    }
+
+    @Bean
+    private OntopVirtualRepository setupVirtualRepository(@Value("${lazy:false}") boolean lazy,
+                                                          OntopSystemConfiguration configuration) throws RepositoryException {
         OntopVirtualRepository repository = OntopRepository.defaultRepository(configuration);
 
         if (!lazy) {

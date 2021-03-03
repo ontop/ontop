@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
@@ -86,12 +87,8 @@ public class RDB2RDFTest {
 			"tc0005a",
 			// Different XSD.DOUBLE lexical form; was expecting the engineering notation. Modified version added.
 			"tc0005b",
-			// Expect an exception when processing the mapping (non-IRI for named graph) TODO: throw it
-			"tc0007h",
 			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
 			"tc0009d",
-			// TODO: fix: too much escaping for the curly brackets in the string
-			"tc0010c",
 			// Modified (different XSD.DOUBLE lexical form)
 			"dg0012",
 			// Direct mapping and bnodes: row unique ids are not considered, leadinq to incomplete results
@@ -101,28 +98,20 @@ public class RDB2RDFTest {
 			"tc0012a",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0012e",
-			// Should reject an invalid language tag
-			"tc0015b",
 			// Double + timezone was not expected to be added. Same for milliseconds.
 			"dg0016",
 			// Different XSD.DOUBLE lexical form. Modified version added.
 			"tc0016b",
 			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
 			"tc0016c",
-			// Wrong data IRI created. TODO: fix it
+			// H2 returns varbinary in lower case while upper case was expected. Modified test added.
 			"tc0016e",
-			// Excessive IRI encoding done for extreme-east asia characters. TODO: fix it
-			"dg0017",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"dg0018",
 			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
 			"tc0018a",
 			// Should create an IRI based on a column and the base IRI. TODO: support the base IRI in R2RML
-			"tc0019a",
-			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
-			"tc0019b",
-			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
-			"tc0020b"
+			"tc0019a"
 	);
 
 	private static List<String> FAILURES = Lists.newArrayList();
@@ -311,13 +300,13 @@ public class RDB2RDFTest {
 		return repo;
 	}
 
-	Builder<? extends Builder> createStandardConfigurationBuilder() {
+	Builder<? extends Builder<?>> createStandardConfigurationBuilder() {
 		  return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				 .properties(PROPERTIES)
 				  .enableDefaultDatatypeInference(true);
 	}
 
-	Builder<? extends Builder> createInMemoryBuilder() {
+	Builder<? extends Builder<?>> createInMemoryBuilder() {
 		return createStandardConfigurationBuilder()
 				.jdbcName("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis())
 				.jdbcUrl(JDBC_URL)
@@ -432,6 +421,17 @@ public class RDB2RDFTest {
 				System.out.println(msg);
 
 				fail(msg);
+			}
+		}
+		catch (QueryEvaluationException e) {
+			if (e.getCause() != null && e.getCause() instanceof OntopResultConversionException) {
+				if (outputExpected) {
+					e.printStackTrace();
+					fail("Unexpected result conversion exception: " + e.getMessage());
+				}
+			}
+			else {
+				fail("Unexpected exception: " + e.getMessage());
 			}
 		}
 		finally {

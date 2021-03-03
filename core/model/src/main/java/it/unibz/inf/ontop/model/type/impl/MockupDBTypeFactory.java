@@ -59,6 +59,26 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
+    public DBTermType getDBGeometryType() {
+        return getDBTermType("GEOMETRY");
+    }
+
+    @Override
+    public DBTermType getDBGeographyType() {
+        return getDBTermType("GEOGRAPHY");
+    }
+
+    @Override
+    public boolean supportsDBGeometryType() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsDBGeographyType() {
+        return false;
+    }
+
+    @Override
     public DBTermType getDBHexBinaryType() {
         return getDBTermType("HEXBINARY");
     }

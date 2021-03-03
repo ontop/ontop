@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.OntopCloseableIterator;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
@@ -20,10 +20,7 @@ import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.NamedAssertion;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +38,6 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     private final OntopQueryEngine queryEngine;
     private final UnmodifiableIterator<VocabularyEntry> vocabularyIterator;
-    private final ABoxAssertionSupplier builder;
-
 
     private int counter;
     @Nullable
@@ -67,7 +62,6 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                                       org.apache.commons.rdf.api.RDF rdfFactory) {
 
         this.termFactory = termFactory;
-        this.builder = OntologyBuilderImpl.assertionSupplier(rdfFactory);
         this.vocabulary = vocabulary;
         this.vocabularyIterator = vocabulary.values().iterator();
 
@@ -159,20 +153,19 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
     /**
      * Builds (named) assertions out of (quad) results
      */
-    private Assertion toAssertion(OntopBindingSet tuple) throws OntopResultConversionException {
+    private RDFFact toAssertion(OntopBindingSet tuple) throws OntopResultConversionException {
         ObjectConstant s = (ObjectConstant) tuple.getConstant("s");
-        ObjectConstant p = lastSeenPredicate.isClass() ? rdfTypeIRI : lastSeenPredicateIRI;
+        IRIConstant p = lastSeenPredicate.isClass() ? rdfTypeIRI : lastSeenPredicateIRI;
         RDFConstant o = lastSeenPredicate.isClass() ? lastSeenPredicateIRI : tuple.getConstant("o");
         ObjectConstant g = (ObjectConstant)tuple.getConstant("g");
-        Assertion a = SimpleGraphResultSet.getAssertion(builder, s, p, o);
-        if (g != null) {
-            a = NamedAssertion.of(a, g);
-        }
-        return a;
+
+        return (g == null)
+                ? RDFFact.createTripleFact(s, p, o)
+                : RDFFact.createQuadFact(s, p, o, g);
     }
 
     @Override
-    public Assertion next() throws OntopQueryAnsweringException {
+    public RDFFact next() throws OntopQueryAnsweringException {
         counter++;
 
         OntopBindingSet resultTuple;
@@ -188,6 +181,12 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
             e.printStackTrace();
         }
         return null;
+    }
+
+    //TODO implement a closable iterator
+    @Override
+    public OntopCloseableIterator<RDFFact, OntopConnectionException> iterator() {
+        throw new UnsupportedOperationException("iterator");
     }
 
     /**

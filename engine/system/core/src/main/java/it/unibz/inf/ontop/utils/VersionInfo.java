@@ -31,15 +31,14 @@ public class VersionInfo {
 	private String version;
 
 	private VersionInfo() {
-		Properties prop = new Properties();
-    	try {
+    	try (InputStream inputStream = VersionInfo.class.getResourceAsStream("/version.properties")) {
             // Load the properties file
-    		InputStream inputStream = VersionInfo.class.getResourceAsStream("/version.properties");
+			Properties prop = new Properties();
     		prop.load(inputStream);
- 
             // Get the property value
             version = prop.getProperty("version");
-    	} catch (IOException ex) {
+    	}
+    	catch (IOException ex) {
     		ex.printStackTrace();
         }
 	}

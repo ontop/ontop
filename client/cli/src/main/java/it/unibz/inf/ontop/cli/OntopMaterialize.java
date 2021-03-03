@@ -38,6 +38,9 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.JDBC_URL;
+import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.JDBC_PASSWORD;
+import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.JDBC_USER;
 import static it.unibz.inf.ontop.injection.OntopSystemSQLSettings.FETCH_SIZE;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
@@ -258,6 +261,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             configBuilder.nativeOntopMappingFile(mappingFile);
         }
 
+        if (dbMetadataFile != null)
+            configBuilder.dbMetadataFile(dbMetadataFile);
+
+        if (ontopViewFile != null)
+            configBuilder.ontopViewFile(ontopViewFile);
+
         Properties properties = OntopModelConfigurationImpl.extractProperties(
                 OntopModelConfigurationImpl.extractPropertyFile(propertiesFile));
 
@@ -287,9 +296,20 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         else
             properties.setProperty(FETCH_SIZE, "-1");
 
-        return configBuilder
+        if (dbPassword != null)
+            properties.setProperty(JDBC_PASSWORD, dbPassword);
+
+        if (dbUrl != null)
+            properties.setProperty(JDBC_URL, dbUrl);
+
+        if (dbUser != null)
+            properties.setProperty(JDBC_USER, dbUser);
+
+        configBuilder
                 .properties(properties)
                 .enableOntologyAnnotationQuerying(true);
+
+        return configBuilder;
     }
 
     private class OutputSpec {

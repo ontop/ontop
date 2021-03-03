@@ -23,15 +23,15 @@ import static org.junit.Assert.assertFalse;
 
 public class DatetimeStampSesameTest  {
 
-	String owlFile = "/mysql/northwind/northwind-dmo.owl";
-	String obdaFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
-	String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
+	private static final String owlFile = "/mysql/northwind/northwind-dmo.owl";
+	private static final String obdaFile = "/mysql/northwind/mapping-northwind-dmo.ttl";
+	private static final String propertyFile = "/mysql/northwind/mapping-northwind-dmo.properties";
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	RepositoryConnection con;
 	Repository repository;
 
-	public DatetimeStampSesameTest(){
+	public DatetimeStampSesameTest() {
 
 		String owlFileName =  this.getClass().getResource(owlFile).toString();
 		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
@@ -44,34 +44,19 @@ public class DatetimeStampSesameTest  {
 				.enableExistentialReasoning(true)
 				.enableTestMode()
 				.build();
-		try {
-			repository = OntopRepository.defaultRepository(configuration);
-			repository.initialize();
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertFalse(false);
-		}
+
+		repository = OntopRepository.defaultRepository(configuration);
+		repository.initialize();
 	}
 	@Before
 	public void setUp() {
-		try {
-			con = repository.getConnection();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertFalse(false);
-		}
-
+		con = repository.getConnection();
 	}
 
 	@After
 	public void tearDown() {
-		try {
-			if (con != null && con.isOpen()) {
-				con.close();
-			}
-		} catch (RepositoryException e) {
-			e.printStackTrace();
+		if (con != null && con.isOpen()) {
+			con.close();
 		}
 	}
 	
@@ -97,77 +82,70 @@ public class DatetimeStampSesameTest  {
 			e.printStackTrace();
 			assertFalse(false);
 		}
-		return resultCount++;
+		return resultCount;
 	}
 
 	@Test
-	public void testOrdersDate() {
+	public void testRequiredDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>" +
+				"select * {?x :RequiredDate ?y}";
 
-		//read next query
-		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/> select * {?x :RequiredDate ?y}" ;
-		//read expected result
-		int expectedResult = 830;
-		
 		int obtainedResult = runQuery(sparqlQuery);
-		log.debug("results "+obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
-
-		//read next query
-		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/> select * {?x :ShippedDate ?y}" ;
-		//read expected result
-		expectedResult = 809;
-
-		obtainedResult = runQuery(sparqlQuery);
 		log.debug("results " + obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
-
+		assertEquals(830, obtainedResult);
 	}
 
 	@Test
-	public void testEmployeesDate() {
-
-		//read next query
-		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :HireDate ?y}" ;
-		//read expected result
-		int expectedResult = 9;
+	public void testShippedDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Orders/>" +
+				"select * {?x :ShippedDate ?y}" ;
 
 		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results " + obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
+		assertEquals(809, obtainedResult);
+	}
 
-		//read next query
-		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :BirthDate ?y}" ;
-		//read expected result
-		expectedResult = 9;
+	@Test
+	public void testHireDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>\n" +
+				"select * {?x :HireDate ?y}";
 
-		obtainedResult = runQuery(sparqlQuery);
+		int obtainedResult = runQuery(sparqlQuery);
+		log.debug("results " + obtainedResult);
+		assertEquals(9, obtainedResult);
+	}
+
+	@Test
+	public void testBirthDate() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>" +
+				"select * {?x :BirthDate ?y}" ;
+
+		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results "+obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
+		assertEquals(9, obtainedResult);
 
 	}
 
 	@Ignore("The current SQL generator does not support xsd:base64Binary")
 	@Test
-	public void testBinary() {
-
-		//read next query
-		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :Photo ?y}" ;
-		//read expected result
-		int expectedResult = 9;
+	public void testPhoto() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>" +
+				"select * {?x :Photo ?y}";
 
 		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results " + obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
+		assertEquals(9, obtainedResult);
+	}
 
-		//read next query
-		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/> select * {?x :Picture ?y}" ;
-		//read expected result
-		expectedResult = 8;
+	@Ignore("The current SQL generator does not support xsd:base64Binary")
+	@Test
+	public void testBinary() {
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/>" +
+				"select * {?x :Picture ?y}" ;
 
-		obtainedResult = runQuery(sparqlQuery);
+		int obtainedResult = runQuery(sparqlQuery);
 		log.debug("results "+obtainedResult);
-		assertEquals(expectedResult, obtainedResult);
-
+		assertEquals(8, obtainedResult);
 	}
 
 }

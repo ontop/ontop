@@ -17,6 +17,7 @@ import java.util.List;
  * Executed with Denodo over Postgresql.
  * The Docker image and data for the Postgresql DB can be found at:
  * https://github.com/ontop/ontop-dockertests/tree/master/pgsql
+ * The parameters to connect to Postgresql from Denodo are in "src/test/resources/pgsql/bind/sparqlBindPostgreSQL.properties"
  */
 @Ignore
 public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {

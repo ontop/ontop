@@ -1,24 +1,5 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -29,6 +10,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -346,12 +328,18 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms) {
-		return new NonGroundFunctionalTermImpl(this, functor, terms);
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl(this, (BooleanFunctionSymbol) functor, terms);
+		else
+			return new NonGroundFunctionalTermImpl(this, functor, terms);
 	}
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms) {
-		return new NonGroundFunctionalTermImpl(functor, terms, this);
+		if (functor instanceof BooleanFunctionSymbol)
+			return new NonGroundExpressionImpl((BooleanFunctionSymbol) functor, terms, this);
+		else
+			return new NonGroundFunctionalTermImpl(functor, terms, this);
 	}
 
 	@Override
@@ -361,7 +349,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm) {
-		return coreUtilsFactory.createDummyVariableNullability(functionalTerm);
+		return coreUtilsFactory.createSimplifiedVariableNullability(functionalTerm);
     }
 
     @Override
@@ -533,6 +521,16 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBNow());
     }
 
+	@Override
+	public ImmutableFunctionalTerm getDBRowUniqueStr() {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowUniqueStr());
+	}
+
+    @Override
+    public ImmutableFunctionalTerm getDBIriStringResolution(IRI baseIRI, ImmutableTerm argLexical) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIriStringResolver(baseIRI), argLexical);
+    }
+
     @Override
     public ImmutableFunctionalTerm getDBCount(boolean isDistinct) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCount(0, isDistinct));
@@ -567,6 +565,153 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullIgnoringDBGroupConcat(isDistinct), subTerm,
 				getDBStringConstant(separator));
+    }
+
+	// Topological functions
+    @Override
+    public ImmutableTerm getDBSTWithin(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTWithin(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTOverlaps(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTOverlaps(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTContains(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTContains(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTCrosses(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTCrosses(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTDisjoint(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTDisjoint(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTEquals(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTEquals(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTIntersects(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTIntersects(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTTouches(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTTouches(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTCoveredBy(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTCoveredBy(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTCovers(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTCovers(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTContainsProperly(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBSTContainsProperly(), arg1, arg2);
+    }
+
+	// Non-topological and common form functions
+    @Override
+    public ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTTransform(), arg1, srid);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTSetSRID(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBSTDistance(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistance(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBAsText(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBAsText(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTFlipCoordinates(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBuffer(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistanceSphere(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTDistanceSpheroid(), ImmutableList.of(arg1, arg2, arg3));
+    }
+
+    @Override
+    public ImmutableTerm getDBIntersection(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIntersection(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBUnion(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUnion(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBEnvelope(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBEnvelope(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBConvexHull(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBConvexHull(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBBoundary(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBBoundary(), ImmutableList.of(arg1));
+    }
+
+    @Override
+    public ImmutableTerm getDBDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDifference(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBSymDifference(ImmutableTerm arg1, ImmutableTerm arg2) {
+         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSymDifference(), ImmutableList.of(arg1, arg2));
+    }
+
+    @Override
+    public ImmutableTerm getDBRelate(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBRelate(), arg1, arg2, arg3);
+    }
+
+    @Override
+    public ImmutableTerm getDBRelateMatrix(ImmutableTerm arg1, ImmutableTerm arg2) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRelateMatrix(), arg1, arg2);
+    }
+
+    @Override
+    public ImmutableTerm getDBGetSRID(ImmutableTerm arg1) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBGetSRID(), ImmutableList.of(arg1));
     }
 
     @Override
@@ -701,13 +846,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString) {
-		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;
-		return getRDFFunctionalTerm(lexicalTerm, iriTypeConstant);
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableTerm term) {
+		return getRDFFunctionalTerm(term, iriTypeConstant);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate,
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(ImmutableList<Template.Component> iriTemplate,
 														ImmutableList<? extends ImmutableTerm> arguments) {
 		if (arguments.isEmpty())
 			throw new IllegalArgumentException("At least one argument for the IRI functional term " +
@@ -728,18 +872,15 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
-														  ImmutableList<? extends ImmutableTerm> arguments) {
-		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
-				arguments);
-		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableTerm term) {
+		return getRDFFunctionalTerm(term, bnodeTypeConstant);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> arguments) {
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(ImmutableList<Template.Component> bnodeTemplate,
+														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(arguments.size()),
+				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
 				arguments);
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
@@ -943,6 +1084,11 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
     }
+
+	@Override
+	public ImmutableFunctionalTerm getDBEncodeForURI(ImmutableTerm term) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBEncodeForURI(), term);
+	}
 
     @Override
 	public ImmutableFunctionalTerm getNullRejectingDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {

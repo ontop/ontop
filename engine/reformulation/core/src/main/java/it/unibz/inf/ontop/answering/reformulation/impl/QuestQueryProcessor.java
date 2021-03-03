@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.answering.reformulation.input.DescribeQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
@@ -83,7 +84,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		IQ cachedQuery = queryCache.get(inputQuery);
 		if (cachedQuery != null) {
-			queryLogger.declareReformulationFinishedAndSerialize(true);
+			queryLogger.declareReformulationFinishedAndSerialize(cachedQuery,true);
 			return cachedQuery;
 		}
 
@@ -92,6 +93,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 				log.debug("SPARQL query:\n{}", inputQuery.getInputString());
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
 			log.debug("Parsed query converted into IQ (after normalization):\n{}", convertedIQ);
+
+			queryLogger.setSparqlIQ(convertedIQ);
 
             try {
                 log.debug("Start the rewriting process...");
@@ -105,7 +108,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
                 	log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
-					queryLogger.declareReformulationFinishedAndSerialize(false);
+					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
 					return unfoldedIQ;
 				}
 
@@ -118,14 +121,17 @@ public class QuestQueryProcessor implements QueryReformulator {
 				if (IS_DEBUG_ENABLED)
 					log.debug("Planned query: \n" + plannedQuery);
 
+				queryLogger.setPlannedQuery(plannedQuery);
+
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				log.debug(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
-				queryLogger.declareReformulationFinishedAndSerialize(false);
+				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				return executableQuery;
 
 			}
             catch (OntopReformulationException e) {
+            	queryLogger.declareReformulationException(e);
                 throw e;
             }
         }
@@ -135,9 +141,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		 */
 		catch (Exception e) {
 			log.warn("Unexpected exception: " + e.getMessage(), e);
-			// TODO: involve the query logger
-			throw new OntopReformulationException(e);
-			//throw new OntopReformulationException("Error rewriting and unfolding into SQL\n" + e.getMessage());
+			OntopReformulationException exception = new OntopReformulationException(e);
+			queryLogger.declareReformulationException(exception);
+			throw exception;
 		}
 	}
 

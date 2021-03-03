@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.model.vocabulary;
 
-
 public class SPARQL {
 
     public static final String LANG = "LANG";
@@ -8,7 +7,6 @@ public class SPARQL {
     public static final String STR = "STR";
     public static final String DATATYPE = "DATATYPE";
     public static final String IS_IRI = "isIRI";
-    public static final String IS_URI = "isURI";
     public static final String IS_BLANK = "isBlank";
     public static final String IS_LITERAL = "isLiteral";
     public static final String IS_NUMERIC = "isNumeric";
@@ -41,6 +39,9 @@ public class SPARQL {
     public static final String MAX = "MAX";
     public static final String SAMPLE = "SAMPLE";
     public static final String GROUP_CONCAT = "GROUP_CONCAT";
+    public static final String BNODE = "BNODE";
+    public static final String IRI = "IRI";
+    public static final String IF = "IF";
     /**
      * Although it is directly mapped in SPARQL 1.1 to fn:year-from-dateTime, in practice all SPARQL implementations
      * extend it to also support xsd:date, not just xsd:dateTime. Therefore it cannot be mapped directly to such a

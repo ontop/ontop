@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RelationID;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * Creates QuotedIDs from database records
@@ -11,7 +13,7 @@ import it.unibz.inf.ontop.dbschema.RelationID;
  * TO BE USED ONLY IN METADATA EXTRACTION
  */
 
-public class RawQuotedIDFactory implements QuotedIDFactory {
+public class RawQuotedIDFactory extends SQLStandardQuotedIDFactory {
 
     private final QuotedIDFactory idFactory;
 
@@ -20,32 +22,14 @@ public class RawQuotedIDFactory implements QuotedIDFactory {
     }
 
     /**
-     * creates attribute ID from the database record (as though it is a quoted name)
+     * creates an ID from the database record (as though it is a quoted name)
      *
      * @param s
      * @return
      */
-
-    @Override
-    public QuotedID createAttributeID(String s) {
-        // ID is as though it is quoted -- DB stores names as is
+    protected QuotedID createFromString(@Nonnull String s) {
+        Objects.requireNonNull(s);
         return new QuotedIDImpl(s, idFactory.getIDQuotationString());
-    }
-
-    /**
-     * creates relation id from the database record (as though it is quoted)
-     *
-     * @param schema as is in DB (possibly null)
-     * @param table as is in DB
-     * @return
-     */
-
-    @Override
-    public RelationID createRelationID(String schema, String table) {
-        // both IDs are as though they are quoted -- DB stores names as is
-        return new RelationIDImpl(
-                new QuotedIDImpl(schema, idFactory.getIDQuotationString()),
-                new QuotedIDImpl(table, idFactory.getIDQuotationString()));
     }
 
     @Override

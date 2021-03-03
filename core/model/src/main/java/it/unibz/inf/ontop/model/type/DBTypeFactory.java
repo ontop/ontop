@@ -23,7 +23,17 @@ public interface DBTypeFactory {
 
     DBTermType getDBDoubleType();
 
+    DBTermType getDBGeometryType();
+
+    DBTermType getDBGeographyType();
+
+    boolean supportsDBGeometryType();
+
+    boolean supportsDBGeographyType();
+
     DBTermType getDBHexBinaryType();
+
+
 
     /**
      * Returns an abstract type

@@ -1,0 +1,4 @@
+postgres.unitTests.university.professor:prof_id
+course:course_id
+teaching:course_id:course:course_id
+teaching:prof_id:professor:prof_id

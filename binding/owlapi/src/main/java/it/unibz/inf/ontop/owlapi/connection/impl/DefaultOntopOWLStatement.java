@@ -1,29 +1,9 @@
 package it.unibz.inf.ontop.owlapi.connection.impl;
 
-/*
- * #%L
- * ontop-quest-owlapi
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.answering.reformulation.input.*;
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
@@ -35,6 +15,8 @@ import it.unibz.inf.ontop.owlapi.resultset.impl.OntopTupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.impl.OntopGraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.impl.OntopBooleanOWLResultSet;
+
+import java.security.SecureRandom;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -84,11 +66,20 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 			SelectQuery query = inputQueryFactory.createSelectQuery(inputQuery);
 			TupleResultSet resultSet = st.execute(query);
 
-			return new OntopTupleOWLResultSet(resultSet);
+
+
+			return new OntopTupleOWLResultSet(resultSet, generateSalt());
 
 		} catch (OntopQueryEngineException e) {
 			throw new OntopOWLException(e);
 		}
+	}
+
+	private byte[] generateSalt() {
+		SecureRandom random = new SecureRandom();
+		byte[] salt = new byte[20];
+		random.nextBytes(salt);
+		return salt;
 	}
 
 	@Override
@@ -138,8 +129,8 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
 			OntopResultConversionException {
 
-		SimpleGraphResultSet resultSet = st.execute(query);
-		return new OntopGraphOWLResultSet(resultSet);
+		GraphResultSet resultSet = st.execute(query);
+		return new OntopGraphOWLResultSet(resultSet, generateSalt());
 	}
 
 	public int getMaxRows() throws OntopOWLException {

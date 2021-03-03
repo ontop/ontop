@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
+import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -41,16 +42,18 @@ import java.util.*;
  * See test case DistinctResultSetTest
  */
 
+@Deprecated
 public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements TupleResultSet {
 
     private Set<List<Object>> rowKeys;
 
     public DistinctJDBCTupleResultSet(ResultSet rs, ImmutableSortedSet<Variable> sqlSignature, ImmutableMap<Variable, DBTermType> sqlTypes,
                                       ConstructionNode constructionNode,
-                                      DistinctVariableOnlyDataAtom answerAtom, QueryLogger queryLogger, TermFactory termFactory,
+                                      DistinctVariableOnlyDataAtom answerAtom, QueryLogger queryLogger,
+                                      @Nullable OntopConnectionCloseable statementClosingCB, TermFactory termFactory,
                                       SubstitutionFactory substitutionFactory) {
 
-        super(rs, sqlSignature, sqlTypes, constructionNode, answerAtom, queryLogger, termFactory, substitutionFactory);
+        super(rs, sqlSignature, sqlTypes, constructionNode, answerAtom, queryLogger, statementClosingCB, termFactory, substitutionFactory);
         rowKeys = new HashSet<>();
     }
 
@@ -87,7 +90,7 @@ public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements Tu
             Object realValue = rs.getObject(column);
             return realValue;
         } catch (Exception e) {
-            throw new OntopConnectionException(e);
+            throw buildConnectionException(e);
         }
     }
 }

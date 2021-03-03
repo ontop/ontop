@@ -1,30 +1,12 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
-/*
- * #%L
- * ontop-quest-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
+
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.AbstractBindingSet;
 import org.eclipse.rdf4j.query.Binding;
@@ -33,18 +15,23 @@ import org.eclipse.rdf4j.query.impl.SimpleBinding;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingSet {
 
     private static final long serialVersionUID = -8455466574395305166L;
 
     private OntopBindingSet ontopBindingSet;
+    private final byte[] salt;
 
-    public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet) {
+    public OntopRDF4JBindingSet(OntopBindingSet ontopBindingSet,
+                                byte[] salt) {
         this.ontopBindingSet = ontopBindingSet;
+        this.salt = salt;
     }
 
     @Override
@@ -58,17 +45,17 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
 
     @Override
     public Set<String> getBindingNames() {
-        return new LinkedHashSet<>(ontopBindingSet.getBindingNames());
+        return Arrays.stream((ontopBindingSet.getBindingNames())).collect(Collectors.toSet());
     }
 
     @Override
     @Nullable
     public Value getValue(String variableName) {
         try {
-            final Constant constant = ontopBindingSet.getConstant(variableName);
+            final RDFConstant constant = ontopBindingSet.getConstant(variableName);
             return constant == null?
                     null:
-                    RDF4JHelper.getValue(constant);
+                    RDF4JHelper.getValue(constant, salt);
         } catch (OntopResultConversionException e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +70,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     @Override
     @Nonnull
     public Iterator<Binding> iterator() {
-        return ontopBindingSet.getBindings().stream()
+        return Arrays.stream(ontopBindingSet.getBindings())
                 .map(this::convertBinding)
                 .iterator();
     }
@@ -92,7 +79,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
 //        try {
             return new SimpleBinding(
                     ontopBinding.getName(),
-                    RDF4JHelper.getValue(ontopBinding.getValue())
+                    RDF4JHelper.getValue(ontopBinding.getValue(), salt)
             );
 //        } catch (OntopResultConversionException e) {
 //            throw new RuntimeException(e);
@@ -101,7 +88,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
 
     @Override
     public int size() {
-        return ontopBindingSet.getBindingNames().size();
+        return ontopBindingSet.getBindingNames().length;
     }
 
     @Override

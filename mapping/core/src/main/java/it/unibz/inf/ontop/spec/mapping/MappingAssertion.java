@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -95,11 +94,11 @@ public class MappingAssertion {
             ImmutableList<? extends ImmutableTerm> substitutedArguments = getTerms();
 
             IRI propertyIRI = rdfAtomPredicate.getPropertyIRI(substitutedArguments)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term" + query));
+                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term " + query));
 
             index = propertyIRI.equals(RDF.TYPE)
                     ? MappingAssertionIndex.ofClass(rdfAtomPredicate, rdfAtomPredicate.getClassIRI(substitutedArguments)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term" + query)))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term " + query)))
                     : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
         }
         return index;

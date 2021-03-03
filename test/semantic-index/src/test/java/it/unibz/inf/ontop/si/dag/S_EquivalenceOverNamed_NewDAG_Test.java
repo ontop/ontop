@@ -122,15 +122,13 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 	private static <T> boolean coincide(Set<Equivalences<T>> setd1, Set<Equivalences<T>> setd2) {
 		
 		Set<T> set1 = new HashSet<>();
-		Iterator<Equivalences<T>> it1 = setd1.iterator();
-		while (it1.hasNext()) {
-			set1.addAll(it1.next().getMembers());	
+		for (Equivalences<T> tEquivalences : setd1) {
+			set1.addAll(tEquivalences.getMembers());
 		}
 		
 		Set<T> set2 = new HashSet<>();
-		Iterator<Equivalences<T>> it2 = setd2.iterator();
-		while (it2.hasNext()) {
-			set2.addAll(it2.next().getMembers());	
+		for (Equivalences<T> ts : setd2) {
+			set2.addAll(ts.getMembers());
 		}
 		return set1.equals(set2);		
 	}
@@ -194,91 +192,6 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 		return true;
 	}
 
-/*
-			private boolean checkVertexReduction(DefaultDirectedGraph<Description,DefaultEdge> d1, Test_NamedTBoxReasonerImpl d2, boolean named){
-
-				//number of vertexes in the graph
-				int numberVertexesD1= 0;
-				//
-				//if(d2.isaNamedDAG()){
-				//	for (Description v: d1.vertexSet()){
-				//		if(d1.getRoles().contains(v)| d1.classesDAG().contains(v)){
-				//			numberVertexesD1++;
-				//			System.out.println(v);
-				//		}
-				//	}
-				//}
-				//else			 
-					numberVertexesD1= d1.vertexSet().size();
-				
-				//number of vertexes in the dag
-				int numberVertexesD2 = d2.getNodes().size();
-
-				//number of vertexes in the equivalent mapping
-				int numberEquivalents=0;
-
-
-				Set<Equivalences<Description>> nodesd2= d2.getNodes();
-				Set<Description> set2 = new HashSet<Description>();
-				Iterator<Equivalences<Description>> it1 =nodesd2.iterator();
-				while (it1.hasNext()) {
-					Equivalences<Description> equivalents=it1.next();
-					numberEquivalents += equivalents.size()-1;
-					set2.addAll(equivalents.getMembers());	
-				}
-				
-				log.info("vertex graph {}", numberVertexesD1);
-				log.info("set {}", set2.size());
-
-				log.info("vertex dag {}", numberVertexesD2);
-				log.info("equivalents {} ", numberEquivalents);
-
-				return numberVertexesD1== set2.size() & numberEquivalents== (numberVertexesD1-numberVertexesD2);
-
-			}
-
-			private boolean checkEdgeReduction(DefaultDirectedGraph<Description,DefaultEdge> d1, TestTBoxReasonerImplOnNamedDAG d2, boolean named){
-				
-				//number of edges in the graph
-				int  numberEdgesD1= d1.edgeSet().size();
-				System.out.println(numberEdgesD1);
-				//number of edges in the dag
-				int numberEdgesD2 = d2.getEdgesSize();
-				System.out.println(numberEdgesD2);
-
-				//number of edges between the equivalent nodes
-				int numberEquivalents=0;
-				
-				if(named){
-					TestTBoxReasonerImplOnGraph reasonerd1 = new TestTBoxReasonerImplOnGraph(d1);
-					for(Description vertex: d1.vertexSet()) {
-						if(!reasonerd1.isNamed(vertex)) {
-							if(d1.inDegreeOf(vertex)>=1 || d1.outDegreeOf(vertex)>=1){
-								numberEdgesD1 -=1;
-							}	
-						}
-					}
-				}				
-
-				Set<Equivalences<Description>> nodesd2= d2.getNodes();
-				Iterator<Equivalences<Description>> it1 =nodesd2.iterator();
-				while (it1.hasNext()) {
-					Equivalences<Description> equivalents=it1.next();
-					//System.out.println(equivalents);
-					//two nodes have two edges, three nodes have three edges...
-					if(equivalents.size()>=2){
-						numberEquivalents += equivalents.size();
-					}
-				}
-				
-				log.info("edges graph {}", numberEdgesD1);
-				log.info("edges dag {}", numberEdgesD2);
-				log.info("equivalents {} ", numberEquivalents);
-
-				return numberEdgesD1>= (numberEquivalents+ numberEdgesD2);
-
-			}
-*/			
 	private boolean checkforNamedVertexesOnly(TestClassifiedTBoxImpl_OnNamedDAG dag, ClassifiedTBox reasoner){
 		for (Equivalences<ObjectPropertyExpression> node: dag.objectPropertiesDAG()) {
 			ObjectPropertyExpression vertex = node.getRepresentative();

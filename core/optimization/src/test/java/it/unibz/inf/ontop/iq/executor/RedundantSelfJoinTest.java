@@ -39,12 +39,12 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class RedundantSelfJoinTest {
 
-    private final static DatabaseRelationDefinition TABLE1;
-    private final static DatabaseRelationDefinition TABLE2;
-    private final static DatabaseRelationDefinition TABLE3;
-    private final static DatabaseRelationDefinition TABLE4;
-    private final static DatabaseRelationDefinition TABLE5;
-    private final static DatabaseRelationDefinition TABLE6;
+    private final static NamedRelationDefinition TABLE1;
+    private final static NamedRelationDefinition TABLE2;
+    private final static NamedRelationDefinition TABLE3;
+    private final static NamedRelationDefinition TABLE4;
+    private final static NamedRelationDefinition TABLE5;
+    private final static NamedRelationDefinition TABLE6;
     private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate( 1);
     private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getRDFAnswerPredicate( 2);

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package it.unibz.inf.ontop.owlapi.sql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -8,14 +5,12 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.utils.OWLAPITestingTools;
 import org.junit.After;
 import org.junit.Test;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Scanner;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -49,10 +44,7 @@ public class QuestImplicitDBConstraintsTest {
 	
 	public void prepareDB(String sqlfile) throws Exception {
 		sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
-		try (java.sql.Statement s = sqlConnection.createStatement()) {
-			String text = new Scanner( new File(sqlfile) ).useDelimiter("\\A").next();
-			s.execute(text);
-		}
+		OWLAPITestingTools.executeFromFile(sqlConnection, sqlfile);
 	}
 
 

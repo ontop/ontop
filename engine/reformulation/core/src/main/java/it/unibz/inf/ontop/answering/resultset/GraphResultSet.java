@@ -1,10 +1,15 @@
 package it.unibz.inf.ontop.answering.resultset;
 
-import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 
-public interface GraphResultSet<X extends OntopQueryAnsweringException> extends IterativeOBDAResultSet<Assertion, X> {
+import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
+
+public interface GraphResultSet extends IterativeOBDAResultSet<RDFFact,OntopQueryAnsweringException> {
 
     @Override
-    Assertion next() throws X;
+    RDFFact next() throws OntopQueryAnsweringException, OntopConnectionException;
+
+    OntopCloseableIterator<RDFFact, OntopConnectionException> iterator();
+
 }

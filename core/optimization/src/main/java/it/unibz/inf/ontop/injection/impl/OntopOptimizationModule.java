@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
+import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
@@ -68,6 +69,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(SelfJoinSameTermIQOptimizer.class);
         bindFromSettings(RequiredExtensionalDataNodeExtractor.class);
         bindFromSettings(SelfJoinUCIQOptimizer.class);
+        bindFromSettings(OntopViewUnfolder.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 

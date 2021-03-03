@@ -1,117 +1,119 @@
 package it.unibz.inf.ontop.protege.core;
 
 
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
+import it.unibz.inf.ontop.protege.connection.DataSource;
+import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
 import java.util.Optional;
 import java.util.Properties;
-
-import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.*;
-import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.*;
 
 /**
  * TODO: find a better name
  */
 public class OntopConfigurationManager {
 
-    private final OBDAModel obdaModel;
-    private final DisposableProperties settings;
-    private final DisposableProperties userSettings;
+    public static final String DBPREFS_EXT = ".db_prefs"; // The default db_prefs (currently only user constraints) file extension.
+    public static final String DBMETADATA_EXT = ".json"; // The default db-metadata file extension.
 
-    // Nullable
+    private final OBDAModelManager obdaModelManager;
+    // settings are loaded once in the constructor and not modified afterwards
+    private final Properties settings = new Properties();
+
     @Nullable
     private File implicitDBConstraintFile;
 
-    OntopConfigurationManager(@Nonnull OBDAModel obdaModel, @Nonnull DisposableProperties internalSettings) {
-        this.obdaModel = obdaModel;
-        this.settings = internalSettings;
+    @Nullable
+    private File dbMetadataFile;
+
+    OntopConfigurationManager(@Nonnull OBDAModelManager obdaModelManager, DisposableProperties standardProperties) {
+        this.obdaModelManager = obdaModelManager;
+        this.settings.putAll(standardProperties);
         this.implicitDBConstraintFile = null;
-        this.userSettings = new DisposableProperties();
+        this.dbMetadataFile = null;
     }
 
-    Properties snapshotProperties() {
-        Properties properties = settings.clone();
-        properties.putAll(userSettings.clone());
-        properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
+    public void clear() {
+        this.implicitDBConstraintFile = null;
+        this.dbMetadataFile = null;
+    }
+
+    /**
+        Can be called twice in a row without clear(), at least for now.
+     */
+
+    public void load(String owlName) {
+        File implicitDBConstraintFile = new File(URI.create(owlName + DBPREFS_EXT));
+        this.implicitDBConstraintFile = implicitDBConstraintFile.exists()
+                ? implicitDBConstraintFile
+                : null;
+
+        File dbMetadataFile = new File(URI.create(owlName + DBMETADATA_EXT));
+        this.dbMetadataFile = dbMetadataFile.exists()
+                ? dbMetadataFile
+                : null;
+    }
+
+    private static Properties union(Properties settings, DataSource datasource) {
+        Properties properties = new Properties();
+        properties.putAll(settings);
+        properties.putAll(datasource.asProperties());
         return properties;
     }
 
-    Properties snapshotUserProperties() {
-        Properties properties = userSettings.clone();
-        properties.putAll(DataSource2PropertiesConvertor.convert(obdaModel.getDatasource()));
-        return properties;
+    public SQLMappingParser getSQLMappingParser(DataSource datasource, Reader mappingReader) {
+        OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
+                .properties(union(settings, datasource))
+                .nativeOntopMappingReader(mappingReader)
+                .build();
+
+        return configuration.getInjector().getInstance(SQLMappingParser.class);
     }
 
-    public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology currentOntology) {
+    public OntopMappingSQLAllConfiguration buildR2RMLConfiguration(DataSource datasource, File file) {
+        return OntopMappingSQLAllConfiguration.defaultBuilder()
+                .properties(datasource.asProperties())
+                .r2rmlMappingFile(file)
+                .build();
+    }
 
-        OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .properties(snapshotProperties())
-                .ppMapping(obdaModel.generatePPMapping());
+    public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration(OWLOntology ontology) {
+
+        OBDAModel obdaModel = obdaModelManager.getOBDAModel(ontology);
+
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .properties(union(settings, obdaModel.getDataSource()))
+                .ppMapping(obdaModel.getTriplesMapCollection().generatePPMapping());
 
         Optional.ofNullable(implicitDBConstraintFile)
                 .ifPresent(builder::basicImplicitConstraintFile);
 
-        builder.ontology(currentOntology);
+        Optional.ofNullable(dbMetadataFile)
+                .ifPresent(builder::dbMetadataFile);
+
+        builder.ontology(obdaModel.getOntology());
 
         return builder.build();
     }
 
-    void setImplicitDBConstraintFile(File implicitDBConstraintFile) {
-        this.implicitDBConstraintFile = implicitDBConstraintFile;
-    }
+    public OntopSQLOWLAPIConfiguration getBasicConfiguration(OBDAModel obdaModel) {
+        OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .properties(union(settings, obdaModel.getDataSource()));
 
-    void clearImplicitDBConstraintFile() {
-        this.implicitDBConstraintFile = null;
-    }
+        Optional.ofNullable(implicitDBConstraintFile)
+                .ifPresent(builder::basicImplicitConstraintFile);
 
-    /**
-     * Loads the properties in the global settings and in data source.
-     */
-    public void loadPropertyFile(File propertyFile) throws IOException {
-        userSettings.load(new FileReader(propertyFile));
-        loadDataSource(obdaModel, userSettings);
-    }
+        Optional.ofNullable(dbMetadataFile)
+                .ifPresent(builder::dbMetadataFile);
 
-    void resetProperties(DisposableProperties settings){
-        this.settings.clear();
-        this.settings.putAll(settings);
-        this.userSettings.clear();
+        builder.ontology(obdaModel.getOntology());
 
-        OBDADataSource dataSource = obdaModel.getDatasource();
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "");
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "");
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
-        dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "");
-
-    }
-
-    /**
-     * Loads the properties in the global settings and in data source.
-     */
-    public void loadProperties(Properties properties) throws IOException {
-        userSettings.putAll(properties);
-        loadDataSource(obdaModel, userSettings);
-    }
-
-    private static void loadDataSource(OBDAModel obdaModel, DisposableProperties properties) {
-        OBDADataSource dataSource = obdaModel.getDatasource();
-
-        properties.getOptionalProperty(JDBC_URL)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, v));
-        properties.getOptionalProperty(JDBC_USER)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, v));
-        properties.getOptionalProperty(JDBC_PASSWORD)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, v));
-        properties.getOptionalProperty(JDBC_DRIVER)
-                .ifPresent(v -> dataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, v));
-
+        return builder.build();
     }
 }

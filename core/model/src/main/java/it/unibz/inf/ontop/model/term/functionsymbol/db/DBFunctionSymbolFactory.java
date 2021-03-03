@@ -1,13 +1,12 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonNullConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.UUID;
 
@@ -22,12 +21,12 @@ public interface DBFunctionSymbolFactory {
     /**
      * NB: a functional term using this symbol is producing a NULL or a DB string
      */
-    IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate);
+    IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<Template.Component> iriTemplate);
 
     /**
      * NB: a functional term using this symbol is producing a NULL or a DB string
      */
-    BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(String bnodeTemplate);
+    BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<Template.Component> bnodeTemplate);
 
     /**
      * Returns a fresh Bnode template
@@ -95,6 +94,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIfThenElse();
 
+    DBFunctionSymbol getDBNullIf();
+
     DBFunctionSymbol getDBUpper();
 
     DBFunctionSymbol getDBLower();
@@ -114,6 +115,8 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBCharLength();
 
     DBFunctionSymbol getR2RMLIRISafeEncode();
+
+    DBFunctionSymbol getDBEncodeForURI();
 
     /**
      * arity must be {@code >= 2 }
@@ -195,6 +198,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBRegexpMatches3();
 
     DBBooleanFunctionSymbol getDBLike();
+    DBBooleanFunctionSymbol getDBSimilarTo();
 
     DBFunctionSymbol getDBStrBefore();
     DBFunctionSymbol getDBStrAfter();
@@ -239,6 +243,18 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType);
 
+    /**
+     * Returns a DB string that unique to the row
+     */
+    DBFunctionSymbol getDBRowUniqueStr();
+
+    /**
+     * Returns a different number for each row (e.g. ROWNUM of Oracle)
+     */
+    DBFunctionSymbol getDBRowNumber();
+
+    DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
+
     //-------------
     // Aggregation
     //-------------
@@ -280,4 +296,38 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);
+
+    // Topological functions
+    DBBooleanFunctionSymbol getDBSTWithin();
+    DBBooleanFunctionSymbol getDBSTEquals();
+    DBBooleanFunctionSymbol getDBSTIntersects();
+    DBBooleanFunctionSymbol getDBSTOverlaps();
+    DBBooleanFunctionSymbol getDBSTContains();
+    DBBooleanFunctionSymbol getDBSTCrosses();
+    DBBooleanFunctionSymbol getDBSTDisjoint();
+    DBBooleanFunctionSymbol getDBSTTouches();
+    DBBooleanFunctionSymbol getDBSTCoveredBy();
+    DBBooleanFunctionSymbol getDBSTCovers();
+    DBBooleanFunctionSymbol getDBSTContainsProperly();
+
+    // Non-topological and form functions
+    DBFunctionSymbol getDBSTDistance();
+    DBFunctionSymbol getDBSTDistanceSphere();
+    DBFunctionSymbol getDBSTDistanceSpheroid();
+    DBFunctionSymbol getDBSTTransform();
+    DBFunctionSymbol getDBSTSetSRID();
+    FunctionSymbol getDBAsText();
+    FunctionSymbol getDBSTFlipCoordinates();
+    FunctionSymbol getDBBuffer();
+    FunctionSymbol getDBIntersection();
+    FunctionSymbol getDBBoundary();
+    FunctionSymbol getDBSymDifference();
+    FunctionSymbol getDBUnion();
+    FunctionSymbol getDBEnvelope();
+    FunctionSymbol getDBConvexHull();
+    FunctionSymbol getDBDifference();
+    DBBooleanFunctionSymbol getDBRelate();
+    FunctionSymbol getDBRelateMatrix();
+    FunctionSymbol getDBGetSRID();
+
 }

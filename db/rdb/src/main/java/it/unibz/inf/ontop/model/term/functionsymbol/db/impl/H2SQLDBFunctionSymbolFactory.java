@@ -107,6 +107,11 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
+    protected String serializeDBRowNumber(Function<ImmutableTerm, String> converter, TermFactory termFactory) {
+        return "ROWNUM()";
+    }
+
+    @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
         return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }

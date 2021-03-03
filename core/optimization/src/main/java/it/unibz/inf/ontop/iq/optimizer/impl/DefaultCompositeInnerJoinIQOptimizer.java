@@ -17,10 +17,12 @@ public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimize
     @Inject
     private DefaultCompositeInnerJoinIQOptimizer(
             SelfJoinUCIQOptimizer selfJoinUCIQOptimizer,
-            SelfJoinSameTermIQOptimizer selfJoinSameTermIQOptimizer) {
+            SelfJoinSameTermIQOptimizer selfJoinSameTermIQOptimizer,
+            ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer) {
         // TODO: enrich
         this.optimizers = ImmutableList.of(
                 selfJoinUCIQOptimizer,
+                fdIQOptimizer,
                 selfJoinSameTermIQOptimizer);
     }
 

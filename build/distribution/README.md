@@ -1,30 +1,30 @@
-# Ontop  
+# Ontop
 
-The [Ontop](http://ontop-vkg.org) framework is an open source project available under the terms of the 
-[Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
-By downloading these packages you are agreeing with them.
+The [Ontop](http://ontop-vkg.org) framework is an open source project available under the terms of the
+[Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-* Current version: 4.0.3
-* Release date: 16/10/2020
+* Current version: 4.1.0
+* Release date: 28/02/2021
 * [Changelog](https://ontop-vkg.org/guide/releases.html)
 
+## Downloads
 
-## Main downloads
+### Command line interface of Ontop
 
-- `ontop-cli-[version].zip`: Command line interface of Ontop.
+- `ontop-cli-[version].zip`
 
-- `it.unibz.inf.ontop.protege-[version].jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
+### Platform-specific Ontop Protégé bundles with JRE 8 embedded
 
-- `ontop-protege-bundle-[version].zip` : Protege bundled with Ontop. This is a ready-to-run package. Unzip and use the run.sh or run.bat start scripts.
+- `ontop-protege-bundle-linux-[version].tar.gz`:  Linux bundle (start with `run.sh`)
+- `ontop-protege-bundle-macos-[version].zip`: macOS bundle (first run: right click `Protégé.app` and select `Open` in
+  the warning dialog)
+- `ontop-protege-bundle-windows-[version].zip`: Windows bundle (start with `run.bat` or `Protege.exe`)
 
+### Platform-independent Ontop Protégé plugin and bundle (JRE 8 needs to be installed manually)
 
-## RDF4J Workbench/Server-based SPARQL Endpoint (DEPRECATED)
-
-- `ontop-webapps-[version].zip`: (DEPRECATED) WAR files required to create an Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server .
-
-- `ontop-tomcat-bundle-[version].zip` : (DEPRECATED) Tomcat + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
-
-- `ontop-jetty-bundle-[version].zip` : (DEPRECATED) Jetty + RDF4J workbench + Ontop ready to run a SPARQL endpoint.
+- `it.unibz.inf.ontop.protege-[version].jar`: platform-independent plugin (drop it into Protege’s `plugins` folder).
+- `ontop-protege-bundle-platform-independent-[version].zip`: platform-independent plugin (start with `run.sh`, `run.command`
+  or `run.bat`)
 
 ## Links
 

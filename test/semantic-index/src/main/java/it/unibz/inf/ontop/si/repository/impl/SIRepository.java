@@ -13,8 +13,8 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +34,12 @@ public class SIRepository {
     private static final String DEFAULT_PASSWORD = "";
 
     private final RDBMSSIRepositoryManager dataRepository;
-    private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final LoadingConfiguration loadingConfiguration;
 
     public SIRepository(ClassifiedTBox tbox, LoadingConfiguration loadingConfiguration) {
 
-        this.termFactory = loadingConfiguration.getTermFactory();
-        this.typeFactory = loadingConfiguration.getTypeFactory();
+        TermFactory termFactory = loadingConfiguration.getTermFactory();
+        TypeFactory typeFactory = loadingConfiguration.getTypeFactory();
         this.loadingConfiguration = loadingConfiguration;
         this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory,
             loadingConfiguration.getTargetAtomFactory(), loadingConfiguration.getSourceQueryFactory());
@@ -59,7 +57,7 @@ public class SIRepository {
         return loadingConfiguration.getJdbcDriver();
     }
 
-    public int insertData(Connection connection, Iterator<Assertion> iterator) throws SQLException {
+    public int insertData(Connection connection, Iterator<RDFFact> iterator) throws SQLException {
         return dataRepository.insertData(connection, iterator, 5000, 500);
     }
 
