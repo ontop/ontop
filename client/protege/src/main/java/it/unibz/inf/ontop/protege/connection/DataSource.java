@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.protege.connection;
  */
 
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.protege.utils.EventListenerList;
@@ -114,12 +116,33 @@ public class DataSource {
 		return p;
 	}
 
+	public static ImmutableSet<String> getConnectionParameterNames() {
+		return ImmutableSet.of(
+				OntopSQLCoreSettings.JDBC_NAME,
+				OntopSQLCoreSettings.JDBC_URL,
+				OntopSQLCredentialSettings.JDBC_USER,
+				OntopSQLCredentialSettings.JDBC_PASSWORD,
+				OntopSQLCoreSettings.JDBC_DRIVER);
+	}
+
 	public void clear() {
 		properties.clear();
 		driver = "";
 		url = "";
 		username = "";
 		password = "";
+	}
+
+	public void resetProperty(String oldKey, String newKey, Object value) {
+		System.out.println("RESET: " + oldKey + " " + newKey + " -> " + value + " " + value.getClass());
+		if (oldKey != null)
+			properties.remove(oldKey);
+		properties.put(newKey, value);
+	}
+
+	public void removeProperty(String key) {
+		System.out.println("REMOVE: " + key);
+		properties.remove(key);
 	}
 
 	/**
