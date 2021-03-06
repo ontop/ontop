@@ -40,6 +40,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -57,11 +59,7 @@ public class DialogUtils {
 	 */
 	public static ImageIcon getImageIcon(String path) {
 		java.net.URL imgURL = DialogUtils.class.getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL);
-		} else {
-			return null;
-		}
+		return imgURL != null ? new ImageIcon(imgURL) : null;
 	}
 
 	public static ImageIcon getOntopIcon() {
@@ -87,6 +85,32 @@ public class DialogUtils {
 				JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE,
 				getOntopIcon()) == JOptionPane.YES_OPTION;
+	}
+
+	@FunctionalInterface
+	public interface FileSaveAction {
+		void save(File file) throws IOException;
+	}
+
+	public static void saveFileOrDeleteEmpty(boolean empty, File file, FileSaveAction fileSaveAction, Logger log) throws IOException {
+		if (!empty) {
+			fileSaveAction.save(file);
+			log.info("file saved to {}", file);
+		}
+		else {
+			if (file.exists() && DialogUtils.confirmation(null,
+					"<html><h3>Warning: the file will be deleted</h3>" +
+							"File <b>" + file.getPath() + "</b> is about to be deleted.<br><br>Do you wish to continue?<br>",
+					"Delete file?")) {
+				try {
+					Files.deleteIfExists(file.toPath());
+				}
+				catch (IOException e) {
+					log.debug("Error deleting file {}: {}", file.getPath(), e);
+				}
+			}
+		}
+
 	}
 
 	public static OntopAbstractAction getStandardCloseWindowAction(String text, Window source) {
@@ -271,12 +295,6 @@ public class DialogUtils {
 				getOntopIcon()) == JOptionPane.YES_OPTION;
 	}
 
-	public static void showPrettyMessageDialog(Component parent, Object message, String title, int type) {
-		JOptionPane narrowPane = new JOptionPane(message, type);
-		JDialog errorDialog = narrowPane.createDialog(parent, title);
-		errorDialog.setVisible(true);
-	}
-
 
 	public static Optional<OntopProtegeReasoner> getOntopProtegeReasoner(EditorKit editorKit) {
 		if (!(editorKit instanceof OWLEditorKit))
@@ -311,7 +329,7 @@ public class DialogUtils {
 
 	public static void showCancelledActionDialog(Component parent, String title) {
 		JOptionPane.showMessageDialog(parent,
-				"<html><b>Process cancelled.</b> No changes made.<br></html>",
+				"<html><b>Process cancelled.</b>No changes made.<br></html>",
 				title,
 				JOptionPane.WARNING_MESSAGE);
 	}
@@ -346,53 +364,40 @@ public class DialogUtils {
 					JOptionPane.ERROR_MESSAGE);
 		}
 		else {
-			DialogUtils.showSeeLogErrorDialog(parent, title, message, log, cause);
+			showPrettyMessageDialog(parent, message + "\n" + e.getMessage() + "\n" +
+					"For more information, see the log.", title);
+
+			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 
-
-	public static void showSeeLogErrorDialog(Component parent, String title, String message, Logger log, Throwable e) {
-		String text = message + "\n" +
-				e.getMessage() + "\n" +
-				"For more information, see the log.";
-
-		JOptionPane narrowPane = new JOptionPane(text, JOptionPane.ERROR_MESSAGE);
+	public static void showPrettyMessageDialog(Component parent, Object message, String title) {
+		JOptionPane narrowPane = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
 		JDialog errorDialog = narrowPane.createDialog(parent, title);
-		errorDialog.setModal(true);
 		errorDialog.setVisible(true);
-
-		log.error(e.getMessage(), e);
-		e.printStackTrace();
 	}
 
-	public static void showSeeLogErrorDialog(Component parent, String message, Logger log, Throwable e) {
-		showSeeLogErrorDialog(parent, "Error", message, log, e);
-	}
+	public static void showQuickErrorDialog(Component parent, Throwable e, String message) {
+		String debugInfo = e.getLocalizedMessage() + "\n\n"
+				+ "###################################################\n"
+				+ "##      Debugging information for developers     ##\n"
+				+ "###################################################\n\n"
+				+ Stream.of(e.getStackTrace())
+				.map(StackTraceElement::toString)
+				.collect(Collectors.joining("\n\t", "\t", ""));
 
-	public static void showQuickErrorDialog(Component parent, Exception e, String message) {
-		SwingUtilities.invokeLater(() -> {
-			JTextArea textArea = new JTextArea();
-			textArea.setBackground(Color.WHITE);
-			textArea.setFont(new Font("Monaco", Font.PLAIN, 11));
-			textArea.setEditable(false);
-			textArea.setWrapStyleWord(true);
+		JTextArea textArea = new JTextArea(debugInfo);
+		textArea.setBackground(Color.WHITE);
+		textArea.setFont(new Font("Monaco", Font.PLAIN, 11));
+		textArea.setEditable(false);
+		textArea.setWrapStyleWord(true);
+		textArea.setCaretPosition(0);
 
-			String debugInfo = e.getLocalizedMessage() + "\n\n"
-					+ "###################################################\n"
-					+ "##    Debugging information for developers    ##\n"
-					+ "###################################################\n\n"
-					+ Stream.of(e.getStackTrace())
-						.map(StackTraceElement::toString)
-						.collect(Collectors.joining("\n\t", "\t", ""));
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setPreferredSize(new Dimension(800, 450));
 
-			textArea.setText(debugInfo);
-			textArea.setCaretPosition(0);
-
-			JScrollPane scrollPane = new JScrollPane(textArea);
-			scrollPane.setPreferredSize(new Dimension(800, 450));
-
-			JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);
-		});
+		JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);
 	}
 
 	public static void showInfoDialog(Component parent, String message, String title) {

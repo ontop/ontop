@@ -24,7 +24,9 @@ package it.unibz.inf.ontop.protege.connection;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.EventListenerList;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,6 +136,13 @@ public class DataSource {
 		password = "";
 	}
 
+	public ImmutableSet<String> getPropertyKeys() {
+		return properties.keySet().stream()
+				.map(Object::toString)
+				.filter(k -> !CONNECTION_PARAMETER_NAMES.contains(k))
+				.collect(ImmutableCollectors.toSet());
+	}
+
 	public Object getProperty(@Nonnull String key) {
 		return properties.getProperty(key);
 	}
@@ -210,19 +219,15 @@ public class DataSource {
 
 	public void store(File propertyFile) throws IOException {
 		Properties properties = asProperties();
-
 		// Generate a property file iff there is at least one property that is not "jdbc.name"
-		if (properties.entrySet().stream()
-				.anyMatch(e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
-						!e.getValue().equals(""))) {
+		boolean nonEmpty = properties.entrySet().stream()
+				.anyMatch(e -> !OntopSQLCoreSettings.JDBC_NAME.equals(e.getKey()) &&
+						!"".equals(e.getValue()));
+
+		DialogUtils.saveFileOrDeleteEmpty(!nonEmpty, propertyFile, file -> {
 			try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
 				properties.store(outputStream, null);
 			}
-			LOGGER.info("Property file saved to {}", propertyFile.toPath());
-		}
-		else {
-			Files.deleteIfExists(propertyFile.toPath());
-		}
+		}, LOGGER);
 	}
-
 }

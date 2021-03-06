@@ -20,14 +20,8 @@ public class OntopPropertiesTableModel extends AbstractTableModel {
 
     public void clear(DataSource datasource) {
         this.datasource = datasource;
-
         keys.clear();
-        Properties properties = datasource.asProperties();
-        ImmutableSet<String> connectionParameterNames = DataSource.getConnectionParameterNames();
-        for (Map.Entry<Object, Object> p : properties.entrySet())
-            if (!connectionParameterNames.contains(p.getKey())) {
-                keys.add(p.getKey().toString());
-            }
+        keys.addAll(datasource.getPropertyKeys());
         fireTableDataChanged();
     }
 
@@ -46,7 +40,7 @@ public class OntopPropertiesTableModel extends AbstractTableModel {
             return columnIndex == 0 ? NEW_KEY : newlyAddedValue.isEmpty() ? NEW_VALUE : newlyAddedValue;
 
         String key = keys.get(rowIndex);
-        return columnIndex == 0 ? key : datasource.asProperties().get(key);
+        return columnIndex == 0 ? key : datasource.getProperty(key);
     }
 
     @Override

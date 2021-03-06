@@ -102,8 +102,7 @@ public class BootstrapAction extends ProtegeAction {
 			DialogUtils.showPrettyMessageDialog(getWorkspace(),
 					"Base IRIs cannot contain '#':\n" +
 							baseIri0 + " is not a valid base IRI.",
-					DIALOG_TITLE,
-					JOptionPane.ERROR_MESSAGE);
+					DIALOG_TITLE);
 			return;
 		}
 

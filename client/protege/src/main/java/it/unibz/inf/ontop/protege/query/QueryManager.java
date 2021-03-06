@@ -186,25 +186,17 @@ public class QueryManager {
 
 
 	public void store(File queriesFile) throws IOException {
-		if (root.getChildCount() != 0) {
-			try (FileWriter writer = new FileWriter(queriesFile)) {
+		DialogUtils.saveFileOrDeleteEmpty(root.getChildCount() == 0, queriesFile, file -> {
+			try (FileWriter writer = new FileWriter(file)) {
 				writer.write(root.getChildren().stream()
 						.flatMap(QueryManager::renderItem)
 						.collect(Collectors.joining("\n")));
 			}
 			catch (IOException e) {
-				throw new IOException(String.format("Error while saving the queries to file located at %s.\n" +
-						"Make sure you have the write permission at the location specified.", queriesFile.getAbsolutePath()));
+				throw new IOException(String.format("Error while saving the SPARQL queries to the file located at %s.\n" +
+						"Make sure you have the write permission at the location specified.", file.getAbsolutePath()));
 			}
-			LOGGER.info("query file saved to {}", queriesFile);
-		}
-		else {
-			if (queriesFile.exists() && DialogUtils.confirmation(null,
-					"<html><h3>The file is about to be deleted</h3>" +
-							"File " + queriesFile.getPath() + " is about to be deleted.<br><br>Do you wish to continue?<br>",
-					"Delete file?"))
-			Files.deleteIfExists(queriesFile.toPath());
-		}
+		}, LOGGER);
 	}
 
 	private static Stream<String> renderItem(Item item) {

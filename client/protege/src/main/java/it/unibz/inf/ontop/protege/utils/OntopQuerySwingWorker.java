@@ -98,7 +98,7 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
         catch (ExecutionException e) {
             DialogUtils.showErrorDialog(parent, title, title + " error.", LOGGER, e, null);
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             DialogUtils.showQuickErrorDialog(parent, e, title + " error.");
         }
     }

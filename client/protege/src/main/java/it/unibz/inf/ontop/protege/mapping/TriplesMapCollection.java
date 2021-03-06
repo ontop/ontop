@@ -251,17 +251,9 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
     }
 
     public void store(File obdaFile) throws IOException {
-        if (!map.isEmpty()) {
+        DialogUtils.saveFileOrDeleteEmpty(map.isEmpty(), obdaFile, file -> {
             OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer();
-            writer.write(obdaFile, generatePPMapping());
-            LOGGER.info("mapping file saved to {}", obdaFile);
-        }
-        else {
-            if (obdaFile.exists() && DialogUtils.confirmation(null,
-                    "<html><h3>The file is about to be deleted</h3>" +
-                    "File " + obdaFile.getPath() + " is about to be deleted.<br><br>Do you wish to continue?<br>",
-                    "Delete file?"))
-                Files.deleteIfExists(obdaFile.toPath());
-        }
+            writer.write(file, generatePPMapping());
+        }, LOGGER);
     }
 }
