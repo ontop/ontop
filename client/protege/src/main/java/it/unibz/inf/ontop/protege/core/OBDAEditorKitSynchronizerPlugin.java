@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import org.protege.editor.core.Disposable;
@@ -56,20 +55,12 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 		// Preferences for Quest
 		reasonerPref = new DisposableProperties();
-		Preferences pref = getPreferences();
-		for (String key : getReformulationPlatformPreferencesKeys()) {
-			String value = pref.getString(key, null);
-			if (value != null) {
-				reasonerPref.put(key, value);
-			}
-		}
 
 		// Preferences for JDBC Connection
 		reasonerPref.put(JDBCConnectionPool.class.getCanonicalName(), ConnectionGenerator.class.getCanonicalName());
 
 		// 	Publish the new reasonerPref
 		// 		ConnectionGenerator@JDBCConnectionPool
-		//      rubbish below?
 		//      QuestPreferencesPanel uses
 		//      	OntopReformulationSettings.EXISTENTIAL_REASONING
 		//        	OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS
@@ -81,7 +72,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 	@Override
 	public void dispose() throws Exception {
-		Preferences pref = getPreferences();
+		PreferencesManager man = PreferencesManager.getInstance();
+		Preferences pref = man.getApplicationPreferences("OBDA Plugin");
 		for (Object key : reasonerPref.keySet()) {
 			Object value = reasonerPref.get(key);
 			pref.putString(key.toString(), value.toString());
@@ -112,26 +104,6 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			throw new RuntimeException("Cannot find DisposableProperties");
 
 		return (DisposableProperties)object;
-	}
-
-	private Preferences getPreferences() {
-		PreferencesManager man = PreferencesManager.getInstance();
-		return man.getApplicationPreferences("OBDA Plugin");
-	}
-
-	// TODO: check if the constants below can be removed
-
-	private static final String	DBTYPE	= "org.obda.owlreformulationplatform.dbtype";
-	private static final String OBTAIN_FROM_ONTOLOGY = "org.obda.owlreformulationplatform.obtainFromOntology";
-	private static final String OBTAIN_FROM_MAPPINGS = "org.obda.owlreformulationplatform.obtainFromMappings";
-	private static final String	ABOX_MODE = "org.obda.owlreformulationplatform.aboxmode";
-
-	private static ImmutableList<String> getReformulationPlatformPreferencesKeys() {
-		return ImmutableList.of(
-				ABOX_MODE,
-				DBTYPE,
-				OBTAIN_FROM_ONTOLOGY,
-				OBTAIN_FROM_MAPPINGS);
 	}
 
 }
