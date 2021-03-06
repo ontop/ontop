@@ -186,7 +186,7 @@ public class TargetQueryStyledDocument extends DefaultStyledDocument {
         try {
             String input = getText(0, getLength());
             if (!input.isEmpty())
-                return obdaModelManager.getCurrentOBDAModel().getTargetQuery(input);
+                return obdaModelManager.getCurrentOBDAModel().getTriplesMapFactory().getTargetQuery(input);
         }
         catch (TargetQueryParserException e) {
             if (e.getLine() > 0) {

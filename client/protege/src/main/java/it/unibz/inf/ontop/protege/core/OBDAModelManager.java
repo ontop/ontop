@@ -4,8 +4,8 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.protege.mapping.TriplesMapCollection;
-import it.unibz.inf.ontop.protege.mapping.TriplesMapCollectionListener;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapManager;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapManagerListener;
 import it.unibz.inf.ontop.protege.query.QueryManager;
 import it.unibz.inf.ontop.protege.query.QueryManagerListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -92,14 +92,14 @@ public class OBDAModelManager implements Disposable {
 		queryManagerEventListeners.remove(listener);
 	}
 
-	// TriplesMapCollectionListener
-	private final EventListenerList<TriplesMapCollectionListener> triplesMapCollectionListeners = new EventListenerList<>();
+	// TriplesMapManagerListener
+	private final EventListenerList<TriplesMapManagerListener> triplesMapCollectionListeners = new EventListenerList<>();
 
-	public void addMappingListener(TriplesMapCollectionListener listener) {
+	public void addMappingListener(TriplesMapManagerListener listener) {
 		triplesMapCollectionListeners.add(listener);
 	}
 
-	public void removeMappingListener(TriplesMapCollectionListener listener) {
+	public void removeMappingListener(TriplesMapManagerListener listener) {
 		triplesMapCollectionListeners.remove(listener);
 	}
 
@@ -170,13 +170,13 @@ public class OBDAModelManager implements Disposable {
 			}
 
 			for (Map.Entry<OWLOntologyID, Map<OWLDeclarationAxiom, OWLDeclarationAxiom>> o : rename.entrySet()) {
-				TriplesMapCollection tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapCollection();
+				TriplesMapManager tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapManager();
 				for (Map.Entry<OWLDeclarationAxiom, OWLDeclarationAxiom> e : o.getValue().entrySet())
 					tiplesMaps.renamePredicate(getIRI(e.getKey()), getIRI(e.getValue()));
 			}
 
 			for (Map.Entry<OWLOntologyID, Set<OWLDeclarationAxiom>> o : remove.entrySet()) {
-				TriplesMapCollection tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapCollection();
+				TriplesMapManager tiplesMaps = obdaModels.get(o.getKey()).getTriplesMapManager();
 				for (OWLDeclarationAxiom axiom : o.getValue())
 					tiplesMaps.removePredicate(getIRI(axiom));
 			}
@@ -244,7 +244,7 @@ public class OBDAModelManager implements Disposable {
 	private OBDAModel createObdaModel(OWLOntology ontology) {
 		OBDAModel obdaModel = new OBDAModel(ontology, this);
 		//obdaModel.getDataSource().addListener(s -> dataSourceListeners.fire(l -> l.dataSourceChanged(s)));
-		obdaModel.getTriplesMapCollection().addListener(s -> triplesMapCollectionListeners.fire(l -> l.triplesMapCollectionChanged(s)));
+		obdaModel.getTriplesMapManager().addListener(s -> triplesMapCollectionListeners.fire(l -> l.changed(s)));
 		obdaModel.getQueryManager().addListener(new QueryManagerListener() {
 			@Override
 			public void inserted(QueryManager.Item entity, int indexInParent) {

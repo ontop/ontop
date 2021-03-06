@@ -273,9 +273,9 @@ public class EditMappingDialog extends JDialog {
 			String source = sourceQueryTextPane.getText().trim();
 
 			if (id == null)
-				obdaModel.getTriplesMapCollection().add(newId, source, target);
+				obdaModel.getTriplesMapManager().add(newId, source, target);
 			else
-				obdaModel.getTriplesMapCollection().update(id, newId, source, target);
+				obdaModel.getTriplesMapManager().update(id, newId, source, target);
 
 			dispatchEvent(new WindowEvent(EditMappingDialog.this, WindowEvent.WINDOW_CLOSING));
 		}

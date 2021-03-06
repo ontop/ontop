@@ -95,7 +95,7 @@ public class DialogUtils {
 	public static void saveFileOrDeleteEmpty(boolean empty, File file, FileSaveAction fileSaveAction, Logger log) throws IOException {
 		if (!empty) {
 			fileSaveAction.save(file);
-			log.info("file saved to {}", file);
+			log.info("Saved file {}", file);
 		}
 		else {
 			if (file.exists() && DialogUtils.confirmation(null,

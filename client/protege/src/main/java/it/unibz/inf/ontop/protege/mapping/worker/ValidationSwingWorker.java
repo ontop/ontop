@@ -74,7 +74,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
             if (report.status == TriplesMap.Status.INVALID)
                 invalidTriplesMapCount++;
 
-            obdaModel.getTriplesMapCollection().setStatus(
+            obdaModel.getTriplesMapManager().setStatus(
                     report.id,
                     report.status,
                     report.sqlErrorMessage,

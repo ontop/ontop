@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.URI;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -99,7 +98,7 @@ public class DataSource {
 		this.driver = driver;
 
 		if (changed)
-			listeners.fire(l -> l.dataSourceChanged(this));
+			listeners.fire(l -> l.changed(this));
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -123,10 +122,6 @@ public class DataSource {
 			OntopSQLCredentialSettings.JDBC_USER,
 			OntopSQLCredentialSettings.JDBC_PASSWORD,
 			OntopSQLCoreSettings.JDBC_DRIVER);
-
-	public static ImmutableSet<String> getConnectionParameterNames() {
-		return CONNECTION_PARAMETER_NAMES;
-	}
 
 	public void clear() {
 		properties.clear();
@@ -154,7 +149,7 @@ public class DataSource {
 		Object oldValue = properties.get(key); // can be null
 		if (!value.equals(oldValue)) {
 			properties.put(key, value);
-			listeners.fire(l -> l.dataSourceChanged(this));
+			listeners.fire(l -> l.changed(this));
 		}
 	}
 
@@ -168,7 +163,7 @@ public class DataSource {
 
 		properties.remove(oldKey);
 		properties.put(newKey, value);
-		listeners.fire(l -> l.dataSourceChanged(this));
+		listeners.fire(l -> l.changed(this));
 	}
 
 	public void removeProperty(@Nonnull String key) {
@@ -176,7 +171,7 @@ public class DataSource {
 			throw new IllegalArgumentException("Cannot remove reserved " + key);
 
 		properties.remove(key);
-		listeners.fire(l -> l.dataSourceChanged(this));
+		listeners.fire(l -> l.changed(this));
 	}
 
 	/**

@@ -4,14 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.TargetQueryRenderer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -27,22 +24,20 @@ public class TriplesMap {
     }
 
     private final SQLPPTriplesMap sqlppTriplesMap;
-    private final OntologyPrefixManager prefixManager;
     private final TriplesMapFactory factory;
 
     private Status status;
     private String sqlErrorMessage;
     private ImmutableList<String> invalidPlaceholders = ImmutableList.of();
 
-    public TriplesMap(SQLPPTriplesMap sqlppTriplesMap, OntologyPrefixManager prefixManager, TriplesMapFactory factory) {
+    public TriplesMap(SQLPPTriplesMap sqlppTriplesMap, TriplesMapFactory factory) {
         this.sqlppTriplesMap = sqlppTriplesMap;
-        this.prefixManager = prefixManager;
         this.factory = factory;
         this.status = Status.NOT_VALIDATED;
     }
 
-    public TriplesMap(String id, String sqlQuery, ImmutableList<TargetAtom> targetQuery,  OntologyPrefixManager prefixManager, TriplesMapFactory factory) {
-        this(new OntopNativeSQLPPTriplesMap(id, factory.getSourceQuery(sqlQuery), targetQuery), prefixManager, factory);
+    public TriplesMap(String id, String sqlQuery, ImmutableList<TargetAtom> targetQuery,  TriplesMapFactory factory) {
+        this(new OntopNativeSQLPPTriplesMap(id, factory.getSourceQuery(sqlQuery), targetQuery), factory);
     }
 
     public String getId() { return sqlppTriplesMap.getId(); }
@@ -52,8 +47,7 @@ public class TriplesMap {
     public ImmutableList<TargetAtom> getTargetAtoms() { return sqlppTriplesMap.getTargetAtoms(); }
 
     public String getTargetRendering() {
-        TargetQueryRenderer targetQueryRenderer = new TargetQueryRenderer(prefixManager);
-        return targetQueryRenderer.encode(sqlppTriplesMap.getTargetAtoms());
+        return factory.getTargetRendering(sqlppTriplesMap.getTargetAtoms());
     }
 
     public Status getStatus() { return status; }
@@ -77,7 +71,7 @@ public class TriplesMap {
         TriplesMap copy = new TriplesMap(
                 new OntopNativeSQLPPTriplesMap(
                         newId, sqlppTriplesMap.getSourceQuery(), sqlppTriplesMap.getTargetAtoms()),
-                prefixManager, factory);
+                factory);
         copy.status = this.status;
         copy.sqlErrorMessage = this.sqlErrorMessage;
         copy.invalidPlaceholders = this.invalidPlaceholders;
@@ -88,7 +82,7 @@ public class TriplesMap {
         return new TriplesMap(
                 new OntopNativeSQLPPTriplesMap(
                         sqlppTriplesMap.getId(), sqlppTriplesMap.getSourceQuery(), targetAtoms),
-                prefixManager, factory);
+                factory);
     }
 
     public TriplesMap renamePredicate(IRI removedIri, IRI newIri) {

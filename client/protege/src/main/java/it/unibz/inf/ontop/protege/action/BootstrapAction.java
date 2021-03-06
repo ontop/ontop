@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
@@ -135,7 +134,7 @@ public class BootstrapAction extends ProtegeAction {
 			this.metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 			this.directMappingEngine = injector.getInstance(DirectMappingEngine.class);
 
-			this.currentMappingIndex = new AtomicInteger(obdaModel.getTriplesMapCollection().size() + 1);
+			this.currentMappingIndex = new AtomicInteger(obdaModel.getTriplesMapManager().size() + 1);
 		}
 
 		@Override

@@ -165,15 +165,15 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
             @Override public void contentsChanged(ListDataEvent e) { updateMappingSize(); }
             private void updateMappingSize() {
                 mappingStatusLabel.setText("<html>Mapping size: <b>" +
-                        obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection().size() + "</b></html>");
+                        obdaModelManager.getCurrentOBDAModel().getTriplesMapManager().size() + "</b></html>");
             }
         });
         mappingList.setModel(model);
-        model.triplesMapCollectionChanged(obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection());
+        model.changed(obdaModelManager.getCurrentOBDAModel().getTriplesMapManager());
     }
 
 
-    TriplesMapCollectionListener getTriplesMapCollectionListener() { return model; }
+    TriplesMapManagerListener getTriplesMapManagerListener() { return model; }
 
 
     private final OntopAbstractAction newAction = new OntopAbstractAction(
@@ -200,7 +200,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
             if (!removeConfirm(mappingList.getSelectedValuesList()))
                 return;
 
-            TriplesMapCollection triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
+            TriplesMapManager triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapManager();
             for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
                 triplesMapCollection.remove(triplesMap.getId());
 
@@ -218,7 +218,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
             if (!copyConfirm(mappingList.getSelectedValuesList()))
                 return;
 
-            TriplesMapCollection triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
+            TriplesMapManager triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapManager();
             for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
                 triplesMapCollection.duplicate(triplesMap.getId());
         }
