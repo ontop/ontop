@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.connection;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -12,7 +11,6 @@ import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -22,12 +20,10 @@ import java.util.*;
 
 import static it.unibz.inf.ontop.injection.OntopMappingSettings.*;
 import static it.unibz.inf.ontop.injection.OntopReformulationSettings.*;
+import static it.unibz.inf.ontop.protege.connection.OntopPropertiesTableModel.*;
 import static java.awt.event.KeyEvent.VK_BACK_SPACE;
 
 public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerListener {
-
-    private static final String NEW_KEY = "<new key>";
-    private static final String NEW_VALUE = "<new value>";
 
     private static final ImmutableSet<String> KEYS = ImmutableSet.of(
             QUERY_ONTOLOGY_ANNOTATIONS,
@@ -44,7 +40,7 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
             INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE);
     
     private final OBDAModelManager obdaModelManager;
-    private final PropertiesTableModel model;
+    private final OntopPropertiesTableModel model;
 
     public OntopPropertiesPanel(OWLEditorKit editorKit) {
         super(new BorderLayout());
@@ -53,7 +49,7 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
 
         setBorder(new EmptyBorder(20,40,20, 40));
 
-        model = new PropertiesTableModel();
+        model = new OntopPropertiesTableModel();
         JTable table = new JTable(model) {
             @Override
             public boolean editCellAt(int row, int column, EventObject e) {
@@ -126,7 +122,7 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
                 Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 component.setForeground(!NEW_KEY.equals(value) && !KEYS.contains(value)
                         ? Color.RED
-                        : table.getForeground());
+                        : (isSelected ? table.getSelectionForeground() : table.getForeground()));
 
                 return component;
             }
@@ -159,99 +155,4 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
         model.clear(obdaModel.getDataSource());
     }
 
-    private static class PropertiesTableModel extends AbstractTableModel {
-
-        private final java.util.List<String> keys = new ArrayList<>();
-        private DataSource datasource;
-        private String newlyAddedValue = "";
-
-        void clear(DataSource datasource) {
-            this.datasource = datasource;
-
-            keys.clear();
-            Properties properties = datasource.asProperties();
-            ImmutableSet<String> connectionParameterNames = DataSource.getConnectionParameterNames();
-            for (Map.Entry<Object, Object> p : properties.entrySet())
-                if (!connectionParameterNames.contains(p.getKey())) {
-                    keys.add(p.getKey().toString());
-                }
-            fireTableDataChanged();
-        }
-
-        @Override
-        public int getRowCount() { return keys.size() + 1; }
-
-        @Override
-        public int getColumnCount() { return 2; }
-
-        @Override
-        public String getColumnName(int column) { return column == 0 ? "Property" : "Value"; }
-
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            if (rowIndex == keys.size())
-                return columnIndex == 0 ? NEW_KEY : newlyAddedValue.isEmpty() ? NEW_VALUE : newlyAddedValue;
-
-            String key = keys.get(rowIndex);
-            return columnIndex == 0 ? key : datasource.asProperties().get(key);
-        }
-
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return true;
-        }
-
-        @Override
-        public Class<?> getColumnClass(int c) {
-            return String.class;
-        }
-
-        @Override
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            if (columnIndex == 0) {
-                String key = (String)aValue;
-                if (rowIndex == keys.size()) {
-                    if (NEW_KEY.equals(key))
-                        return;
-
-                    datasource.resetProperty(null, key, newlyAddedValue);
-                    newlyAddedValue = "";
-                    keys.add(rowIndex, key);
-                    fireTableRowsInserted(rowIndex + 1, rowIndex + 1);
-                }
-                else {
-                    String oldKey = keys.set(rowIndex, key);
-                    datasource.resetProperty(oldKey, key, datasource.asProperties().getProperty(oldKey));
-                    fireTableCellUpdated(rowIndex, columnIndex);
-                }
-            }
-            else {
-                String value = (String) aValue;
-                if (rowIndex == keys.size()) {
-                    newlyAddedValue = value;
-                }
-                else {
-                    String key = keys.get(rowIndex);
-                    datasource.resetProperty(key, key, value);
-                }
-                fireTableCellUpdated(rowIndex, columnIndex);
-            }
-        }
-
-        void removeRow(int rowIndex) {
-            if (rowIndex < keys.size()) {
-                String key = keys.remove(rowIndex);
-                datasource.removeProperty(key);
-                fireTableRowsDeleted(rowIndex, rowIndex);
-            }
-        }
-
-        public boolean canBeInRow(Object key, int row) {
-            for (int i = 0; i < keys.size(); i++)
-                if (i != row)
-                    if (keys.get(i).equals(key))
-                        return false;
-            return true;
-        }
-    }
 }

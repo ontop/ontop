@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,6 +199,10 @@ public class QueryManager {
 			LOGGER.info("query file saved to {}", queriesFile);
 		}
 		else {
+			if (queriesFile.exists() && DialogUtils.confirmation(null,
+					"<html><h3>The file is about to be deleted</h3>" +
+							"File " + queriesFile.getPath() + " is about to be deleted.<br><br>Do you wish to continue?<br>",
+					"Delete file?"))
 			Files.deleteIfExists(queriesFile.toPath());
 		}
 	}

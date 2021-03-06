@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.protege.core.OntologyPrefixManager;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OldSyntaxMappingConverter;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.EventListenerList;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -256,7 +257,11 @@ public class TriplesMapCollection implements Iterable<TriplesMap> {
             LOGGER.info("mapping file saved to {}", obdaFile);
         }
         else {
-            Files.deleteIfExists(obdaFile.toPath());
+            if (obdaFile.exists() && DialogUtils.confirmation(null,
+                    "<html><h3>The file is about to be deleted</h3>" +
+                    "File " + obdaFile.getPath() + " is about to be deleted.<br><br>Do you wish to continue?<br>",
+                    "Delete file?"))
+                Files.deleteIfExists(obdaFile.toPath());
         }
     }
 }

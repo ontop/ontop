@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.connection;
  */
 
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
@@ -116,13 +115,15 @@ public class DataSource {
 		return p;
 	}
 
+	private static final ImmutableSet<String> CONNECTION_PARAMETER_NAMES = ImmutableSet.of(
+			OntopSQLCoreSettings.JDBC_NAME,
+			OntopSQLCoreSettings.JDBC_URL,
+			OntopSQLCredentialSettings.JDBC_USER,
+			OntopSQLCredentialSettings.JDBC_PASSWORD,
+			OntopSQLCoreSettings.JDBC_DRIVER);
+
 	public static ImmutableSet<String> getConnectionParameterNames() {
-		return ImmutableSet.of(
-				OntopSQLCoreSettings.JDBC_NAME,
-				OntopSQLCoreSettings.JDBC_URL,
-				OntopSQLCredentialSettings.JDBC_USER,
-				OntopSQLCredentialSettings.JDBC_PASSWORD,
-				OntopSQLCoreSettings.JDBC_DRIVER);
+		return CONNECTION_PARAMETER_NAMES;
 	}
 
 	public void clear() {
@@ -133,16 +134,40 @@ public class DataSource {
 		password = "";
 	}
 
-	public void resetProperty(String oldKey, String newKey, Object value) {
-		System.out.println("RESET: " + oldKey + " " + newKey + " -> " + value + " " + value.getClass());
-		if (oldKey != null)
-			properties.remove(oldKey);
-		properties.put(newKey, value);
+	public Object getProperty(@Nonnull String key) {
+		return properties.getProperty(key);
 	}
 
-	public void removeProperty(String key) {
-		System.out.println("REMOVE: " + key);
+	public void setProperty(@Nonnull String key, @Nonnull Object value) {
+		if (CONNECTION_PARAMETER_NAMES.contains(key))
+			throw new IllegalArgumentException("Cannot change reserved " + key);
+
+		Object oldValue = properties.get(key); // can be null
+		if (!value.equals(oldValue)) {
+			properties.put(key, value);
+			listeners.fire(l -> l.dataSourceChanged(this));
+		}
+	}
+
+	public void renameProperty(@Nonnull String oldKey, @Nonnull String newKey) {
+		if (CONNECTION_PARAMETER_NAMES.contains(oldKey))
+			throw new IllegalArgumentException("Cannot rename reserved " + oldKey);
+
+		Object value = properties.get(oldKey);
+		if (value == null)
+			throw new IllegalArgumentException("Key " + oldKey + " not found");
+
+		properties.remove(oldKey);
+		properties.put(newKey, value);
+		listeners.fire(l -> l.dataSourceChanged(this));
+	}
+
+	public void removeProperty(@Nonnull String key) {
+		if (CONNECTION_PARAMETER_NAMES.contains(key))
+			throw new IllegalArgumentException("Cannot remove reserved " + key);
+
 		properties.remove(key);
+		listeners.fire(l -> l.dataSourceChanged(this));
 	}
 
 	/**
