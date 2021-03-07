@@ -42,42 +42,22 @@ import org.protege.editor.owl.OWLEditorKit;
 public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 	private OBDAModelManager obdaModelManager;
-	private DisposableProperties reasonerPref;
 
 	@Override
-	public void initialise() throws Exception {
+	public void initialise() {
 		EditorKit editorKit = getEditorKit();
-		if (!(editorKit instanceof OWLEditorKit)) {
+		if (!(editorKit instanceof OWLEditorKit))
 			throw new IllegalArgumentException("The OBDA Plugin only works with OWLEditorKit instances.");
-		}
 
 		editorKit.put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
-
-		// Preferences for Quest
-		reasonerPref = new DisposableProperties();
-
-		// Preferences for JDBC Connection
-		reasonerPref.put(JDBCConnectionPool.class.getCanonicalName(), ConnectionGenerator.class.getCanonicalName());
-
-		// 	Publish the new reasonerPref
-		// 		ConnectionGenerator@JDBCConnectionPool
-		//      QuestPreferencesPanel uses
-		//      	OntopReformulationSettings.EXISTENTIAL_REASONING
-		//        	OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS
-		//        	OntopOBDASettings.SAME_AS
-		editorKit.put(DisposableProperties.class.getName(), reasonerPref);
 
 		obdaModelManager = new OBDAModelManager((OWLEditorKit) editorKit);
 	}
 
 	@Override
-	public void dispose() throws Exception {
-		PreferencesManager man = PreferencesManager.getInstance();
-		Preferences pref = man.getApplicationPreferences("OBDA Plugin");
-		for (Object key : reasonerPref.keySet()) {
-			Object value = reasonerPref.get(key);
-			pref.putString(key.toString(), value.toString());
-		}
+	public void dispose()  {
+		//PreferencesManager man = PreferencesManager.getInstance();
+		//Preferences pref = man.getApplicationPreferences("OBDA Plugin");
 
 		obdaModelManager.dispose();
 	}
@@ -91,19 +71,6 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	}
 
 	public static OBDAModel getCurrentOBDAModel(EditorKit editorKit) {
-		Disposable object = editorKit.get(OBDAEditorKitSynchronizerPlugin.class.getName());
-		if (!(object instanceof OBDAEditorKitSynchronizerPlugin))
-			throw new RuntimeException("Cannot find OBDAEditorKitSynchronizerPlugin");
-
-		return (((OBDAEditorKitSynchronizerPlugin)object).obdaModelManager).getCurrentOBDAModel();
+		return getOBDAModelManager(editorKit).getCurrentOBDAModel();
 	}
-
-	public static DisposableProperties getProperties(EditorKit editorKit) {
-		Disposable object = editorKit.get(DisposableProperties.class.getName());
-		if (!(object instanceof DisposableProperties))
-			throw new RuntimeException("Cannot find DisposableProperties");
-
-		return (DisposableProperties)object;
-	}
-
 }

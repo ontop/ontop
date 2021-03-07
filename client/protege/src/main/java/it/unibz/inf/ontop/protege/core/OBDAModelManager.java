@@ -187,11 +187,6 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	public DisposableProperties getStandardProperties() {
-		return OBDAEditorKitSynchronizerPlugin.getProperties(owlEditorKit);
-	}
-
-
 
 
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {

@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
+import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -87,8 +89,6 @@ public class OBDAModel {
 
     private final OBDAModelManager obdaModelManager;
 
-    private final Properties settings;
-
     @Nullable
     private File implicitDBConstraintFile;
 
@@ -101,7 +101,6 @@ public class OBDAModel {
 
         this.ontology = ontology;
         this.obdaModelManager = obdaModelManager;
-        this.settings = obdaModelManager.getStandardProperties();
 
         datasource = new DataSource();
         datasource.addListener(s -> setOntologyDirtyFlag());
@@ -278,8 +277,8 @@ public class OBDAModel {
     private <B extends OntopMappingSQLAllConfiguration.Builder<?>> B constructBuilder(B builder) {
 
         Properties properties = new Properties();
-        properties.putAll(settings);
-        properties.putAll(datasource.asProperties()); // can possibly override the settings
+        properties.put(JDBCConnectionPool.class.getCanonicalName(), ConnectionGenerator.class.getCanonicalName());
+        properties.putAll(datasource.asProperties());
 
         builder.properties(properties);
 

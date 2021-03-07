@@ -89,11 +89,6 @@
   	<editorKitId value="OWLEditorKit"/>
   </extension>
 
-  <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
-    <label value="Ontop Reasoner"/>
-    <class value="it.unibz.inf.ontop.protege.quest.QuestPreferencesPanel"/>
-  </extension>
-
   <!-- MENUS -->
 
 	<extension id="menu.ontop" point="org.protege.editor.core.application.EditorKitMenuAction">
