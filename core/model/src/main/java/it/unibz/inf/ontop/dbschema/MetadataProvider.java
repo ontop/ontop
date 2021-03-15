@@ -22,4 +22,8 @@ public interface MetadataProvider extends MetadataLookup {
 
     DBParameters getDBParameters();
 
+    /**
+     * Mostly useful for OntopViewMetadataProvider-s
+     */
+    void normalizeRelations();
 }

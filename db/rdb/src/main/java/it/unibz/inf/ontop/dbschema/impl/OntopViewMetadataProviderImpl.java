@@ -116,4 +116,9 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     public DBParameters getDBParameters() {
         return parentMetadataProvider.getDBParameters();
     }
+
+    @Override
+    public void normalizeRelations() {
+        // TODO: normalize the parents before the children using the OntopViewNormalizer.
+    }
 }

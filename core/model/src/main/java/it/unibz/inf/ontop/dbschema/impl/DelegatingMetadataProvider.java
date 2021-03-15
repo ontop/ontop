@@ -18,6 +18,11 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
+    public void normalizeRelations() {
+        provider.normalizeRelations();
+    }
+
+    @Override
     public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
         return provider.getRelationIDs();
     }

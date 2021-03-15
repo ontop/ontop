@@ -23,6 +23,11 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
     public DBParameters getDBParameters() { return dbParameters; }
 
     @Override
+    public void normalizeRelations() {
+        // Does nothing
+    }
+
+    @Override
     public ImmutableList<RelationID> getRelationIDs()  { return relationIds; }
 
     @Override

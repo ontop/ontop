@@ -57,6 +57,10 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     @Override
     public DBParameters getDBParameters() { return dbParameters; }
 
+    @Override
+    public void normalizeRelations() {
+        // Does nothing
+    }
 
 
     protected boolean isRelationExcluded(RelationID id) { return false; }
