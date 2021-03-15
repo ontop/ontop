@@ -13,23 +13,31 @@
   },
   "ontop.sameAs": {
     "type": "Boolean",
-    "description": "Default value: false"
+    "description": "Default value: false. If true, enforces the owl:sameAs semantics at the mapping level. Not very efficient, please consider canonical IRIs instead. See https://ontop-vkg.org/tutorial/mapping/uri-templates#canonical-iris"
   },
   "jdbc.url": {
     "type": "IRI",
-    "description": ""
-  },
-  "jdbc.name": {
-    "type": "String",
-    "description": ""
+    "description": "JDBC URL for connecting the database. The username and the password are not expected to be specified in this URL."
   },
   "jdbc.driver": {
     "type": "String",
-    "description": "Canonical name of the JDBC driver class"
+    "description": "Canonical name of the JDBC driver class."
+  },
+  "jdbc.user": {
+    "type": "String",
+    "description": "Username for connecting to the database."
+  },
+  "jdbc.password": {
+    "type": "String",
+    "description": "Password for connecting to the database."
+  },
+  "jdbc.name": {
+    "type": "String",
+    "description": "DEPRECATED. This value is ignored."
   },
   "ontop.queryOntologyAnnotation": {
     "type": "Boolean",
-    "description": ""
+    "description": "Default value: false. If true, includes annotations about classes and properties in the virtual graph."
   },
   "ontop.inferDefaultDatatype": {
     "type": "Boolean",
@@ -37,7 +45,7 @@
   },
   "ontop.tolerateAbstractDatatype": {
     "type": "Boolean",
-    "description": "Default value: ????. If false, throws an exception is an abstract datatype is used for a literal in a mapping assertion. If true, abstract datatypes will be replaced by concrete ones."
+    "description": "Default value: false. If false, throws an exception is an abstract datatype is used for a literal in a mapping assertion. If true, abstract datatypes will be replaced by concrete ones."
   },
   "ontop.isCanonicalIRIComplete": {
     "type": "Boolean",
@@ -49,15 +57,15 @@
   },
   "ontop.existentialReasoning": {
     "type": "Boolean",
-    "description": ""
+    "description": "Default value: false. If true, rewrites the SPARQL query using the tree witnesses technique."
   },
   "ontop.distinctResultSet": {
     "type": "Boolean",
-    "description": "DEPRECATED."
+    "description": "DEPRECATED. Default value: false. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
   },
   "ontop.avoidPostProcessing": {
     "type": "Boolean",
-    "description": ""
+    "description": "Default value: false. If true, maximizes the processing done by the SQL query."
   },
   "ontop.excludeInvalidTriplesFromResultSet": {
     "type": "Boolean",
@@ -65,47 +73,47 @@
   },
   "ontop.cache.query.size": {
     "type": "Integer",
-    "description": ""
+    "description": "Default value: 1000. Maximum size for the internal query cache for bypassing query reformulation."
   },
   "ontop.queryLogging": {
     "type": "Boolean",
-    "description": "Default value: false."
+    "description": "Default value: false. If true, enables query logging."
   },
   "ontop.applicationName": {
     "type": "String",
-    "description": ""
+    "description": "Default value: Ontop. Application name appearing in the query log."
   },
   "ontop.queryLogging.includeSparqlQuery": {
     "type": "Boolean",
-    "description": "Includes the SPARQL query string into the query log"
+    "description": "Includes the SPARQL query string into the query log."
   },
   "ontop.queryLogging.includeReformulatedQuery": {
     "type": "Boolean",
-    "description": "Includes the reformulated query into the query log"
+    "description": "Includes the reformulated query into the query log."
   },
   "ontop.queryLogging.includeClassesAndProperties": {
     "type": "Boolean",
-    "description": "Includes classes and properties into the query log"
+    "description": "Includes classes and properties into the query log."
   },
   "ontop.queryLogging.includeTables": {
     "type": "Boolean",
-    "description": "Includes DB tables/views into the query log"
+    "description": "Includes DB tables/views into the query log."
   },
-  "ontop.queryLogging.includeHttpHeader.": {
+  "ontop.queryLogging.includeHttpHeader.HEADER_NAME": {
     "type": "Boolean",
-    "description": ""
+    "description": "If true, includes a specific HTTP header (please replace HEADER_NAME by the desired one) into the query log."
   },
   "ontop.queryLogging.extractQueryTemplate": {
     "type": "Boolean",
-    "description": ""
+    "description": "Default value: false. If true, extracts a query template and constants out of the SPARQL query. Allows to recognize queries generated from the same template."
   },
   "ontop.queryLogging.decomposition": {
     "type": "Boolean",
-    "description": ""
+    "description": "Default value: false. If true, outputs multiple log entries per query (after decomposition, after receiving the first result, after receiving all the results)."
   },
   "ontop.queryLogging.decompositionAndMergingMutuallyExclusive": {
     "type": "Boolean",
-    "description": ""
+    "description": "Default value: true. If true, either outputs an unique log entry per query or, if the decomposition is enabled,  log entries per query (after decomposition, after receiving the first result, after receiving all the results, but not the version including all the keys."
   },
   "ontop.includeFixedObjectPositionInDescribe": {
     "type": "Boolean",
@@ -113,26 +121,26 @@
   },
   "ontop.query.defaultTimeout": {
     "type": "Integer",
-    "description": "Query EVALUATION timeout (executed on the DB engine) Has no effect if negative or equal to 0."
+    "description": "Query timeout assigned to the DB engine. Has no effect if negative or equal to 0."
   },
   "ontop.permanentConnection": {
     "type": "Boolean",
-    "description": "Needed by some in-memory DBs (e.g. an H2 DB storing a semantic index)"
+    "description": "Needed by some in-memory DBs (e.g. an H2 DB storing a semantic index)."
   },
   "ontop.http.cacheControl": {
     "type": "String",
-    "description": ""
+    "description": "Value to assign to the HTTP header Cache-Control in case of success. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control"
   },
   "ontop.http.cache.maxAge": {
     "type": "Integer",
-    "description": "DEPRECATED"
+    "description": "DEPRECATED. Use ontop.http.cacheControl instead."
   },
   "ontop.http.cache.staleWhileRevalidate": {
     "type": "Integer",
-    "description": "DEPRECATED"
+    "description": "DEPRECATED. Use ontop.http.cacheControl instead."
   },
   "ontop.http.cache.staleIfError": {
     "type": "Integer",
-    "description": "DEPRECATED"
+    "description": "DEPRECATED. Use ontop.http.cacheControl instead."
   }
 }
