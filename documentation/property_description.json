@@ -1,19 +1,19 @@
 {
   "ontop.cardinalityMode": {
     "type": "Enum",
-    "description": "Default value: STRICT. If set to LOOSE, the cardinality is not guaranteed to be preserved anymore."
+    "description": "Default value: `STRICT`. If set to `LOOSE`, the cardinality is not guaranteed to be preserved anymore."
   },
   "ontop.testMode": {
     "type": "Boolean",
-    "description": "Default value: false. If true, performs extra checks. Should not be enabled in production."
+    "description": "Default value: `false`. If `true`, performs extra checks. Should not be enabled in production."
   },
   "ontop.maxNbChildrenLiftingDBFS": {
     "type": "Integer",
-    "description": "Default value: 10. Above this threshold, the preference for a function symbol to be post-processed is not considered."
+    "description": "Default value: `10`. Above this threshold, the preference for a function symbol to be post-processed is not considered."
   },
   "ontop.sameAs": {
     "type": "Boolean",
-    "description": "Default value: false. If true, enforces the owl:sameAs semantics at the mapping level. Not very efficient, please consider canonical IRIs instead. See https://ontop-vkg.org/tutorial/mapping/uri-templates#canonical-iris"
+    "description": "Default value: `false`. If true, enforces the owl:sameAs semantics at the mapping level. Not very efficient, please consider using canonical IRIs instead. See https://ontop-vkg.org/tutorial/mapping/uri-templates#canonical-iris"
   },
   "jdbc.url": {
     "type": "IRI",
@@ -37,19 +37,19 @@
   },
   "ontop.queryOntologyAnnotation": {
     "type": "Boolean",
-    "description": "Default value: false. If true, includes annotations about classes and properties in the virtual graph."
+    "description": "Default value: `false`. If true, includes annotations about classes and properties in the virtual graph."
   },
   "ontop.inferDefaultDatatype": {
     "type": "Boolean",
-    "description": "Default value: false. If false, throws an exception if the system is not able to infer the datatype from the database If true use default datatype (xsd:string)."
+    "description": "Default value: `false`. If false, throws an exception if the system is not able to infer the datatype from the database. If true, uses the default datatype (xsd:string)."
   },
   "ontop.tolerateAbstractDatatype": {
     "type": "Boolean",
-    "description": "Default value: false. If false, throws an exception is an abstract datatype is used for a literal in a mapping assertion. If true, abstract datatypes will be replaced by concrete ones."
+   "description": "Default value: `false`. If false, throws an exception is an abstract datatype is used for a literal in a mapping assertion. If true, abstract datatypes will be replaced by concrete ones."
   },
   "ontop.isCanonicalIRIComplete": {
     "type": "Boolean",
-    "description": "Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology). And let dom(M(S)) (resp. range(M(S))) be all subjects (resp. objects) of some triple in M(S). Now let C be all mapping assertions with isCanonicalIRIOf as predicate, and let A_sub (resp(A_obj)) be all mapping assertions whose subject (resp. object) is built with a URI template, and whose predicate is not isCanonicalIRIOf. If this parameter is set to true, then for any a in A_sub, either dom({a}(S)) \\cap range(C(S)) = \\emptyset, or dom({a}(S)) \\subseteq range(C(S))). Similarly, for any a in A_obj, either range({a}(S)) \\cap range(C(S)) = \\emptyset, or range({a}(S)) \\subseteq range(C(S)))."
+    "description": "Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology). And let dom(M(S)) (resp. range(M(S))) be all subjects (resp. objects) of some triple in M(S). Now let C be all mapping assertions with isCanonicalIRIOf as predicate, and let A_sub (resp(A_obj)) be all mapping assertions whose subject (resp. object) is built with a URI template, and whose predicate is not isCanonicalIRIOf. If this parameter is set to `true`, then for any a in A_sub, either dom({a}(S)) \\cap range(C(S)) = \\emptyset, or dom({a}(S)) \\subseteq range(C(S))). Similarly, for any a in A_obj, either range({a}(S)) \\cap range(C(S)) = \\emptyset, or range({a}(S)) \\subseteq range(C(S)))."
   },
   "mapping.baseIri": {
     "type": "IRI",
@@ -57,31 +57,31 @@
   },
   "ontop.existentialReasoning": {
     "type": "Boolean",
-    "description": "Default value: false. If true, rewrites the SPARQL query using the tree witnesses technique."
+    "description": "Default value: `false`. If true, rewrites the SPARQL query using the tree witnesses technique."
   },
   "ontop.distinctResultSet": {
     "type": "Boolean",
-    "description": "DEPRECATED. Default value: false. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
+    "description": "DEPRECATED. Default value: `false`. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
   },
   "ontop.avoidPostProcessing": {
     "type": "Boolean",
-    "description": "Default value: false. If true, maximizes the processing done by the SQL query."
+    "description": "Default value: `false`. If true, maximizes the processing done by the SQL query."
   },
   "ontop.excludeInvalidTriplesFromResultSet": {
     "type": "Boolean",
-    "description": "Default value: false. If false, makes the query fail when an invalid triple is detected."
+    "description": "Default value: `false`. If false, makes the query fail when an invalid triple is detected."
   },
   "ontop.cache.query.size": {
     "type": "Integer",
-    "description": "Default value: 1000. Maximum size for the internal query cache for bypassing query reformulation."
+    "description": "Default value: `1000`. Maximum size for the internal query cache for bypassing query reformulation."
   },
   "ontop.queryLogging": {
     "type": "Boolean",
-    "description": "Default value: false. If true, enables query logging."
+    "description": "Default value: `false`. If true, enables query logging."
   },
   "ontop.applicationName": {
     "type": "String",
-    "description": "Default value: Ontop. Application name appearing in the query log."
+    "description": "Default value: `Ontop`. Application name appearing in the query log."
   },
   "ontop.queryLogging.includeSparqlQuery": {
     "type": "Boolean",
@@ -101,23 +101,23 @@
   },
   "ontop.queryLogging.includeHttpHeader.HEADER_NAME": {
     "type": "Boolean",
-    "description": "If true, includes a specific HTTP header (please replace HEADER_NAME by the desired one) into the query log."
+    "description": "If true, includes a specific HTTP header (please replace `HEADER_NAME` by the desired one) into the query log."
   },
   "ontop.queryLogging.extractQueryTemplate": {
     "type": "Boolean",
-    "description": "Default value: false. If true, extracts a query template and constants out of the SPARQL query. Allows to recognize queries generated from the same template."
+    "description": "Default value: `false`. If true, extracts a query template and constants out of the SPARQL query. Allows to recognize queries generated from the same template."
   },
   "ontop.queryLogging.decomposition": {
     "type": "Boolean",
-    "description": "Default value: false. If true, outputs multiple log entries per query (after decomposition, after receiving the first result, after receiving all the results)."
+    "description": "Default value: `false`. If true, outputs multiple log entries per query (after decomposition, after receiving the first result, after receiving all the results)."
   },
   "ontop.queryLogging.decompositionAndMergingMutuallyExclusive": {
     "type": "Boolean",
-    "description": "Default value: true. If true, either outputs an unique log entry per query or, if the decomposition is enabled,  log entries per query (after decomposition, after receiving the first result, after receiving all the results, but not the version including all the keys."
+    "description": "Default value: `true`. If true, either outputs an unique log entry per query or, if the decomposition is enabled,  log entries per query (after decomposition, after receiving the first result, after receiving all the results, but not the version including all the keys."
   },
   "ontop.includeFixedObjectPositionInDescribe": {
     "type": "Boolean",
-    "description": "Default value: false. If true the pattern \"?s ?p <to_describe> \" is also considered when answering a DESCRIBE query."
+    "description": "Default value: `false`. If true, the pattern `?s ?p <to_describe>` is also considered when answering a DESCRIBE query."
   },
   "ontop.query.defaultTimeout": {
     "type": "Integer",
@@ -133,14 +133,14 @@
   },
   "ontop.http.cache.maxAge": {
     "type": "Integer",
-    "description": "DEPRECATED. Use ontop.http.cacheControl instead."
+    "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
   },
   "ontop.http.cache.staleWhileRevalidate": {
     "type": "Integer",
-    "description": "DEPRECATED. Use ontop.http.cacheControl instead."
+    "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
   },
   "ontop.http.cache.staleIfError": {
     "type": "Integer",
-    "description": "DEPRECATED. Use ontop.http.cacheControl instead."
+    "description": "DEPRECATED. Please use `ontop.http.cacheControl` instead."
   }
 }
