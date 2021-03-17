@@ -23,12 +23,14 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     private final MetadataProvider parentMetadataProvider;
     private final CachingMetadataLookupWithDependencies parentCacheMetadataLookup;
+    private final OntopViewNormalizer ontopViewNormalizer;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
-                                            @Assisted Reader ontopViewReader) throws MetadataExtractionException {
+                                            @Assisted Reader ontopViewReader,
+                                            OntopViewNormalizer ontopViewNormalizer) throws MetadataExtractionException {
         this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
             private final Set<RelationID> completeRelations = new HashSet<>();
 
@@ -58,6 +60,8 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         catch (IOException e) {
             throw new MetadataExtractionException(e);
         }
+
+        this.ontopViewNormalizer = ontopViewNormalizer;
     }
 
     /**
