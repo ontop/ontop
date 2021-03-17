@@ -5,7 +5,7 @@
   },
   "ontop.testMode": {
     "type": "Boolean",
-    "description": "Default value: `false`. If `true`, performs extra checks. Should not be enabled in production."
+    "description": "Default value: `false`. If true, performs extra checks. Should not be enabled in production."
   },
   "ontop.maxNbChildrenLiftingDBFS": {
     "type": "Integer",
