@@ -15,7 +15,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -122,7 +124,16 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public void normalizeRelations() {
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitionList) {
         // TODO: normalize the parents before the children using the OntopViewNormalizer.
+        List<OntopViewDefinition> viewDefinitions = relationDefinitionList.stream()
+                .filter(OntopViewDefinition.class::isInstance)
+                .map(OntopViewDefinition.class::cast)
+                // Sort by view level in ascending order
+                .sorted(Comparator.comparing(OntopViewDefinition::getLevel))
+                .collect(ImmutableCollectors.toList());
+
+        // Apply normalization
+        viewDefinitions.forEach(ontopViewNormalizer::normalize);
     }
 }

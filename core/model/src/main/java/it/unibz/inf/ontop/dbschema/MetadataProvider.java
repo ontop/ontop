@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import java.util.List;
+
 /**
  */
 
@@ -25,5 +27,5 @@ public interface MetadataProvider extends MetadataLookup {
     /**
      * Mostly useful for OntopViewMetadataProvider-s
      */
-    void normalizeRelations();
+    void normalizeRelations(List<NamedRelationDefinition> relationDefinitionList);
 }

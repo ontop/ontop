@@ -43,7 +43,7 @@ public class CachingMetadataLookup implements MetadataLookup {
         for (NamedRelationDefinition relation : list)
             provider.insertIntegrityConstraints(relation, lookup);
 
-        provider.normalizeRelations();
+        provider.normalizeRelations(list);
 
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }

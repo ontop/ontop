@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
@@ -58,7 +59,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     public DBParameters getDBParameters() { return dbParameters; }
 
     @Override
-    public void normalizeRelations() {
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitionList) {
         // Does nothing
     }
 

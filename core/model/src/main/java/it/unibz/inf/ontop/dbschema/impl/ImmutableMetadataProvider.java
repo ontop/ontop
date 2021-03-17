@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.List;
+
 
 public class ImmutableMetadataProvider extends ImmutableMetadataLookup implements MetadataProvider {
 
@@ -23,7 +25,7 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
     public DBParameters getDBParameters() { return dbParameters; }
 
     @Override
-    public void normalizeRelations() {
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitionList) {
         // Does nothing
     }
 
