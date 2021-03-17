@@ -47,7 +47,7 @@ public class OntopViewDefinitionImpl extends AbstractNamedRelationDefinition imp
 
     @Override
     public void updateIQ(@Nonnull IQ newIQ) throws IllegalStateException {
-        if (!isFrozen)
+        if (isFrozen)
             throw new IllegalStateException("Cannot change the IQ after freezing");
         if (!iq.getProjectionAtom().getPredicate().equals(newIQ.getProjectionAtom().getPredicate()))
             throw new IllegalArgumentException("IQ with a different atom predicate provided");

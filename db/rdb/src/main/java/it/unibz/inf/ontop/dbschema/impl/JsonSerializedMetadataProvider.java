@@ -100,4 +100,9 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     public DBParameters getDBParameters() {
         return dbParameters;
     }
+
+    @Override
+    public void normalizeRelations() {
+        // Does nothing
+    }
 }
