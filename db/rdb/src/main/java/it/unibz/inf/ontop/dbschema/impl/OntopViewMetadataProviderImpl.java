@@ -129,8 +129,8 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         ImmutableList<OntopViewDefinition> viewDefinitions = relationDefinitions.stream()
                 .filter(OntopViewDefinition.class::isInstance)
                 .map(OntopViewDefinition.class::cast)
-                // Sort by view level in ascending order
-                .sorted(Comparator.comparing(OntopViewDefinition::getLevel))
+                // Sort by view level in ascending order - To be reviewed when level >1 views are introduced
+                // .sorted(Comparator.comparing(OntopViewDefinition::getLevel))
                 .collect(ImmutableCollectors.toList());
 
         // Apply normalization
