@@ -103,7 +103,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitionList) {
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         // Does nothing
     }
 }

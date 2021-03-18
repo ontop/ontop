@@ -124,9 +124,9 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitionList) {
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         // TODO: normalize the parents before the children using the OntopViewNormalizer.
-        List<OntopViewDefinition> viewDefinitions = relationDefinitionList.stream()
+        ImmutableList<OntopViewDefinition> viewDefinitions = relationDefinitions.stream()
                 .filter(OntopViewDefinition.class::isInstance)
                 .map(OntopViewDefinition.class::cast)
                 // Sort by view level in ascending order

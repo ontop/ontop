@@ -59,7 +59,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     public DBParameters getDBParameters() { return dbParameters; }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitionList) {
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         // Does nothing
     }
 
