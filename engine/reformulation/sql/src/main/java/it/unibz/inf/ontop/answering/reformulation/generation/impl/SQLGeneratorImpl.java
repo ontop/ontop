@@ -124,8 +124,14 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         if (IS_DEBUG_ENABLED)
             log.debug("Query tree after pulling out equalities: \n" + treeAfterPullOut);
 
+        // Top construction elimination when it causes problems
+        // Pattern: CONSTRUCTION, DISTINCT, [CONSTRUCTION] and ORDER BY
+        IQTree treeAfterTopConstructionNormalization = dropTopConstruct(treeAfterPullOut);
+        if (IS_DEBUG_ENABLED)
+            log.debug("New query after top construction elimination in order by cases: \n" + treeAfterTopConstructionNormalization);
+
         // Dialect specific
-        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterPullOut, variableGenerator);
+        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterTopConstructionNormalization, variableGenerator);
         if (IS_DEBUG_ENABLED)
             log.debug("New query after the dialect-specific extra normalization: \n" + afterDialectNormalization);
         return afterDialectNormalization;
@@ -144,6 +150,43 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
                 return iqFactory.createUnaryIQTree(sliceNode,
                         iqFactory.createUnaryIQTree(constructionNode, grandChildTree));
+            }
+        }
+        return subTree;
+    }
+
+    private IQTree dropTopConstruct(IQTree subTree) {
+
+        if (subTree.getRootNode() instanceof ConstructionNode) {
+            //ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
+            IQTree childTree = ((UnaryIQTree) subTree).getChild();
+            if (childTree.getRootNode() instanceof DistinctNode) {
+                DistinctNode distinctNode = (DistinctNode) childTree.getRootNode();
+                IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
+                // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
+                if (grandChildTree.getRootNode() instanceof ConstructionNode) {
+                    ConstructionNode constructionNode1 = (ConstructionNode) grandChildTree.getRootNode();
+                    IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
+                    if (grandGrandChildTree instanceof OrderByNode) {
+                        /*
+                         * Drop the top construction node
+                         */
+                        OrderByNode orderByNode = (OrderByNode) grandGrandChildTree.getRootNode();
+                        IQTree grandGrandGrandChildTree = ((UnaryIQTree) grandGrandChildTree).getChild();
+
+                        return iqFactory.createUnaryIQTree(distinctNode,
+                                iqFactory.createUnaryIQTree(constructionNode1,
+                                        iqFactory.createUnaryIQTree(orderByNode, grandGrandGrandChildTree)));
+                    }
+                // CASE 2: CONSTRUCT, DISTINCT, ORDER BY
+                } else
+                    if (grandChildTree.getRootNode() instanceof OrderByNode) {
+                    OrderByNode orderByNode = (OrderByNode) grandChildTree.getRootNode();
+                    IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
+
+                    return iqFactory.createUnaryIQTree(distinctNode,
+                            iqFactory.createUnaryIQTree(orderByNode, grandGrandChildTree));
+                }
             }
         }
         return subTree;
