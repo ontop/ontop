@@ -156,11 +156,11 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     }
 
     private IQTree dropTopConstruct(IQTree subTree) {
-
         if (subTree.getRootNode() instanceof ConstructionNode) {
-            //ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
+            ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
+            // If there is variable substitution in the top construction do not normalize
             IQTree childTree = ((UnaryIQTree) subTree).getChild();
-            if (childTree.getRootNode() instanceof DistinctNode) {
+            if (childTree.getRootNode() instanceof DistinctNode && constructionNode.getSubstitution().isEmpty()) {
                 DistinctNode distinctNode = (DistinctNode) childTree.getRootNode();
                 IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
                 // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
