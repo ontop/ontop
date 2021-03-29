@@ -25,3 +25,8 @@ INSERT INTO "GEOMS" VALUES (23, 'POINT(-0.0754 51.5055)', 'Tower Bridge <http://
 INSERT INTO "GEOMS" VALUES (24, 'POINT(2.2945 48.8584)', 'Eiffel Tower <http://www.opengis.net/def/crs/EPSG/0/4326>');
 INSERT INTO "GEOMS" VALUES (25, 'POINT(-0.0754 51.5055)', 'Tower Bridge <http://www.opengis.net/def/crs/EPSG/0/4326>');
 INSERT INTO "GEOMS" VALUES (26, 'POINT(668683.853 5122640.964)', 'a point in BZ with SRID <http://www.opengis.net/def/crs/EPSG/0/3044>');
+
+
+CREATE TABLE "POINTS" (id INT PRIMARY KEY , longitude float, latitude float, name TEXT);
+INSERT INTO "POINTS" VALUES (3, 2.2945, 48.8584, 'Eiffel Tower');
+INSERT INTO "POINTS" VALUES (4, -0.0754, 51.5055, 'Tower Bridge');
