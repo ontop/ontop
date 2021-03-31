@@ -182,18 +182,6 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <sesame.version>2.7.16</sesame.version>
-
-        <h2.version>1.4.196</h2.version>
-        <hive-jdbc.version>2.3.7</hive-jdbc.version>
-
-        <docker.url>localhost</docker.url>
-        <docker.db2.password>obda-pwd</docker.db2.password>
-        <docker.mssql.password>Mssql1.0</docker.mssql.password>
-        <docker.mysql.password>mysql</docker.mysql.password>
-        <docker.oracle.password>oracle</docker.oracle.password>
-        <docker.pgsql.password>postgres2</docker.pgsql.password>
-        <docker.denodo.password>admin</docker.denodo.password>
-
     </properties>
 
     <dependencyManagement>
@@ -745,16 +733,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-devtools</artifactId>
                 <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.hive</groupId>
-                <artifactId>hive-jdbc</artifactId>
-                <version>${hive-jdbc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.microsoft.sqlserver</groupId>
-                <artifactId>sqljdbc4</artifactId>
-                <version>4.0.2206.100</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>

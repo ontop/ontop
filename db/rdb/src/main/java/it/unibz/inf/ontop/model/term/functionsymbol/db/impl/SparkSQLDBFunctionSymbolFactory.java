@@ -125,8 +125,8 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     }
 
     @Override
-    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
-        return new SparkSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    protected DBFunctionSymbol createEncodeURLorIRI(boolean preserveInternationalChars) {
+        return new SparkSQLEncodeURLorIRIFunctionSymbolImpl(dbStringType, preserveInternationalChars);
     }
 }
 
