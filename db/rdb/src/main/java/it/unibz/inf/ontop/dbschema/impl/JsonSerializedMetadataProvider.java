@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
 
 public class JsonSerializedMetadataProvider implements SerializedMetadataProvider {
 
@@ -99,5 +100,10 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     @Override
     public DBParameters getDBParameters() {
         return dbParameters;
+    }
+
+    @Override
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+        // Does nothing
     }
 }
