@@ -53,7 +53,7 @@ public class GeoUtils {
     }
 
     static WKTLiteralValue extractWKTLiteralValue(TermFactory termFactory, ImmutableTerm wktLiteralTerm) {
-        // Get the respective SRIDs
+        // Get the respective SRID
         IRI srid = tryExtractSRIDFromDbConstant(Optional.of(wktLiteralTerm))
                 .orElseGet(
                         // template
@@ -62,12 +62,13 @@ public class GeoUtils {
                                 .orElse(defaultSRID)
                 );
 
-        // Get the respective geometries
+        // Get the respective geometry
         ImmutableTerm geometry = tryExtractGeometryFromConstant(wktLiteralTerm, termFactory)
                 .orElseGet(
                         // If template then
-                        () -> tryExtractArgFromTemplate(wktLiteralTerm, 1)
-                                .orElse(wktLiteralTerm)
+//                        () -> tryExtractArgFromTemplate(wktLiteralTerm, 1)
+//                                .orElse(wktLiteralTerm)
+                        () -> wktLiteralTerm
                 );
 
         return new WKTLiteralValue(srid, geometry);

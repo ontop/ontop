@@ -37,5 +37,9 @@ source		SELECT * FROM GEOMS WHERE ID=25
 mappingId	geoms
 target		:epsg3044/{ID} a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> {THE_GEOM}"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
 source		SELECT * FROM GEOMS WHERE ID=26
+
+mappingId	points
+target		:point/{ID} a :Geom ; geo:asWKT "POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+source		SELECT * FROM POINTS
 ]]
 

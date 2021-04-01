@@ -334,6 +334,27 @@ public class GeoSPARQLTest {
         assertTrue(val);
     }
 
+
+    @Test // Case when WKT is from a template  "POINT ({longitude} {latitude})"^^geo:wktLiteral
+    public void testSelectDistance_long_lat() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/point/3> a :Geom; geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/point/4> a :Geom; geo:asWKT ?yWkt.\n" +
+                "BIND(geof:distance(?xWkt, ?yWkt, uom:metre) as ?x) .\n" +
+                "FILTER(?x < 350000) .\n" +
+                "}\n";
+        //double val = runQueryAndReturnDoubleX(query);
+        //assertEquals(339241, val, 1.0);
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+    
     @Test
     public void testSelectBuffer() throws Exception {
         //language=TEXT
