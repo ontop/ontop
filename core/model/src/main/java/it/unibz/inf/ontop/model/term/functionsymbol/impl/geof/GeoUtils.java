@@ -36,7 +36,8 @@ public class GeoUtils {
                 .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
                 // template uses DBConcatFunctionSymbol as the functional symbol
                 .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
-                // the first argument is the string starting with the IRI of the SRID
+                // check if the first argument is the string starting with the IRI of the SRID
+                .filter(t -> templateStartsWithSRID(t.getTerm(0)))
                 .map(t -> t.getTerm(index));
     }
 
@@ -66,9 +67,8 @@ public class GeoUtils {
         ImmutableTerm geometry = tryExtractGeometryFromConstant(wktLiteralTerm, termFactory)
                 .orElseGet(
                         // If template then
-//                        () -> tryExtractArgFromTemplate(wktLiteralTerm, 1)
-//                                .orElse(wktLiteralTerm)
-                        () -> wktLiteralTerm
+                        () -> tryExtractArgFromTemplate(wktLiteralTerm, 1)
+                                .orElse(wktLiteralTerm)
                 );
 
         return new WKTLiteralValue(srid, geometry);
@@ -114,5 +114,16 @@ public class GeoUtils {
 //            }
         }
 
+    }
+
+    /**
+     * Check whether the template starts with SRID e.g. <http://www.opengis.net/def/crs/OGC/1.3/CRS84>
+     */
+    private static boolean templateStartsWithSRID(ImmutableTerm immutableTerm) {
+        return Optional.of(immutableTerm)
+                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
+                .map(Constant::getValue)
+                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                .isPresent();
     }
 }
