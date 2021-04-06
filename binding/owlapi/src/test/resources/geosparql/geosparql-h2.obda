@@ -43,11 +43,11 @@ target		:point/{ID} a :Geom ; geo:asWKT "POINT ({longitude} {latitude})"^^geo:wk
 source		SELECT * FROM POINTS
 
 mappingId	geoms
-target		:epsg3044/21 a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+target		:point/epsg3044/21 a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
 source		SELECT * FROM POINTS WHERE ID=21
 
 mappingId	geoms
-target		:epsg3044/26 a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
+target		:point/epsg3044/26 a :Geom ; geo:asWKT "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT ({longitude} {latitude})"^^geo:wktLiteral ; rdfs:label {NAME}^^xsd:string .
 source		SELECT * FROM POINTS WHERE ID=26
 ]]
 

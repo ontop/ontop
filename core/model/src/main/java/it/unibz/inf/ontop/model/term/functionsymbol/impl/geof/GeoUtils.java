@@ -30,15 +30,23 @@ public class GeoUtils {
                 .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()));
     }
 
-    static Optional<ImmutableTerm> tryExtractArgFromTemplate(ImmutableTerm term, int index) {
+    static Optional<ImmutableTerm> tryExtractArgFromTemplate(ImmutableTerm term, int index, TermFactory termFactory) {
         return Optional.of(term)
                 // template is a NonGroundFunctionalTerm
                 .filter(t -> t instanceof NonGroundFunctionalTerm).map(t -> (NonGroundFunctionalTerm) t)
                 // template uses DBConcatFunctionSymbol as the functional symbol
                 .filter(t -> t.getFunctionSymbol() instanceof DBConcatFunctionSymbol)
                 // check if the first argument is the string starting with the IRI of the SRID
-                .filter(t -> templateStartsWithSRID(t.getTerm(0)))
-                .map(t -> t.getTerm(index));
+                .map(t -> {
+                    // Always return the first argument
+                    if (index == 0) return t.getTerm(index);
+                    // If the template does not start with SRID, ignore (i.e. wktLiteralTerm is taken entirely as input)
+                    else if (!templateStartsWithSRID(t.getTerm(0))) return null;
+                    // If SRID + geometry, return geometry which is index=1 (special case since DBConcat below reqs 2+ args)
+                    else if (t.getTerms().size() < 3) return t.getTerm(index);
+                    // Otherwise drop the SRID template, and return everything else
+                    else return termFactory.getNullRejectingDBConcatFunctionalTerm(t.getTerms().subList(1, t.getTerms().size()));
+                });
     }
 
     static Optional<IRI> tryExtractSRIDFromDbConstant(Optional<ImmutableTerm> immutableTerm) {
@@ -58,7 +66,7 @@ public class GeoUtils {
         IRI srid = tryExtractSRIDFromDbConstant(Optional.of(wktLiteralTerm))
                 .orElseGet(
                         // template
-                        () -> tryExtractSRIDFromDbConstant(tryExtractArgFromTemplate(wktLiteralTerm, 0))
+                        () -> tryExtractSRIDFromDbConstant(tryExtractArgFromTemplate(wktLiteralTerm, 0, termFactory))
                                 // otherwise, returns the default SRID
                                 .orElse(defaultSRID)
                 );
@@ -67,7 +75,7 @@ public class GeoUtils {
         ImmutableTerm geometry = tryExtractGeometryFromConstant(wktLiteralTerm, termFactory)
                 .orElseGet(
                         // If template then
-                        () -> tryExtractArgFromTemplate(wktLiteralTerm, 1)
+                        () -> tryExtractArgFromTemplate(wktLiteralTerm, 1, termFactory)
                                 .orElse(wktLiteralTerm)
                 );
 
