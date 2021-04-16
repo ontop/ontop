@@ -125,7 +125,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             log.debug("Query tree after pulling out equalities: \n" + treeAfterPullOut);
 
         // Top construction elimination when it causes problems
-        // Pattern: CONSTRUCTION, DISTINCT, [CONSTRUCTION] and ORDER BY
+        // Pattern: [LIMIT], CONSTRUCTION, DISTINCT, [CONSTRUCTION] and ORDER BY
         IQTree treeAfterTopConstructionNormalization = dropTopConstruct(treeAfterPullOut);
         if (IS_DEBUG_ENABLED)
             log.debug("New query after top construction elimination in order by cases: \n" + treeAfterTopConstructionNormalization);
@@ -156,40 +156,40 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     }
 
     private IQTree dropTopConstruct(IQTree subTree) {
-        if (subTree.getRootNode() instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
-            // If there is variable substitution in the top construction do not normalize
-            IQTree childTree = ((UnaryIQTree) subTree).getChild();
-            if (childTree.getRootNode() instanceof DistinctNode && constructionNode.getSubstitution().isEmpty()) {
-                DistinctNode distinctNode = (DistinctNode) childTree.getRootNode();
-                IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
-                // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
-                if (grandChildTree.getRootNode() instanceof ConstructionNode) {
-                    ConstructionNode constructionNode1 = (ConstructionNode) grandChildTree.getRootNode();
-                    IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
-                    if (grandGrandChildTree instanceof OrderByNode) {
+        // Check if it starts with [LIMIT]
+        if (subTree.getRootNode() instanceof SliceNode) {
+            SliceNode sliceNode = (SliceNode) subTree.getRootNode();
+            // Add slice node to trimmed childtree
+            return iqFactory.createUnaryIQTree(sliceNode,
+                    dropTopConstruct(((UnaryIQTree) subTree).getChild()));
+        } else {
+            // Check for pattern CONSTRUCT, DISTINCT, [CONSTRUCT], ORDER BY
+            if (subTree.getRootNode() instanceof ConstructionNode) {
+                ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
+                // If there is variable substitution in the top construction do not normalize
+                IQTree childTree = ((UnaryIQTree) subTree).getChild();
+                if (childTree.getRootNode() instanceof DistinctNode && constructionNode.getSubstitution().isEmpty()) {
+                    IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
+                    // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
+                    if (grandChildTree.getRootNode() instanceof ConstructionNode) {
+                        IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
+                        if (grandGrandChildTree instanceof OrderByNode) {
+                            /*
+                             * Drop the top construction node
+                             */
+                            return childTree;
+                        }
+                    // CASE 2: CONSTRUCT, DISTINCT, ORDER BY
+                    } else if (grandChildTree.getRootNode() instanceof OrderByNode) {
                         /*
                          * Drop the top construction node
                          */
-                        OrderByNode orderByNode = (OrderByNode) grandGrandChildTree.getRootNode();
-                        IQTree grandGrandGrandChildTree = ((UnaryIQTree) grandGrandChildTree).getChild();
-
-                        return iqFactory.createUnaryIQTree(distinctNode,
-                                iqFactory.createUnaryIQTree(constructionNode1,
-                                        iqFactory.createUnaryIQTree(orderByNode, grandGrandGrandChildTree)));
+                        return childTree;
                     }
-                // CASE 2: CONSTRUCT, DISTINCT, ORDER BY
-                } else
-                    if (grandChildTree.getRootNode() instanceof OrderByNode) {
-                    OrderByNode orderByNode = (OrderByNode) grandChildTree.getRootNode();
-                    IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
-
-                    return iqFactory.createUnaryIQTree(distinctNode,
-                            iqFactory.createUnaryIQTree(orderByNode, grandGrandChildTree));
                 }
             }
+            return subTree;
         }
-        return subTree;
     }
 
     private NativeNode generateNativeNode(IQTree normalizedSubTree) {
