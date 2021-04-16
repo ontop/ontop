@@ -173,7 +173,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                     // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
                     if (grandChildTree.getRootNode() instanceof ConstructionNode) {
                         IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
-                        if (grandGrandChildTree instanceof OrderByNode) {
+                        if (grandGrandChildTree.getRootNode() instanceof OrderByNode) {
                             /*
                              * Drop the top construction node
                              */
