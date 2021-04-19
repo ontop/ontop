@@ -33,9 +33,7 @@ public class GeoUtils {
                 .orElseGet(
                         // If template then
                         () -> tryExtractGeometryFromTemplate(termFactory, wktLiteralTerm)
-                                .orElseThrow(
-                                        () -> new IllegalArgumentException("Illegal term for Geometry: " + wktLiteralTerm)
-                                )
+                                .orElse(wktLiteralTerm)                         
                 );
 
         return new WKTLiteralValue(srid, geometry);
