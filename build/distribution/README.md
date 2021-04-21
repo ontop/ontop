@@ -18,7 +18,7 @@ The [Ontop](http://ontop-vkg.org) framework is an open source project available 
 - `ontop-protege-bundle-linux-[version].tar.gz`:  Linux bundle (start with `run.sh`)
 - `ontop-protege-bundle-macos-[version].zip`: macOS bundle (first run: right click `Protégé.app` and select `Open` in
   the warning dialog)
-- `ontop-protege-bundle-windows-[version].zip`: Windows bundle (start with `run.bat` and `Protege.exe`)
+- `ontop-protege-bundle-windows-[version].zip`: Windows bundle (start with `run.bat` or `Protege.exe`)
 
 ### Platform-independent Ontop Protégé plugin and bundle (JRE 8 needs to be installed manually)
 

@@ -124,8 +124,14 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         if (IS_DEBUG_ENABLED)
             log.debug("Query tree after pulling out equalities: \n" + treeAfterPullOut);
 
+        // Top construction elimination when it causes problems
+        // Pattern: [LIMIT], CONSTRUCTION, DISTINCT, [CONSTRUCTION] and ORDER BY
+        IQTree treeAfterTopConstructionNormalization = dropTopConstruct(treeAfterPullOut);
+        if (IS_DEBUG_ENABLED)
+            log.debug("New query after top construction elimination in order by cases: \n" + treeAfterTopConstructionNormalization);
+
         // Dialect specific
-        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterPullOut, variableGenerator);
+        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterTopConstructionNormalization, variableGenerator);
         if (IS_DEBUG_ENABLED)
             log.debug("New query after the dialect-specific extra normalization: \n" + afterDialectNormalization);
         return afterDialectNormalization;
@@ -147,6 +153,43 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             }
         }
         return subTree;
+    }
+
+    private IQTree dropTopConstruct(IQTree subTree) {
+        // Check if it starts with [LIMIT]
+        if (subTree.getRootNode() instanceof SliceNode) {
+            SliceNode sliceNode = (SliceNode) subTree.getRootNode();
+            // Add slice node to trimmed childtree
+            return iqFactory.createUnaryIQTree(sliceNode,
+                    dropTopConstruct(((UnaryIQTree) subTree).getChild()));
+        } else {
+            // Check for pattern CONSTRUCT, DISTINCT, [CONSTRUCT], ORDER BY
+            if (subTree.getRootNode() instanceof ConstructionNode) {
+                ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
+                // If there is variable substitution in the top construction do not normalize
+                IQTree childTree = ((UnaryIQTree) subTree).getChild();
+                if (childTree.getRootNode() instanceof DistinctNode && constructionNode.getSubstitution().isEmpty()) {
+                    IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
+                    // CASE 1: CONSTRUCT, DISTINCT, CONSTRUCT, ORDER BY
+                    if (grandChildTree.getRootNode() instanceof ConstructionNode) {
+                        IQTree grandGrandChildTree = ((UnaryIQTree) grandChildTree).getChild();
+                        if (grandGrandChildTree.getRootNode() instanceof OrderByNode) {
+                            /*
+                             * Drop the top construction node
+                             */
+                            return childTree;
+                        }
+                    // CASE 2: CONSTRUCT, DISTINCT, ORDER BY
+                    } else if (grandChildTree.getRootNode() instanceof OrderByNode) {
+                        /*
+                         * Drop the top construction node
+                         */
+                        return childTree;
+                    }
+                }
+            }
+            return subTree;
+        }
     }
 
     private NativeNode generateNativeNode(IQTree normalizedSubTree) {
