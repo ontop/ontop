@@ -116,7 +116,7 @@ public class DataSource {
 		return p;
 	}
 
-	private static final ImmutableSet<String> CONNECTION_PARAMETER_NAMES = ImmutableSet.of(
+	public static final ImmutableSet<String> CONNECTION_PARAMETER_NAMES = ImmutableSet.of(
 			OntopSQLCoreSettings.JDBC_NAME,
 			OntopSQLCoreSettings.JDBC_URL,
 			OntopSQLCredentialSettings.JDBC_USER,
