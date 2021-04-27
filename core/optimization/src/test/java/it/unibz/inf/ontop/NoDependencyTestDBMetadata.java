@@ -34,31 +34,31 @@ public class NoDependencyTestDBMetadata {
     public static final RelationDefinition INT_TABLE2_NULL_AR2;
     public static final RelationDefinition INT_TABLE1_NULL_AR3;
 
-
-    private static FlattenNodePredicate createFlattenNodePredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory, int arity){
-        return dbMetadata.createFlattenNodeRelation(
-                idFactory.createRelationID(
-                        null,
-                        String.format(
-                                "flatten_node_pred_arity_%s",
-                                arity
-                        )),
-                createAttributeIds(idFactory, arity),
-                IntStream.range(0, arity)
-                        .mapToObj(i -> TYPE_FACTORY.getUnderspecifiedDBType())
-                        .collect(ImmutableCollectors.toList()),
-                IntStream.range(0, arity)
-                        .mapToObj(i -> true)
-                        .collect(ImmutableCollectors.toList())
-                ).getAtomPredicate();
-    }
-
-    private static ImmutableList<QuotedID> createAttributeIds(QuotedIDFactory idFac, int arity) {
-        return IntStream.range(1, arity+1).boxed()
-                .map(i -> idFac.createAttributeID("col"+i))
-                .collect(ImmutableCollectors.toList());
-    }
-
+//
+//    private static FlattenNodePredicate createFlattenNodePredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory, int arity){
+//        return dbMetadata.createFlattenNodeRelation(
+//                idFactory.createRelationID(
+//                        null,
+//                        String.format(
+//                                "flatten_node_pred_arity_%s",
+//                                arity
+//                        )),
+//                createAttributeIds(idFactory, arity),
+//                IntStream.range(0, arity)
+//                        .mapToObj(i -> TYPE_FACTORY.getUnderspecifiedDBType())
+//                        .collect(ImmutableCollectors.toList()),
+//                IntStream.range(0, arity)
+//                        .mapToObj(i -> true)
+//                        .collect(ImmutableCollectors.toList())
+//                ).getAtomPredicate();
+//    }
+//
+//    private static ImmutableList<QuotedID> createAttributeIds(QuotedIDFactory idFac, int arity) {
+//        return IntStream.range(1, arity+1).boxed()
+//                .map(i -> idFac.createAttributeID("col"+i))
+//                .collect(ImmutableCollectors.toList());
+//    }
+//
     static {
         OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         TABLE1_AR1 = builder.createRelationWithStringAttributes(1, 1, false);

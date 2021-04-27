@@ -1,27 +1,28 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
-import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.QueryNodeVisitor;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public IntensionalDataNode clone() {
-        return iqFactory.createIntensionalDataNode(getDataAtom());
+        return iqFactory.createIntensionalDataNode(getProjectionAtom());
     }
 
     @Override
@@ -112,7 +113,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof IntensionalDataNode)
-                && ((IntensionalDataNode) node).getDataAtom().equals(this.getDataAtom());
+                && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
     }
 
     @Override
@@ -123,12 +124,12 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof IntensionalDataNode)
-                && getDataAtom().equals(((IntensionalDataNode) queryNode).getDataAtom());
+                && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());
     }
 
     @Override
     public String toString() {
-        return INTENSIONAL_DATA_NODE_STR + " " + getDataAtom();
+        return INTENSIONAL_DATA_NODE_STR + " " + getProjectionAtom();
     }
 
     @Override

@@ -67,12 +67,7 @@ public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingT
     }
 
     @Override
-    public IQTree transformStrictFlatten(IQTree tree, StrictFlattenNode node, IQTree child) {
-        return tree;
-    }
-
-    @Override
-    public IQTree transformRelaxedFlatten(IQTree tree, RelaxedFlattenNode node, IQTree child) {
+    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
         return tree;
     }
 

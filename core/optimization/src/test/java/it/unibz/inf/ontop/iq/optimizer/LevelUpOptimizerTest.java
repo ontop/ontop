@@ -68,8 +68,8 @@ public class LevelUpOptimizerTest {
     private static final Constant TWO = TERM_FACTORY.getConstantLiteral("2");
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+//        BasicDBMetadata dbMetadata = createDummyMetadata();
+//        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         // has nestedView1 as child, and no parent
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table1"));

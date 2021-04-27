@@ -76,13 +76,8 @@ public class HomogeneousIQTreeVisitingTransformer extends DefaultRecursiveIQTree
     }
 
     @Override
-    public IQTree transformStrictFlatten(IQTree tree, StrictFlattenNode node, IQTree child) {
-        return transformUnaryNode(node.acceptNodeTransformer(nodeTransformer), child);
-    }
-
-    @Override
-    public IQTree transformRelaxedFlatten(IQTree tree, RelaxedFlattenNode node, IQTree child) {
-        return transformUnaryNode(node.acceptNodeTransformer(nodeTransformer), child);
+    public IQTree transformFlatten(IQTree tree, FlattenNode rootNode, IQTree child) {
+        return transformUnaryNode(tree, rootNode.acceptNodeTransformer(nodeTransformer), child);
     }
 
     @Override

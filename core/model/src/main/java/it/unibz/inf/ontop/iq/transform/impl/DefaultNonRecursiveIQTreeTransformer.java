@@ -67,12 +67,7 @@ public abstract class DefaultNonRecursiveIQTreeTransformer implements IQTreeVisi
     }
 
     @Override
-    public IQTree transformStrictFlatten(IQTree tree, StrictFlattenNode node, IQTree child) {
-        return transformUnaryNode(tree, node, child);
-    }
-
-    @Override
-    public IQTree transformRelaxedFlatten(IQTree tree, RelaxedFlattenNode node, IQTree child) {
+    public IQTree transformFlatten(IQTree tree, FlattenNode node, IQTree child) {
         return transformUnaryNode(tree, node, child);
     }
 
