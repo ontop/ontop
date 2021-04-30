@@ -1,12 +1,16 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.generation.algebra.SQLOneTupleDummyQueryExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 
 
 @Singleton
@@ -39,6 +43,16 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
              * }
              */
 
+            private boolean emptyOrderBy = false;
+
+            @Override
+            protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
+                                              ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+                if (sortConditions.isEmpty())
+                    emptyOrderBy = true;
+                return super.serializeOrderBy(sortConditions, fromColumnMap);
+            }
+
             @Override
             protected String serializeLimitOffset(long limit, long offset) {
                 return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
@@ -46,7 +60,9 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
 
             @Override
             protected String serializeLimit(long limit) {
-                return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
+                return emptyOrderBy
+                        ? String.format("ORDER BY (SELECT NULL)\nOFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit)
+                        : String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
             }
 
             @Override
