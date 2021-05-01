@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 
 public class OntopFlattenedViewDefinitionImpl extends OntopViewDefinitionImpl {
 
-//
+
 //    public OntopFlattenedViewDefinitionImpl(ImmutableList<RelationID> allIds, AttributeListBuilder builder,
 //                                   IQ iqWithTemporaryAtomPredicate, int level, CoreSingletons coreSingletons) {
 //        super(allIds, builder, iqWithTemporaryAtomPredicate, level, coreSingletons);

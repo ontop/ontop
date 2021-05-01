@@ -6,11 +6,13 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -29,41 +31,52 @@ import java.util.stream.Stream;
 public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNode {
 
 
-    private static final String RELAXED_FLATTEN_PREFIX = "RELAXED-FLATTEN";
-    private static final String STRICT_FLATTEN_PREFIX = "STRICT-FLATTEN";
+    private static final String RELAXED_FLATTEN_PREFIX = "FLATTEN";
+    private static final String STRICT_FLATTEN_PREFIX = "FLATTEN STRICT";
 
     private final Variable flattenedVariable;
     private final Variable outputVariable;
-    private final Optional<Variable> positionVariable;
+    private final Optional<Variable> indexVariable;
     private final boolean isStrict;
-
+    private final ImmutableTerm flattenTerm;
+    private final Optional<ImmutableFunctionalTerm> indexTerm;
 
     @AssistedInject
-    private FlattenNodeImpl(@Assisted Variable flattenedVariable,
-                            @Assisted Variable outputVariable,
-                            @Assisted Optional<Variable> positionVariable,
+    private FlattenNodeImpl(@Assisted Variable outputVariable,
+                            @Assisted Optional<Variable> indexVariable,
                             @Assisted boolean isStrict,
+                            @Assisted ImmutableFunctionalTerm flattenTerm,
+                            OntopModelSettings settings,
                             SubstitutionFactory substitutionFactory,
-                            IntermediateQueryFactory iqFactory) {
-        super(substitutionFactory, iqFactory);
-        this.flattenedVariable = flattenedVariable;
+                            IntermediateQueryFactory iqFactory,
+                            TermFactory termFactory) {
+            super(substitutionFactory, iqFactory);
+        if (settings.isTestModeEnabled())
+            validateNode(flattenTerm);
+        this.flattenedVariable = flattenTerm.getVariables().iterator().next();
         this.outputVariable = outputVariable;
-        this.positionVariable = positionVariable;
+        this.indexVariable = indexVariable;
         this.isStrict = isStrict;
+        this.flattenTerm = flattenTerm;
+        this.indexTerm = generateIndexTerm(termFactory);
     }
 
-    @AssistedInject
-    private FlattenNodeImpl(@Assisted Variable flattenedVariable,
-                            @Assisted Variable outputVariable,
-                            @Assisted Variable positionVariable,
-                            @Assisted boolean isStrict,
-                            SubstitutionFactory substitutionFactory,
-                            IntermediateQueryFactory iqFactory) {
-        super(substitutionFactory, iqFactory);
-        this.flattenedVariable = flattenedVariable;
-        this.outputVariable = outputVariable;
-        this.positionVariable = Optional.of(positionVariable);
-        this.isStrict = isStrict;
+    private Optional<ImmutableFunctionalTerm> generateIndexTerm(TermFactory termFactory) {
+        if(indexVariable.isPresent()) {
+            termFactory.getImmutableFunctionalTerm()
+        }
+        return Optional.empty();
+    }
+
+    private void validateNode(ImmutableFunctionalTerm flattenTerm) {
+        if(!(flattenTerm.getFunctionSymbol() instanceof DBFlattenFunctionSymbol)){
+            throw new InvalidQueryNodeException("Flatten Node:" +
+                    " the flatten term should use the flatten function\n" + toString());
+        }
+        if(!(flattenTerm.getTerm(0) instanceof Variable)){
+            throw new InvalidQueryNodeException("Flatten Node:" +
+                    "the flatten term should have a variable as argument\n" + toString());
+        }
     }
 
     @Override
@@ -78,12 +91,21 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public Optional<Variable> getIndexVariable() {
-        return positionVariable;
+        return indexVariable;
     }
 
     @Override
     public boolean isStrict() {
         return isStrict;
+    }
+
+    @Override
+    public ImmutableTerm getFlattenTerm() {
+        return iqFactory.c
+    }
+
+    @Override
+    public Optional<ImmutableTerm> getIndexInTerm() {
     }
 
     @Override
@@ -93,9 +115,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return positionVariable.isPresent() ?
-                ImmutableSet.of(flattenedVariable, outputVariable, positionVariable.get()) :
-                ImmutableSet.of(flattenedVariable, outputVariable);
+        return ImmutableSet.of(flattenedVariable);
     }
 
     @Override
@@ -105,25 +125,19 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 RELAXED_FLATTEN_PREFIX;
 
         return prefix + " [" +
-                outputVariable + "/FLATTEN(" + flattenedVariable + ")" +
-                (positionVariable.isPresent() ?
-                        positionVariable.get() + "/POSITION_IN(" + flattenedVariable + ")" :
+                outputVariable + "/flatten(" + flattenedVariable + ")" +
+                (indexVariable.isPresent() ?
+                        indexVariable.get() + "/IndexIn(" + flattenedVariable + ")" :
                         ""
                 ) +
                 "]";
     }
 
-//    protected abstract N newFlattenNode(Variable newArrayVariable, DataAtom newAtom);
 
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of(flattenedVariable);
     }
-
-//    @Override
-//    public ImmutableList<Boolean> getArgumentNullability() {
-//        return argumentNullability;
-//    }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
@@ -265,7 +279,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     public VariableNullability getVariableNullability(IQTree child) {
 
         return child.getVariableNullability().extendToExternalVariables(
-                Stream.of(Optional.of(outputVariable), positionVariable)
+                Stream.of(Optional.of(outputVariable), indexVariable)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
         );
@@ -294,7 +308,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        if (positionVariable.isPresent() && variable.equals(positionVariable.get()))
+        if (indexVariable.isPresent() && variable.equals(indexVariable.get()))
             return isStrict;
         if (variable.equals(outputVariable)) {
             return false;
@@ -359,7 +373,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
             FlattenNode flattenNode = (FlattenNode) node;
             return flattenNode.getFlattenedVariable().equals(flattenedVariable) &&
                     flattenNode.getOutputVariable().equals(outputVariable) &&
-                    flattenNode.getIndexVariable().equals(positionVariable) &&
+                    flattenNode.getIndexVariable().equals(indexVariable) &&
                     flattenNode.isStrict() == isStrict;
         }
         return false;
@@ -378,7 +392,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public FlattenNode clone() {
-        return iqFactory.createFlattenNode(flattenedVariable, outputVariable, positionVariable, isStrict);
+        return iqFactory.createFlattenNode(flattenedVariable, outputVariable, indexVariable, isStrict);
     }
 
     @Override
@@ -397,15 +411,15 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private FlattenNode applySubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> sub) {
         Variable sFlattenedVar = applySubstitution(flattenedVariable, sub);
         Variable sOutputVar = applySubstitution(outputVariable, sub);
-        Optional<Variable> sPositionVar = applySubstitution(positionVariable, sub);
+        Optional<Variable> sIndexVar = applySubstitution(indexVariable, sub);
         return sFlattenedVar.equals(flattenedVariable) &&
                 sOutputVar.equals(outputVariable) &&
-                sPositionVar.equals(positionVariable)?
+                sIndexVar.equals(indexVariable)?
                 this:
                 iqFactory.createFlattenNode(
-                        applySubstitution(flattenedVariable, sub),
-                        applySubstitution(outputVariable, sub),
-                        applySubstitution(positionVariable, sub),
+                        sFlattenedVar,
+                        sOutputVar,
+                        sIndexVar,
                         isStrict
                 );
     }

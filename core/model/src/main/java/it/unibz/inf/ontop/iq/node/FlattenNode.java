@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.iq.node;
 
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
@@ -58,7 +60,7 @@ import java.util.Optional;
  * The variable I is used (by subsequent operators) to refer to the third attribute of R''.
  *
  * We call:
- *  X the "flattened variable"
+ *  Y the "flattened variable"
  *  O the "output variable"
  *  I the "index variable"
  *
@@ -72,6 +74,14 @@ public interface FlattenNode extends UnaryOperatorNode {
     Optional<Variable> getIndexVariable();
 
     boolean isStrict();
+
+    // returns the term flatten(Y), where "flatten" is the DB function symbol for flatten, and Y is the flattened attribute
+    ImmutableTerm getFlattenTerm();
+
+    // for type extraction purposes
+    // returns the term indexIn(Y), where "index" is Ontop's internal "indexIn" function symbol, and Y is the flattened attribute
+    Optional<ImmutableTerm> getIndexTerm();
+
 
 //    @Override
 //    P acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer);
