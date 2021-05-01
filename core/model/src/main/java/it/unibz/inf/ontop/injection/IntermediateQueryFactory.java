@@ -52,7 +52,6 @@ public interface IntermediateQueryFactory {
 
     FlattenNode createFlattenNode(Variable flattenedVariable,
                                   Variable outputVariable,
-                                  Optional<Variable> positionVariable,
                                   boolean isStrict);
 
     FlattenNode createFlattenNode(Variable flattenedVariable,

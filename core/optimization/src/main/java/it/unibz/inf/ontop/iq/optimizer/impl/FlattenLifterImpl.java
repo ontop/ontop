@@ -90,8 +90,7 @@ import java.util.stream.Stream;
  * . flatten nodes from the left-hand-side are lifted if they do not define a variable used in the left join condition
  *
  * - construction node:
- * . flatten nodes are lifted if they do not define a variable used in the substitution range.
- * . the substitution is applied to the lifted flatten nodes' output variable (could happen in theory in the construction node renames this variable)
+ * . flatten nodes are lifted if they do not define a variable used in the substitution's range.
  * . the construction node's projected variables are updated accordingly
  */
 public class FlattenLifterImpl implements FlattenLifter {
@@ -113,15 +112,6 @@ public class FlattenLifterImpl implements FlattenLifter {
                 query.getProjectionAtom(),
                 query.getTree().acceptTransformer(treeTransformer)
         );
-//        IQ prev;
-        //do {
-        //  prev = query;
-//            query = iqFactory.createIQ(
-//                    query.getProjectionAtom(),
-//                    query.getTree().acceptTransformer(treeTransformer)
-//            );
-        //} while (!prev.equals(query));
-//        return query;
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -314,7 +304,7 @@ public class FlattenLifterImpl implements FlattenLifter {
             FlattenNode flatten = (FlattenNode) seq.get(parentIndex - 1);
             QueryNode parent = seq.get(parentIndex);
             // Variables defined by the flatten node (and not in its subtree)
-            ImmutableSet<Variable> definedVars = getDefinedVariables(flatten, seq, parentIndex - 1, subTreeVars);
+            ImmutableSet<Variable> definedVars = flatten.getLocallyDefinedVariables();
             ImmutableList<QueryNode> lift = getChildParentLift(flatten, parent, definedVars, blockingVars);
             if (lift.isEmpty()) {
                 return seq;
@@ -394,41 +384,21 @@ public class FlattenLifterImpl implements FlattenLifter {
 
         private ImmutableList<QueryNode> getLift(FlattenNode liftedNode, ConstructionNode parent, ImmutableSet<Variable> definedVars) {
             ImmutableSet<Variable> varsInSubRange = getVarsInSubstitutionRange(parent);
-            ImmutableSet<Variable> arrayDefinedVars = (ImmutableSet<Variable>) liftedNode.getDataAtom().getVariables().stream()
-                    .filter(v -> !definedVars.contains(v))
-                    .collect(ImmutableCollectors.toSet());
-            if (arrayDefinedVars.stream()
+
+            if (definedVars.stream()
                     .anyMatch(v -> varsInSubRange.contains(v))) {
                 return ImmutableList.of();
             }
-            // among variables projected by the cn, delete the ones defined in the fn's array, and add the fn's array variable
+            // among variables projected by the cn, delete the ones defined by the fn, and add the flattened variable
             ImmutableSet<Variable> projectedVars =
                     Stream.concat(
                             parent.getVariables().stream()
-                                    .filter(v -> arrayDefinedVars.contains(v)),
+                                    .filter(v -> definedVars.contains(v)),
                             Stream.of(liftedNode.getFlattenedVariable())
                     ).collect(ImmutableCollectors.toSet());
 
-            // apply the substitution to the flatten node's array variable (if applicable, which is unlikely)
             ConstructionNode updatedCn = iqFactory.createConstructionNode(projectedVars, parent.getSubstitution());
-            FlattenNode updatedFlatten = applySubstitution(parent.getSubstitution(), liftedNode);
-            return ImmutableList.of(updatedCn, updatedFlatten);
-        }
-
-
-
-        private ImmutableSet<Variable> getDefinedVariables(FlattenNode flatten, ImmutableList<QueryNode> seq, int index, ImmutableSet<Variable> subtreeVars) {
-
-            ImmutableSet<Variable> subsequenceVars = (ImmutableSet<Variable>) seq.subList(0, index).stream()
-                    .filter(n -> n instanceof FlattenNode)
-                    .flatMap(n -> ((FlattenNode) n).getDataAtom().getVariables().stream())
-                    .collect(ImmutableCollectors.toSet());
-
-            return (ImmutableSet<Variable>)
-                    flatten.getDataAtom().getVariables().stream()
-                            .filter(v -> !subtreeVars.contains(v))
-                            .filter(v -> !subsequenceVars.contains(v))
-                            .collect(ImmutableCollectors.toSet());
+            return ImmutableList.of(updatedCn, liftedNode);
         }
 
         private ImmutableList<QueryNode> concat(Stream<? extends QueryNode>... streams) {
@@ -464,24 +434,6 @@ public class FlattenLifterImpl implements FlattenLifter {
                 throw new FlattenLiftException(n + "is not a unary node");
             }
             return subtree;
-        }
-
-        private FlattenNode applySubstitution(ImmutableSubstitution substitution, FlattenNode flattenNode) {
-
-            Variable arrayVar = Optional.of(
-                    substitution.apply(flattenNode.getFlattenedVariable()))
-                    .filter(v -> v instanceof Variable)
-                    .map(v -> (Variable) v)
-                    .orElseThrow(() -> new FlattenLiftException("Applying this substitution is expected to yield a variable." +
-                            "\nSubstitution: " + substitution +
-                            "\nApplied to: " + substitution
-                    ));
-
-            return flattenNode.newNode(
-                    arrayVar,
-                    flattenNode.getArrayIndexIndex(),
-                    flattenNode.getDataAtom()
-            );
         }
 
         private SplitLJLift splitLJLift(ImmutableList<QueryNode> seq) {

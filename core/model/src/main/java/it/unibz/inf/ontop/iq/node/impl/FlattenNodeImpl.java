@@ -77,7 +77,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     }
 
     @Override
-    public Optional<Variable> getPositionVariable() {
+    public Optional<Variable> getIndexVariable() {
         return positionVariable;
     }
 
@@ -359,7 +359,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
             FlattenNode flattenNode = (FlattenNode) node;
             return flattenNode.getFlattenedVariable().equals(flattenedVariable) &&
                     flattenNode.getOutputVariable().equals(outputVariable) &&
-                    flattenNode.getPositionVariable().equals(positionVariable) &&
+                    flattenNode.getIndexVariable().equals(positionVariable) &&
                     flattenNode.isStrict() == isStrict;
         }
         return false;
