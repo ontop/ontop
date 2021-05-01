@@ -23,86 +23,66 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Lifts flatten nodes.
+ * Lifts flatten nodes up the algebraic tree.
+ * ASSUMPTION: all join conditions are EXPLICIT.
+ *
+ * The procedure may alter the order of flatten nodes.
+ *
+ * E.g.:
  * <p>
- * Main difficulty: sequence of consecutive flatten nodes.
- * Consider the (sub)tree S, composed of a potentially blocking operator (e.g. filter),
- * and a sequence of flatten, e.g.:
- * <p>
- * Ex: filter(A1 = C3)
- * flatten1 (A -> [A1,A2])
- * flatten2 (B -> [B1,B2])
- * flatten3 (C1 -> [C3,C4])
- * flatten4 (D -> [D1,D2])
- * flatten5 (C -> [C1,C2])
+ * filter(A' = C'')
+ * flatten1 (A -> A')
+ * flatten2 (B -> B')
+ * flatten3 (C' -> C'')
+ * flatten4 (D -> D')
+ * flatten5 (C -> C')
  * table(A,B,C,D)
- * <p>
+ *
  * Note that:
  * - flatten1 and flatten3 cannot be lifted over the filter.
  * - flatten5 cannot be lifted over flatten3.
  * <p>
- * Solution:
- * - apply the optimization to the child tree first (in this example, it consists of the data node only).
- * - within S, lift each flatten node one after the other, as high as possible, starting with the 1st flatten (from root to leaf).
- * Note that the order of flatten operators may change as a result.
+ * The procedure yields:
  * <p>
- * This yields:
- * <p>
- * flatten4 (D -> [D1,D2])
- * flatten2 (B -> [B1,B2])
- * filter(A1 = C3)
- * flatten3 (C1 -> [C3,C4])
- * flatten5 (C -> [C1,C2])
- * flatten1 (A -> [A1,A2])
+ * flatten4 (D -> D')
+ * flatten2 (B -> B')
+ * filter(A' = A'')
+ * flatten3 (C' -> C'')
+ * flatten5 (C -> C')
+ * flatten1 (A -> A')
  * table(A,B,C,D)
  * <p>
- * <p>
- * This is complicated by the potential split of boolean expressions.
- * E.g. in the previous example, let the filter expression be (A1 = 2) && (C3 = 3)
- * <p>
- * Then some conjuncts of the expression may be lifted together with a flatten.
- * This is performed only if at least one conjunct is not lifted.
- * <p>
- * E.g. lifting flatten 1 first, we get:
- * <p>
- * filter(A1 = 2)
- * flatten1 (A -> [A1,A2])
- * filter(C3 = 3)
- * flatten2 (B -> [B1,B2])
- * flatten4 (D -> [D1,D2])
- * flatten3 (C1 -> [C3,C4])
- * flatten5 (C -> [C1,C2])
- * table(A,B,C,D)
- * <p>
- * Then lifting flatten 2:
- * <p>
- * flatten2 (B -> [B1,B2])
- * filter(A1 = 2)
- * flatten1 (A -> [A1,A2])
- * filter(C3 = 3)
- * flatten4 (D -> [D1,D2])
- * flatten3 (C1 -> [C3,C4])
- * flatten5 (C -> [C1,C2])
- * table(A,B,C,D)
- * <p>
- * Then flatten 4:
- * <p>
- * flatten4 (D -> [D1,D2])
- * flatten2 (B -> [B1,B2])
- * filter(A1 = 2)
- * flatten1 (A -> [A1,A2])
- * filter(C3 = 3)
- * flatten3 (C1 -> [C3,C4])
- * flatten5 (C -> [C1,C2])
- * table(A,B,C,D)
- * <p>
- * The behavior for the other operators is the following:
+ *
+ * For efficiency, the procedure tries to lift consecutive flatten nodes in one pass.
+ * More precisely, the procedure f takes a query Q, with root N.
+ * - base case (N is a data node): f(Q) = Q
+ * - inductive case:
+ *  for each child Q' of Q:
+ *      a) compute f(Q')
+ *      b) try to lift above N all consecutive flatten nodes at the root of f(Q').
+ *
+ *  Step b) may:
+ *  - leave some flatten nodes below N
+ *  - reorder flatten nodes
+ *
+ * The behavior for potentially blocking operators is the following:
+ *
+ * - filter:
+ * . lift all flatten nodes that can be lifted above the filter
+ * . if a conjunct of the filter condition blocks the lift of a flatten node, then the filter may be split.
+ * E.g.:
+ * filter (A' = 1 && B' = 2)
+ * flatten (A -> A')
+ * becomes:
+ * filter(A' = 1)
+ * flatten (A -> A')
+ * filter(B' = 2)
  *
  * - inner join:
- * . the the explicit join condition is isolated as a filter,
+ * . the explicit join condition is isolated as a filter,
  * . flatten nodes are systematically lifted above the join (and below the filter)
  * . the procedure for a lift above the filter is applied
- * . the (possibly) resulting filter-join sequence is replaced by a join with explicit join condition.
+ * . if a filter-join sequence has been produced, it may be simplified (as a join with an explicit join condition).
  *
  * - left join:
  * . the explicit join condition is never lifted.
@@ -110,8 +90,8 @@ import java.util.stream.Stream;
  * . flatten nodes from the left-hand-side are lifted if they do not define a variable used in the left join condition
  *
  * - construction node:
- * . flatten nodes are lifted if they do not define a variable used ion the substitution range.
- * . the substitution is applied to the lifted flatten nodes' array variables (could happen in theory in the construction node renames the array variable)
+ * . flatten nodes are lifted if they do not define a variable used in the substitution range.
+ * . the substitution is applied to the lifted flatten nodes' output variable (could happen in theory in the construction node renames this variable)
  * . the construction node's projected variables are updated accordingly
  */
 public class FlattenLifterImpl implements FlattenLifter {
@@ -153,6 +133,7 @@ public class FlattenLifterImpl implements FlattenLifter {
         @Override
         public IQTree transformFilter(IQTree tree, FilterNode filter, IQTree child) {
             child = child.acceptTransformer(this);
+
             ImmutableList<FlattenNode> flattens = getConsecutiveFlatten(child)
                     .collect(ImmutableCollectors.toList());
 
