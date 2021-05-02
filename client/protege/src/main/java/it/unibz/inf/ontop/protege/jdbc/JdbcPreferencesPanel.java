@@ -31,7 +31,7 @@ public class JdbcPreferencesPanel extends OWLPreferencesPanel {
     private ServiceTracker<?,?> jdbcRegistryTracker;
 
     @Override
-    public void initialise() throws Exception {
+    public void initialise() {
         BundleContext context = JdbcPreferencesPanelBundleActivator.getContext();
         jdbcRegistryTracker = new ServiceTracker<>(context, JdbcRegistry.class.getName(), null);
 

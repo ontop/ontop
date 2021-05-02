@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.protege.connection;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -16,26 +17,29 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.*;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.*;
 
 import static it.unibz.inf.ontop.protege.connection.DataSource.CONNECTION_PARAMETER_NAMES;
-import static it.unibz.inf.ontop.protege.connection.OntopPropertiesTableModel.*;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.getKeyStrokeWithCtrlMask;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.setUpAccelerator;
 import static java.awt.event.KeyEvent.VK_BACK_SPACE;
+import static java.awt.event.KeyEvent.VK_ENTER;
 
 public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OntopPropertiesPanel.class);
 
     private static final ImmutableMap<String, JsonPropertyDescription> ONTOP_PROPERTIES;
-    
+
+    private final OWLEditorKit editorKit;
     private final OBDAModelManager obdaModelManager;
     private final OntopPropertiesTableModel model;
+    private final JTable table;
 
     static {
         Map<String, JsonPropertyDescription> map;
@@ -55,111 +59,53 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
     }
 
     public OntopPropertiesPanel(OWLEditorKit editorKit) {
-        super(new BorderLayout());
+        super(new GridBagLayout());
 
+        this.editorKit = editorKit;
         this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
 
         setBorder(new EmptyBorder(20,40,20, 40));
 
         model = new OntopPropertiesTableModel();
-        JTable table = new JTable(model) {
-            @Override
-            public boolean editCellAt(int row, int column, EventObject e) {
-                boolean result = super.editCellAt(row, column, e);
-                if (column == 1) {
-                    Component editor = getEditorComponent();
-                    if (editor instanceof JTextComponent) {
-                        JTextComponent textComponent = (JTextComponent) editor;
-                        String contents = textComponent.getText();
-                        if (NEW_VALUE.equals(contents)) {
-                            if (e instanceof MouseEvent)
-                                //  Avoids the problem with a double click,
-                                //  when the second click makes the editor to cancel selection
-                                EventQueue.invokeLater(textComponent::selectAll);
-                            else
-                                textComponent.selectAll();
-                        }
-                    }
-                }
-                return result;
-            }
-        };
-        table.setFillsViewportHeight(true);
+        table = new JTable(model);
+
+        add(new JScrollPane(table),
+                new GridBagConstraints(0, 0, 3, 3, 1, 1,
+                GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH,
+                new Insets(0, 0, 0, 0), 0, 0));
+
+        JPanel controlPanel = new JPanel(new FlowLayout());
+        controlPanel.add(DialogUtils.getButton(addAction));
+        controlPanel.add(DialogUtils.getButton(deleteAction));
+        controlPanel.add(DialogUtils.getButton(editAction));
+        add(controlPanel,
+                new GridBagConstraints(0, 4, 1, 1, 0, 0,
+                        GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                        new Insets(0, 0, 0, 0), 0, 0));
+
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setCellSelectionEnabled(true);
-        JComboBox<String> keysComboBox = new JComboBox<>(new DefaultComboBoxModel<String>(ONTOP_PROPERTIES.keySet().toArray(new String[0])) {
+        table.getSelectionModel().addListSelectionListener(e -> setActionsEnabled());
+
+        table.addMouseListener(new MouseAdapter() {
             @Override
-            public void setSelectedItem(Object item) { // disables selection of keys
-                if (model.canBeInRow(item, table.getSelectedRow()))
-                    super.setSelectedItem(item);
-            }
-
-        });
-        keysComboBox.setFont(table.getFont());
-        keysComboBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                          int index, boolean isSelected, boolean cellHasFocus) {
-                if (index == -1)
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-                int row = table.getSelectedRow();
-                boolean itemEnabled = model.canBeInRow(value, row);
-
-                Component component = super.getListCellRendererComponent(list, value, index,
-                        isSelected && itemEnabled, cellHasFocus);
-
-                if (!itemEnabled)
-                    component.setForeground(UIManager.getColor("Label.disabledForeground"));
-
-                if (row != -1 && value.equals(model.getValueAt(row, 0)))
-                    component.setFont(component.getFont().deriveFont(Font.BOLD));
-
-                return component;
-            }
-        });
-        TableColumn keysColumn = table.getColumnModel().getColumn(0);
-        keysColumn.setCellEditor(new DefaultCellEditor(keysComboBox) {
-            @Override
-            public boolean stopCellEditing() {
-                JComboBox<String> comboBox = (JComboBox<String>) getComponent();
-                return model.canBeInRow(comboBox.getSelectedItem(), table.getSelectedRow())
-                        && super.stopCellEditing();
-            }
-        });
-        keysColumn.setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                component.setForeground(!NEW_KEY.equals(value) && !ONTOP_PROPERTIES.containsKey(value)
-                        ? Color.RED
-                        : (isSelected ? table.getSelectionForeground() : table.getForeground()));
-
-                return component;
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2)
+                    editAction.actionPerformed(null);
             }
         });
 
-        OntopAbstractAction removeAction = new OntopAbstractAction(
-                "Remove",
-                null,
-                null,
-                DialogUtils.getKeyStrokeWithCtrlMask(VK_BACK_SPACE)) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int row = table.getSelectedRow();
-                table.getCellEditor().cancelCellEditing();
-                if (row != -1 && row != model.getRowCount() - 1) {
-                    model.removeRow(row);
-                    table.getSelectionModel().setSelectionInterval(row, row);
-                }
-            }
-        };
+        setActionsEnabled();
 
-        DialogUtils.setUpAccelerator(table, removeAction);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        setUpAccelerator(table, editAction);
+        setUpAccelerator(table, deleteAction);
 
         activeOntologyChanged(obdaModelManager.getCurrentOBDAModel());
+    }
+
+    private void setActionsEnabled() {
+        boolean selectNonEmpty = !table.getSelectionModel().isSelectionEmpty();
+        editAction.setEnabled(selectNonEmpty);
+        deleteAction.setEnabled(selectNonEmpty);
     }
 
     @Override
@@ -167,4 +113,51 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
         model.clear(obdaModel.getDataSource());
     }
 
+    private final OntopAbstractAction addAction = new OntopAbstractAction("Add",
+            null, null, null) {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            ImmutableSet<String> names = model.getNames();
+            OntopPropertiesEditDialog dialog = new OntopPropertiesEditDialog(
+                    ONTOP_PROPERTIES.entrySet().stream()
+                        .filter(e -> !names.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+            DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
+            dialog.getProperty().ifPresent(i -> model.setProperty(i.getKey(), i.getValue()));
+        }
+    };
+
+    private final OntopAbstractAction editAction = new OntopAbstractAction("Edit",
+            null,
+            "Change property value",
+            getKeyStrokeWithCtrlMask(VK_ENTER)) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int row = table.getSelectedRow();
+            String name = model.getName(row);
+            String value = model.getValue(row);
+            OntopPropertiesEditDialog dialog = new OntopPropertiesEditDialog(
+                    name, value, ONTOP_PROPERTIES.get(name));
+            DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
+            dialog.getProperty().ifPresent(i -> model.setProperty(i.getKey(), i.getValue()));
+        }
+    };
+
+    private final OntopAbstractAction deleteAction = new OntopAbstractAction("Delete",
+            null,
+            "Delete property",
+            getKeyStrokeWithCtrlMask(VK_BACK_SPACE)) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int row = table.getSelectedRow();
+            String name = (String)model.getValueAt(row, 0);
+
+            if (!DialogUtils.confirmation(OntopPropertiesPanel.this,
+                    "<html>Proceed deleting property <b>" + name + "</b>?</html>",
+                    "Delete Ontop Property Confirmation"))
+                return;
+
+            model.removeRow(row);
+        }
+    };
 }

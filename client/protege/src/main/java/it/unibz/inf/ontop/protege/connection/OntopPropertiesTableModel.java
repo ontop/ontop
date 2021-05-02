@@ -1,22 +1,17 @@
 package it.unibz.inf.ontop.protege.connection;
 
+
 import com.google.common.collect.ImmutableSet;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 public class OntopPropertiesTableModel extends AbstractTableModel {
-
-    public static final String NEW_KEY = "<new key>";
-    public static final String NEW_VALUE = "<new value>";
 
     private final List<String> keys = new ArrayList<>();
 
     private DataSource datasource;
-    private String newlyAddedValue = "";
 
     public void clear(DataSource datasource) {
         this.datasource = datasource;
@@ -26,7 +21,7 @@ public class OntopPropertiesTableModel extends AbstractTableModel {
     }
 
     @Override
-    public int getRowCount() { return keys.size() + 1; }
+    public int getRowCount() { return keys.size(); }
 
     @Override
     public int getColumnCount() { return 2; }
@@ -36,16 +31,13 @@ public class OntopPropertiesTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (rowIndex == keys.size())
-            return columnIndex == 0 ? NEW_KEY : newlyAddedValue.isEmpty() ? NEW_VALUE : newlyAddedValue;
-
         String key = keys.get(rowIndex);
         return columnIndex == 0 ? key : datasource.getProperty(key);
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
+        return false;
     }
 
     @Override
@@ -53,35 +45,16 @@ public class OntopPropertiesTableModel extends AbstractTableModel {
         return String.class;
     }
 
-    @Override
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        if (columnIndex == 0) {
-            String key = (String)aValue;
-            if (rowIndex == keys.size()) {
-                if (NEW_KEY.equals(key))
-                    return;
-
-                datasource.setProperty(key, newlyAddedValue);
-                newlyAddedValue = "";
-                keys.add(rowIndex, key);
-                fireTableRowsInserted(rowIndex + 1, rowIndex + 1);
-            }
-            else {
-                String oldKey = keys.set(rowIndex, key);
-                datasource.renameProperty(oldKey, key);
-                fireTableCellUpdated(rowIndex, columnIndex);
-            }
+    public void setProperty(String name, String value) {
+        if (datasource.getProperty(name) == null) {
+            keys.add(name);
+            datasource.setProperty(name, value);
+            fireTableRowsInserted(keys.size(), keys.size());
         }
         else {
-            String value = (String) aValue;
-            if (rowIndex == keys.size()) {
-                newlyAddedValue = value;
-            }
-            else {
-                String key = keys.get(rowIndex);
-                datasource.setProperty(key, value);
-            }
-            fireTableCellUpdated(rowIndex, columnIndex);
+            int rowIndex = keys.indexOf(name);
+            datasource.setProperty(name, value);
+            fireTableCellUpdated(rowIndex, 1);
         }
     }
 
@@ -91,6 +64,18 @@ public class OntopPropertiesTableModel extends AbstractTableModel {
             datasource.removeProperty(key);
             fireTableRowsDeleted(rowIndex, rowIndex);
         }
+    }
+
+    String getName(int row) {
+        return (String)getValueAt(row, 0);
+    }
+
+    String getValue(int row) {
+        return (String)getValueAt(row, 1);
+    }
+
+    ImmutableSet<String> getNames() {
+        return datasource.getPropertyKeys();
     }
 
     public boolean canBeInRow(Object key, int row) {
