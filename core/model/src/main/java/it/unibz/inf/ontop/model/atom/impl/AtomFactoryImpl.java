@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 public class AtomFactoryImpl implements AtomFactory {
 
     private final TriplePredicate triplePredicate;
+    private final TripleRefPredicate tripleRefPredicate;
     private final QuadPredicate quadPredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
@@ -36,6 +37,12 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType(),
                 typeFactory.getIRITermType()),
+                iriType, rdfFactory);
+        tripleRefPredicate = new TripleRefPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getAbstractObjectRDFType()),
                 iriType, rdfFactory);
     }
 
@@ -80,6 +87,11 @@ public class AtomFactoryImpl implements AtomFactory {
     public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
                                                             VariableOrGroundTerm object) {
         return getDataAtom(triplePredicate, subject, property, object);
+    }
+
+    public DataAtom<AtomPredicate> getIntensionalTripleRefAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                            VariableOrGroundTerm object, VariableOrGroundTerm ref) {
+        return getDataAtom(tripleRefPredicate, subject, property, object, ref);
     }
 
     // Davide> TODO Add "quad" version for other methods as well

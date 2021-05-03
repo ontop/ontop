@@ -199,6 +199,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         if (node instanceof Order)
             return translateOrder((Order) node, externalBindings);
 
+        if (node instanceof TripleRef)
+            return translateTripleRef((TripleRef) node, externalBindings);
+
         throw new Sparql2IqConversionException("Unexpected SPARQL operator : " + node.toString());
     }
 
@@ -900,6 +903,30 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                 ))),
                 allNullable
         );
+    }
+
+    // Translates rdf4j's tripleRef node. This node is used
+    private TranslationResult translateTripleRef(TripleRef tripleRef, ImmutableMap<Variable, GroundTerm> externalBindings) {
+        if (tripleRef.getExprVar() == null) {
+            // TODO: Decide what to do in the case of TripleRef lacking reference
+            throw new Sparql2IqConversionException("This tripleRef has no ref, we've not implemented how to deal with this : " + tripleRef.toString());
+        }
+        IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
+                atomFactory.getIntensionalTripleRefAtom(
+                        translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                        translateRDF4JVar(tripleRef.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                        translateRDF4JVar(tripleRef.getObjectVar(), ImmutableSet.of(), true, externalBindings),
+                        translateRDF4JVar(tripleRef.getExprVar(), ImmutableSet.of(), true, externalBindings)
+                ));
+
+        // In most cases
+        if (externalBindings.isEmpty())
+            return createTranslationResult(dataNode, ImmutableSet.of());
+
+        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(dataNode.getVariables(), externalBindings.keySet());
+        IQTree iqTree = applyExternalBindingFilter(dataNode, externalBindings, externallyBoundedVariables);
+
+        return createTranslationResult(iqTree, ImmutableSet.of());
     }
 
     private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings) {

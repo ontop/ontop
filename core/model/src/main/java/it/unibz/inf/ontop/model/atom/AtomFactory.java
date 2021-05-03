@@ -39,6 +39,12 @@ public interface AtomFactory {
 
     /**
      * TODO: change the generic-type to RDFAtomPredicate?
+     */
+    DataAtom<AtomPredicate> getIntensionalTripleRefAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                     VariableOrGroundTerm object, VariableOrGroundTerm ref);
+
+    /**
+     * TODO: change the generic-type to RDFAtomPredicate?
      * Davide: For provenance TODO: Add quads version for each method in this intereface
      */
     DataAtom<AtomPredicate> getIntensionalQuadAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
