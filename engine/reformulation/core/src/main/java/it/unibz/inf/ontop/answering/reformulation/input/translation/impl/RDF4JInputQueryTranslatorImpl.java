@@ -905,20 +905,55 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    // Translates rdf4j's tripleRef node. This node is used
+    // Translates rdf4j's tripleRef node. This node is used for rdf-star support
     private TranslationResult translateTripleRef(TripleRef tripleRef, ImmutableMap<Variable, GroundTerm> externalBindings) {
         if (tripleRef.getExprVar() == null) {
             // TODO: Decide what to do in the case of TripleRef lacking reference
             throw new Sparql2IqConversionException("This tripleRef has no ref, we've not implemented how to deal with this : " + tripleRef.toString());
         }
-        IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
-                atomFactory.getIntensionalTripleRefAtom(
-                        translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(tripleRef.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(tripleRef.getObjectVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(tripleRef.getExprVar(), ImmutableSet.of(), true, externalBindings)
-                ));
+        // TODO: Deciding if triple contains nesting is currently done by checking if the var name contains "_anon_",
+        //  this feels hacky and liable to introduce bugs
+        IntensionalDataNode dataNode;
+        if (tripleRef.getSubjectVar().getName().contains("_anon_")) {
+            if (tripleRef.getObjectVar().getName().contains("_anon_")) {
+                dataNode = iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalTripleRefNestedSOAtom(
+                                translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getObjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getExprVar(), ImmutableSet.of(), true, externalBindings)
+                        ));
+            }
+            else {
+                dataNode = iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalTripleRefNestedSubjectAtom(
+                                translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getObjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getExprVar(), ImmutableSet.of(), true, externalBindings)
+                        ));
+            }
+        }
+        else if (tripleRef.getObjectVar().getName().contains("_anon_")) {
+            dataNode = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalTripleRefNestedObjectAtom(
+                            translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(tripleRef.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(tripleRef.getObjectVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(tripleRef.getExprVar(), ImmutableSet.of(), true, externalBindings)
+                    ));
+        }
+        else {
+            dataNode = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalTripleRefSimpleAtom(
+                            translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(tripleRef.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(tripleRef.getObjectVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(tripleRef.getExprVar(), ImmutableSet.of(), true, externalBindings)
+                    ));
+        }
 
+        // TODO: The below part is copied from translateTriplePattern, I do not know if it's necessary /Lukas
         // In most cases
         if (externalBindings.isEmpty())
             return createTranslationResult(dataNode, ImmutableSet.of());
@@ -930,12 +965,43 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings) {
-        IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
-                atomFactory.getIntensionalTripleAtom(
-                        translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)
-                ));
+        // TODO: I've added these if checks to translate rdf-star triples, but they feel hacky and I think they can introduce bugs /lukas
+        IntensionalDataNode dataNode;
+        if (triple.getSubjectVar().getName().contains("_anon_")) {
+            if (triple.getObjectVar().getName().contains("_anon_")) {
+                dataNode = iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalTripleNestedSOAtom(
+                                translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)
+                        ));
+            }
+            else {
+                dataNode = iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalTripleNestedSubjectAtom(
+                                translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)
+                        ));
+            }
+        }
+        else if (triple.getObjectVar().getName().contains("_anon_")) {
+            dataNode = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalTripleNestedObjectAtom(
+                            translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)
+                    ));
+        }
+        // end of rdf-star part
+        else {
+            dataNode = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalTripleAtom(
+                            translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                            translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)
+                    ));
+        }
 
         // In most cases
         if (externalBindings.isEmpty())

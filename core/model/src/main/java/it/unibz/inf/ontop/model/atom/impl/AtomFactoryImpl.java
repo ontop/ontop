@@ -15,10 +15,18 @@ import java.util.stream.IntStream;
 public class AtomFactoryImpl implements AtomFactory {
 
     private final TriplePredicate triplePredicate;
-    private final TripleRefPredicate tripleRefPredicate;
     private final QuadPredicate quadPredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+
+    // These are used for RDF-star support
+    private final TripleNestedSubjectPredicate tripleNestedSubjectPredicate;
+    private final TripleNestedObjectPredicate tripleNestedObjectPredicate;
+    private final TripleNestedSOPredicate tripleNestedSOPredicate;
+    private final TripleRefSimplePredicate tripleRefSimplePredicate;
+    private final TripleRefNestedSubjectPredicate tripleRefNestedSubjectPredicate;
+    private final TripleRefNestedObjectPredicate tripleRefNestedObjectPredicate;
+    private final TripleRefNestedSOPredicate tripleRefNestedSOPredicate;
 
     @Inject
     private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, org.apache.commons.rdf.api.RDF rdfFactory) {
@@ -38,11 +46,45 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getAbstractRDFTermType(),
                 typeFactory.getIRITermType()),
                 iriType, rdfFactory);
-        tripleRefPredicate = new TripleRefPredicateImpl(ImmutableList.of(
+        // These are used for RDF-star support
+        tripleRefSimplePredicate = new TripleRefSimplePredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType(),
                 typeFactory.getAbstractObjectRDFType()),
+                iriType, rdfFactory);
+        tripleRefNestedSubjectPredicate = new TripleRefNestedSubjectPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getAbstractObjectRDFType()),
+                iriType, rdfFactory);
+        tripleRefNestedObjectPredicate = new TripleRefNestedObjectPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getAbstractObjectRDFType()),
+                iriType, rdfFactory);
+        tripleRefNestedSOPredicate = new TripleRefNestedSOPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getAbstractObjectRDFType()),
+                iriType, rdfFactory);
+        tripleNestedSubjectPredicate = new TripleNestedSubjectPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType()),
+                iriType, rdfFactory);
+        tripleNestedObjectPredicate = new TripleNestedObjectPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType()),
+                iriType, rdfFactory);
+        tripleNestedSOPredicate = new TripleNestedSOPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType()),
                 iriType, rdfFactory);
     }
 
@@ -89,11 +131,6 @@ public class AtomFactoryImpl implements AtomFactory {
         return getDataAtom(triplePredicate, subject, property, object);
     }
 
-    public DataAtom<AtomPredicate> getIntensionalTripleRefAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
-                                                            VariableOrGroundTerm object, VariableOrGroundTerm ref) {
-        return getDataAtom(tripleRefPredicate, subject, property, object, ref);
-    }
-
     // Davide> TODO Add "quad" version for other methods as well
     @Override
     public DataAtom<AtomPredicate> getIntensionalQuadAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
@@ -124,5 +161,41 @@ public class AtomFactoryImpl implements AtomFactory {
     public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
                                                             Variable namedGraph) {
         return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
+    }
+
+    // These are used for RDF-star support
+    public DataAtom<AtomPredicate> getIntensionalTripleRefSimpleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                               VariableOrGroundTerm object, VariableOrGroundTerm ref) {
+        return getDataAtom(tripleRefSimplePredicate, subject, property, object, ref);
+    }
+
+    public DataAtom<AtomPredicate> getIntensionalTripleRefNestedSubjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                     VariableOrGroundTerm object, VariableOrGroundTerm ref) {
+        return getDataAtom(tripleRefNestedSubjectPredicate, subject, property, object, ref);
+    }
+
+    public DataAtom<AtomPredicate> getIntensionalTripleRefNestedObjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                     VariableOrGroundTerm object, VariableOrGroundTerm ref) {
+        return getDataAtom(tripleRefNestedObjectPredicate, subject, property, object, ref);
+    }
+
+    public DataAtom<AtomPredicate> getIntensionalTripleRefNestedSOAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                     VariableOrGroundTerm object, VariableOrGroundTerm ref) {
+        return getDataAtom(tripleRefNestedSOPredicate, subject, property, object, ref);
+    }
+
+    public DataAtom<AtomPredicate> getIntensionalTripleNestedSubjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                            VariableOrGroundTerm object) {
+        return getDataAtom(tripleNestedSubjectPredicate, subject, property, object);
+    }
+
+    public DataAtom<AtomPredicate> getIntensionalTripleNestedObjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                           VariableOrGroundTerm object) {
+        return getDataAtom(tripleNestedObjectPredicate, subject, property, object);
+    }
+
+    public DataAtom<AtomPredicate> getIntensionalTripleNestedSOAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                       VariableOrGroundTerm object) {
+        return getDataAtom(tripleNestedSOPredicate, subject, property, object);
     }
 }
