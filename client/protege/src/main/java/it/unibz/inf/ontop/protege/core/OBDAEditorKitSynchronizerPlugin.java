@@ -20,14 +20,21 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
-import it.unibz.inf.ontop.answering.connection.pool.impl.ConnectionGenerator;
+import com.google.common.collect.ImmutableList;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+
+import javax.annotation.Nonnull;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA
@@ -43,6 +50,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 	private OBDAModelManager obdaModelManager;
 
+	private final Map<String, Color> colorProperties = new HashMap<>();
+
 	@Override
 	public void initialise() {
 		EditorKit editorKit = getEditorKit();
@@ -52,25 +61,45 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		editorKit.put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
 
 		obdaModelManager = new OBDAModelManager((OWLEditorKit) editorKit);
+		PreferencesManager man = PreferencesManager.getInstance();
+		Preferences pref = man.getApplicationPreferences("OBDA Plugin");
+		List<String> keys = pref.getStringList("Colors", new ArrayList<>());
+		for (String k : keys)
+			colorProperties.put(k, new Color(pref.getInt(k, 0)));
 	}
 
 	@Override
 	public void dispose()  {
-		//PreferencesManager man = PreferencesManager.getInstance();
-		//Preferences pref = man.getApplicationPreferences("OBDA Plugin");
+		PreferencesManager man = PreferencesManager.getInstance();
+		Preferences pref = man.getApplicationPreferences("OBDA Plugin");
+		pref.putStringList("Colors", ImmutableList.copyOf(colorProperties.keySet()));
+		for (Map.Entry<String, Color> e : colorProperties.entrySet())
+			pref.putInt(e.getKey(), e.getValue().getRGB());
 
 		obdaModelManager.dispose();
 	}
 
+	public static Optional<Color> getColor(EditorKit editorKit, String property) {
+		return Optional.ofNullable(get(editorKit).colorProperties.get(property));
+	}
+
+	public static void setColor(EditorKit editorKit, String property, Color color) {
+		get(editorKit).colorProperties.put(property, color);
+	}
+
 	public static OBDAModelManager getOBDAModelManager(EditorKit editorKit) {
+		return get(editorKit).obdaModelManager;
+	}
+
+	public static OBDAModel getCurrentOBDAModel(EditorKit editorKit) {
+		return get(editorKit).obdaModelManager.getCurrentOBDAModel();
+	}
+
+	private static @Nonnull OBDAEditorKitSynchronizerPlugin get(EditorKit editorKit) {
 		Disposable object = editorKit.get(OBDAEditorKitSynchronizerPlugin.class.getName());
 		if (!(object instanceof OBDAEditorKitSynchronizerPlugin))
 			throw new RuntimeException("Cannot find OBDAEditorKitSynchronizerPlugin");
 
-		return ((OBDAEditorKitSynchronizerPlugin)object).obdaModelManager;
-	}
-
-	public static OBDAModel getCurrentOBDAModel(EditorKit editorKit) {
-		return getOBDAModelManager(editorKit).getCurrentOBDAModel();
+		return (OBDAEditorKitSynchronizerPlugin)object;
 	}
 }

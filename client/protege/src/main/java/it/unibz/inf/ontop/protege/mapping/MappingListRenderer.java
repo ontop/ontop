@@ -22,15 +22,20 @@ package it.unibz.inf.ontop.protege.mapping;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.utils.SQLQueryStyledDocument;
 import it.unibz.inf.ontop.protege.utils.TargetQueryStyledDocument;
+import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import static it.unibz.inf.ontop.protege.mapping.MappingListPreferencesPanel.*;
 
 public class MappingListRenderer extends JPanel implements ListCellRenderer<TriplesMap> {
 
@@ -46,9 +51,6 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 	private final int plainFontHeight;
 	private final int plainFontWidth;
 
-	private static final Color SELECTION_BACKGROUND_COLOR = UIManager.getDefaults().getColor("List.selectionBackground");
-	private static final Color BACKGROUND_COLOR = new Color(240, 245, 240);
-
 	private static final ImmutableMap<TriplesMap.Status, Color> VALIDITY_BACKGROUND = ImmutableMap.of(
 			TriplesMap.Status.VALID, new Color(19, 139, 114),
 			TriplesMap.Status.NOT_VALIDATED, Color.GRAY.brighter(),
@@ -58,6 +60,9 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 			TriplesMap.Status.VALID, "V",
 			TriplesMap.Status.NOT_VALIDATED, "",
 			TriplesMap.Status.INVALID, "I");
+
+	private final Color selectionBackgroundColor;
+	private final Color backgroundColor;
 
 	private final SimpleAttributeSet mappingIdStyle = new SimpleAttributeSet();
 	private final SimpleAttributeSet selectionForeground = new SimpleAttributeSet();
@@ -69,8 +74,12 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 	private static final int SEPARATOR = 2;
 	private static final int STATUS_WIDTH = 2;
 
-	public MappingListRenderer(OBDAModelManager obdaModelManager) {
+	private final OWLEditorKit editorKit;
+
+	public MappingListRenderer(OWLEditorKit editorKit) {
 		super(new SpringLayout());
+
+		this.editorKit = editorKit;
 
 		mapTextPane = new JTextPane();
 		mapTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
@@ -80,7 +89,7 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 		trgQueryTextPane.setMargin(new Insets(SEPARATOR, MARGIN, SEPARATOR, MARGIN));
 		trgQueryTextPane.setOpaque(false);
 		trgQueryDocument = new TargetQueryStyledDocument(
-				obdaModelManager,
+				OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit),
 				doc -> {
 					try {
 						doc.validate();
@@ -131,15 +140,34 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 		StyleConstants.setFontSize(mappingIdStyle, plainFont.getSize());
 		StyleConstants.setBold(mappingIdStyle, true);
 
-		Color selectionForegroundColor = UIManager.getDefaults().getColor("List.selectionForeground");
+		selectionBackgroundColor = getColor(SELECTION_COLOR_PROPERTY + BACKGROUND,
+				() -> UIManager.getDefaults().getColor("List.selectionBackground"));
+
+		backgroundColor = getColor(DEFAULT_COLOR_PROPERTY + BACKGROUND,
+				() -> new Color(240, 245, 240));
+
+		Color selectionForegroundColor = getColor(SELECTION_COLOR_PROPERTY + FOREGOUND,
+				() -> UIManager.getDefaults().getColor("List.selectionForeground"));
 		if (selectionForegroundColor != null)
 			StyleConstants.setForeground(selectionForeground, selectionForegroundColor);
 
-		Color foregroundColor = UIManager.getDefaults().getColor("List.foreground");
+		Color foregroundColor = getColor(DEFAULT_COLOR_PROPERTY + FOREGOUND,
+				() -> UIManager.getDefaults().getColor("List.foreground"));
 		if (foregroundColor != null)
 			StyleConstants.setForeground(foreground, foregroundColor);
 	}
 
+	private Color getColor(String property, Supplier<Color> supplier) {
+		Optional<Color> color = OBDAEditorKitSynchronizerPlugin.getColor(editorKit, property);
+		if (!color.isPresent()) {
+			Color defaultColor = supplier.get();
+			if (defaultColor != null)
+				OBDAEditorKitSynchronizerPlugin.setColor(editorKit, property, defaultColor);
+
+			return defaultColor;
+		}
+		return color.get();
+	}
 
 	private void setAttributes(JTextPane pane, SimpleAttributeSet attributes, boolean replace) {
 		StyledDocument doc = pane.getStyledDocument();
@@ -165,7 +193,7 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 		statusLabel.setText(VALIDITY_TEXT.get(triplesMap.getStatus()));
 
 		statusPanel.setBackground(VALIDITY_BACKGROUND.get(triplesMap.getStatus()));
-		mainPanel.setBackground(isSelected ? SELECTION_BACKGROUND_COLOR : BACKGROUND_COLOR);
+		mainPanel.setBackground(isSelected ? selectionBackgroundColor : backgroundColor);
 
 		/*
 		 * Now we compute the sizes of each of the components, including the text

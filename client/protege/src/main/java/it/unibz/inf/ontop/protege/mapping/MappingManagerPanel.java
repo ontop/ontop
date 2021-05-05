@@ -57,7 +57,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         setLayout(new BorderLayout());
 
         mappingList = new JList<>();
-        mappingList.setCellRenderer(new MappingListRenderer(obdaModelManager));
+        mappingList.setCellRenderer(new MappingListRenderer(editorKit));
         mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         add(new JScrollPane(mappingList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,

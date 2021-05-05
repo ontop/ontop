@@ -168,4 +168,11 @@
         <class value="it.unibz.inf.ontop.protege.jdbc.JdbcPreferencesPanel"/>
     </extension>
 
+	<!-- MappingListPreferences -->
+	<extension id="mapping.prefs"
+			   point="org.protege.editor.core.application.preferencespanel">
+		<label value="Mapping Preferences"/>
+		<class value="it.unibz.inf.ontop.protege.mapping.MappingListPreferencesPanel"/>
+	</extension>
+
 </plugin>
