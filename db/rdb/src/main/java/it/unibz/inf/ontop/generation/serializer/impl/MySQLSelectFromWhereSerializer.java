@@ -78,8 +78,8 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                     // serializeLimitOffset and serializeLimit are standard
 
                     @Override
-                    protected String serializeOffset(long offset) {
-                        return serializeLimitOffset(Long.MAX_VALUE, offset);
+                    protected String serializeOffset(long offset, boolean noSortCondition) {
+                        return serializeLimitOffset(Long.MAX_VALUE, offset, noSortCondition);
                     }
 
                     /**

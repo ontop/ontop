@@ -38,7 +38,7 @@ public class TeiidSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                     //  serializeLimitOffset and  serializeLimit are standard
 
                     @Override
-                    protected String serializeOffset(long offset) {
+                    protected String serializeOffset(long offset, boolean noSortCondition) {
                         return String.format("OFFSET %d ROWS", offset);
                     }
                 });
