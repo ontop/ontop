@@ -51,18 +51,18 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
              * Reason: In 12.1 and later, you can use the OFFSET and/or FETCH [FIRST | NEXT] operators
              */
             @Override
-            protected String serializeLimitOffset(long limit, long offset) {
+            protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                 return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
             }
 
             @Override
-            protected String serializeLimit(long limit, ImmutableList<SQLOrderComparator> sortConditions) {
+            protected String serializeLimit(long limit, boolean noSortCondition) {
                 // ROWNUM <= limit could also be used
                 return String.format("FETCH NEXT %d ROWS ONLY", limit);
             }
 
             @Override
-            protected String serializeOffset(long offset) {
+            protected String serializeOffset(long offset, boolean noSortCondition) {
                 return String.format("OFFSET %d ROWS\nFETCH NEXT 99999999 ROWS ONLY", offset);
             }
 

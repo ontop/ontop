@@ -23,9 +23,6 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
 
     @Override
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
-        QuerySerialization a0;
-        a0 = selectFromWhere.acceptVisitor(new IgnoreNullFirstRelationVisitingSerializer(dbParameters.getQuotedIDFactory()));
-        boolean check = a0.getString().contains("ORDER BY");
         return selectFromWhere.acceptVisitor(new IgnoreNullFirstRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
 
             //@Override SQL Server allows no FROM clause
@@ -47,8 +44,10 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
              */
 
             @Override
-            protected String serializeLimitOffset(long limit, long offset) {
-                return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
+            protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
+                return noSortCondition
+                        ? String.format("ORDER BY (SELECT NULL)\nOFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit)
+                        : String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
             }
 
             /**
@@ -56,15 +55,17 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
              * ORDER BY (SELECT NULL) added as a default when no ORDER BY present
              */
             @Override
-            protected String serializeLimit(long limit, ImmutableList<SQLOrderComparator> sortConditions) {
-                return sortConditions.isEmpty()
+            protected String serializeLimit(long limit, boolean noSortCondition) {
+                return noSortCondition
                         ? String.format("ORDER BY (SELECT NULL)\nOFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit)
                         : String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
             }
 
             @Override
-            protected String serializeOffset(long offset) {
-                return String.format("OFFSET %d ROWS", offset);
+            protected String serializeOffset(long offset, boolean noSortCondition) {
+                return noSortCondition
+                        ? String.format("ORDER BY (SELECT NULL)\nOFFSET %d ROWS", offset)
+                        : String.format("OFFSET %d ROWS", offset);
             }
 
             @Override

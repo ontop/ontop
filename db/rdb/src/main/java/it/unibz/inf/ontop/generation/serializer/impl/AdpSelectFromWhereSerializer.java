@@ -23,12 +23,12 @@ public class AdpSelectFromWhereSerializer extends DefaultSelectFromWhereSerializ
                      * same as PostgreSQL: serializeLimit is standard
                      */
                     @Override
-                    protected String serializeOffset(long offset) {
+                    protected String serializeOffset(long offset, boolean noSortCondition) {
                         return String.format("LIMIT ALL\nOFFSET %d", offset);
                     }
 
                     @Override
-                    protected String serializeLimitOffset(long limit, long offset) {
+                    protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("LIMIT %d\nOFFSET %d", limit, offset);
                     }
                 });
