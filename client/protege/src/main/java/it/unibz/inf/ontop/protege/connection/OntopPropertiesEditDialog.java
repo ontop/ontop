@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OntopAbstractAction;
+import it.unibz.inf.ontop.protege.utils.SimpleDocumentListener;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,13 +16,13 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.getButton;
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.setUpAccelerator;
-import static javax.swing.SwingConstants.TOP;
 
 public class OntopPropertiesEditDialog extends JDialog {
 
-    private final JLabel statusLabel;
-    private final JTextField valueField;
     private final JComboBox<String> nameComboBox;
+    private final JLabel typeLabel;
+    private final JTextField valueField;
+    private final Color defaultTextColor;
     private final JTextArea descriptionLabel;
 
     private final ImmutableMap<String, JsonPropertyDescription> properties;
@@ -54,21 +55,34 @@ public class OntopPropertiesEditDialog extends JDialog {
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        mainPanel.add(new JLabel("Value:"),
+        mainPanel.add(new JLabel("Type:"),
                 new GridBagConstraints(0, 1, 1, 1, 0, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-        valueField = new JTextField();
-        mainPanel.add(valueField,
+        typeLabel = new JLabel();
+        mainPanel.add(typeLabel,
                 new GridBagConstraints(1, 1, 2, 1, 1, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
-
-        mainPanel.add(new JLabel("Description:"),
+        mainPanel.add(new JLabel("Value:"),
                 new GridBagConstraints(0, 2, 1, 1, 0, 0,
                         GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
+
+        valueField = new JTextField();
+        defaultTextColor = valueField.getForeground();
+        valueField.getDocument().addDocumentListener(
+                (SimpleDocumentListener) e -> onValueChange(getCurrentProperty()));
+        mainPanel.add(valueField,
+                new GridBagConstraints(1, 2, 2, 1, 1, 0,
+                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
+
+        mainPanel.add(new JLabel("Description:"),
+                new GridBagConstraints(0, 3, 1, 1, 0, 1,
+                        GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
         descriptionLabel = new JTextArea();
@@ -82,18 +96,9 @@ public class OntopPropertiesEditDialog extends JDialog {
         descriptionLabel.setBorder(null);
         descriptionLabel.setBackground(mainPanel.getBackground());
         JScrollPane scrollPane = new JScrollPane(descriptionLabel);
-        //scrollPane.setOpaque(false);
         scrollPane.setPreferredSize(new Dimension(500, 100));
         mainPanel.add(scrollPane,
-                new GridBagConstraints(1, 2, 1, 1, 1, 0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
-
-        statusLabel = new JLabel(" ");
-        statusLabel.setForeground(Color.RED);
-        statusLabel.setVerticalAlignment(TOP);
-        mainPanel.add(statusLabel,
-                new GridBagConstraints(0, 3, 3, 1, 1, 1,
+                new GridBagConstraints(1, 3, 1, 1, 1, 1,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
@@ -110,28 +115,38 @@ public class OntopPropertiesEditDialog extends JDialog {
         getRootPane().setDefaultButton(okButton);
         setUpAccelerator(getRootPane(), cancelAction);
 
-        onSelectProperty();
-        nameComboBox.addItemListener(e -> onSelectProperty());
+        onPropertySelect();
+        nameComboBox.addItemListener(e -> onPropertySelect());
     }
 
     public OntopPropertiesEditDialog(String name, String value, JsonPropertyDescription description) {
         this(ImmutableMap.of(name, description));
 
         nameComboBox.setSelectedItem(name);
-        //nameComboBox.setEnabled(false);
         valueField.setText(value);
     }
 
-    private void onSelectProperty() {
-        String name = (String) nameComboBox.getSelectedItem();
-        String description = properties.get(name).getDescription();
-        descriptionLabel.setText(description);
+    private void onPropertySelect() {
+        JsonPropertyDescription property = getCurrentProperty();
+        typeLabel.setText(property.getType());
+        descriptionLabel.setText(property.getDescription());
+        onValueChange(property);
+    }
+
+    private void onValueChange(JsonPropertyDescription property) {
+        boolean valid = property.isValidValue(valueField.getText());
+        valueField.setForeground(valid ? defaultTextColor : Color.RED);
+    }
+
+    private JsonPropertyDescription getCurrentProperty() {
+        String name = (String)nameComboBox.getSelectedItem();
+        return properties.get(name);
     }
 
     private final OntopAbstractAction okAction = new OntopAbstractAction(DialogUtils.OK_BUTTON_TEXT, null, null, null) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            result = Maps.immutableEntry(nameComboBox.getSelectedItem().toString(), valueField.getText());
+            result = Maps.immutableEntry((String)nameComboBox.getSelectedItem(), valueField.getText());
             dispatchEvent(new WindowEvent(OntopPropertiesEditDialog.this, WindowEvent.WINDOW_CLOSING));
         }
     };

@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -68,6 +70,22 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
 
         model = new OntopPropertiesTableModel();
         table = new JTable(model);
+        table.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                String name = model.getName(row);
+                Color fg = ONTOP_PROPERTIES.containsKey(name)
+                        && (column == 0 || ONTOP_PROPERTIES.get(name).isValidValue(model.getValue(row)))
+                        ? (isSelected ? table.getSelectionForeground() : table.getForeground())
+                        : Color.RED;
+
+                component.setForeground(fg);
+
+                return component;
+            }
+        });
 
         add(new JScrollPane(table),
                 new GridBagConstraints(0, 0, 3, 3, 1, 1,
@@ -89,8 +107,8 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2)
-                    editAction.actionPerformed(null);
+                if (e.getClickCount() == 2 && editAction.isEnabled())
+                        editAction.actionPerformed(null);
             }
         });
 
@@ -104,7 +122,7 @@ public class OntopPropertiesPanel extends JPanel implements OBDAModelManagerList
 
     private void setActionsEnabled() {
         boolean selectNonEmpty = !table.getSelectionModel().isSelectionEmpty();
-        editAction.setEnabled(selectNonEmpty);
+        editAction.setEnabled(selectNonEmpty && ONTOP_PROPERTIES.containsKey(model.getName(table.getSelectedRow())));
         deleteAction.setEnabled(selectNonEmpty);
     }
 
