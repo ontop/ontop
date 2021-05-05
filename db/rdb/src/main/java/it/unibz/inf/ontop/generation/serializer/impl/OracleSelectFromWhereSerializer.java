@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.DBConstant;
@@ -54,7 +56,7 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
             }
 
             @Override
-            protected String serializeLimit(long limit) {
+            protected String serializeLimit(long limit, ImmutableList<SQLOrderComparator> sortConditions) {
                 // ROWNUM <= limit could also be used
                 return String.format("FETCH NEXT %d ROWS ONLY", limit);
             }

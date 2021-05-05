@@ -84,7 +84,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs);
             String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), columnIDs);
-            String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset());
+            String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset(),
+                    selectFromWhere.getSortConditions());
 
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
                     fromString, whereString, groupByString, orderByString, sliceString);
@@ -176,7 +177,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return String.format("LIMIT %d, %d", offset, limit);
         }
 
-        protected String serializeLimit(long limit) {
+        //sortConditions added to handle cases of LIMIT without ORDER BY, which need a dummy ORDER BY
+        protected String serializeLimit(long limit, ImmutableList<SQLOrderComparator> sortConditions) {
             return String.format("LIMIT %d", limit);
         }
 
@@ -186,7 +188,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
+        private String serializeSlice(Optional<Long> limit, Optional<Long> offset, ImmutableList<SQLOrderComparator> sortConditions) {
             if (!limit.isPresent() && !offset.isPresent())
                 return "";
 
@@ -194,7 +196,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 return serializeLimitOffset(limit.get(), offset.get());
 
             if (limit.isPresent())
-                return serializeLimit(limit.get());
+                return serializeLimit(limit.get(), sortConditions);
 
             return serializeOffset(offset.get());
         }
