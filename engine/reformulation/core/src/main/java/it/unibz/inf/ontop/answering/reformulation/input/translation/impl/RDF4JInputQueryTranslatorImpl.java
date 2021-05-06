@@ -912,10 +912,10 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             throw new Sparql2IqConversionException("This tripleRef has no ref, we've not implemented how to deal with this : " + tripleRef.toString());
         }
         // TODO: Deciding if triple contains nesting is currently done by checking if the var name contains "_anon_",
-        //  this feels hacky and liable to introduce bugs
+        //  this feels hacky and liable to introduce bugs. The reason for the length check is to not trigger on blank nodes.
         IntensionalDataNode dataNode;
-        if (tripleRef.getSubjectVar().getName().contains("_anon_")) {
-            if (tripleRef.getObjectVar().getName().contains("_anon_")) {
+        if (tripleRef.getSubjectVar().getName().contains("_anon_") && tripleRef.getSubjectVar().getName().length() > 10) {
+            if (tripleRef.getObjectVar().getName().contains("_anon_")  && tripleRef.getObjectVar().getName().length() > 10) {
                 dataNode = iqFactory.createIntensionalDataNode(
                         atomFactory.getIntensionalTripleRefNestedSOAtom(
                                 translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
@@ -934,7 +934,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         ));
             }
         }
-        else if (tripleRef.getObjectVar().getName().contains("_anon_")) {
+        else if (tripleRef.getObjectVar().getName().contains("_anon_") && tripleRef.getObjectVar().getName().length() > 10) {
             dataNode = iqFactory.createIntensionalDataNode(
                     atomFactory.getIntensionalTripleRefNestedObjectAtom(
                             translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
@@ -967,8 +967,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings) {
         // TODO: I've added these if checks to translate rdf-star triples, but they feel hacky and I think they can introduce bugs /lukas
         IntensionalDataNode dataNode;
-        if (triple.getSubjectVar().getName().contains("_anon_")) {
-            if (triple.getObjectVar().getName().contains("_anon_")) {
+        if (triple.getSubjectVar().getName().contains("_anon_") && triple.getSubjectVar().getName().length() > 10) {
+            if (triple.getObjectVar().getName().contains("_anon_") && triple.getObjectVar().getName().length() > 10) {
                 dataNode = iqFactory.createIntensionalDataNode(
                         atomFactory.getIntensionalTripleNestedSOAtom(
                                 translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
@@ -985,7 +985,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         ));
             }
         }
-        else if (triple.getObjectVar().getName().contains("_anon_")) {
+        else if (triple.getObjectVar().getName().contains("_anon_") && triple.getObjectVar().getName().length() > 10) {
             dataNode = iqFactory.createIntensionalDataNode(
                     atomFactory.getIntensionalTripleNestedObjectAtom(
                             translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
