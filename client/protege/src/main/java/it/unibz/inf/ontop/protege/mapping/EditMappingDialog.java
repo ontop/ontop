@@ -67,14 +67,14 @@ public class EditMappingDialog extends JDialog {
 
 	private boolean allComponentsNonEmpty = false, isValid = false;
 
-	public EditMappingDialog(OBDAModel obdaModel, String id) {
-		this(obdaModel, null, "New Triples Map", "Create");
+	public EditMappingDialog(OBDAModel obdaModel, ColorSettings colorSettings, String id) {
+		this(obdaModel, colorSettings, null, "New Triples Map", "Create");
 
 		mappingIdField.setText(id);
 	}
 
-	public EditMappingDialog(OBDAModel obdaModel, TriplesMap triplesMap) {
-		this(obdaModel, triplesMap.getId(), "Edit Triples Map", "Update");
+	public EditMappingDialog(OBDAModel obdaModel, ColorSettings colorSettings, TriplesMap triplesMap) {
+		this(obdaModel, colorSettings, triplesMap.getId(), "Edit Triples Map", "Update");
 
 		mappingIdField.setText(triplesMap.getId());
 		sourceQueryTextPane.setText(triplesMap.getSqlQuery());
@@ -89,7 +89,7 @@ public class EditMappingDialog extends JDialog {
 		targetValidation();
 	}
 
-	private EditMappingDialog(OBDAModel obdaModel, String id, String title, String buttonText) {
+	private EditMappingDialog(OBDAModel obdaModel, ColorSettings colorSettings, String id, String title, String buttonText) {
 		this.obdaModel = obdaModel;
 		this.id = id;
 
@@ -128,7 +128,7 @@ public class EditMappingDialog extends JDialog {
 		targetQueryTextPane.setBorder(defaultBorder);
 		Timer timer = new Timer(1000, e -> targetValidation());
 		timer.setRepeats(false);
-		targetQueryDocument = new TargetQueryStyledDocument(obdaModel.getObdaModelManager(), d -> timer.restart());
+		targetQueryDocument = new TargetQueryStyledDocument(obdaModel.getObdaModelManager(), colorSettings, d -> timer.restart());
 		targetQueryTextPane.setDocument(targetQueryDocument);
 		setKeyboardShortcuts(targetQueryTextPane);
 		targetQueryPanel.add(new JScrollPane(targetQueryTextPane), BorderLayout.CENTER);

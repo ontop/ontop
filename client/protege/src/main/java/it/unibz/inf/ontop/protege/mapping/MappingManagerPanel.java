@@ -41,6 +41,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
 	private static final long serialVersionUID = -486013653814714526L;
 
 	private final OBDAModelManager obdaModelManager;
+	private final ColorSettings colorSettings;
 	private final OWLEditorKit editorKit;
     private final MappingFilteredListModel model;
     private final JList<TriplesMap> mappingList;
@@ -53,6 +54,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
 	public MappingManagerPanel(OWLEditorKit editorKit) {
         this.editorKit = editorKit;
         this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
+        this.colorSettings = OBDAEditorKitSynchronizerPlugin.getColorSettings(editorKit);
 
         setLayout(new BorderLayout());
 
@@ -185,6 +187,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         public void actionPerformed(ActionEvent e) {
             EditMappingDialog dialog = new EditMappingDialog(
                     obdaModelManager.getCurrentOBDAModel(),
+                    colorSettings,
                     IDGenerator.getNextUniqueID("MAPID-"));
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }
@@ -230,6 +233,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         public void actionPerformed(ActionEvent e) {
             EditMappingDialog dialog = new EditMappingDialog(
                     obdaModelManager.getCurrentOBDAModel(),
+                    colorSettings,
                     mappingList.getSelectedValue());
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }

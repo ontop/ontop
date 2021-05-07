@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.protege.utils.ColorSettings;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
@@ -49,8 +50,7 @@ import java.util.Optional;
 public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 	private OBDAModelManager obdaModelManager;
-
-	private final Map<String, Color> colorProperties = new HashMap<>();
+	private ColorSettings colorSettings;
 
 	@Override
 	public void initialise() {
@@ -61,35 +61,19 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		editorKit.put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
 
 		obdaModelManager = new OBDAModelManager((OWLEditorKit) editorKit);
-		PreferencesManager man = PreferencesManager.getInstance();
-		Preferences pref = man.getApplicationPreferences("OBDA Plugin");
-		List<String> keys = pref.getStringList("Colors", new ArrayList<>());
-		for (String k : keys)
-			colorProperties.put(k, new Color(pref.getInt(k, 0)));
+		colorSettings = new ColorSettings();
 	}
 
 	@Override
 	public void dispose()  {
-		PreferencesManager man = PreferencesManager.getInstance();
-		Preferences pref = man.getApplicationPreferences("OBDA Plugin");
-		pref.putStringList("Colors", ImmutableList.copyOf(colorProperties.keySet()));
-		for (Map.Entry<String, Color> e : colorProperties.entrySet())
-			pref.putInt(e.getKey(), e.getValue().getRGB());
-
 		obdaModelManager.dispose();
-	}
-
-	public static Optional<Color> getColor(EditorKit editorKit, String property) {
-		return Optional.ofNullable(get(editorKit).colorProperties.get(property));
-	}
-
-	public static void setColor(EditorKit editorKit, String property, Color color) {
-		get(editorKit).colorProperties.put(property, color);
 	}
 
 	public static OBDAModelManager getOBDAModelManager(EditorKit editorKit) {
 		return get(editorKit).obdaModelManager;
 	}
+
+	public static ColorSettings getColorSettings(EditorKit editorKit) { return get(editorKit).colorSettings; }
 
 	public static OBDAModel getCurrentOBDAModel(EditorKit editorKit) {
 		return get(editorKit).obdaModelManager.getCurrentOBDAModel();
