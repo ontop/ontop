@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -118,7 +119,14 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
         @Override
         public Optional<TermType> visitFlatten(FlattenNode flattenNode, IQTree child) {
             if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get()))
-                return
+                return ((ImmutableTerm) flattenNode.getSubstitution().getImmutableMap().get(variable))
+                        .inferType()
+                        .flatMap(TermTypeInference::getTermType);
+            if (variable.equals(flattenNode.getOutputVariable()))
+                return ((ImmutableTerm) flattenNode.getSubstitution().getImmutableMap().get(variable))
+                        .inferType()
+                        .flatMap(TermTypeInference::getTermType);
+            return child.acceptVisitor(this);
         }
 
         @Override

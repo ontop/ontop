@@ -38,45 +38,30 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private final Variable outputVariable;
     private final Optional<Variable> indexVariable;
     private final boolean isStrict;
-    private final ImmutableTerm flattenTerm;
-    private final Optional<ImmutableFunctionalTerm> indexTerm;
+    // generated if needed: the susbtitution does not carry extra information
+    private Optional<ImmutableSubstitution> substitution;
 
     @AssistedInject
     private FlattenNodeImpl(@Assisted Variable outputVariable,
+                            @Assisted Variable flattenedVariable,
                             @Assisted Optional<Variable> indexVariable,
                             @Assisted boolean isStrict,
-                            @Assisted ImmutableFunctionalTerm flattenTerm,
                             OntopModelSettings settings,
                             SubstitutionFactory substitutionFactory,
                             IntermediateQueryFactory iqFactory,
                             TermFactory termFactory) {
-            super(substitutionFactory, iqFactory);
-        if (settings.isTestModeEnabled())
-            validateNode(flattenTerm);
-        this.flattenedVariable = flattenTerm.getVariables().iterator().next();
+        super(substitutionFactory, iqFactory);
         this.outputVariable = outputVariable;
+        this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
         this.isStrict = isStrict;
-        this.flattenTerm = flattenTerm;
-        this.indexTerm = generateIndexTerm(termFactory);
     }
 
-    private Optional<ImmutableFunctionalTerm> generateIndexTerm(TermFactory termFactory) {
-        if(indexVariable.isPresent()) {
-            termFactory.getImmutableFunctionalTerm()
-        }
+
+
+    private ImmutableFunctionalTerm generateIndexTerm(TermFactory termFactory) {
+         return  termFactory.getImmutableFunctionalTerm(termFactory.)
         return Optional.empty();
-    }
-
-    private void validateNode(ImmutableFunctionalTerm flattenTerm) {
-        if(!(flattenTerm.getFunctionSymbol() instanceof DBFlattenFunctionSymbol)){
-            throw new InvalidQueryNodeException("Flatten Node:" +
-                    " the flatten term should use the flatten function\n" + toString());
-        }
-        if(!(flattenTerm.getTerm(0) instanceof Variable)){
-            throw new InvalidQueryNodeException("Flatten Node:" +
-                    "the flatten term should have a variable as argument\n" + toString());
-        }
     }
 
     @Override
@@ -97,6 +82,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public boolean isStrict() {
         return isStrict;
+    }
+
+    @Override
+    public ImmutableSubstitution getSubstitution() {
+        return ;
     }
 
     @Override

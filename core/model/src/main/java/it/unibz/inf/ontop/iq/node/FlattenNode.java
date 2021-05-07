@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
 
@@ -28,7 +29,7 @@ import java.util.Optional;
  *     (3, NULL),
  *     (4, NULL)
  * }
- * The variable O is used (by subsequent operators) to refer to the second attribute of R'.
+ *  Variable O is used (by subsequent operators) to refer to the second attribute of R'.
  *
  * A "strict" flatten discards instances with an empty relation or a NULL value for the flattened attribute.
  *
@@ -63,7 +64,6 @@ import java.util.Optional;
  *  Y the "flattened variable"
  *  O the "output variable"
  *  I the "index variable"
- *
  */
 public interface FlattenNode extends UnaryOperatorNode {
 
@@ -75,30 +75,7 @@ public interface FlattenNode extends UnaryOperatorNode {
 
     boolean isStrict();
 
-    // returns the term flatten(Y), where "flatten" is the DB function symbol for flatten, and Y is the flattened attribute
-    ImmutableTerm getFlattenTerm();
-
-    // for type extraction purposes
-    // returns the term indexIn(Y), where "index" is Ontop's internal "indexIn" function symbol, and Y is the flattened attribute
-    Optional<ImmutableTerm> getIndexTerm();
-
-
-//    @Override
-//    P acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer);
-
-//    @Override
-//    NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
-
-//    /**
-//     * Returns a new FlattenNode of the same type, with the new arguments
-//     */
-//    P newNode(Variable flattenedVariable,
-//              Variable outputVariable);
-
-//    int getArrayIndexIndex();
-
-//    @Override
-//    P clone();
-
-   // public ImmutableList<Boolean> getArgumentNullability();
+    // The substitution does not carry extra information:
+    // it can be generated out of the output variable, flattened variable and optional index variable
+    ImmutableSubstitution getSubstitution();
 }
