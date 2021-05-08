@@ -59,7 +59,6 @@ public class RDFStarTest extends AbstractRDF4JTest {
                 "SELECT  ?x ?c ?s\n" +
                 "WHERE {\n" +
                 "<<<<?x rdf:type :Person>> ex:certainty ?c>> ex:source ?s.  \n" +
-                //"<<?x ?p ?o>> ex:certainty ?c.  \n" +
                 "}";
         runQueryAndCompare(query, ImmutableList.of("Per", "Jane"));
     }

@@ -51,40 +51,40 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType(),
-                typeFactory.getAbstractObjectRDFType()),
+                typeFactory.getIRITermType()),
                 iriType, rdfFactory);
         tripleRefNestedSubjectPredicate = new TripleRefNestedSubjectPredicateImpl(ImmutableList.of(
-                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getAbstractRDFStarTermType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType(),
-                typeFactory.getAbstractObjectRDFType()),
+                typeFactory.getIRITermType()),
                 iriType, rdfFactory);
         tripleRefNestedObjectPredicate = new TripleRefNestedObjectPredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
-                typeFactory.getAbstractRDFTermType(),
-                typeFactory.getAbstractObjectRDFType()),
+                typeFactory.getAbstractRDFStarTermType(),
+                typeFactory.getIRITermType()),
                 iriType, rdfFactory);
         tripleRefNestedSOPredicate = new TripleRefNestedSOPredicateImpl(ImmutableList.of(
-                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getAbstractRDFStarTermType(),
                 typeFactory.getIRITermType(),
-                typeFactory.getAbstractRDFTermType(),
-                typeFactory.getAbstractObjectRDFType()),
+                typeFactory.getAbstractRDFStarTermType(),
+                typeFactory.getIRITermType()),
                 iriType, rdfFactory);
         tripleNestedSubjectPredicate = new TripleNestedSubjectPredicateImpl(ImmutableList.of(
-                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getAbstractRDFStarTermType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType()),
                 iriType, rdfFactory);
         tripleNestedObjectPredicate = new TripleNestedObjectPredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
-                typeFactory.getAbstractRDFTermType()),
+                typeFactory.getAbstractRDFStarTermType()),
                 iriType, rdfFactory);
         tripleNestedSOPredicate = new TripleNestedSOPredicateImpl(ImmutableList.of(
-                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getAbstractRDFStarTermType(),
                 typeFactory.getIRITermType(),
-                typeFactory.getAbstractRDFTermType()),
+                typeFactory.getAbstractRDFStarTermType()),
                 iriType, rdfFactory);
     }
 
