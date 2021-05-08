@@ -252,6 +252,10 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIriStringResolver(IRI baseIRI);
 
+    FunctionSymbol getDBFlattenArray();
+    FunctionSymbol getDBIndexIn();
+
+
     //-------------
     // Aggregation
     //-------------

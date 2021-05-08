@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -38,7 +39,9 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     private final Variable outputVariable;
     private final Optional<Variable> indexVariable;
     private final boolean isStrict;
-    // generated if needed: the susbtitution does not carry extra information
+    private final TermFactory termFactory;
+
+    // generated if needed: the substitution does not carry extra information
     private Optional<ImmutableSubstitution> substitution;
 
     @AssistedInject
@@ -46,7 +49,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                             @Assisted Variable flattenedVariable,
                             @Assisted Optional<Variable> indexVariable,
                             @Assisted boolean isStrict,
-                            OntopModelSettings settings,
                             SubstitutionFactory substitutionFactory,
                             IntermediateQueryFactory iqFactory,
                             TermFactory termFactory) {
@@ -55,13 +57,23 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         this.flattenedVariable = flattenedVariable;
         this.indexVariable = indexVariable;
         this.isStrict = isStrict;
+        this.termFactory = termFactory;
     }
 
-
-
-    private ImmutableFunctionalTerm generateIndexTerm(TermFactory termFactory) {
-         return  termFactory.getImmutableFunctionalTerm(termFactory.)
-        return Optional.empty();
+    private ImmutableSubstitution generateSubstitution() {
+        ImmutableTerm flattenTerm = termFactory.getDBFlattenArray(flattenedVariable);
+        this.substitution = Optional.of(
+                indexVariable.isPresent() ?
+                        substitutionFactory.getSubstitution(
+                                outputVariable,
+                                flattenTerm,
+                                indexVariable.get(),
+                                termFactory.getDBIndexIn(flattenedVariable)) :
+                        substitutionFactory.getSubstitution(
+                                outputVariable,
+                                flattenTerm
+                        ));
+        return this.substitution.get();
     }
 
     @Override
@@ -86,16 +98,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public ImmutableSubstitution getSubstitution() {
-        return ;
-    }
-
-    @Override
-    public ImmutableTerm getFlattenTerm() {
-        return iqFactory.c
-    }
-
-    @Override
-    public Optional<ImmutableTerm> getIndexInTerm() {
+       return substitution.orElse(generateSubstitution());
     }
 
     @Override
@@ -197,8 +200,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     /**
      * Only the flattened variable is required
      */
-     @Override
-     public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
         return child.getNotInternallyRequiredVariables().stream()
                 .filter(v -> !v.equals(flattenedVariable))
                 .collect(ImmutableCollectors.toSet());
@@ -261,7 +264,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     /**
      * Assumption: a flattened array can contain null values.
-     *
+     * <p>
      * If so, even a relaxed flatten has no incidence on variable nullability
      * (a tuple may map the output variable to null, and the position variable to a non-null value)
      */
@@ -404,8 +407,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         Optional<Variable> sIndexVar = applySubstitution(indexVariable, sub);
         return sFlattenedVar.equals(flattenedVariable) &&
                 sOutputVar.equals(outputVariable) &&
-                sIndexVar.equals(indexVariable)?
-                this:
+                sIndexVar.equals(indexVariable) ?
+                this :
                 iqFactory.createFlattenNode(
                         sFlattenedVar,
                         sOutputVar,
