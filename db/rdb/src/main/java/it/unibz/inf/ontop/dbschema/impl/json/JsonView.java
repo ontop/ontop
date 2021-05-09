@@ -57,6 +57,9 @@ public abstract class JsonView extends JsonOpenObject {
                 case "BasicViewDefinition":
                     instanceClass = JsonBasicView.class;
                     break;
+                case "FlattenedViewDefinition":
+                    instanceClass = JsonFlattenedView.class;
+                    break;
                 default:
                     // TODO: throw proper exception
                     throw new RuntimeException("Unsupported type of Ontop views: " + type);
