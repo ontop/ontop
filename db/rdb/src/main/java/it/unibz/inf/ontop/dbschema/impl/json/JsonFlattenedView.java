@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.cglib.core.$DefaultNamingPolicy;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
@@ -61,6 +62,8 @@ public class JsonFlattenedView extends JsonView {
     @Nonnull
     public final List<String> baseRelation;
     @Nonnull
+    private final String flattenedColumn;
+    @Nonnull
     public final UniqueConstraints uniqueConstraints;
     @Nonnull
     public final OtherFunctionalDependencies otherFunctionalDependencies;
@@ -70,14 +73,18 @@ public class JsonFlattenedView extends JsonView {
     protected static final Logger LOGGER = LoggerFactory.getLogger(JsonFlattenedView.class);
 
     @JsonCreator
-    public JsonFlattenedView(@JsonProperty("columns") Columns columns, @JsonProperty("name") List<String> name,
+    public JsonFlattenedView(
+                         @JsonProperty("columns") Columns columns,
+                         @JsonProperty("name") List<String> name,
                          @JsonProperty("baseRelation") List<String> baseRelation,
+                         @JsonProperty("flattenedColumn") String flattenedColumn,
                          @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                          @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
                          @JsonProperty("foreignKeys") ForeignKeys foreignKeys) {
         super(name);
         this.columns = columns;
         this.baseRelation = baseRelation;
+        this.flattenedColumn = flattenedColumn;
         this.uniqueConstraints = uniqueConstraints;
         this.otherFunctionalDependencies = otherFunctionalDependencies;
         this.foreignKeys = foreignKeys;
@@ -98,7 +105,7 @@ public class JsonFlattenedView extends JsonView {
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
 
-        return new OntopViewDefinitionImpl(
+        return new OntopFlattenedViewDefinitionImpl(
                 ImmutableList.of(relationId),
                 attributeBuilder,
                 iq,
@@ -134,13 +141,15 @@ public class JsonFlattenedView extends JsonView {
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
 
-        ImmutableSet<Variable> addedVariables = columns.added.stream()
+        ImmutableSet<Variable> addedVariables = columns.extracted.stream()
                 .map(a -> a.name)
                 .map(attributeName -> normalizeAttributeName(attributeName, quotedIdFactory))
                 .map(termFactory::getVariable)
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<Variable> projectedVariables = extractRelationVariables(addedVariables, columns.hidden, parentDefinition,
+        ImmutableSet<String> keptColumnNames = columns.kept.stream()
+                .collect(ImmutableCollectors.toSet());
+        ImmutableList<Variable> projectedVariables = extractRelationVariables(addedVariables, keptColumnNames, parentDefinition,
                 dbParameters);
 
         ImmutableMap<Integer, Variable> parentArgumentMap = createParentArgumentMap(addedVariables, parentDefinition,
@@ -161,20 +170,16 @@ public class JsonFlattenedView extends JsonView {
                 .normalizeForOptimization();
     }
 
-    private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, List<String> hidden,
-                                                             NamedRelationDefinition parentDefinition, DBParameters dbParameters) {
+    private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables,
+                                                             ImmutableSet<String> keptColumnNames,
+                                                             NamedRelationDefinition parentDefinition,
+                                                             DBParameters dbParameters) {
         TermFactory termFactory = dbParameters.getCoreSingletons().getTermFactory();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
-
-        ImmutableList<String> hiddenColumnNames = hidden.stream()
-                .map(attributeName -> normalizeAttributeName(attributeName, quotedIdFactory))
-                .collect(ImmutableCollectors.toList());
 
         ImmutableList<Variable> inheritedVariableStream = parentDefinition.getAttributes().stream()
                 .map(a -> a.getID().getName())
-                .filter(n -> !hiddenColumnNames.contains(n))
+                .filter(n -> keptColumnNames.contains(n))
                 .map(termFactory::getVariable)
-                .filter(v -> !addedVariables.contains(v))
                 .collect(ImmutableCollectors.toList());
 
         return Stream.concat(
@@ -493,39 +498,49 @@ public class JsonFlattenedView extends JsonView {
     }
 
     @JsonPropertyOrder({
-            "added",
-            "hidden"
+            "kept",
+            "extracted",
+            "position",
     })
     private static class Columns extends JsonOpenObject {
         @Nonnull
-        public final List<AddColumns> added;
+        public final List<String> kept;
         @Nonnull
-        public final List<String> hidden;
+        public final List<ExtractedColumns> extracted;
+
+        public final String position;
 
         @JsonCreator
-        public Columns(@JsonProperty("added") List<AddColumns> added,
-                       @JsonProperty("hidden") List<String> hidden) {
-            this.added = added;
-            this.hidden = hidden;
+        public Columns(@JsonProperty("added") List<String> kept,
+                       @JsonProperty("extracted") List<ExtractedColumns> extracted,
+                       @JsonProperty("position") String position
+        ) {
+            this.kept = kept;
+            this.extracted = extracted;
+            this.position = position;
         }
     }
 
     @JsonPropertyOrder({
             "name",
-            "expression",
+            "datatype",
+            "key",
     })
-    private static class AddColumns extends JsonOpenObject {
+    private static class ExtractedColumns extends JsonOpenObject {
         @Nonnull
         public final String name;
         @Nonnull
-        public final String expression;
+        public final String datatype;
 
+        public final List<String> key;
 
         @JsonCreator
-        public AddColumns(@JsonProperty("name") String name,
-                          @JsonProperty("expression") String expression) {
+        public ExtractedColumns(@JsonProperty("name") String name,
+                                @JsonProperty("datatype") String datatype,
+                                @JsonProperty("key") List<String> key) {
             this.name = name;
-            this.expression = expression;
+            this.datatype = datatype;
+            this.key = key;
         }
     }
 
