@@ -62,4 +62,16 @@ public class RDFStarTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableList.of("Per", "Jane"));
     }
+
+
+    @Test // Sparql-star test, with very deep embedded triple in the query
+    public void testDeepEmbeddingInSPARQLWhere() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>\n" +
+                "PREFIX ex: <http://example.org/>\n" +
+                "SELECT  ?a ?e ?h\n" +
+                "WHERE {\n" +
+                "<< <<?a ?b ?c>> ?d <<?e ?f ?g>> >> ?h << <<?i ?j ?k>> ?l <<?m ?n ?o>> >> " +
+                "}";
+        runQueryAndCompare(query, ImmutableList.of("Per", "Jane"));
+    }
 }

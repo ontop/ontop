@@ -764,7 +764,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
      */
     private IQTree convertToNestedRDFStar(IQTree primaryTree, IQTree secondaryTree) {
         if (primaryTree instanceof IntensionalDataNode) {
-            ImmutableSet<ImmutableTerm> tripleRefsInSecondaryStream = Stream.concat(Stream.concat(Stream.of(secondaryTree), secondaryTree.getChildren().stream()), secondaryTree.getChildren().stream().flatMap(child -> child.getChildren().stream()))
+            ImmutableSet<ImmutableTerm> tripleRefsInSecondaryStream = Stream.concat(Stream.of(secondaryTree), secondaryTree.getChildren().stream())
                     .filter(tree -> tree instanceof IntensionalDataNode)
                     .filter(node -> ((IntensionalDataNode) node).getProjectionAtom().getPredicate() instanceof TripleRefPredicate)
                     .map(node -> ((IntensionalDataNode) node).getProjectionAtom().getTerm(3))
