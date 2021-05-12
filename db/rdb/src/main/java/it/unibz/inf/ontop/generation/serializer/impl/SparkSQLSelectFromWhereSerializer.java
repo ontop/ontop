@@ -127,28 +127,12 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     return "";
 
                 if (limit.isPresent() && offset.isPresent())
-                    return serializeLimitOffset(limit.get(), offset.get());
+                    return serializeLimitOffset(limit.get(), offset.get(), true);
 
                 if (limit.isPresent())
-                    return serializeLimit(limit.get());
+                    return serializeLimit(limit.get(), true);
 
-                return serializeOffset(offset.get());
-            }
-
-            /**
-             * Not supported
-             */
-            @Override
-            protected String serializeLimitOffset(long limit, long offset) {
-                throw new UnsupportedOperationException("OFFSET clause not compliant to SparkSQL syntax");
-            }
-
-            /**
-             * Not supported
-             */
-            @Override
-            protected String serializeOffset(long offset) {
-                throw new UnsupportedOperationException("OFFSET clause not compliant to SparkSQL syntax");
+                return serializeOffset(offset.get(), true);
             }
 
             /**
