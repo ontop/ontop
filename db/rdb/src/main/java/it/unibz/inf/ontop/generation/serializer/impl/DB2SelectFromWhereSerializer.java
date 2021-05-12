@@ -25,13 +25,13 @@ public class DB2SelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhere
             // serializeLimit is standard
 
             @Override
-            protected String serializeLimitOffset(long limit, long offset) {
+            protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                 return String.format("LIMIT %d\nOFFSET %d", limit, offset);
             }
 
             @Override
-            protected String serializeOffset(long offset) {
-                return serializeLimitOffset(8000, offset);
+            protected String serializeOffset(long offset, boolean noSortCondition) {
+                return serializeLimitOffset(8000, offset, noSortCondition);
             }
         });
     }

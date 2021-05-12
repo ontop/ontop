@@ -127,15 +127,11 @@ public class DirectMappingEngine {
 					.orElse(OWLManager.createOWLOntologyManager().createOntology(IRI.create(baseIRI)));
 
             // update ontology
-            OWLOntologyManager manager = ontology.getOWLOntologyManager();
-            Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
-            		manager,
-                    newPPMapping.getTripleMaps().stream()
-                            .flatMap(ax -> ax.getTargetAtoms().stream()),
+            MappingOntologyUtils.extractAndInsertDeclarationAxioms(
+					ontology,
+                    newPPMapping.getTripleMaps(),
 					typeFactory,
-					true
-			);
-            manager.addAxioms(ontology, declarationAxioms);
+					true);
 
             return new 	BootstrappingResults() {
 				@Override

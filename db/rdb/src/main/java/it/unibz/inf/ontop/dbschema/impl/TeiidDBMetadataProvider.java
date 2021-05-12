@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
@@ -20,9 +21,8 @@ import static it.unibz.inf.ontop.dbschema.RelationID.TABLE_INDEX;
 public class TeiidDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @AssistedInject
-    TeiidDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
-        super(connection, metadata -> new TeiidQuotedIDFactory(), typeFactory);
-
+    TeiidDBMetadataProvider(@Assisted Connection connection, CoreSingletons coreSingletons) throws MetadataExtractionException {
+        super(connection, metadata -> new TeiidQuotedIDFactory(), coreSingletons);
     }
 
     @Override

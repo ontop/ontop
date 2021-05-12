@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE OBDA [
-   <!ENTITY quest: 'http://obda.org/quest#'>
-]>
-<OBDA version="1.0" xml:base="http://www.kro.com/ontologies/" xmlns="http://www.kro.com/ontologies/" xmlns:quest:="http://obda.org/quest#">
-  <SavedQueries/>
-</OBDA>

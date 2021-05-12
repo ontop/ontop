@@ -33,7 +33,7 @@ public class MonetDBSelectFromWhereSerializer extends DefaultSelectFromWhereSeri
                     // sqlLimit, sqlOffset, sqlTopNSQL are standard
 
                     @Override
-                    protected String serializeLimitOffset(long limit, long offset) {
+                    protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("LIMIT %d\nOFFSET %d", offset, limit);
                     }
                 });

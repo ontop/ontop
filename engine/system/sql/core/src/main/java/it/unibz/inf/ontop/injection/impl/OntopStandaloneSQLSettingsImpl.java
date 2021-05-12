@@ -39,6 +39,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public boolean areInvalidTriplesExcludedFromResultSet() {
+        return systemSettings.areInvalidTriplesExcludedFromResultSet();
+    }
+
+    @Override
     public boolean isQueryLoggingEnabled() {
         return getRequiredBoolean(QUERY_LOGGING);
     }
