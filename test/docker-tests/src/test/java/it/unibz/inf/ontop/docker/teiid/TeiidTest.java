@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+@Ignore("A proper Docker-compose env needs to added")
 public class TeiidTest {
     public static OntopOWLReasoner res;
     public static OntopOWLConnection ct;
