@@ -131,7 +131,24 @@ public class BasicViewWithConstraintsParsingTest {
                 .map(ForeignKeyConstraint::getName)
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableSet.of("status_id_fkey"), fk_name);
+        assertEquals(ImmutableSet.of("status_id_fkey", "status_desc_fkey"), fk_name);
+    }
+
+    /**
+     * Composite foreign key
+     */
+    @Test
+    public void testCompositeForeignKey() throws Exception {
+        ImmutableList<String> destination_column = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
+                .flatMap(Collection::stream)
+                .filter(fk -> fk.getName().equals("status_desc_fkey"))
+                .map(ForeignKeyConstraint::getComponents)
+                .flatMap(Collection::stream)
+                .map(c -> c.getAttribute().getID().getName())
+                .collect(ImmutableCollectors.toList());
+
+        assertEquals(ImmutableList.of("status", "statusDescription"), destination_column);
     }
 
     protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
