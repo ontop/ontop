@@ -32,3 +32,8 @@ INSERT INTO "POINTS" VALUES (3, 2.2945, 48.8584, 'Eiffel Tower');
 INSERT INTO "POINTS" VALUES (4, -0.0754, 51.5055, 'Tower Bridge');
 INSERT INTO "POINTS" VALUES (21, 668682.853, 5122639.964, 'a point in BZ with SRID <http://www.opengis.net/def/crs/EPSG/0/3044>');
 INSERT INTO "POINTS" VALUES (26, 668683.853, 5122640.964, 'a point in BZ with SRID <http://www.opengis.net/def/crs/EPSG/0/3044>');
+
+
+CREATE TABLE "FEATURES" (id INT PRIMARY KEY, gid TEXT, the_geom geometry, name TEXT);
+INSERT INTO "FEATURES" VALUES (1, 'FRANCE1', 'POINT(2.2945 48.8584)', 'Eiffel Tower');
+INSERT INTO "FEATURES" VALUES (2, 'UK1', 'POINT(-0.0754 51.5055)', 'Tower Bridge');

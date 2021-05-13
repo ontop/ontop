@@ -1439,6 +1439,22 @@ public class GeoSPARQLTest {
         assertEquals("http://www.opengis.net/def/crs/EPSG/0/3044", val);
     }
 
+    @Test // geo:hasGeometry format test
+    public void testAskIntersectHasGeometry() throws Exception {
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/feature/1> a :Feature; geo:hasGeometry/geo:asWKT ?xWkt.\n" +
+                "<http://ex.org/feature/2> a :Feature; geo:hasGeometry/geo:asWKT ?yWkt.\n" +
+                "BIND(geof:buffer(?yWkt, 10, uom:degree) AS ?bWkt) .\n" +
+                "FILTER (geof:sfIntersects(?xWkt, ?bWkt))\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
     private boolean runQueryAndReturnBooleanX(String query) throws Exception {
         try (OWLStatement st = conn.createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
