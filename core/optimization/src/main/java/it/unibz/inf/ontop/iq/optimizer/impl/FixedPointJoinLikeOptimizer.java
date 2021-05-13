@@ -22,18 +22,16 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(FixedPointJoinLikeOptimizer.class);
     private static final int MAX_LOOP = 100;
     private final InnerJoinMutableOptimizer joinMutableOptimizer;
-    private final LeftJoinMutableOptimizer leftJoinMutableOptimizer;
     private final InnerJoinIQOptimizer innerJoinIQOptimizer;
     private final LeftJoinIQOptimizer leftJoinIQOptimizer;
     private final IQConverter iqConverter;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private FixedPointJoinLikeOptimizer(InnerJoinMutableOptimizer joinMutableOptimizer, LeftJoinMutableOptimizer leftJoinMutableOptimizer,
+    private FixedPointJoinLikeOptimizer(InnerJoinMutableOptimizer joinMutableOptimizer,
                                         InnerJoinIQOptimizer innerJoinIQOptimizer, LeftJoinIQOptimizer leftJoinIQOptimizer,
                                         IQConverter iqConverter, IntermediateQueryFactory iqFactory){
         this.joinMutableOptimizer = joinMutableOptimizer;
-        this.leftJoinMutableOptimizer = leftJoinMutableOptimizer;
         this.innerJoinIQOptimizer = innerJoinIQOptimizer;
         this.leftJoinIQOptimizer = leftJoinIQOptimizer;
         this.iqConverter = iqConverter;
@@ -69,10 +67,6 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
                 UUID oldVersionNumber;
                 do {
                     oldVersionNumber = mutableQuery.getVersionNumber();
-                    mutableQuery = leftJoinMutableOptimizer.optimize(mutableQuery);
-                    if (isLogDebugEnabled)
-                        LOGGER.debug("New query after left join mutable optimization: \n" + mutableQuery.toString());
-
                     mutableQuery = joinMutableOptimizer.optimize(mutableQuery);
                     if (isLogDebugEnabled)
                         LOGGER.debug("New query after join mutable optimization: \n" + mutableQuery.toString());
