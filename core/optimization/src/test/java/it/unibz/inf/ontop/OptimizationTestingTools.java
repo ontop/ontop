@@ -84,6 +84,7 @@ public class OptimizationTestingTools {
     public static final Variable G;
     public static final Variable GF1;
     public static final Variable H;
+    public static final Variable HF0;
     public static final Variable I;
     public static final Variable IF7;
     public static final Variable L;
@@ -162,6 +163,7 @@ public class OptimizationTestingTools {
         G = TERM_FACTORY.getVariable("g");
         GF1 = TERM_FACTORY.getVariable("gf1");
         H = TERM_FACTORY.getVariable("h");
+        HF0 = TERM_FACTORY.getVariable("hf0");
         I = TERM_FACTORY.getVariable("i");
         IF7 = TERM_FACTORY.getVariable("if7");
         L = TERM_FACTORY.getVariable("l");
