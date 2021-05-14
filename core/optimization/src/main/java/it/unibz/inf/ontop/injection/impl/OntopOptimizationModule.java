@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
-import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
 import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
@@ -47,7 +46,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(UnionLiftExecutor.class);
         bindFromSettings(ProjectionShrinkingExecutor.class);
         bindFromSettings(FlattenUnionExecutor.class);
-        bindFromSettings(ConstructionNodeCleaningExecutor.class);
         bindFromSettings(InnerJoinMutableOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
