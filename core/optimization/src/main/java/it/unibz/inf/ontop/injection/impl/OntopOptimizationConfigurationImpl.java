@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
-import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
 import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
@@ -66,7 +65,6 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, InnerJoinExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftExecutor.class);
-        internalExecutorMapBuilder.put(LeftJoinOptimizationProposal.class, LeftJoinExecutor.class);
         internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);
         internalExecutorMapBuilder.put(FlattenUnionProposal.class, FlattenUnionExecutor.class);
         internalExecutorMapBuilder.put(ConstructionNodeCleaningProposal.class, ConstructionNodeCleaningExecutor.class);
