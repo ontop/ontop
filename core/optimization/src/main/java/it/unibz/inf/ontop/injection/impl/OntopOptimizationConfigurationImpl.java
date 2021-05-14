@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
-import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.proposal.*;
 
@@ -60,7 +59,6 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
                 internalExecutorMapBuilder = ImmutableMap.builder();
         internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
         internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, InnerJoinExecutor.class);
-        internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftExecutor.class);
         return internalExecutorMapBuilder.build();
     }
