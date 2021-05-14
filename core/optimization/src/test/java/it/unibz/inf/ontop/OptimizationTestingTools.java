@@ -90,6 +90,7 @@ public class OptimizationTestingTools {
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
+    public static final Variable NF0;
     public static final Variable PROV;
     public static final DBConstant ONE, TWO, ONE_STR, TWO_STR;
 
@@ -169,6 +170,7 @@ public class OptimizationTestingTools {
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
+        NF0 = TERM_FACTORY.getVariable("nf0");
         PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
         TWO = TERM_FACTORY.getDBIntegerConstant(2);
