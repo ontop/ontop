@@ -10,11 +10,14 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -95,8 +98,10 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
         if (selectedRightDataNodes.isEmpty())
             return Optional.empty();
 
-        return Optional.of(transfer(rootNode, leftChild, rightChild, selectedRightDataNodes)
-                .normalizeForOptimization(variableGenerator));
+        Optional<IQTree> rightChildWithConstructionNodeMovedAside = moveTopConstructionNodeAside(rightChild);
+        return rightChildWithConstructionNodeMovedAside
+                .map(newRightChild -> transfer(rootNode, leftChild, newRightChild, selectedRightDataNodes)
+                        .normalizeForOptimization(variableGenerator));
     }
 
     protected ImmutableSet<SelectedNode> selectRightDataNodesToTransfer(
@@ -232,7 +237,40 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
      * Can be overridden to put restrictions
      */
     protected Stream<ExtensionalDataNode> extractRightDataNodes(IQTree rightChild) {
-        return requiredDataNodeExtractor.extractSomeRequiredNodes(rightChild, true);
+        return requiredDataNodeExtractor.extractSomeRequiredNodes(rightChild, false);
+    }
+
+    /**
+     * Moves a top construction with ground term definitions (typically provenance constants) aside if present.
+     *
+     * If the top construction is having non-ground definitions, returns empty.
+     *
+     */
+    private Optional<IQTree> moveTopConstructionNodeAside(IQTree rightTree) {
+        QueryNode rootNode = rightTree.getRootNode();
+        if (rootNode instanceof ConstructionNode) {
+            ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
+
+            if (substitution.getImmutableMap().values().stream().allMatch(ImmutableTerm::isGround)) {
+                ConstructionNode newConstructionNode = iqFactory.createConstructionNode(substitution.getDomain(), substitution);
+
+                IQTree initialChild = ((UnaryIQTree) rightTree).getChild();
+
+                NaryIQTree newTree = iqFactory.createNaryIQTree(
+                        iqFactory.createInnerJoinNode(),
+                        ImmutableList.of(
+                                initialChild,
+                                iqFactory.createUnaryIQTree(
+                                        newConstructionNode,
+                                        iqFactory.createTrueNode())));
+
+                return Optional.of(newTree);
+            }
+            else
+                return Optional.empty();
+        }
+        else
+            return Optional.of(rightTree);
     }
 
     private IQTree transfer(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild,
