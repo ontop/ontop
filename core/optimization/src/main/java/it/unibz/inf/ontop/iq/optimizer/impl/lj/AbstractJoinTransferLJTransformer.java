@@ -100,7 +100,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
 
         Optional<IQTree> rightChildWithConstructionNodeMovedAside = moveTopConstructionNodeAside(rightChild);
         return rightChildWithConstructionNodeMovedAside
-                .map(newRightChild -> transfer(rootNode, leftChild, newRightChild, selectedRightDataNodes)
+                .map(newRightChild -> transfer(rootNode, leftChild, newRightChild, selectedRightDataNodes, rightChild.getVariables())
                         .normalizeForOptimization(variableGenerator));
     }
 
@@ -273,8 +273,8 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
             return Optional.of(rightTree);
     }
 
-    private IQTree transfer(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild,
-                            ImmutableSet<SelectedNode> selectedNodes) {
+    private IQTree transfer(LeftJoinNode rootNode, IQTree leftChild, IQTree transformedRightChild,
+                            ImmutableSet<SelectedNode> selectedNodes, ImmutableSet<Variable> initialRightVariables) {
         if (selectedNodes.isEmpty())
             throw new IllegalArgumentException("selectedNodes must not be empty");
 
@@ -305,7 +305,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                         renamingAndEqualities.equalities.stream()));
 
 
-        IQTree simplifiedRightChild = replaceSelectedNodesAndRename(selectedNodes, rightChild,
+        IQTree simplifiedRightChild = replaceSelectedNodesAndRename(selectedNodes, transformedRightChild,
                 renamingAndEqualities.renamingSubstitution);
 
         RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
@@ -315,7 +315,7 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 iqFactory.createLeftJoinNode(newLeftJoinCondition),
                 newLeftChild, rightProvenance.getRightTree());
 
-        ConstructionNode constructionNode = createConstructionNode(leftChild, rightChild,
+        ConstructionNode constructionNode = createConstructionNode(leftChild.getVariables(), initialRightVariables,
                 renamingAndEqualities.renamingSubstitution, rightProvenance.getProvenanceVariable());
 
         return iqFactory.createUnaryIQTree(constructionNode, newLeftJoinTree);
@@ -338,15 +338,17 @@ public abstract class AbstractJoinTransferLJTransformer extends DefaultNonRecurs
                 .applyFreshRenaming(renamingSubstitution);
     }
 
-    private ConstructionNode createConstructionNode(IQTree leftChild, IQTree rightChild,
+    private ConstructionNode createConstructionNode(ImmutableSet<Variable> initialLeftVariables,
+                                                    ImmutableSet<Variable> initialRightVariables,
                                                     InjectiveVar2VarSubstitution renamingSubstitution,
                                                     Variable provenanceVariable) {
-        ImmutableSet<Variable> projectedVariables = Sets.union(leftChild.getVariables(), rightChild.getVariables())
+        ImmutableSet<Variable> projectedVariables = Sets.union(initialLeftVariables, initialRightVariables)
                 .immutableCopy();
 
         ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
 
         ImmutableMap<Variable, ImmutableTerm> substitutionMap = renamingSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> termFactory.getIfElseNull(condition, e.getValue())
