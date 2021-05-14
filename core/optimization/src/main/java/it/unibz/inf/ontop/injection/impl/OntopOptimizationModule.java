@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
-import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -39,7 +38,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         // Executors
         bindFromSettings(InnerJoinExecutor.class);
         bindFromSettings(UnionBasedQueryMerger.class);
-        bindFromSettings(UnionLiftExecutor.class);
         bindFromSettings(InnerJoinMutableOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
