@@ -275,7 +275,7 @@ public class NodeDeletionTest {
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IQ initialIQ =  IQ_CONVERTER.convert(query);
 
-        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
         if (optimizedIQ.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 

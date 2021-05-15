@@ -34,7 +34,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     }
 
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
 
@@ -45,7 +45,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
             long beginningJoinLike = System.currentTimeMillis();
-            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding, executorRegistry);
+            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding);
 
             if (isLogDebugEnabled)
                 LOGGER.debug(String.format("New query after fixed point join optimization (%d ms): \n%s",

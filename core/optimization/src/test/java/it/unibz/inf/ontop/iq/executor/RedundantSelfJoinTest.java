@@ -14,10 +14,10 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -702,7 +702,7 @@ public class RedundantSelfJoinTest {
 //        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 //        System.out.println("\n Expected query : \n" +  expectedQuery);
 //
-//        NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+//        NodeCentricOptimizationResults<InnerJoinNode> results = optimize(query, expectedQuery);
 //
 //        System.out.println("\n Optimized query: \n" +  query);
 //
@@ -751,7 +751,7 @@ public class RedundantSelfJoinTest {
 //
 //        System.out.println("\n Expected query : \n" +  expectedQuery);
 //
-//        NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+//        NodeCentricOptimizationResults<InnerJoinNode> results = optimize(query, expectedQuery);
 //
 //        System.out.println("\n After optimization: \n" +  query);
 //
@@ -815,7 +815,7 @@ public class RedundantSelfJoinTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        optimize(query, expectedQuery);
         System.out.println("\nAfter optimization: \n" +  query);
 
 
@@ -840,19 +840,9 @@ public class RedundantSelfJoinTest {
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
-        UUID initialVersion = query.getVersionNumber();
 
         IntermediateQuery expectedQuery = query.createSnapshot();
-
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
-
-        System.out.println("\nAfter optimization: \n" +  query);
-
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
-        assertEquals("The version number has changed", initialVersion, query.getVersionNumber());
+        optimize(query, expectedQuery);
     }
 
     @Test
@@ -1382,7 +1372,7 @@ public class RedundantSelfJoinTest {
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial query: "+ initialIQ);
         System.out.println("Expected query: "+ expectedIQ);
-        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
         System.out.println("Optimized query: "+ optimizedIQ);
     }
 
@@ -1393,7 +1383,7 @@ public class RedundantSelfJoinTest {
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IQ initialIQ =  IQ_CONVERTER.convert(query);
 
-        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
         if (optimizedIQ.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
@@ -1412,6 +1402,21 @@ public class RedundantSelfJoinTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         return P.p(queryBuilder, joinNode);
+    }
+
+    private void optimize(IntermediateQuery query, IntermediateQuery expectedQuery) {
+        optimize(IQ_CONVERTER.convert(query), IQ_CONVERTER.convert(expectedQuery));
+    }
+
+    private void optimize(IQ initialQuery, IQ expectedQuery) {
+        System.out.println("\nBefore optimization: \n" +  initialQuery);
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+
+        System.out.println("\n After optimization: \n" +  optimizedIQ);
+
+        Assert.assertEquals(expectedQuery, optimizedIQ);
     }
 
 }
