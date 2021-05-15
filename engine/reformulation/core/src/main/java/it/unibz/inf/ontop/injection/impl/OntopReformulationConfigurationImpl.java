@@ -94,7 +94,7 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
         ReformulationFactory reformulationFactory = getInjector().getInstance(ReformulationFactory.class);
         OBDASpecification obdaSpecification = loadSpecification();
 
-        return reformulationFactory.create(obdaSpecification, getExecutorRegistry());
+        return reformulationFactory.create(obdaSpecification);
     }
 
     @Override
