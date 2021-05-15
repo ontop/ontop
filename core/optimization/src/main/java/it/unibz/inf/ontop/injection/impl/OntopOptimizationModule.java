@@ -8,13 +8,8 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
-import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
-import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
-import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
-import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
-import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -42,12 +37,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
 
         // Executors
         bindFromSettings(InnerJoinExecutor.class);
-        bindFromSettings(SubstitutionPropagationExecutor.class);
         bindFromSettings(UnionBasedQueryMerger.class);
-        bindFromSettings(UnionLiftExecutor.class);
-        bindFromSettings(ProjectionShrinkingExecutor.class);
-        bindFromSettings(FlattenUnionExecutor.class);
-        bindFromSettings(ConstructionNodeCleaningExecutor.class);
         bindFromSettings(InnerJoinMutableOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
