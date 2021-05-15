@@ -7,10 +7,8 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
-import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 import javax.annotation.Nullable;
@@ -56,20 +54,6 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
                         super.buildGuiceModules(),
                         optimizationConfiguration.buildGuiceModules()),
                 Stream.of(new OntopTranslationModule(this)));
-    }
-
-    /**
-     * Can be overloaded by sub-classes
-     */
-    @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-    generateOptimizationConfigurationMap() {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-                internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-        internalExecutorMapBuilder.putAll(optimizationConfiguration.generateOptimizationConfigurationMap());
-
-        return internalExecutorMapBuilder.build();
     }
 
     @Override

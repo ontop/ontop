@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.impl.tree;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -16,7 +15,6 @@ import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.impl.IntermediateQueryImpl;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
@@ -33,7 +31,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         }
     }
 
-    private final ExecutorRegistry executorRegistry;
     private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -43,12 +40,10 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private boolean canEdit;
 
     @AssistedInject
-    protected DefaultIntermediateQueryBuilder(@Assisted ExecutorRegistry executorRegistry,
-                                              IntermediateQueryFactory iqFactory,
+    protected DefaultIntermediateQueryBuilder(IntermediateQueryFactory iqFactory,
                                               IntermediateQueryValidator validator,
                                               CoreUtilsFactory coreUtilsFactory,
                                               OntopModelSettings settings) {
-        this.executorRegistry = executorRegistry;
         this.iqFactory = iqFactory;
         this.validator = validator;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -150,7 +145,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     protected IntermediateQuery buildQuery(DistinctVariableOnlyDataAtom projectionAtom,
                                            QueryTreeComponent treeComponent) {
 
-        return new IntermediateQueryImpl(projectionAtom, treeComponent, executorRegistry, validator,
+        return new IntermediateQueryImpl(projectionAtom, treeComponent, validator,
                 settings, iqFactory);
     }
 
@@ -187,10 +182,6 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     @Override
     public IntermediateQueryFactory getFactory() {
         return iqFactory;
-    }
-
-    protected ExecutorRegistry getExecutorRegistry() {
-        return executorRegistry;
     }
 
     protected IntermediateQueryValidator getValidator() {

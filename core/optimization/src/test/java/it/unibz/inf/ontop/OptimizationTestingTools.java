@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -32,7 +31,6 @@ import java.util.stream.IntStream;
 
 public class OptimizationTestingTools {
 
-    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
@@ -109,7 +107,6 @@ public class OptimizationTestingTools {
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
-        EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
         BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
@@ -186,7 +183,7 @@ public class OptimizationTestingTools {
     }
 
     public static IntermediateQueryBuilder createQueryBuilder() {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        return IQ_FACTORY.createIQBuilder();
     }
 
     public static OfflineMetadataProviderBuilder3 createMetadataProviderBuilder() {
