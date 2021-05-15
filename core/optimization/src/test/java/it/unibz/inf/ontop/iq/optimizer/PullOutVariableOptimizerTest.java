@@ -466,8 +466,6 @@ public class PullOutVariableOptimizerTest {
                 IQ_FACTORY.createIQ(
                         iq.getProjectionAtom(),
                         eet.transform(iq.getTree())
-                ),
-                query.getExecutorRegistry()
-        );
+                ));
     }
 }

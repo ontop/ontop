@@ -1383,7 +1383,7 @@ public class RedundantSelfJoinTest {
         if (optimizedIQ.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
-        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
+        return IQ_CONVERTER.convert(optimizedIQ);
     }
 
     private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1()

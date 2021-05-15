@@ -129,8 +129,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
 
-            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology);
         }
 
         /*
@@ -140,8 +139,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingFile.isPresent()) {
             specInputBuilder.addMappingFile(optionalMappingFile.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         /*
@@ -151,8 +149,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingReader.isPresent()) {
             specInputBuilder.addMappingReader(optionalMappingReader.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         /*
@@ -162,8 +159,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingGraph.isPresent()) {
             specInputBuilder.addMappingGraph(optionalMappingGraph.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         throw new MissingInputMappingException();

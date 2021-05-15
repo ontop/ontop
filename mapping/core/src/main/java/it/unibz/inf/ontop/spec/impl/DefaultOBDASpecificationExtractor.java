@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBParameters;
@@ -34,7 +33,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     @Override
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput,
-                                     @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
+                                     @Nonnull Optional<Ontology> optionalOntology)
             throws OBDASpecificationException {
 
         try {
@@ -49,8 +48,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     @Override
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping<? extends PreProcessedTriplesMap> ppMapping,
-                                     @Nonnull Optional<Ontology> optionalOntology,
-                                     ExecutorRegistry executorRegistry) throws OBDASpecificationException {
+                                     @Nonnull Optional<Ontology> optionalOntology) throws OBDASpecificationException {
 
         try {
             MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, optionalOntology);

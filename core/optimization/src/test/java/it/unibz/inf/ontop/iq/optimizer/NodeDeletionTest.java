@@ -279,6 +279,6 @@ public class NodeDeletionTest {
         if (optimizedIQ.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
-        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
+        return IQ_CONVERTER.convert(optimizedIQ);
     }
 }
