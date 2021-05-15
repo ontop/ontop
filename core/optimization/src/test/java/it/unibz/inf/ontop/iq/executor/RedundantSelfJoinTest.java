@@ -14,10 +14,10 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -702,7 +702,7 @@ public class RedundantSelfJoinTest {
 //        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 //        System.out.println("\n Expected query : \n" +  expectedQuery);
 //
-//        NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+//        NodeCentricOptimizationResults<InnerJoinNode> results = optimize(query, expectedQuery);
 //
 //        System.out.println("\n Optimized query: \n" +  query);
 //
@@ -751,7 +751,7 @@ public class RedundantSelfJoinTest {
 //
 //        System.out.println("\n Expected query : \n" +  expectedQuery);
 //
-//        NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+//        NodeCentricOptimizationResults<InnerJoinNode> results = optimize(query, expectedQuery);
 //
 //        System.out.println("\n After optimization: \n" +  query);
 //
@@ -789,21 +789,19 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testNoModification1() throws EmptyQueryException {
+    public void testNoModification1() {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, constructionNode);
 
         ImmutableExpression joiningCondition = TERM_FACTORY.getDisjunction(
                 TERM_FACTORY.getStrictEquality(O, TWO),
                 TERM_FACTORY.getStrictEquality(O, THREE));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
-        queryBuilder.addChild(constructionNode, joinNode);
+        queryBuilder.init(projectionAtom, joinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, ONE));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE2, ImmutableList.of(M, N1, O));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, M, 2, O));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -815,7 +813,7 @@ public class RedundantSelfJoinTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        optimize(query, expectedQuery);
         System.out.println("\nAfter optimization: \n" +  query);
 
 
@@ -824,35 +822,23 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testNoModification2() throws EmptyQueryException {
+    public void testNoModification2() {
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        queryBuilder.init(projectionAtom, constructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(constructionNode, joinNode);
+        queryBuilder.init(projectionAtom, joinNode);
         ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE1, ImmutableList.of(M, N, ONE));
-        ExtensionalDataNode dataNode2 =  createExtensionalDataNode(TABLE2, ImmutableList.of(M, N1, O));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, M, 2, O));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
-        UUID initialVersion = query.getVersionNumber();
 
         IntermediateQuery expectedQuery = query.createSnapshot();
-
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
-
-        System.out.println("\nAfter optimization: \n" +  query);
-
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
-        assertEquals("The version number has changed", initialVersion, query.getVersionNumber());
+        optimize(query, expectedQuery);
     }
 
     @Test
@@ -1382,7 +1368,7 @@ public class RedundantSelfJoinTest {
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial query: "+ initialIQ);
         System.out.println("Expected query: "+ expectedIQ);
-        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
         System.out.println("Optimized query: "+ optimizedIQ);
     }
 
@@ -1393,7 +1379,7 @@ public class RedundantSelfJoinTest {
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IQ initialIQ =  IQ_CONVERTER.convert(query);
 
-        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
         if (optimizedIQ.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
@@ -1412,6 +1398,21 @@ public class RedundantSelfJoinTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         return P.p(queryBuilder, joinNode);
+    }
+
+    private void optimize(IntermediateQuery query, IntermediateQuery expectedQuery) {
+        optimize(IQ_CONVERTER.convert(query), IQ_CONVERTER.convert(expectedQuery));
+    }
+
+    private void optimize(IQ initialQuery, IQ expectedQuery) {
+        System.out.println("\nBefore optimization: \n" +  initialQuery);
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+
+        System.out.println("\n After optimization: \n" +  optimizedIQ);
+
+        Assert.assertEquals(expectedQuery, optimizedIQ);
     }
 
 }

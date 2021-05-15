@@ -371,7 +371,7 @@ public class NullableUniqueConstraintTest {
 
     private void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(
-                initialIQ.normalizeForOptimization(), EXECUTOR_REGISTRY);
+                initialIQ.normalizeForOptimization());
 
         assertEquals(expectedIQ, optimizedIQ);
     }

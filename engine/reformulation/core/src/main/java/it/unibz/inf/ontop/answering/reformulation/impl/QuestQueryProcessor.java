@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.answering.reformulation.input.DescribeQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
@@ -18,12 +17,9 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.UUID;
 
 /**
  * TODO: rename it QueryTranslatorImpl ?
@@ -41,7 +37,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private static boolean IS_DEBUG_ENABLED = log.isDebugEnabled();
-	private final ExecutorRegistry executorRegistry;
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
@@ -50,7 +45,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
-								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
@@ -71,7 +65,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
-		this.executorRegistry = executorRegistry;
 
 		log.info("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -116,8 +109,8 @@ public class QuestQueryProcessor implements QueryReformulator {
                 if (IS_DEBUG_ENABLED)
                 	log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, executorRegistry);
-				IQ plannedQuery = queryPlanner.optimize(optimizedQuery, executorRegistry);
+                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
+				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				if (IS_DEBUG_ENABLED)
 					log.debug("Planned query: \n" + plannedQuery);
 

@@ -46,7 +46,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
         OBDASpecification specification = configuration.loadSpecification();
-        this.queryEngine = engineFactory.create(specification, configuration.getExecutorRegistry());
+        this.queryEngine = engineFactory.create(specification);
         this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
         this.termFactory = injector.getInstance(TermFactory.class);
         this.rdfFactory = injector.getInstance(RDF.class);

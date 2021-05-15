@@ -77,12 +77,12 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
      * If something has been pushed, it re-applies the structural and semantic optimizations.
      */
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         IQ liftedQuery = lift(query);
         return liftedQuery.equals(query)
                 ? query
                 // Re-applies the structural and semantic optimizations
-                : generalOptimizer.optimize(liftedQuery, executorRegistry);
+                : generalOptimizer.optimize(liftedQuery);
     }
 
     protected IQ lift(IQ query) {
