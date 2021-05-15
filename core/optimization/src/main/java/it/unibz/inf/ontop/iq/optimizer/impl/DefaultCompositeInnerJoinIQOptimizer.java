@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.SelfJoinUCIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.*;
 
 import javax.inject.Inject;
 
@@ -18,12 +15,13 @@ public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimize
     private DefaultCompositeInnerJoinIQOptimizer(
             SelfJoinUCIQOptimizer selfJoinUCIQOptimizer,
             SelfJoinSameTermIQOptimizer selfJoinSameTermIQOptimizer,
-            ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer) {
-        // TODO: enrich
+            ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer,
+            RedundantJoinFKOptimizer fkOptimizer) {
         this.optimizers = ImmutableList.of(
                 selfJoinUCIQOptimizer,
                 fdIQOptimizer,
-                selfJoinSameTermIQOptimizer);
+                selfJoinSameTermIQOptimizer,
+                fkOptimizer);
     }
 
     @Override
