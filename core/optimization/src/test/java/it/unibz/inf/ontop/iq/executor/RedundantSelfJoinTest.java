@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -22,7 +21,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
@@ -201,8 +199,7 @@ public class RedundantSelfJoinTest {
      * TODO: explain
      */
     @Test
-    public void testSelfJoinElimination2() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException {
+    public void testSelfJoinElimination2() throws IntermediateQueryBuilderException {
 
         P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();
@@ -226,8 +223,7 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testNonEliminationTable1() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException {
+    public void testNonEliminationTable1() throws IntermediateQueryBuilderException {
 
         P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();
@@ -252,8 +248,7 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testSelfJoinElimination3() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException {
+    public void testSelfJoinElimination3() throws IntermediateQueryBuilderException {
 
         P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();
@@ -277,8 +272,7 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testNonEliminationTable3() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException {
+    public void testNonEliminationTable3() throws IntermediateQueryBuilderException {
 
         P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();

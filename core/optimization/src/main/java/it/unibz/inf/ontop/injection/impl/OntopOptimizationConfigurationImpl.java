@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
-import it.unibz.inf.ontop.iq.proposal.*;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -45,18 +43,6 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         return Stream.concat(
                 super.buildGuiceModules(),
                 Stream.of(new OntopOptimizationModule(this)));
-    }
-
-    /**
-     * Can be overloaded by sub-classes
-     */
-    @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-    generateOptimizationConfigurationMap() {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-                internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-        return internalExecutorMapBuilder.build();
     }
 
     protected static class DefaultOntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder<B>>

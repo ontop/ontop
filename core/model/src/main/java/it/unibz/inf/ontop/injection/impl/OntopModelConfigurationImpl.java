@@ -6,11 +6,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -79,14 +77,6 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
             }
         }
         return injector;
-    }
-
-    /**
-     * Can be overloaded by sub-classes
-     */
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-        generateOptimizationConfigurationMap() {
-        return ImmutableMap.of();
     }
 
     /**
