@@ -158,7 +158,7 @@ public class RedundantJoinFKOptimizerImpl implements RedundantJoinFKOptimizer {
             if (sourceNode.isEquivalentTo((QueryNode) targetNode))
                 return false;
 
-            ImmutableMap<Integer, ? extends VariableOrGroundTerm> sourceArgumentMap = targetNode.getArgumentMap();
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> sourceArgumentMap = sourceNode.getArgumentMap();
 
             if (!foreignKeyConstraint.getComponents().stream()
                     .map(c -> c.getAttribute().getIndex() -1)

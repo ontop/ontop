@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -47,7 +48,7 @@ public class RedundantJoinFKTest {
 
     static {
 
-        /**
+        /*
          * build the FKs
          */
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
@@ -97,10 +98,8 @@ public class RedundantJoinFKTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
-        expectedQueryBuilder.addChild(constructionNode, filterNode);
-        expectedQueryBuilder.addChild(filterNode, dataNode2);
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(1, A));
+        expectedQueryBuilder.init(projectionAtom, newDataNode);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         optimize(query, expectedQuery);
@@ -232,16 +231,13 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         expectedQueryBuilder.init(projectionAtom1, constructionNode);
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(
-                TERM_FACTORY.getDBIsNotNull(A),
-                TERM_FACTORY.getDBIsNotNull(C)));
-        expectedQueryBuilder.addChild(constructionNode, joinNode1);
-        expectedQueryBuilder.addChild(joinNode1, dataNode1_1);
-        expectedQueryBuilder.addChild(joinNode1, dataNode1_2);
-        expectedQueryBuilder.addChild(joinNode1, dataNode2_1);
-        expectedQueryBuilder.addChild(joinNode1, dataNode2_2);
-        expectedQueryBuilder.addChild(joinNode1, dataNode2_3);
-        expectedQueryBuilder.addChild(joinNode1, dataNode2_4);
+        expectedQueryBuilder.addChild(constructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, dataNode1_1);
+        expectedQueryBuilder.addChild(joinNode, dataNode1_2);
+        expectedQueryBuilder.addChild(joinNode, dataNode2_1);
+        expectedQueryBuilder.addChild(joinNode, dataNode2_2);
+        expectedQueryBuilder.addChild(joinNode, dataNode2_3);
+        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, D)));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -267,12 +263,8 @@ public class RedundantJoinFKTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(
-                TERM_FACTORY.getDBIsNotNull(A),
-                TERM_FACTORY.getDBIsNotNull(B)));
-        expectedQueryBuilder.addChild(constructionNode, filterNode);
-        expectedQueryBuilder.addChild(filterNode, dataNode2);
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE4, ImmutableMap.of(1, A));
+        expectedQueryBuilder.init(projectionAtom, newDataNode);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -332,7 +324,7 @@ public class RedundantJoinFKTest {
 
 
     private void optimize(IntermediateQuery query, IntermediateQuery expectedQuery) {
-        optimize(IQ_CONVERTER.convert(query), IQ_CONVERTER.convert(expectedQuery));
+        optimize(IQ_CONVERTER.convert(query), IQ_CONVERTER.convert(expectedQuery).normalizeForOptimization());
     }
 
     private void optimize(IQ initialQuery, IQ expectedQuery) {
