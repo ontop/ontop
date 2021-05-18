@@ -69,6 +69,6 @@ public abstract class AbstractGeofBooleanFunctionSymbolDirectImpl extends Abstra
         boolean v1_castGeom = v0.getGeometry().inferType().isPresent() &&
                 v0.getGeometry().inferType().get().getTermType().get().toString() == "GEOGRAPHY";
 
-        return (!(v0_castGeom ^ !v1_castGeom));
+        return (!(v0_castGeom ^ v1_castGeom));
     }
 }

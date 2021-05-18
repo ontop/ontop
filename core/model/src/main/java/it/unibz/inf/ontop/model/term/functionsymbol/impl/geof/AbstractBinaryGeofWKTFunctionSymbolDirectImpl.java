@@ -67,7 +67,7 @@ public abstract class AbstractBinaryGeofWKTFunctionSymbolDirectImpl extends Abst
                 v0.getGeometry().inferType().get().getTermType().get().toString() == "GEOGRAPHY" &&
                 this.getOfficialName() != "http://www.opengis.net/def/function/geosparql/sfIntersects";
 
-        return (!(v0_castGeom ^ !v1_castGeom));
+        return (!(v0_castGeom ^ v1_castGeom));
     }
 
     abstract public BiFunction<ImmutableTerm, ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory);

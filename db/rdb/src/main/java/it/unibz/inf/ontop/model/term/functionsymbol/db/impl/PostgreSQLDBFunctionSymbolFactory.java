@@ -81,8 +81,8 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeographyNormFunctionSymbol(defaultDBGeographyType);
         builder.put(dbTypeFactory.getDBGeographyType(),typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
 
-        //GEOGRAPHY used by ST_BUFFER inside a boolean expression e.g. ST_INTERSECTS
-        //builder.put(dbTypeFactory.getDBBooleanType(), typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
+        //GEOGRAPHY used by ST_BUFFER inside a boolean expression e.g. ST_INTERSECTS, uncast BOOLEANtoTEXT
+        builder.put(dbTypeFactory.getDBBooleanType(), typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
 
         return builder.build();
     }
