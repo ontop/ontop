@@ -579,6 +579,7 @@ public interface TermFactory {
 	// Non-topological and common form functions
 	ImmutableTerm getDBSTSTransform(ImmutableTerm arg1, ImmutableTerm srid);
 	ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableTerm getDBSTGeomFromText(ImmutableTerm arg1);
 	ImmutableTerm getDBSTFlipCoordinates(ImmutableTerm arg1);
 	ImmutableTerm getDBSTDistanceSphere(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableTerm getDBSTDistanceSpheroid(ImmutableTerm arg1, ImmutableTerm arg2, ImmutableTerm arg3);

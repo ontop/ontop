@@ -1051,7 +1051,6 @@ public class GeoSPARQLTest {
                 "\n" +
                 "SELECT ?x WHERE {\n" +
                 ":2 a :Geom; geo:asWKT ?xWkt.\n" +
-                //":1 a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND(geof:difference(?xWkt, 'POLYGON((2 2, 7 2, 7 5, 2 5, 2 2))'^^geo:wktLiteral) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);
@@ -1068,7 +1067,6 @@ public class GeoSPARQLTest {
                 "\n" +
                 "SELECT ?x WHERE {\n" +
                 ":2 a :Geom; geo:asWKT ?xWkt.\n" +
-                //":1 a :Geom; geo:asWKT ?yWkt.\n" +
                 "BIND(geof:difference(?xWkt, '<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POLYGON((2 2, 7 2, 7 5, 2 5, 2 2))'^^geo:wktLiteral) as ?x) .\n" +
                 "}\n";
         String val = runQueryAndReturnString(query);

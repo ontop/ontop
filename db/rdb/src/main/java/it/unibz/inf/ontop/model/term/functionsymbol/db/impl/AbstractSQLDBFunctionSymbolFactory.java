@@ -68,7 +68,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ST_DISTANCE_SPHEROID = "ST_DISTANCESPHEROID";
 
     protected static final String ST_TRANSFORM = "ST_TRANSFORM";
-
+    protected static final String ST_GEOMFROMTEXT = "ST_GEOMFROMTEXT";
     protected static final String ST_SETSRID = "ST_SETSRID";
 
     protected static final String ST_FLIP_COORDINATES = "ST_FLIPCOORDINATES";
@@ -348,6 +348,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol getsridSymbol = new GeoDBTypedFunctionSymbol(ST_SRID, 1, dbIntType, false,
                 abstractRootDBType);
         builder.put(ST_SRID, 1, getsridSymbol);
+
+        DBFunctionSymbol setsridSymbol = new GeoDBTypedFunctionSymbol(ST_SETSRID, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_SETSRID, 2, setsridSymbol);
+
+        DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_GEOMFROMTEXT, 1, geomfromtextSymbol);
 
         return builder.build();
     }
@@ -1072,6 +1080,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBSTSetSRID() {
         return getRegularDBFunctionSymbol(ST_SETSRID, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTGeomFromText() {
+        return getRegularDBFunctionSymbol(ST_GEOMFROMTEXT, 1);
     }
 
     /**

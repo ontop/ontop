@@ -62,6 +62,7 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
         DBMathBinaryOperator divides = dbFunctionSymbolFactory.getDBMathBinaryOperator("/", dbTypeFactory.getDBDoubleType());
 
+
         if (inputUnit == METRE && outputUnit == METRE) {
             return termFactory.getDBSTDistance(geom0, geom1).simplify();
         } else if (inputUnit == METRE && outputUnit == RADIAN) {
@@ -73,20 +74,34 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER / 180 * Math.PI), dbTypeFactory.getDBDoubleType());
             return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
         } else if (inputUnit == DEGREE && outputUnit == DEGREE) {
-            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(
+                    uncastSRID(geom0, termFactory, subLexicalTerms.get(0)),
+                    uncastSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER / 180 * Math.PI), dbTypeFactory.getDBDoubleType());
             return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
         } else if (inputUnit == DEGREE && outputUnit == RADIAN) {
-            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
+            ImmutableTerm distanceInMetre = termFactory.getDBSTDistanceSphere(
+                    uncastSRID(geom0, termFactory, subLexicalTerms.get(0)),
+                    uncastSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER), dbTypeFactory.getDBDoubleType());
             return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
         } else if (inputUnit == DEGREE && outputUnit == METRE) {
             // TODO: consider using getDBSTDistanceSpheroid to get more accurate results
-            return termFactory.getDBSTDistanceSphere(geom0, geom1).simplify();
+            return termFactory.getDBSTDistanceSphere(
+                    uncastSRID(geom0, termFactory, subLexicalTerms.get(0)),
+                    uncastSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
         } else {
             throw new IllegalArgumentException(String.format("Unsupported combination of units for distance. input: %s, output: %s", inputUnit, outputUnit));
         }
-
     }
+
+    /**
+     * H2 does not support ST_SETSRID within DISTANCESPHERE unlike PostGIS. For both EPSG4326 automatically cast with function
+     */
+        static ImmutableTerm uncastSRID(ImmutableTerm geom, TermFactory termFactory, ImmutableTerm subLexicalTerm) {
+            return geom.isGround()
+                    ? GeoUtils.extractConstantWKTLiteralValue(termFactory, subLexicalTerm).get()
+                    : geom;
+        }
 
 }

@@ -29,7 +29,7 @@ public class GeoUtils {
                 );
 
         // Get the respective geometry
-        ImmutableTerm geometry = tryExtractGeometryFromConstant(wktLiteralTerm, termFactory)
+        ImmutableTerm geometry = tryExtractGeometryFromConstant(wktLiteralTerm, termFactory, srid)
                 .orElseGet(
                         // If template then
                         () -> tryExtractGeometryFromTemplate(termFactory, wktLiteralTerm)
@@ -63,15 +63,24 @@ public class GeoUtils {
         return tryExtractSRIDFromDbConstant(firstTermFromTemplate);
     }
 
-    static Optional<ImmutableTerm> tryExtractGeometryFromConstant(ImmutableTerm immutableTerm, TermFactory termFactory) {
+    static Optional<ImmutableTerm> tryExtractGeometryFromConstant(ImmutableTerm immutableTerm, TermFactory termFactory, IRI srid) {
+        final String EPSG_PREFIX = "EPSG:";
+        String epsg0 = toProj4jName(srid.getIRIString());
+        String epsg1 = (epsg0.equals("CRS:84"))
+                ? "4326"
+                : epsg0.substring(EPSG_PREFIX.length());
+        DBConstant epsg = termFactory.getDBStringConstant(epsg1);
         return Optional.of(immutableTerm)
                 // template is NOT a NonGroundFunctionalTerm, but a string user input
                 .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
                 .map(Constant::getValue)
                 // the SRID is enclosed by "<" and ">
-                .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                //.filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
                 // extract the geometry out of the string
-                .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()));
+                .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()))
+                .map(v -> termFactory.getDBSTGeomFromText(v))
+                .map(v -> termFactory.getDBSTSetSRID(v, epsg))
+                .map(v -> termFactory.getDBAsText(v));
     }
 
     private static Optional<ImmutableTerm> tryExtractGeometryFromTemplate(TermFactory termFactory, ImmutableTerm wktLiteralTerm) {
@@ -107,6 +116,18 @@ public class GeoUtils {
                 .map(Constant::getValue)
                 .filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
                 .isPresent();
+    }
+
+    static Optional<ImmutableTerm> extractConstantWKTLiteralValue(TermFactory termFactory, ImmutableTerm immutableTerm) {
+        // Get the respective geometry
+        return Optional.of(immutableTerm)
+                // template is NOT a NonGroundFunctionalTerm, but a string user input
+                .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
+                .map(Constant::getValue)
+                // the SRID is enclosed by "<" and ">
+                //.filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
+                // extract the geometry out of the string
+                .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()));
     }
     
     static String toProj4jName(String sridIRIString) {
