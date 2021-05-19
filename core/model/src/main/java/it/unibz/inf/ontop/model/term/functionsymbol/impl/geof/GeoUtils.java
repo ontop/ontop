@@ -64,23 +64,26 @@ public class GeoUtils {
     }
 
     static Optional<ImmutableTerm> tryExtractGeometryFromConstant(ImmutableTerm immutableTerm, TermFactory termFactory, IRI srid) {
+
+        // Find which SRID to set, constants have SRID=0 in PostG
         final String EPSG_PREFIX = "EPSG:";
-        String epsg0 = toProj4jName(srid.getIRIString());
-        String epsg1 = (epsg0.equals("CRS:84"))
-                ? "4326"
-                : epsg0.substring(EPSG_PREFIX.length());
-        DBConstant epsg = termFactory.getDBStringConstant(epsg1);
+        String sridProj4j = toProj4jName(srid.getIRIString());
+        DBConstant newEPSG = (sridProj4j.equals("CRS:84"))
+                ? termFactory.getDBStringConstant("4326")
+                : termFactory.getDBStringConstant(sridProj4j.substring(EPSG_PREFIX.length()));
+
         return Optional.of(immutableTerm)
                 // template is NOT a NonGroundFunctionalTerm, but a string user input
                 .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
                 .map(Constant::getValue)
-                // the SRID is enclosed by "<" and ">
-                //.filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
                 // extract the geometry out of the string
                 .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()))
-                .map(v -> termFactory.getDBSTGeomFromText(v))
-                .map(v -> termFactory.getDBSTSetSRID(v, epsg))
-                .map(v -> termFactory.getDBAsText(v));
+                // Use GeomFromText with one argument to convert text into geometry
+                .map(termFactory::getDBSTGeomFromText)
+                // Set SRID
+                .map(v -> termFactory.getDBSTSetSRID(v, newEPSG))
+                // Convert to text
+                .map(termFactory::getDBAsText);
     }
 
     private static Optional<ImmutableTerm> tryExtractGeometryFromTemplate(TermFactory termFactory, ImmutableTerm wktLiteralTerm) {
@@ -102,7 +105,7 @@ public class GeoUtils {
                             return t.getTerm(1);
                         else
                             // Otherwise drop the SRID template, and return everything else
-                            return termFactory.getNullRejectingDBConcatFunctionalTerm(t.getTerms().subList(1, t.getTerms().size()));
+                            return termFactory.getDBSTMakePoint(t.getTerms().get(1), t.getTerms().get(3));
                     }
                 });
     }
@@ -124,8 +127,6 @@ public class GeoUtils {
                 // template is NOT a NonGroundFunctionalTerm, but a string user input
                 .filter(t -> t instanceof DBConstant).map(t -> (DBConstant) t)
                 .map(Constant::getValue)
-                // the SRID is enclosed by "<" and ">
-                //.filter(v -> v.startsWith("<") && v.indexOf(">") > 0)
                 // extract the geometry out of the string
                 .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()));
     }

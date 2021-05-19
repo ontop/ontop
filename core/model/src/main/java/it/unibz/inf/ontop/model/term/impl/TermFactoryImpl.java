@@ -634,6 +634,11 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTGeomFromText(), ImmutableList.of(arg1));
 	}
 
+	@Override
+	public ImmutableTerm getDBSTMakePoint(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTMakePoint(), ImmutableList.of(arg1, arg2));
+	}
+
     @Override
     public ImmutableTerm getDBSTSetSRID(ImmutableTerm arg1, ImmutableTerm arg2) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSTSetSRID(), ImmutableList.of(arg1, arg2));

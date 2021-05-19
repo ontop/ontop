@@ -316,6 +316,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSTDistanceSpheroid();
     DBFunctionSymbol getDBSTTransform();
     DBFunctionSymbol getDBSTGeomFromText();
+    DBFunctionSymbol getDBSTMakePoint();
     DBFunctionSymbol getDBSTSetSRID();
     FunctionSymbol getDBAsText();
     FunctionSymbol getDBSTFlipCoordinates();
