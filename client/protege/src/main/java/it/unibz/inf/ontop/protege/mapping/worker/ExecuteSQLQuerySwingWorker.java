@@ -66,7 +66,13 @@ public class ExecuteSQLQuerySwingWorker extends SwingWorkerWithCompletionPercent
                 while (rs.next()) {
                     String[] values = new String[numcols];
                     for (int i = 1; i <= numcols; i++)
-                        values[i - 1] = rs.getString(i);
+                        try {
+                            values[i - 1] = rs.getString(i);
+                        } catch (Exception ex) {
+                            // TODO: check proper condition
+                            //  if (ex.getCause())
+                            values[i - 1] = "-- BLOB --";
+                        }
                     tableModel.addRow(values);
                     tick();
                 }
