@@ -1359,6 +1359,51 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Test
+    public void test2LevelJoinWithAggregate() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(
+                0, A,
+                1, B));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(
+                0, A));
+
+        IQTree subInnerJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        AggregationNode aggregationNode = IQ_FACTORY.createAggregationNode(ImmutableSet.of(B),
+                SUBSTITUTION_FACTORY.getSubstitution(C,
+                        TERM_FACTORY.getDBCount(false)));
+
+        IQTree aggTree = IQ_FACTORY.createUnaryIQTree(aggregationNode, subInnerJoinTree);
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(
+                0, B));
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode3, aggTree));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), B, C);
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(
+                1, B));
+
+        // TODO: use dataNode4 once the normalization of aggregation has been improved.
+        UnaryIQTree newAggTree = IQ_FACTORY.createUnaryIQTree(aggregationNode, dataNode1);
+
+        NaryIQTree expectedTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode3, newAggTree));
+
+
+        optimize(IQ_FACTORY.createIQ(projectionAtom, initialTree),
+                IQ_FACTORY.createIQ(projectionAtom, expectedTree));
+
+    }
+
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial query: "+ initialIQ);
         System.out.println("Expected query: "+ expectedIQ);
