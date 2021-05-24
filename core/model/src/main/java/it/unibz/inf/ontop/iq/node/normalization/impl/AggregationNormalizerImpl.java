@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.AggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -36,13 +37,16 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final NotRequiredVariableRemover notRequiredVariableRemover;
 
     @Inject
-    protected AggregationNormalizerImpl(CoreSingletons coreSingletons) {
+    protected AggregationNormalizerImpl(CoreSingletons coreSingletons,
+                                        NotRequiredVariableRemover notRequiredVariableRemover) {
         this.coreSingletons = coreSingletons;
         this.iqFactory = coreSingletons.getIQFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.notRequiredVariableRemover = notRequiredVariableRemover;
     }
 
     /**
@@ -59,7 +63,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         if (aggregationNode.getGroupingVariables().isEmpty() && aggregationNode.getSubstitution().isEmpty())
             return iqFactory.createTrueNode();
 
-        IQTree shrunkChild = child.normalizeForOptimization(variableGenerator);
+        IQTree shrunkChild = notRequiredVariableRemover.optimize(child.normalizeForOptimization(variableGenerator),
+                aggregationNode.getLocallyRequiredVariables(), variableGenerator);
 
         if (shrunkChild.isDeclaredAsEmpty()) {
             return normalizeEmptyChild(aggregationNode, normalizedProperties);
