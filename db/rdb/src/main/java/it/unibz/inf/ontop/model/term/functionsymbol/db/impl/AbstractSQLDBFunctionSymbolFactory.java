@@ -732,8 +732,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
-        return new DefaultSimpleDBCastFunctionSymbol(geoType, typeFactory.getDBTypeFactory().getDBGeometryType(),
-                Serializers.getCastSerializer(typeFactory.getDBTypeFactory().getDBGeometryType()));
+        return new DefaultSimpleDBCastFunctionSymbol(geoType, geoType, Serializers.getCastSerializer(geoType));
     }
 
     @Override

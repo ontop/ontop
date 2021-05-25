@@ -202,7 +202,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geometryType) {
+    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
         return createSimpleCastFunctionSymbol(dbTypeFactory.getDBGeometryType(), dbStringType);
     }
 

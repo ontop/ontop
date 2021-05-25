@@ -71,10 +71,15 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                         "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
         builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
 
+        //GEOMETRY
+        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
+        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
+        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
+
         //GEOGRAPHY - Data type exclusive to PostGIS
         DBTermType defaultDBGeographyType = dbTypeFactory.getDBGeographyType();
-        DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeographyNormFunctionSymbol(defaultDBGeographyType);
-        builder.put(dbTypeFactory.getDBGeographyType(),typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
+        DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeographyType);
+        builder.put(defaultDBGeographyType,typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
 
         return builder.build();
     }
@@ -138,12 +143,6 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
         return new OneLetterBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
-    }
-
-    // GEOGRAPHY data type unique to PostGIS
-    protected DBTypeConversionFunctionSymbol createGeographyNormFunctionSymbol(DBTermType geoType) {
-        return new DefaultSimpleDBCastFunctionSymbol(geoType, typeFactory.getDBTypeFactory().getDBGeographyType(),
-                Serializers.getCastSerializer(typeFactory.getDBTypeFactory().getDBGeographyType()));
     }
 
     @Override
