@@ -7,7 +7,6 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -35,6 +34,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbGeometryType = dbTypeFactory.getDBGeometryType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));

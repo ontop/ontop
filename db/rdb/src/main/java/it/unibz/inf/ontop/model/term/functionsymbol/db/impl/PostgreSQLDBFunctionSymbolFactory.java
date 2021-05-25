@@ -71,18 +71,10 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                         "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
         builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
 
-        //GEOMETRY
-        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
-        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
-        builder.put(dbTypeFactory.getDBGeometryType(),typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
-
-        //GEOGRAPHY
+        //GEOGRAPHY - Data type exclusive to PostGIS
         DBTermType defaultDBGeographyType = dbTypeFactory.getDBGeographyType();
         DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeographyNormFunctionSymbol(defaultDBGeographyType);
         builder.put(dbTypeFactory.getDBGeographyType(),typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
-
-        //GEOGRAPHY used by ST_BUFFER inside a boolean expression e.g. ST_INTERSECTS, uncast BOOLEANtoTEXT
-        builder.put(dbTypeFactory.getDBBooleanType(), typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
 
         return builder.build();
     }
@@ -148,14 +140,10 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return new OneLetterBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
     }
 
+    // GEOGRAPHY data type unique to PostGIS
     protected DBTypeConversionFunctionSymbol createGeographyNormFunctionSymbol(DBTermType geoType) {
         return new DefaultSimpleDBCastFunctionSymbol(geoType, typeFactory.getDBTypeFactory().getDBGeographyType(),
                 Serializers.getCastSerializer(typeFactory.getDBTypeFactory().getDBGeographyType()));
-    }
-
-    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
-        return new DefaultSimpleDBCastFunctionSymbol(geoType, typeFactory.getDBTypeFactory().getDBGeometryType(),
-                Serializers.getCastSerializer(typeFactory.getDBTypeFactory().getDBGeometryType()));
     }
 
     @Override
