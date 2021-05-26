@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.docker.datatypes;
  */
 
 import it.unibz.inf.ontop.docker.ResultSetInfo;
-import it.unibz.inf.ontop.docker.ResultSetInfoTupleUtil;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import junit.framework.TestCase;
@@ -223,7 +222,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 
 	private ResultSetInfo readResultSetInfo() throws Exception {
 		Set<Statement> resultGraph = readGraphResultSetInfo();
-		return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
+		return ResultSetInfo.toResultSetInfo(resultGraph);
 	}
 
 	private Set<Statement> readGraphResultSetInfo() throws Exception {
