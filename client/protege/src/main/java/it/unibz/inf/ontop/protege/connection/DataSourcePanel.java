@@ -145,7 +145,8 @@ public class DataSourcePanel extends JPanel implements OBDAModelManagerListener 
             connectionStatusLabel.setForeground(Color.BLACK);
             connectionStatusLabel.setText("Establishing connection...");
 
-            try (Connection ignored = obdaModelManager.getCurrentOBDAModel().getDataSource().getConnection()) {
+            DataSource dataSource =  obdaModelManager.getCurrentOBDAModel().getDataSource();
+            try (Connection ignored = dataSource.getConnection()) {
                 connectionStatusLabel.setForeground(Color.GREEN.darker());
                 connectionStatusLabel.setText("Connection is OK");
             }

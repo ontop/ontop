@@ -24,7 +24,7 @@ import static it.unibz.inf.ontop.protege.utils.DialogUtils.htmlEscape;
  */
 public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 
-	private void handleError(Exception e){
+	private void handleError(Exception e) {
 		DialogUtils.showPrettyMessageDialog(null,
 				"<html><h3>Error during reasoner initialization.</h3>" + htmlEscape(e.getMessage()) + "</html>",
 				"Ontop Initialization Error");
@@ -71,7 +71,7 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 			checkArgument(config instanceof OntopProtegeOWLConfiguration, "Config %s is not an instance of OntopProtegeOWLConfiguration", config);
 			return new OntopProtegeReasoner(ontology, (OntopProtegeOWLConfiguration) config);
 		}
-		catch (Exception e){
+		catch (Exception e) {
 			handleError(e);
 			throw e;
 		}

@@ -34,6 +34,7 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -47,21 +48,41 @@ public class DataSource {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSource.class);
 	
 	private final Properties properties = new Properties();
-	private final JDBCConnectionManager connectionManager;
 
 	private final URI id;
 	private String driver = "", url = "", username = "", password = "";
 
 	private final EventListenerList<DataSourceListener> listeners = new EventListenerList<>();
 
+	private Connection connection;
+
+	/*  TODO: default parameters for creating statements (to be enforced?)
+			JDBC_AUTOCOMMIT, false
+			JDBC_FETCHSIZE, 100
+			JDBC_RESULTSETCONCUR, ResultSet.CONCUR_READ_ONLY
+			JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY
+		 */
+
+
 	public DataSource() {
-		this.connectionManager = new JDBCConnectionManager();
 		this.id = URI.create(UUID.randomUUID().toString());
 	}
 
+	/**
+	 * Closes the connection quietly
+	 */
 	public void dispose() {
-		connectionManager.dispose();
+		try {
+			if (connection != null) {
+				connection.close();
+				connection = null;
+			}
+		}
+		catch (Exception e) {
+			LOGGER.error(e.getMessage());
+		}
 	}
+
 
 	@Nonnull
 	public String getDriver() {
@@ -97,12 +118,21 @@ public class DataSource {
 		this.password = password;
 		this.driver = driver;
 
-		if (changed)
+		if (changed) {
+			dispose();
 			listeners.fire(l -> l.changed(this));
+		}
 	}
 
+	/**
+	 * Retrieves the connection object.
+	 * If the connection doesn't exist or is dead, it will create a new connection.
+	 */
 	public Connection getConnection() throws SQLException {
-		return connectionManager.getConnection(url, username, password);
+		if (connection == null || connection.isClosed())
+			connection = DriverManager.getConnection(url, username, password);
+
+		return connection;
 	}
 
 	public Properties asProperties() {
@@ -129,6 +159,7 @@ public class DataSource {
 		url = "";
 		username = "";
 		password = "";
+		connection = null;
 	}
 
 	public ImmutableSet<String> getPropertyKeys() {
@@ -151,19 +182,6 @@ public class DataSource {
 			properties.put(key, value);
 			listeners.fire(l -> l.changed(this));
 		}
-	}
-
-	public void renameProperty(@Nonnull String oldKey, @Nonnull String newKey) {
-		if (CONNECTION_PARAMETER_NAMES.contains(oldKey))
-			throw new IllegalArgumentException("Cannot rename reserved " + oldKey);
-
-		Object value = properties.get(oldKey);
-		if (value == null)
-			throw new IllegalArgumentException("Key " + oldKey + " not found");
-
-		properties.remove(oldKey);
-		properties.put(newKey, value);
-		listeners.fire(l -> l.changed(this));
 	}
 
 	public void removeProperty(@Nonnull String key) {

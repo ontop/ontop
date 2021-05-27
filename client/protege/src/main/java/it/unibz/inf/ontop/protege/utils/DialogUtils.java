@@ -220,7 +220,7 @@ public class DialogUtils {
 		StringBuilder sb = new StringBuilder();
 		int offset = 0;
 		while (offset < s.length()) {
-			int pos = s.indexOf('\n');
+			int pos = s.indexOf('\n', offset);
 			if (pos == -1)
 				pos = s.length() - 1;
 			String line = s.substring(offset, pos + 1);
