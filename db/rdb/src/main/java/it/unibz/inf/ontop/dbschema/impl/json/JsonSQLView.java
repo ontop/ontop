@@ -14,11 +14,14 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -108,39 +111,64 @@ public class JsonSQLView extends JsonView {
         TermFactory termFactory = coreSingletons.getTermFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
+        ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
+        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
 
         RAExpression2IQConverter raExpression2IQConverter = new RAExpression2IQConverter(coreSingletons);
 
-        IQTree iqTree;
+        IQTree initialChild;
         RAExpression raExpression;
         try {
             raExpression = extractRAExpression(dbParameters, parentCacheMetadataLookup);
-            iqTree = raExpression2IQConverter.convert(raExpression);
+            initialChild = raExpression2IQConverter.convert(raExpression);
         } catch (JSQLParserException | UnsupportedSelectQueryException | InvalidSelectQueryException e) {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 
-        ImmutableMap<Variable, Variable> map1 = raExpression.getAttributes().asMap().entrySet().stream()
+        ImmutableMap<QualifiedAttributeID, Variable> attributeVariableMap = raExpression.getAttributes().asMap().keySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> termFactory.getVariable(e.getValue().toString()),
-                        e -> termFactory.getVariable(e.getKey().getAttribute().getName())
+                        k -> k,
+                        k -> termFactory.getVariable(k.getAttribute().getName())
                 ));
 
+        ImmutableList<Variable> atomVariables = raExpression.getAttributes().asMap().keySet().stream()
+                .map(attributeVariableMap::get)
+                .collect(ImmutableCollectors.toList());
 
-        SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-        InjectiveVar2VarSubstitution injectiveVar2VarSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(map1);
-        IQTree iqTreeRenamedVariables = iqTree.applyFreshRenaming(injectiveVar2VarSubstitution);
+        ImmutableSet<Variable> projectedVariables = ImmutableSet.copyOf(atomVariables);
+
+        if (atomVariables.size() != projectedVariables.size()) {
+            ImmutableMultiset<Variable> multiSet = ImmutableMultiset.copyOf(atomVariables);
+            ImmutableSet<Variable> conflictingVariables = multiSet.stream()
+                    .filter(v -> multiSet.count(v) > 1)
+                    .collect(ImmutableCollectors.toSet());
+
+            throw new MetadataExtractionException("The following projected columns have multiple possible provenances: "
+                    + conflictingVariables);
+        }
+
+        ImmutableMap<Variable, ImmutableTerm> ascendingSubstitutionMap = raExpression.getAttributes().asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> attributeVariableMap.get(e.getKey()),
+                        Map.Entry::getValue));
+
+        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
+                substitutionFactory.getSubstitution(ascendingSubstitutionMap),
+                projectedVariables);
+
+        IQTree updatedChild = normalization.updateChild(initialChild);
+
+        IQTree iqTree = iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(projectedVariables, normalization.getNormalizedSubstitution()),
+                updatedChild);
+
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
-        IQTree iqTreeTransformed = notYetTypedEqualityTransformer.transform(iqTreeRenamedVariables);
+        IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);
 
-        ImmutableSet<Variable> iqTreeVariables = iqTree.getVariables();
-        List<Variable> targetList = Lists.newArrayList(iqTreeVariables);
-        ImmutableList<Variable> projectedVariables = ImmutableList.copyOf(targetList);
-        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
-        DistinctVariableOnlyDataAtom projectionAtomWithSubstitution = injectiveVar2VarSubstitution.applyToDistinctVariableOnlyDataAtom(projectionAtom);
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, atomVariables.size(), coreSingletons);
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, atomVariables);
 
-        return iqFactory.createIQ(projectionAtomWithSubstitution, iqTreeTransformed)
+        return iqFactory.createIQ(projectionAtom, transformedTree)
                 .normalizeForOptimization();
     }
 
