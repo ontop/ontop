@@ -128,7 +128,6 @@ public class JsonSQLView extends JsonView {
         ImmutableMap<QualifiedAttributeID, Variable> attributeVariableMap = raExpression.getAttributes().asMap().keySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         k -> k,
-                        // TODO: throw an exception when the attribute is projected twice!
                         k -> termFactory.getVariable(k.getAttribute().getName())
                 ));
 
@@ -137,6 +136,16 @@ public class JsonSQLView extends JsonView {
                 .collect(ImmutableCollectors.toList());
 
         ImmutableSet<Variable> projectedVariables = ImmutableSet.copyOf(atomVariables);
+
+        if (atomVariables.size() != projectedVariables.size()) {
+            ImmutableMultiset<Variable> multiSet = ImmutableMultiset.copyOf(atomVariables);
+            ImmutableSet<Variable> conflictingVariables = multiSet.stream()
+                    .filter(v -> multiSet.count(v) > 1)
+                    .collect(ImmutableCollectors.toSet());
+
+            throw new MetadataExtractionException("The following projected columns have multiple possible provenances: "
+                    + conflictingVariables);
+        }
 
         ImmutableMap<Variable, ImmutableTerm> ascendingSubstitutionMap = raExpression.getAttributes().asMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
