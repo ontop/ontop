@@ -201,7 +201,7 @@ public class TestExecutor {
 
     private ResultSetInfo readResultSetInfo() throws Exception {
         Set<Statement> resultGraph = readGraphResultSetInfo();
-        return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
+        return ResultSetInfo.toResultSetInfo(resultGraph);
     }
 
     private Set<Statement> readGraphResultSetInfo() throws Exception {
