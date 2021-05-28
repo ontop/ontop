@@ -137,7 +137,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
         ResultSetMetaData md = rs.getMetaData();
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         for (int i = 1; i <= md.getColumnCount(); i++)
-            builder.add(md.getColumnName(i).toUpperCase());
+            builder.add(md.getColumnLabel(i).toUpperCase());
         ImmutableSet<String> normalizedColumnNames = builder.build();
 
         // a very lax version of column matching - quotation and case are ignored
