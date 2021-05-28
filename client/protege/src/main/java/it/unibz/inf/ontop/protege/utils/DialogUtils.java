@@ -359,21 +359,38 @@ public class DialogUtils {
 			Throwable owlExceptionCause = owlException.getCause();
 			JOptionPane.showMessageDialog(parent,
 					"<html><b>Error executing SPARQL query.</b><br><br>" +
-							HTML_TAB + htmlEscape(owlExceptionCause.getMessage()) + "<br></html>",
+							HTML_TAB + htmlEscape(get10Lines(owlExceptionCause.getMessage())) + "<br></html>",
 					title,
 					JOptionPane.ERROR_MESSAGE);
+
+			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 		else {
-			showPrettyMessageDialog(parent, message + "\n" + e.getMessage() + "\n" +
-					"For more information, see the log.", title);
+			JOptionPane.showMessageDialog(parent,
+					"<html><b>" + message + ".</b><br><br>" +
+						HTML_TAB + htmlEscape(get10Lines(e.getMessage())) + "<br><br>"
+						+ "For more information, see the log.</html>",
+					title,
+					JOptionPane.ERROR_MESSAGE);
 
 			log.error(e.getMessage(), e);
 			e.printStackTrace();
 		}
 	}
 
-	public static void showPrettyMessageDialog(Component parent, Object message, String title) {
-		JOptionPane narrowPane = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
+	private static String get10Lines(String s) {
+		int pos = -1;
+		for (int i = 0; i < 10; i++) {
+			pos = s.indexOf('\n', pos + 1);
+			if (pos == -1)
+				return s;
+		}
+		return s.substring(0, pos);
+	}
+
+	public static void showPrettyMessageDialog(Component parent, String message, String title) {
+		JOptionPane narrowPane = new JOptionPane(get10Lines(message), JOptionPane.ERROR_MESSAGE);
 		JDialog errorDialog = narrowPane.createDialog(parent, title);
 		errorDialog.setVisible(true);
 	}
