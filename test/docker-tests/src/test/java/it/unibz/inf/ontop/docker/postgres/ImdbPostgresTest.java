@@ -553,5 +553,17 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "order by desc(?rating) ?prod_year\n" +
                 "limit 25");
     }
+
+    /**
+     * Technical test
+     */
+    @Test
+    public void testBirthNameContainsZ() throws Exception {
+        countResults(196531, "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
+                "" +
+                "SELECT ?p WHERE {\n" +
+                " ?p  :birthNameContainsZ true .\n" +
+                "}");
+    }
 }
 
