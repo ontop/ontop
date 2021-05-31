@@ -24,7 +24,8 @@
       "datatype" : "VARCHAR",
       "isNullable" : true
     } ],
-    "name" : ["\"PROFESSORS\""]
+    "name" : ["\"PROFESSORS\""],
+    "otherNames": [["\"PUBLIC\"","\"PROFESSORS\""]]
   }, {
     "uniqueConstraints" : [ {
       "name" : "CONSTRAINT_7",
@@ -84,7 +85,8 @@
       "datatype" : "INTEGER",
       "isNullable" : false
     } ],
-    "name" : ["\"TEACHING\""]
+    "name" : ["\"TEACHING\""],
+    "otherNames": [["\"PUBLIC\"","\"TEACHING\""]]
   } ],
   "metadata" : {
     "dbmsProductName" : "H2",
