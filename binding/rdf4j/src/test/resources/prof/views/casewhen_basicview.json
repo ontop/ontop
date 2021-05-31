@@ -2,7 +2,7 @@
   "relations": [
     {
       "name" : ["\"views\"", "\"profs\""],
-      "baseRelation" : ["\"PROFESSORS\""],
+      "baseRelation" : ["\"PUBLIC\"", "\"PROFESSORS\""],
       "columns" : {
         "added" : [
           {
