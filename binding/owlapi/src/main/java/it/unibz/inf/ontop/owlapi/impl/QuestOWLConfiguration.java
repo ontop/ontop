@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
 /**
  * See QuestPreferences.builder() for an high-level configuration builder.
  */
-@SuppressWarnings("serial")
 public class QuestOWLConfiguration extends SimpleConfiguration {
 
     private final OntopSystemOWLAPIConfiguration ontopConfiguration;
@@ -23,15 +22,6 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
 
     QuestOWLConfiguration(@Nonnull OntopSystemOWLAPIConfiguration ontopConfiguration) {
         super(new NullReasonerProgressMonitor());
-        this.ontopConfiguration = ontopConfiguration;
-    }
-
-    /**
-     * Constructor
-     */
-    public QuestOWLConfiguration(@Nonnull OntopSystemOWLAPIConfiguration ontopConfiguration,
-                                 @Nonnull ReasonerProgressMonitor progressMonitor) {
-        super(progressMonitor);
         this.ontopConfiguration = ontopConfiguration;
     }
 }

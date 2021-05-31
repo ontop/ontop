@@ -30,6 +30,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -166,7 +167,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
             start("initializing...");
 
             RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
-                    obdaModel.getConfigurationForOntology(),
+                    obdaModel.getOntopConfiguration(),
                     MaterializationParams.defaultBuilder().build());
             MaterializationGraphQuery query = materializer.materialize();
 
@@ -217,7 +218,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
         }
     }
 
-    private class MaterializeToOntologyWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Void> {
+    private class MaterializeToOntologyWorker extends SwingWorkerWithTimeIntervalMonitor<Void, Set<OWLAxiom>> {
 
         private final OBDAModel obdaModel;
         private long vocabularySize;
@@ -234,7 +235,7 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
             start("initializing...");
 
             OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
-                    obdaModel.getConfigurationForOntology(),
+                    obdaModel.getOntopConfiguration(),
                     MaterializationParams.defaultBuilder().build());
 
             startLoop(() -> 50, () -> String.format("%d triples materialized...", getCount()));
@@ -245,10 +246,23 @@ public class RDFGraphMaterializationAction extends ProtegeAction {
                     tick();
                 }
                 vocabularySize = graphResultSet.getSelectedVocabulary().size();
+                endLoop("storing " + getCount() + " triples in the ontology...");
+
+                Set<OWLAxiom> chunk = new LinkedHashSet<>();
+                int count = 0;
+                for (OWLAxiom a : setAxioms) {
+                    chunk.add(a);
+                    count++;
+                    if (chunk.size() >= 1000) {
+                        obdaModel.addAxiomsToOntology(chunk);
+                        progressMonitor.setProgress(50, "stored " + count + "/" + getCount() + " triples in the ontology...");
+                        chunk = new LinkedHashSet<>();
+                    }
+                }
+                if (!chunk.isEmpty())
+                    obdaModel.addAxiomsToOntology(chunk);
+                end();
             }
-            endLoop("storing " + getCount() + " triples in the ontology...");
-            obdaModel.addAxiomsToOntology(setAxioms);
-            end();
             return null;
         }
 

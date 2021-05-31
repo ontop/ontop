@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStructuralAndSemanticIQOptimizer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralStructuralAndSemanticIQOptimizerImpl.class);
+
     private final UnionAndBindingLiftOptimizer bindingLiftOptimizer;
     private final JoinLikeOptimizer joinLikeOptimizer;
     private final OrderBySimplifier orderBySimplifier;
@@ -37,19 +38,16 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
 
-        boolean isLogDebugEnabled = LOGGER.isDebugEnabled();
-        if (isLogDebugEnabled)
-            LOGGER.debug("New lifted query: \n" + liftedQuery.toString());
+        LOGGER.debug("New lifted query:\n{}\n", liftedQuery);
 
         IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
             long beginningJoinLike = System.currentTimeMillis();
             queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding);
 
-            if (isLogDebugEnabled)
-                LOGGER.debug(String.format("New query after fixed point join optimization (%d ms): \n%s",
+            LOGGER.debug("New query after fixed point join optimization ({} ms):\n{}\n",
                         System.currentTimeMillis() - beginningJoinLike,
-                        queryAfterJoinLikeAndViewUnfolding.toString()));
+                        queryAfterJoinLikeAndViewUnfolding);
 
             IQ queryBeforeUnfolding = queryAfterJoinLikeAndViewUnfolding;
             // Unfolds Ontop views one level at a time (hence the loop)
@@ -61,11 +59,10 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         } while (true);
 
         IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeAndViewUnfolding);
-        if (isLogDebugEnabled)
-            LOGGER.debug("New query after simplifying the aggregation node: \n" + queryAfterAggregationSimplification);
+        LOGGER.debug("New query after simplifying the aggregation node:\n{}\n", queryAfterAggregationSimplification);
+
         IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
-        if (isLogDebugEnabled)
-            LOGGER.debug("New query after simplifying the order by node: \n" + optimizedQuery);
+        LOGGER.debug("New query after simplifying the order by node:\n{}\n", optimizedQuery);
 
         return optimizedQuery;
     }

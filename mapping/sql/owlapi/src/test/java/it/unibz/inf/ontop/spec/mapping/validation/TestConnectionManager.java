@@ -34,44 +34,32 @@ public class TestConnectionManager implements Closeable {
     }
 
     private void createTables() throws IOException, SQLException {
-        		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
         connection = DriverManager.getConnection(jdbcUrl, dbUser, dbPassword);
-        Statement st = connection.createStatement();
-
-        FileReader reader = new FileReader(MappingOntologyMismatchTest.class.getResource(createScriptFilePath).getFile());
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
+        try (Statement st = connection.createStatement()) {
+            st.executeUpdate(readFile(MappingOntologyMismatchTest.class.getResource(createScriptFilePath).getFile()));
         }
-        in.close();
-
-        st.executeUpdate(bf.toString());
         connection.commit();
     }
 
     private void dropTables() throws SQLException, IOException {
-
-        Statement st = connection.createStatement();
-
-        FileReader reader = new FileReader(MappingOntologyMismatchTest.class.getResource(dropScriptFilePath).getFile());
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
+        try (Statement st = connection.createStatement()) {
+            st.executeUpdate(readFile(MappingOntologyMismatchTest.class.getResource(dropScriptFilePath).getFile()));
         }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
         connection.commit();
         connection.close();
+    }
+
+    private static String readFile(String file) throws IOException {
+        try (FileReader reader = new FileReader(file);
+        BufferedReader in = new BufferedReader(reader)) {
+            StringBuilder bf = new StringBuilder();
+            String line = in.readLine();
+            while (line != null) {
+                bf.append(line);
+                line = in.readLine();
+            }
+            return bf.toString();
+        }
     }
 
     public OBDASpecification extractSpecification(String owlFile, String obdaFile) throws OBDASpecificationException {

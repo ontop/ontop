@@ -97,6 +97,15 @@
             <version>1.4.4</version>
             <scope>test</scope>
         </dependency>
+        <!-- teiid JDBC Driver-->
+        <dependency>
+            <groupId>org.teiid</groupId>
+            <artifactId>teiid</artifactId>
+            <classifier>jdbc</classifier>
+            <version>15.0.1</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>

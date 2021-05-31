@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.docker.datatypes;
  */
 
 import it.unibz.inf.ontop.docker.ResultSetInfo;
-import it.unibz.inf.ontop.docker.ResultSetInfoTupleUtil;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import junit.framework.TestCase;
@@ -50,6 +49,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -107,7 +107,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		}
 	}
 
-	protected Repository createRepository() throws Exception {
+	protected Repository createRepository()  {
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
 				.enableTestMode()
@@ -201,7 +201,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 			Set<String> names = bs.getBindingNames();
 			StringBuilder b = new StringBuilder();
 			for (String name: names) {
-				b.append(name + "=" + bs.getValue(name) + ", ");
+				b.append(name).append("=").append(bs.getValue(name)).append(", ");
 			}
 //			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
 			logger.debug(b.toString());
@@ -223,13 +223,13 @@ public abstract class QuestDatatypeParent extends TestCase {
 
 	private ResultSetInfo readResultSetInfo() throws Exception {
 		Set<Statement> resultGraph = readGraphResultSetInfo();
-		return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
+		return ResultSetInfo.toResultSetInfo(resultGraph);
 	}
 
 	private Set<Statement> readGraphResultSetInfo() throws Exception {
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
-		if (rdfFormat != null) {
-			RDFParser parser = Rio.createParser(rdfFormat);
+		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
+		if (rdfFormat.isPresent()) {
+			RDFParser parser = Rio.createParser(rdfFormat.get());
 
 			ParserConfig config = parser.getParserConfig();
 			// To emulate DatatypeHandling.IGNORE
@@ -246,7 +246,8 @@ public abstract class QuestDatatypeParent extends TestCase {
 				parser.parse(in, resultFileURL);
 			}
 			return result;
-		} else {
+		}
+		else {
 			throw new RuntimeException("Unable to determine file type of results file");
 		}
 	}

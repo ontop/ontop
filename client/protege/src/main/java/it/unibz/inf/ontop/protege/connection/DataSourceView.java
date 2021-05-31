@@ -33,8 +33,6 @@ public class DataSourceView extends AbstractOWLViewComponent {
 
 	private static final long serialVersionUID = -4515710047558710080L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceView.class);
-
 	private OBDAModelManager obdaModelManager;
 	private DataSourcePanel panel;
 
@@ -48,8 +46,6 @@ public class DataSourceView extends AbstractOWLViewComponent {
 		add(panel, BorderLayout.NORTH);
 
 		obdaModelManager.addListener(panel);
-
-		LOGGER.debug("DataSource browser initialized");
 	}
 
 	@Override

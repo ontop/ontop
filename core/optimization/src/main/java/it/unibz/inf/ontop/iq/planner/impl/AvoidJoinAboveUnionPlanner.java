@@ -58,6 +58,7 @@ import java.util.stream.Stream;
 public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AvoidJoinAboveUnionPlanner.class);
+    
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final AvoidJoinAboveUnionTransformer transformer;
     private final IntermediateQueryFactory iqFactory;
@@ -91,8 +92,8 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
         IQ newIQ = newTree.equals(tree)
                 ? query
                 : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug(String.format("Planned IQ: %s\n", newIQ));
+
+        LOGGER.debug("Planned IQ:\n{}\n", newIQ);
         return newIQ;
     }
 
@@ -197,6 +198,4 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
                     .collect(ImmutableCollectors.toList());
         }
     }
-
-
 }
