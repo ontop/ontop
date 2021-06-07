@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
@@ -100,14 +101,21 @@ public class GeoUtils {
                     }
                     // SRID + geometry
                     else {
-                        // return geometry which is index = 1 (special case since DBConcat below reqs 2 + args)
+                        // return geometry which is index = 1 (special case since DBNullRejConcat needs 2+ args)
                         if (t.getTerms().size() == 2)
                             return t.getTerm(1);
                         else
                             // Otherwise drop the SRID template, and return everything else
-                            return termFactory.getDBSTMakePoint(t.getTerms().get(1), t.getTerms().get(3));
-                    }
-                });
+                            return termFactory.getNullRejectingDBConcatFunctionalTerm(
+                                    t.getTerms()
+                                    .stream()
+                                    // If argument with SRID, drop SRID, otherwise keep terms
+                                    .map(subterm -> subterm.toString().contains("<")
+                                            ? extractConstantWKTLiteralValue(termFactory,subterm).get()
+                                            : subterm)
+                                    .collect(ImmutableCollectors.toList()));
+                        }
+                    });
     }
 
     /**
