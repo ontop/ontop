@@ -19,11 +19,11 @@ import java.io.IOException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class OntopEndpointTest {
+public class OntopEndpointNoPortalTest {
 
     @ClassRule
     public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
-    private static String PORT = "29831";
+    private static String PORT = "29839";
 
 
     @BeforeClass
@@ -32,8 +32,8 @@ public class OntopEndpointTest {
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-d", "src/test/resources/output/exampleBooks-metadata.json",
-                //"-v", "src/test/resources/output/exampleBooks-metadata.json",
-                "--port=" + PORT);
+                "--port=" + PORT,
+                "--disable-portal-page");
     }
 
 
@@ -62,20 +62,7 @@ public class OntopEndpointTest {
             }
         }
     }
-    
-    @Test(expected = QueryEvaluationException.class)
-    public void testInvalidQuery() {
 
-        String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
-        Repository repo = new SPARQLRepository(sparqlEndpoint);
-        repo.initialize();
-        try (RepositoryConnection conn = repo.getConnection()) {
-            String queryString = "X";
-            TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-            TupleQueryResult result = tupleQuery.evaluate();
-        }
-    }
-    
     @Test
     public void testPortal() throws IOException {
         HttpUriRequest request = new HttpGet("http://localhost:" + PORT + "/");
@@ -86,7 +73,8 @@ public class OntopEndpointTest {
         // Then
         assertThat(
                 httpResponse.getStatusLine().getStatusCode(),
-                equalTo(HttpStatus.SC_OK));
+                equalTo(HttpStatus.SC_NOT_FOUND));
     }
+
 
 }
