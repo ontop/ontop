@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.swing.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static it.unibz.inf.ontop.protege.utils.DialogUtils.htmlEscape;
 
 /**
  * Wrapper around OntopProtegeReasoner for use in the ontop Protege plugin
@@ -23,11 +24,10 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 
-	private void handleError(Exception e){
+	private void handleError(Exception e) {
 		DialogUtils.showPrettyMessageDialog(null,
-				"Error during reasoner initialization: " + e,
-				"Ontop Initialization Error",
-				JOptionPane.ERROR_MESSAGE);
+				"<html><h3>Error during reasoner initialization.</h3>" + htmlEscape(e.getMessage()) + "</html>",
+				"Ontop Initialization Error");
 	}
 
 	@SuppressWarnings("unused")
@@ -68,10 +68,10 @@ public class OntopProtegeOWLFactory implements OWLReasonerFactory {
 	@Override
 	public OntopProtegeReasoner createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try {
-			checkArgument(config instanceof OntopProtegeOWLConfiguration, "config %s is not an instance of OntopProtegeOWLConfiguration", config);
+			checkArgument(config instanceof OntopProtegeOWLConfiguration, "Config %s is not an instance of OntopProtegeOWLConfiguration", config);
 			return new OntopProtegeReasoner(ontology, (OntopProtegeOWLConfiguration) config);
 		}
-		catch (Exception e){
+		catch (Exception e) {
 			handleError(e);
 			throw e;
 		}

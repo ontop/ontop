@@ -98,7 +98,7 @@ public class MappingStatisticsAction extends ProtegeAction {
 				try (Connection c = obdaModel.getDataSource().getConnection();
 					 Statement st = c.createStatement()) {
 					int total = 0;
-					for (TriplesMap map : obdaModel.getTriplesMapCollection()) {
+					for (TriplesMap map : obdaModel.getTriplesMapManager()) {
 						if (isCancelled())
 							break;
 

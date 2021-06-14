@@ -7,7 +7,7 @@ public abstract class SwingWorkerWithCompletionPercentageMonitor<T, V> extends S
     private int count, max;
 
     protected SwingWorkerWithCompletionPercentageMonitor(Component parent, Object message) {
-        super(parent, message, false);
+        super(new ProgressMonitorDialogComponent(parent, message, false));
     }
 
     @Override
@@ -15,10 +15,6 @@ public abstract class SwingWorkerWithCompletionPercentageMonitor<T, V> extends S
         count++;
         notifyProgressMonitor();
         super.tick();
-    }
-
-    public int getCount() {
-        return count;
     }
 
     protected void setMaxTicks(int max) {

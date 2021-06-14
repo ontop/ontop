@@ -21,13 +21,14 @@ package it.unibz.inf.ontop.protege.action;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
+import it.unibz.inf.ontop.protege.mapping.TriplesMap;
+import it.unibz.inf.ontop.protege.mapping.TriplesMapFactory;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.slf4j.Logger;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -82,11 +82,18 @@ public class R2RMLImportAction extends ProtegeAction {
 		@Override
 		protected ImmutableList<SQLPPTriplesMap> doInBackground() throws Exception {
 			start("initializing...");
-			OntopMappingSQLAllConfiguration configuration = obdaModel.getConfigurationManager()
-					.buildR2RMLConfiguration(obdaModel.getDataSource(), file);
-			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
+			SQLPPMapping parsedModel = obdaModel.parseR2RMLMapping(file);
 
-			ImmutableList<SQLPPTriplesMap> triplesMaps = parsedModel.getTripleMaps();
+			// convert R2RML into Native triples maps
+			TriplesMapFactory triplesMapFactory = obdaModel.getTriplesMapFactory();
+			ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
+			for (SQLPPTriplesMap m : parsedModel.getTripleMaps()) {
+				String target = triplesMapFactory.getTargetRendering(m.getTargetAtoms());
+				SQLPPTriplesMap nativeTriplesMap = new OntopNativeSQLPPTriplesMap(m.getId(), m.getSourceQuery(), triplesMapFactory.getTargetQuery(target));
+				builder.add(nativeTriplesMap);
+			}
+
+			ImmutableList<SQLPPTriplesMap> triplesMaps = builder.build();
 			endLoop("");
 			end();
 			return triplesMaps;

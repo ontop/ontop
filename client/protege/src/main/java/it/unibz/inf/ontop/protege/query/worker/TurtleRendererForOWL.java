@@ -6,20 +6,21 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.SimpleRenderer;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class TurtleRendererForOWL {
 
 	private final PrefixManager prefixManager;
-	private final boolean shortenIRIs;
+	private final SimpleRenderer renderer;
 
 	public TurtleRendererForOWL(PrefixManager prefixManager, boolean shortenIRIs) {
 		// TODO: subclass AbstractPrefixManager
 		this.prefixManager = prefixManager;
-		this.shortenIRIs = shortenIRIs;
+		this.renderer = new SimpleRenderer();
+		if (shortenIRIs)
+			prefixManager.getPrefixMap().forEach(renderer::setPrefix);
 	}
 
 	public Optional<String> render(OWLAxiom axiom) {
@@ -52,15 +53,7 @@ public class TurtleRendererForOWL {
 	}
 
 	private String render(OWLObject constant) {
-		if (constant == null)
-			return "";
-
-		if (constant instanceof OWLNamedIndividual || constant instanceof IRI) {
-			String iri = constant.toString();
-			return shortenIRIs ? prefixManager.getShortForm(iri) : iri;
-		}
-
-		return ToStringRenderer.getInstance().getRendering(constant);
+		return (constant == null) ? "" : renderer.render(constant);
 	}
 
 	private String renderAxiom(OWLClassAssertionAxiom axiom) {

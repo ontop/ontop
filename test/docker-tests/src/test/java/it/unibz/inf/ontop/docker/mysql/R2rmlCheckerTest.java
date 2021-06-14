@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.validation.OntopOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +46,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -72,11 +72,6 @@ public class R2rmlCheckerTest {
 
     @Before
 	public void setUp() throws Exception {
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
-		Ontology onto1 = OWLAPI_TRANSLATOR.translateAndClassify(owl);
-		onto = onto1.tbox();
-
 		log.info("Loading obda file");
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -86,6 +81,13 @@ public class R2rmlCheckerTest {
 				.enableTestMode()
 				.build();
 		reasonerOBDA = factory.createReasoner(config);
+
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(new URL(owlFileName).getPath()));
+		Ontology onto1 = config.getInjector().getInstance(OWLAPITranslatorOWL2QL.class)
+				.translateAndClassify(owl);
+		onto = onto1.tbox();
+
 
 		log.info("Loading r2rml file");
 		OntopOWLFactory factory1 = OntopOWLFactory.defaultFactory();

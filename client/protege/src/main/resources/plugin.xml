@@ -13,6 +13,16 @@
 		<category value="ontop"/>
 	</extension>
 
+	<extension id="OntopPropertiesViewComponent"
+			   point="org.protege.editor.core.application.ViewComponent">
+		<label value="Ontop properties"/>
+		<class
+				value="it.unibz.inf.ontop.protege.connection.OntopPropertiesView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="ontop"/>
+	</extension>
+
 	<extension id="MappingsManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping editor"/>
@@ -77,11 +87,6 @@
   <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
   	<class value="it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin"/>
   	<editorKitId value="OWLEditorKit"/>
-  </extension>
-
-  <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
-    <label value="Ontop Reasoner"/>
-    <class value="it.unibz.inf.ontop.protege.quest.QuestPreferencesPanel"/>
   </extension>
 
   <!-- MENUS -->
@@ -162,5 +167,12 @@
         <label value="JDBC Drivers"/>
         <class value="it.unibz.inf.ontop.protege.jdbc.JdbcPreferencesPanel"/>
     </extension>
+
+	<!-- MappingListPreferences -->
+	<extension id="mapping.prefs"
+			   point="org.protege.editor.core.application.preferencespanel">
+		<label value="Mapping Preferences"/>
+		<class value="it.unibz.inf.ontop.protege.mapping.MappingListPreferencesPanel"/>
+	</extension>
 
 </plugin>

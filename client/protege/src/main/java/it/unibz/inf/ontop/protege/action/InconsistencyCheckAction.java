@@ -61,7 +61,7 @@ public class InconsistencyCheckAction extends ProtegeAction {
 			}
 		}
 		catch (Throwable e) {
-			DialogUtils.showSeeLogErrorDialog(getWorkspace(), "Error checking consistency.", LOGGER, e);
+			DialogUtils.showQuickErrorDialog(getWorkspace(), e, DIALOG_TITlE + " error.");
 		}
 	}
 
