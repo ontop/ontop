@@ -174,7 +174,7 @@
         <xml-apis.version>1.4.01</xml-apis.version>
 
         <!-- Dependency versions: indirectly used & pinned for enforcer plugin -->
-        <commons-io.version>2.5</commons-io.version>
+        <commons-io.version>2.10.0</commons-io.version>
         <commons-logging.version>1.2</commons-logging.version>
         <jsonld-java.version>0.13.0</jsonld-java.version>
         <junit-jupiter-api.version>5.6.2</junit-jupiter-api.version>
