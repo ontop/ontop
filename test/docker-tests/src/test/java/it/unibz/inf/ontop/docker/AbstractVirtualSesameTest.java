@@ -24,6 +24,7 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
         this.propertyFileName =  this.getClass().getResource(propertyFile).toString();
     }
 
+    @Override
     public void setUp() {
         Repository repo;
         try {
@@ -50,9 +51,9 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
             e.printStackTrace();
             assertFalse(false);
         }
-
     }
 
+    @Override
     public void tearDown() {
         try {
             if (con != null && con.isOpen()) {
@@ -65,22 +66,17 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
 
     protected int count(String query){
         int resultCount = 0;
-        try {
-            TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
-                    query);
-            TupleQueryResult result = tupleQuery.evaluate();
-
+        TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query);
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 result.next();
                 resultCount++;
             }
-
-            result.close();
-
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             assertFalse(false);
         }
-        return resultCount++;
+        return resultCount;
     }
 }

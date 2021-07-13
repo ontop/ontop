@@ -24,15 +24,12 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.swing.*;
 
-public class MappingFilteredListModel extends AbstractListModel<TriplesMap> implements TriplesMapCollectionListener {
+public class MappingFilteredListModel extends AbstractListModel<TriplesMap> implements TriplesMapManagerListener {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
@@ -45,8 +42,8 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap> impl
 		this.filter = ImmutableList.of();
 	}
 
-	private TriplesMapCollection getCurrent() {
-		return obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
+	private TriplesMapManager getCurrent() {
+		return obdaModelManager.getCurrentOBDAModel().getTriplesMapManager();
 	}
 
 	public void setFilter(@Nonnull ImmutableList<String> filter) {
@@ -103,7 +100,7 @@ public class MappingFilteredListModel extends AbstractListModel<TriplesMap> impl
 	}
 
 	@Override
-	public void triplesMapCollectionChanged(TriplesMapCollection triplesMapCollection) {
+	public void changed(TriplesMapManager triplesMapCollection) {
 		fireContentsChanged(triplesMapCollection, 0, getSize());
 	}
 }

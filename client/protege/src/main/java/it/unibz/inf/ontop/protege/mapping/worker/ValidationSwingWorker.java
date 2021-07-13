@@ -74,7 +74,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
             if (report.status == TriplesMap.Status.INVALID)
                 invalidTriplesMapCount++;
 
-            obdaModel.getTriplesMapCollection().setStatus(
+            obdaModel.getTriplesMapManager().setStatus(
                     report.id,
                     report.status,
                     report.sqlErrorMessage,
@@ -88,7 +88,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
             complete();
             String message = invalidTriplesMapCount == 0
                     ? (triplesMapList.size() == 1
-                    ? "The only triples map has been found valid."
+                    ? "The only triples map selected has been found valid."
                     : "All <b>" + triplesMapList.size() + "</b> triples map have been found valid.")
                     : "<b>" + invalidTriplesMapCount + "</b> triples map" + (invalidTriplesMapCount > 1 ? "s" : "") + " (out of <b>" +
                     triplesMapList.size() + "</b>) have been found invalid.";
@@ -137,7 +137,7 @@ public class ValidationSwingWorker extends SwingWorkerWithCompletionPercentageMo
         ResultSetMetaData md = rs.getMetaData();
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         for (int i = 1; i <= md.getColumnCount(); i++)
-            builder.add(md.getColumnName(i).toUpperCase());
+            builder.add(md.getColumnLabel(i).toUpperCase());
         ImmutableSet<String> normalizedColumnNames = builder.build();
 
         // a very lax version of column matching - quotation and case are ignored

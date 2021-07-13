@@ -20,6 +20,7 @@ import java.util.UUID;
 public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FixedPointJoinLikeOptimizer.class);
+
     private static final int MAX_LOOP = 100;
     private final InnerJoinMutableOptimizer joinMutableOptimizer;
     private final LeftJoinMutableOptimizer leftJoinMutableOptimizer;
@@ -45,7 +46,6 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
      */
     @Override
     public IQ optimize(IQ initialIQ, ExecutorRegistry executorRegistry) {
-        boolean isLogDebugEnabled = LOGGER.isDebugEnabled();
 
         //Non-final
         IQ iq = initialIQ;
@@ -70,12 +70,10 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
                 do {
                     oldVersionNumber = mutableQuery.getVersionNumber();
                     mutableQuery = leftJoinMutableOptimizer.optimize(mutableQuery);
-                    if (isLogDebugEnabled)
-                        LOGGER.debug("New query after left join mutable optimization: \n" + mutableQuery.toString());
+                    LOGGER.debug("New query after left join mutable optimization:\n{}\n", mutableQuery);
 
                     mutableQuery = joinMutableOptimizer.optimize(mutableQuery);
-                    if (isLogDebugEnabled)
-                        LOGGER.debug("New query after join mutable optimization: \n" + mutableQuery.toString());
+                    LOGGER.debug("New query after join mutable optimization:\n{}\n", mutableQuery);
 
                 } while (oldVersionNumber != mutableQuery.getVersionNumber());
 
@@ -86,8 +84,8 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
 
                 isFirstRound = false;
             } while (hasMutableQueryChanged);
-
-        } catch (EmptyQueryException e ) {
+        }
+        catch (EmptyQueryException e ) {
             return iqFactory.createIQ(initialIQ.getProjectionAtom(),
                     iqFactory.createEmptyNode(initialIQ.getTree().getVariables()));
         }

@@ -20,16 +20,63 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * This class is used to store the result set information. Please refer to the
- * <code>ResultSetInfoSchema</code> to look at the supported attributes.
+ * Below is an example of using ResultSetInfo in the test framework.
+ * <p>
+ * 1. To check the size of result set:
+ *
+ * <pre>
+ * {@code
+ * (at)prefix rsi: <http://ontop.inf.unibz.it/tests/rs-info#> .
+ * (at)prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+ * (at)prefix :    <http://example.org/#> .
+ *
+ * []  rdf:type               rsi:ResultSetInfo ;
+ *     rsi:size               "99" .
+ * }
+ * </pre>
+ *
+ * 2. To check the thrown exception (the <code>rsi:size</code> is optional):
+ * <pre>
+ * {@code
+ * (at)prefix rsi: <http://ontop.inf.unibz.it/tests/rs-info#> .
+ * (at)prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+ * (at)prefix :    <http://example.org/#> .
+ *
+ * []  rdf:type               rsi:ResultSetInfo ;
+ *     rsi:size               "-1" ;
+ *     rsi:thrownException    "java.io.IOException" .
+ * }
  */
+
 public class ResultSetInfo {
 
-	private Map<String, Object> info = new HashMap<String, Object>();
+	private static final String NAMESPACE = "http://ontop.inf.unibz.it/tests/rs-info#";
+
+	private static final URI RESULTSET_INFO;
+	private static final URI RESULTSET_SIZE;
+	private static final URI THROWN_EXCEPTION;
+
+	static {
+		ValueFactory vf = ValueFactoryImpl.getInstance();
+		RESULTSET_INFO = vf.createURI(NAMESPACE, "ResultSetInfo");
+		RESULTSET_SIZE = vf.createURI(NAMESPACE, "size");
+		THROWN_EXCEPTION = vf.createURI(NAMESPACE, "thrownException");
+	}
+
+
+	private final Map<String, Object> info = new HashMap<>();
 	
 	public ResultSetInfo() {
 		// NO-OP
@@ -46,4 +93,22 @@ public class ResultSetInfo {
 	public Object get(String key) {
 		return info.get(key);
 	}
+
+	public static ResultSetInfo toResultSetInfo(Set<Statement> resultGraph) {
+		ResultSetInfo rsInfo = new ResultSetInfo();
+		for (Statement stmt : resultGraph) {
+			IRI predicate = stmt.getPredicate();
+			if (predicate.equals(RESULTSET_SIZE)) {
+				rsInfo.put("counter", Integer.parseInt(stmt.getObject().stringValue()));
+			} else if (predicate.equals(THROWN_EXCEPTION)) {
+				rsInfo.put("thrownException", stmt.getObject().stringValue());
+			} else if (predicate.equals(RDF.TYPE)) {
+				// NO-OP
+			} else {
+				throw new RuntimeException("Unsupported URI: " + predicate);
+			}
+		}
+		return rsInfo;
+	}
+
 }

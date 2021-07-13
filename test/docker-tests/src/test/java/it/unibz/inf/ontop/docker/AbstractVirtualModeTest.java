@@ -175,10 +175,7 @@ public abstract class AbstractVirtualModeTest {
                 String errorMessageSuffix = returnedAnswers.size() > 10 ?
                         "none was returned" :
                         "the query returned " + returnedAnswers;
-                assertTrue(
-                        "One of " + expectedTuples + " was expected among the answers, but " + errorMessageSuffix,
-                        false
-                );
+                fail("One of " + expectedTuples + " was expected among the answers, but " + errorMessageSuffix);
             }
         }
     }

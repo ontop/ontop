@@ -1,5 +1,10 @@
 package it.unibz.inf.ontop.cli;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -8,6 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
+
+import java.io.IOException;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class OntopEndpointTest {
 
@@ -52,7 +62,7 @@ public class OntopEndpointTest {
             }
         }
     }
-
+    
     @Test(expected = QueryEvaluationException.class)
     public void testInvalidQuery() {
 
@@ -65,6 +75,18 @@ public class OntopEndpointTest {
             TupleQueryResult result = tupleQuery.evaluate();
         }
     }
+    
+    @Test
+    public void testPortal() throws IOException {
+        HttpUriRequest request = new HttpGet("http://localhost:" + PORT + "/");
 
+        // When
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+        // Then
+        assertThat(
+                httpResponse.getStatusLine().getStatusCode(),
+                equalTo(HttpStatus.SC_OK));
+    }
 
 }
