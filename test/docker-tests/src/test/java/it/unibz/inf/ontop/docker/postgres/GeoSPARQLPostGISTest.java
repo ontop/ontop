@@ -185,4 +185,25 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "-0.075257747114709 51.505513997335385,-0.075256104751844 51.50549640923696)))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>");
     }
 
+    /**
+     * ST_DISTANCESPHERE in PostGIS supported
+     */
+    @Test
+    public void testAskDistance() throws Exception {
+        //language=TEXT
+        String query = "PREFIX : <http://ex.org/> \n" +
+                "PREFIX geo: <http://www.opengis.net/ont/geosparql#>\n" +
+                "PREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n" +
+                "PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>\n" +
+                "ASK WHERE {\n" +
+                "<http://ex.org/feature/1> a :Feature; geo:hasGeometry/geo:asWKT ?xWkt.\n" +
+                "BIND((geof:distance(?xWkt, 'POINT(-0.0754 51.5055)'^^geo:wktLiteral, uom:metre)/1000) as ?x) .\n" +
+                "FILTER(?x < 350000) .\n" +
+                "}\n";
+        boolean val = runQueryAndReturnBooleanX(query);
+        assertTrue(val);
+    }
+
+
+
 }
