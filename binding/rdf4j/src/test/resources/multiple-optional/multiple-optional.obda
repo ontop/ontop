@@ -1,0 +1,24 @@
+[PrefixDeclaration]
+ex: http://example.org/
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+
+[MappingDeclaration] @collection [[
+
+mappingId   label_en
+target      ex:{id} a ex:Individual ; rdfs:label {label}@en .
+source      SELECT id, label FROM data WHERE language='en'
+
+mappingId   label_fr
+target      ex:{id} a ex:Individual ; rdfs:label {label}@fr .
+source      SELECT id, label FROM data WHERE language='fr'
+
+mappingId   label_de
+target      ex:{id} a ex:Individual ; rdfs:label {label}@de .
+source      SELECT id, label FROM data WHERE language='de'
+
+mappingId   label_zh
+target      ex:{id} a ex:Individual ; rdfs:label {label}@zh .
+source      SELECT id, label FROM data WHERE language='zh'
+
+]]
