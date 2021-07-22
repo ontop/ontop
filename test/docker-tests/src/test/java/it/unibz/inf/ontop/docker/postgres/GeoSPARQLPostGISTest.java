@@ -201,7 +201,7 @@ public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
                 "FILTER(?x < 350000) .\n" +
                 "}\n";
         boolean val = runQueryAndReturnBooleanX(query);
-        assertTrue(val);
+        assertEquals(val, true);
     }
 
 
