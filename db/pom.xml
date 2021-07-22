@@ -14,6 +14,8 @@
 
     <modules>
         <module>rdb</module>
+        <module>rdb-teiid-embedded</module>
+        <module>rdb-teiid-services</module>
     </modules>
 
 </project>

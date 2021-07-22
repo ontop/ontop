@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>ontop-db</artifactId>
+		<groupId>it.unibz.inf.ontop</groupId>
+		<version>4.1.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>ontop-rdb-teiid-embedded</artifactId>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.infinispan</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- COMPILE DEPENDENCIES -->
+
+		<!-- Ontop modules -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-rdb-teiid-services</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- Spring Boot -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+
+		<!-- TEIID Spring -->
+		<dependency>
+			<groupId>org.teiid</groupId>
+			<artifactId>teiid-spring-boot-starter</artifactId>
+			<version>${teiid-spring-boot.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.persistence</groupId>
+					<artifactId>jakarta.persistence-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-orm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-tools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.teiid</groupId>
+					<artifactId>spring-data-excel</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.teiid.connectors</groupId>
+					<artifactId>translator-loopback</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Narayana -->
+		<!-- <dependency> -->
+		<!-- <groupId>me.snowdrop</groupId> -->
+		<!-- <artifactId>narayana-spring-boot-starter</artifactId> -->
+		<!-- <version>${narayana.version}</version> -->
+		<!-- </dependency> -->
+
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<!-- PROVIDED DEPENDENCIES -->
+
+		<!-- JSR-305 annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- RUNTIME DEPENDENCIES -->
+
+		<!-- TEIID -->
+		<dependency>
+			<groupId>org.teiid.connectors</groupId>
+			<artifactId>translator-jdbc</artifactId>
+			<version>${teiid.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- JDBC connectors -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- TEST DEPENDENCIES -->
+
+		<!-- JUnit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+</project>

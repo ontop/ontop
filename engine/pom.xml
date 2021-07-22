@@ -15,6 +15,7 @@
     <modules>
         <module>reformulation</module>
         <module>system</module>
+        <module>ctables</module>
     </modules>
 
 </project>
