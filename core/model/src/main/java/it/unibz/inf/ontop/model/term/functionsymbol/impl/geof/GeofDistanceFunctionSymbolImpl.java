@@ -35,7 +35,6 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
 
     /**
      * @param subLexicalTerms (geom1, geom2, unit)
-     *                        NB: we assume that the geoms are WGS 84 (lat lon). Other SRIDs need to be implemented.
      */
     @Override
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {

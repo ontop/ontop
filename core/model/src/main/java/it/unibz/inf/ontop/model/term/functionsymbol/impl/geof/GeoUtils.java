@@ -54,7 +54,7 @@ public class GeoUtils {
 
         return new WKTLiteralValue(srid, geometry);
     }
-
+    
     /**
      * Extracts the SRID from a geometry input at SPARQL query time by a user
      * e.g. from input "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT(6.6441878 49.7596208)"
@@ -62,6 +62,7 @@ public class GeoUtils {
      * @param immutableTerm
      * @return SRID
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     static Optional<IRI> tryExtractSRIDFromDbConstant(Optional<ImmutableTerm> immutableTerm) {
         return immutableTerm
                 // the first argument has to be a constant
