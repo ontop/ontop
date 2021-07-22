@@ -17,8 +17,23 @@ public class GeoUtils {
     static final double EARTH_MEAN_RADIUS_METER = 6370986;
 
     private static final RDF rdfFactory = new SimpleRDF();
+
+    /**
+     * The default GeoSPARQL SRID - CRS84
+     */
     public static final IRI defaultSRID = rdfFactory.createIRI("http://www.opengis.net/def/crs/OGC/1.3/CRS84");
 
+
+    /**
+     * Method returns the WKTLiteralValue constructed using the SRID and geometry
+     * SRID: If no SRID defined, default CRS84 SRID is assigned. If the input is provided at query time
+     * the SRID is extracted from a constant. Otherwise minimal parsing used to extract from template.
+     * Geometry: If constant input at query tie {@link #tryExtractGeometryFromConstant(ImmutableTerm, TermFactory, IRI)}
+     * Geometry: If DB attribute {@link #tryExtractGeometryFromTemplate(TermFactory, ImmutableTerm)}
+     * @param termFactory
+     * @param wktLiteralTerm
+     * @return WKTLiteralValue which is composed of the SRID and geometry
+     */
     static WKTLiteralValue extractWKTLiteralValue(TermFactory termFactory, ImmutableTerm wktLiteralTerm) {
         // Get the respective SRID
         IRI srid = tryExtractSRIDFromDbConstant(Optional.of(wktLiteralTerm))
@@ -40,6 +55,13 @@ public class GeoUtils {
         return new WKTLiteralValue(srid, geometry);
     }
 
+    /**
+     * Extracts the SRID from a geometry input at SPARQL query time by a user
+     * e.g. from input "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT(6.6441878 49.7596208)"
+     * output is 3044
+     * @param immutableTerm
+     * @return SRID
+     */
     static Optional<IRI> tryExtractSRIDFromDbConstant(Optional<ImmutableTerm> immutableTerm) {
         return immutableTerm
                 // the first argument has to be a constant
@@ -52,6 +74,11 @@ public class GeoUtils {
                 .map(rdfFactory::createIRI);
     }
 
+    /**
+     * Extract SRID from any geospatial template
+     * @param wktLiteralTerm
+     * @return SRID
+     */
     private static Optional<IRI> tryExtractSRIDFromTemplate(ImmutableTerm wktLiteralTerm) {
         Optional<ImmutableTerm> firstTermFromTemplate = Optional.of(wktLiteralTerm)
                 // template is a NonGroundFunctionalTerm
@@ -64,6 +91,18 @@ public class GeoUtils {
         return tryExtractSRIDFromDbConstant(firstTermFromTemplate);
     }
 
+    /**
+     * Method extracts geometry from constant input at query time by user.
+     * The SRID of the input is set to match that of the SRID IRI template or default SRID if none provided.
+     * e.g. for geof:distance("<http://www.opengis.net/def/crs/EPSG/0/3044> POINT(6.6441878 49.7596208)", geom1)
+     * the SRID of POINT(6.6441878 49.7596208) has to be set to 3044
+     * Method used in DB is ST_SETSRID and must be specified with the geometry in this instance
+     * If no SRID IRI is provided, the default SRID of 4326 is set (since some DBs would otherwise set this to 0)
+     * @param immutableTerm
+     * @param termFactory
+     * @param srid
+     * @return geometry with respective srid setting (either derived from SRID IRI or defaultSRID)
+     */
     static Optional<ImmutableTerm> tryExtractGeometryFromConstant(ImmutableTerm immutableTerm, TermFactory termFactory, IRI srid) {
 
         // Find which SRID to set, constants have SRID=0 in PostG
@@ -87,6 +126,13 @@ public class GeoUtils {
                 .map(termFactory::getDBAsText);
     }
 
+    /**
+     * Method extracts geometry from non-constant database data.
+     * Drop any SRID template provided by user at query time by removing the first term.
+     * @param termFactory
+     * @param wktLiteralTerm
+     * @return geometry without SRID
+     */
     private static Optional<ImmutableTerm> tryExtractGeometryFromTemplate(TermFactory termFactory, ImmutableTerm wktLiteralTerm) {
         return Optional.of(wktLiteralTerm)
                 // template is a NonGroundFunctionalTerm
@@ -120,6 +166,8 @@ public class GeoUtils {
 
     /**
      * Check whether the template starts with SRID e.g. {@code <http://www.opengis.net/def/crs/OGC/1.3/CRS84>}
+     * @param immutableTerm
+     * @return boolean yes=template starts with SRID
      */
     private static boolean templateStartsWithSRID(ImmutableTerm immutableTerm) {
         return Optional.of(immutableTerm)
@@ -129,6 +177,13 @@ public class GeoUtils {
                 .isPresent();
     }
 
+    /**
+     * Method extracts geometry without any SRID information.
+     * This includes any template {GEOM} or {Lng}{Lat} which has a preceding SRID IRI
+     * @param termFactory
+     * @param immutableTerm
+     * @return geometry string without SRID
+     */
     static Optional<ImmutableTerm> extractConstantWKTLiteralValue(TermFactory termFactory, ImmutableTerm immutableTerm) {
         // Get the respective geometry
         return Optional.of(immutableTerm)
@@ -138,7 +193,13 @@ public class GeoUtils {
                 // extract the geometry out of the string
                 .map(v -> termFactory.getDBStringConstant(v.substring(v.indexOf(">") + 1).trim()));
     }
-    
+
+    /**
+     * Generates the abbreviated SRID from the full SRID IRI
+     * Distinguishes between the default SRID CRS84 and other SRIDs with prefix EPSG
+     * @param sridIRIString
+     * @return Abbreviated SRID string
+     */
     static String toProj4jName(String sridIRIString) {
         final String CRS_PREFIX = "http://www.opengis.net/def/crs/OGC/1.3/CRS";
         final String EPSG_PREFIX = "http://www.opengis.net/def/crs/EPSG/0/";
@@ -153,6 +214,12 @@ public class GeoUtils {
         throw new IllegalArgumentException("Unknown SRID IRI: " + sridIRIString);
     }
 
+    /**
+     * Based on the abbreviated SRID denomination deduces the unit of the distance measure
+     * The units generally include metre, degree and radian
+     * @param sridIRIString
+     * @return unit of distance
+     */
     public static DistanceUnit getUnitFromSRID(String sridIRIString) {
         String csName = toProj4jName(sridIRIString);
         if (csName.equals("CRS:84")) {

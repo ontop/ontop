@@ -28,6 +28,12 @@ public class GeofSfIntersectsFunctionSymbolImpl extends AbstractGeofBooleanFunct
             throw new IllegalArgumentException(String.format("SRIDs do not match: %s and %s", v0.getSRID(), v1.getSRID()));
         }
 
+        /**
+         * If the database supports GEOGRAPHY (e.g. PostGIS v13) cast inputs to geography. Otherwise to geometry.
+         * ST_INTERSECTS accepts both GEOGRAPHY and GEOMETRY inputs for PostGIS, thus if types are not explicitly
+         * defined there is an error since PostGIS may not know which function to choose.
+         * @see https://postgis.net/docs/ST_Intersects.html
+         */
         if (dbTypeFactory.supportsDBGeographyType()) {
             return getDBFunction(termFactory).apply(
                     termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBGeographyType(), v0.getGeometry()),
