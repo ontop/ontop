@@ -9,7 +9,7 @@ One can either use `ontop/ontop-endpoint` directly, or create a dedicated image 
 Here is a list of environment variables. Most of them directly correspond to arguments of the CLI `ontop-endpoint`command. Please refer to [its documentation page for more details about these arguments](https://ontop-vkg.org/guide/cli.html#ontop-endpoint).
 
 - `ONTOP_MAPPING_FILE` (required). Corresponds to the argument `--mapping`.
-- `ONTOP_PROPERTIES_FILE` (required). Corresponds to the argument `--properties`.
+- `ONTOP_PROPERTIES_FILE` (optional). Corresponds to the argument `--properties`.
 - `ONTOP_ONTOLOGY_FILE` (optional). Corresponds to the argument `--ontology`.
 - `ONTOP_DB_PASSWORD` (optional). Corresponds to the argument `--db-password`. Added in 4.1.0.
 - `ONTOP_DB_PASSWORD_FILE` (optional). Loads the DB password from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-password`. Introduced in 4.1.0.
@@ -17,6 +17,8 @@ Here is a list of environment variables. Most of them directly correspond to arg
 - `ONTOP_DB_USER_FILE` (optional). Loads the DB user from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-user`. Introduced in 4.1.0.
 - `ONTOP_DB_URL` (optional). Corresponds to the argument `--db-url`. Added in 4.1.0.
 - `ONTOP_DB_URL_FILE` (optional). Loads the DB url from a separate file (e.g. a Docker secret) and assigns it to the argument `--db-url`. Introduced in 4.1.0.
+- `ONTOP_DB_NAME` (optional). Corresponds to the argument `--db-name`. Added in 4.2.0.
+- `ONTOP_DB_DRIVER` (optional). Corresponds to the argument `--db-driver`. Added in 4.2.0.
 - `ONTOP_XML_CATALOG_FILE` (optional). Corresponds to the argument `--xml-catalog`.
 - `ONTOP_CONSTRAINT_FILE` (optional). Corresponds to the argument `--constraint`.
 - `ONTOP_DB_METADATA_FILE` (optional). Corresponds to the argument `--db-metadata`. Added in 4.1.0.

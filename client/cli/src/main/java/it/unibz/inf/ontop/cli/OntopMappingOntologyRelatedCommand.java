@@ -22,7 +22,7 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-p", "--properties"}, title = "properties file",
             description = "Properties file")
-    @Required
+    //@Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String propertiesFile;
 
@@ -55,6 +55,16 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
             description = "DB URL (overrides the properties)")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String dbUrl;
+
+    @Option(type = OptionType.COMMAND, name = {"--db-name"}, title = "DB name",
+            description = "DB name (overrides the properties)")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbName;
+
+    @Option(type = OptionType.COMMAND, name = {"--db-driver"}, title = "DB driver",
+            description = "DB driver (overrides the properties)")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbDriver;
 
     protected boolean isR2rmlFile(String mappingFile) {
         return !mappingFile.endsWith(".obda");
