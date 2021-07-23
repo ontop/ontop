@@ -39,6 +39,12 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
+		<!-- SLF4J -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
 		<!-- Guava -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -55,6 +61,18 @@
 		</dependency>
 
 		<!-- TEST DEPENDENCIES -->
+
+		<!-- Logback -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- JUnit -->
 		<dependency>

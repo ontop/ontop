@@ -158,7 +158,7 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         return (final Tuple[] tuples) -> {
             final Tuple result = Tuple.create(outputSignature);
             for (int i = 0; i < result.size(); ++i) {
-                result.set(i, tuples[inputTupleIndexes[i]].get(inputTupleIndexes[i]));
+                result.set(i, tuples[inputTupleIndexes[i]].get(inputArgumentIndexes[i]));
             }
             return result;
         };
@@ -175,8 +175,7 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         }
     }
 
-    @Override
-    public String toString() {
+    public String toString(final boolean includeNames) {
         final StringBuilder sb = new StringBuilder();
         sb.append('[');
         for (int i = 0; i < this.values.length; ++i) {
@@ -184,6 +183,10 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
                 sb.append(',').append(' ');
             }
             final Object v = this.values[i];
+
+            if (includeNames) {
+                sb.append(this.signature.get(i).getName()).append('=');
+            }
 
             if (v == null) {
                 sb.append("null");
@@ -200,6 +203,11 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         }
         sb.append(']');
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return this.toString(false);
     }
 
 }

@@ -17,9 +17,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.teiid.core.types.DataTypeManager;
 import org.teiid.language.AndOr;
 import org.teiid.language.Argument;
 import org.teiid.language.Call;
@@ -63,6 +67,8 @@ import it.unibz.inf.ontop.teiid.services.util.Tuple;
 @Translator(name = "service")
 public class ServiceExecutionFactory
         extends ExecutionFactory<ServiceConnectionFactory, ServiceConnection> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceExecutionFactory.class);
 
     public ServiceExecutionFactory() {
         // TODO: supportsSelectExpression, supportsRowLimit/supportsRowOffset
@@ -169,7 +175,7 @@ public class ServiceExecutionFactory
             inputTuple.set(name, value);
         }
 
-        return new ServiceExecution(service, inputTuple);
+        return new ServiceExecution(service, inputTuple, null);
     }
 
     @Nullable
@@ -189,6 +195,7 @@ public class ServiceExecutionFactory
         final Table table = ((NamedTable) from.get(0)).getMetadataObject();
 
         final Set<String> outputAttrs = Sets.newHashSet();
+        final List<Attribute> outputAttrsList = Lists.newArrayList();
         for (final DerivedColumn c : select.getDerivedColumns()) {
             final Expression e = c.getExpression();
             if (!(e instanceof ColumnReference)) {
@@ -199,6 +206,7 @@ public class ServiceExecutionFactory
                 return null;
             }
             outputAttrs.add(a);
+            outputAttrsList.add(Attribute.create(a, DataTypeManager.getDataTypeName(e.getType())));
         }
 
         final Map<String, Object> inputAttrs = getConstraints(select.getWhere());
@@ -213,7 +221,8 @@ public class ServiceExecutionFactory
 
         final Service service = getService(conn.getServiceManager(), proc);
         final Tuple inputTuple = Tuple.create(service.getInputSignature(), inputAttrs);
-        return new ServiceExecution(service, inputTuple);
+        final Signature outputSignature = Signature.create(outputAttrsList);
+        return new ServiceExecution(service, inputTuple, outputSignature);
     }
 
     @Nullable
@@ -252,7 +261,7 @@ public class ServiceExecutionFactory
 
         final Service service = getService(conn.getServiceManager(), proc);
         final Tuple inputTuple = Tuple.create(service.getInputSignature(), attrs);
-        return new ServiceExecution(service, inputTuple);
+        return new ServiceExecution(service, inputTuple, null);
     }
 
     private Service getService(final ServiceManager manager, final AbstractMetadataRecord metadata)
@@ -290,6 +299,7 @@ public class ServiceExecutionFactory
             if (service == null) {
                 throw new UnsupportedOperationException();
             }
+            LOGGER.debug("Mapped {} to {}", metadata, service);
             return service;
 
         } catch (final Throwable ex) {
@@ -426,9 +436,14 @@ public class ServiceExecutionFactory
 
         private Iterator<Tuple> outputTuples;
 
-        public ServiceExecution(final Service service, final Tuple inputTuple) {
+        @Nullable
+        private final Signature outputProjection;
+
+        public ServiceExecution(final Service service, final Tuple inputTuple,
+                @Nullable final Signature outputProjection) {
             this.service = service;
             this.inputTuple = inputTuple;
+            this.outputProjection = outputProjection;
         }
 
         @Override
@@ -448,7 +463,14 @@ public class ServiceExecutionFactory
 
         @Override
         public List<?> next() throws TranslatorException, DataNotAvailableException {
-            return this.outputTuples.hasNext() ? this.outputTuples.next() : null;
+            if (!this.outputTuples.hasNext()) {
+                return null;
+            }
+            Tuple t = this.outputTuples.next();
+            if (this.outputProjection != null) {
+                t = t.project(this.outputProjection);
+            }
+            return t;
         }
 
         @Override

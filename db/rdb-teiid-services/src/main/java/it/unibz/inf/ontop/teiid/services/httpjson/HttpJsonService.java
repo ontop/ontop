@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -32,6 +31,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import it.unibz.inf.ontop.teiid.services.AbstractService;
 import it.unibz.inf.ontop.teiid.services.util.Json;
@@ -41,6 +42,8 @@ import it.unibz.inf.ontop.teiid.services.util.StringTemplate;
 import it.unibz.inf.ontop.teiid.services.util.Tuple;
 
 public class HttpJsonService extends AbstractService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpJsonService.class);
 
     public static final String PROP_URL = "url";
 
@@ -107,6 +110,8 @@ public class HttpJsonService extends AbstractService {
                 ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
             }
 
+            LOGGER.debug("{} {} {}", this.method, uri, inputTuple.toString(true));
+
             final HttpResponse resp = this.client.execute(request);
 
             final HttpEntity entity = resp.getEntity();
@@ -122,10 +127,15 @@ public class HttpJsonService extends AbstractService {
                     : ImmutableList.of();
 
             final Tuple[] tmpTuples = new Tuple[] { null, inputTuple };
-            return Iterators.transform(outputTuples.iterator(), t -> {
+            for (int i = 0; i < outputTuples.size(); ++i) {
+                Tuple t = outputTuples.get(i);
                 tmpTuples[0] = t;
-                return this.projection.apply(tmpTuples);
-            });
+                t = this.projection.apply(tmpTuples);
+                outputTuples.set(i, t);
+                LOGGER.debug("#{}: {}", i + 1, t.toString(true));
+            }
+
+            return outputTuples.iterator();
 
         } catch (final IOException ex) {
             throw new UncheckedIOException(ex);
