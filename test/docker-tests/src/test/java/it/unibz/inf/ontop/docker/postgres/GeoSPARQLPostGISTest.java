@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests to check if PostGIS supports GeoSPARQL properly.
  */
+@Ignore
 public class GeoSPARQLPostGISTest extends AbstractVirtualModeTest {
 
     static final String owlfile = "/pgsql/geosparql/geosparql.owl";
