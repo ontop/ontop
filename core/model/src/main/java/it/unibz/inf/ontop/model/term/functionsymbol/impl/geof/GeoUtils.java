@@ -30,6 +30,7 @@ public class GeoUtils {
      * the SRID is extracted from a constant. Otherwise minimal parsing used to extract from template.
      * Geometry: If constant input at query tie {@link #tryExtractGeometryFromConstant(ImmutableTerm, TermFactory, IRI)}
      * Geometry: If DB attribute {@link #tryExtractGeometryFromTemplate(TermFactory, ImmutableTerm)}
+     *
      * @param termFactory
      * @param wktLiteralTerm
      * @return WKTLiteralValue which is composed of the SRID and geometry
@@ -49,16 +50,17 @@ public class GeoUtils {
                 .orElseGet(
                         // If template then
                         () -> tryExtractGeometryFromTemplate(termFactory, wktLiteralTerm)
-                                .orElse(wktLiteralTerm)                         
+                                .orElse(wktLiteralTerm)
                 );
 
         return new WKTLiteralValue(srid, geometry);
     }
-    
+
     /**
      * Extracts the SRID from a geometry input at SPARQL query time by a user
      * e.g. from input "<http://www.opengis.net/def/crs/EPSG/0/3044> POINT(6.6441878 49.7596208)"
      * output is 3044
+     *
      * @param immutableTerm
      * @return SRID
      */
@@ -77,6 +79,7 @@ public class GeoUtils {
 
     /**
      * Extract SRID from any geospatial template
+     *
      * @param wktLiteralTerm
      * @return SRID
      */
@@ -99,6 +102,7 @@ public class GeoUtils {
      * the SRID of POINT(6.6441878 49.7596208) has to be set to 3044
      * Method used in DB is ST_SETSRID and must be specified with the geometry in this instance
      * If no SRID IRI is provided, the default SRID of 4326 is set (since some DBs would otherwise set this to 0)
+     *
      * @param immutableTerm
      * @param termFactory
      * @param srid
@@ -130,6 +134,7 @@ public class GeoUtils {
     /**
      * Method extracts geometry from non-constant database data.
      * Drop any SRID template provided by user at query time by removing the first term.
+     *
      * @param termFactory
      * @param wktLiteralTerm
      * @return geometry without SRID
@@ -155,18 +160,19 @@ public class GeoUtils {
                             // Otherwise drop the SRID template, and return everything else
                             return termFactory.getNullRejectingDBConcatFunctionalTerm(
                                     t.getTerms()
-                                    .stream()
-                                    // If argument with SRID, drop SRID, otherwise keep terms
-                                    .map(subterm -> subterm.toString().contains("<")
-                                            ? extractConstantWKTLiteralValue(termFactory,subterm).get()
-                                            : subterm)
-                                    .collect(ImmutableCollectors.toList()));
-                        }
-                    });
+                                            .stream()
+                                            // If argument with SRID, drop SRID, otherwise keep terms
+                                            .map(subterm -> subterm.toString().contains("<")
+                                                    ? extractConstantWKTLiteralValue(termFactory, subterm).get()
+                                                    : subterm)
+                                            .collect(ImmutableCollectors.toList()));
+                    }
+                });
     }
 
     /**
      * Check whether the template starts with SRID e.g. {@code <http://www.opengis.net/def/crs/OGC/1.3/CRS84>}
+     *
      * @param immutableTerm
      * @return boolean yes=template starts with SRID
      */
@@ -181,6 +187,7 @@ public class GeoUtils {
     /**
      * Method extracts geometry without any SRID information.
      * This includes any template {GEOM} or {Lng}{Lat} which has a preceding SRID IRI
+     *
      * @param termFactory
      * @param immutableTerm
      * @return geometry string without SRID
@@ -198,6 +205,7 @@ public class GeoUtils {
     /**
      * Generates the abbreviated SRID from the full SRID IRI
      * Distinguishes between the default SRID CRS84 and other SRIDs with prefix EPSG
+     *
      * @param sridIRIString
      * @return Abbreviated SRID string
      */
@@ -218,6 +226,7 @@ public class GeoUtils {
     /**
      * Based on the abbreviated SRID denomination deduces the unit of the distance measure
      * The units generally include metre, degree and radian
+     *
      * @param sridIRIString
      * @return unit of distance
      */

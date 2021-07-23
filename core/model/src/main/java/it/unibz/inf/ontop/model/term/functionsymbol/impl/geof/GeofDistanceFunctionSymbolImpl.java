@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
@@ -12,14 +14,11 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
-
-import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.DEGREE;
-import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.METRE;
-import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.RADIAN;
-import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoUtils.EARTH_MEAN_RADIUS_METER;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.DistanceUnit.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeoUtils.EARTH_MEAN_RADIUS_METER;
 
 public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSymbolImpl {
 
@@ -75,16 +74,16 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         } else if (inputUnit == DEGREE && outputUnit == DEGREE) {
             // NOTE: supportsDBDistanceSphere() refers to official support i.e. PostGIS and not experimental i.e. H2GIS
             ImmutableTerm distanceInMetre = dbTypeFactory.supportsDBDistanceSphere()
-                ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
-                : termFactory.getDBSTDistanceSphere(
-                        removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
-                        removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
+                    ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
+                    : termFactory.getDBSTDistanceSphere(
+                    removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
+                    removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER / 180 * Math.PI), dbTypeFactory.getDBDoubleType());
             return termFactory.getImmutableFunctionalTerm(divides, distanceInMetre, ratioConstant);
         } else if (inputUnit == DEGREE && outputUnit == RADIAN) {
             ImmutableTerm distanceInMetre = dbTypeFactory.supportsDBDistanceSphere()
-                ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
-                : termFactory.getDBSTDistanceSphere(
+                    ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
+                    : termFactory.getDBSTDistanceSphere(
                     removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
                     removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
             DBConstant ratioConstant = termFactory.getDBConstant(String.valueOf(EARTH_MEAN_RADIUS_METER), dbTypeFactory.getDBDoubleType());
@@ -92,10 +91,10 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         } else if (inputUnit == DEGREE && outputUnit == METRE) {
             // TODO: consider using getDBSTDistanceSpheroid to get more accurate results
             return dbTypeFactory.supportsDBDistanceSphere()
-                ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
-                : termFactory.getDBSTDistanceSphere(
-                        removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
-                        removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
+                    ? termFactory.getDBSTDistanceSphere(geom0, geom1).simplify()
+                    : termFactory.getDBSTDistanceSphere(
+                    removeSetSRID(geom0, termFactory, subLexicalTerms.get(0)),
+                    removeSetSRID(geom1, termFactory, subLexicalTerms.get(1))).simplify();
         } else {
             throw new IllegalArgumentException(String.format("Unsupported combination of units for distance. input: %s, output: %s", inputUnit, outputUnit));
         }
@@ -106,13 +105,14 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
      * e.g. ST_DISTANCESPHRE(geom1, ST_SETSRID(geom2)) fails
      * Method returns the actual geometry instead for these cases
      * H2GIS does not distinguish SRID 0 from SRID 4326, so most use cases still work
+     *
      * @return Geometry if input from the user at query time
      */
     // TODO: Consider limitations of DISTANCESPHERE for H2GIS
-        static ImmutableTerm removeSetSRID(ImmutableTerm geom, TermFactory termFactory, ImmutableTerm subLexicalTerm) {
-            return geom.isGround()
-                    ? GeoUtils.extractConstantWKTLiteralValue(termFactory, subLexicalTerm).get()
-                    : geom;
-        }
+    static ImmutableTerm removeSetSRID(ImmutableTerm geom, TermFactory termFactory, ImmutableTerm subLexicalTerm) {
+        return geom.isGround()
+                ? GeoUtils.extractConstantWKTLiteralValue(termFactory, subLexicalTerm).get()
+                : geom;
+    }
 
 }
