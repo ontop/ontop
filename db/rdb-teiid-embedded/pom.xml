@@ -13,24 +13,6 @@
 
 	<artifactId>ontop-rdb-teiid-embedded</artifactId>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring-boot.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.infinispan</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 
 		<!-- COMPILE DEPENDENCIES -->
@@ -42,47 +24,30 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- Spring Boot -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jdbc</artifactId>
-		</dependency>
-
-		<!-- TEIID Spring -->
+		<!-- Teiid -->
 		<dependency>
 			<groupId>org.teiid</groupId>
-			<artifactId>teiid-spring-boot-starter</artifactId>
-			<version>${teiid-spring-boot.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.persistence</groupId>
-					<artifactId>jakarta.persistence-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-orm</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-tools</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.teiid</groupId>
-					<artifactId>spring-data-excel</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.teiid.connectors</groupId>
-					<artifactId>translator-loopback</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>teiid-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.teiid</groupId>
+			<artifactId>teiid-runtime</artifactId>
+			<version>${teiid.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.teiid</groupId>
+			<artifactId>teiid-common-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.teiid</groupId>
+			<artifactId>cache-caffeine</artifactId>
+			<version>${teiid.version}</version>
+		</dependency>
+
+		<!-- Hikari -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
 		</dependency>
 
 		<!-- Narayana -->
@@ -107,24 +72,35 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- RUNTIME DEPENDENCIES -->
+		<!-- TEST DEPENDENCIES -->
 
-		<!-- TEIID -->
+		<!-- Teiid JDBC translator -->
 		<dependency>
 			<groupId>org.teiid.connectors</groupId>
 			<artifactId>translator-jdbc</artifactId>
 			<version>${teiid.version}</version>
-			<scope>runtime</scope>
+			<scope>test</scope>
 		</dependency>
 
-		<!-- JDBC connectors -->
+		<!-- MySQL JDBC connector -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
+			<version>8.0.21</version>
+			<scope>test</scope>
 		</dependency>
 
-		<!-- TEST DEPENDENCIES -->
+		<!-- Logback -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- JUnit -->
 		<dependency>

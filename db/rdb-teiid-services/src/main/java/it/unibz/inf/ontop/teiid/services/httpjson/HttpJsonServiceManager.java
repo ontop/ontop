@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 import it.unibz.inf.ontop.teiid.services.Service;
 import it.unibz.inf.ontop.teiid.services.ServiceManager;
@@ -22,8 +23,8 @@ public final class HttpJsonServiceManager implements ServiceManager {
 
     private final Map<String, Service> serviceMap;
 
-    public HttpJsonServiceManager(final HttpClient client) {
-        this.client = Objects.requireNonNull(client);
+    public HttpJsonServiceManager(@Nullable final HttpClient client) {
+        this.client = client != null ? client : HttpClients.createDefault();
         this.serviceMap = Maps.newHashMap();
     }
 
