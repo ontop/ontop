@@ -21,11 +21,6 @@ public class GeofBoundaryFunctionSymbolImpl extends AbstractUnaryGeofWKTFunction
         super("GEOF_BOUNDARY", functionIRI, ImmutableList.of(wktLiteralType), wktLiteralType);
     }
 
-//    @Override
-//    protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-//        return termFactory.getDBAsText(termFactory.getDBBoundary(subLexicalTerms.get(0))).simplify();
-//    }
-
     @Override
     public Function<ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory) {
         return termFactory::getDBBoundary;

@@ -12,5 +12,5 @@ unzip -o ontop-cli*.zip -d ontop
 cd ontop
 rm -r ontop.bat ontop ontop-completion.sh jdbc
 cp ${ONTOP_HOME}/client/docker/entrypoint.sh .
-docker build -t ontop/ontop-endpoint:4.1 -f ${ONTOP_HOME}/client/docker/Dockerfile .
+docker build -t ontop/ontop-endpoint:4.1.1 -f ${ONTOP_HOME}/client/docker/Dockerfile .
 cd ${CURRENT_DIR}

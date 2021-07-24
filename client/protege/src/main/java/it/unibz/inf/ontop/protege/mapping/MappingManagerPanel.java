@@ -34,14 +34,14 @@ import java.awt.event.*;
 import java.util.List;
 
 import static it.unibz.inf.ontop.protege.utils.DialogUtils.*;
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_N;
+import static java.awt.event.KeyEvent.*;
 
 public class MappingManagerPanel extends JPanel implements OBDAModelManagerListener {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
 	private final OBDAModelManager obdaModelManager;
+	private final ColorSettings colorSettings;
 	private final OWLEditorKit editorKit;
     private final MappingFilteredListModel model;
     private final JList<TriplesMap> mappingList;
@@ -54,11 +54,12 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
 	public MappingManagerPanel(OWLEditorKit editorKit) {
         this.editorKit = editorKit;
         this.obdaModelManager = OBDAEditorKitSynchronizerPlugin.getOBDAModelManager(editorKit);
+        this.colorSettings = OBDAEditorKitSynchronizerPlugin.getColorSettings(editorKit);
 
         setLayout(new BorderLayout());
 
         mappingList = new JList<>();
-        mappingList.setCellRenderer(new MappingListRenderer(obdaModelManager));
+        mappingList.setCellRenderer(new MappingListRenderer(editorKit));
         mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         add(new JScrollPane(mappingList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -82,8 +83,13 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
+        buttonsPanel.add(getButton(validateAction),
+                new GridBagConstraints(3, 0, 1, 1, 0, 0,
+                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+                        new Insets(GAP, GAP, GAP, GAP), 0, 0));
+
         buttonsPanel.add(new JPanel(), // stretchable panel
-                new GridBagConstraints(3, 0, 1, 1, 1, 0,
+                new GridBagConstraints(4, 0, 1, 1, 1, 0,
                         GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
                         new Insets(GAP, GAP, GAP, GAP), 0, 0));
 
@@ -136,7 +142,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         menu.add(getMenuItem("Copy triples maps", copyAction));
         menu.add(getMenuItem(editAction));
         menu.addSeparator();
-        menu.add(getMenuItem(validateAction));
+        menu.add(getMenuItem("Validate triples maps", validateAction));
         menu.add(getMenuItem(executeSQLAction));
         setUpPopUpMenu(mappingList, menu);
         // additional accelerators
@@ -161,15 +167,15 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
             @Override public void contentsChanged(ListDataEvent e) { updateMappingSize(); }
             private void updateMappingSize() {
                 mappingStatusLabel.setText("<html>Mapping size: <b>" +
-                        obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection().size() + "</b></html>");
+                        obdaModelManager.getCurrentOBDAModel().getTriplesMapManager().size() + "</b></html>");
             }
         });
         mappingList.setModel(model);
-        model.triplesMapCollectionChanged(obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection());
+        model.changed(obdaModelManager.getCurrentOBDAModel().getTriplesMapManager());
     }
 
 
-    TriplesMapCollectionListener getTriplesMapCollectionListener() { return model; }
+    TriplesMapManagerListener getTriplesMapManagerListener() { return model; }
 
 
     private final OntopAbstractAction newAction = new OntopAbstractAction(
@@ -181,6 +187,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         public void actionPerformed(ActionEvent e) {
             EditMappingDialog dialog = new EditMappingDialog(
                     obdaModelManager.getCurrentOBDAModel(),
+                    colorSettings,
                     IDGenerator.getNextUniqueID("MAPID-"));
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }
@@ -196,7 +203,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
             if (!removeConfirm(mappingList.getSelectedValuesList()))
                 return;
 
-            TriplesMapCollection triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
+            TriplesMapManager triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapManager();
             for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
                 triplesMapCollection.remove(triplesMap.getId());
 
@@ -214,7 +221,7 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
             if (!copyConfirm(mappingList.getSelectedValuesList()))
                 return;
 
-            TriplesMapCollection triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapCollection();
+            TriplesMapManager triplesMapCollection = obdaModelManager.getCurrentOBDAModel().getTriplesMapManager();
             for (TriplesMap triplesMap : mappingList.getSelectedValuesList())
                 triplesMapCollection.duplicate(triplesMap.getId());
         }
@@ -226,13 +233,17 @@ public class MappingManagerPanel extends JPanel implements OBDAModelManagerListe
         public void actionPerformed(ActionEvent e) {
             EditMappingDialog dialog = new EditMappingDialog(
                     obdaModelManager.getCurrentOBDAModel(),
+                    colorSettings,
                     mappingList.getSelectedValue());
             DialogUtils.setLocationRelativeToProtegeAndOpen(editorKit, dialog);
         }
     };
 
-    private final OntopAbstractAction validateAction = new OntopAbstractAction("Validate triples maps",
-            null,null, null) {
+    private final OntopAbstractAction validateAction = new OntopAbstractAction(
+            "Validate",
+            "validate.png",
+            "Validate selected triples maps",
+            getKeyStrokeWithCtrlMask(VK_V)) {
         @Override
         public void actionPerformed(ActionEvent e) {
             ValidationSwingWorker worker = new ValidationSwingWorker(

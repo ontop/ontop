@@ -79,6 +79,11 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
+    public boolean supportsDBDistanceSphere() {
+        return false;
+    }
+
+    @Override
     public DBTermType getDBHexBinaryType() {
         return getDBTermType("HEXBINARY");
     }

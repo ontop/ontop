@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-test</artifactId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.1.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-docker-tests</artifactId>
@@ -97,6 +97,15 @@
             <version>1.4.4</version>
             <scope>test</scope>
         </dependency>
+        <!-- teiid JDBC Driver-->
+        <dependency>
+            <groupId>org.teiid</groupId>
+            <artifactId>teiid</artifactId>
+            <classifier>jdbc</classifier>
+            <version>15.0.1</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>

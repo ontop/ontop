@@ -137,6 +137,7 @@ public class H2SameAsTest {
     /**
 	 * Test use of sameAs
      * the expected results
+	 *  <pre> 
      * 911 'Amerigo'
      * 911 Aleksi
      * 1 Aleksi
@@ -144,6 +145,8 @@ public class H2SameAsTest {
      * 992 'Luis'
      * 993 'Sagrada Familia'
      * 2 'Eljas'
+	 * </pre>
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -183,6 +186,7 @@ public class H2SameAsTest {
     /**
      * Test use of sameAs
      * the expected results
+	 * <pre>
      * 911 'Amerigo' 13
      * 1 Aleksi 13
      * 2 'Eljas' 100
@@ -193,6 +197,7 @@ public class H2SameAsTest {
 	 * 1 'Amerigo' 13
 	 * 1 Aleksi 13
 	 * 2 'Eljas' 100
+	 * </pre>
 	 * Results as testNoSameAs2b()
      * @throws Exception
      */

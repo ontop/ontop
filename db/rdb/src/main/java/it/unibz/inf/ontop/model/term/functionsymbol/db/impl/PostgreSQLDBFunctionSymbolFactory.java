@@ -71,6 +71,16 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                         "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
         builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
 
+        //GEOMETRY
+        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
+        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
+        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
+
+        //GEOGRAPHY - Data type exclusive to PostGIS
+        DBTermType defaultDBGeographyType = dbTypeFactory.getDBGeographyType();
+        DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeographyType);
+        builder.put(defaultDBGeographyType,typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
+
         return builder.build();
     }
 

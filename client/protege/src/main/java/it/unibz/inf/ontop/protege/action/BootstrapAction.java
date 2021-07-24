@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
@@ -102,8 +101,7 @@ public class BootstrapAction extends ProtegeAction {
 			DialogUtils.showPrettyMessageDialog(getWorkspace(),
 					"Base IRIs cannot contain '#':\n" +
 							baseIri0 + " is not a valid base IRI.",
-					DIALOG_TITLE,
-					JOptionPane.ERROR_MESSAGE);
+					DIALOG_TITLE);
 			return;
 		}
 
@@ -132,12 +130,11 @@ public class BootstrapAction extends ProtegeAction {
 
 			obdaModel = OBDAEditorKitSynchronizerPlugin.getCurrentOBDAModel(getEditorKit());
 
-			OntopSQLOWLAPIConfiguration configuration = obdaModel.getConfigurationForOntology();
-			Injector injector = configuration.getInjector();
+			Injector injector = obdaModel.getOntopConfiguration().getInjector();
 			this.metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 			this.directMappingEngine = injector.getInstance(DirectMappingEngine.class);
 
-			this.currentMappingIndex = new AtomicInteger(obdaModel.getTriplesMapCollection().size() + 1);
+			this.currentMappingIndex = new AtomicInteger(obdaModel.getTriplesMapManager().size() + 1);
 		}
 
 		@Override

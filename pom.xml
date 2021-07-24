@@ -12,7 +12,7 @@
 
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://ontop-vkg.org/</url>
 
@@ -730,6 +730,7 @@
                 <artifactId>spring-boot-starter-actuator</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-devtools</artifactId>

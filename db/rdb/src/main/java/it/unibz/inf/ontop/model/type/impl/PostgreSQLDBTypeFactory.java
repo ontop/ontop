@@ -118,4 +118,9 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public boolean supportsDBGeographyType() {
         return true;
     }
+
+    @Override
+    public boolean supportsDBDistanceSphere() {
+        return true;
+    }
 }

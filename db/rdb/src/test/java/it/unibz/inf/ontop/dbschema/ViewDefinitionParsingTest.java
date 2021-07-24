@@ -43,7 +43,7 @@ public class ViewDefinitionParsingTest {
                 "src/test/resources/prof/prof_with_constraints.db-extract.json");
     }
 
-    protected ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
+    public static ImmutableSet<OntopViewDefinition> loadViewDefinitions(String viewFilePath,
                                                                     String dbMetadataFilePath)
             throws Exception {
 

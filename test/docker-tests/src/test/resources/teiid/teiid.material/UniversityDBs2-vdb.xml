@@ -1,0 +1,58 @@
+<vdb name="UniversityDBs2"  version="1">
+    <model visible="true" name="uni1">
+        <source name="uni1" translator-name="mysql5" connection-jndi-name="java:/MySqlUni1"/>
+        <metadata type="DDL"><![CDATA[
+                CREATE FOREIGN TABLE student (
+                  s_id  integer not null primary key,
+                  first_name varchar(40) not null,
+                  last_name varchar(40) not null
+                  )OPTIONS(UPDATABLE 'FALSE');
+                  
+                CREATE FOREIGN TABLE academic (
+                  a_id integer not null primary key,
+                  first_name varchar(40) not null,
+                  last_name varchar(40) not null,
+                  position integer not null
+                 )OPTIONS(UPDATABLE 'FALSE');
+                 
+                 CREATE FOREIGN TABLE course (
+                   c_id integer not null primary key,
+                   title varchar(100) not null
+                  )OPTIONS(UPDATABLE 'FALSE');
+                  
+                CREATE FOREIGN TABLE teaching (
+                 c_id integer not null,
+                 a_id integer not null
+                 )OPTIONS(UPDATABLE 'FALSE');
+                 
+                CREATE FOREIGN TABLE course_registration (
+                  c_id integer not null,
+                  s_id integer not null
+                 )OPTIONS(UPDATABLE 'FALSE');
+            ]]> </metadata>   
+      </model> 
+      <model visible="true" name="uni2">
+        <source name="uni2" translator-name="mysql5" connection-jndi-name="java:/MySqlUni2"/>
+        <metadata type="DDL"><![CDATA[
+                CREATE FOREIGN TABLE person (
+                  pid integer not null primary key,
+                  fname varchar(40) not null,
+                  lname varchar(40) not null,
+                  status integer not null,
+                  ssn varchar(40) not null unique
+                 )OPTIONS(UPDATABLE 'FALSE');
+                 
+             CREATE FOREIGN TABLE course (
+              cid integer not null primary key,
+              lecturer integer not null,
+              lab_teacher integer not null,
+              topic varchar(100) not null
+               )OPTIONS(UPDATABLE 'FALSE');
+               
+             CREATE FOREIGN TABLE registration (
+              pid integer not null,
+              cid integer not null
+              )OPTIONS(UPDATABLE 'FALSE');
+            ]]> </metadata>                
+    </model>    
+  </vdb>
