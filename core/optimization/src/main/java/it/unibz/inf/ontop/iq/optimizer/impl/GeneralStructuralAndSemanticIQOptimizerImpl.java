@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     }
 
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
 
@@ -44,7 +43,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
             long beginningJoinLike = System.currentTimeMillis();
-            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding, executorRegistry);
+            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding);
 
             LOGGER.debug("New query after fixed point join optimization ({} ms):\n{}\n",
                         System.currentTimeMillis() - beginningJoinLike,

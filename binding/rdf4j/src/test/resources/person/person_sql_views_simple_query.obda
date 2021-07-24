@@ -10,7 +10,7 @@ quest:		http://obda.org/quest#
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-person
-target		:person/{"id"} a :Person ; :status {"status"} .
-source		SELECT r."id", r."status" FROM "hr"."persons" AS r;
+target		:person/{"rid"} a :Person ; :status {"s"} .
+source		SELECT * FROM "hr"."persons" AS r;
 
 ]]

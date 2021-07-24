@@ -528,11 +528,16 @@ public class JsonBasicView extends JsonView {
 
         ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(addForeignKey.name, relation, targetRelation);
 
+        int columnCount = addForeignKey.to.columns.size();
+        if (addForeignKey.from.size() != columnCount)
+            throw new MetadataExtractionException("Not the same number of from and to columns in FK definition");
+
         try {
-            for (String column : addForeignKey.to.columns)
+            for (int i=0; i < columnCount; i++ ) {
                 builder.add(
-                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.from),
-                        lookup.getQuotedIDFactory().createAttributeID(column));
+                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.from.get(i)),
+                        lookup.getQuotedIDFactory().createAttributeID(addForeignKey.to.columns.get(i)));
+            }
         }
         catch (AttributeNotFoundException e) {
             throw new MetadataExtractionException(e);
@@ -712,12 +717,12 @@ public class JsonBasicView extends JsonView {
         @Nonnull
         public final String name;
         @Nonnull
-        public final String from;
+        public final List<String> from;
         @Nonnull
         public final ForeignKeyPart to;
 
         public AddForeignKey(@JsonProperty("name") String name,
-                             @JsonProperty("from") String from,
+                             @JsonProperty("from") List<String> from,
                              @JsonProperty("to") ForeignKeyPart to) {
             this.name = name;
             this.from = from;

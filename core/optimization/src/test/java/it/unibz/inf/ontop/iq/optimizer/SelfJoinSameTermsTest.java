@@ -429,7 +429,7 @@ public class SelfJoinSameTermsTest {
     }
 
     private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) {
-        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery, EXECUTOR_REGISTRY);
+        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         assertEquals(expectedQuery, optimizedQuery);
     }
 }

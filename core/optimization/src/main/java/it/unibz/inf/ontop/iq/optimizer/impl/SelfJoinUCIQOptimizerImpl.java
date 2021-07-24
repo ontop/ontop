@@ -67,7 +67,9 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                     .collect(ImmutableCollectors.toList());
 
             return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables())
-                    .orElse(tree);
+                    .orElseGet(() -> children.equals(liftedChildren)
+                            ? tree
+                            : iqFactory.createNaryIQTree(rootNode, liftedChildren));
         }
     }
 

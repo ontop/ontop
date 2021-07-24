@@ -464,6 +464,6 @@ public class PushDownBooleanExpressionOptimizerTest {
         IQTree newTree = PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER.transform(initialIQ.getTree());
         IQ newIQ = IQ_FACTORY.createIQ(initialIQ.getProjectionAtom(), newTree);
 
-        return IQ_CONVERTER.convert(newIQ, query.getExecutorRegistry());
+        return IQ_CONVERTER.convert(newIQ);
     }
 }

@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -78,12 +77,12 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
      * If something has been pushed, it re-applies the structural and semantic optimizations.
      */
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         IQ liftedQuery = lift(query);
         return liftedQuery.equals(query)
                 ? query
                 // Re-applies the structural and semantic optimizations
-                : generalOptimizer.optimize(liftedQuery, executorRegistry);
+                : generalOptimizer.optimize(liftedQuery);
     }
 
     protected IQ lift(IQ query) {

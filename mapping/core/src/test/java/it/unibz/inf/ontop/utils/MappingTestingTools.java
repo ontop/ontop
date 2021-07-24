@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -25,7 +24,6 @@ import org.apache.commons.rdf.api.RDF;
 
 public class MappingTestingTools {
 
-    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
 
     public static final TermFactory TERM_FACTORY;
@@ -67,7 +65,6 @@ public class MappingTestingTools {
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
-        EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_NORMALIZER = injector.getInstance(MappingVariableNameNormalizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
@@ -103,7 +100,7 @@ public class MappingTestingTools {
     }
 
     public static IntermediateQueryBuilder createQueryBuilder() {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        return IQ_FACTORY.createIQBuilder();
     }
 
     public static OfflineMetadataProviderBuilder2 createMetadataProviderBuilder() {

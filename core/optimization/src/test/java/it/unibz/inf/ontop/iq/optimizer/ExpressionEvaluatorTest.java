@@ -132,7 +132,7 @@ public class ExpressionEvaluatorTest {
 
         unOptimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
-        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(IQ_CONVERTER.convert(unOptimizedQuery), EXECUTOR_REGISTRY);
+        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(IQ_CONVERTER.convert(unOptimizedQuery));
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
