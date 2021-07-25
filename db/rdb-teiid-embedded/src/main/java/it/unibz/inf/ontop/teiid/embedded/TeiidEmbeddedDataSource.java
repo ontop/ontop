@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -25,6 +26,8 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Resources;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.impl.ModelMetaData;
 import org.teiid.adminapi.impl.SourceMappingMetadata;
@@ -45,7 +48,11 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
     // TODO: closing a data source should remove it from the map
     // TODO: use soft references and intercept GC
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TeiidEmbeddedDataSource.class);
+
     private static final Map<HashCode, TeiidEmbeddedDataSource> DATA_SOURCES = Maps.newHashMap();
+
+    private final Map<String, Object> connectionFactories;
 
     private final EmbeddedServer server;
 
@@ -89,10 +96,12 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
         final EmbeddedServer server = new EmbeddedServer();
 
         // Register a DataSource/ConnectionFactory for each server in the DDL
+        final Map<String, Object> connectionFactories = Maps.newHashMap();
         for (final String serverName : serverNames) {
             final String serverUrl = metadata.getPropertyValue("server." + serverName);
-            server.addConnectionFactory(serverName,
-                    TeiidEmbeddedUtils.getConnectionFactory(serverUrl));
+            final Object connectionFactory = TeiidEmbeddedUtils.getConnectionFactory(serverUrl);
+            server.addConnectionFactory(serverName, connectionFactory);
+            connectionFactories.put(serverName, connectionFactory);
         }
 
         // Register an ExecutionFactory for each translator name mentioned in the DDL
@@ -114,6 +123,7 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
         server.deployVDB(new ByteArrayInputStream(ddlContent.getBytes()), true);
 
         // Initialize state
+        this.connectionFactories = connectionFactories;
         this.server = server;
         this.url = "jdbc:teiid:" + metadata.getName();
     }
@@ -186,6 +196,17 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
     public void close() throws IOException {
         synchronized (this.server) {
             this.server.stop();
+            for (final Entry<String, Object> e : this.connectionFactories.entrySet()) {
+                if (e.getValue() instanceof Closeable) {
+                    try {
+                        ((Closeable) e.getValue()).close();
+                    } catch (final Throwable ex) {
+                        LOGGER.warn("Ignoring exception while closing connection factory "
+                                + e.getKey());
+                    }
+                }
+            }
+            this.connectionFactories.clear();
         }
     }
 
