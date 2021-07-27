@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>it.unibz.inf.ontop</groupId>
@@ -12,11 +14,68 @@
 	<artifactId>ontop-ctables</artifactId>
 
 	<dependencies>
+
+		<!-- COMPILE DEPENDENCIES -->
+
+		<!-- Ontop -->
+		<dependency>
+			<groupId>it.unibz.inf.ontop</groupId>
+			<artifactId>ontop-rdb</artifactId>
+		</dependency>
+
+		<!-- Jackson -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+		</dependency>
+
+		<!-- Cron-Utils -->
+		<dependency>
+			<groupId>com.cronutils</groupId>
+			<artifactId>cron-utils</artifactId>
+			<version>9.1.5</version>
+		</dependency>
+
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<!-- PROVIDED DEPENDENCIES -->
+
+		<!-- JSR-305 annotations -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- TEST DEPENDENCIES -->
+
+		<!-- Logback -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- JUnit -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 </project>

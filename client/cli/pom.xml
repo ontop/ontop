@@ -33,6 +33,10 @@
             <artifactId>ontop-endpoint</artifactId>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-ctables</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline</artifactId>
         </dependency>

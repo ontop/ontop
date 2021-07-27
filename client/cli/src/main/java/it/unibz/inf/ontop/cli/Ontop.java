@@ -49,6 +49,7 @@ public class Ontop {
                         OntopValidate.class,
                         OntopEndpoint.class,
                         OntopExtractDBMetadata.class,
+                        OntopCTables.class,
                         /**
                          * hidden commands
                          */

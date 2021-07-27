@@ -4,6 +4,12 @@ ONTOP_HOME=/opt/ontop
 
 args_array=()
 
+command=endpoint
+if [ "${ONTOP_COMMAND+x}" ]; then
+  command=${ONTOP_COMMAND}
+fi
+args_array+=($command)
+
 if [ "${MAPPING_FILE+x}" ]; then
   ONTOP_MAPPING_FILE=${MAPPING_FILE}
   echo "WARNING: environment variable MAPPING_FILE is deprecated. Please use ONTOP_MAPPING_FILE instead"
@@ -84,6 +90,10 @@ if [ "${ONTOP_VIEW_FILE+x}" ]; then
   args_array+=("--ontop-views=${ONTOP_VIEW_FILE}")
 fi
 
+if [ "${ONTOP_CTABLES_FILE+x}" ]; then
+  args_array+=("--ctables=${ONTOP_CTABLES_FILE}")
+fi
+
 if [ "${ONTOP_CORS_ALLOWED_ORIGINS+x}" ]; then
   args_array+=("--cors-allowed-origins=${ONTOP_CORS_ALLOWED_ORIGINS}")
 fi
@@ -131,7 +141,7 @@ if [ -z "${ONTOP_FILE_ENCODING}" ]; then
 fi
 
 echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
- it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
+ it.unibz.inf.ontop.cli.Ontop "${args_array[@]}"
 
 java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
- it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
+ it.unibz.inf.ontop.cli.Ontop "${args_array[@]}"
