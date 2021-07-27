@@ -113,8 +113,12 @@ public class OntopViewUnfolderImpl implements OntopViewUnfolder {
                     renamingSubstitution.applyToDistinctVariableOnlyDataAtom(renamedDefinition.getProjectionAtom()),
                     dataNode.getArgumentMap());
 
-            return renamedDefinition.getTree()
-                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
+            IQTree substitutedDefinition = renamedDefinition.getTree()
+                    .applyDescendingSubstitution(descendingSubstitution, Optional.empty());
+
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(dataNode.getVariables()),
+                    substitutedDefinition)
                     .normalizeForOptimization(variableGenerator);
         }
 
