@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -32,7 +31,6 @@ import java.util.stream.IntStream;
 
 public class OptimizationTestingTools {
 
-    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
@@ -84,11 +82,13 @@ public class OptimizationTestingTools {
     public static final Variable G;
     public static final Variable GF1;
     public static final Variable H;
+    public static final Variable HF0;
     public static final Variable I;
     public static final Variable IF7;
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
+    public static final Variable NF0;
     public static final Variable PROV;
     public static final DBConstant ONE, TWO, ONE_STR, TWO_STR;
 
@@ -107,7 +107,6 @@ public class OptimizationTestingTools {
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
-        EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
         BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
@@ -162,11 +161,13 @@ public class OptimizationTestingTools {
         G = TERM_FACTORY.getVariable("g");
         GF1 = TERM_FACTORY.getVariable("gf1");
         H = TERM_FACTORY.getVariable("h");
+        HF0 = TERM_FACTORY.getVariable("hf0");
         I = TERM_FACTORY.getVariable("i");
         IF7 = TERM_FACTORY.getVariable("if7");
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
+        NF0 = TERM_FACTORY.getVariable("nf0");
         PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
         TWO = TERM_FACTORY.getDBIntegerConstant(2);
@@ -182,7 +183,7 @@ public class OptimizationTestingTools {
     }
 
     public static IntermediateQueryBuilder createQueryBuilder() {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        return IQ_FACTORY.createIQBuilder();
     }
 
     public static OfflineMetadataProviderBuilder3 createMetadataProviderBuilder() {

@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -30,7 +29,6 @@ import java.util.stream.IntStream;
 public class OntopModelTestingTools {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
@@ -60,7 +58,6 @@ public class OntopModelTestingTools {
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
-        EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
     }

@@ -15,7 +15,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -23,12 +25,14 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     private final MetadataProvider parentMetadataProvider;
     private final CachingMetadataLookupWithDependencies parentCacheMetadataLookup;
+    private final OntopViewNormalizer ontopViewNormalizer;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
-                                            @Assisted Reader ontopViewReader) throws MetadataExtractionException {
+                                            @Assisted Reader ontopViewReader,
+                                            OntopViewNormalizer ontopViewNormalizer) throws MetadataExtractionException {
         this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
             private final Set<RelationID> completeRelations = new HashSet<>();
 
@@ -58,6 +62,8 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         catch (IOException e) {
             throw new MetadataExtractionException(e);
         }
+
+        this.ontopViewNormalizer = ontopViewNormalizer;
     }
 
     /**
@@ -115,5 +121,19 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     @Override
     public DBParameters getDBParameters() {
         return parentMetadataProvider.getDBParameters();
+    }
+
+    @Override
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+        // TODO: normalize the parents before the children using the OntopViewNormalizer.
+        ImmutableList<OntopViewDefinition> viewDefinitions = relationDefinitions.stream()
+                .filter(OntopViewDefinition.class::isInstance)
+                .map(OntopViewDefinition.class::cast)
+                // Sort by view level in ascending order - To be reviewed when level >1 views are introduced
+                // .sorted(Comparator.comparing(OntopViewDefinition::getLevel))
+                .collect(ImmutableCollectors.toList());
+
+        // Apply normalization
+        viewDefinitions.forEach(ontopViewNormalizer::normalize);
     }
 }

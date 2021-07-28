@@ -18,7 +18,7 @@ public interface OntopSystemConfiguration extends OntopReformulationConfiguratio
         Injector injector = getInjector();
         OntopSystemFactory systemFactory = injector.getInstance(OntopSystemFactory.class);
         OBDASpecification obdaSpecification = loadSpecification();
-        return systemFactory.create(obdaSpecification, getExecutorRegistry());
+        return systemFactory.create(obdaSpecification);
     }
 
     interface OntopSystemBuilderFragment<B extends Builder<B>> {

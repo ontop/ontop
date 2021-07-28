@@ -6,17 +6,14 @@ import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSystemSQLConfigurationImpl.OntopSystemSQLOptions;
 import it.unibz.inf.ontop.injection.impl.OntopReformulationConfigurationImpl.DefaultOntopReformulationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.DefaultOntopReformulationSQLBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.OntopReformulationSQLOptions;
-import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import javax.annotation.Nonnull;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -55,19 +52,6 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         return Stream.concat(
                 super.buildGuiceModules(),
                 systemConfiguration.buildGuiceModules());
-    }
-
-    /**
-     * Can be overloaded by sub-classes
-     */
-    @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-    generateOptimizationConfigurationMap() {
-        return Stream.concat(
-                    super.generateOptimizationConfigurationMap().entrySet().stream(),
-                    systemConfiguration.generateOptimizationConfigurationMap().entrySet().stream())
-                .distinct()
-                .collect(ImmutableCollectors.toMap());
     }
 
 

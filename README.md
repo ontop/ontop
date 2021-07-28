@@ -12,8 +12,8 @@
 Ontop
 =====
 
-Ontop is a Virtual Knowledge Graph system. 
-It exposes the content of arbitrary relational databases as knowledge graphs. These graphs are virtual, which means that data remains in the data sources instead of being moved to another database. 
+Ontop is a Virtual Knowledge Graph system.
+It exposes the content of arbitrary relational databases as knowledge graphs. These graphs are virtual, which means that data remains in the data sources instead of being moved to another database.
 
 Ontop translates [SPARQL queries](https://www.w3.org/TR/sparql11-query/) expressed over the knowledge graphs into SQL queries executed by the relational data sources. It relies on [R2RML mappings](https://www.w3.org/TR/r2rml/) and can take advantage of lightweight ontologies.
 
@@ -60,6 +60,6 @@ The Ontop framework is available under the Apache License, Version 2.0
   limitations under the License.
 ```
 
-All documentation is licensed under the 
+All documentation is licensed under the
 [Creative Commons](http://creativecommons.org/licenses/by/4.0/)
 (attribute)  license.

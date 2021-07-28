@@ -568,6 +568,6 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IQ newIQ = IQ_CONVERTER.convert(query).normalizeForOptimization();
-        return IQ_CONVERTER.convert(newIQ, query.getExecutorRegistry());
+        return IQ_CONVERTER.convert(newIQ);
     }
 }
