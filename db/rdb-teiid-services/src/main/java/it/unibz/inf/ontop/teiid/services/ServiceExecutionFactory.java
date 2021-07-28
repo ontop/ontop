@@ -343,7 +343,7 @@ public class ServiceExecutionFactory
                     && getConstraints(e.getRightCondition(), constrainedAttributes);
 
         } else {
-            return false;
+            return condition == null;
         }
     }
 

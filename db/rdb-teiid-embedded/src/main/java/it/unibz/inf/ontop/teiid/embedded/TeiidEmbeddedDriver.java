@@ -2,16 +2,31 @@ package it.unibz.inf.ontop.teiid.embedded;
 
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teiid.core.util.ApplicationInfo;
 import org.teiid.jdbc.JDBCPlugin;
 
 public final class TeiidEmbeddedDriver implements Driver {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TeiidEmbeddedDriver.class);
+
+    private static final TeiidEmbeddedDriver INSTANCE = new TeiidEmbeddedDriver();
+
+    static {
+        try {
+            DriverManager.registerDriver(INSTANCE);
+        } catch (final SQLException ex) {
+            LOGGER.warn("Could not register TeiidEmbeddedDriver in JDBC DriverManager", ex);
+        }
+    }
 
     @Override
     public boolean acceptsURL(final String jdbcUrl) {

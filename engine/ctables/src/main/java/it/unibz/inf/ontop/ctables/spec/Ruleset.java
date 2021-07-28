@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.ctables;
+package it.unibz.inf.ontop.ctables.spec;
 
 import java.io.IOException;
 import java.io.InputStream;

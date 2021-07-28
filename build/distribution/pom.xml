@@ -28,12 +28,24 @@
             <artifactId>h2</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.teiid.connectors</groupId>
+            <artifactId>translator-jdbc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdf4j</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-cli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-rdb-teiid-embedded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-rdb-teiid-services</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>

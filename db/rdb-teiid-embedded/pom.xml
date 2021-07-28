@@ -32,7 +32,6 @@
 		<dependency>
 			<groupId>org.teiid</groupId>
 			<artifactId>teiid-runtime</artifactId>
-			<version>${teiid.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.teiid</groupId>
@@ -41,7 +40,6 @@
 		<dependency>
 			<groupId>org.teiid</groupId>
 			<artifactId>cache-caffeine</artifactId>
-			<version>${teiid.version}</version>
 		</dependency>
 
 		<!-- Hikari -->
@@ -51,11 +49,10 @@
 		</dependency>
 
 		<!-- Narayana -->
-		<!-- <dependency> -->
-		<!-- <groupId>me.snowdrop</groupId> -->
-		<!-- <artifactId>narayana-spring-boot-starter</artifactId> -->
-		<!-- <version>${narayana.version}</version> -->
-		<!-- </dependency> -->
+		<dependency>
+			<groupId>org.jboss.narayana.jta</groupId>
+			<artifactId>narayana-jta</artifactId>
+		</dependency>
 
 		<!-- Guava -->
 		<dependency>
@@ -78,7 +75,6 @@
 		<dependency>
 			<groupId>org.teiid.connectors</groupId>
 			<artifactId>translator-jdbc</artifactId>
-			<version>${teiid.version}</version>
 			<scope>test</scope>
 		</dependency>
 

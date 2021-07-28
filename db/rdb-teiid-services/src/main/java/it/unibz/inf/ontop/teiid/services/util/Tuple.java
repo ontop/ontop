@@ -182,24 +182,27 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
             if (i > 0) {
                 sb.append(',').append(' ');
             }
-            final Object v = this.values[i];
+            Object v = this.values[i];
 
             if (includeNames) {
                 sb.append(this.signature.get(i).getName()).append('=');
             }
 
-            if (v == null) {
-                sb.append("null");
-            } else if (v instanceof Clob) {
+            if (v instanceof Clob) {
                 try {
-                    final String s = BaseClobType.getString((Clob) v);
-                    sb.append(s);
+                    v = BaseClobType.getString((Clob) v);
                 } catch (final Throwable ex) {
-                    sb.append("<error>");
+                    v = "<error>";
                 }
-            } else {
-                sb.append(v.toString());
             }
+            if (v == null) {
+                v = "<null>";
+            }
+            String s = v.toString();
+            if (s.length() > 64) {
+                s = s.substring(0, 61) + "...";
+            }
+            sb.append(s);
         }
         sb.append(']');
         return sb.toString();

@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.zaxxer.hikari.HikariConfig;
@@ -41,7 +42,7 @@ public class TeiidEmbeddedUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(TeiidEmbeddedUtils.class);
 
     private static final Pattern URL_PATTERN = Pattern
-            .compile("jdbc:teiid:@ontop:([^@^;]+)(?:@([^;]*))?(;.*)?\"");
+            .compile("jdbc:teiid:@ontop:([^@^;]+)(?:@([^;]*))?(;.*)?");
 
     private static final Map<String, Class<?>> EXECUTION_FACTORY_CLASSES;
 
@@ -100,7 +101,7 @@ public class TeiidEmbeddedUtils {
         try {
             final String vdbName = URLDecoder.decode(m.group(1), "UTF-8");
             final String vdbPath = URLDecoder.decode(m.group(2), "UTF-8");
-            final String options = m.group(3);
+            final String options = Strings.nullToEmpty(m.group(3));
 
             properties = properties != null ? PropertiesUtils.clone(properties) : new Properties();
             properties.setProperty(JDBC_VDB_NAME, vdbName);
@@ -164,8 +165,8 @@ public class TeiidEmbeddedUtils {
                     efClass = (Class) EXECUTION_FACTORY_CLASSES.get(name);
                     ef = efClass.newInstance();
                     ef.start();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new TranslatorException(e);
+                } catch (Throwable e) {
+                    throw new TranslatorException(e, "Could not instantiate " + name);
                 }
                 EXECUTION_FACTORIES.put(name, ef);
             }

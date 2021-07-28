@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.Reader;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-import it.unibz.inf.ontop.ctables.Ruleset;
+import it.unibz.inf.ontop.ctables.spec.Ruleset;
 import it.unibz.inf.ontop.injection.impl.OntopCTablesConfigurationImpl;
 
 public interface OntopCTablesConfiguration extends OntopSQLCredentialConfiguration {
@@ -14,7 +14,7 @@ public interface OntopCTablesConfiguration extends OntopSQLCredentialConfigurati
     @Override
     OntopCTablesSettings getSettings();
 
-    Optional<Ruleset> loadRuleset();
+    Ruleset loadRuleset();
 
     static Builder<? extends Builder<?>> defaultBuilder() {
         return new OntopCTablesConfigurationImpl.BuilderImpl<>();
@@ -22,13 +22,15 @@ public interface OntopCTablesConfiguration extends OntopSQLCredentialConfigurati
 
     interface OntopCTablesBuilderFragment<B extends Builder<B>> {
 
-        B ctablesRuleset(@Nonnull Ruleset ruleset);
+        B ctablesRuleset(@Nullable Ruleset ctablesRuleset);
 
-        B ctablesRulesetFile(@Nonnull File mappingFilename);
+        B ctablesRulesetFile(@Nullable File ctablesRulesetFile);
 
-        B ctablesRulesetFile(@Nonnull String mappingFilename);
+        B ctablesRulesetFile(@Nullable String ctablesRulesetFile);
 
-        B ctablesRulesetReader(@Nonnull Reader mappingReader);
+        B ctablesRulesetReader(@Nullable Reader ctablesRulesetReader);
+
+        B ctablesRefreshSchedule(@Nullable String ctablesRefreshSchedule);
 
     }
 

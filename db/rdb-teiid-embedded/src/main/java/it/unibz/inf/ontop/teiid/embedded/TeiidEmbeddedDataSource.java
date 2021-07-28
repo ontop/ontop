@@ -58,6 +58,11 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
 
     private final String url;
 
+    static {
+        System.setProperty("org.teiid.comparableLobs", "true");
+        System.setProperty("org.teiid.maxStringLength", "65535");
+    }
+
     // INITIALIZATION
 
     private TeiidEmbeddedDataSource(final String ddlContent) throws IOException,
@@ -113,6 +118,7 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
         // Complete server configuration and start the server
         final EmbeddedConfiguration config = new EmbeddedConfiguration();
         config.setCacheFactory(new CaffeineCacheFactory());
+        config.setTransactionManager(com.arjuna.ats.jta.TransactionManager.transactionManager()); // TODO
         if (sc != null) {
             config.addTransport(sc);
         }
@@ -149,7 +155,9 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
                     ddlContent = com.google.common.io.Files.toString(new File(vdbPath),
                             Charsets.UTF_8);
                 } else {
+                    System.out.println(vdbPath);
                     final URL url = ClassLoader.getSystemClassLoader().getResource(vdbPath);
+                    System.out.println(url);
                     ddlContent = Resources.toString(url, Charsets.UTF_8);
                 }
 

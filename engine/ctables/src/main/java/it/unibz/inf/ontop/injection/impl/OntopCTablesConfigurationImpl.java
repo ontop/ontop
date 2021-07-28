@@ -12,7 +12,9 @@ import java.util.Properties;
 
 import javax.annotation.Nullable;
 
-import it.unibz.inf.ontop.ctables.Ruleset;
+import com.google.common.collect.ImmutableList;
+
+import it.unibz.inf.ontop.ctables.spec.Ruleset;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopCTablesConfiguration;
 import it.unibz.inf.ontop.injection.OntopCTablesSettings;
@@ -37,26 +39,26 @@ public class OntopCTablesConfigurationImpl extends OntopSQLCredentialConfigurati
     }
 
     @Override
-    public Optional<Ruleset> loadRuleset() {
+    public Ruleset loadRuleset() {
 
         if (this.options.ctablesRuleset.isPresent()) {
-            return this.options.ctablesRuleset;
+            return this.options.ctablesRuleset.get();
         }
 
         try {
             if (this.options.ctablesRulesetFile.isPresent()) {
                 final URL url = this.options.ctablesRulesetFile.get().toURI().toURL();
-                return Optional.of(Ruleset.create(url));
+                return Ruleset.create(url);
             }
             if (this.options.ctablesRulesetReader.isPresent()) {
                 final Reader reader = this.options.ctablesRulesetReader.get();
-                return Optional.of(Ruleset.create(reader));
+                return Ruleset.create(reader);
             }
         } catch (final IOException ex) {
             throw new UncheckedIOException(ex);
         }
 
-        return Optional.empty();
+        return Ruleset.create(ImmutableList.of()); // empty
     }
 
     static class OntopCTablesOptions {
@@ -92,6 +94,8 @@ public class OntopCTablesConfigurationImpl extends OntopSQLCredentialConfigurati
 
         private Optional<Reader> ctablesRulesetReader = Optional.empty();
 
+        private Optional<String> ctablesRefreshSchedule = Optional.empty();
+
         protected StandardCTablesBuilderFragment(final B builder) {
             this.builder = builder;
         }
@@ -101,6 +105,10 @@ public class OntopCTablesConfigurationImpl extends OntopSQLCredentialConfigurati
             if (this.ctablesRulesetFile.isPresent()) {
                 p.setProperty(OntopCTablesSettings.CTABLES_RULESET_FILE,
                         this.ctablesRulesetFile.get().toString());
+            }
+            if (this.ctablesRefreshSchedule.isPresent()) {
+                p.setProperty(OntopCTablesSettings.CTABLES_REFRESH_SCHEDULE,
+                        this.ctablesRefreshSchedule.get());
             }
             return p;
         }
@@ -154,6 +162,12 @@ public class OntopCTablesConfigurationImpl extends OntopSQLCredentialConfigurati
             return this.builder;
         }
 
+        @Override
+        public B ctablesRefreshSchedule(@Nullable final String ctablesRefreshSchedule) {
+            this.ctablesRefreshSchedule = Optional.ofNullable(ctablesRefreshSchedule);
+            return this.builder;
+        }
+
     }
 
     protected abstract static class OntopCTablesBuilderMixin<B extends OntopCTablesConfiguration.Builder<B>>
@@ -186,6 +200,11 @@ public class OntopCTablesConfigurationImpl extends OntopSQLCredentialConfigurati
         @Override
         public B ctablesRulesetReader(final Reader ctablesRulesetReader) {
             return this.localFragmentBuilder.ctablesRulesetReader(ctablesRulesetReader);
+        }
+
+        @Override
+        public B ctablesRefreshSchedule(final String ctablesRefreshSchedule) {
+            return this.localFragmentBuilder.ctablesRefreshSchedule(ctablesRefreshSchedule);
         }
 
         @Override
