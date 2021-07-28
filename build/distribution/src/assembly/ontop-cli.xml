@@ -22,14 +22,14 @@
 				<include>logback-debug.xml</include>
 			</includes>
 		</fileSet>
-        <fileSet>
-            <directory>${maven.multiModuleProjectDirectory}/client/cli/src/main/resources/
-            </directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>*</include>
-            </includes>
-        </fileSet>
+		<fileSet>
+			<directory>${maven.multiModuleProjectDirectory}/client/cli/src/main/resources/
+			</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
 		<fileSet>
 			<directory>${maven.multiModuleProjectDirectory}/engine/owlapi/src/main/resources/
 			</directory>

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 ONTOP_HOME=${CURRENT_DIR}/../..
