@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.injection;
 
 import java.io.File;
 import java.io.Reader;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 

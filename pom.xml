@@ -177,6 +177,8 @@
         <xml-apis.version>1.4.01</xml-apis.version>
 		
         <!-- Dependency versions: indirectly used & pinned for enforcer plugin -->
+        <caffeine.version>2.8.6</caffeine.version>
+        <checker-qual.version>3.7.0</checker-qual.version>
         <commons-io.version>2.5</commons-io.version>
         <commons-logging.version>1.2</commons-logging.version>
         <jsonld-java.version>0.13.0</jsonld-java.version>
@@ -185,6 +187,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <sesame.version>2.7.16</sesame.version>
+        <snakeyaml.version>1.27</snakeyaml.version>
         <tomcat-embed-core.version>9.0.41</tomcat-embed-core.version>
     </properties>
 
@@ -757,6 +760,12 @@
                 <groupId>org.teiid.connectors</groupId>
                 <artifactId>translator-jdbc</artifactId>
                 <version>${teiid.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             
             <!-- Narayana -->
@@ -1084,6 +1093,21 @@
             </dependency>
 
             <!-- Indirectly used & pinned (for maven-enforcer-plugin) -->
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>${checker-qual.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.openrdf.sesame</groupId>
                 <artifactId>sesame-model</artifactId>
