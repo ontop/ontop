@@ -199,6 +199,7 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
                 v = "<null>";
             }
             String s = v.toString();
+            s = s.replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
             if (s.length() > 64) {
                 s = s.substring(0, 61) + "...";
             }
