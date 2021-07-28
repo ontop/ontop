@@ -8,7 +8,7 @@
 	<parent>
 		<artifactId>ontop-db</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>4.1.1-SNAPSHOT</version>
+		<version>4.1.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ontop-rdb-teiid-services</artifactId>
