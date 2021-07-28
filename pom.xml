@@ -135,6 +135,7 @@
         <commons-collections4.version>4.2</commons-collections4.version>
         <commons-lang3.version>3.11</commons-lang3.version>
         <commons-rdf.version>0.5.0</commons-rdf.version>
+        <cron-utils.version>9.1.5</cron-utils.version>
         <functionaljava.version>4.8.1</functionaljava.version>
         <gson.version>2.8.6</gson.version>
         <guava-failureaccess.version>1.0.1</guava-failureaccess.version>
@@ -154,6 +155,7 @@
         <jsr305.version>3.0.2</jsr305.version>
         <junit.version>4.13.1</junit.version>
         <logback.version>1.2.3</logback.version>
+        <narayana.version>5.12.0.Final</narayana.version>
         <opencsv.version>4.6</opencsv.version>
         <owlapi.version>4.5.19</owlapi.version>
         <proj4j.version>1.1.1</proj4j.version>
@@ -166,7 +168,6 @@
         <slf4j.version>1.7.13</slf4j.version>
         <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
         <teiid.version>14.0.0</teiid.version>
-		<teiid-spring-boot.version>1.5.1</teiid-spring-boot.version>
         <thrift.version>[0.12.0,)</thrift.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -742,6 +743,28 @@
                 <artifactId>teiid-common-core</artifactId>
                 <version>${teiid.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.teiid</groupId>
+                <artifactId>teiid-runtime</artifactId>
+                <version>${teiid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teiid</groupId>
+                <artifactId>cache-caffeine</artifactId>
+                <version>${teiid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teiid.connectors</groupId>
+                <artifactId>translator-jdbc</artifactId>
+                <version>${teiid.version}</version>
+            </dependency>
+            
+            <!-- Narayana -->
+            <dependency>
+                <groupId>org.jboss.narayana.jta</groupId>
+                <artifactId>narayana-jta</artifactId>
+                <version>${narayana.version}</version>
+            </dependency>
 		
             <!-- Spring Boot -->
             <dependency>
@@ -880,6 +903,13 @@
                 <version>${guava-failureaccess.version}</version>
             </dependency>
 
+            <!-- Cron-utils -->
+		    <dependency>
+			    <groupId>com.cronutils</groupId>
+			    <artifactId>cron-utils</artifactId>
+			    <version>${cron-utils.version}</version>
+            </dependency>
+            
             <!-- Airline CLI library -->
             <dependency>
                 <groupId>com.github.rvesse</groupId>
