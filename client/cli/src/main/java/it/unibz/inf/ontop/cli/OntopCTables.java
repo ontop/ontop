@@ -57,6 +57,10 @@ public class OntopCTables implements OntopCommand {
     @BashCompletion(behaviour = CompletionBehaviour.NONE)
     String ctablesRefreshSchedule;
 
+    @Option(type = OptionType.COMMAND, name = {
+            "--ctables-refresh-at-start" }, title = "refresh-at-start", description = "whether to force a table refresh when the engine starts")
+    private boolean ctablesRefreshAtStart = false;
+
     @Override
     public void run() {
 
@@ -110,6 +114,13 @@ public class OntopCTables implements OntopCommand {
 
             // Register shutdown hook and signal handler, if supported
             Runtime.getRuntime().addShutdownHook(shutdownHandler);
+
+            // Force refresh if requested
+            if (this.ctablesRefreshAtStart || "true".equalsIgnoreCase(configuration.getSettings()
+                    .getProperty("ctables.refreshAtStart").orElse("false"))) {
+                LOGGER.info("CTables engine refresh forced at startup as requested");
+                engine.refresh();
+            }
 
             // Enter loop where signals and terminal input are checked and processed
             outer: while (!shutdownRequested.get()) {

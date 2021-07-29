@@ -23,8 +23,8 @@ public class OntopSQLCredentialSettingsImpl extends OntopSQLCoreSettingsImpl imp
     protected OntopSQLCredentialSettingsImpl(Properties userProperties) {
         super(userProperties);
 
-        jdbcUser = getRequiredProperty(OntopSQLCredentialSettings.JDBC_USER);
-        jdbcPassword = getRequiredProperty(OntopSQLCredentialSettings.JDBC_PASSWORD);
+        jdbcUser = getProperty(OntopSQLCredentialSettings.JDBC_USER).orElse("");
+        jdbcPassword = getProperty(OntopSQLCredentialSettings.JDBC_PASSWORD).orElse("");
     }
 
     @Override

@@ -17,7 +17,7 @@ fi
 
 if [ "${ONTOP_MAPPING_FILE+x}" ]; then
   args_array+=("--mapping=${ONTOP_MAPPING_FILE}")
-else
+elif [ "${ONTOP_COMMAND}" = "endpoint" ]; then
   echo "ERROR: environment variable ONTOP_MAPPING_FILE is not set" && exit 1
 fi
 
@@ -90,8 +90,16 @@ if [ "${ONTOP_VIEW_FILE+x}" ]; then
   args_array+=("--ontop-views=${ONTOP_VIEW_FILE}")
 fi
 
-if [ "${ONTOP_CTABLES_FILE+x}" ]; then
-  args_array+=("--ctables=${ONTOP_CTABLES_FILE}")
+if [ "${ONTOP_CTABLES_RULESET+x}" ]; then
+  args_array+=("--ctables-ruleset=${ONTOP_CTABLES_RULESET}")
+fi
+
+if [ "${ONTOP_CTABLES_SCHEDULE+x}" ]; then
+  args_array+=("--ctables-schedule=${ONTOP_CTABLES_SCHEDULE}")
+fi
+
+if [ "${ONTOP_CTABLES_REFRESH_AT_START+x}" ]; then
+  args_array+=("--ctables-refresh-at-start")
 fi
 
 if [ "${ONTOP_CORS_ALLOWED_ORIGINS+x}" ]; then
@@ -140,8 +148,8 @@ if [ -z "${ONTOP_FILE_ENCODING}" ]; then
   ONTOP_FILE_ENCODING="UTF-8"
 fi
 
-# echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
+# echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" -Dlogback.configurationFile="${LOGBACK_CONFIG_FILE}" \
 # it.unibz.inf.ontop.cli.Ontop "${args_array[@]}"
 
-java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
+java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" -Dlogback.configurationFile="${LOGBACK_CONFIG_FILE}" \
  it.unibz.inf.ontop.cli.Ontop "${args_array[@]}"

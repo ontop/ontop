@@ -76,6 +76,23 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
                 "/tmp/narayana-object-store");
         System.setProperty("com.arjuna.ats.arjuna.objectstore.objectStoreDir",
                 "/tmp/narayana-object-store");
+
+        // Register shutdown hook to close data sources
+        final Thread shutdownHandler = new Thread("shutdown") {
+
+            @Override
+            public void run() {
+                for (TeiidEmbeddedDataSource ds : DATA_SOURCES.values()) {
+                    try {
+                        ds.close();
+                    } catch (Throwable ex) {
+                        // ignore
+                    }
+                }
+            }
+
+        };
+        Runtime.getRuntime().addShutdownHook(shutdownHandler);
     }
 
     // INITIALIZATION

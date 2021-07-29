@@ -115,7 +115,7 @@ public class HttpJsonService extends AbstractService {
                 ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
             }
 
-            LOGGER.debug("{}: {} {} {}", requestId, this.method, uri, inputTuple.toString(true));
+            LOGGER.info("{}: {} {} {}", requestId, this.method, uri, inputTuple.toString(true));
 
             final HttpResponse resp = this.client.execute(request);
 
@@ -137,7 +137,7 @@ public class HttpJsonService extends AbstractService {
                 tmpTuples[0] = t;
                 t = this.projection.apply(tmpTuples);
                 outputTuples.set(i, t);
-                LOGGER.debug("{}: #{} {}", requestId, i + 1, t.toString(true));
+                LOGGER.info("{}: #{} {}", requestId, i + 1, t.toString(true));
             }
 
             return outputTuples.iterator();
