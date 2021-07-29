@@ -59,8 +59,23 @@ public class TeiidEmbeddedDataSource implements DataSource, Closeable {
     private final String url;
 
     static {
+        // Configure TEIID
         System.setProperty("org.teiid.comparableLobs", "true");
         System.setProperty("org.teiid.maxStringLength", "65535");
+
+        // Configure transaction manager type (in-memory)
+        System.setProperty("ObjectStoreEnvironmentBean.objectStoreType",
+                "com.arjuna.ats.internal.arjuna.objectstore.VolatileStore");
+        System.setProperty("ObjectStoreEnvironmentBean.stateStore.objectStoreType",
+                "com.arjuna.ats.internal.arjuna.objectstore.VolatileStore");
+        System.setProperty("ObjectStoreEnvironmentBean.communicationStore.objectStoreType",
+                "com.arjuna.ats.internal.arjuna.objectstore.VolatileStore");
+
+        // Configure transaction manager storage location (not needed for in-memory)
+        System.setProperty("ObjectStoreEnvironmentBean.objectStoreDir",
+                "/tmp/narayana-object-store");
+        System.setProperty("com.arjuna.ats.arjuna.objectstore.objectStoreDir",
+                "/tmp/narayana-object-store");
     }
 
     // INITIALIZATION

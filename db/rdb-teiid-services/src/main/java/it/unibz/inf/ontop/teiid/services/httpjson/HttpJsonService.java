@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -52,6 +53,8 @@ public class HttpJsonService extends AbstractService {
     public static final String PROP_REQUEST_BODY = "requestBody";
 
     public static final String PROP_RESPONSE_BODY = "responseBody";
+
+    private static final AtomicInteger REQUEST_COUNTER = new AtomicInteger();
 
     private final HttpClient client;
 
@@ -95,6 +98,8 @@ public class HttpJsonService extends AbstractService {
     @Override
     public Iterator<Tuple> invoke(final Tuple inputTuple) {
 
+        final String requestId = String.format("REQ%04d", REQUEST_COUNTER.incrementAndGet());
+
         try {
             final String uri = this.urlTemplate.format(inputTuple);
 
@@ -110,7 +115,7 @@ public class HttpJsonService extends AbstractService {
                 ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
             }
 
-            LOGGER.debug("{} {} {}", this.method, uri, inputTuple.toString(true));
+            LOGGER.debug("{}: {} {} {}", requestId, this.method, uri, inputTuple.toString(true));
 
             final HttpResponse resp = this.client.execute(request);
 
@@ -132,7 +137,7 @@ public class HttpJsonService extends AbstractService {
                 tmpTuples[0] = t;
                 t = this.projection.apply(tmpTuples);
                 outputTuples.set(i, t);
-                LOGGER.debug("#{}: {}", i + 1, t.toString(true));
+                LOGGER.debug("{}: #{} {}", requestId, i + 1, t.toString(true));
             }
 
             return outputTuples.iterator();
