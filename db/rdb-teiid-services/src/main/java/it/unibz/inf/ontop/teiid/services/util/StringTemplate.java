@@ -48,7 +48,8 @@ public final class StringTemplate implements Serializable, Comparable<StringTemp
         processTemplateIfNeeded();
 
         try {
-            final Object[] values = this.format.parse(string);
+            final Object[] values = string.isEmpty() ? new Object[signature.size()]
+                    : this.format.parse(string);
             return Tuple.create(this.signature, values);
         } catch (final ParseException ex) {
             throw new IllegalArgumentException("Cannot parse placeholders from string '" + string
