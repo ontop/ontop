@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.cli;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.junit.rules.ExternalResource;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,6 +53,7 @@ public class OntopEndpointTest {
                     "\t\t ?y a :Author; :name ?author.\n" +
                     "\t\t ?z a :Edition; :editionNumber ?edition\n" +
                     "}";
+
             TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
             //TupleQueryResult result = tupleQuery.evaluate();
             try (TupleQueryResult result = tupleQuery.evaluate()) {
@@ -82,6 +85,22 @@ public class OntopEndpointTest {
 
         // When
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+        // Then
+        assertThat(
+                httpResponse.getStatusLine().getStatusCode(),
+                equalTo(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void testOntologyFetcher() throws IOException {
+        HttpUriRequest request = new HttpGet("http://localhost:" + PORT + "/ontology");
+
+        // When
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+//        StringWriter writer = new StringWriter();
+//        IOUtils.copy(httpResponse.getEntity().getContent(), writer);
+//        String theString = writer.toString();
 
         // Then
         assertThat(
