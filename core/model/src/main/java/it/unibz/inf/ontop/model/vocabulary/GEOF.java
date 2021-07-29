@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.vocabulary;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 
@@ -8,7 +9,7 @@ public class GEOF {
     public static final String PREFIX = "http://www.opengis.net/def/function/geosparql/";
 
     // Prefix for properties
-    public static final String PREFIX_PROP = "http://www.opengis.net/ont/geosparql/";
+    public static final String PREFIX_PROP = "http://www.opengis.net/ont/geosparql#";
 
     // Simple Feature functions
     public static final IRI SF_EQUALS;
@@ -170,7 +171,5 @@ public class GEOF {
 
         // geof:relate --> String result
         RELATEM = factory.createIRI(PREFIX + "relate");
-
     }
 }
-

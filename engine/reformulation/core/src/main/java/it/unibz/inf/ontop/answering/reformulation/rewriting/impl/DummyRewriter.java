@@ -38,6 +38,8 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.vocabulary.GEO;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -51,19 +53,22 @@ import java.util.function.Function;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private FullLinearInclusionDependenciesImpl<RDFAtomPredicate> sigma;
+    protected FullLinearInclusionDependenciesImpl<RDFAtomPredicate> sigma;
 
     protected final IntermediateQueryFactory iqFactory;
     protected final AtomFactory atomFactory;
     protected final TermFactory termFactory;
     protected final CoreUtilsFactory coreUtilsFactory;
+    protected final FunctionSymbolFactory functionSymbolFactory;
 
     @Inject
-    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, CoreUtilsFactory coreUtilsFactory) {
+    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, CoreUtilsFactory coreUtilsFactory,
+                            FunctionSymbolFactory functionSymbolFactory) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     @Override
@@ -92,17 +97,26 @@ public class DummyRewriter implements QueryRewriter {
         optimise with Sigma ABox dependencies
      */
     @Override
-	public IQ rewrite(IQ query) throws EmptyQueryException {
-        return iqFactory.createIQ(query.getProjectionAtom(),
-                query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
-            @Override
-            protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
-                return removeRedundantAtoms(bgp);
-            }
-        }));
-	}
+    public IQ rewrite(IQ query) throws EmptyQueryException {
 
-	private ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<IntensionalDataNode> bgp) {
+        // If the query contains the geospatial query rewrite terms, delegate to GeoRewriter class
+        if (isGeospatial(query.toString())) {
+            GeoRewriter geoRewriter = new GeoRewriter(iqFactory, atomFactory, termFactory, coreUtilsFactory, sigma,
+                    functionSymbolFactory);
+            return geoRewriter.rewrite(query);
+        } else {
+            return iqFactory.createIQ(query.getProjectionAtom(),
+                    query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+                        @Override
+                        protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
+                            //ImmutableList<IntensionalDataNode> newbgp = addGeoIntensionalTriples(bgp, query);
+                            return removeRedundantAtoms(bgp);
+                        }
+                    }));
+        }
+    }
+
+    protected ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<IntensionalDataNode> bgp) {
         ArrayList<IntensionalDataNode> list = new ArrayList<>(bgp); // mutable copy
         // this loop has to remain sequential (no streams)
         for (int i = 0; i < list.size(); i++) {
@@ -169,5 +183,17 @@ public class DummyRewriter implements QueryRewriter {
 
     protected <T extends AtomPredicate> DataAtom<T> getAtom(VariableOrGroundTerm t, OClass oc) {
         return (DataAtom)atomFactory.getIntensionalTripleAtom(t, oc.getIRI());
+    }
+
+    /**
+     * Check whether geospatial translation is necessary - GeoSPARQL query rewrite extension
+     * Condition : Any geo:{topological_function} used, limited to simple feature functions
+     */
+
+    protected boolean isGeospatial(String query) {
+
+        return GEO.QUERY_REWRITE_FUNCTIONS.stream()
+                .map(g -> g.getIRIString().toUpperCase())
+                .anyMatch(query.toUpperCase()::contains);
     }
 }

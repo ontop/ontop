@@ -25,7 +25,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -34,6 +33,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
@@ -68,11 +68,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
     @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory,
-								TermFactory termFactory,
+                                TermFactory termFactory,
                                 IntermediateQueryFactory iqFactory,
-								CoreUtilsFactory coreUtilsFactory,
-                                SubstitutionFactory substitutionFactory) {
-        super(iqFactory, atomFactory, termFactory, coreUtilsFactory);
+                                CoreUtilsFactory coreUtilsFactory,
+                                SubstitutionFactory substitutionFactory,
+                                FunctionSymbolFactory functionSymbolFactory) {
+        super(iqFactory, atomFactory, termFactory, coreUtilsFactory, functionSymbolFactory);
 
         this.substitutionFactory = substitutionFactory;
     }
