@@ -264,7 +264,7 @@ public class ServiceExecutionFactory
         return new ServiceExecution(service, inputTuple, null);
     }
 
-    private Service getService(final ServiceManager manager, final AbstractMetadataRecord metadata)
+    private synchronized Service getService(final ServiceManager manager, final AbstractMetadataRecord metadata)
             throws TranslatorException {
 
         final String name = metadata.getName();

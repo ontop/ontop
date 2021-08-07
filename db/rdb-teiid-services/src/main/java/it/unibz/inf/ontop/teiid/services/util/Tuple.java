@@ -114,8 +114,10 @@ public final class Tuple extends AbstractList<Object> implements Serializable, C
         } else {
             final Tuple tuple = Tuple.create(signature);
             for (int i = 0; i < signature.size(); ++i) {
-                final String name = signature.get(i).getName();
-                tuple.set(i, get(name));
+                int index = this.signature.nameToIndex(signature.get(i).getName(), -1);
+                if (index >= 0) {
+                    tuple.set(i, get(index));
+                }
             }
             return tuple;
         }

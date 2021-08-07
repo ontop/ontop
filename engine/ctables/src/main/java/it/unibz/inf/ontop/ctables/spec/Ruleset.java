@@ -36,8 +36,9 @@ public final class Ruleset implements Serializable {
     }
 
     @JsonCreator
-    public static Ruleset create(@JsonProperty("rules") final Iterable<Rule> rules) {
-        final List<Rule> ruleList = ImmutableList.copyOf(rules);
+    public static Ruleset create(@JsonProperty("rules") @Nullable final Iterable<Rule> rules) {
+        final List<Rule> ruleList = rules == null ? ImmutableList.of()
+                : ImmutableList.copyOf(rules);
         final Map<String, Rule> rulesById = ImmutableMap
                 .copyOf(ruleList.stream().collect(Collectors.toMap(r -> r.getId(), r -> r)));
         return new Ruleset(ruleList, rulesById);
