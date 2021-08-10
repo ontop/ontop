@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
+import it.unibz.inf.ontop.model.template.impl.RDFStarTemplateFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -46,8 +47,8 @@ public class R2RMLToSQLPPTriplesMapConverter {
 	private final String baseIri = "http://example.com/base/";
 
 	private final ImmutableMap<IRI, TermMapFactory<TermMap, ? extends TemplateFactory>> iriTerm;
-	private final ImmutableMap<IRI, TermMapFactory<TermMap, ? extends TemplateFactory>> iriOrBnodeTerm;
-	private final ImmutableMap<IRI, TermMapFactory<ObjectMap, ? extends TemplateFactory>> iriOrBnodeOrLiteralTerm;
+	private final ImmutableMap<IRI, TermMapFactory<TermMap, ? extends TemplateFactory>> iriOrBnodeOrRDFStarTerm;
+	private final ImmutableMap<IRI, TermMapFactory<ObjectMap, ? extends TemplateFactory>> iriOrBnodeOrLiteralOrRDFStarTerm;
 
 	@Inject
 	private R2RMLToSQLPPTriplesMapConverter(TermFactory termFactory,
@@ -65,16 +66,19 @@ public class R2RMLToSQLPPTriplesMapConverter {
 		IRITemplateFactory iriTemplateFactory = new IRITemplateFactory(termFactory);
 		BnodeTemplateFactory bnodeTemplateFactory = new BnodeTemplateFactory(termFactory);
 		LiteralTemplateFactory literalTemplateFactory = new LiteralTemplateFactory(termFactory, typeFactory);
+		RDFStarTemplateFactory rdfStarTemplateFactory = new RDFStarTemplateFactory(termFactory);
 
 		this.iriTerm = ImmutableMap.of(
 				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory));
-		this.iriOrBnodeTerm = ImmutableMap.of(
-				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory),
-				R2RMLVocabulary.blankNode, new BnodeTermMapFactory<>(bnodeTemplateFactory));
-		this.iriOrBnodeOrLiteralTerm = ImmutableMap.of(
+		this.iriOrBnodeOrRDFStarTerm = ImmutableMap.of(
 				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory),
 				R2RMLVocabulary.blankNode, new BnodeTermMapFactory<>(bnodeTemplateFactory),
-				R2RMLVocabulary.literal, new LiteralTermMapFactory<>(literalTemplateFactory));
+				RDFStarVocabulary.rdfStarTermType, new RDFStarTermMapFactory<>(rdfStarTemplateFactory));
+		this.iriOrBnodeOrLiteralOrRDFStarTerm = ImmutableMap.of(
+				R2RMLVocabulary.iri, new IriTermMapFactory<>(iriTemplateFactory),
+				R2RMLVocabulary.blankNode, new BnodeTermMapFactory<>(bnodeTemplateFactory),
+				R2RMLVocabulary.literal, new LiteralTermMapFactory<>(literalTemplateFactory),
+				RDFStarVocabulary.rdfStarTermType, new RDFStarTermMapFactory<>(rdfStarTemplateFactory));
 	}
 
 
@@ -120,7 +124,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 	private Stream<TargetAtom> getTargetAtoms(TriplesMap tm)  {
 		SubjectMap subjectMap = tm.getSubjectMap();
 
-		ImmutableTerm subject = extract(iriOrBnodeTerm, subjectMap);
+		ImmutableTerm subject = extract(iriOrBnodeOrRDFStarTerm, subjectMap);
 		ImmutableList<NonVariableTerm> subject_graphs = subjectMap.getGraphMaps().stream()
 				.map(m -> extract(iriTerm, m))
 				.collect(ImmutableCollectors.toList());
@@ -138,7 +142,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 				.map(m -> extract(iriTerm, m));
 
 		List<NonVariableTerm> objects = pom.getObjectMaps().stream()
-				.map(m -> extract(iriOrBnodeOrLiteralTerm, m))
+				.map(m -> extract(iriOrBnodeOrLiteralOrRDFStarTerm, m))
 				.collect(ImmutableCollectors.toList());
 
 		ImmutableList<NonVariableTerm> subject_graphs_and_predicate_object_graphs = Stream.concat(
@@ -200,7 +204,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 
 		if (robm.getJoinConditions().isEmpty()) {
 			if (!parent.getLogicalTable().getSQLQuery().trim().equals(tm.getLogicalTable().getSQLQuery().trim()))
-				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
+				throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are distinct: " +
 						tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
 			childMap = parentMap = Stream.concat(
@@ -269,7 +273,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 						.map(a -> a.getSubstitutedTerm(0))
 						.findAny()
 						.orElseThrow(() -> new MinorOntopInternalBugException("All created SQLPPTriplesMaps must have at least one target atom")))
-				.orElseGet(() -> extract(iriOrBnodeTerm, tm.getSubjectMap()));
+				.orElseGet(() -> extract(iriOrBnodeOrRDFStarTerm, tm.getSubjectMap()));
 	}
 
 	private static Stream<Variable> getVariableStreamOf(ImmutableTerm t, ImmutableList<? extends ImmutableTerm> l1, ImmutableList<? extends ImmutableTerm> l2) {
@@ -402,6 +406,42 @@ public class R2RMLToSQLPPTriplesMapConverter {
 
 			return termFactory.getRDFLiteralFunctionalTerm(super.extract(om), datatype);
 		}
+	}
+
+	private class RDFStarTermMapFactory<T extends TermMap> extends TermMapFactory<T, RDFStarTemplateFactory> {
+		public RDFStarTermMapFactory(RDFStarTemplateFactory templateFactory) {
+			super(templateFactory);
+		}
+		@Override
+		protected NonVariableTerm onConstant(RDFTerm constant) {
+			throw new R2RMLParsingBugException("RDFStar term maps can not be constant-valued.");
+		}
+
+		@Override
+		protected NonVariableTerm onColumn(String column) {
+			throw new R2RMLParsingBugException("RDFStar term maps can not be column-valued.");
+		}
+
+		@Override
+		protected NonVariableTerm onTemplate(String template) {
+			throw new R2RMLParsingBugException("RDFStar term maps can not be template-valued.");
+		}
+
+		@Override
+		public NonVariableTerm extract(T termMap) {
+			if (termMap instanceof RDFStarTermMap) {
+				RDFStarTermMap tm = (RDFStarTermMap) termMap;
+				if (tm.getSubject() != null && tm.getPredicate() != null && tm.getObject() != null) {
+					return templateFactory.getRDFStarTerm(
+							R2RMLToSQLPPTriplesMapConverter.this.extract(iriOrBnodeOrRDFStarTerm, tm.getSubject()),
+							R2RMLToSQLPPTriplesMapConverter.this.extract(iriTerm, tm.getPredicate()),
+							R2RMLToSQLPPTriplesMapConverter.this.extract(iriOrBnodeOrLiteralOrRDFStarTerm, tm.getObject()));
+				}
+				throw new R2RMLParsingBugException("RDFStar term maps must have subject, predicate, and object specified.");
+			}
+			throw new R2RMLParsingBugException("This termMap has class: " + termMap.getClass() + ", expected RDFStarTermMap.");
+		}
+
 	}
 
 	/**

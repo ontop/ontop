@@ -29,6 +29,12 @@ public interface TypeFactory {
 
 	TermType getAbstractAtomicTermType();
 
+	RDFStarTermType getAbstractRDFStarTermType();
+
+	NonLiteralRDFStarTermType getAbstractNonLiteralRDFStarTermType();
+
+	NestedTripleTermType getAbstractNestedTripleTermType();
+
 	RDFTermType getAbstractRDFTermType();
 
 	ObjectRDFType getAbstractObjectRDFType();

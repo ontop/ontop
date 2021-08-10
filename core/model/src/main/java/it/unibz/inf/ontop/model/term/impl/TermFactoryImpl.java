@@ -162,6 +162,15 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getNestedTripleFunctionalTerm(NonVariableTerm subject,
+																 NonVariableTerm predicate,
+																 NonVariableTerm object) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getNestedTripleFunctionSymbol(),
+				ImmutableList.of(subject, predicate, object));
+	}
+
+	@Override
 	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments) {
 		return getImmutableExpression(functor, ImmutableList.copyOf(arguments));
 	}

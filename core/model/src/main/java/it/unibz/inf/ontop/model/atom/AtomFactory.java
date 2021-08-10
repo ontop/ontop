@@ -37,6 +37,7 @@ public interface AtomFactory {
     DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
                                                      VariableOrGroundTerm object);
 
+
     /**
      * TODO: change the generic-type to RDFAtomPredicate?
      * Davide: For provenance TODO: Add quads version for each method in this intereface
@@ -59,4 +60,26 @@ public interface AtomFactory {
 
     DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
                                                      Variable namedGraph);
+
+    // RDF-star support
+    DataAtom<AtomPredicate> getIntensionalTripleRefSimpleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                        VariableOrGroundTerm object, VariableOrGroundTerm ref);
+
+    DataAtom<AtomPredicate> getIntensionalTripleRefNestedSubjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                        VariableOrGroundTerm object, VariableOrGroundTerm ref);
+
+    DataAtom<AtomPredicate> getIntensionalTripleRefNestedObjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                        VariableOrGroundTerm object, VariableOrGroundTerm ref);
+
+    DataAtom<AtomPredicate> getIntensionalTripleRefNestedSOAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                        VariableOrGroundTerm object, VariableOrGroundTerm ref);
+
+    DataAtom<AtomPredicate> getIntensionalTripleNestedSubjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                     VariableOrGroundTerm object);
+
+    DataAtom<AtomPredicate> getIntensionalTripleNestedObjectAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                    VariableOrGroundTerm object);
+
+    DataAtom<AtomPredicate> getIntensionalTripleNestedSOAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                                VariableOrGroundTerm object);
 }

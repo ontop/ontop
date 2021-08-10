@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
@@ -580,6 +581,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
+    }
+
+    @Override
+    public NestedTripleFunctionSymbol getNestedTripleFunctionSymbol() {
+        return new NestedTripleFunctionSymbolImpl(
+                typeFactory,
+                ImmutableList.of(   // TODO: Move typefactory calls up to constructor
+                        typeFactory.getAbstractNonLiteralRDFStarTermType(),
+                        typeFactory.getIRITermType(),
+                        typeFactory.getAbstractRDFStarTermType()));
     }
 
 }

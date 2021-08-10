@@ -29,6 +29,9 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	private final TermType rootTermType;
 	private final MetaRDFTermType metaRDFTermType;
+	private final RDFStarTermType rootRDFStarTermType;
+	private final NonLiteralRDFStarTermType rootNonLiteralRDFStarTermType;
+	private final NestedTripleTermType rootNestedTripleTermType;
 	private final RDFTermType rootRDFTermType;
 	private final ObjectRDFType objectRDFType, iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype, dateOrDatetimeDatatype;
@@ -50,6 +53,9 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 
+		rootRDFStarTermType = RDFStarTermTypeImpl.createRDFStarTermRoot(rootTermType.getAncestry());
+		rootNonLiteralRDFStarTermType = NonLiteralRDFStarTermTypeImpl.createNonLiteralRDFStarTermRoot(rootTermType.getAncestry());
+		rootNestedTripleTermType = NestedTripleTermTypeImpl.createNestedTripleTermTypeRoot(rootTermType.getAncestry());
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
 		metaRDFTermType = MetaRDFTermTypeImpl.createMetaRDFTermType(rootRDFTermType.getAncestry());
 
@@ -243,6 +249,15 @@ public class TypeFactoryImpl implements TypeFactory {
 	public TermType getAbstractAtomicTermType() {
 		return rootTermType;
 	}
+
+	@Override
+	public RDFStarTermType getAbstractRDFStarTermType() { return rootRDFStarTermType; }
+
+	@Override
+	public NonLiteralRDFStarTermType getAbstractNonLiteralRDFStarTermType() { return rootNonLiteralRDFStarTermType; }
+
+	@Override
+	public NestedTripleTermType getAbstractNestedTripleTermType() {return rootNestedTripleTermType; }
 
 	@Override
 	public RDFTermType getAbstractRDFTermType() {

@@ -596,4 +596,6 @@ public interface TermFactory {
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
 
+	// RDF-Star
+	ImmutableFunctionalTerm getNestedTripleFunctionalTerm(NonVariableTerm subject, NonVariableTerm predicate, NonVariableTerm object);
 }

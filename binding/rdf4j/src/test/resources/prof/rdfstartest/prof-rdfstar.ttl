@@ -1,0 +1,55 @@
+@prefix : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix star: <http://ontop-vkg.org/2021/rdfstar#>.
+@prefix ex: <http://example.org/>.
+
+<urn:MAPID-professor-certainty> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id FROM professors;"
+    ];
+  rr:subjectMap [ a rr:SubjectMap, star:RDFStarTermMap;
+      rr:termType star:RDFStarTermType;
+      star:subject [a rr:ObjectMap;
+        rr:template "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#individuals/professor_{prof_id}";
+        ];
+      star:predicate [a rr:PredicateMap;
+        rr:constant rdf:type
+        ];
+      star:object [a rr:ObjectMap;
+        rr:constant :Professor
+        ];
+      rr:class :RDFStarTriple;
+    ];
+  rr:predicateObjectMap [
+      rr:predicate :source;
+      rr:object "My First Database";
+    ].
+
+<urn:MAPID-professor-mentioned> a rr:TriplesMap;
+  rr:logicalTable [ a rr:R2RMLView;
+      rr:sqlQuery "SELECT prof_id, last_name FROM professors;"
+    ];
+  rr:subjectMap [ a rr:SubjectMap;
+      rr:template "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#individuals/professor_{prof_id}";
+      rr:class :Professor;
+    ];
+  rr:predicateObjectMap [
+      rr:predicate :isMentionedBy;
+      rr:objectMap [  a rr:ObjectMap, star:RDFStarTermMap;
+        rr:termType star:RDFStarTermType;
+        star:subject [a rr:ObjectMap;
+            rr:template "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#individuals/professor_{prof_id}";
+            rr:termType rr:IRI;
+          ];
+        star:predicate [a rr:PredicateMap;
+            rr:constant :hasLastname;
+          ];
+        star:object [a rr:ObjectMap;
+            rr:column "last_name";
+            rr:termType rr:Literal;
+          ];
+        ];
+    ].

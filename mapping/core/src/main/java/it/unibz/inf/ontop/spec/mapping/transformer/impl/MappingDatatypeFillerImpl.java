@@ -73,11 +73,11 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                 .orElseThrow(() -> new MinorOntopInternalBugException("No object definition found"));
 
         /*
-         * If the datatype is abstract --> we consider it as missing
+         * If the datatype is abstract --> we consider it as missing, exception for nested triples (RDF-star)
          */
         if (optionalTypeInference
                 .flatMap(TermTypeInference::getTermType)
-                .filter(t -> !t.isAbstract())
+                .filter(t -> !t.isAbstract() || t instanceof NestedTripleTermType)
                 .isPresent())
             return assertion;
         else

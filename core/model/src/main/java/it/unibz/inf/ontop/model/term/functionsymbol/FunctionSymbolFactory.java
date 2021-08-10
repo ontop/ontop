@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -124,4 +125,6 @@ public interface FunctionSymbolFactory {
                                                      DBTermType targetType);
 
     FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
+    NestedTripleFunctionSymbol getNestedTripleFunctionSymbol();
 }

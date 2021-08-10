@@ -63,7 +63,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                                    ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
-        Optional<RDFTermType> tripleObjectType = assertion.getIndex().isClass()
+        Optional<RDFStarTermType> tripleObjectType = assertion.getIndex().isClass()
                 ? Optional.empty()
                 : extractTripleObjectType(assertion);
 
@@ -84,7 +84,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * Note that this assumption does not hold for intermediate query in general.
      *
      */
-    private Optional<RDFTermType> extractTripleObjectType(MappingAssertion assertion)
+    private Optional<RDFStarTermType> extractTripleObjectType(MappingAssertion assertion)
             throws TripleObjectTypeInferenceException {
 
         Variable objectVariable = assertion.getRDFAtomPredicate().getObject(assertion.getProjectionAtom().getArguments());
@@ -93,10 +93,10 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         if (constructionTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
 
-            Optional<RDFTermType> optionalType = constructionFunctionalTerm.inferType()
+            Optional<RDFStarTermType> optionalType = constructionFunctionalTerm.inferType()
                     .flatMap(TermTypeInference::getTermType)
-                    .filter(t -> t instanceof RDFTermType)
-                    .map(t -> (RDFTermType) t);
+                    .filter(t -> t instanceof RDFStarTermType)
+                    .map(t -> (RDFStarTermType) t);
 
             if (!optionalType.isPresent())
                 throw new TripleObjectTypeInferenceException(assertion.getQuery(), objectVariable,
@@ -120,17 +120,21 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void checkTripleObject(IRI predicateIRI, Optional<RDFTermType> optionalTripleObjectType,
+    private void checkTripleObject(IRI predicateIRI, Optional<RDFStarTermType> optionalTripleObjectType,
                                    Ontology ontology,
                                    ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         if (optionalTripleObjectType.isPresent()) {
-            RDFTermType tripleObjectType = optionalTripleObjectType.get();
+            RDFStarTermType tripleObjectType = optionalTripleObjectType.get();
 
-            if (tripleObjectType.isAbstract())
-                throw new AbstractTripleObjectTypeException(predicateIRI, tripleObjectType);
-
+            if (tripleObjectType.isAbstract()) {
+                if (tripleObjectType instanceof NestedTripleTermType) {  // TODO: Solve this nicer
+                    return;
+                } else {
+                    throw new AbstractTripleObjectTypeException(predicateIRI, tripleObjectType);
+                }
+            }
             /*
              * TODO: avoid instanceof tests!
              */

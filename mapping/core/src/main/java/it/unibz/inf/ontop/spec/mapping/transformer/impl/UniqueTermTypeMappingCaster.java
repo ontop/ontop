@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.NestedTripleFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -54,11 +55,13 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     @Override
     public MappingAssertion transform(MappingAssertion assertion) {
         RDFTermFunctionSymbol rdfTermFunctionSymbol = functionSymbolFactory.getRDFTermFunctionSymbol();
+        NestedTripleFunctionSymbol nestedTripleFunctionSymbol = functionSymbolFactory.getNestedTripleFunctionSymbol();
 
         if (!assertion.getTerms().stream()
                 .allMatch(t -> ((t instanceof ImmutableFunctionalTerm) &&
                         ((ImmutableFunctionalTerm) t).getFunctionSymbol().equals(rdfTermFunctionSymbol))
-                        || (t instanceof RDFConstant))) {
+                        || (t instanceof RDFConstant)
+                        || ((ImmutableFunctionalTerm) t).getFunctionSymbol().equals(nestedTripleFunctionSymbol))) {
             throw new MinorOntopInternalBugException(
                     "The root construction node is not defining all the variables with a RDF functional or constant term\n"
                             + assertion);
@@ -91,6 +94,14 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     private ImmutableTerm transformDefinition(ImmutableTerm rdfTerm, IQTree childTree) {
         if (rdfTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm rdfTermDefinition = (ImmutableFunctionalTerm) rdfTerm;
+            // RDF-star support, recursive
+            if (rdfTermDefinition.getFunctionSymbol() instanceof NestedTripleFunctionSymbol) {
+                return termFactory.getNestedTripleFunctionalTerm(
+                        (NonVariableTerm) this.transformDefinition(rdfTermDefinition.getTerm(0), childTree),
+                        (NonVariableTerm) this.transformDefinition(rdfTermDefinition.getTerm(1), childTree),
+                        (NonVariableTerm) this.transformDefinition(rdfTermDefinition.getTerm(2), childTree));
+            }
+
             ImmutableTerm uncastLexicalTerm = DBTypeConversionFunctionSymbol.uncast(rdfTermDefinition.getTerm(0));
             ImmutableTerm rdfTypeTerm = rdfTermDefinition.getTerm(1);
 

@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
+import it.unibz.inf.ontop.model.atom.TripleRefPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -198,6 +200,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         if (node instanceof Order)
             return translateOrder((Order) node, externalBindings);
+
+        if (node instanceof TripleRef)
+            return translateTripleRef((TripleRef) node, externalBindings);
 
         throw new Sparql2IqConversionException("Unexpected SPARQL operator : " + node.toString());
     }
@@ -732,6 +737,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         InjectiveVar2VarSubstitution nonProjVarsRenaming = getNonProjVarsRenaming(leftQuery, rightQuery);
 
+        leftQuery = convertToNestedRDFStar(leftQuery, rightQuery);
+        rightQuery = convertToNestedRDFStar(rightQuery, leftQuery);
+
         IQTree joinTree = getJoinTree(
                 joinNode,
                 leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution),
@@ -750,6 +758,70 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         joinTree
                 );
     }
+
+    /*
+        Converts simple triples and triplerefs to top level ones with nesting, if nesting is detected. For RDF-Star support.
+     */
+    private IQTree convertToNestedRDFStar(IQTree primaryTree, IQTree secondaryTree) {
+        if (primaryTree instanceof IntensionalDataNode) {
+            ImmutableSet<ImmutableTerm> tripleRefsInSecondaryTree = Stream.concat(Stream.of(secondaryTree), secondaryTree.getChildren().stream())
+                    .filter(tree -> tree instanceof IntensionalDataNode)
+                    .filter(node -> ((IntensionalDataNode) node).getProjectionAtom().getPredicate() instanceof TripleRefPredicate)
+                    .map(node -> ((IntensionalDataNode) node).getProjectionAtom().getTerm(3))
+                    .collect(ImmutableCollectors.toSet());
+            if (((IntensionalDataNode) primaryTree).getProjectionAtom().getPredicate() instanceof TriplePredicate) {
+                if (tripleRefsInSecondaryTree.contains(((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0))) {
+                    if (tripleRefsInSecondaryTree.contains(((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2))) {
+                        // Both subject and object are nested
+                        iqFactory.createIntensionalDataNode(atomFactory.getIntensionalTripleNestedSOAtom(
+                                ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0),
+                                ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(1),
+                                ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2)));
+                    }
+                    // Only subject is nested
+                    return iqFactory.createIntensionalDataNode(atomFactory.getIntensionalTripleNestedSubjectAtom(
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0),
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(1),
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2)));
+                }
+                if (tripleRefsInSecondaryTree.contains(((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2))) {
+                    // Only object is nested
+                    return iqFactory.createIntensionalDataNode(atomFactory.getIntensionalTripleNestedObjectAtom(
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0),
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(1),
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2)));
+                }
+                return primaryTree;
+            }
+            if (((IntensionalDataNode) primaryTree).getProjectionAtom().getPredicate() instanceof TripleRefPredicate) {
+                    if (tripleRefsInSecondaryTree.contains(((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0))) {
+                        if (tripleRefsInSecondaryTree.contains(((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2))) {
+                            return iqFactory.createIntensionalDataNode(atomFactory.getIntensionalTripleRefNestedSOAtom(
+                                    ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0),
+                                    ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(1),
+                                    ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2),
+                                    ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(3)));
+                        }
+                        return iqFactory.createIntensionalDataNode(atomFactory.getIntensionalTripleRefNestedSubjectAtom(
+                                ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0),
+                                ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(1),
+                                ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2),
+                                ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(3)));
+                }
+                if (tripleRefsInSecondaryTree.contains(((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2))) {
+                    return iqFactory.createIntensionalDataNode(atomFactory.getIntensionalTripleRefNestedSubjectAtom(
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(0),
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(1),
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(2),
+                            ((IntensionalDataNode) primaryTree).getProjectionAtom().getTerm(3)));
+                }
+                return primaryTree;
+            }
+            return primaryTree;
+        }
+        return primaryTree;
+    }
+
 
     private IQTree getJoinTree(JoinLikeNode joinNode, IQTree leftTree, IQTree rightTree) {
         if (joinNode instanceof LeftJoinNode) {
@@ -902,13 +974,38 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings) {
+    // Translates rdf4j's tripleRef node. This node is used for rdf-star support. We initially create only simple nodes (no further nesting)
+    private TranslationResult translateTripleRef(TripleRef tripleRef, ImmutableMap<Variable, GroundTerm> externalBindings) {
+        if (tripleRef.getExprVar() == null) {
+            // TODO: Decide what to do in the case of TripleRef lacking reference
+            throw new Sparql2IqConversionException("This tripleRef has no ref, we've not implemented how to deal with this : " + tripleRef);
+        }
         IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
-                atomFactory.getIntensionalTripleAtom(
-                        translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
-                        translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)
-                ));
+                        atomFactory.getIntensionalTripleRefSimpleAtom(
+                                translateRDF4JVar(tripleRef.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getObjectVar(), ImmutableSet.of(), true, externalBindings),
+                                translateRDF4JVar(tripleRef.getExprVar(), ImmutableSet.of(), true, externalBindings)
+                        ));
+
+        // TODO: The below part is copied from translateTriplePattern, I do not know if it's necessary /Lukas
+        // In most cases
+        if (externalBindings.isEmpty())
+            return createTranslationResult(dataNode, ImmutableSet.of());
+
+        Sets.SetView<Variable> externallyBoundedVariables = Sets.intersection(dataNode.getVariables(), externalBindings.keySet());
+        IQTree iqTree = applyExternalBindingFilter(dataNode, externalBindings, externallyBoundedVariables);
+
+        return createTranslationResult(iqTree, ImmutableSet.of());
+    }
+
+    private TranslationResult translateTriplePattern(StatementPattern triple, ImmutableMap<Variable, GroundTerm> externalBindings) {
+        // TODO: I've added these if checks to translate rdf-star triples, but they feel hacky and I think they can introduce bugs /lukas
+        IntensionalDataNode dataNode = iqFactory.createIntensionalDataNode(
+            atomFactory.getIntensionalTripleAtom(
+                    translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true, externalBindings),
+                    translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true, externalBindings),
+                    translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true, externalBindings)));
 
         // In most cases
         if (externalBindings.isEmpty())
