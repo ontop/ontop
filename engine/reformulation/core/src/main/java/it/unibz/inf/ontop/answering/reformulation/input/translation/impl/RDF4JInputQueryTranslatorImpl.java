@@ -236,19 +236,20 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
-                        iqFactory.createFilterNode(
-                                filter
-                        ),
-                        iqFactory.createBinaryNonCommutativeIQTree(
-                                iqFactory.createLeftJoinNode(ljCond),
-                                leftTranslation.iqTree
-                                        .applyFreshRenamingToAllVariables(nonProjVarsRenamings.left),
-                                rightTranslation.iqTree
-                                        .applyDescendingSubstitutionWithoutOptimizing(sub)
-                                        .applyFreshRenamingToAllVariables(nonProjVarsRenamings.right)
-                        )),
-                leftTranslation.nullableVariables
-        );
+                        iqFactory.createConstructionNode(leftVars),
+                        iqFactory.createUnaryIQTree(
+                                iqFactory.createFilterNode(
+                                        filter
+                                ),
+                                iqFactory.createBinaryNonCommutativeIQTree(
+                                        iqFactory.createLeftJoinNode(ljCond),
+                                        leftTranslation.iqTree
+                                                .applyFreshRenamingToAllVariables(nonProjVarsRenamings.left),
+                                        rightTranslation.iqTree
+                                                .applyDescendingSubstitutionWithoutOptimizing(sub)
+                                                .applyFreshRenamingToAllVariables(nonProjVarsRenamings.right)
+                                ))),
+                leftTranslation.nullableVariables);
     }
 
     private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub,
