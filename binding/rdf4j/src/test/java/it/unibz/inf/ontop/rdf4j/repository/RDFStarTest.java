@@ -9,7 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-
+@Ignore
 public class RDFStarTest extends AbstractRDF4JTest {
     private static final String MAPPING = "/prof/rdfstartest/prof-rdfstar.ttl";
     private static final String SQL_SCRIPT = "/prof/prof.sql";
