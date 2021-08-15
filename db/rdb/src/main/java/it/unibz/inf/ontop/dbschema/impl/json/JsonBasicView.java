@@ -317,7 +317,7 @@ public class JsonBasicView extends JsonView {
 
         RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
 
-        for (Variable v : iqTree.getVariables()) {
+        for (Variable v : iq.getProjectionAtom().getVariables()) {
             builder.addAttribute(rawQuotedIqFactory.createAttributeID(v.getName()),
                     (DBTermType) uniqueTermTypeExtractor.extractUniqueTermType(v, iqTree)
                             // TODO: give the name of the view
