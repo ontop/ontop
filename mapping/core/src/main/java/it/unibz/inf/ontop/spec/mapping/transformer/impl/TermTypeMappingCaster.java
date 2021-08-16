@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -26,23 +26,23 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Implementation making use of the UniqueTermTypeExtractor
+ * Implementation making use of the SingleTermTypeExtractor
  *   (and thus sharing its assumptions on how the source query of the mapping assertion is typed)
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class UniqueTermTypeMappingCaster implements MappingCaster {
+public class TermTypeMappingCaster implements MappingCaster {
 
     private final FunctionSymbolFactory functionSymbolFactory;
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final UniqueTermTypeExtractor typeExtractor;
+    private final SingleTermTypeExtractor typeExtractor;
     private final TermFactory termFactory;
     private final DBTermType dBStringType;
 
     @Inject
-    private UniqueTermTypeMappingCaster(FunctionSymbolFactory functionSymbolFactory,
-                                        CoreSingletons coreSingletons,
-                                        UniqueTermTypeExtractor typeExtractor) {
+    private TermTypeMappingCaster(FunctionSymbolFactory functionSymbolFactory,
+                                  CoreSingletons coreSingletons,
+                                  SingleTermTypeExtractor typeExtractor) {
         this.functionSymbolFactory = functionSymbolFactory;
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
@@ -110,7 +110,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     }
 
     private Optional<DBTermType> extractInputDBType(ImmutableTerm uncastLexicalTerm, IQTree childTree) {
-        Optional<TermType> type = typeExtractor.extractUniqueTermType(uncastLexicalTerm, childTree);
+        Optional<TermType> type = typeExtractor.extractSingleTermType(uncastLexicalTerm, childTree);
         if (type
                 .filter(t -> !(t instanceof DBTermType))
                 .isPresent()) {

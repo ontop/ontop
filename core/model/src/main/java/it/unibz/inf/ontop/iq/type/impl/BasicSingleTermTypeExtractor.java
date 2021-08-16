@@ -6,29 +6,28 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.exception.NonUniqueTermTypeException;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
 @Singleton
-public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
+public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
     @Inject
-    private BasicUniqueTermTypeExtractor() {
+    private BasicSingleTermTypeExtractor() {
     }
 
     @Override
-    public Optional<TermType> extractUniqueTermType(ImmutableTerm term, IQTree subTree) {
+    public Optional<TermType> extractSingleTermType(ImmutableTerm term, IQTree subTree) {
         return (term instanceof Variable)
                 ? extractTypeFromVariable((Variable)term, subTree)
                 : extractType((NonVariableTerm) term, subTree);
@@ -51,9 +50,9 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
     protected static class TermTypeVariableVisitor implements IQVisitor<Optional<TermType>> {
 
         protected final Variable variable;
-        protected final UniqueTermTypeExtractor typeExtractor;
+        protected final SingleTermTypeExtractor typeExtractor;
 
-        protected TermTypeVariableVisitor(Variable variable, UniqueTermTypeExtractor typeExtractor) {
+        protected TermTypeVariableVisitor(Variable variable, SingleTermTypeExtractor typeExtractor) {
             this.variable = variable;
             this.typeExtractor = typeExtractor;
         }
@@ -107,7 +106,7 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
         }
 
         protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
-            return typeExtractor.extractUniqueTermType(rootNode.getSubstitution().apply(variable), child);
+            return typeExtractor.extractSingleTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override
@@ -179,10 +178,7 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
                     .map(Optional::get)
                     .collect(ImmutableCollectors.toSet());
 
-            if (termTypes.size() > 1)
-                throw new NonUniqueTermTypeException(String.format("Multiple term types found for %s: %s",
-                        variable, termTypes));
-
+            // Picks arbitrarily one of them
             return termTypes.stream()
                     .findAny();
         }
