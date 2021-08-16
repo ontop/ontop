@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
@@ -191,7 +190,7 @@ public class JsonSQLView extends JsonView {
     }
 
     private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
-        UniqueTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
+        SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
 
@@ -202,7 +201,7 @@ public class JsonSQLView extends JsonView {
 
         for (Variable v : iq.getProjectionAtom().getVariables()) {
             builder.addAttribute(rawQuotedIqFactory.createAttributeID(v.getName()),
-                    (DBTermType) uniqueTermTypeExtractor.extractUniqueTermType(v, iqTree)
+                    (DBTermType) uniqueTermTypeExtractor.extractSingleTermType(v, iqTree)
                             // TODO: give the name of the view
                             .orElseGet(dbTypeFactory::getAbstractRootDBType),
                     iqTree.getVariableNullability().isPossiblyNullable(v));

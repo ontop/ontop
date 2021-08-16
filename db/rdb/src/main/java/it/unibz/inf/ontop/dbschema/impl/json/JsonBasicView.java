@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -309,7 +309,7 @@ public class JsonBasicView extends JsonView {
     }
 
     private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
-        UniqueTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
+        SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
 
         RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
@@ -319,7 +319,7 @@ public class JsonBasicView extends JsonView {
 
         for (Variable v : iq.getProjectionAtom().getVariables()) {
             builder.addAttribute(rawQuotedIqFactory.createAttributeID(v.getName()),
-                    (DBTermType) uniqueTermTypeExtractor.extractUniqueTermType(v, iqTree)
+                    (DBTermType) uniqueTermTypeExtractor.extractSingleTermType(v, iqTree)
                             // TODO: give the name of the view
                             .orElseThrow(() -> new MetadataExtractionException("No type inferred for " + v + " in " + iq)),
                     iqTree.getVariableNullability().isPossiblyNullable(v));
