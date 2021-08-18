@@ -75,30 +75,25 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
             ImmutableSet<Variable> groupingVariables = rootNode.getGroupingVariables();
 
-            /*
-             * After normalization, grouping variable definitions are expected to be lifted above
-             * the aggregation node except if their definitions are not unique (i.e. blocked by a UNION)
-             */
-            ImmutableSet<Variable> groupingVariablesWithDifferentDefinitions = groupingVariables.stream()
-                    .filter(child::isConstructed)
-                    .collect(ImmutableCollectors.toSet());
-
-            if (groupingVariablesWithDifferentDefinitions.isEmpty())
-                return Optional.empty();
-
-
             Optional<ConstructionNode> childConstructionNode = Optional.of(child.getRootNode())
                     .filter(n -> n instanceof ConstructionNode)
                     .map(n -> (ConstructionNode) n);
 
-            if (childConstructionNode
-                    .filter(n ->
-                        !Sets.intersection(
-                                n.getLocallyDefinedVariables(),
-                                groupingVariables).isEmpty())
-                    .isPresent())
-                throw new MinorOntopInternalBugException("Should not happen in a normalized tree " +
-                        "(grouping variable definitions should have been already lifted)");
+            /*
+             * After normalization, grouping variable definitions are expected to be lifted above
+             * the aggregation node except if their definitions are not unique (i.e. blocked by a UNION).
+             *
+             * For the sake of simplicity, we exclude variables defined by the child construction node.
+             */
+            ImmutableSet<Variable> groupingVariablesWithDifferentDefinitions = groupingVariables.stream()
+                    .filter(child::isConstructed)
+                    .filter(v -> !childConstructionNode
+                            .filter(n -> n.getSubstitution().isDefining(v))
+                            .isPresent())
+                    .collect(ImmutableCollectors.toSet());
+
+            if (groupingVariablesWithDifferentDefinitions.isEmpty())
+                return Optional.empty();
 
             IQTree nonConstructionChild = childConstructionNode
                     .map(cst -> ((UnaryIQTree) child).getChild())
