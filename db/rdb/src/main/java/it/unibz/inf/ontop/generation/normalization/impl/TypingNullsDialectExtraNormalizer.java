@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -29,13 +29,13 @@ import java.util.Optional;
 public class TypingNullsDialectExtraNormalizer extends DefaultRecursiveIQTreeVisitingTransformer
         implements DialectExtraNormalizer {
 
-    private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
+    private final SingleTermTypeExtractor uniqueTermTypeExtractor;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
     protected TypingNullsDialectExtraNormalizer(CoreSingletons coreSingletons,
-                                                UniqueTermTypeExtractor uniqueTermTypeExtractor) {
+                                                SingleTermTypeExtractor uniqueTermTypeExtractor) {
         super(coreSingletons);
         this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
         this.termFactory = coreSingletons.getTermFactory();
@@ -68,7 +68,7 @@ public class TypingNullsDialectExtraNormalizer extends DefaultRecursiveIQTreeVis
         ImmutableMap<Variable, Optional<TermType>> typeMap = nullVariables.stream()
                 .collect(ImmutableCollectors.toMap(
                         v -> v,
-                        v -> uniqueTermTypeExtractor.extractUniqueTermType(v, tree)));
+                        v -> uniqueTermTypeExtractor.extractSingleTermType(v, tree)));
 
         ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap = typeMap.entrySet().stream()
                 .filter(e -> e.getValue().isPresent())
