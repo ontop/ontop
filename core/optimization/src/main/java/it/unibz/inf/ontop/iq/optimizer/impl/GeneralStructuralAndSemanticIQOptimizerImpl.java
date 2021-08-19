@@ -19,18 +19,21 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
     private final OntopViewUnfolder viewUnfolder;
+    private final AggregationSplitter aggregationSplitter;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
                                                         OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier,
-                                                        OntopViewUnfolder viewUnfolder) {
+                                                        OntopViewUnfolder viewUnfolder,
+                                                        AggregationSplitter aggregationSplitter) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.viewUnfolder = viewUnfolder;
+        this.aggregationSplitter = aggregationSplitter;
     }
 
     @Override
@@ -61,7 +64,10 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeAndViewUnfolding);
         LOGGER.debug("New query after simplifying the aggregation node:\n{}\n", queryAfterAggregationSimplification);
 
-        IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
+        IQ queryAfterAggregationSplitting = aggregationSplitter.optimize(queryAfterAggregationSimplification);
+        LOGGER.debug("New query after trying to split the aggregation node:\n{}\n", queryAfterAggregationSplitting);
+
+        IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSplitting);
         LOGGER.debug("New query after simplifying the order by node:\n{}\n", optimizedQuery);
 
         return optimizedQuery;
