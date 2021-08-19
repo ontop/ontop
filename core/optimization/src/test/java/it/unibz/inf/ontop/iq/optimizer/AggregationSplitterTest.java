@@ -506,6 +506,94 @@ public class AggregationSplitterTest {
     }
 
     @Test
+    public void testLiftAggregation7() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, X, Y, Z);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(T1_AR3, ImmutableMap.of(0, A));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(T2_AR3, ImmutableMap.of(0, A));
+
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(Z, A));
+
+        ImmutableSubstitution<ImmutableTerm> zSubstitution1 = SUBSTITUTION_FACTORY.getSubstitution(Z, ONE);
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(unionNode.getVariables(), zSubstitution1);
+
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                constructionNode1,
+                dataNode1);
+
+        ImmutableSubstitution<ImmutableTerm> zSubstitution2 = SUBSTITUTION_FACTORY.getSubstitution(Z, TWO);
+
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
+                zSubstitution2);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                constructionNode2,
+                dataNode2);
+
+        NaryIQTree unionTree = IQ_FACTORY.createNaryIQTree(
+                unionNode,
+                ImmutableList.of(
+                        child1,
+                        child2));
+
+        ConstructionNode commonConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Z, A),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBBinaryNumericFunctionalTerm("+",
+                        TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType(), Z, A)));
+
+        AggregationNode aggregationNode = IQ_FACTORY.createAggregationNode(ImmutableSet.of(X,Z), SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)
+        ));
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(aggregationNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                commonConstructionNode,
+                                unionTree)));
+
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
+
+        AggregationNode newAggregationNode1 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(X), SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)));
+
+        IQTree newChild1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), zSubstitution1),
+                IQ_FACTORY.createUnaryIQTree(
+                        newAggregationNode1,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,A),
+                                                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBBinaryNumericFunctionalTerm("+",
+                                                        TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType(), ONE, A))),
+                                                dataNode1))
+                        .applyFreshRenamingToAllVariables(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(
+                                ImmutableMap.of(A, AF0))));
+
+        AggregationNode newAggregationNode2 = IQ_FACTORY.createAggregationNode(ImmutableSet.of(X), SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)));
+
+        IQTree newChild2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(newUnionNode.getVariables(), zSubstitution2),
+                IQ_FACTORY.createUnaryIQTree(
+                        newAggregationNode2,
+                        IQ_FACTORY.createUnaryIQTree(
+                                IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,A),
+                                        SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBBinaryNumericFunctionalTerm("+",
+                                                TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType(), TWO, A))),
+                                dataNode2))
+                        .applyFreshRenamingToAllVariables(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(
+                                ImmutableMap.of(A, AF1))));
+
+        NaryIQTree newUnionTree = IQ_FACTORY.createNaryIQTree(
+                newUnionNode,
+                ImmutableList.of(newChild1, newChild2));
+
+        IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom, newUnionTree);
+
+        optimizeAndCompare(initialQuery, expectedQuery);
+    }
+
+    @Test
     public void testNoLiftAggregation1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
@@ -635,6 +723,56 @@ public class AggregationSplitterTest {
         IQ initialQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(aggregationNode, unionTree));
+
+        optimizeAndCompare(initialQuery, initialQuery);
+    }
+
+    @Test
+    public void testNoLiftAggregation4() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(T1_AR3, ImmutableMap.of(0, A));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(T2_AR3, ImmutableMap.of(0, A));
+
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(B, A));
+
+        ImmutableSubstitution<ImmutableTerm> xSubstitution1 = SUBSTITUTION_FACTORY.getSubstitution(B, ONE);
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(unionNode.getVariables(), xSubstitution1);
+
+        UnaryIQTree child1 = IQ_FACTORY.createUnaryIQTree(
+                constructionNode1,
+                dataNode1);
+
+        ImmutableSubstitution<ImmutableTerm> xSubstitution2 = SUBSTITUTION_FACTORY.getSubstitution(B, TWO);
+
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(unionNode.getVariables(),
+                xSubstitution2);
+
+        UnaryIQTree child2 = IQ_FACTORY.createUnaryIQTree(
+                constructionNode2,
+                dataNode2);
+
+        NaryIQTree unionTree = IQ_FACTORY.createNaryIQTree(
+                unionNode,
+                ImmutableList.of(
+                        child1,
+                        child2));
+
+        ConstructionNode commonConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,A),
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getDBBinaryNumericFunctionalTerm("+",
+                        TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType(), B, B)));
+
+        AggregationNode aggregationNode = IQ_FACTORY.createAggregationNode(ImmutableSet.of(X), SUBSTITUTION_FACTORY.getSubstitution(
+                Y, TERM_FACTORY.getDBCount(A, false)
+        ));
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(aggregationNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                commonConstructionNode,
+                                unionTree)));
 
         optimizeAndCompare(initialQuery, initialQuery);
     }
