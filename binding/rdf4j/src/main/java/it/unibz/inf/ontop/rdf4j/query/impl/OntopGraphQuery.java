@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
 import java.util.Collections;
+import java.util.Map;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
@@ -17,6 +18,7 @@ import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.impl.IteratingGraphQueryResult;
 import org.eclipse.rdf4j.query.parser.ParsedDescribeQuery;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -59,6 +61,8 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 			RDFHandlerException {
 		try(GraphQueryResult result =  evaluate()) {
 			handler.startRDF();
+			Map<String, String> namespaces = ((ParsedGraphQuery)getParsedQuery()).getQueryNamespaces();
+			namespaces.forEach(handler::handleNamespace);
 			while (result.hasNext())
 				handler.handleStatement(result.next());
 			handler.endRDF();
