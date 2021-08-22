@@ -64,10 +64,6 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
                 throw new NullPointerException("OntopQuerySwingWorker received a null OntopOWLStatement object from the reasoner");
             String sql;
             try {
-
-                statement.inputQueryFactory.createSPARQLQuery(queryString);
-                
-                
                 IQ sqlExecutableQuery = statement.getExecutableQuery(query);
                 sql = sqlExecutableQuery.toString();
             } catch (OWLException ex) {
