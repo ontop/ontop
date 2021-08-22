@@ -39,6 +39,13 @@
     </owl:ObjectProperty>
     
 
+    <!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teaches -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Teacher"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Course"/>
+    </owl:ObjectProperty>
+
 
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -123,6 +130,63 @@
     <!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Teacher -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Teacher"/>
+
+
+
+<!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+
+
+    <!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Algorithms -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Algorithms"/>
+
+
+
+<!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/DataIntegration -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/DataIntegration"/>
+
+
+
+<!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Programming -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Programming"/>
+
+
+
+<!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Mathematics -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Mathematics"/>
+
+
+
+<!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Painting -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Painting"/>
+
+
+
+<!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teacher/Jane -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teacher/Jane">
+            <conductsLab rdf:resource="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Algorithms"/>
+    </owl:NamedIndividual>
+
+
+
+<!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teacher/Joe -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teacher/Joe">
+            <conductsLab rdf:resource="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/DataIntegration"/>
+    </owl:NamedIndividual>
 </rdf:RDF>
 
 
