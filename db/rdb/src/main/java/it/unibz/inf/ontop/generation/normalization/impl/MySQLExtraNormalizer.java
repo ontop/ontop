@@ -11,18 +11,24 @@ public class MySQLExtraNormalizer implements DialectExtraNormalizer {
 
     private final OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer orderByNormalizer;
     private final ReplaceProvenanceConstantByNonGroundTermNormalizer provenanceNormalizer;
+    private final ConvertValuesToUnionNormalizer toUnionNormalizer;
 
     @Inject
     private MySQLExtraNormalizer(OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer orderByNormalizer,
-                                 ReplaceProvenanceConstantByNonGroundTermNormalizer provenanceNormalizer) {
+                                 ReplaceProvenanceConstantByNonGroundTermNormalizer provenanceNormalizer,
+                                 ConvertValuesToUnionNormalizer toUnionNormalizer) {
 
         this.orderByNormalizer = orderByNormalizer;
         this.provenanceNormalizer = provenanceNormalizer;
+        this.toUnionNormalizer = toUnionNormalizer;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return provenanceNormalizer.transform(
-                orderByNormalizer.transform(tree, variableGenerator), variableGenerator);
+        return toUnionNormalizer.transform(
+                    provenanceNormalizer.transform(
+                        orderByNormalizer.transform(tree, variableGenerator),
+                    variableGenerator),
+                variableGenerator);
     }
 }

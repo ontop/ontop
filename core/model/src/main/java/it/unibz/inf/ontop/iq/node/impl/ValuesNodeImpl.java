@@ -234,9 +234,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         ConstructionAndFilterAndValues constructionAndFilterAndValues =
                 new ConstructionAndFilterAndValues(null, null, this);
         // Split up the substitution in three groups
-        ImmutableSubstitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.getGroundFunctionalTermFragment();
-        ImmutableSubstitution<Constant> constantSubstitutionFragment = descendingSubstitution.getConstantFragment();
-        Var2VarSubstitution variableSubstitutionFragment = descendingSubstitution.getVar2VarFragment();
+        ImmutableSubstitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.getFragment(GroundFunctionalTerm.class);
+        ImmutableSubstitution<Constant> constantSubstitutionFragment = descendingSubstitution.getFragment(Constant.class);
+        ImmutableSubstitution<Variable> variableSubstitutionFragment = descendingSubstitution.getFragment(Variable.class);
+        Var2VarSubstitution var2varSubstitutionFragment = substitutionFactory.getVar2VarSubstitution(
+                variableSubstitutionFragment.getImmutableMap());
 
         if (!functionalSubstitutionFragment.isEmpty()) {
             constructionAndFilterAndValues = addProjectedVariablesToConstruction(descendingSubstitution, constructionAndFilterAndValues);
@@ -246,7 +248,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             constructionAndFilterAndValues = substituteConstants(constantSubstitutionFragment, constructionAndFilterAndValues);
         }
         if (!variableSubstitutionFragment.isEmpty()) {
-            constructionAndFilterAndValues = substituteVariables(variableSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
+            constructionAndFilterAndValues = substituteVariables(var2varSubstitutionFragment, constructionAndFilterAndValues, iqFactory);
         }
         return buildTreeFromCFV(constructionAndFilterAndValues);
     }

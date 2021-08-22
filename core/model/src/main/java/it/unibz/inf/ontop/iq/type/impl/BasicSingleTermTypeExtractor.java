@@ -99,10 +99,6 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
                             .orElseGet(Stream::empty))
                     .collect(ImmutableCollectors.toSet());
 
-            if (termTypes.size() > 1)
-                throw new NonUniqueTermTypeException(String.format("Multiple term types found for %s: %s",
-                        variable, termTypes));
-
             return termTypes.stream()
                     .findAny();
         }

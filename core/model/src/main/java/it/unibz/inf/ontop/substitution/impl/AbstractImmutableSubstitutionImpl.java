@@ -235,4 +235,34 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         return substitutionFactory.getSubstitution(newMap);
     }
+
+    @Override
+    public  Optional<ImmutableExpression> convertIntoBooleanExpression() {
+        return convertIntoBooleanExpression(this);
+    }
+
+    protected Optional<ImmutableExpression> convertIntoBooleanExpression(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+
+        List<ImmutableExpression> equalities = new ArrayList<>();
+
+        for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
+            equalities.add(termFactory.getStrictEquality(entry.getKey(), entry.getValue()));
+        }
+
+        switch(equalities.size()) {
+            case 0:
+                return Optional.empty();
+            case 1:
+                return Optional.of(equalities.get(0));
+            default:
+                Iterator<ImmutableExpression> equalityIterator = equalities.iterator();
+                // Non-final
+                ImmutableExpression aggregateExpression = equalityIterator.next();
+                while (equalityIterator.hasNext()) {
+                    aggregateExpression = termFactory.getConjunction(aggregateExpression, equalityIterator.next());
+                }
+                return Optional.of(aggregateExpression);
+        }
+    }
 }
