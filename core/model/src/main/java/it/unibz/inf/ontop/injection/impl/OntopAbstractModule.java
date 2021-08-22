@@ -55,7 +55,7 @@ public abstract class OntopAbstractModule extends AbstractModule {
     }
 
     /**
-     * TO be called by sub-classes, inside the configure() method.
+     * To be called by sub-classes, inside the {@link #configure()} method.
      */
     protected void configureCoreConfiguration() {
         bind(OntopModelSettings.class).toInstance(settings);

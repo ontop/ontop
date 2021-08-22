@@ -13,7 +13,8 @@ import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -61,8 +62,9 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(DistinctNormalizer.class);
         bindFromSettings(AggregationNormalizer.class);
         bindFromSettings(NotRequiredVariableRemover.class);
+        bindFromSettings(NotYetTypedEqualityTransformer.class);
         bindFromSettings(RDF.class);
-        bindFromSettings(UniqueTermTypeExtractor.class);
+        bindFromSettings(SingleTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);
         bindFromSettings(TypeConstantDictionary.class);
         bindFromSettings(IQTreeCache.class);
@@ -73,7 +75,6 @@ public class OntopModelModule extends OntopAbstractModule {
                 ImmutableList.of(
                         VariableGenerator.class,
                         VariableNullability.class,
-                        DummyVariableNullability.class,
                         ProjectionDecomposer.class
                 ),
                 CoreUtilsFactory.class);

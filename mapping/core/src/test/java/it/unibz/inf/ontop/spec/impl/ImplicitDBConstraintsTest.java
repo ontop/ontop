@@ -26,7 +26,7 @@ public class ImplicitDBConstraintsTest {
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
 			.getInstance(ImplicitDBConstraintsProviderFactoryImpl.class);
 
-	private static final DatabaseRelationDefinition TABLENAME, TABLE2;
+	private static final NamedRelationDefinition TABLENAME, TABLE2;
 
 	static {
 		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
@@ -86,7 +86,7 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
-		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((NamedRelationDefinition)ref.getRelation()).getID());
 		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
 	}
 
@@ -98,7 +98,7 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
-		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createRelationID("TABLE2"), ((NamedRelationDefinition)ref.getRelation()).getID());
 		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
 		assertEquals(ImmutableList.of(TABLENAME.getAttribute(1)),
 				TABLENAME.getUniqueConstraints().get(0).getAttributes());

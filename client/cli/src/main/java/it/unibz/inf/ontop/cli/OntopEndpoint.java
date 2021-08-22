@@ -54,6 +54,10 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String contexts;
 
+    @Option(type = OptionType.COMMAND, name = {"--disable-portal-page"}, title = "disable the portal page",
+            description = "Disable the portal page (/index.html) of the SPARQL endpoint. ")
+    private boolean disablePortalPage = false;
+    
     @Override
     public void run() {
 
@@ -62,7 +66,9 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
                 "--properties=" + this.propertiesFile,
                 "--port=" + this.port,
                 "--lazy=" + this.lazy,
-                "--dev=" + this.dev);
+                "--dev=" + this.dev,
+                "--disable-portal-page=" + this.disablePortalPage
+                );
 
         if (this.corsAllowedOrigins != null)
             argList.add("--cors-allowed-origins=" + this.corsAllowedOrigins);
@@ -75,6 +81,12 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         if (this.constraintFile != null)
             argList.add("--constraint=" + this.constraintFile);
+
+        if (this.dbMetadataFile != null)
+            argList.add("--db-metadata=" + this.dbMetadataFile);
+
+        if (this.ontopViewFile != null)
+            argList.add("--ontop-views=" + this.ontopViewFile);
 
         if (this.portalFile != null)
             argList.add("--portal=" + this.portalFile);
@@ -96,8 +108,6 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         if (dbUrl != null)
             argList.add("--db-url=" + this.dbUrl);
-
-
 
         String[] args = new String[argList.size()];
         argList.toArray(args);

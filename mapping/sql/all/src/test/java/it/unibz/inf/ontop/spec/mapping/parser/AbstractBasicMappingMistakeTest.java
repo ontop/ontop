@@ -18,7 +18,7 @@ public abstract class AbstractBasicMappingMistakeTest {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTypeFactory dbTypeFactory = builder.getDBTypeFactory();
 
-        DatabaseRelationDefinition personTable = builder.createDatabaseRelation("PERSON",
+        NamedRelationDefinition personTable = builder.createDatabaseRelation("PERSON",
             "ID", dbTypeFactory.getDBLargeIntegerType(), false,
             "FNAME", dbTypeFactory.getDBStringType(), false);
         UniqueConstraint.primaryKeyOf(personTable.getAttribute(1));

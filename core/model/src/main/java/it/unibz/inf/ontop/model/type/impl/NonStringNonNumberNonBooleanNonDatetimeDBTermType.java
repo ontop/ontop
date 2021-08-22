@@ -12,6 +12,7 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
     @Nullable
     private final RDFDatatype rdfDatatype;
     private final StrictEqSupport support;
+    private final boolean isNeedingIRISafeEncoding;
 
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
@@ -19,42 +20,61 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
         super(name, parentAncestry, isAbstract, Category.OTHER);
         rdfDatatype = null;
         this.support = StrictEqSupport.SAME_TYPE_NO_CONSTANT;
+        this.isNeedingIRISafeEncoding = true;
     }
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
                                                                 RDFDatatype rdfDatatype) {
+        this(name, parentAncestry, rdfDatatype, true);
+    }
+
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
+                                                                RDFDatatype rdfDatatype, boolean isNeedingIRISafeEncoding) {
         super(name, parentAncestry, false, Category.OTHER);
         this.rdfDatatype = rdfDatatype;
         this.support = StrictEqSupport.SAME_TYPE_NO_CONSTANT;
+        this.isNeedingIRISafeEncoding = isNeedingIRISafeEncoding;
     }
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
             String name, TermTypeAncestry parentAncestry,
             StrictEqSupport support) {
+        this(name, parentAncestry, support, true);
+    }
+
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
+            String name, TermTypeAncestry parentAncestry,
+            StrictEqSupport support, boolean isNeedingIRISafeEncoding) {
         super(name, parentAncestry, false, Category.OTHER);
         this.support = support;
         this.rdfDatatype = null;
+        this.isNeedingIRISafeEncoding = isNeedingIRISafeEncoding;
     }
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
             String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
             StrictEqSupport support) {
+        this(name, parentAncestry, rdfDatatype, support, true);
+    }
+
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
+            String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
+            StrictEqSupport support, boolean isNeedingIRISafeEncoding) {
         super(name, parentAncestry, false, Category.OTHER);
         this.support = support;
         this.rdfDatatype = rdfDatatype;
+        this.isNeedingIRISafeEncoding = isNeedingIRISafeEncoding;
     }
 
-    @Override
+
+        @Override
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
         return Optional.ofNullable(rdfDatatype);
     }
 
-    /**
-     * By default, we don't know if it is safe or not
-     */
     @Override
     public boolean isNeedingIRISafeEncoding() {
-        return true;
+        return isNeedingIRISafeEncoding;
     }
 
     @Override

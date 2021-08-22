@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
+import it.unibz.inf.ontop.model.vocabulary.GEO;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
@@ -67,4 +68,12 @@ public interface TypeFactory {
 	MetaRDFTermType getMetaRDFTermType();
 
 	DBTypeFactory getDBTypeFactory();
+
+    default RDFDatatype getWktLiteralDatatype() {
+        return getDatatype(GEO.GEO_WKT_LITERAL);
+    }
+
+	default RDFDatatype getXsdAnyUri() {
+		return getDatatype(XSD.ANYURI);
+	}
 }

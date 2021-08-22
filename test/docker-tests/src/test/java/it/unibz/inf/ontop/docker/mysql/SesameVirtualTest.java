@@ -36,19 +36,15 @@ import java.util.List;
 public class SesameVirtualTest extends TestCase {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	
-	
-	public void test() {
-		//create a sesame repository
-		RepositoryConnection con = null;
-		Repository repo = null;
 
-		String owlFile = "/mysql/example/exampleBooks.owl";
-		String obdaFile = "/mysql/example/exampleBooks.obda";
-		String propertyFile = "/mysql/example/exampleBooks.properties";
-		String owlFileName = this.getClass().getResource(owlFile).toString();
-		String obdaFileName = this.getClass().getResource(obdaFile).toString();
-		String propertyFileName = this.getClass().getResource(propertyFile).toString();
+	private static final String owlFile = "/mysql/example/exampleBooks.owl";
+	private static final String obdaFile = "/mysql/example/exampleBooks.obda";
+	private static final  String propertyFile = "/mysql/example/exampleBooks.properties";
+	private final String owlFileName = this.getClass().getResource(owlFile).toString();
+	private final String obdaFileName = this.getClass().getResource(obdaFile).toString();
+	private final String propertyFileName = this.getClass().getResource(propertyFile).toString();
+
+	public void test() {
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileName)
@@ -57,11 +53,11 @@ public class SesameVirtualTest extends TestCase {
 				.enableTestMode()
 				.build();
 
-		repo = OntopRepository.defaultRepository(configuration);
+		Repository repo = OntopRepository.defaultRepository(configuration);
 
 		repo.initialize();
 
-		con = repo.getConnection();
+		RepositoryConnection con = repo.getConnection();
 
 		///query repo
 
@@ -79,7 +75,6 @@ public class SesameVirtualTest extends TestCase {
 
 		result.close();
 
-
 		queryString = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
 		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 		GraphQueryResult gresult = graphQuery.evaluate();
@@ -89,9 +84,7 @@ public class SesameVirtualTest extends TestCase {
 		}
 
 		System.out.println("Closing...");
-
 		con.close();
-
 
 		System.out.println("Done.");
 	}

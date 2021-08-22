@@ -1,5 +1,11 @@
 package it.unibz.inf.ontop.cli;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -8,6 +14,11 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
+
+import java.io.IOException;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class OntopEndpointTest {
 
@@ -18,18 +29,17 @@ public class OntopEndpointTest {
 
     @BeforeClass
     public static void setupEndpoint() {
-
-        String[] argv = {"endpoint", "-m", "src/test/resources/books/exampleBooks.obda",
+        Ontop.main("endpoint", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
-                "--port=" + PORT};
-        Ontop.main(argv);
+                "-d", "src/test/resources/output/exampleBooks-metadata.json",
+                //"-v", "src/test/resources/output/exampleBooks-metadata.json",
+                "--port=" + PORT);
     }
 
 
     @Test
     public void testQuery() {
-
         String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
         Repository repo = new SPARQLRepository(sparqlEndpoint);
         repo.initialize();
@@ -53,6 +63,26 @@ public class OntopEndpointTest {
         }
     }
 
+    @Test
+    public void testDescribeQuery() {
+        String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
+        Repository repo = new SPARQLRepository(sparqlEndpoint);
+        repo.initialize();
+
+        try (RepositoryConnection conn = repo.getConnection()) {
+            String queryString = "DESCRIBE <http://meraka/moss/exampleBooks.owl#book/10/>";
+            GraphQuery graphQuery = conn.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+            //TupleQueryResult result = tupleQuery.evaluate();
+            try (GraphQueryResult result = graphQuery.evaluate()) {
+                while (result.hasNext()) {  // iterate over the result
+                    Statement bindingSet = result.next();
+                    //Value movie = bindingSet.getValue("teacher");
+                    System.out.println(bindingSet);
+                }
+            }
+        }
+    }
+    
     @Test(expected = QueryEvaluationException.class)
     public void testInvalidQuery() {
 
@@ -65,6 +95,18 @@ public class OntopEndpointTest {
             TupleQueryResult result = tupleQuery.evaluate();
         }
     }
+    
+    @Test
+    public void testPortal() throws IOException {
+        HttpUriRequest request = new HttpGet("http://localhost:" + PORT + "/");
 
+        // When
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+        // Then
+        assertThat(
+                httpResponse.getStatusLine().getStatusCode(),
+                equalTo(HttpStatus.SC_OK));
+    }
 
 }

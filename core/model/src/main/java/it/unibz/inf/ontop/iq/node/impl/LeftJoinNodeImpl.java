@@ -484,7 +484,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         // (too complicated)
         // Therefore, please consider normalizing afterwards
         ImmutableExpression.Evaluation results = expression.evaluate2VL(
-                coreUtilsFactory.createDummyVariableNullability(expression));
+                coreUtilsFactory.createSimplifiedVariableNullability(expression));
 
         if (results.isEffectiveFalse())
             throw new UnsatisfiableConditionException();
@@ -492,7 +492,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return results.getExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
                 .orElseGet(() ->
-                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getVariableOrGroundTermFragment()));
+                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getFragment(VariableOrGroundTerm.class)));
     }
 
     /**

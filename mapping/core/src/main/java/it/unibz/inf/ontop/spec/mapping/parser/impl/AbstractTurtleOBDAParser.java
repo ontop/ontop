@@ -21,96 +21,77 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.model.vocabulary.*;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.listener.ThrowingErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 
 
 public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 
-	private final ImmutableMap<String, String> prefixes;
-	private final Supplier<TurtleOBDAVisitor> visitorSupplier;
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTurtleOBDAParser.class);
+
+	private final Supplier<TurtleOBDAVisitor<ImmutableTerm>> termVisitorSupplier;
+	private final TargetAtomFactory targetAtomFactory;
 
 	/**
 	 * Constructs the parser object with prefixes. These prefixes will
 	 * help to generate the query header that contains the prefix definitions
-	 * (i.e., the directives @BASE and @PREFIX).
+	 * (i.e., the directives @base and @prefix).
 	 *
 	 */
-	public AbstractTurtleOBDAParser(ImmutableMap<String, String> prefixes,
-									Supplier<TurtleOBDAVisitor> visitorSupplier) {
-		this.prefixes = prefixes;
-		this.visitorSupplier = visitorSupplier;
+	public AbstractTurtleOBDAParser(TargetAtomFactory targetAtomFactory, Supplier<TurtleOBDAVisitor<ImmutableTerm>> termVisitorSupplier) {
+		this.targetAtomFactory = targetAtomFactory;
+		this.termVisitorSupplier = termVisitorSupplier;
 	}
 
 	/**
-	 * Returns the CQIE object from the input string. If the input prefix
-	 * manager is null then no directive header will be appended.
+	 * Returns the list of TargetAtom objects from the input string.
+	 * If the input prefix manager is empty then no directive header will be appended.
 	 * 
-	 * @param input
-	 *            A target query string written in Turtle syntax.
-	 * @return A CQIE object.
+	 * @param input A target query string written in Turtle syntax.
+	 * @return a list of TargetAtom objects.
 	 */
 	@Override
 	public ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException {
-		StringBuffer bf = new StringBuffer(input.trim());
-		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
-			bf.insert(bf.length() - 1, ' ');
-		}
-		if (!prefixes.isEmpty()) {
-			// Update the input by appending the directives
-			appendDirectives(bf);
-		}		
 		try {
-			CharStream inputStream = CharStreams.fromString(bf.toString());
+			CharStream inputStream = CharStreams.fromString(input);
 			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
-
 			//substitute the standard ConsoleErrorListener (simply print out the error) with ThrowingErrorListener
             lexer.removeErrorListeners();
-			lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+			lexer.addErrorListener(new ThrowingErrorListener());
 
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
             //substitute the standard ConsoleErrorListener (simply print out the error) with ThrowingErrorListener
 			parser.removeErrorListeners();
-			parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+			parser.addErrorListener(new ThrowingErrorListener());
 
-			return (ImmutableList<TargetAtom>)visitorSupplier.get().visitParse(parser.parse());
-		} catch (RuntimeException e) {
+			TurtleOBDASQLVisitor visitor = new TurtleOBDASQLVisitor(targetAtomFactory, termVisitorSupplier.get());
+			return visitor.visitParse(parser.parse()).collect(ImmutableCollectors.toList());
+		}
+		catch (ParseCancellationException e) {
+			throw (TargetQueryParserException)e.getCause();
+		}
+		catch (RuntimeException e) {
 			throw new TargetQueryParserException(e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * The turtle syntax predefines the quest, rdf, rdfs and owl prefixes.
-	 * 
-	 * Adds directives to the query header from the PrefixManager.
-	 */
-	private void appendDirectives(StringBuffer query) {
-		StringBuffer sb = new StringBuffer();
-		for (String prefix : prefixes.keySet()) {
-			sb.append("@PREFIX");
-			sb.append(" ");
-			sb.append(prefix);
-			sb.append(" ");
-			sb.append("<");
-			sb.append(prefixes.get(prefix));
-			sb.append(">");
-			sb.append(" .\n");
+	private static class ThrowingErrorListener extends BaseErrorListener {
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
+				throws ParseCancellationException {
+			LOGGER.debug("Syntax error location: column {}, line {}\n{}", charPositionInLine, line, msg);
+			throw new ParseCancellationException(msg, new TargetQueryParserException(line, charPositionInLine, msg, e));
 		}
-		sb.append("@PREFIX " + OntopInternal.PREFIX_XSD + " <" + XSD.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_OBDA + " <" + Ontop.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_RDF + " <" + RDF.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_RDFS + " <" + RDFS.PREFIX + "> .\n");
-		sb.append("@PREFIX " + OntopInternal.PREFIX_OWL + " <" + OWL.PREFIX + "> .\n");
-		query.insert(0, sb);
 	}
 }

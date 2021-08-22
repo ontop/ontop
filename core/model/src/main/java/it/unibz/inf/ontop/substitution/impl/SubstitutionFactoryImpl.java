@@ -66,7 +66,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap) {
+    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
         return new InjectiveVar2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory, this);
     }
 

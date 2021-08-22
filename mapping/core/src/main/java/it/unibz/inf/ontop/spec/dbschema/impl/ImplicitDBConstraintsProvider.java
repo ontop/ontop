@@ -49,7 +49,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
      */
     @Override
-    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
 
         provider.insertIntegrityConstraints(relation, metadataLookup);
 
@@ -69,7 +69,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
             for (Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor> fkc : relation.getAllIDs().stream()
                     .flatMap(id -> foreignKeys.get(id).stream())
                     .collect(ImmutableCollectors.toList())) {
-                DatabaseRelationDefinition referencedRelation;
+                NamedRelationDefinition referencedRelation;
                 try {
                     referencedRelation = metadataLookup.getRelation(fkc.getValue().tableId);
                 }
@@ -89,7 +89,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
         }
     }
 
-    private static String getTableName(DatabaseRelationDefinition relation) {
+    private static String getTableName(NamedRelationDefinition relation) {
         return relation.getID().getComponents().get(RelationID.TABLE_INDEX).getName();
     }
 

@@ -84,7 +84,7 @@ public class FlattenUnionOptimizerTest {
     private IntermediateQuery optimize(IntermediateQuery initialQuery) throws EmptyQueryException {
         IQ initialIQ = IQ_CONVERTER.convert(initialQuery);
         IQ optimizedIQ = initialIQ.normalizeForOptimization();
-        return IQ_CONVERTER.convert(optimizedIQ, initialQuery.getExecutorRegistry());
+        return IQ_CONVERTER.convert(optimizedIQ);
     }
 
     @Test

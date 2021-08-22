@@ -52,6 +52,11 @@ public abstract class AbstractEncodeURIorIRIFunctionSymbol extends AbstractTyped
     }
 
     @Override
+    protected boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
+        return true;
+    }
+
+    @Override
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {

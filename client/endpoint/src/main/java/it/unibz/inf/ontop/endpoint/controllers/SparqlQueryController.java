@@ -5,15 +5,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VersionInfo;
-
-import org.eclipse.rdf4j.query.BooleanQuery;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.Update;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLBooleanJSONWriter;
@@ -37,18 +29,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 @RestController
@@ -61,13 +49,6 @@ public class SparqlQueryController {
     @Autowired
     public SparqlQueryController(OntopVirtualRepository repository) {
         this.repository = repository;
-    }
-
-    @GetMapping(value = "/")
-    public ModelAndView home() {
-        Map<String, String> model = new HashMap<>();
-        model.put("version", VersionInfo.getVersionInfo().getVersion());
-        return new ModelAndView("index", model);
     }
 
     @RequestMapping(value = "/sparql",
@@ -228,6 +209,8 @@ public class SparqlQueryController {
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+        // Invalidates the previous Cache-Control header
+        headers.set(CACHE_CONTROL, "no-store");
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         return new ResponseEntity<>(message, headers, status);
     }

@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
-import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -15,10 +14,11 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NPDUnfolderTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    private final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
+public class NPDUnfolderTest {
 
+    private static final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
 
     /**
      * Query 6 from the NPD benchmark
@@ -174,7 +174,6 @@ public class NPDUnfolderTest extends TestCase {
         String unf_rew = getNPDUnfolding(q09, p);
 
         assertEquals(countUnions(unf), countUnions(unf_rew));
-
     }
 
     //@Test
@@ -248,7 +247,6 @@ public class NPDUnfolderTest extends TestCase {
 	private String getRewriting(String query) throws Exception {
         Properties p = new Properties();
         p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, true);
-
 
         OntopOWLFactory fac = OntopOWLFactory.defaultFactory();
         String rewriting;

@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,8 +40,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR;
 
 /***
  * Test returns  empty concepts and roles, based on the mappings.
@@ -91,7 +90,8 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPI_TRANSLATOR.translateAndClassify(config.loadProvidedInputOntology()).tbox();
+		onto = config.getInjector().getInstance(OWLAPITranslatorOWL2QL.class)
+				.translateAndClassify(config.loadProvidedInputOntology()).tbox();
 	}
 
 	@After
@@ -121,48 +121,18 @@ public class EmptyEntitiesTest {
 
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
-			st.close();
-			// conn.close();
-
 		}
-
 	}
 
 	private boolean runSPARQLRolesQuery(String description) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			return (rs.hasNext());
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
-			// conn.close();
-			st.close();
-
 		}
-
 	}
 
 	/**

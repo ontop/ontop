@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Ignore;
@@ -37,8 +38,8 @@ public class ConstructionNodeCleanerTest {
     private final static Variable Z1 = TERM_FACTORY.getVariable("Z1");
     private final static Variable Z2 = TERM_FACTORY.getVariable("Z2");
 
-    private String URI_TEMPLATE_STR_1 = "http://example.org/ds1/{}";
-    private String URI_TEMPLATE_STR_2_2 = "http://example.org/ds2/{}/{}";
+    private ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
+    private ImmutableList<Template.Component> URI_TEMPLATE_STR_2_2 = Template.of("http://example.org/ds2/", 0, "/", 1);
 
     // TODO: choose an implementation
     private static IntermediateQueryOptimizer constructionNodeCleaner = null;

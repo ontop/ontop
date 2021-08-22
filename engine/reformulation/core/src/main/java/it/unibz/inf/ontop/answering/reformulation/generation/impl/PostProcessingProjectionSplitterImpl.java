@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer.ProjectionDecomposition;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -22,7 +23,8 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final ProjectionDecomposer decomposer;
+    private final ProjectionDecomposer avoidPostProcessingDecomposer;
+    private final ProjectionDecomposer proPostProcessingDecomposer;
     private final DistinctNormalizer distinctNormalizer;
 
     @Inject
@@ -32,12 +34,34 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
                                                  DistinctNormalizer distinctNormalizer) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
-        this.decomposer = coreUtilsFactory.createProjectionDecomposer(ImmutableFunctionalTerm::canBePostProcessed);
+        this.avoidPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(
+                PostProcessingProjectionSplitterImpl::hasFunctionalToBePostProcessed,
+                t -> !(t.isNull() || (t instanceof Variable) || (t instanceof DBConstant)));
+        this.proPostProcessingDecomposer = coreUtilsFactory.createProjectionDecomposer(
+                ImmutableFunctionalTerm::canBePostProcessed, t -> true);
         this.distinctNormalizer = distinctNormalizer;
     }
 
+    private static boolean hasFunctionalToBePostProcessed(ImmutableFunctionalTerm functionalTerm) {
+        if (!functionalTerm.canBePostProcessed())
+            return false;
+
+        if (!(functionalTerm.getFunctionSymbol() instanceof DBFunctionSymbol))
+            return true;
+
+        return functionalTerm.getTerms().stream()
+                .anyMatch(PostProcessingProjectionSplitterImpl::hasToBePostProcessed);
+    }
+
+    private static boolean hasToBePostProcessed(ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm)
+            return hasFunctionalToBePostProcessed((ImmutableFunctionalTerm) term);
+
+        return !term.isNull() && (!(term instanceof DBConstant)) && (!(term instanceof Variable));
+    }
+
     @Override
-    public PostProcessingSplit split(IQ initialIQ) {
+    public PostProcessingSplit split(IQ initialIQ, boolean avoidPostProcessing) {
 
         IQTree topTree = initialIQ.getTree();
         VariableGenerator variableGenerator = initialIQ.getVariableGenerator();
@@ -45,7 +69,7 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
         return Optional.of(topTree)
                 .filter(t -> t.getRootNode() instanceof ConstructionNode)
                 .map(t -> (UnaryIQTree) t)
-                .map(t -> split(t, variableGenerator))
+                .map(t -> split(t, variableGenerator, avoidPostProcessing))
                 .orElseGet(() -> new PostProcessingSplitImpl(
                         // "Useless" construction node --> no post-processing
                         iqFactory.createConstructionNode(topTree.getVariables(), substitutionFactory.getSubstitution()),
@@ -54,13 +78,14 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
     }
 
 
-    private PostProcessingSplit split(UnaryIQTree initialTree, VariableGenerator variableGenerator) {
+    private PostProcessingSplit split(UnaryIQTree initialTree, VariableGenerator variableGenerator, boolean avoidPostProcessing) {
 
         ConstructionNode initialRootNode = (ConstructionNode) initialTree.getRootNode();
         IQTree initialSubTree = initialTree.getChild();
 
-        ProjectionDecomposition decomposition = decomposer.decomposeSubstitution(initialRootNode.getSubstitution(),
-                variableGenerator);
+        ProjectionDecomposer decomposer = avoidPostProcessing ? avoidPostProcessingDecomposer : proPostProcessingDecomposer;
+
+        ProjectionDecomposition decomposition = decomposer.decomposeSubstitution(initialRootNode.getSubstitution(), variableGenerator);
 
         ConstructionNode postProcessingNode = iqFactory.createConstructionNode(initialRootNode.getVariables(),
                 decomposition.getTopSubstitution()

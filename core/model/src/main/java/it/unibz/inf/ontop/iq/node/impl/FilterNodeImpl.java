@@ -122,19 +122,16 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return propagateDownCondition(child, Optional.of(constraint));
-    }
-
-    private IQTree propagateDownCondition(IQTree child, Optional<ImmutableExpression> initialConstraint) {
         try {
-            VariableNullability childVariableNullability = child.getVariableNullability();
+            VariableNullability extendedChildVariableNullability = child.getVariableNullability()
+                    .extendToExternalVariables(constraint.getVariableStream());
 
             // TODO: also consider the constraint for simplifying the condition
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier
-                    .simplifyCondition(getFilterCondition(), childVariableNullability);
+                    .simplifyCondition(getFilterCondition(), extendedChildVariableNullability);
 
-            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(initialConstraint,
-                    conditionSimplificationResults, childVariableNullability);
+            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
+                    conditionSimplificationResults, extendedChildVariableNullability);
 
             IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
                     .filter(s -> !s.isEmpty())
@@ -258,14 +255,18 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         ImmutableSet<Variable> newlyProjectedVariables = constructionNodeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
 
-        VariableNullability dummyVariableNullability = coreUtilsFactory.createDummyVariableNullability(
+        VariableNullability simplifiedFutureChildVariableNullability = coreUtilsFactory.createSimplifiedVariableNullability(
                 newlyProjectedVariables.stream());
 
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, dummyVariableNullability);
+            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, simplifiedFutureChildVariableNullability);
+
+            VariableNullability extendedVariableNullability = constraint
+                    .map(c -> simplifiedFutureChildVariableNullability.extendToExternalVariables(c.getVariableStream()))
+                    .orElse(simplifiedFutureChildVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
-                    expressionAndSubstitution, dummyVariableNullability);
+                    expressionAndSubstitution, extendedVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
                     ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)

@@ -1,12 +1,8 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
@@ -33,7 +29,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
     private static final class BuilderImpl implements Builder {
         private final String name;
         private final ImmutableList.Builder<Component> builder = ImmutableList.builder();
-        private final DatabaseRelationDefinition relation, referencedRelation;
+        private final NamedRelationDefinition relation, referencedRelation;
 
         /**
          * creates a FOREIGN KEY builder
@@ -42,7 +38,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
          * @param referencedRelation
          */
 
-        private BuilderImpl(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+        private BuilderImpl(String name, NamedRelationDefinition relation, NamedRelationDefinition referencedRelation) {
             this.name = name;
             this.relation = relation;
             this.referencedRelation = referencedRelation;
@@ -83,13 +79,13 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
         }
     }
 
-    public static Builder builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+    public static Builder builder(String name, NamedRelationDefinition relation, NamedRelationDefinition referencedRelation) {
         return new BuilderImpl(name, relation, referencedRelation);
     }
 
     private final String name;
     private final ImmutableList<Component> components;
-    private final DatabaseRelationDefinition relation, referencedRelation;
+    private final NamedRelationDefinition relation, referencedRelation;
 
     /**
      * private constructor (use Builder instead)
@@ -101,8 +97,8 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
     private ForeignKeyConstraintImpl(String name, ImmutableList<Component> components) {
         this.name = name;
         this.components = components;
-        this.relation = (DatabaseRelationDefinition)components.get(0).getAttribute().getRelation();
-        this.referencedRelation = (DatabaseRelationDefinition)components.get(0).getReferencedAttribute().getRelation();
+        this.relation = (NamedRelationDefinition)components.get(0).getAttribute().getRelation();
+        this.referencedRelation = (NamedRelationDefinition)components.get(0).getReferencedAttribute().getRelation();
     }
 
     /**
@@ -136,7 +132,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
      */
 
     @Override
-    public DatabaseRelationDefinition getReferencedRelation() {
+    public NamedRelationDefinition getReferencedRelation() {
         return referencedRelation;
     }
 
@@ -147,7 +143,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
      */
 
     @Override
-    public DatabaseRelationDefinition getRelation() {
+    public NamedRelationDefinition getRelation() {
         return relation;
     }
 
@@ -165,43 +161,4 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
                         .collect(Collectors.joining(", ")) +
                 ")";
     }
-
-    public static class ForeignKeyConstraintSerializer extends JsonSerializer<ForeignKeyConstraintImpl> {
-        @Override
-        public void serialize(ForeignKeyConstraintImpl value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-
-            gen.writeStartObject();
-            {
-                gen.writeStringField("name", value.getName());
-                {
-                    gen.writeFieldName("from");
-                    gen.writeStartObject();
-                    gen.writeStringField("relation", value.relation.getID().getSQLRendering());
-                    {
-                        gen.writeArrayFieldStart("columns");
-                        for (Component component : value.getComponents()) {
-                            gen.writeString(component.getAttribute().getID().getSQLRendering());
-                        }
-                        gen.writeEndArray();
-                    }
-                    gen.writeEndObject();
-                }
-                {
-                    gen.writeFieldName("to");
-                    gen.writeStartObject();
-                    gen.writeStringField("relation", value.referencedRelation.getID().getSQLRendering());
-                    {
-                        gen.writeArrayFieldStart("columns");
-                        for (Component component : value.getComponents()) {
-                            gen.writeString(component.getReferencedAttribute().getID().getSQLRendering());
-                        }
-                        gen.writeEndArray();
-                    }
-                    gen.writeEndObject();
-                }
-            }
-            gen.writeEndObject();
-        }
-    }
-
 }

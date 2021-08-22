@@ -106,10 +106,15 @@ public class QuotedIDImpl implements QuotedID {
 
         if (obj instanceof QuotedIDImpl)  {
             QuotedIDImpl other = (QuotedIDImpl)obj;
-            if (this.id.equals(other.id))
-                return true;
-            if (!this.caseSensitive || !other.caseSensitive)
-                return this.id.toLowerCase().equals(other.id.toLowerCase());
+            if (this.id.length() != other.id.length())
+                return false;
+
+            return this.id.regionMatches(
+                    !this.caseSensitive || !other.caseSensitive,
+                    0,
+                    other.id,
+                    0,
+                    this.id.length());
         }
         return false;
     }

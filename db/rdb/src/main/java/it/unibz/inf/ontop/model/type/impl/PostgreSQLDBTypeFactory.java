@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
-import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
 import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
 
@@ -31,7 +29,11 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
     public static final String UUID_STR = "UUID";
-    ;
+
+    protected static final String GEOMETRY_STR = "GEOMETRY";
+    protected static final String GEOGRAPHY_STR = "GEOGRAPHY";
+
+
 
     @AssistedInject
     protected PostgreSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -60,8 +62,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.TIME), NOTHING);
 
-        DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(),
-                WITH_ALL);
+        DBTermType uuidType = new UUIDDBTermType(UUID_STR, rootTermType.getAncestry(), xsdString);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);
@@ -85,6 +86,13 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TIMETZ_STR, timeTzType);
         map.put(BOOL_STR, map.get(BOOLEAN_STR));
         map.put(UUID_STR, uuidType);
+
+        /*
+         * POSTGIS types
+         */
+        map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
+        map.put(GEOGRAPHY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOGRAPHY_STR, rootAncestry, xsdString));
+
         return map;
     }
 
@@ -92,6 +100,27 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
+        /*
+         * POSTGIS types
+         */
+        map.put(DefaultTypeCode.GEOGRAPHY, GEOGRAPHY_STR);
+        map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);
+
         return ImmutableMap.copyOf(map);
+    }
+
+    @Override
+    public boolean supportsDBGeometryType() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDBGeographyType() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDBDistanceSphere() {
+        return true;
     }
 }

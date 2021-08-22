@@ -50,6 +50,12 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         else
             builder.nativeOntopMappingFile(mappingFile);
 
+        if (dbMetadataFile != null)
+            builder.dbMetadataFile(dbMetadataFile);
+
+        if (ontopViewFile != null)
+            builder.ontopViewFile(ontopViewFile);
+
         OntopSQLOWLAPIConfiguration config = builder.build();
 
         OWLOntology ontology = null;

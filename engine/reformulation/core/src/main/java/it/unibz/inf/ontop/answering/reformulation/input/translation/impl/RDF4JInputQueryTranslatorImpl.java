@@ -232,22 +232,24 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
         ImmutableExpression filter = getFilterConditionForDifference(sub);
 
-        InjectiveVar2VarSubstitution nonProjVarsRenaming = getNonProjVarsRenaming(leftTranslation.iqTree, rightTranslation.iqTree);
+        NonProjVarRenamings nonProjVarsRenamings = getNonProjVarsRenamings(leftTranslation.iqTree, rightTranslation.iqTree);
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
-                        iqFactory.createFilterNode(
-                                filter
-                        ),
-                        iqFactory.createBinaryNonCommutativeIQTree(
-                                iqFactory.createLeftJoinNode(ljCond),
-                                leftTranslation.iqTree,
-                                rightTranslation.iqTree
-                                        .applyDescendingSubstitutionWithoutOptimizing(sub)
-                                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming)
-                        )),
-                leftTranslation.nullableVariables
-        );
+                        iqFactory.createConstructionNode(leftVars),
+                        iqFactory.createUnaryIQTree(
+                                iqFactory.createFilterNode(
+                                        filter
+                                ),
+                                iqFactory.createBinaryNonCommutativeIQTree(
+                                        iqFactory.createLeftJoinNode(ljCond),
+                                        leftTranslation.iqTree
+                                                .applyFreshRenamingToAllVariables(nonProjVarsRenamings.left),
+                                        rightTranslation.iqTree
+                                                .applyDescendingSubstitutionWithoutOptimizing(sub)
+                                                .applyFreshRenamingToAllVariables(nonProjVarsRenamings.right)
+                                ))),
+                leftTranslation.nullableVariables);
     }
 
     private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub,
@@ -730,14 +732,15 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 topSubstitution.getImmutableMap().keySet().stream())
                 .collect(ImmutableCollectors.toSet());
 
-        InjectiveVar2VarSubstitution nonProjVarsRenaming = getNonProjVarsRenaming(leftQuery, rightQuery);
+        NonProjVarRenamings nonProjVarsRenaming = getNonProjVarsRenamings(leftQuery, rightQuery);
 
         IQTree joinTree = getJoinTree(
                 joinNode,
-                leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution),
+                leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution)
+                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming.left),
                 rightQuery
                         .applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution)
-                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming)
+                        .applyFreshRenamingToAllVariables(nonProjVarsRenaming.right)
         );
 
         return topSubstitution.isEmpty() ?
@@ -881,7 +884,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         ConstructionNode rootNode = iqFactory.createConstructionNode(rootVariables);
 
-        InjectiveVar2VarSubstitution nonProjVarsRenaming = getNonProjVarsRenaming(leftQuery, rightQuery);
+        NonProjVarRenamings nonProjVarsRenamings = getNonProjVarsRenamings(leftQuery, rightQuery);
 
         return createTranslationResult(
                 iqFactory.createUnaryIQTree(
@@ -892,11 +895,11 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                         iqFactory.createUnaryIQTree(
                                                 leftCn,
                                                 leftQuery
-                                        ),
+                                        ).applyFreshRenamingToAllVariables(nonProjVarsRenamings.left),
                                         iqFactory.createUnaryIQTree(
                                                 rightCn,
                                                 rightQuery
-                                        ).applyFreshRenamingToAllVariables(nonProjVarsRenaming)
+                                        ).applyFreshRenamingToAllVariables(nonProjVarsRenamings.right)
                                 ))),
                 allNullable
         );
@@ -1036,27 +1039,34 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private InjectiveVar2VarSubstitution getNonProjVarsRenaming(IQTree leftQuery, IQTree rightQuery) {
+    private NonProjVarRenamings getNonProjVarsRenamings(IQTree leftQuery, IQTree rightQuery) {
+
+        ImmutableSet<Variable> leftKnownVars = leftQuery.getKnownVariables();
+        ImmutableSet<Variable> rightKnownVars = rightQuery.getKnownVariables();
+
         VariableGenerator vGen = coreUtilsFactory.createVariableGenerator(
                 Sets.union(
-                        leftQuery.getKnownVariables(),
-                        rightQuery.getKnownVariables()
+                        leftKnownVars,
+                        rightKnownVars
                 ));
-        ImmutableSet<Variable> leftNonProjVars = ImmutableSet.copyOf(
-                Sets.difference(
-                        leftQuery.getKnownVariables(),
-                        leftQuery.getVariables()
-                ));
-        ImmutableSet<Variable> righProjVars = rightQuery.getVariables();
+        ImmutableSet<Variable> leftProjVars = leftQuery.getVariables();
+        ImmutableSet<Variable> rightProjVars = rightQuery.getVariables();
 
-        // Return a substitution that renames non-projected variables from the right operand that are also present in the left operand
-        return generateVariableSubstitution(
-                rightQuery.getKnownVariables().stream()
-                        .filter(v -> !righProjVars.contains(v))
-                        .filter(v -> leftNonProjVars.contains(v))
-                        .collect(ImmutableCollectors.toSet()),
-                vGen
-        );
+        /* Returns two substitutions that respectively rename:
+         *  - non-projected variables from the left operand that are also present in the right operand
+         *  - non-projected variables from the right operand that are also present in the left operand
+         */
+        InjectiveVar2VarSubstitution leftSubstitution = generateVariableSubstitution(leftKnownVars.stream()
+                .filter(v -> !leftProjVars.contains(v))
+                .filter(rightKnownVars::contains)
+                .collect(ImmutableCollectors.toSet()), vGen);
+        InjectiveVar2VarSubstitution rightSubstitution = generateVariableSubstitution(rightKnownVars.stream()
+                .filter(v -> !rightProjVars.contains(v))
+                .filter(leftKnownVars::contains)
+                .collect(ImmutableCollectors.toSet()), vGen);
+
+
+        return new NonProjVarRenamings(leftSubstitution, rightSubstitution);
     }
 
     private ImmutableSet<Variable> getNewNullableVars(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableSet<Variable> nullableVariables) {
@@ -1610,6 +1620,15 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         private TranslationResult(IQTree iqTree, ImmutableSet<Variable> nullableVariables) {
             this.nullableVariables = nullableVariables;
             this.iqTree = iqTree;
+        }
+    }
+
+    private static class NonProjVarRenamings {
+      final InjectiveVar2VarSubstitution left, right;
+
+        private NonProjVarRenamings(InjectiveVar2VarSubstitution left, InjectiveVar2VarSubstitution right) {
+            this.left = left;
+            this.right = right;
         }
     }
 

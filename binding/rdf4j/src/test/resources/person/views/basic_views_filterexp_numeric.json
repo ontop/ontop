@@ -1,0 +1,31 @@
+{
+  "relations": [
+    {
+      "name": ["\"views\"", "\"persons\""],
+      "baseRelation": ["\"person\""],
+      "filterExpression": "\"status\" < 1",
+      "columns": {
+        "added": [
+          {
+            "name": "\"fullNameAndLocality\"",
+            "expression": "CONCAT(UPPER(\"fullName\"),' ',\"locality\")"
+          }
+        ],
+        "hidden": [
+          "\"firstName\"",
+          "\"lastName\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}

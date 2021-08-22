@@ -24,4 +24,13 @@ public class PostgresJDBCStatementInitializer extends DefaultJDBCStatementInitia
         }
         return statement;
     }
+
+    @Override
+    public void closeStatement(Statement statement) throws SQLException {
+        if (!statement.isClosed()) {
+            if (settings.getFetchSize() > 0)
+                statement.execute("COMMIT");
+            statement.close();
+        }
+    }
 }

@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -166,8 +167,9 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private boolean isFirstOcc(Variable variable, ImmutableList<IQTree> children, IQTree tree) {
             return children.stream().sequential()
                     .filter(t -> t.getVariables().contains(variable))
-                    .findFirst().get()
-                    .equals(tree);
+                    .findFirst()
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Should be present"))
+                    == tree;
         }
 
         private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<InjectiveVar2VarSubstitution> substitutions) {

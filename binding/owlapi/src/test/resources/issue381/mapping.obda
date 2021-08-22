@@ -1,0 +1,17 @@
+[MappingDeclaration] @collection [[
+mappingId     "m12"
+source        SELECT "s", "o" FROM "t12" WHERE  "l" = 'en'
+target        <{s}> <http://ex.org/p1>  "{o}"@en  .
+
+mappingId     "m2"
+source        SELECT "s", "o" FROM "t2"
+target        <{s}> <http://ex.org/p2> <{o}> .
+
+mappingId     "m3"
+source        SELECT "s", "o" FROM "t3"
+target        <{s}> <http://ex.org/p3> "{o}"^^<http://www.w3.org/2001/XMLSchema#integer> .
+
+mappingId     "m11"
+source        SELECT "s", "o" FROM "t11"
+target        <{s}> <http://ex.org/p1> <{o}> .
+]]

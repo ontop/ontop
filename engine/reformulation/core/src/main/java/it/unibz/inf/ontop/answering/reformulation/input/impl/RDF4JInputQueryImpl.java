@@ -13,17 +13,12 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import java.util.Objects;
 
 
-class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuery<R> {
+abstract class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuery<R> {
 
-    protected final ParsedQuery parsedQuery;
     private final String inputQueryString;
     protected final BindingSet bindings;
 
-    /**
-     * TODO: support bindings
-     */
-    RDF4JInputQueryImpl(ParsedQuery parsedQuery, String inputQueryString, BindingSet bindings) {
-        this.parsedQuery = parsedQuery;
+    RDF4JInputQueryImpl(String inputQueryString, BindingSet bindings) {
         this.inputQueryString = inputQueryString;
         this.bindings = bindings;
     }
@@ -39,8 +34,10 @@ class RDF4JInputQueryImpl<R extends OBDAResultSet> implements InputQuery<R> {
         if (!(translator instanceof RDF4JInputQueryTranslator)) {
             throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");
         }
-        return ((RDF4JInputQueryTranslator) translator).translate(parsedQuery, bindings);
+        return ((RDF4JInputQueryTranslator) translator).translate(transformParsedQuery(), bindings);
     }
+
+    protected abstract ParsedQuery transformParsedQuery() throws OntopUnsupportedInputQueryException;
 
     @Override
     public boolean equals(Object o) {

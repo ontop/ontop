@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.eclipse.rdf4j.model.Statement;
@@ -42,6 +43,18 @@ public class AbstractRDF4JTest {
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath, @Nullable String propertyFile) throws SQLException, IOException {
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, propertyFile, null);
+    }
+
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile,
+                                   @Nullable String viewFile) throws SQLException, IOException {
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, propertyFile, viewFile, null);
+    }
+
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
+                                   @Nullable String ontologyRelativePath, @Nullable String propertyFile,
+                                   @Nullable String viewFile, @Nullable String dbMetadataFile) throws SQLException, IOException {
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
         SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
@@ -73,6 +86,12 @@ public class AbstractRDF4JTest {
 
         if (propertyFile != null)
             builder.propertyFile(AbstractRDF4JTest.class.getResource(propertyFile).getPath());
+
+        if (viewFile != null)
+            builder.ontopViewFile(AbstractRDF4JTest.class.getResource(viewFile).getPath());
+
+        if (dbMetadataFile != null)
+            builder.dbMetadataFile(AbstractRDF4JTest.class.getResource(dbMetadataFile).getPath());
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
@@ -116,7 +135,7 @@ public class AbstractRDF4JTest {
         st.executeUpdate(bf.toString());
         SQL_CONNECTION.commit();
 
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder<?>> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .r2rmlMappingFile(AbstractRDF4JTest.class.getResource(r2rmlRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
@@ -195,6 +214,25 @@ public class AbstractRDF4JTest {
         return vValueBuilder.build();
     }
 
+    protected ImmutableList<ImmutableMap<String, String>> executeQuery(String queryString) {
+        TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+
+        TupleQueryResult result = query.evaluate();
+        ImmutableList.Builder<ImmutableMap<String, String>> list = ImmutableList.builder();
+        while (result.hasNext()) {
+            BindingSet bindingSet = result.next();
+            ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
+            for (Binding b : bindingSet) {
+                map.put(b.getName(), b.getValue().stringValue());
+            }
+            list.add(map.build());
+            LOGGER.debug(bindingSet + "\n");
+        }
+        result.close();
+
+        return list.build();
+    }
+
     protected void runGraphQueryAndCompare(String queryString, ImmutableSet<Statement> expectedGraph) {
         runGraphQueryAndCompare(queryString, expectedGraph, new MapBindingSet());
     }
@@ -217,6 +255,11 @@ public class AbstractRDF4JTest {
 
     protected TupleQueryResult evaluate(String queryString) {
         TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+        return query.evaluate();
+    }
+
+    protected GraphQueryResult evaluateGraph(String queryString) {
+        GraphQuery query = REPO_CONNECTION.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
         return query.evaluate();
     }
 }

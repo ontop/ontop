@@ -1,33 +1,25 @@
 package it.unibz.inf.ontop.protege.core;
 
 
-import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.impl.QuestOWLConfiguration;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import javax.annotation.Nonnull;
 
-@SuppressWarnings("serial")
-public class OntopProtegeOWLConfiguration extends QuestOWLConfiguration {
+public class OntopProtegeOWLConfiguration extends SimpleConfiguration {
 
+    private final OBDAModelManager obdaModelManager;
 
-    private final OntopConfigurationManager ontopConfigurationManager;
+    public OntopProtegeOWLConfiguration(@Nonnull OBDAModelManager obdaModelManager,
+                                        @Nonnull ReasonerProgressMonitor progressMonitor) {
+        super(progressMonitor);
+        this.obdaModelManager = obdaModelManager;
+    }
 
     @Nonnull
-    public OntopConfigurationManager getOntopConfigurationManager() {
-        return ontopConfigurationManager;
-    }
-
-
-    public OntopProtegeOWLConfiguration(@Nonnull OntopSystemOWLAPIConfiguration ontopConfiguration,
-                                        @Nonnull ReasonerProgressMonitor progressMonitor,
-                                        @Nonnull OntopConfigurationManager configurationGenerator) {
-        super(ontopConfiguration, progressMonitor);
-        this.ontopConfigurationManager = configurationGenerator;
-    }
-
-    OWLAPITranslatorOWL2QL getOWLAPITranslator() {
-        return getOntopConfiguration().getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
+    public OntopSQLOWLAPIConfiguration getOntopConfiguration(OWLOntology rootOntology) {
+        return obdaModelManager.getOBDAModel(rootOntology).getOntopConfiguration();
     }
 }

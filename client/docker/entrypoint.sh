@@ -76,6 +76,14 @@ if [ "${ONTOP_CONSTRAINT_FILE+x}" ]; then
   args_array+=("--constraint=${ONTOP_CONSTRAINT_FILE}")
 fi
 
+if [ "${ONTOP_DB_METADATA_FILE+x}" ]; then
+  args_array+=("--db-metadata=${ONTOP_DB_METADATA_FILE}")
+fi
+
+if [ "${ONTOP_VIEW_FILE+x}" ]; then
+  args_array+=("--ontop-views=${ONTOP_VIEW_FILE}")
+fi
+
 if [ "${ONTOP_CORS_ALLOWED_ORIGINS+x}" ]; then
   args_array+=("--cors-allowed-origins=${ONTOP_CORS_ALLOWED_ORIGINS}")
 fi
@@ -104,6 +112,10 @@ if [ "${ONTOP_LAZY_INIT+x}" ]; then
   args_array+=("--lazy")
 fi
 
+if [ "${ONTOP_DISABLE_PORTAL_PAGE+x}" ]; then
+  args_array+=("--disable-portal-page")
+fi
+
 if [ -z "${ONTOP_JAVA_ARGS+x}" ]; then
   ONTOP_JAVA_ARGS="-Xmx512m"
 fi
@@ -114,5 +126,12 @@ else
   LOGBACK_CONFIG_FILE=${ONTOP_HOME}/log/logback.xml
 fi
 
-java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
+if [ -z "${ONTOP_FILE_ENCODING}" ]; then
+  ONTOP_FILE_ENCODING="UTF-8"
+fi
+
+# echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
+# it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
+
+java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
  it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"

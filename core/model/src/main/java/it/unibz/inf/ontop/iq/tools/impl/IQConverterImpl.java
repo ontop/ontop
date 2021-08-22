@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -66,11 +65,11 @@ public class IQConverterImpl implements IQConverter {
 
 
     @Override
-    public IntermediateQuery convert(IQ query, ExecutorRegistry executorRegistry) throws EmptyQueryException {
+    public IntermediateQuery convert(IQ query) throws EmptyQueryException {
         if (query.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
-        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(executorRegistry);
+        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder();
         IQTree topTree = query.getTree();
         QueryNode rootNode = topTree.getRootNode();
         queryBuilder.init(query.getProjectionAtom(), rootNode);

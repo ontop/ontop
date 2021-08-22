@@ -49,12 +49,12 @@ public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerialize
                     // serializeLimit is standard
 
                     @Override
-                    protected String serializeLimitOffset(long limit, long offset) {
+                    protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
                     }
 
                     @Override
-                    protected String serializeOffset(long offset) {
+                    protected String serializeOffset(long offset, boolean noSortCondition) {
                         return String.format("OFFSET %d ROWS", offset);
                     }
 

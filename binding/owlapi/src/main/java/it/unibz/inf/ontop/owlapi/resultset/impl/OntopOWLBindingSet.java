@@ -12,8 +12,11 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import org.semanticweb.owlapi.model.*;
 
 import javax.annotation.Nonnull;
+
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class OntopOWLBindingSet implements OWLBindingSet {
 
@@ -30,22 +33,22 @@ public class OntopOWLBindingSet implements OWLBindingSet {
     @Override
     @Nonnull
     public Iterator<OWLBinding> iterator() {
-        return Iterators.transform(ontopBindingSet.iterator(), ontopBinding -> new OntopOWLBinding(ontopBinding, salt));
+        return Iterators.transform(ontopBindingSet.iterator(),
+                ontopBinding -> new OntopOWLBinding(ontopBinding, translator, salt));
     }
 
     @Override
-    public List<String> getBindingNames() {
-        return ontopBindingSet.getBindingNames();
+    public Set<String> getBindingNames() {
+        return Arrays.stream(ontopBindingSet.getBindingNames()).collect(Collectors.toSet());
     }
 
     @Override
     public OWLBinding getBinding(String bindingName) {
-        final OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
-        if (ontopBinding == null) {
-            return null;
-        } else {
-            return new OntopOWLBinding(ontopBinding, salt);
+        OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
+        if (ontopBinding != null) {
+            return new OntopOWLBinding(ontopBinding, translator, salt);
         }
+        return null;
     }
 
     @Override

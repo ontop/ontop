@@ -18,6 +18,8 @@ public class OntopVirtualRepositoryBean {
                                                              @Value("${xml-catalog:#{null}}") String xmlCatalog,
                                                              @Value("${properties}") String properties,
                                                              @Value("${constraint:#{null}}") String constraint,
+                                                             @Value("${db-metadata:#{null}}") String dbMetadata,
+                                                             @Value("${ontop-views:#{null}}") String ontopViews,
                                                              @Value("${db-user:#{null}}") String dbUser,
                                                              @Value("${db-password:#{null}}") String dbPassword,
                                                              @Value("${db-url:#{null}}") String dbUrl) throws RepositoryException {
@@ -37,6 +39,12 @@ public class OntopVirtualRepositoryBean {
 
         if (constraint != null && !constraint.isEmpty())
             builder.basicImplicitConstraintFile(constraint);
+
+        if (dbMetadata !=null && !dbMetadata.isEmpty())
+            builder.dbMetadataFile(dbMetadata);
+
+        if (ontopViews !=null && !ontopViews.isEmpty())
+            builder.ontopViewFile(ontopViews);
 
         if (dbUser != null && !dbUser.isEmpty())
             builder.jdbcUser(dbUser);
