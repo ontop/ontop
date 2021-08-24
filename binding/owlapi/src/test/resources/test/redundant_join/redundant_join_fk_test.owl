@@ -39,7 +39,7 @@
     </owl:ObjectProperty>
     
 
-    <!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#teaches -->
+    <!-- http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab -->
 
     <owl:ObjectProperty rdf:about="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab">
         <rdfs:domain rdf:resource="http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#Teacher"/>

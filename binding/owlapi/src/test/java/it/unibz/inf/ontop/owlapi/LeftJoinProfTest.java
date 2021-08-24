@@ -1243,7 +1243,7 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
     }
 
     @Test
-    public void testValuesNodeOntologyObjectProperty() throws Exception {
+    public void testValuesNodeOntologyProperty() throws Exception {
         String querySelect = "SELECT ?o WHERE {\n" +
                 "?s <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab> ?o\n" +
                 "}";
