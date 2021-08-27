@@ -1,0 +1,72 @@
+@prefix data:  <http://mydata.example.org/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix voc:   <http://myvoc.example.org/> .
+
+[ <http://www.w3.org/ns/r2rml#logicalTable>
+          [ <http://www.w3.org/ns/r2rml#sqlQuery>
+                    "SELECT V1.\"country\" AS \"country\", V1.\"fullName\" AS \"fullName\", V1.\"id\" AS \"id\", V1.\"locality\" AS \"locality\", V1.\"status\" AS \"status\"\nFROM \"person\" V1\n" ] ;
+  <http://www.w3.org/ns/r2rml#subjectMap>
+          [ <http://www.w3.org/ns/r2rml#class>
+                    voc:Person ;
+            <http://www.w3.org/ns/r2rml#graphMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              <http://www.w3.org/ns/r2rml#defaultGraph> ] ;
+            <http://www.w3.org/ns/r2rml#graphMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              <http://mydata.example.org/graph/person-specific-graph> ] ;
+            <http://www.w3.org/ns/r2rml#graphMap>
+                    [ <http://www.w3.org/ns/r2rml#template>
+                              "http://mydata.example.org/graph/persons/{\"id\"}" ;
+                      <http://www.w3.org/ns/r2rml#termType>
+                              <http://www.w3.org/ns/r2rml#IRI>
+                    ] ;
+            <http://www.w3.org/ns/r2rml#template>
+                    "http://mydata.example.org/persons/{\"id\"}" ;
+            <http://www.w3.org/ns/r2rml#termType>
+                    <http://www.w3.org/ns/r2rml#IRI>
+          ]
+] .
+
+[ <http://www.w3.org/ns/r2rml#logicalTable>
+          [ <http://www.w3.org/ns/r2rml#sqlQuery>
+                    "SELECT V1.\"country\" AS \"country\", V1.\"fullName\" AS \"fullName\", V1.\"id\" AS \"id\", V1.\"locality\" AS \"locality\", 1 AS \"status\"\nFROM \"person\" V1\nWHERE 1 = V1.\"status\"\n" ] ;
+  <http://www.w3.org/ns/r2rml#predicateObjectMap>
+          [ <http://www.w3.org/ns/r2rml#objectMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              voc:SoftwareDeveloper ] ;
+            <http://www.w3.org/ns/r2rml#predicateMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ]
+          ] ;
+  <http://www.w3.org/ns/r2rml#subjectMap>
+          [ <http://www.w3.org/ns/r2rml#graphMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              <http://mydata.example.org/graph/person-specific-graph> ] ;
+            <http://www.w3.org/ns/r2rml#template>
+                    "http://mydata.example.org/persons/{\"id\"}" ;
+            <http://www.w3.org/ns/r2rml#termType>
+                    <http://www.w3.org/ns/r2rml#IRI>
+          ]
+] .
+
+[ <http://www.w3.org/ns/r2rml#logicalTable>
+          [ <http://www.w3.org/ns/r2rml#sqlQuery>
+                    "SELECT V1.\"country\" AS \"country\", V1.\"fullName\" AS \"fullName\", V1.\"id\" AS \"id\", V1.\"locality\" AS \"locality\", 9 AS \"status\"\nFROM \"person\" V1\nWHERE 9 = V1.\"status\"\n" ] ;
+  <http://www.w3.org/ns/r2rml#predicateObjectMap>
+          [ <http://www.w3.org/ns/r2rml#objectMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              voc:ProjectManager ] ;
+            <http://www.w3.org/ns/r2rml#predicateMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ]
+          ] ;
+  <http://www.w3.org/ns/r2rml#subjectMap>
+          [ <http://www.w3.org/ns/r2rml#graphMap>
+                    [ <http://www.w3.org/ns/r2rml#constant>
+                              <http://mydata.example.org/graph/person-specific-graph> ] ;
+            <http://www.w3.org/ns/r2rml#template>
+                    "http://mydata.example.org/persons/{\"id\"}" ;
+            <http://www.w3.org/ns/r2rml#termType>
+                    <http://www.w3.org/ns/r2rml#IRI>
+          ]
+] .
