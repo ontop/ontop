@@ -30,7 +30,7 @@ public class PersonGeneratedMappingTest extends AbstractRDF4JTest {
         int count = runQueryAndCount("prefix voc: <http://myvoc.example.org/>\n" +
                 "\n" +
                 "select * where {\n" +
-                "  GRAPH ?g { ?p a voc:SoftwareDeveloper }" +
+                "  ?p a voc:SoftwareDeveloper" +
                 "}");
         assertEquals(1, count);
     }
@@ -40,9 +40,21 @@ public class PersonGeneratedMappingTest extends AbstractRDF4JTest {
         int count = runQueryAndCount("prefix voc: <http://myvoc.example.org/>\n" +
                 "\n" +
                 "select * where {\n" +
-                "  GRAPH ?g { ?p a voc:ProjectManager }" +
+                "  ?p a voc:ProjectManager " +
                 "}");
         assertEquals(0, count);
     }
+
+    @Test
+    public void testCountries() {
+        int count = runQueryAndCount("prefix voc: <http://myvoc.example.org/>\n" +
+                "\n" +
+                "select * where {\n" +
+                "  ?p voc:countryOfOrigin ?c " +
+                "}");
+        assertEquals(1, count);
+    }
+
+
 
 }
