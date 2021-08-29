@@ -1639,7 +1639,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         }
     }
 
-    private class VarDef {
+    private static class VarDef {
         final Variable var;
         private final ImmutableTerm term;
 
