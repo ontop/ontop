@@ -46,12 +46,6 @@ import java.util.stream.IntStream;
 public class JsonSQLView extends JsonView {
     @Nonnull
     public final String query;
-    @Nonnull
-    public final UniqueConstraints uniqueConstraints;
-    @Nonnull
-    public final OtherFunctionalDependencies otherFunctionalDependencies;
-    @Nonnull
-    public final ForeignKeys foreignKeys;
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(JsonSQLView.class);
 
@@ -61,11 +55,8 @@ public class JsonSQLView extends JsonView {
                        @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                        @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
                        @JsonProperty("foreignKeys") ForeignKeys foreignKeys) {
-        super(name);
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys);
         this.query = query;
-        this.uniqueConstraints = uniqueConstraints;
-        this.otherFunctionalDependencies = otherFunctionalDependencies;
-        this.foreignKeys = foreignKeys;
     }
 
     @Override
@@ -241,168 +232,5 @@ public class JsonSQLView extends JsonView {
             }
         }
 
-    }
-
-    @JsonPropertyOrder({
-            "added"
-    })
-    private static class UniqueConstraints extends JsonOpenObject {
-        @Nonnull
-        public final List<AddUniqueConstraints> added;
-
-        @JsonCreator
-        public UniqueConstraints(@JsonProperty("added") List<AddUniqueConstraints> added) {
-            this.added = added;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "name",
-            "determinants",
-            "isPrimaryKey"
-    })
-    private static class AddUniqueConstraints extends JsonOpenObject {
-        @Nonnull
-        public final String name;
-        @Nonnull
-        public final List<String> determinants;
-        public final Boolean isPrimaryKey;
-
-
-        @JsonCreator
-        public AddUniqueConstraints(@JsonProperty("name") String name,
-                                    @JsonProperty("determinants") List<String> determinants,
-                                    @JsonProperty("isPrimaryKey") Boolean isPrimaryKey) {
-            this.name = name;
-            this.determinants = determinants;
-            this.isPrimaryKey = isPrimaryKey;
-        }
-
-        /*
-         * Ovverride equals method to ensure we can check for object equality
-         */
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            AddUniqueConstraints other = (AddUniqueConstraints) obj;
-            return Objects.equals(determinants, other.determinants);
-        }
-
-        /*
-         * Ovverride hashCode method to ensure we can check for object equality
-         */
-        @Override
-        public int hashCode() {
-            return Objects.hash(determinants);
-        }
-    }
-
-    private static class OtherFunctionalDependencies extends JsonOpenObject {
-        @Nonnull
-        public final List<AddFunctionalDependency> added;
-
-        @JsonCreator
-        public OtherFunctionalDependencies(@JsonProperty("added") List<AddFunctionalDependency> added) {
-            this.added = added;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
-    private static class AddFunctionalDependency extends JsonOpenObject {
-        @Nonnull
-        public final List<String> determinants;
-        @Nonnull
-        public final List<String> dependents;
-
-        public AddFunctionalDependency(@JsonProperty("determinants") List<String> determinants,
-                                       @JsonProperty("dependents") List<String> dependents) {
-            this.determinants = determinants;
-            this.dependents = dependents;
-        }
-
-        /*
-         * Ovverride equals method to ensure we can check for object equality
-         */
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            AddFunctionalDependency other = (AddFunctionalDependency) obj;
-            return Objects.equals(ImmutableMap.of(determinants, dependents),
-                    ImmutableMap.of(other.determinants, other.dependents));
-        }
-
-        /*
-         * Ovverride hashCode method to ensure we can check for object equality
-         */
-        @Override
-        public int hashCode() {
-            return Objects.hash(ImmutableMap.of(determinants, dependents));
-        }
-    }
-
-    private static class ForeignKeys extends JsonOpenObject {
-        @Nonnull
-        public final List<AddForeignKey> added;
-
-        @JsonCreator
-        public ForeignKeys(@JsonProperty("added") List<AddForeignKey> added) {
-            this.added = added;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
-    private static class AddForeignKey extends JsonOpenObject {
-        @Nonnull
-        public final String name;
-        @Nonnull
-        public final String from;
-        @Nonnull
-        public final ForeignKeyPart to;
-
-        public AddForeignKey(@JsonProperty("name") String name,
-                             @JsonProperty("from") String from,
-                             @JsonProperty("to") ForeignKeyPart to) {
-            this.name = name;
-            this.from = from;
-            this.to = to;
-        }
-    }
-
-    @JsonPropertyOrder({
-            "relation",
-            "columns"
-    })
-    public static class ForeignKeyPart extends JsonOpenObject {
-        public final List<String> relation;
-        public final List<String> columns;
-
-        @JsonCreator
-        public ForeignKeyPart(@JsonProperty("relation") List<String> relation,
-                              @JsonProperty("columns") List<String> columns) {
-            this.relation = relation;
-            this.columns = columns;
-        }
     }
 }
