@@ -54,8 +54,9 @@ public class JsonSQLView extends JsonView {
                        @JsonProperty("query") String query,
                        @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
                        @JsonProperty("otherFunctionalDependencies") OtherFunctionalDependencies otherFunctionalDependencies,
-                       @JsonProperty("foreignKeys") ForeignKeys foreignKeys) {
-        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys);
+                       @JsonProperty("foreignKeys") ForeignKeys foreignKeys,
+                       @JsonProperty("nonNullConstraints") NonNullConstraints nonNullConstraints) {
+        super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
         this.query = query;
     }
 

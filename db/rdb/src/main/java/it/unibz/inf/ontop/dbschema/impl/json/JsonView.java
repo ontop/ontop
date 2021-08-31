@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -31,18 +32,24 @@ public abstract class JsonView extends JsonOpenObject {
 
     @Nonnull
     public final UniqueConstraints uniqueConstraints;
+
     @Nonnull
     public final OtherFunctionalDependencies otherFunctionalDependencies;
 
     @Nonnull
     public final ForeignKeys foreignKeys;
 
+    @Nullable
+    public final NonNullConstraints nonNullConstraints;
+
     public JsonView(List<String> name, UniqueConstraints uniqueConstraints,
-                    OtherFunctionalDependencies otherFunctionalDependencies, ForeignKeys foreignKeys) {
+                    OtherFunctionalDependencies otherFunctionalDependencies, ForeignKeys foreignKeys,
+                    @Nullable NonNullConstraints nonNullConstraints) {
         this.name = name;
         this.uniqueConstraints = uniqueConstraints;
         this.otherFunctionalDependencies = otherFunctionalDependencies;
         this.foreignKeys = foreignKeys;
+        this.nonNullConstraints = nonNullConstraints;
     }
 
     public abstract OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
@@ -248,4 +255,16 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
+    @JsonPropertyOrder({
+            "added"
+    })
+    protected static class NonNullConstraints extends JsonOpenObject {
+        @Nonnull
+        public final List<String> added;
+
+        @JsonCreator
+        public NonNullConstraints(@JsonProperty("added") List<String> added) {
+            this.added = added;
+        }
+    }
 }
