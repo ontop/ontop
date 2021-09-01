@@ -300,36 +300,6 @@ public class JsonBasicView extends JsonView {
                 : parser.parseBooleanExpression(plainSelect.getWhere(), new RAExpressionAttributes(parentAttributeMap, null));
     }
 
-    private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
-        SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
-
-        RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
-        IQTree iqTree = iq.getTree();
-
-        ImmutableSet<QuotedID> addedNonNullAttributes = nonNullConstraints == null
-                ? ImmutableSet.of()
-                : nonNullConstraints.added.stream()
-                .map(quotedIdFactory::createAttributeID)
-                .collect(ImmutableCollectors.toSet());
-
-        RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
-
-        for (Variable v : iq.getProjectionAtom().getVariables()) {
-            QuotedID attributeId = rawQuotedIqFactory.createAttributeID(v.getName());
-
-            boolean isNullable = (!addedNonNullAttributes.contains(attributeId))
-                    && iqTree.getVariableNullability().isPossiblyNullable(v);
-
-            builder.addAttribute(attributeId,
-                    (DBTermType) uniqueTermTypeExtractor.extractSingleTermType(v, iqTree)
-                            // TODO: give the name of the view
-                            .orElseThrow(() -> new MetadataExtractionException("No type inferred for " + v + " in " + iq)),
-                    isNullable);
-        }
-        return builder;
-    }
-
     private void insertUniqueConstraints(NamedRelationDefinition relation,
                                          QuotedIDFactory idFactory,
                                          List<AddUniqueConstraints> addUniqueConstraints,

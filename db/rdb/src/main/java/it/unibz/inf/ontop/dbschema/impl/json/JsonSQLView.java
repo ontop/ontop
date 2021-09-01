@@ -181,26 +181,6 @@ public class JsonSQLView extends JsonView {
                         .map(i -> dbRootType).collect(ImmutableCollectors.toList()));
     }
 
-    private RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
-        SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
-        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
-
-        RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
-        IQTree iqTree = iq.getTree();
-
-        RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
-
-        for (Variable v : iq.getProjectionAtom().getVariables()) {
-            builder.addAttribute(rawQuotedIqFactory.createAttributeID(v.getName()),
-                    (DBTermType) uniqueTermTypeExtractor.extractSingleTermType(v, iqTree)
-                            // TODO: give the name of the view
-                            .orElseGet(dbTypeFactory::getAbstractRootDBType),
-                    iqTree.getVariableNullability().isPossiblyNullable(v));
-        }
-        return builder;
-    }
-
     private void insertUniqueConstraints(NamedRelationDefinition relation,
                                          QuotedIDFactory idFactory,
                                          List<JsonSQLView.AddUniqueConstraints> addUniqueConstraints)

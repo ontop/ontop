@@ -11,13 +11,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.dbschema.MetadataLookup;
-import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
-import it.unibz.inf.ontop.dbschema.OntopViewDefinition;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
+import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -58,6 +64,36 @@ public abstract class JsonView extends JsonOpenObject {
     public abstract void insertIntegrityConstraints(NamedRelationDefinition relation,
                                                     ImmutableList<NamedRelationDefinition> baseRelations,
                                                     MetadataLookup metadataLookup) throws MetadataExtractionException;
+
+    protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
+        SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
+        QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
+
+        RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
+        IQTree iqTree = iq.getTree();
+
+        ImmutableSet<QuotedID> addedNonNullAttributes = nonNullConstraints == null
+                ? ImmutableSet.of()
+                : nonNullConstraints.added.stream()
+                .map(quotedIdFactory::createAttributeID)
+                .collect(ImmutableCollectors.toSet());
+
+        RawQuotedIDFactory rawQuotedIqFactory = new RawQuotedIDFactory(quotedIdFactory);
+
+        for (Variable v : iq.getProjectionAtom().getVariables()) {
+            QuotedID attributeId = rawQuotedIqFactory.createAttributeID(v.getName());
+
+            boolean isNullable = (!addedNonNullAttributes.contains(attributeId))
+                    && iqTree.getVariableNullability().isPossiblyNullable(v);
+
+            builder.addAttribute(attributeId,
+                    (DBTermType) uniqueTermTypeExtractor.extractSingleTermType(v, iqTree)
+                            // TODO: give the name of the view
+                            .orElseThrow(() -> new MetadataExtractionException("No type inferred for " + v + " in " + iq)),
+                    isNullable);
+        }
+        return builder;
+    }
 
 
     @JsonPropertyOrder({
