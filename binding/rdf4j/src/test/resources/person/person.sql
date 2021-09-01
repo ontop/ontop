@@ -2,7 +2,7 @@ create table "person" (
                           "id" int primary key,
                           "fullName" varchar(100) NOT NULL,
                           "status" int NOT NULL,
-                          "country" varchar(100) NOT NULL,
+                          "country" varchar(100) NULL,
                           "locality" varchar(100) NOT NULL
 );
 
