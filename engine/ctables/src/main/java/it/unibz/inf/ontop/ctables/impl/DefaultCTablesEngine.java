@@ -196,9 +196,6 @@ public final class DefaultCTablesEngine implements CTablesEngine {
         // Operate within a single connection
         try (Connection conn = this.connectionFactory.get()) {
 
-            // TODO: need to disable transactions to support embedded TEIID (fix)
-            conn.setTransactionIsolation(Connection.TRANSACTION_NONE);
-
             // Wipe out the content of computed tables (TODO: incremental update)
             for (final String target : this.ruleset.getTargets()) {
                 evalUpdate(conn, "DELETE FROM " + target);
@@ -255,7 +252,7 @@ public final class DefaultCTablesEngine implements CTablesEngine {
                 final int numColumns = meta.getColumnCount();
                 signature = new String[numColumns];
                 for (int i = 1; i <= numColumns; ++i) {
-                    signature[i - 1] = meta.getColumnName(i);
+                    signature[i - 1] = meta.getColumnLabel(i);
                 }
 
                 // Extract result tuples
