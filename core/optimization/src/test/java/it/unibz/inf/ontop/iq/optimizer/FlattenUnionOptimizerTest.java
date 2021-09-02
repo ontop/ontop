@@ -236,7 +236,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0, X)));
-        queryBuilder2.addChild(unionNode1, innerJoinNode);
+        ConstructionNode newSubConstructionNode1 = IQ_FACTORY.createConstructionNode(unionNode1.getVariables());
+        queryBuilder2.addChild(unionNode1, newSubConstructionNode1);
+        queryBuilder2.addChild(newSubConstructionNode1, innerJoinNode);
         queryBuilder2.addChild(innerJoinNode, dataNode2);
         queryBuilder2.addChild(innerJoinNode, unionNode2);
         queryBuilder2.addChild(unionNode2, IQ_FACTORY.createExtensionalDataNode(
@@ -293,7 +295,9 @@ public class FlattenUnionOptimizerTest {
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, dataNode1);
-        queryBuilder2.addChild(unionNode1, innerJoinNode);
+        ConstructionNode newSubConstructionNode1 = IQ_FACTORY.createConstructionNode(unionNode1.getVariables());
+        queryBuilder2.addChild(unionNode1, newSubConstructionNode1);
+        queryBuilder2.addChild(newSubConstructionNode1, innerJoinNode);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
                 TABLE2_AR2, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(innerJoinNode, dataNode3);
