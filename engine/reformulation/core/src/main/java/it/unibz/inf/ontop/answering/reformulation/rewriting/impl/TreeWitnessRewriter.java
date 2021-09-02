@@ -425,6 +425,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 .filter(v -> joined.stream().allMatch(j -> j.getVariables().contains(v)))
                 .collect(ImmutableCollectors.toSet());
 
-        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), joined));
+        ImmutableList<IQTree> unionChildren = joined.stream()
+                .map(c -> c.getVariables().equals(vars)
+                        ? c
+                        : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(vars), c))
+                .collect(ImmutableCollectors.toList());
+
+        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), unionChildren));
     }
 }
