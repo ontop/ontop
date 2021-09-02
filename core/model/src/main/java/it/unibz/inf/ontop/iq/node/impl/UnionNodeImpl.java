@@ -336,10 +336,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableSet<Variable> unionVariables = getVariables();
 
         for (IQTree child : children) {
-            if (!child.getVariables().containsAll(unionVariables)) {
+            if (!child.getVariables().equals(unionVariables)) {
                 throw new InvalidIntermediateQueryException("This child " + child
-                        + " does not project all the variables " +
-                        "required by the UNION node (" + unionVariables + ")\n" + this);
+                        + " does not project exactly all the variables " +
+                        "of the UNION node (" + unionVariables + ")\n" + this);
             }
         }
     }
