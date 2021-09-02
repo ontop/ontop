@@ -91,7 +91,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         Variable proposedVariable = variableGenerator.generateNewVariableIfConflicting(v);
         if (proposedVariable.equals(v)
-                // Makes sure that a "fresh" variable does not exists in the variable set
+                // Makes sure that a "fresh" variable does not exist in the variable set
                 || (!variables.contains(proposedVariable)))
             return proposedVariable;
 

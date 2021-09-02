@@ -433,7 +433,7 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
 
     @Test
     public void testFindMovieTitlesProducedByProductionCompaniesInEasternAsia() throws Exception {
-        countResults(8513, "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
+        countResults(8519, "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
                 "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
                 "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
                 "SELECT ?y ?name ?movie_title ?prod_year\n" +
