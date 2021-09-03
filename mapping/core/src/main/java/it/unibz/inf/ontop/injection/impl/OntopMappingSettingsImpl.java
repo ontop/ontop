@@ -46,4 +46,7 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     public boolean isCanIRIComplete() {
         return getRequiredBoolean(IS_CANONICAL_IRI_COMPLETE);
     }
+
+    @Override
+    public boolean isValuesNodeEnabled() { return getRequiredBoolean(OntopMappingSettings.ENABLE_VALUES_NODE);}
 }

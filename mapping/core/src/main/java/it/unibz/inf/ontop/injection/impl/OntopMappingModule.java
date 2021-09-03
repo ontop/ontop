@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.transformer.QueryUnionSplitter;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.ABoxFactIntoMappingConverterImpl;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.LegacyABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
@@ -31,7 +33,12 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingVariableNameNormalizer.class);
         bindFromSettings(MappingSaturator.class);
         bindFromSettings(MappingCanonicalTransformer.class);
-        bindFromSettings(ABoxFactIntoMappingConverter.class);
+        // Used to enable/disable the new values node feature since v4.2.0
+        if (configuration.getSettings().isValuesNodeEnabled()) {
+            bind(ABoxFactIntoMappingConverter.class).to(ABoxFactIntoMappingConverterImpl.class);
+        } else {
+            bind(ABoxFactIntoMappingConverter.class).to(LegacyABoxFactIntoMappingConverter.class);
+        }
         bindFromSettings(MappingDatatypeFiller.class);
         bindFromSettings(MappingTransformer.class);
         bindFromSettings(MappingOntologyComplianceValidator.class);
