@@ -33,12 +33,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingVariableNameNormalizer.class);
         bindFromSettings(MappingSaturator.class);
         bindFromSettings(MappingCanonicalTransformer.class);
-        // Used to enable/disable the new values node feature since v4.2.0
-        if (configuration.getSettings().isValuesNodeEnabled()) {
-            bind(ABoxFactIntoMappingConverter.class).to(ABoxFactIntoMappingConverterImpl.class);
-        } else {
-            bind(ABoxFactIntoMappingConverter.class).to(LegacyABoxFactIntoMappingConverter.class);
-        }
+        bindFromSettings(ABoxFactIntoMappingConverter.class);
         bindFromSettings(MappingDatatypeFiller.class);
         bindFromSettings(MappingTransformer.class);
         bindFromSettings(MappingOntologyComplianceValidator.class);
