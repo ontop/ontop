@@ -29,18 +29,23 @@ import java.util.stream.Stream;
 
 /**
  * When an UNION appears as a child of an inner join, looks for other siblings that could be "pushed under the union".
- *
+ * <p>
  * Criteria for selecting siblings: must be leaf and must naturally join (i.e. share a variable) with the union.
  *
+ *
  * Example:
+ * <pre>
  *   JOIN
  *     T1(x,y)
  *     UNION(x,z)
  *       T2(x,z)
  *       T3(x,z)
  *     T4(w)
- *
+ * </pre>
+ *  
  *  becomes
+ *  
+ *  <pre>
  *    JOIN
  *      UNION(x,z)
  *        JOIN
@@ -50,9 +55,8 @@ import java.util.stream.Stream;
  *          T3(x,z)
  *          T1(x,y)
  *      T4(w)
- *
+ * </pre>
  * TODO: shall we consider also the joining condition for pushing more siblings?
- *
  */
 @Singleton
 public class AvoidJoinAboveUnionPlanner implements QueryPlanner {

@@ -8,6 +8,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -28,7 +29,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * See TranslationFactory for creating a new instance.
+ * See {@link TranslationFactory} for creating a new instance.
  */
 public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
@@ -38,6 +39,9 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     private final UnionBasedQueryMerger queryMerger;
     private final CoreUtilsFactory coreUtilsFactory;
 
+    /**
+     * See {@link TranslationFactory#create(Mapping)}
+     */
     @AssistedInject
     private BasicQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
