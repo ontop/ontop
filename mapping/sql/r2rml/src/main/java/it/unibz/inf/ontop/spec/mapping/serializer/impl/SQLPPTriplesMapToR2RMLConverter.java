@@ -68,25 +68,26 @@ public class SQLPPTriplesMapToR2RMLConverter {
 
 		// check if mapping id is an iri
 		String mapping_id = triplesMap.getId();
-		String mainNodeURLPrefix = !mapping_id.contains(":")
+		String mainNodeIriPrefix = !mapping_id.contains(":")
 				? baseIRIString + mapping_id
 				: mapping_id;
 
-		LogicalTable logicalTable = mappingFactory.createR2RMLView(triplesMap.getSourceQuery().getSQL());
-
-		ImmutableList<Map.Entry<RDFAtomPredicate, TargetAtom>> targetAtoms = triplesMap.getTargetAtoms().stream()
+		ImmutableMap<ImmutableTerm, Collection<Map.Entry<RDFAtomPredicate, TargetAtom>>> subjectMap = triplesMap.getTargetAtoms().stream()
 				.filter(t -> t.getProjectionAtom().getPredicate() instanceof RDFAtomPredicate)
 				.map(t -> Maps.immutableEntry((RDFAtomPredicate)t.getProjectionAtom().getPredicate(), t))
-				.collect(ImmutableCollectors.toList());
-
-		ImmutableMap<ImmutableTerm, Collection<Map.Entry<RDFAtomPredicate, TargetAtom>>> subjectMap = targetAtoms.stream()
 				.collect(ImmutableCollectors.toMultimap(
 						e -> e.getKey().getSubject(e.getValue().getSubstitutedTerms()),
 						e -> e))
 				.asMap();
 
+		String sql = triplesMap.getSourceQuery().getSQL();
+
 		return subjectMap.entrySet().stream()
-				.flatMap(e -> processSameSubjectGroup(logicalTable, e.getKey(), e.getValue(), mainNodeURLPrefix));
+				.flatMap(e -> processSameSubjectGroup(mappingFactory.createR2RMLView(sql), e.getKey(), e.getValue(),
+						// do not create triples map with the same name in case of multiple subjects
+						subjectMap.size() == 1
+								? mainNodeIriPrefix
+								: mainNodeIriPrefix + "-" + UUID.randomUUID()));
 	}
 
 	private Stream<TriplesMap> processSameSubjectGroup(LogicalTable logicalTable,
@@ -110,9 +111,9 @@ public class SQLPPTriplesMapToR2RMLConverter {
 													Collection<Map.Entry<RDFAtomPredicate, TargetAtom>> targetAtoms,
 													String mainNodeIriPrefix) {
 
-		// Make sure we don't create triples map with the same name in case of multiple named graphs
+		// do not create triples map with the same name in case of multiple named graphs
 		IRI iri = rdfFactory.createIRI(
-				graph.map(t -> mainNodeIriPrefix + "-" + UUID.randomUUID().toString())
+				graph.map(t -> mainNodeIriPrefix + "-" + UUID.randomUUID())
 						.orElse(mainNodeIriPrefix));
 
 		TriplesMap tm = mappingFactory.createTriplesMap(logicalTable, getTermMap(subject, subjectTermMapFactorySupplier), iri);
