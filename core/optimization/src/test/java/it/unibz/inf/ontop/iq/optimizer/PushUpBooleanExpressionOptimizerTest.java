@@ -426,8 +426,14 @@ public class PushUpBooleanExpressionOptimizerTest {
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(W, X, Z));
 
         queryBuilder1.init(projectionAtom, unionNode1);
-        queryBuilder1.addChild(unionNode1, filterNode1);
-        queryBuilder1.addChild(unionNode1, filterNode2);
+
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(unionNode1.getVariables());
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(unionNode1.getVariables());
+
+        queryBuilder1.addChild(unionNode1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, filterNode1);
+        queryBuilder1.addChild(unionNode1, constructionNode2);
+        queryBuilder1.addChild(constructionNode2, filterNode2);
         queryBuilder1.addChild(filterNode1, dataNode1);
         queryBuilder1.addChild(filterNode2, dataNode2);
         IntermediateQuery query1 = queryBuilder1.build();
