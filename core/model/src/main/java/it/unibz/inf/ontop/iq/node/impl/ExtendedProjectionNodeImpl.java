@@ -316,6 +316,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
     }
 
-    protected class EmptyTreeException extends Exception {
+    protected static class EmptyTreeException extends Exception {
     }
 }

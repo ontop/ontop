@@ -30,7 +30,7 @@ public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimize
                 .reduce(query,
                         (q, o) -> o.optimize(q),
                         (q1, q2) -> {
-                    throw  new MinorOntopInternalBugException("Merge is not supported");
+                            throw new MinorOntopInternalBugException("Merge is not supported");
                         });
     }
 }

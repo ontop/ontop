@@ -8,11 +8,13 @@ import it.unibz.inf.ontop.model.type.*;
 import java.util.Optional;
 
 /**
- * Takes a RDF type term as input.
+ * Takes an RDF type term as input.
  * Returns
- *   * NULL if it is not a literal
- *   * "" if the literal type does not have a language tag
- *   * the language tag if available
+ * <ul>
+ *   <li> NULL if it is not a literal </li>
+ *   <li> "" if the literal type does not have a language tag </li>
+ *   <li> the language tag if available </li>
+ * </ul>  
  */
 public class LangTagFunctionSymbolImpl extends FunctionSymbolImpl {
 
