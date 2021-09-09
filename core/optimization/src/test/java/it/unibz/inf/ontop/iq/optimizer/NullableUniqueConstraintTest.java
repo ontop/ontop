@@ -146,6 +146,69 @@ public class NullableUniqueConstraintTest {
     }
 
     @Test
+    public void testJoinOnLeft3() {
+        ExtensionalDataNode leftNode1 =  IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
+        ExtensionalDataNode leftNode2 =  IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, A));
+        ExtensionalDataNode rightNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, H, G));
+        ExtensionalDataNode rightNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(1, G));
+
+        NaryIQTree rightJoin = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(rightNode1, rightNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, A, H, I);
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(leftNode1, leftNode2));
+
+        UnaryIQTree rightTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(A, H, I),
+                        SUBSTITUTION_FACTORY.getSubstitution(I, TERM_FACTORY.getProvenanceSpecialConstant())),
+                rightJoin);
+
+        IQTree initialTree =
+                IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                        IQ_FACTORY.createLeftJoinNode(), joinTree,
+                        rightTree);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ImmutableFunctionalTerm hDefinition = TERM_FACTORY.getIfElseNull(TERM_FACTORY.getDBIsNotNull(I), HF0);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        H, hDefinition));
+
+        ExtensionalDataNode newLeftNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, HF0, GF1));
+
+        ExtensionalDataNode newLeftNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2, ImmutableMap.of(0, A));
+
+        NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(newLeftNode1, newLeftNode2));
+
+        ExtensionalDataNode newRightNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2, ImmutableMap.of(1, GF1));
+
+        UnaryIQTree newRightTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(GF1, I),
+                        SUBSTITUTION_FACTORY.getSubstitution(I, TERM_FACTORY.getProvenanceSpecialConstant())),
+                newRightNode1);
+
+        IQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                newJoinTree, newRightTree);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(newConstructionNode, newLeftJoinTree));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
     public void testNotSimplified1() {
         ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A));
         ExtensionalDataNode rightNode = createExtensionalDataNode(TABLE1, ImmutableList.of(A, TWO, G));
@@ -308,7 +371,7 @@ public class NullableUniqueConstraintTest {
 
     private void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(
-                initialIQ.normalizeForOptimization(), EXECUTOR_REGISTRY);
+                initialIQ.normalizeForOptimization());
 
         assertEquals(expectedIQ, optimizedIQ);
     }

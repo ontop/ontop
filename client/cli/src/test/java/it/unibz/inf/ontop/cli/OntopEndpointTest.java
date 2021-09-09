@@ -5,6 +5,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -48,7 +49,6 @@ public class OntopEndpointTest {
 
     @Test
     public void testQuery() {
-
         String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
         Repository repo = new SPARQLRepository(sparqlEndpoint);
         repo.initialize();
@@ -65,6 +65,26 @@ public class OntopEndpointTest {
             try (TupleQueryResult result = tupleQuery.evaluate()) {
                 while (result.hasNext()) {  // iterate over the result
                     BindingSet bindingSet = result.next();
+                    //Value movie = bindingSet.getValue("teacher");
+                    System.out.println(bindingSet);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testDescribeQuery() {
+        String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";
+        Repository repo = new SPARQLRepository(sparqlEndpoint);
+        repo.initialize();
+
+        try (RepositoryConnection conn = repo.getConnection()) {
+            String queryString = "DESCRIBE <http://meraka/moss/exampleBooks.owl#book/10/>";
+            GraphQuery graphQuery = conn.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+            //TupleQueryResult result = tupleQuery.evaluate();
+            try (GraphQueryResult result = graphQuery.evaluate()) {
+                while (result.hasNext()) {  // iterate over the result
+                    Statement bindingSet = result.next();
                     //Value movie = bindingSet.getValue("teacher");
                     System.out.println(bindingSet);
                 }

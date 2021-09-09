@@ -136,8 +136,8 @@ if [ -z "${ONTOP_FILE_ENCODING}" ]; then
   ONTOP_FILE_ENCODING="UTF-8"
 fi
 
-echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
- it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
+# echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
+# it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
 
 java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dfile.encoding=${ONTOP_FILE_ENCODING} -Dlogging.config="${LOGBACK_CONFIG_FILE}" \
  it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"

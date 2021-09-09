@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -30,18 +29,23 @@ import java.util.stream.Stream;
 
 /**
  * When an UNION appears as a child of an inner join, looks for other siblings that could be "pushed under the union".
- *
+ * <p>
  * Criteria for selecting siblings: must be leaf and must naturally join (i.e. share a variable) with the union.
  *
+ *
  * Example:
+ * <pre>
  *   JOIN
  *     T1(x,y)
  *     UNION(x,z)
  *       T2(x,z)
  *       T3(x,z)
  *     T4(w)
- *
+ * </pre>
+ *  
  *  becomes
+ *  
+ *  <pre>
  *    JOIN
  *      UNION(x,z)
  *        JOIN
@@ -51,9 +55,8 @@ import java.util.stream.Stream;
  *          T3(x,z)
  *          T1(x,y)
  *      T4(w)
- *
+ * </pre>
  * TODO: shall we consider also the joining condition for pushing more siblings?
- *
  */
 @Singleton
 public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
@@ -78,12 +81,12 @@ public class AvoidJoinAboveUnionPlanner implements QueryPlanner {
      * If something has been pushed, it re-applies the structural and semantic optimizations.
      */
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         IQ liftedQuery = lift(query);
         return liftedQuery.equals(query)
                 ? query
                 // Re-applies the structural and semantic optimizations
-                : generalOptimizer.optimize(liftedQuery, executorRegistry);
+                : generalOptimizer.optimize(liftedQuery);
     }
 
     protected IQ lift(IQ query) {

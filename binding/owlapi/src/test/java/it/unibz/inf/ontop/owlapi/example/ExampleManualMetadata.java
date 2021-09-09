@@ -43,8 +43,7 @@ public class ExampleManualMetadata {
 		Injector injector = configuration.getInjector();
 		OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
-		queryEngine = engineFactory.create(configuration.loadSpecification(),
-				configuration.getExecutorRegistry());
+		queryEngine = engineFactory.create(configuration.loadSpecification());
 		queryEngine.connect();
 
 		/*

@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.answering.connection.DBConnector;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 public class OntopQueryEngineImpl implements OntopQueryEngine {
@@ -20,10 +19,9 @@ public class OntopQueryEngineImpl implements OntopQueryEngine {
 
     @AssistedInject
     private OntopQueryEngineImpl(@Assisted OBDASpecification obdaSpecification,
-                                 @Assisted ExecutorRegistry executorRegistry,
                                  ReformulationFactory translationFactory,
                                  OntopSystemFactory systemFactory) {
-        queryReformulator = translationFactory.create(obdaSpecification, executorRegistry);
+        queryReformulator = translationFactory.create(obdaSpecification);
         dbConnector = systemFactory.create(queryReformulator);
     }
 

@@ -16,12 +16,16 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
+    private static final Logger log = LoggerFactory.getLogger(MappingCQCOptimizerImpl.class);
+    
     private final IntermediateQueryFactory iqFactory;
     private final CoreSingletons coreSingletons;
 
@@ -69,7 +73,8 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables,
                                         IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
                                 new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(children, coreSingletons)))) {
-                            System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
+                            //System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
+                            log.debug("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             children = subChildren;
                             if (children.size() < 2)
                                 break;

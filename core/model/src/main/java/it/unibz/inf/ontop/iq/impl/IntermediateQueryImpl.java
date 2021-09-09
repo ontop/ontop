@@ -6,15 +6,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeException;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.proposal.ProposalResults;
-import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -56,8 +50,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
-    private final ExecutorRegistry executorRegistry;
-
     private final IntermediateQueryValidator validator;
 
     private final OntopModelSettings settings;
@@ -69,12 +61,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * For IntermediateQueryBuilders ONLY!!
      */
     public IntermediateQueryImpl(DistinctVariableOnlyDataAtom projectionAtom,
-                                 QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
+                                 QueryTreeComponent treeComponent,
                                  IntermediateQueryValidator validator, OntopModelSettings settings,
                                  IntermediateQueryFactory iqFactory) {
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
-        this.executorRegistry = executorRegistry;
         this.validator = validator;
         this.settings = settings;
         this.iqFactory = iqFactory;
@@ -96,7 +87,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public IntermediateQuery createSnapshot() {
         return new IntermediateQueryImpl(projectionAtom, treeComponent.createSnapshot(),
-                executorRegistry, validator, settings, iqFactory);
+                validator, settings, iqFactory);
     }
 
     @Override
@@ -125,7 +116,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQueryBuilder newBuilder() {
-        return iqFactory.createIQBuilder(executorRegistry);
+        return iqFactory.createIQBuilder();
     }
 
     @Override
@@ -192,34 +183,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public boolean contains(QueryNode node) {
         return treeComponent.contains(node);
-    }
-
-    @Override
-    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
-                                                                                               boolean disableValidationTests)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-
-        if ((!disableValidationTests) && settings.isTestModeEnabled()) {
-            validate();
-        }
-
-        ProposalExecutor<P, R> executor = executorRegistry.getExecutor(proposal);
-
-        /**
-         * Has a SIDE-EFFECT on the tree component.
-         */
-        R results = executor.apply(proposal, this, treeComponent);
-        if ((!disableValidationTests) && settings.isTestModeEnabled()) {
-            validate();
-        }
-
-        return results;
-    }
-
-    @Override
-    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        return applyProposal(propagationProposal, false);
     }
 
     @Override
@@ -312,11 +275,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ExecutorRegistry getExecutorRegistry() {
-        return executorRegistry;
-    }
-
-    @Override
     public IntermediateQueryFactory getFactory() {
         return iqFactory;
     }
@@ -353,7 +311,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQuery getSubquery(QueryNode subQueryRoot, DistinctVariableOnlyDataAtom projectionAtom) {
-        IntermediateQueryBuilder builder = iqFactory.createIQBuilder(executorRegistry);
+        IntermediateQueryBuilder builder = iqFactory.createIQBuilder();
         builder.init(projectionAtom, subQueryRoot);
         builder.appendSubtree(subQueryRoot, this);
         return builder.build();

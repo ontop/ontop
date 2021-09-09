@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import java.util.List;
+
 public class DelegatingMetadataProvider implements MetadataProvider {
 
     protected final MetadataProvider provider;
@@ -15,6 +17,11 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     @Override
     public DBParameters getDBParameters() {
         return provider.getDBParameters();
+    }
+
+    @Override
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+        provider.normalizeRelations(relationDefinitions);
     }
 
     @Override

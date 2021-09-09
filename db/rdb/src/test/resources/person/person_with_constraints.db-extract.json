@@ -19,10 +19,16 @@
       "name" : "\"status\"",
       "datatype" : "INTEGER",
       "isNullable" : false
-    }, {
+    },
+      {
+        "name" : "\"statusDescription\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : false
+      },
+      {
       "name" : "\"country\"",
       "datatype" : "VARCHAR",
-      "isNullable" : false
+      "isNullable" : true
     }, {
       "name" : "\"locality\"",
       "datatype" : "VARCHAR",

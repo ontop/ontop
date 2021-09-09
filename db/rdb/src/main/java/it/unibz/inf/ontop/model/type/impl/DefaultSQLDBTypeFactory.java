@@ -296,6 +296,11 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
+    public boolean supportsDBDistanceSphere() {
+        return false;
+    }
+
+    @Override
     public DBTermType getDBHexBinaryType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.HEXBINARY));
     }

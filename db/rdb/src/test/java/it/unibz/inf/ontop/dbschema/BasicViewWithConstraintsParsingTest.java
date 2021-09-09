@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BasicViewWithConstraintsParsingTest {
     private static final String VIEW_FILE = "src/test/resources/person/basic_views_with_constraints.json";
@@ -121,6 +123,39 @@ public class BasicViewWithConstraintsParsingTest {
                 .map(ForeignKeyConstraint::getName)
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableSet.of("status_id_fkey"), fk_name);
+        assertEquals(ImmutableSet.of("status_id_fkey", "status_desc_fkey"), fk_name);
+    }
+
+    /**
+     * Composite foreign key
+     */
+    @Test
+    public void testCompositeForeignKey() throws Exception {
+        ImmutableList<String> destination_column = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
+                .flatMap(Collection::stream)
+                .filter(fk -> fk.getName().equals("status_desc_fkey"))
+                .map(ForeignKeyConstraint::getComponents)
+                .flatMap(Collection::stream)
+                .map(c -> c.getAttribute().getID().getName())
+                .collect(ImmutableCollectors.toList());
+
+        assertEquals(ImmutableList.of("status", "statusDescription"), destination_column);
+    }
+
+
+    /**
+     * Non-null constraint taken into account
+     */
+    @Test
+    public void testPersonAddNonNullConstraint() throws Exception {
+        ImmutableSet<String> nonNullColumns = viewDefinitions.stream()
+                .map(RelationDefinition::getAttributes)
+                .flatMap(Collection::stream)
+                .filter(a -> !a.isNullable())
+                .map(v -> v.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertTrue(nonNullColumns.contains("country"));
     }
 }
