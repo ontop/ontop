@@ -97,7 +97,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
         return false;
     }
 
-    /***
+    /**
      * MUST detect ALL the cases where the SPARQL function would produce an error (that is a NULL)
      * {@code ---> } the resulting condition must determine if the output of the SPARQL function is NULL (evaluates to FALSE or NULL)
      *      or not (evaluates to TRUE).

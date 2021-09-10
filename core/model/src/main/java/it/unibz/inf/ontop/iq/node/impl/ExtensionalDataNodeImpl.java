@@ -65,6 +65,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
      */
+    @SuppressWarnings("unused")
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
