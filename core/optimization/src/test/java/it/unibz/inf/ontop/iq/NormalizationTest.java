@@ -2808,7 +2808,7 @@ public class NormalizationTest {
                 ImmutableList.of(leftChild1, leftChild2));
 
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of(0, C, 1, Y));
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE13_AR2, ImmutableMap.of(0, C, 1, Y));
         BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
                 unionTree, rightDataNode);
@@ -2827,7 +2827,22 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
-        normalizeAndCompare(initialIQ, initialIQ);
+
+        UnaryIQTree newFilterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBBooleanCoalesce(
+                        ImmutableList.of(
+                                TERM_FACTORY.getStrictEquality(rightXDef, X),
+                                TERM_FACTORY.getStrictEquality(zDef, X)))),
+                leftJoinTree);
+
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables()),
+                newFilterTree);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
     }
 
     @Test
@@ -2865,7 +2880,7 @@ public class NormalizationTest {
                 ImmutableList.of(unionTree, leftDataNode3));
 
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of(0, C, 1, Y));
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE13_AR2, ImmutableMap.of(0, C, 1, Y));
         BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
                 leftTree, rightDataNode);
@@ -2884,7 +2899,21 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
-        normalizeAndCompare(initialIQ, initialIQ);
+        UnaryIQTree newFilterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBBooleanCoalesce(
+                        ImmutableList.of(
+                                TERM_FACTORY.getStrictEquality(rightXDef, X),
+                                TERM_FACTORY.getStrictEquality(zDef, X)))),
+                leftJoinTree);
+
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables()),
+                newFilterTree);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
     }
 
 
