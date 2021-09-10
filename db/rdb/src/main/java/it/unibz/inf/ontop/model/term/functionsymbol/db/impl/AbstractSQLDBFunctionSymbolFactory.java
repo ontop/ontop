@@ -588,6 +588,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
+                dbBooleanType,
+                Serializers.getRegularSerializer(COALESCE_STR));
+    }
+
+    @Override
     protected DBStrictEqFunctionSymbol createDBStrictEquality(int arity) {
         return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }
