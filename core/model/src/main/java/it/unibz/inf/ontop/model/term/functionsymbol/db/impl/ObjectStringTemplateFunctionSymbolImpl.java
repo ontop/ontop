@@ -172,8 +172,17 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbolImpl) {
             ObjectStringTemplateFunctionSymbolImpl other = (ObjectStringTemplateFunctionSymbolImpl) otherFunctionSymbol;
 
-            if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, other.safeSeparatorFragments))
-                return IncrementalEvaluation.declareIsFalse();
+            if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, other.safeSeparatorFragments)) {
+                // 3VL: needs to check for term nullability (null: if at least one is null, false otherwise)
+                Optional<ImmutableExpression> newExpression = termFactory.getDisjunction(
+                                Stream.concat(terms.stream(), otherTerm.getTerms().stream())
+                                        .map(termFactory::getDBIsNull))
+                        .map(e -> termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(e)));
+
+                return newExpression
+                        .map(e -> e.evaluate(variableNullability, true))
+                        .orElseGet(IncrementalEvaluation::declareIsFalse);
+            }
 
             if (!other.equals(this))
                 return tryToSimplifyCompatibleTemplates(other, terms, otherTerm, termFactory, variableNullability);

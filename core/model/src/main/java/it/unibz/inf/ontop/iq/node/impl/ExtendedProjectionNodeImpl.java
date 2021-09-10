@@ -265,7 +265,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             throws EmptyTreeException {
 
         ImmutableExpression.Evaluation descendingConstraintResults = theta.applyToBooleanExpression(initialConstraint)
-                .evaluate(variableNullabilityForConstraint);
+                .evaluate2VL(variableNullabilityForConstraint);
 
         if (descendingConstraintResults.isEffectiveFalse())
             throw new EmptyTreeException();
