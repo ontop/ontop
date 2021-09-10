@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.dbschema.OntopViewNormalizer;
 import it.unibz.inf.ontop.dbschema.SerializedMetadataProvider;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
@@ -30,6 +31,7 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
         bindFromSettings(IQTree2SelectFromWhereConverter.class);
         bindFromSettings(DialectExtraNormalizer.class);
         bindFromSettings(IQTree2NativeNodeGenerator.class);
+        bindFromSettings(OntopViewNormalizer.class);
 
         Module sqlAlgebraFactory = buildFactory(
                 ImmutableList.of(

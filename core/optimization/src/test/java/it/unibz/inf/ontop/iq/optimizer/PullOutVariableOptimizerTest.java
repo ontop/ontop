@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
@@ -19,6 +21,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 public class PullOutVariableOptimizerTest {
@@ -459,6 +462,101 @@ public class PullOutVariableOptimizerTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
+    @Test
+    public void testDistinctProjection() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1), B);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, A, 1, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR3, ImmutableMap.of(0, A, 1, C));
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        distinctNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(),
+                                ImmutableList.of(dataNode1, dataNode2))));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR3, ImmutableMap.of(0, AF0, 1, C));
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode newInnerJoinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(A, AF0));
+
+        IQTree newTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                newConstructionNode,
+                                IQ_FACTORY.createNaryIQTree(
+                                        newInnerJoinNode,
+                                        ImmutableList.of(dataNode1, dataNode3)))));
+        IQ expectedQ = IQ_FACTORY.createIQ(projectionAtom, newTree);
+
+        optimize(initialIQ, expectedQ);
+    }
+
+    @Test
+    public void testUnionDistinctProjection() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1), B);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, A, 1, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR3, ImmutableMap.of(0, A, 1, C));
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQTree subTree1 = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        distinctNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(),
+                                ImmutableList.of(dataNode1, dataNode2))));
+
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR3, ImmutableMap.of(2, B));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createUnionNode(projectionAtom.getVariables()),
+                        ImmutableList.of(subTree1, dataNode3)));
+
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR3, ImmutableMap.of(0, AF0, 1, C));
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode newInnerJoinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(A, AF0));
+
+        IQTree newSubTree1 = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                newConstructionNode,
+                                IQ_FACTORY.createNaryIQTree(
+                                        newInnerJoinNode,
+                                        ImmutableList.of(dataNode1, newDataNode2)))));
+        IQ expectedQ = IQ_FACTORY.createIQ(projectionAtom,
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createUnionNode(projectionAtom.getVariables()),
+                        ImmutableList.of(newSubTree1, dataNode3)));
+
+        optimize(initialIQ, expectedQ);
+    }
+
+    private void optimize(IQ initialQuery, IQ expectedQuery) {
+        ExplicitEqualityTransformer eet = OPTIMIZER_FACTORY.createEETransformer(initialQuery.getVariableGenerator());
+        IQ optimizedIQ = IQ_FACTORY.createIQ(
+                        initialQuery.getProjectionAtom(),
+                        eet.transform(initialQuery.getTree()));
+
+        assertEquals(expectedQuery, optimizedIQ);
+    }
+
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IQ iq = IQ_CONVERTER.convert(query);
         ExplicitEqualityTransformer eet = OPTIMIZER_FACTORY.createEETransformer(iq.getVariableGenerator());
@@ -466,8 +564,6 @@ public class PullOutVariableOptimizerTest {
                 IQ_FACTORY.createIQ(
                         iq.getProjectionAtom(),
                         eet.transform(iq.getTree())
-                ),
-                query.getExecutorRegistry()
-        );
+                ));
     }
 }

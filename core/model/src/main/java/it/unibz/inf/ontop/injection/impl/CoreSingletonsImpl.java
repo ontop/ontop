@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -28,7 +28,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
+    private final SingleTermTypeExtractor uniqueTermTypeExtractor;
     private final IntermediateQueryFactory iqFactory;
     private final ImmutableUnificationTools unificationTools;
     private final OntopModelSettings settings;
@@ -41,7 +41,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                FunctionSymbolFactory functionSymbolFactory,
                                DBFunctionSymbolFactory dbFunctionsymbolFactory, AtomFactory atomFactory,
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
-                               UniqueTermTypeExtractor uniqueTermTypeExtractor,
+                               SingleTermTypeExtractor uniqueTermTypeExtractor,
                                IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
                                OntopModelSettings settings,
                                ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer,
@@ -109,7 +109,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     }
 
     @Override
-    public UniqueTermTypeExtractor getUniqueTermTypeExtractor() {
+    public SingleTermTypeExtractor getUniqueTermTypeExtractor() {
         return uniqueTermTypeExtractor;
     }
 

@@ -76,7 +76,7 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 
 			
 			
-			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :CountryWithSpace . }";
+			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country WHERE {?country a :CountryWithSpace . } ORDER BY ?country LIMIT 1";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
 			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");

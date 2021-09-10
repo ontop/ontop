@@ -202,6 +202,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBGeometryType(), dbStringType);
+    }
+
+    @Override
     protected DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType) {
         return new DefaultTypedDBMathBinaryOperator(MULTIPLY_STR, dbNumericType);
     }
@@ -617,6 +622,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public DBFunctionSymbol getDBSTSetSRID() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTGeomFromText() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTMakePoint() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

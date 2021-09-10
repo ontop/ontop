@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Singleton
 public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemover {
@@ -223,11 +224,21 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            UnionNode newUnionNode = iqFactory.createUnionNode(Sets.difference(rootNode.getVariables(), variablesToRemove)
-                    .immutableCopy());
+            ImmutableSet<Variable> newVariables = Sets.difference(rootNode.getVariables(), variablesToRemove)
+                    .immutableCopy();
+            UnionNode newUnionNode = iqFactory.createUnionNode(newVariables);
+
+            if (rootNode.equals(newUnionNode))
+                return tree.normalizeForOptimization(variableGenerator);
+
+            ImmutableList<IQTree> newChildren = children.stream()
+                    .map(c -> c.getVariables().equals(newVariables)
+                            ? c
+                            : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(newVariables), c))
+                    .collect(ImmutableCollectors.toList());
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
-            return iqFactory.createNaryIQTree(newUnionNode, children)
+            return iqFactory.createNaryIQTree(newUnionNode, newChildren)
                     .normalizeForOptimization(variableGenerator);
         }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.github.jsonldjava.shaded.com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
@@ -18,11 +19,15 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class JsonSerializedMetadataProvider implements SerializedMetadataProvider {
 
     private final DBParameters dbParameters;
     private final ImmutableMap<RelationID, JsonDatabaseTable> relationMap;
+    private final ImmutableMap<RelationID, RelationID> otherNames;
 
 
     @AssistedInject
@@ -39,9 +44,18 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
                 idFactory,
                 coreSingletons);
 
-        // TODO: add to all
         relationMap = jsonMetadata.relations.stream()
                 .collect(ImmutableCollectors.toMap(t -> JsonMetadata.deserializeRelationID(idFactory, t.name), t -> t));
+
+        otherNames = jsonMetadata.relations.stream()
+                .flatMap(t -> {
+                    RelationID mainId = JsonMetadata.deserializeRelationID(idFactory, t.name);
+                    return t.otherNames.stream()
+                            .map(n -> JsonMetadata.deserializeRelationID(idFactory, n))
+                            .filter(n -> !n.equals(mainId))
+                            .map(id -> Maps.immutableEntry(id, mainId));
+                })
+                .collect(ImmutableCollectors.toMap());
     }
 
 
@@ -69,9 +83,15 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     @Override
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         JsonDatabaseTable jsonTable = relationMap.get(id);
-        if (jsonTable == null)
-            throw new IllegalArgumentException("The relation " + id.getSQLRendering()
-                    + " is unknown to the JsonSerializedMetadataProvider");
+        if (jsonTable == null) {
+            RelationID mainId = otherNames.get(id);
+
+            if (mainId == null)
+                throw new IllegalArgumentException("The relation " + id.getSQLRendering()
+                        + " is unknown to the JsonSerializedMetadataProvider");
+
+            return getRelation(mainId);
+        }
 
         return jsonTable.createDatabaseTableDefinition(dbParameters);
     }
@@ -99,5 +119,10 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     @Override
     public DBParameters getDBParameters() {
         return dbParameters;
+    }
+
+    @Override
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+        // Does nothing
     }
 }

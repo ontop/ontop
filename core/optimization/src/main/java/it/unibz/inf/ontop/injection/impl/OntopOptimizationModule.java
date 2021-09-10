@@ -8,14 +8,6 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
-import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
-import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
-import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
-import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
-import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
-import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
-import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
-import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -42,19 +34,9 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bind(OntopOptimizationSettings.class).toInstance(configuration.getSettings());
 
         // Executors
-        bindFromSettings(InnerJoinExecutor.class);
-        bindFromSettings(SubstitutionPropagationExecutor.class);
         bindFromSettings(UnionBasedQueryMerger.class);
-        bindFromSettings(UnionLiftExecutor.class);
-        bindFromSettings(LeftJoinExecutor.class);
-        bindFromSettings(ProjectionShrinkingExecutor.class);
-        bindFromSettings(FlattenUnionExecutor.class);
-        bindFromSettings(ConstructionNodeCleaningExecutor.class);
-        bindFromSettings(InnerJoinMutableOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
-        bindFromSettings(LeftJoinMutableOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
-        bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
         bindFromSettings(UnionFlattener.class);
         bindFromSettings(TermTypeTermLifter.class);
@@ -69,7 +51,9 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(SelfJoinSameTermIQOptimizer.class);
         bindFromSettings(RequiredExtensionalDataNodeExtractor.class);
         bindFromSettings(SelfJoinUCIQOptimizer.class);
+        bindFromSettings(RedundantJoinFKOptimizer.class);
         bindFromSettings(OntopViewUnfolder.class);
+        bindFromSettings(AggregationSplitter.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 

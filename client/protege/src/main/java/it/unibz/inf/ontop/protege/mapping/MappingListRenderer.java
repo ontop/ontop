@@ -33,6 +33,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
+import java.util.Arrays;
 
 public class MappingListRenderer extends JPanel implements ListCellRenderer<TriplesMap> {
 
@@ -190,9 +191,11 @@ public class MappingListRenderer extends JPanel implements ListCellRenderer<Trip
 
 		int textTargetHeight = minTextHeight * getTargetQueryLinesNumber(textWidth);
 		trgQueryTextPane.setPreferredSize(new Dimension(textWidth, textTargetHeight));
-
-		int maxChars = (textWidth / plainFontWidth) - 10;
-		int linesSource = srcQueryTextPane.getText().length() / maxChars + 1;
+		
+		int maxChars = textWidth / plainFontWidth;
+		int linesSource = Arrays.stream(srcQueryTextPane.getText().split("\\r?\\n"))
+				.mapToInt(line -> (int) (Math.ceil(line.length() / (double) maxChars)))
+				.sum();
 		int textSourceHeight = minTextHeight * linesSource;
 		srcQueryTextPane.setPreferredSize(new Dimension(textWidth, textSourceHeight));
 
