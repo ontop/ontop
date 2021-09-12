@@ -72,7 +72,7 @@ public class MultipleOptionalsTest extends AbstractRDF4JTest {
                 "  OPTIONAL { ?source rdfs:label ?v . " +
                 "  FILTER (LANG(?v) = 'de')}\n" +
                 "}";
-        runQueryAndCompare(query, ImmutableList.of("german", "french", "english"));
+        runQueryAndCompare(query, ImmutableList.of("french", "german", "english"));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class MultipleOptionalsTest extends AbstractRDF4JTest {
                 "  OPTIONAL { ?source rdfs:label ?v . " +
                 "  FILTER (LANG(?v) = 'zh')}\n" +
                 "}";
-        runQueryAndCompare(query, ImmutableList.of("chinese", "german", "english", "french"));
+        runQueryAndCompare(query, ImmutableList.of("chinese", "german", "french", "english"));
     }
 
     @Test
