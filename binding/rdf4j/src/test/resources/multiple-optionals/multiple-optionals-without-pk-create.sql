@@ -1,5 +1,5 @@
 CREATE TABLE data (
-                      id integer PRIMARY KEY NOT NULL,
+                      id integer NOT NULL,
                       label character varying(10),
                       language character varying(10)
 );
