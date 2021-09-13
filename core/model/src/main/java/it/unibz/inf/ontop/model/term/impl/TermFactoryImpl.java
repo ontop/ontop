@@ -1047,7 +1047,14 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCoalesce(terms.size()), terms);
     }
 
-    @Override
+	@Override
+	public ImmutableExpression getDBBooleanCoalesce(ImmutableList<ImmutableTerm> terms) {
+		if (terms.size() < 1)
+			throw new IllegalArgumentException("At least one argument is expected");
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanCoalesce(terms.size()), terms);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
 	}

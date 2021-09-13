@@ -385,6 +385,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
 
+	ImmutableExpression getDBBooleanCoalesce(ImmutableList<ImmutableTerm> terms);
+
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
 
 	ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -2808,7 +2809,7 @@ public class NormalizationTest {
                 ImmutableList.of(leftChild1, leftChild2));
 
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of(0, C, 1, Y));
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE13_AR2, ImmutableMap.of(0, C, 1, Y));
         BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
                 unionTree, rightDataNode);
@@ -2827,7 +2828,22 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
-        normalizeAndCompare(initialIQ, initialIQ);
+
+        UnaryIQTree newFilterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBBooleanCoalesce(
+                        ImmutableList.of(
+                                TERM_FACTORY.getStrictEquality(rightXDef, X),
+                                TERM_FACTORY.getStrictEquality(zDef, X)))),
+                leftJoinTree);
+
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables()),
+                newFilterTree);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
     }
 
     @Test
@@ -2865,7 +2881,7 @@ public class NormalizationTest {
                 ImmutableList.of(unionTree, leftDataNode3));
 
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2, ImmutableMap.of(0, C, 1, Y));
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE13_AR2, ImmutableMap.of(0, C, 1, Y));
         BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(),
                 leftTree, rightDataNode);
@@ -2884,7 +2900,114 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
-        normalizeAndCompare(initialIQ, initialIQ);
+        UnaryIQTree newFilterTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBBooleanCoalesce(
+                        ImmutableList.of(
+                                TERM_FACTORY.getStrictEquality(rightXDef, X),
+                                TERM_FACTORY.getStrictEquality(zDef, X)))),
+                leftJoinTree);
+
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(projectionAtom.getVariables()),
+                newFilterTree);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testInnerJoinCoalesce1() {
+        SPARQLFunctionSymbol sparqlCoalesce2FunctionSymbol = FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol("COALESCE", 2)
+                .orElseThrow(() -> new RuntimeException("Should have been available"));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE13_AR2, ImmutableMap.of(0, D, 1, E));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE13_AR2, ImmutableMap.of(0, F));
+
+        ImmutableFunctionalTerm defA = TERM_FACTORY.getRDFFunctionalTerm(
+                D,
+                TERM_FACTORY.getIfElseNull(
+                        TERM_FACTORY.getDBIsNotNull(D),
+                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("fr"))));
+
+        ImmutableFunctionalTerm defB = TERM_FACTORY.getRDFFunctionalTerm(
+                E,
+                TERM_FACTORY.getIfElseNull(
+                        TERM_FACTORY.getDBIsNotNull(E),
+                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("en"))));
+
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(A, B),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        A, defA,
+                        B, defB));
+
+        ImmutableFunctionalTerm defC = TERM_FACTORY.getRDFFunctionalTerm(
+                F,
+                TERM_FACTORY.getIfElseNull(
+                        TERM_FACTORY.getDBIsNotNull(F),
+                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("de"))));
+
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(
+                ImmutableSet.of(C),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        C, defC));
+
+        ImmutableExpression condition = TERM_FACTORY.getRDF2DBBooleanFunctionalTerm(
+                TERM_FACTORY.getSPARQLNonStrictEquality(
+                        TERM_FACTORY.getImmutableFunctionalTerm(
+                                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol("LANG", 1).get(),
+                                TERM_FACTORY.getImmutableFunctionalTerm(
+                                        sparqlCoalesce2FunctionSymbol,
+                                        TERM_FACTORY.getImmutableFunctionalTerm(sparqlCoalesce2FunctionSymbol, A, B), C)
+                        ),
+                        TERM_FACTORY.getRDFLiteralFunctionalTerm(TERM_FACTORY.getDBStringConstant("de"), TYPE_FACTORY.getXsdStringDatatype())
+                )
+        );
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(condition),
+                ImmutableList.of(
+                IQ_FACTORY.createUnaryIQTree(
+                        leftConstructionNode,
+                        dataNode1),
+                IQ_FACTORY.createUnaryIQTree(
+                        rightConstructionNode,
+                        dataNode2)));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                joinTree);
+
+        //JOIN AND3(IS_NOT_NULL(f),IS_NULL(d),IS_NULL(e))
+        IQTree innerJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getDBIsNotNull(F),
+                        TERM_FACTORY.getDBIsNull(D),
+                        TERM_FACTORY.getDBIsNull(E))),
+                ImmutableList.of(
+                        dataNode1,
+                        dataNode2));
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        A, defA,
+                        B, defB,
+                        C, TERM_FACTORY.getRDFFunctionalTerm(
+                                F,
+                                TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getLangTermType("de")))));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        topConstructionNode,
+                        innerJoinTree));
+
+        normalizeAndCompare(initialIQ, expectedIQ);
     }
 
 

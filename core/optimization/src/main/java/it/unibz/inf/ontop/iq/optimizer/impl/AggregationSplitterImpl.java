@@ -54,11 +54,13 @@ public class AggregationSplitterImpl implements AggregationSplitter {
 
         private final VariableGenerator variableGenerator;
         private final SubstitutionFactory substitutionFactory;
+        private final TermFactory termFactory;
 
         protected AggregationUnionLifterTransformer(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
             super(coreSingletons);
             this.variableGenerator = variableGenerator;
             this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+            this.termFactory = coreSingletons.getTermFactory();
         }
 
         @Override
@@ -161,7 +163,7 @@ public class AggregationSplitterImpl implements AggregationSplitter {
                 // Non-final
                 boolean foundAGroup = false;
                 for (ChildGroup group : groups) {
-                    if (group.addIfCompatible(tree, treeDefinitions, variableNullability))
+                    if (group.addIfCompatible(tree, treeDefinitions, variableNullability, termFactory))
                         foundAGroup = true;
                 }
 
@@ -299,10 +301,11 @@ public class AggregationSplitterImpl implements AggregationSplitter {
          *
          * Has side effect.
          */
-        public boolean addIfCompatible(IQTree tree, Set<NonVariableTerm> treeDefinitions, VariableNullability variableNullability) {
+        public boolean addIfCompatible(IQTree tree, Set<NonVariableTerm> treeDefinitions, VariableNullability variableNullability,
+                                       TermFactory termFactory) {
             for (NonVariableTerm definition : treeDefinitions) {
                 if (definitions.contains(definition)
-                        || definitions.stream().anyMatch(d -> areCompatibleGroupingConditions(d, definition, variableNullability))) {
+                        || definitions.stream().anyMatch(d -> areCompatibleGroupingConditions(d, definition, variableNullability, termFactory))) {
                     trees.add(tree);
                     definitions.addAll(treeDefinitions);
                     return true;
@@ -316,13 +319,14 @@ public class AggregationSplitterImpl implements AggregationSplitter {
          *
          * Must not produce any false negative.
          */
-        private boolean areCompatibleGroupingConditions(NonVariableTerm t1, NonVariableTerm t2, VariableNullability variableNullability) {
+        private boolean areCompatibleGroupingConditions(NonVariableTerm t1, NonVariableTerm t2, VariableNullability variableNullability, TermFactory termFactory) {
             // Special case of incompatibility: one is null and the other one is not nullable
             if ((t1.isNull() && (!t2.isNullable(variableNullability.getNullableVariables())))
                     || (t2.isNull() && (!t1.isNullable(variableNullability.getNullableVariables()))))
                 return false;
 
-            return t1.evaluateStrictEq(t2, variableNullability).getStatus() != IncrementalEvaluation.Status.IS_FALSE;
+            return !termFactory.getStrictEquality(t1, t2)
+                    .evaluate2VL(variableNullability).isEffectiveFalse();
         }
 
         /**

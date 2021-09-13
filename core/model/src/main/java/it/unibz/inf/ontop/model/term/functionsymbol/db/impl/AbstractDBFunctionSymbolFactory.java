@@ -194,6 +194,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<Integer, DBFunctionSymbol> coalesceMap;
 
+
+    /**
+     * Coalesce functions according to their arities
+     */
+    private final Map<Integer, DBBooleanFunctionSymbol> booleanCoalesceMap;
+
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> numericInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> booleanInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> stringInequalityMap;
@@ -287,6 +293,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dateInequalityMap = new ConcurrentHashMap<>();
         this.defaultInequalityMap = new ConcurrentHashMap<>();
         this.coalesceMap = new ConcurrentHashMap<>();
+        this.booleanCoalesceMap = new ConcurrentHashMap<>();
 
         this.absMap = new ConcurrentHashMap<>();
         this.ceilMap = new ConcurrentHashMap<>();
@@ -680,6 +687,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         return coalesceMap
                 .computeIfAbsent(arity, (this::createCoalesceFunctionSymbol));
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBBooleanCoalesce(int arity) {
+        if (arity < 1)
+            throw new IllegalArgumentException("Minimal arity is 1");
+
+        return booleanCoalesceMap
+                .computeIfAbsent(arity, (this::createBooleanCoalesceFunctionSymbol));
     }
 
     @Override
@@ -1173,6 +1189,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter);
 
     protected abstract DBFunctionSymbol createCoalesceFunctionSymbol(int arity);
+    protected abstract DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity);
 
     protected DBBooleanFunctionSymbol createDBBooleanIfElseNull() {
         return new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
