@@ -90,7 +90,7 @@ public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDepend
             default:
         }
 
-        Optional<ImmutableFunctionalTerm> optionalLiftedOptionalTerm = tryToLiftRDFTermTypeFunctions(remainingTerms,
+        Optional<ImmutableFunctionalTerm> optionalLiftedOptionalTerm = tryToLift(remainingTerms,
                 termFactory);
         if (optionalLiftedOptionalTerm.isPresent())
             return optionalLiftedOptionalTerm.get()
@@ -102,7 +102,8 @@ public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDepend
                 remainingTerms.subList(1, remainingTerms.size()), variableNullability, termFactory)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<ImmutableTerm> simplifiedTerms = mergeIfElseNulls(termsAfterNullConstraintPropagation,
+        ImmutableList<ImmutableTerm> simplifiedTerms = furtherSimplify(
+                mergeIfElseNulls(termsAfterNullConstraintPropagation, variableNullability, termFactory),
                 variableNullability, termFactory);
 
         switch (simplifiedTerms.size()) {
@@ -115,8 +116,22 @@ public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDepend
         }
     }
 
+    protected ImmutableList<ImmutableTerm> furtherSimplify(ImmutableList<ImmutableTerm> terms,
+                                                           VariableNullability variableNullability,
+                                                           TermFactory termFactory) {
+        return terms;
+    }
+
     protected abstract ImmutableFunctionalTerm createCoalesce(ImmutableList<ImmutableTerm> simplifiedTerms,
                                                               TermFactory termFactory);
+
+    /**
+     * Can be overridden to further optimize
+     */
+    protected Optional<ImmutableFunctionalTerm> tryToLift(ImmutableList<ImmutableTerm> terms,
+                                                          TermFactory termFactory) {
+        return tryToLiftRDFTermTypeFunctions(terms, termFactory);
+    }
 
     private Optional<ImmutableFunctionalTerm> tryToLiftRDFTermTypeFunctions(ImmutableList<ImmutableTerm> terms,
                                                                             TermFactory termFactory) {
@@ -239,7 +254,7 @@ public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDepend
                 if (firstCondition.equals(secondCondition)) {
                     ImmutableTerm mergedTerm = termFactory.getIfElseNull(
                             firstCondition,
-                            termFactory.getDBCoalesce(ImmutableList.of(thenValueFirstTerm, thenValueSecondTerm)))
+                            createCoalesce(ImmutableList.of(thenValueFirstTerm, thenValueSecondTerm), termFactory))
                             .simplify(variableNullability);
 
                     return ImmutableList.of(mergedTerm);
