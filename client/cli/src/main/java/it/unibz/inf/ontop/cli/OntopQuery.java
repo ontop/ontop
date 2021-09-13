@@ -66,9 +66,12 @@ public class OntopQuery extends OntopReasoningCommandBase {
         }
 
         OntopSQLOWLAPIConfiguration.Builder configurationBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .propertyFile(propertiesFile)
                 .ontology(ontology)
                 .enableOntologyAnnotationQuerying(enableAnnotations);
+
+        if (propertiesFile != null) {
+            configurationBuilder.propertyFile(propertiesFile);
+        }
 
         if (isR2rmlFile(mappingFile)) {
             configurationBuilder.r2rmlMappingFile(mappingFile);
@@ -90,6 +93,12 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
         if (dbUser != null)
             configurationBuilder.jdbcUser(dbUser);
+
+        if (dbName != null)
+            configurationBuilder.jdbcName(dbName);
+
+        if (dbDriver != null)
+            configurationBuilder.jdbcDriver(dbDriver);
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 

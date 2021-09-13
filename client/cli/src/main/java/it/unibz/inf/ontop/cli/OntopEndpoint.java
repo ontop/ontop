@@ -63,12 +63,15 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         ArrayList<String> argList = Lists.newArrayList(
                 "--mapping=" + this.mappingFile,
-                "--properties=" + this.propertiesFile,
+                //"--properties=" + this.propertiesFile,
                 "--port=" + this.port,
                 "--lazy=" + this.lazy,
                 "--dev=" + this.dev,
                 "--disable-portal-page=" + this.disablePortalPage
                 );
+
+        if (this.propertiesFile != null)
+            argList.add("--properties=" + this.propertiesFile);
 
         if (this.corsAllowedOrigins != null)
             argList.add("--cors-allowed-origins=" + this.corsAllowedOrigins);
@@ -108,6 +111,12 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
 
         if (dbUrl != null)
             argList.add("--db-url=" + this.dbUrl);
+
+        if (dbName != null)
+            argList.add("--db-name=" + this.dbName);
+
+        if (dbDriver != null)
+            argList.add("--db-driver=" + this.dbDriver);
 
         String[] args = new String[argList.size()];
         argList.toArray(args);
