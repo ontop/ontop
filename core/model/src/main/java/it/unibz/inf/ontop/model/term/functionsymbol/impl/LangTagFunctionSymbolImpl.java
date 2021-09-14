@@ -4,13 +4,10 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBCoalesceFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBCoalesceFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Optional;
 
 /**
  * Takes an RDF type term as input.
@@ -46,8 +43,7 @@ public class LangTagFunctionSymbolImpl extends AbstractLangTagLikeFunctionSymbol
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) newTerm;
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
-            // TODO: use an interface?
-            if (functionSymbol instanceof DefaultDBCoalesceFunctionSymbol) {
+            if (functionSymbol instanceof DBCoalesceFunctionSymbol) {
                 ImmutableFunctionalTerm newCoalesceFunctionalTerm = termFactory.getDBCoalesce(
                         functionalTerm.getTerms().stream()
                                 .map(t -> termFactory.getImmutableFunctionalTerm(langTagWithPlaceholder, t))
