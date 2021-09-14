@@ -154,7 +154,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
     private Optional<ImmutableTerm> simplifyCoalesce(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        if ((getArity() == 1) && (!tolerateNulls()) && (!mayReturnNullWithoutNullArguments())) {
+        if (enableCoalesceLifting() && (getArity() == 1) && (!tolerateNulls()) && (!mayReturnNullWithoutNullArguments())) {
             ImmutableTerm firstTerm = terms.get(0);
             if ((firstTerm instanceof ImmutableFunctionalTerm)
                     && (((ImmutableFunctionalTerm) firstTerm).getFunctionSymbol() instanceof DBCoalesceFunctionSymbol)) {
@@ -397,11 +397,20 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     protected abstract boolean mayReturnNullWithoutNullArguments();
 
     /**
-     * Returns false if IfElseNullLifting must be disabled althrough it may have been technically possible.
+     * Returns false if IfElseNullLifting must be disabled although it may have been technically possible.
      *
-     * False by defaults
+     * False by default
      */
     protected boolean enableIfElseNullLifting() {
+        return false;
+    }
+
+    /**
+     * Returns false if CoalesceLifting must be disabled although it may have been technically possible.
+     *
+     * False by default
+     */
+    protected boolean enableCoalesceLifting() {
         return false;
     }
 

@@ -27,6 +27,14 @@ public abstract class SPARQLLikeFunctionSymbolImpl extends FunctionSymbolImpl {
         return true;
     }
 
+    /**
+     * Default value
+     */
+    @Override
+    protected boolean enableCoalesceLifting() {
+        return true;
+    }
+
     protected boolean isRDFFunctionalTerm(ImmutableTerm term) {
         return (term instanceof ImmutableFunctionalTerm)
                 && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermFunctionSymbol);
