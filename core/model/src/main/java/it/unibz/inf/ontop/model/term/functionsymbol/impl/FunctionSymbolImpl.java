@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecom
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBCoalesceFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
@@ -92,8 +93,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if ((!tolerateNulls()) && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
             return termFactory.getNullConstant();
 
-        return simplifyIfElseNull(newTerms, termFactory, variableNullability)
+        return simplifyIfElseNullOrCoalesce(newTerms, termFactory, variableNullability)
                 .orElseGet(() -> buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+    }
+
+    private Optional<ImmutableTerm> simplifyIfElseNullOrCoalesce(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
+                                                       VariableNullability variableNullability) {
+        return simplifyIfElseNull(terms, termFactory, variableNullability)
+                .map(Optional::of)
+                .orElseGet(() -> simplifyCoalesce(terms, termFactory, variableNullability));
     }
 
     /**
@@ -142,6 +150,28 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                 termFactory.getImmutableFunctionalTerm(this, newTerms));
 
         return newFunctionalTerm.simplify(variableNullability);
+    }
+
+    private Optional<ImmutableTerm> simplifyCoalesce(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        if (enableCoalesceLifting() && (getArity() == 1) && (!tolerateNulls()) && (!mayReturnNullWithoutNullArguments())) {
+            ImmutableTerm firstTerm = terms.get(0);
+            if ((firstTerm instanceof ImmutableFunctionalTerm)
+                    && (((ImmutableFunctionalTerm) firstTerm).getFunctionSymbol() instanceof DBCoalesceFunctionSymbol)) {
+                ImmutableFunctionalTerm initialCoalesceFunctionalTerm = (ImmutableFunctionalTerm) firstTerm;
+
+                ImmutableList<ImmutableTerm> subTerms = initialCoalesceFunctionalTerm.getTerms().stream()
+                        .map(t -> termFactory.getImmutableFunctionalTerm(this, t))
+                        .collect(ImmutableCollectors.toList());
+
+                if (this instanceof BooleanFunctionSymbol) {
+                    return Optional.of(termFactory.getDBBooleanCoalesce(subTerms).simplify(variableNullability));
+                }
+                else
+                    return Optional.of(termFactory.getDBCoalesce(subTerms).simplify(variableNullability));
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -367,11 +397,20 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     protected abstract boolean mayReturnNullWithoutNullArguments();
 
     /**
-     * Returns false if IfElseNullLifting must be disabled althrough it may have been technically possible.
+     * Returns false if IfElseNullLifting must be disabled although it may have been technically possible.
      *
-     * False by defaults
+     * False by default
      */
     protected boolean enableIfElseNullLifting() {
+        return false;
+    }
+
+    /**
+     * Returns false if CoalesceLifting must be disabled although it may have been technically possible.
+     *
+     * False by default
+     */
+    protected boolean enableCoalesceLifting() {
         return false;
     }
 

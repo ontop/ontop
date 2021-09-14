@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBCoalesceFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
@@ -18,7 +19,8 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDBFunctionSymbol {
+public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDBFunctionSymbol
+        implements DBCoalesceFunctionSymbol {
 
     private final DBFunctionSymbolSerializer serializer;
 
@@ -71,9 +73,8 @@ public abstract class AbstractDBCoalesceFunctionSymbol extends AbstractArgDepend
                                                      VariableNullability variableNullability) {
 
         ImmutableList<ImmutableTerm> flattenedTerms = newTerms.stream()
-                // TODO: consider using an interface
                 .flatMap(t -> ((t instanceof ImmutableFunctionalTerm)
-                        && (((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof AbstractDBCoalesceFunctionSymbol))
+                        && (((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof DBCoalesceFunctionSymbol))
                         ? ((ImmutableFunctionalTerm) t).getTerms().stream()
                         : Stream.of(t))
                 .collect(ImmutableCollectors.toList());

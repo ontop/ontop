@@ -148,8 +148,7 @@ public abstract class AbstractMultipleOptionalsTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableSet.of("french", "english"));
     }
-
-    @Ignore("TODO: support (make sure COALESCE lifting is generalized)")
+    
     @Test
     public void testThreeOptionalsLangMatches() {
         String query = "PREFIX ex: <http://example.org/>\n" +
@@ -168,7 +167,6 @@ public abstract class AbstractMultipleOptionalsTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, ImmutableSet.of("french", "german", "english"));
     }
 
-    @Ignore("TODO: support (make sure COALESCE lifting is generalized)")
     @Test
     public void testFourOptionalsLangMatches() {
         String query = "PREFIX ex: <http://example.org/>\n" +

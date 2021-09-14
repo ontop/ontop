@@ -8,15 +8,12 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBCoalesceFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * TODO: find a better name!
@@ -59,14 +56,6 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                         functionalTerm.getFunctionSymbol()).getConversionMap();
 
                 return simplifyIntoConjunction(conversionMap, functionalTerm.getTerm(0), termFactory, variableNullability);
-            }
-            // TODO: rely on an interface
-            else if (functionSymbol instanceof DefaultDBCoalesceFunctionSymbol) {
-                return termFactory.getDBBooleanCoalesce(
-                                functionalTerm.getTerms().stream()
-                                        .map(t -> termFactory.getImmutableFunctionalTerm(this, t))
-                                        .collect(ImmutableCollectors.toList()))
-                        .simplify(variableNullability);
             }
         }
         return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
