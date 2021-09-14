@@ -91,12 +91,8 @@ $(() => {
                     if (config.title) $("#title").text(config.title);
 
                     // If a portal file is provided with default query provided, set the default tab
-                    if (config.defaultTab) {
-                        let defaultPortalTab = config.defaultTab
-                        if (defaultPortalTab.query) {
-                            YASGUI.YASQE.defaults.value = config.defaultTab.query;
-                        }
-                    }
+                    if (config.defaultTab && config.defaultTab.query) 
+                        YASGUI.YASQE.defaults.value = config.defaultTab.query;
 
                     if (config.tabGroups) {
                         let numGroups = config.tabGroups.length;
