@@ -655,8 +655,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
              * Same for functions that do not strongly type their arguments (unsafe to decompose). Example: STRICT_EQ
              */
             if ((!firstFunctionSymbol.equals(functionalTerm2.getFunctionSymbol()))
-                    || IntStream.range(0, firstFunctionSymbol.getArity())
-                            .anyMatch(i -> firstFunctionSymbol.getExpectedBaseType(i).isAbstract())) {
+                    || (!firstFunctionSymbol.shouldBeDecomposedInUnion())) {
                 return topLevel
                         ? Optional.empty()
                         : Optional.of(variableGenerator.generateNewVariable());
