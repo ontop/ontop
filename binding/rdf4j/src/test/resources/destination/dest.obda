@@ -1,0 +1,121 @@
+[PrefixDeclaration]
+:		http://destination.example.org/ontology/dest#
+sf:		http://www.opengis.net/ont/sf#
+cdt:		http://w3id.org/lindt/custom_datatypes#
+geo:		http://www.opengis.net/ont/geosparql#
+gml:		http://www.opengis.net/ont/gml#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+ssn:		http://www.w3.org/ns/ssn/
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+data:		http://destination.example.org/data/
+obda:		https://w3id.org/obda/vocabulary#
+qudt:		http://qudt.org/schema/qudt#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+skos:		http://www.w3.org/2004/02/skos/core#
+sosa:		http://www.w3.org/ns/sosa/
+schema:		http://schema.org/
+qudt-1-1:	http://qudt.org/1.1/schema/qudt#
+qudt-unit:	http://qudt.org/vocab/unit#
+qudt-1-1-unit:	http://qudt.org/1.1/vocab/unit#
+
+[MappingDeclaration] @collection [[
+mappingId	Municipality
+target		data:municipality/{istat} a :Municipality ; schema:name {name_it}@it , {name_de}@de , {name_en}@en ; schema:geo data:geo/municipality/{istat} .
+source		SELECT * FROM "source1_municipalities"
+
+mappingId	Source 1 - lodging business
+target		data:source1/hospitality/{h_id} a schema:LodgingBusiness ; schema:name {name_en}@en , {name_it}@it , {name_de}@de ; schema:telephone {telephone} ; schema:email {email} .
+source		SELECT * FROM "source1_hospitality"
+
+mappingId	Source 1 - lodging business - municipality
+target		data:source1/hospitality/{h_id} schema:containedInPlace data:municipality/{istat} .
+source		SELECT h.h_id, m.istat FROM "source1_hospitality" h, "source1_municipalities" m
+			WHERE h.m_id = m.m_id
+
+mappingId	Source 1 - hotel
+target		data:source1/hospitality/{h_id} a schema:Hotel .
+source		SELECT h_id, h_type FROM "source1_hospitality"
+			WHERE h_type = 'HotelPension'
+
+mappingId	Source 1 - campground
+target		data:source1/hospitality/{h_id} a schema:Campground .
+source		SELECT h_id, h_type FROM "source1_hospitality"
+			WHERE h_type = 'Camping'
+
+mappingId	Source 1 - b2b
+target		data:source1/hospitality/{h_id} a schema:BedAndBreakfast .
+source		SELECT h_id, h_type FROM "source1_hospitality"
+			WHERE h_type = 'BedBreakfast'
+
+mappingId	Source 1 - hostel
+target		data:source1/hospitality/{h_id} a schema:Hostel .
+source		SELECT h_id, h_type FROM "source1_hospitality"
+			WHERE h_type = 'Youth'
+
+mappingId	Source 1 - accommodation
+target		data:source1/rooms/{r_id} a schema:Accommodation ; schema:name {name_en}@en , {name_it}@it , {name_de}@de ; schema:description {description_de}@de , {description_it}@it ; :numberOfUnits {room_units} ; schema:containedInPlace data:source1/hospitality/{h_id} ; schema:occupancy data:source1/occupancy/rooms/{r_id} .
+source		SELECT * FROM "source1_rooms"
+
+mappingId	Source 1 - room occupancy
+target		data:source1/occupancy/rooms/{r_id} a schema:QuantitativeValue ; schema:maxValue {capacity} ; schema:unitCode "C62"^^xsd:string .
+source		SELECT * FROM "source1_rooms"
+
+mappingId	Source 1 - apartment
+target		data:source1/rooms/{r_id} a schema:Apartment .
+source		SELECT * FROM "source1_rooms"
+			WHERE r_type = 'apartment'
+
+mappingId	Source 1 - room
+target		data:source1/rooms/{r_id} a schema:Room .
+source		SELECT * FROM "source1_rooms"
+			WHERE r_type = 'room'
+
+mappingId	Source 1 - camping pitch
+target		data:source1/rooms/{r_id} a schema:CampingPitch .
+source		SELECT * FROM "source1_rooms"
+			WHERE r_type = 'pitch'
+
+mappingId	Source 2 - lodging business
+target		data:source2/hotels/{id} a schema:LodgingBusiness ; schema:name {english}@en , {italian}@it , {german}@de ; schema:containedInPlace data:municipality/0{mun} .
+source		SELECT * FROM "source2_hotels"
+
+mappingId	Source 2 - hotel
+target		data:source2/hotels/{id} a schema:Hotel .
+source		SELECT * FROM "source2_hotels"
+			WHERE htype = 2
+
+mappingId	Source 2 - Bed and breakfast
+target		data:source2/hotels/{id} a schema:BedAndBreakfast .
+source		SELECT * FROM "source2_hotels"
+			WHERE htype = 1
+
+mappingId	Source 2 - Campground
+target		data:source2/hotels/{id} a schema:Campground .
+source		SELECT * FROM "source2_hotels"
+			WHERE htype = 4
+
+mappingId	Source 2 lodging business - accommodation
+target		data:source2/accommodation/{id} a schema:Accommodation ; schema:name {english_title}@en , {italian_title}@it , {german_title}@de ; schema:description {german_description}@de , {italian_description}@it ; :numberOfUnits 1 ; schema:containedInPlace data:source2/hotels/{hotel} ; schema:occupancy data:source2/occupancy/accommodation/{id} .
+source		SELECT * FROM "source2_accommodation"
+
+mappingId	Source 2 - room occupancy
+target		data:source2/occupancy/accommodation/{id} a schema:QuantitativeValue ; schema:maxValue {guest_nb} ; schema:unitCode "C62"^^xsd:string .
+source		SELECT * FROM "source2_accommodation"
+
+mappingId	Source 2 - apartment
+target		data:source2/accommodation/{id} a schema:Apartment .
+source		SELECT * FROM "source2_accommodation"
+			WHERE acco_type = 2
+
+mappingId	Source 2 - room
+target		data:source2/accommodation/{id} a schema:Room .
+source		SELECT * FROM "source2_accommodation"
+			WHERE acco_type = 1
+
+mappingId	Source 2 - camping pitch
+target		data:source2/accommodation/{id} a schema:CampingPitch .
+source		SELECT * FROM "source2_accommodation"
+			WHERE acco_type = 3
+]]
