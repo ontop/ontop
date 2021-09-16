@@ -28,7 +28,8 @@ public class JdbcPreferencesPanelBundleActivator implements BundleActivator {
 		else {
 			context.addServiceListener(evt -> {
 				if (evt.getType() == ServiceEvent.REGISTERED) {
-					ServiceReference<JdbcRegistry> sr1 = (ServiceReference<JdbcRegistry>)evt.getServiceReference();
+					@SuppressWarnings("unchecked")
+                    ServiceReference<JdbcRegistry> sr1 = (ServiceReference<JdbcRegistry>)evt.getServiceReference();
 					installDrivers(sr1);
 				}
 			}, "(objectclass=" + JdbcRegistry.class.getName() + ")");

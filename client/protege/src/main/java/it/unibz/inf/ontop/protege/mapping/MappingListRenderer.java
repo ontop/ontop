@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.mapping;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.utils.ColorSettings;

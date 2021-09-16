@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.protege.utils;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
@@ -22,7 +22,6 @@ import java.awt.*;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
 
 public class TargetQueryStyledDocument extends DefaultStyledDocument {
 

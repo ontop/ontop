@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.protege.utils;
 
-import java.awt.event.ActionListener;
-
 /**
  * all methods are called on the event dispatch thread
  */

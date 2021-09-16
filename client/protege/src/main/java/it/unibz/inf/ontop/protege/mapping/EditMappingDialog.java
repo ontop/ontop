@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.mapping;
  * #L%
  */
 
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.worker.ExecuteSQLQuerySwingWorker;

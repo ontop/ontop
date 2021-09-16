@@ -1,7 +1,7 @@
 package org.protege.osgi.jdbc;
 
 
-import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.protege.osgi.jdbc.impl.OSGiJdbcDriverBundleActivator;

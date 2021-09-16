@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;

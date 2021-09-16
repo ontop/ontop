@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.protege.action;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.*;
 import it.unibz.inf.ontop.protege.mapping.DuplicateTriplesMapException;
-import it.unibz.inf.ontop.protege.mapping.TriplesMap;
 import it.unibz.inf.ontop.protege.mapping.TriplesMapFactory;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.mapping;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin;
 import it.unibz.inf.ontop.protege.utils.ColorSettings;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;

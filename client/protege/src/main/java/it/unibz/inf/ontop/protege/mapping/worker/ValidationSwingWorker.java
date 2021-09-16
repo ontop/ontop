@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.mapping.worker;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.shaded.com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
