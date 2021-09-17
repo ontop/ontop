@@ -3024,8 +3024,8 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
 
@@ -3055,7 +3055,7 @@ public class NormalizationTest {
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
 
-        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3, ImmutableMap.of(0, A, 1, B, 2, F));
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, F));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -3082,8 +3082,8 @@ public class NormalizationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
 
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getStrictEquality(

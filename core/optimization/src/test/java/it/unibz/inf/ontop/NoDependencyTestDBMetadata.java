@@ -32,6 +32,7 @@ public class NoDependencyTestDBMetadata {
 
     public static final RelationDefinition INT_TABLE1_AR2;
     public static final RelationDefinition INT_TABLE2_AR2;
+    public static final RelationDefinition INT_TABLE1_AR3;
     public static final RelationDefinition INT_TABLE1_NULL_AR2;
     public static final RelationDefinition INT_TABLE2_NULL_AR2;
     public static final RelationDefinition INT_TABLE1_NULL_AR3;
@@ -66,6 +67,7 @@ public class NoDependencyTestDBMetadata {
 
         INT_TABLE1_AR2 = builder.createRelationWithIntAttributes(1, 2, false);
         INT_TABLE2_AR2 = builder.createRelationWithIntAttributes(2, 2, false);
+        INT_TABLE1_AR3 = builder.createRelationWithIntAttributes(1, 3, false);
 
         INT_TABLE1_NULL_AR2 = builder.createRelationWithIntAttributes(1, 2, true);
         INT_TABLE2_NULL_AR2 = builder.createRelationWithIntAttributes(2, 2, true);
