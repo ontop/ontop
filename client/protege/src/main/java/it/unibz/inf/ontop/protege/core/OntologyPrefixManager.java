@@ -22,11 +22,14 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import it.unibz.inf.ontop.protege.utils.Adapter;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
@@ -87,10 +90,13 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
-		if (!ontologyID.getOntologyIRI().isPresent())
+	    
+        final IRI ontologyIri = Adapter.getOntologyIRI(ontologyID).orNull();
+
+		if (ontologyIri == null)
 			return;
 
-		String prefixUri = ontologyID.getOntologyIRI().get().toString();
+		String prefixUri = ontologyIri.toString();
 		if (!prefixUri.endsWith("#") && !prefixUri.endsWith("/")) {
 			String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
 			if (!prefixUri.endsWith(defaultSeparator))  {
