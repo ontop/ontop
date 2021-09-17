@@ -9,12 +9,14 @@ import java.util.Optional;
 public class MockupDBTypeFactory implements DBTypeFactory {
 
     private final NonStringNonNumberNonBooleanNonDatetimeDBTermType rootDBType;
+    private final TypeFactory typeFactory;
     private final TermTypeAncestry rootAncestry;
 
     @AssistedInject
     private MockupDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
         rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType("AbstractDBType",
                 rootTermType.getAncestry(), true);
+        this.typeFactory = typeFactory;
         rootAncestry = rootDBType.getAncestry();
     }
 
@@ -25,7 +27,8 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @Override
     public DBTermType getDBLargeIntegerType() {
-        return getDBTermType("LARGE_INT");
+        return new NumberDBTermType("LARGE_INT", rootAncestry, typeFactory.getXsdIntegerDatatype(),
+                DBTermType.Category.INTEGER);
     }
 
     @Override

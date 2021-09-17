@@ -3055,7 +3055,7 @@ public class NormalizationTest {
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
 
-        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, F));
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, D, 1, B, 2, F));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
