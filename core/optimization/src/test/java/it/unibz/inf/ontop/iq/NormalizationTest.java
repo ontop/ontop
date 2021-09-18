@@ -3070,7 +3070,7 @@ public class NormalizationTest {
     }
 
     @Test
-    public void testIRITemplateContextuallyNotInjective1() {
+    public void testIRITemplateContextuallyInjective2() {
         ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
                 .addSeparator("http://www.Department")
                 .addColumn()
@@ -3083,12 +3083,378 @@ public class NormalizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
+
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
+        DBTypeConversionFunctionSymbol castFunction = FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                .getDBCastFunctionSymbol(dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType());
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, A),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, B),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, C))),
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        D,
+                                        E,
+                                        F))));
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(dataNode1, dataNode2));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getStrictEquality(TERM_FACTORY.getImmutableFunctionalTerm(castFunction, A), D),
+                                                TERM_FACTORY.getStrictEquality(TERM_FACTORY.getImmutableFunctionalTerm(castFunction, B), E),
+                                                TERM_FACTORY.getStrictEquality(TERM_FACTORY.getImmutableFunctionalTerm(castFunction, C), F))),
+                                ImmutableList.of(dataNode1, dataNode2))));
+
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testIRITemplateContextuallyInjective3() {
+        ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
+                .addSeparator("http://www.Department")
+                .addColumn()
+                .addSeparator(".University")
+                .addColumn()
+                .addSeparator(".edu/GraduateStudent")
+                .addColumn()
+                .build();
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
+
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
+        DBTypeConversionFunctionSymbol castFunction = FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                .getDBCastFunctionSymbol(dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType());
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        D,
+                                        E,
+                                        F)),
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, A),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, B),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, C)))));
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(dataNode1, dataNode2));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getStrictEquality(D, TERM_FACTORY.getImmutableFunctionalTerm(castFunction, A)),
+                                                TERM_FACTORY.getStrictEquality(E, TERM_FACTORY.getImmutableFunctionalTerm(castFunction, B)),
+                                                TERM_FACTORY.getStrictEquality(F, TERM_FACTORY.getImmutableFunctionalTerm(castFunction, C)))),
+                                ImmutableList.of(dataNode1, dataNode2))));
+
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testIRITemplateContextuallyInjective4() {
+        ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
+                .addSeparator("http://www.Department")
+                .addColumn()
+                .addSeparator(".University1")
+                .addColumn()
+                .addSeparator(".edu/GraduateStudent")
+                .addColumn()
+                .build();
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
+
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
+        DBTypeConversionFunctionSymbol castFunction = FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                .getDBCastFunctionSymbol(dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType());
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, A),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, B),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, C))),
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, D),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, E),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, F)))));
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(dataNode1, dataNode2));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
+
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, D, 1, B, 2, F));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(),
+                                ImmutableList.of(newDataNode, newDataNode))
+                ));
+
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testIRITemplateContextuallyInjective5() {
+        ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
+                .addSeparator("http://www.Department")
+                .addColumn()
+                .addSeparator(".University")
+                .addColumn()
+                .addSeparator(".edu-GraduateStudent")
+                .addColumn()
+                .build();
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, D, 2, F));
+
+
+        DBConstant constant = TERM_FACTORY.getDBStringConstant(".edu-GraduateStudent.University");
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        A,
+                                        constant,
+                                        C)),
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        D,
+                                        constant,
+                                        F))));
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(dataNode1, dataNode2));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, D, 1, B, 2, F));
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, D, 2, F));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode,
+                        IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(),
+                                ImmutableList.of(newDataNode1, newDataNode2))
+                ));
+
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testIRITemplateContextuallyNotInjective1() {
+        ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
+                .addSeparator("http://www.Department")
+                .addColumn()
+                .addSeparator(".University")
+                .addColumn()
+                .addSeparator(".edu/GraduateStudent")
+                .addColumn()
+                .build();
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
 
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getStrictEquality(
                         TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate, ImmutableList.of(A, B, C)).getTerm(0),
                         TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate, ImmutableList.of(D, E, F)).getTerm(0)));
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(dataNode1, dataNode2));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
+
+        normalizeAndCompare(initialIQ, initialIQ);
+    }
+
+    @Test
+    public void testIRITemplateContextuallyNotInjective2() {
+        ImmutableList<Template.Component> template = Template.builder()
+                .addSeparator("http://www.Department")
+                .addColumn()
+                .addSeparator("1")
+                .addColumn()
+                .addSeparator(".edu/GraduateStudent")
+                .addColumn()
+                .build();
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
+
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
+        DBTypeConversionFunctionSymbol castFunction = FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                .getDBCastFunctionSymbol(dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType());
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getIRIFunctionalTerm(template,
+                                ImmutableList.of(
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, A),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, B),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, C))).getTerm(0),
+                        TERM_FACTORY.getIRIFunctionalTerm(template,
+                                ImmutableList.of(
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, D),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, E),
+                                        TERM_FACTORY.getImmutableFunctionalTerm(castFunction, F))).getTerm(0)));
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(dataNode1, dataNode2));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
+
+        normalizeAndCompare(initialIQ, initialIQ);
+    }
+
+    @Test
+    public void testIRITemplateContextuallyNotInjective3() {
+        ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
+                .addSeparator("http://www.Department")
+                .addColumn()
+                .addSeparator(".University")
+                .addColumn()
+                .addSeparator(".edu/GraduateStudent")
+                .addColumn()
+                .build();
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(C, F));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR3, ImmutableMap.of(0, D, 1, E, 2, F));
+
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
+        DBTypeConversionFunctionSymbol castFunction = FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                .getDBCastFunctionSymbol(dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType());
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate, ImmutableList.of(
+                                TERM_FACTORY.getImmutableFunctionalTerm(castFunction, A), E, F)).getTerm(0),
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate, ImmutableList.of(
+                                TERM_FACTORY.getImmutableFunctionalTerm(castFunction, B), D, E)).getTerm(0)));
+
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                innerJoinNode,
+                ImmutableList.of(dataNode1, dataNode2));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree));
+
+        normalizeAndCompare(initialIQ, initialIQ);
+    }
+
+    @Test
+    public void testIRITemplateContextuallyNotInjective4() {
+        ImmutableList<Template.Component> notAlwaysInjectiveTemplate = Template.builder()
+                .addSeparator("http://www.Department")
+                .addColumn()
+                .addSeparator(".University")
+                .addColumn()
+                .addSeparator(".edu-GraduateStudent")
+                .addColumn()
+                .build();
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(B, F));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, A, 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR3, ImmutableMap.of(0, D, 2, F));
+
+
+        DBConstant constant = TERM_FACTORY.getDBStringConstant(".University.edu-GraduateStudent");
+
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        A,
+                                        constant,
+                                        C)).getTerm(0),
+                        TERM_FACTORY.getIRIFunctionalTerm(notAlwaysInjectiveTemplate,
+                                ImmutableList.of(
+                                        D,
+                                        constant,
+                                        F)).getTerm(0)));
 
         IQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 innerJoinNode,

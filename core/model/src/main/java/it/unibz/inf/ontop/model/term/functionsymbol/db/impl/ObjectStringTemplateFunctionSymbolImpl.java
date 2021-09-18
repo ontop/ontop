@@ -375,11 +375,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
                 boolean isSafelySeparating = ((DBTypeConversionFunctionSymbol) functionSymbol).getInputType()
                         .filter(t -> { switch(t.getCategory()) {
-                            case DECIMAL:
                             case INTEGER:
-                            case FLOAT_DOUBLE:
-                                // Even dots are safe separators
                                 return !separatorString.matches("[0-9]+");
+                            case DECIMAL:
+                            case FLOAT_DOUBLE:
+                                return !separatorString.matches("[0-9.+\\-eE]+");
                             default:
                                 return false;
                         }
