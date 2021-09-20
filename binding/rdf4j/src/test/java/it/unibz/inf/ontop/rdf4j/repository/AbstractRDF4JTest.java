@@ -38,7 +38,7 @@ public class AbstractRDF4JTest {
     }
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath) throws SQLException, IOException {
-        initOBDA(dbScriptRelativePath, obdaRelativePath, null, null);
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, null);
     }
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
@@ -102,6 +102,7 @@ public class AbstractRDF4JTest {
          */
         REPO_CONNECTION = repo.getConnection();
     }
+
 
     protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
         initR2RML(dbScriptRelativePath, r2rmlRelativePath, null, null);

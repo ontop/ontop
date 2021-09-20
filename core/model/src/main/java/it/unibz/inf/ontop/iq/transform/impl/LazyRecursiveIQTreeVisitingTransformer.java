@@ -34,6 +34,11 @@ public abstract class LazyRecursiveIQTreeVisitingTransformer implements IQTreeVi
     }
 
     @Override
+    public IQTree transformValues(ValuesNode node) {
+        return node;
+    }
+
+    @Override
     public IQTree transformNonStandardLeafNode(LeafIQTree leafNode) {
         return leafNode;
     }

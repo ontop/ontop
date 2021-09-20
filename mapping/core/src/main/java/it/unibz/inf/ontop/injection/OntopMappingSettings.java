@@ -35,6 +35,12 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean isCanIRIComplete();
 
+    /**
+     * If false, use Union Node instead of Values Node
+     * If true use Values Node
+     */
+    boolean isValuesNodeEnabled();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -43,6 +49,7 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     String INFER_DEFAULT_DATATYPE = "ontop.inferDefaultDatatype";
     String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";
+    String ENABLE_VALUES_NODE = "ontop.enableValuesNode";
 
 
     /**

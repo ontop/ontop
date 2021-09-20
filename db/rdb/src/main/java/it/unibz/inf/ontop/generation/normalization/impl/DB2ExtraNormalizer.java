@@ -6,14 +6,14 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 
-public class DB2ExtractNormalizer implements DialectExtraNormalizer {
+public class DB2ExtraNormalizer implements DialectExtraNormalizer {
 
     private final DialectExtraNormalizer enforceNullOrderNormalizer;
     private final DialectExtraNormalizer projectOrderByNormalizer;
 
     @Inject
-    protected DB2ExtractNormalizer(EnforceNullOrderNormalizer enforceNullOrderNormalizer,
-                                   OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectOrderByNormalizer) {
+    protected DB2ExtraNormalizer(EnforceNullOrderNormalizer enforceNullOrderNormalizer,
+                                 OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer projectOrderByNormalizer) {
         this.enforceNullOrderNormalizer = enforceNullOrderNormalizer;
         this.projectOrderByNormalizer = projectOrderByNormalizer;
     }

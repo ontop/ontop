@@ -72,4 +72,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
     ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability);
 
     ImmutableSubstitution<ImmutableTerm> simplifyValues();
+
+    Optional<ImmutableExpression> convertIntoBooleanExpression();
 }

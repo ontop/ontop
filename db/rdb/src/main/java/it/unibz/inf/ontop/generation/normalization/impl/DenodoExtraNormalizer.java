@@ -8,27 +8,23 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class OracleExtraNormalizer implements DialectExtraNormalizer {
+public class DenodoExtraNormalizer implements DialectExtraNormalizer {
 
-    private final DialectExtraNormalizer orderByNormalizer;
-    private final DialectExtraNormalizer expressionWrapper;
+    private final AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer;
     private final ConvertValuesToUnionNormalizer toUnionNormalizer;
 
     @Inject
-    protected OracleExtraNormalizer(OnlyInPresenceOfDistinctProjectOrderByTermsNormalizer orderByNormalizer,
-                                    WrapProjectedOrOrderByExpressionNormalizer expressionWrapper,
+    protected DenodoExtraNormalizer(AlwaysProjectOrderByTermsNormalizer alwaysProjectOrderByTermsNormalizer,
                                     ConvertValuesToUnionNormalizer toUnionNormalizer) {
-        this.orderByNormalizer = orderByNormalizer;
-        this.expressionWrapper = expressionWrapper;
+        this.alwaysProjectOrderByTermsNormalizer = alwaysProjectOrderByTermsNormalizer;
         this.toUnionNormalizer = toUnionNormalizer;
     }
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
         return toUnionNormalizer.transform(
-                orderByNormalizer.transform(
-                        expressionWrapper.transform(tree, variableGenerator),
-                        variableGenerator),
+                alwaysProjectOrderByTermsNormalizer.transform(tree, variableGenerator),
                 variableGenerator);
     }
 }
+

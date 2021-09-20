@@ -17,6 +17,7 @@ public interface IQTreeVisitingTransformer extends IQTreeTransformer {
     IQTree transformExtensionalData(ExtensionalDataNode rootNode);
     IQTree transformEmpty(EmptyNode rootNode);
     IQTree transformTrue(TrueNode rootNode);
+    IQTree transformValues(ValuesNode valuesNode);
     IQTree transformNonStandardLeafNode(LeafIQTree rootNode);
 
     IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);

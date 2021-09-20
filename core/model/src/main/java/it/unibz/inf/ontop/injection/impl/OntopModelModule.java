@@ -93,6 +93,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 ExtensionalDataNode.class,
                 IntensionalDataNode.class,
                 NativeNode.class,
+                ValuesNode.class,
                 EmptyNode.class,
                 TrueNode.class,
                 DistinctNode.class,

@@ -100,6 +100,15 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
+    public ValuesNode transform(ValuesNode valuesNode) throws QueryNodeTransformationException {
+        ImmutableList<Variable> newOrderedVariables = valuesNode.getOrderedVariables().stream()
+                .map(renamingSubstitution::applyToVariable)
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createValuesNode(newOrderedVariables, valuesNode.getValues());
+    }
+
+    @Override
     public DistinctNode transform(DistinctNode distinctNode) {
         return iqFactory.createDistinctNode();
     }
