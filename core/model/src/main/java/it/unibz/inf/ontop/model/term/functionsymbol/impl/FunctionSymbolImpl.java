@@ -318,6 +318,17 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
+     * By default, we assume it to be safe to be decomposed, as we experienced very little problems with it.
+     *
+     * Ideally, it should check the input data types, but at the moment (09/2021) they are rarely precisely specified.
+     */
+    @Override
+    public boolean shouldBeDecomposedInUnion() {
+        // return IntStream.range(0, getArity()).anyMatch(i -> getExpectedBaseType(i).isAbstract());
+        return true;
+    }
+
+    /**
      * Default implementation, can be overridden
      *
      */

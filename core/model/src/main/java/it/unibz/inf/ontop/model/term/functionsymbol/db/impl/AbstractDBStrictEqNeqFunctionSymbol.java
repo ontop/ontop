@@ -37,6 +37,15 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
         return true;
     }
 
+    /**
+     * Here all sorts of data types are accepted as arguments, so it is clearly not safe to decompose it.
+     * Concrete problems already experienced.
+     */
+    @Override
+    public boolean shouldBeDecomposedInUnion() {
+        return false;
+    }
+
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
