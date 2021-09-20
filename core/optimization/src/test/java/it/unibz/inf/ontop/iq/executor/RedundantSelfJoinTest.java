@@ -1193,23 +1193,26 @@ public class RedundantSelfJoinTest {
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, B, constant));
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, X, C));
-        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE4, ImmutableList.of(X, D));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE4, ImmutableMap.of(0, X));
         initialQueryBuilder.addChild(initialRootNode, unionNode);
         initialQueryBuilder.addChild(unionNode, dataNode3);
-        initialQueryBuilder.addChild(unionNode, joinNode);
+
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(unionNode.getVariables());
+        initialQueryBuilder.addChild(unionNode, rightConstructionNode);
+        initialQueryBuilder.addChild(rightConstructionNode, joinNode);
         initialQueryBuilder.addChild(joinNode, dataNode1);
         initialQueryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         System.out.println("Initial query: "+ initialQuery);
-        /**
+        /*
          * The following is only one possible syntactic variant of the expected query,
          * namely the one expected based on the current state of the implementation of self join elimination
          * and substitution propagation.
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, X, constant));
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(1, X, 2, constant));
         expectedQueryBuilder.init(projectionAtom, unionNode);
         expectedQueryBuilder.addChild(unionNode, dataNode3);
         expectedQueryBuilder.addChild(unionNode, dataNode4);
@@ -1230,10 +1233,14 @@ public class RedundantSelfJoinTest {
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
         ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, X, constant));
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, Y, C));
-        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE4, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE4, ImmutableMap.of(0, X, 1, Y));
         initialQueryBuilder.addChild(initialRootNode, unionNode);
         initialQueryBuilder.addChild(unionNode, dataNode3);
-        initialQueryBuilder.addChild(unionNode, joinNode);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(unionNode.getVariables());
+
+        initialQueryBuilder.addChild(unionNode, constructionNode);
+        initialQueryBuilder.addChild(constructionNode, joinNode);
         initialQueryBuilder.addChild(joinNode, dataNode1);
         initialQueryBuilder.addChild(joinNode, dataNode2);
 
@@ -1245,17 +1252,17 @@ public class RedundantSelfJoinTest {
          * and substitution propagation.
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(X, Y)
         );
         expectedQueryBuilder.init(projectionAtom, unionNode);
         expectedQueryBuilder.addChild(unionNode, dataNode3);
-        expectedQueryBuilder.addChild(unionNode, constructionNode);
+        expectedQueryBuilder.addChild(unionNode, newConstructionNode);
 
         ExtensionalDataNode newDataNode = createExtensionalDataNode(TABLE1, ImmutableList.of(A, Y, constant));
 
-        expectedQueryBuilder.addChild(constructionNode, newDataNode);
+        expectedQueryBuilder.addChild(newConstructionNode, newDataNode);
 
 
         optimizeAndCompare(initialQuery, expectedQueryBuilder.build());

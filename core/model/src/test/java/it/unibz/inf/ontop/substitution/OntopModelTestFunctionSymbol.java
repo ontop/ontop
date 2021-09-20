@@ -84,4 +84,9 @@ public class OntopModelTestFunctionSymbol extends PredicateImpl implements Funct
     public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory) {
         return null;
     }
+
+    @Override
+    public boolean shouldBeDecomposedInUnion() {
+        return true;
+    }
 }

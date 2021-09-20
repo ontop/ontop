@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecom
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBCoalesceFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
@@ -92,8 +93,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if ((!tolerateNulls()) && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
             return termFactory.getNullConstant();
 
-        return simplifyIfElseNull(newTerms, termFactory, variableNullability)
+        return simplifyIfElseNullOrCoalesce(newTerms, termFactory, variableNullability)
                 .orElseGet(() -> buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+    }
+
+    private Optional<ImmutableTerm> simplifyIfElseNullOrCoalesce(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
+                                                       VariableNullability variableNullability) {
+        return simplifyIfElseNull(terms, termFactory, variableNullability)
+                .map(Optional::of)
+                .orElseGet(() -> simplifyCoalesce(terms, termFactory, variableNullability));
     }
 
     /**
@@ -142,6 +150,28 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                 termFactory.getImmutableFunctionalTerm(this, newTerms));
 
         return newFunctionalTerm.simplify(variableNullability);
+    }
+
+    private Optional<ImmutableTerm> simplifyCoalesce(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        if (enableCoalesceLifting() && (getArity() == 1) && (!tolerateNulls()) && (!mayReturnNullWithoutNullArguments())) {
+            ImmutableTerm firstTerm = terms.get(0);
+            if ((firstTerm instanceof ImmutableFunctionalTerm)
+                    && (((ImmutableFunctionalTerm) firstTerm).getFunctionSymbol() instanceof DBCoalesceFunctionSymbol)) {
+                ImmutableFunctionalTerm initialCoalesceFunctionalTerm = (ImmutableFunctionalTerm) firstTerm;
+
+                ImmutableList<ImmutableTerm> subTerms = initialCoalesceFunctionalTerm.getTerms().stream()
+                        .map(t -> termFactory.getImmutableFunctionalTerm(this, t))
+                        .collect(ImmutableCollectors.toList());
+
+                if (this instanceof BooleanFunctionSymbol) {
+                    return Optional.of(termFactory.getDBBooleanCoalesce(subTerms).simplify(variableNullability));
+                }
+                else
+                    return Optional.of(termFactory.getDBCoalesce(subTerms).simplify(variableNullability));
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -288,6 +318,17 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
+     * By default, we assume it to be safe to be decomposed, as we experienced very little problems with it.
+     *
+     * Ideally, it should check the input data types, but at the moment (09/2021) they are rarely precisely specified.
+     */
+    @Override
+    public boolean shouldBeDecomposedInUnion() {
+        // return IntStream.range(0, getArity()).anyMatch(i -> getExpectedBaseType(i).isAbstract());
+        return true;
+    }
+
+    /**
      * Default implementation, can be overridden
      *
      */
@@ -299,15 +340,9 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
          * In case of injectivity
          */
         if (otherTerm.getFunctionSymbol().equals(this)
-                && isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms()) {
+                && canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms())) {
             if (getArity() == 0)
                 return IncrementalEvaluation.declareIsTrue();
-
-            if (!canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms()))
-                /*
-                 * TODO: support this special case? Could potentially be wrapped into an IF-ELSE-NULL
-                 */
-                return IncrementalEvaluation.declareSameExpression();
 
             ImmutableExpression newExpression = termFactory.getConjunction(
                     IntStream.range(0, getArity())
@@ -322,18 +357,33 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
-     * ONLY for injective function symbols
      *
      * Makes sure that the conjunction would never evaluate as FALSE instead of NULL
      * (first produced equality evaluated as false, while the second evaluates as NULL)
+     *
+     * TODO: could be refactored so as to signal it needs to be wrapped in a BOOL_IF_ELSE_NULL.
      *
      */
     protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
                                                          VariableNullability variableNullability,
                                                          ImmutableList<? extends ImmutableTerm> otherTerms) {
+        // Can be relaxed by overriding
+        if (!isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
+            return false;
+
+        return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+    }
+
+    /**
+     * ONLY when injectivity has been proved
+     *
+     */
+    protected boolean canBeSafelyDecomposedIntoConjunctionWhenInjective(ImmutableList<? extends ImmutableTerm> terms,
+                                                           VariableNullability variableNullability,
+                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (mayReturnNullWithoutNullArguments())
             return false;
-        if (getArity() == 1)
+        if (getArity() < 2)
             return true;
 
         return !(variableNullability.canPossiblyBeNullSeparately(terms)
@@ -367,11 +417,20 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     protected abstract boolean mayReturnNullWithoutNullArguments();
 
     /**
-     * Returns false if IfElseNullLifting must be disabled althrough it may have been technically possible.
+     * Returns false if IfElseNullLifting must be disabled although it may have been technically possible.
      *
-     * False by defaults
+     * False by default
      */
     protected boolean enableIfElseNullLifting() {
+        return false;
+    }
+
+    /**
+     * Returns false if CoalesceLifting must be disabled although it may have been technically possible.
+     *
+     * False by default
+     */
+    protected boolean enableCoalesceLifting() {
         return false;
     }
 

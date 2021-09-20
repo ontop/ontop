@@ -177,6 +177,16 @@ public class AbstractRDF4JTest {
         return count;
     }
 
+    protected void runQueryAndCompare(String queryString, ImmutableSet<String> expectedVValues) {
+        runQueryAndCompare(queryString, expectedVValues, new MapBindingSet());
+    }
+
+    protected void runQueryAndCompare(String queryString, ImmutableSet<String> expectedVValues,
+                                      BindingSet bindings) {
+        ImmutableSet<String> vValues = ImmutableSet.copyOf(runQuery(queryString, bindings));
+        assertEquals(expectedVValues, vValues);
+    }
+
     protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues) {
         runQueryAndCompare(queryString, expectedVValues, new MapBindingSet());
     }

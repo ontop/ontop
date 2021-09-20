@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.type.*;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
@@ -585,6 +586,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected DBFunctionSymbol createCoalesceFunctionSymbol(int arity) {
         return new DefaultDBCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
                 Serializers.getRegularSerializer(COALESCE_STR));
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
+                dbBooleanType,
+                (terms, termConverter, termFactory) -> {
+                    String parameterString = terms.stream()
+                            .map(termConverter)
+                            .collect(Collectors.joining(","));
+                    return String.format("COALESCE(%s) IS TRUE", parameterString);
+                });
     }
 
     @Override

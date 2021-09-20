@@ -25,15 +25,24 @@ public class OntopEndpointTest {
     @ClassRule
     public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
     private static String PORT = "29831";
+    private static String DBNAME = "books";
+    private static String DBURL = "jdbc:h2:tcp://localhost:19123/./src/test/resources/h2/books;ACCESS_MODE_DATA=r";
+    private static String DBUSER = "sa";
+    private static String DBPASSWORD = "test";
 
 
     @BeforeClass
     public static void setupEndpoint() {
         Ontop.main("endpoint", "-m", "src/test/resources/books/exampleBooks.obda",
-                "-p", "src/test/resources/books/exampleBooks.properties",
+                //"-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
-                "-d", "src/test/resources/output/exampleBooks-metadata.json",
+                //"-d", "src/test/resources/output/exampleBooks-metadata.json",
                 //"-v", "src/test/resources/output/exampleBooks-metadata.json",
+                "--db-url=" + DBURL,
+                //"--db-driver="
+                "--db-user=" + DBUSER,
+                "--db-name=" + DBNAME,
+                "--db-password=" + DBPASSWORD,
                 "--port=" + PORT);
     }
 
