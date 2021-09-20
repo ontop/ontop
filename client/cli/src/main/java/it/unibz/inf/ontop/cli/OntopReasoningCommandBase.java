@@ -7,6 +7,8 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import org.semanticweb.owlapi.model.*;
 
+import it.unibz.inf.ontop.utils.OWLAPIAdapter;
+
 import java.util.Set;
 
 public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRelatedCommand {
@@ -32,7 +34,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
 	protected static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
 
-        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI().get();
+	    IRI ontologyIRI = OWLAPIAdapter.getOntologyIRI(ontology.getOntologyID()).get();
         System.err.println("Ontology " + ontologyIRI);
 
         Set<OWLDeclarationAxiom> declarationAxioms = ontology.getAxioms(AxiomType.DECLARATION);

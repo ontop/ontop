@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import it.unibz.inf.ontop.utils.OWLAPIAdapter;
+
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
@@ -1096,7 +1098,8 @@ public class OWLAPITranslatorOWL2QL {
 
     private IRIConstant getIndividual(OWLAnnotationSubject subject) throws TranslationException {
         if (subject instanceof IRI) {
-            return termFactory.getConstantIRI(rdfFactory.createIRI(((IRI)subject).asIRI().get().toString()));
+            final String iri = OWLAPIAdapter.asIRI((IRI)subject).get().toString();
+            return termFactory.getConstantIRI(rdfFactory.createIRI(iri));
         }
         else
             throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + subject);
@@ -1105,10 +1108,12 @@ public class OWLAPITranslatorOWL2QL {
     private RDFConstant getValue(OWLAnnotationValue value)  throws TranslationException {
         try {
             if (value instanceof IRI) {
-                return termFactory.getConstantIRI(rdfFactory.createIRI(value.asIRI().get().toString()));
+                final String iri = OWLAPIAdapter.asIRI(value).get().toString();
+                return termFactory.getConstantIRI(rdfFactory.createIRI(iri));
             }
             else if (value instanceof OWLLiteral) {
-                return getValueOfLiteral(value.asLiteral().get());
+                final OWLLiteral literal = OWLAPIAdapter.asLiteral(value).get();
+                return getValueOfLiteral(literal);
             }
             else
                 throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + value);

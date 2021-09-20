@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.protege.utils;
+package it.unibz.inf.ontop.utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -28,7 +28,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.semanticweb.owlapi.util.OWLObjectTransformer;
 
-public final class Adapter {
+public final class OWLAPIAdapter {
 
     private static final Class<?> class_Predicate;
 
@@ -126,87 +126,140 @@ public final class Adapter {
         }
     }
 
-    public static Optional<String> getRemainder(final IRI iri) {
-        return invokeOptionalMethod(Objects.requireNonNull(iri), method_IRI_geRemainder);
+    /**
+     * Adapter for {@link IRI#getRemainder()}.
+     */
+    public static Optional<String> getRemainder(final IRI self) {
+        return invokeOptionalMethod(Objects.requireNonNull(self), method_IRI_geRemainder);
     }
 
-    public static Optional<IRI> asIRI(final OWLOntologyID id) {
-        return invokeOptionalMethod(Objects.requireNonNull(id), method_OWLAnnotationValue_asIRI);
+    /**
+     * Adapter for {@link OWLAnnotationValue#asIRI()}.
+     */
+    public static Optional<IRI> asIRI(final OWLAnnotationValue self) {
+        return invokeOptionalMethod(Objects.requireNonNull(self), method_OWLAnnotationValue_asIRI);
     }
 
-    public static Optional<OWLLiteral> asLiteral(final OWLOntologyID id) {
-        return invokeOptionalMethod(Objects.requireNonNull(id),
+    /**
+     * Adapter for {@link OWLAnnotationValue#asLiteral()}.
+     */
+    public static Optional<OWLLiteral> asLiteral(final OWLAnnotationValue self) {
+        return invokeOptionalMethod(Objects.requireNonNull(self),
                 method_OWLAnnotationValue_asLiteral);
     }
 
-    public static Optional<OWLAnonymousIndividual> asAnonymousIndividual(final OWLOntologyID id) {
-        return invokeOptionalMethod(Objects.requireNonNull(id),
+    /**
+     * Adapter for {@link OWLAnnotationValue#asAnonymousIndividual()}.
+     */
+    public static Optional<OWLAnonymousIndividual> asAnonymousIndividual(
+            final OWLAnnotationValue self) {
+        return invokeOptionalMethod(Objects.requireNonNull(self),
                 method_OWLAnnotationValue_asAnonymousIndividual);
     }
 
-    public static Optional<IRI> getOntologyIRI(final OWLOntologyID id) {
-        return invokeOptionalMethod(Objects.requireNonNull(id),
+    /**
+     * Adapter for {@link OWLOntologyID#getOntologyIRI()}.
+     */
+    public static Optional<IRI> getOntologyIRI(final OWLOntologyID self) {
+        return invokeOptionalMethod(Objects.requireNonNull(self),
                 method_OWLOntologyID_getOntologyIRI);
     }
 
-    public static Optional<IRI> getVersionIRI(final OWLOntologyID id) {
-        return invokeOptionalMethod(Objects.requireNonNull(id),
+    /**
+     * Adapter for {@link OWLOntologyID#getVersionIRI()}.
+     */
+    public static Optional<IRI> getVersionIRI(final OWLOntologyID self) {
+        return invokeOptionalMethod(Objects.requireNonNull(self),
                 method_OWLOntologyID_getVersionIRI);
     }
 
-    public static Optional<IRI> getDefaultDocumentIRI(final OWLOntologyID id) {
-        return invokeOptionalMethod(Objects.requireNonNull(id),
+    /**
+     * Adapter for {@link OWLOntologyID#getDefaultDocumentIRI()}.
+     */
+    public static Optional<IRI> getDefaultDocumentIRI(final OWLOntologyID self) {
+        return invokeOptionalMethod(Objects.requireNonNull(self),
                 method_OWLOntologyID_getDefaultDocumentIRI);
     }
 
+    /**
+     * Adapter for {@link EntitySearcher#getDataPropertyValues(OWLIndividual, OWLOntology)}.
+     */
     public static Multimap<OWLDataPropertyExpression, OWLLiteral> getDataPropertyValues(
             final OWLIndividual i, final OWLOntology ontology) {
         return invokeMultimapMethod(null, method_EntitySearcher_getDataPropertyValues, i,
                 ontology);
     }
 
+    /**
+     * Adapter for {@link EntitySearcher#getDataPropertyValues(OWLIndividual, Iterable)}.
+     */
     public static Multimap<OWLDataPropertyExpression, OWLLiteral> getDataPropertyValues(
             final OWLIndividual i, final Iterable<OWLOntology> ontologies) {
         return invokeMultimapMethod(null, method_EntitySearcher_getDataPropertyValues_Iterable, i,
                 ontologies);
     }
 
+    /**
+     * Adapter for {@link EntitySearcher#getObjectPropertyValues(OWLIndividual, OWLOntology)}.
+     */
     public static Multimap<OWLObjectPropertyExpression, OWLIndividual> getObjectPropertyValues(
             final OWLIndividual i, final OWLOntology ontology) {
         return invokeMultimapMethod(null, method_EntitySearcher_getObjectPropertyValues, i,
                 ontology);
     }
 
+    /**
+     * Adapter for {@link EntitySearcher#getObjectPropertyValues(OWLIndividual, Iterable)}.
+     */
     public static Multimap<OWLObjectPropertyExpression, OWLIndividual> getObjectPropertyValues(
             final OWLIndividual i, final Iterable<OWLOntology> ontologies) {
         return invokeMultimapMethod(null, method_EntitySearcher_getObjectPropertyValues_Iterable,
                 i, ontologies);
     }
 
+    /**
+     * Adapter for
+     * {@link EntitySearcher#getNegativeDataPropertyValues(OWLIndividual, OWLOntology)}.
+     */
     public static Multimap<OWLDataPropertyExpression, OWLLiteral> getNegativeDataPropertyValues(
             final OWLIndividual i, final OWLOntology ontology) {
         return invokeMultimapMethod(null, method_EntitySearcher_getNegativeDataPropertyValues, i,
                 ontology);
     }
 
+    /**
+     * Adapter for {@link EntitySearcher#getNegativeDataPropertyValues(OWLIndividual, Iterable)}.
+     */
     public static Multimap<OWLDataPropertyExpression, OWLLiteral> getNegativeDataPropertyValues(
             final OWLIndividual i, final Iterable<OWLOntology> ontologies) {
         return invokeMultimapMethod(null,
                 method_EntitySearcher_getNegativeDataPropertyValues_Iterable, i, ontologies);
     }
 
+    /**
+     * Adapter for
+     * {@link EntitySearcher#getNegativeObjectPropertyValues(OWLIndividual, OWLOntology)}.
+     */
     public static Multimap<OWLObjectPropertyExpression, OWLIndividual> getNegativeObjectPropertyValues(
             final OWLIndividual i, final OWLOntology ontology) {
         return invokeMultimapMethod(null, method_EntitySearcher_getNegativeObjectPropertyValues, i,
                 ontology);
     }
 
+    /**
+     * Adapter for
+     * {@link EntitySearcher#getNegativeObjectPropertyValues(OWLIndividual, Iterable)}.
+     */
     public static Multimap<OWLObjectPropertyExpression, OWLIndividual> getNegativeObjectPropertyValues(
             final OWLIndividual i, final Iterable<OWLOntology> ontologies) {
         return invokeMultimapMethod(null,
                 method_EntitySearcher_getNegativeObjectPropertyValues_Iterable, i, ontologies);
     }
 
+    /**
+     * Adapter for
+     * {@link OWLObjectTransformer#OWLObjectTransformer(Predicate, Function, OWLDataFactory, Class)}.
+     */
     public static <T> OWLObjectTransformer<T> newOWLObjectTransformer(
             final Predicate<Object> predicate, final Function<T, T> transformer,
             final OWLDataFactory df, final Class<T> witness) {
@@ -280,7 +333,7 @@ public final class Adapter {
         }
     }
 
-    private Adapter() {
+    private OWLAPIAdapter() {
         throw new Error();
     }
 
