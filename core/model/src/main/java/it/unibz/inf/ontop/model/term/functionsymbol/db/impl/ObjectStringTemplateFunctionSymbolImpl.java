@@ -38,6 +38,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final ImmutableList<Template.Component> components;
     private final ImmutableList<SafeSeparatorFragment> safeSeparatorFragments;
     private final IRISafeEnDecoder enDecoder;
+    private final Pattern patternForInteger;
+    private final Pattern patternForDecimalFloat;
+    private final Pattern patternForUuid;
 
     protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
         super(getTemplateString(components), createBaseTypes(components, typeFactory));
@@ -47,6 +50,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // must not produce false positives
         this.isInjective = atMostOnePlaceholderPerSeparator(safeSeparatorFragments);
         this.enDecoder = new IRISafeEnDecoder();
+
+        this.patternForInteger = Pattern.compile("^[0-9]+$");
+        this.patternForDecimalFloat = Pattern.compile("^[0-9.+\\-eE]+$");
+        this.patternForUuid = Pattern.compile("^[0-9a-fA-F\\-]+$");
     }
 
     private boolean atMostOnePlaceholderPerSeparator(ImmutableList<SafeSeparatorFragment> safeSeparatorFragments) {
@@ -319,14 +326,17 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (columnPositions.stream().anyMatch(i -> columnPositions.contains(i+1)))
             return false;
 
+        ImmutableSet<Integer> separatorPositions = IntStream.range(0, components.size())
+                .filter(i -> !components.get(i).isColumnNameReference())
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+
         // TODO: remove this restriction and tolerates consecutive separators
         if (IntStream.range(0, components.size() - 1)
-                .filter(i -> !components.get(i).isColumnNameReference())
-                .anyMatch(i -> !components.get(i+1).isColumnNameReference()))
+                .anyMatch(i -> separatorPositions.contains(i) && separatorPositions.contains(i+1)))
             return false;
 
-        if (IntStream.range(0, components.size())
-                .filter(i -> !components.get(i).isColumnNameReference())
+        if (separatorPositions.stream()
                 // Only those separating columns
                 .filter(i -> columnPositions.contains(i-1) && columnPositions.contains(i+1))
                 .allMatch(i -> isSafelySeparating(i, terms, otherTerms))) {
@@ -362,11 +372,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         if (term instanceof Constant) {
             Constant constant = (Constant) term;
 
-            // Should normally happen
+            // Should normally not happen
             return term.isNull()
-                    || isTermBefore
-                    ? constant.getValue().endsWith(separatorString)
-                    : constant.getValue().startsWith(separatorString);
+                    || (isTermBefore
+                        ? constant.getValue().endsWith(separatorString)
+                        : constant.getValue().startsWith(separatorString));
         }
         else {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
@@ -376,10 +386,12 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 boolean isSafelySeparating = ((DBTypeConversionFunctionSymbol) functionSymbol).getInputType()
                         .filter(t -> { switch(t.getCategory()) {
                             case INTEGER:
-                                return !separatorString.matches("[0-9]+");
+                                return !patternForInteger.matcher(separatorString).find();
                             case DECIMAL:
                             case FLOAT_DOUBLE:
-                                return !separatorString.matches("[0-9.+\\-eE]+");
+                                return !patternForDecimalFloat.matcher(separatorString).find();
+                            case UUID:
+                                return !patternForUuid.matcher(separatorString).find();
                             default:
                                 return false;
                         }

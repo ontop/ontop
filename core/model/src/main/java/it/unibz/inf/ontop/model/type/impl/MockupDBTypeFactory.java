@@ -98,7 +98,12 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @Override
     public DBTermType getDBTermType(String typeName) {
-        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
+        switch (typeName) {
+            case "UUID":
+                return new UUIDDBTermType("UUID", rootAncestry, typeFactory.getXsdStringDatatype());
+            default:
+                return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
+        }
     }
 
     @Override
