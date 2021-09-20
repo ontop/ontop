@@ -44,18 +44,12 @@ public class RDF4JMaterializerExampleTest {
 			fout.delete(); // clean any existing output file.
 		}
 		
-		BufferedWriter out = null;
-		try {
-		    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout, true)));
+		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout, true)))) {
 		    RDFWriter writer = new NTriplesWriter(out);
 			graphQuery.evaluate(writer);
 
 			long numberOfTriples = graphQuery.getTripleCountSoFar();
 			System.out.println("Generated triples: " + numberOfTriples);
-		} finally {
-		    if (out != null) {
-		    	out.close();
-		    }
 		}
 	}
 

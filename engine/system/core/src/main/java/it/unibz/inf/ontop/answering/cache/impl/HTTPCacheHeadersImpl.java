@@ -6,8 +6,6 @@ import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 public class HTTPCacheHeadersImpl implements HTTPCacheHeaders {
@@ -19,21 +17,11 @@ public class HTTPCacheHeadersImpl implements HTTPCacheHeaders {
 
     @Inject
     private HTTPCacheHeadersImpl(OntopSystemSettings settings) {
-        String cacheControlValue = Stream.of(settings.getHttpMaxAge()
-                        .map(i -> "max-age=" + i),
-                settings.getHttpStaleWhileRevalidate()
-                        .map(i -> "stale-while-revalidate=" + i),
-                settings.getHttpStaleIfError()
-                        .map(i -> "stale-if-error=" + i))
-                .flatMap(e -> e.map(Stream::of)
-                        .orElseGet(Stream::empty))
-                .collect(Collectors.joining(", "));
-
-        map = cacheControlValue.isEmpty()
-                ? ImmutableMap.of()
-                : ImmutableMap.of(
-                        CACHE_CONTROL_KEY, cacheControlValue,
-                        VARY_KEY, ACCEPT_KEY);
+        map = settings.getHttpCacheControl()
+                .map(v -> ImmutableMap.of(
+                        CACHE_CONTROL_KEY, v,
+                        VARY_KEY, ACCEPT_KEY))
+                .orElseGet(ImmutableMap::of);
     }
 
     @Override

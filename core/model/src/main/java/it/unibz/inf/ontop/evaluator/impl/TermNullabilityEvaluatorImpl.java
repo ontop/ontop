@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.evaluator.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheBuilderSpec;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -44,7 +43,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, valueNull)
                 .applyToBooleanExpression(expression);
 
-        return nullCaseExpression.evaluate2VL(coreUtilsFactory.createDummyVariableNullability(expression))
+        return nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))
                 .isEffectiveFalse();
     }
 
@@ -63,7 +62,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
                                 v -> valueNull)))
                 .applyToBooleanExpression(expression);
 
-        boolean result = nullCaseExpression.evaluate2VL(coreUtilsFactory.createDummyVariableNullability(expression))
+        boolean result = nullCaseExpression.evaluate2VL(coreUtilsFactory.createSimplifiedVariableNullability(expression))
                 .isEffectiveFalse();
         cache.put(entry, result);
         return result;

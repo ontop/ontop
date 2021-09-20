@@ -9,7 +9,7 @@ package it.unibz.inf.ontop.answering.resultset;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -35,4 +35,6 @@ public interface TupleResultSet extends IterativeOBDAResultSet<OntopBindingSet, 
 	List<String> getSignature() throws OntopConnectionException;
 
 	int getFetchSize() throws OntopConnectionException;
+
+	boolean isConnectionAlive() throws OntopConnectionException;
 }

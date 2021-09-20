@@ -9,12 +9,10 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLCoreBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.DefaultOntopSQLCredentialBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCredentialConfigurationImpl.OntopSQLCredentialOptions;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -72,14 +70,19 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
      */
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty, Optional::empty,
+                Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     OBDASpecification loadSpecification(OntologySupplier ontologySupplier,
                                         Supplier<Optional<File>> mappingFileSupplier,
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
-                                        Supplier<Optional<File>> constraintFileSupplier)
+                                        Supplier<Optional<File>> constraintFileSupplier,
+                                        Supplier<Optional<File>> dbMetadataFileSupplier,
+                                        Supplier<Optional<Reader>> dbMetadataReaderSupplier,
+                                        Supplier<Optional<File>> ontopViewFileSupplier,
+                                        Supplier<Optional<Reader>> ontopViewReaderSupplier)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -87,7 +90,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
                 mappingFileSupplier,
                 mappingReaderSupplier,
                 mappingGraphSupplier,
-                constraintFileSupplier
+                constraintFileSupplier,
+                dbMetadataFileSupplier,
+                dbMetadataReaderSupplier,
+                ontopViewFileSupplier,
+                ontopViewReaderSupplier
         );
     }
 
@@ -118,6 +125,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
+            // The parser is in charge of closing the reader
             return Optional.of(parser.parse(optionalMappingReader.get()));
         }
         Optional<Graph> optionalMappingGraph = mappingGraphSupplier.get();
@@ -126,20 +134,6 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
         }
 
         return Optional.empty();
-    }
-
-    /**
-     * Can be overloaded by sub-classes
-     */
-    @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-    generateOptimizationConfigurationMap() {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-                internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-        internalExecutorMapBuilder.putAll(sqlConfiguration.generateOptimizationConfigurationMap());
-
-        return internalExecutorMapBuilder.build();
     }
 
 

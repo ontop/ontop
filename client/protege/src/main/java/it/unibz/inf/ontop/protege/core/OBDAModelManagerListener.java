@@ -22,5 +22,5 @@ package it.unibz.inf.ontop.protege.core;
 
 public interface OBDAModelManagerListener {
 
-	void activeOntologyChanged();
+	void activeOntologyChanged(OBDAModel obdaModel);
 }

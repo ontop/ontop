@@ -1,20 +1,19 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.Templates;
 
 
 public class IRIStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFunctionSymbolImpl implements IRIStringTemplateFunctionSymbol {
 
-    private IRIStringTemplateFunctionSymbolImpl(String iriTemplate, int arity, TypeFactory typeFactory) {
-        super(iriTemplate, arity, typeFactory);
+    private IRIStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> template, TypeFactory typeFactory) {
+        super(template, typeFactory);
     }
 
-    protected static IRIStringTemplateFunctionSymbol createFunctionSymbol(String iriTemplate,
+    protected static IRIStringTemplateFunctionSymbol createFunctionSymbol(ImmutableList<Template.Component> template,
                                                                           TypeFactory typeFactory) {
-        int arity = Templates.getArity(iriTemplate);
-
-        return new IRIStringTemplateFunctionSymbolImpl(iriTemplate, arity, typeFactory);
+        return new IRIStringTemplateFunctionSymbolImpl(template, typeFactory);
     }
 }

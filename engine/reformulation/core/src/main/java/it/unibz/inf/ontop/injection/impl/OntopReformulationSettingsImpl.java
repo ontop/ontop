@@ -46,6 +46,16 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
+    public boolean isPostProcessingAvoided() {
+        return getRequiredBoolean(AVOID_POST_PROCESSING);
+    }
+
+    @Override
+    public boolean areInvalidTriplesExcludedFromResultSet() {
+        return getRequiredBoolean(EXCLUDE_INVALID_TRIPLES_FROM_RESULT_SET);
+    }
+
+    @Override
     public boolean isQueryLoggingEnabled() {
         return getRequiredBoolean(QUERY_LOGGING);
     }
@@ -83,6 +93,11 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     @Override
     public boolean areQueryLoggingDecompositionAndMergingMutuallyExclusive() {
         return getRequiredBoolean(QUERY_LOGGING_DECOMPOSITION_AND_MERGING_EXCLUSIVE);
+    }
+
+    @Override
+    public boolean isFixedObjectIncludedInDescribe() {
+        return getRequiredBoolean(INCLUDE_FIXED_OBJECT_POSITION_IN_DESCRIBE);
     }
 
     @Override

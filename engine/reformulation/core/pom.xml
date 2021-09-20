@@ -1,31 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <parent>
-        <artifactId>ontop-reformulation</artifactId>
-        <groupId>it.unibz.inf.ontop</groupId>
-        <version>4.1.0-beta-1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>it.unibz.inf.ontop</groupId>
+        <artifactId>ontop-reformulation</artifactId>
+        <version>4.2.0-SNAPSHOT</version>
+    </parent>
+
     <artifactId>ontop-reformulation-core</artifactId>
-    <packaging>jar</packaging>
-    <name>ontop-reformulation-core</name>
+
+    <properties>
+        <!-- filtering currently not used -->
+        <filter.main.resources>true</filter.main.resources>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-obda-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-optimization</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -68,18 +71,8 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-mapping-core</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
-
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-    </build>
 </project>

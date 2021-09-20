@@ -22,7 +22,7 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-p", "--properties"}, title = "properties file",
             description = "Properties file")
-    @Required
+    //@Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String propertiesFile;
 
@@ -30,6 +30,16 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
             description = "user supplied DB constraint file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String constraintFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-d", "--db-metadata"}, title = "db-metadata file",
+            description = "User-supplied db-metadata file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbMetadataFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-v", "--ontop-views"}, title = "Ontop view file",
+            description = "User-supplied view file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String ontopViewFile;
 
     @Option(type = OptionType.COMMAND, name = {"--db-password"}, title = "DB password",
             description = "DB password (overrides the properties)")
@@ -45,6 +55,16 @@ abstract class OntopMappingOntologyRelatedCommand implements OntopCommand {
             description = "DB URL (overrides the properties)")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String dbUrl;
+
+    @Option(type = OptionType.COMMAND, name = {"--db-name"}, title = "DB name",
+            description = "DB name (overrides the properties)")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbName;
+
+    @Option(type = OptionType.COMMAND, name = {"--db-driver"}, title = "DB driver",
+            description = "DB driver (overrides the properties)")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String dbDriver;
 
     protected boolean isR2rmlFile(String mappingFile) {
         return !mappingFile.endsWith(".obda");

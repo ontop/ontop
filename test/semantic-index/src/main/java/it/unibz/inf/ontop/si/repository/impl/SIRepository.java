@@ -34,14 +34,12 @@ public class SIRepository {
     private static final String DEFAULT_PASSWORD = "";
 
     private final RDBMSSIRepositoryManager dataRepository;
-    private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final LoadingConfiguration loadingConfiguration;
 
     public SIRepository(ClassifiedTBox tbox, LoadingConfiguration loadingConfiguration) {
 
-        this.termFactory = loadingConfiguration.getTermFactory();
-        this.typeFactory = loadingConfiguration.getTypeFactory();
+        TermFactory termFactory = loadingConfiguration.getTermFactory();
+        TypeFactory typeFactory = loadingConfiguration.getTypeFactory();
         this.loadingConfiguration = loadingConfiguration;
         this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory,
             loadingConfiguration.getTargetAtomFactory(), loadingConfiguration.getSourceQueryFactory());

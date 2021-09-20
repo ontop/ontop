@@ -5,7 +5,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.connection.DBConnector;
 import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
@@ -36,7 +35,6 @@ public class JDBCConnector implements DBConnector {
     private final Logger log = LoggerFactory.getLogger(JDBCConnector.class);
     private final JDBCConnectionPool connectionPool;
 
-    private final InputQueryFactory inputQueryFactory;
     private final TermFactory termFactory;
     private final RDF rdfFactory;
     private final JDBCStatementInitializer statementInitializer;
@@ -44,14 +42,12 @@ public class JDBCConnector implements DBConnector {
     @AssistedInject
     private JDBCConnector(@Assisted QueryReformulator queryReformulator,
                           JDBCConnectionPool connectionPool,
-                          InputQueryFactory inputQueryFactory,
                           TermFactory termFactory,
                           SubstitutionFactory substitutionFactory,
                           RDF rdfFactory,
                           JDBCStatementInitializer statementInitializer,
                           OntopSystemSQLSettings settings) {
         this.queryReformulator = queryReformulator;
-        this.inputQueryFactory = inputQueryFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.settings = settings;
@@ -119,7 +115,7 @@ public class JDBCConnector implements DBConnector {
     public OntopConnection getConnection() throws OntopConnectionException {
 
         return new SQLConnection(this, queryReformulator, getSQLPoolConnection(),
-                inputQueryFactory, termFactory, rdfFactory, substitutionFactory, statementInitializer, settings);
+                termFactory, rdfFactory, substitutionFactory, statementInitializer, settings);
     }
 
 

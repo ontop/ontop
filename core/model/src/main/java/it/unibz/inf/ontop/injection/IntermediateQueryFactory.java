@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -31,7 +30,7 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {
 
-    IntermediateQueryBuilder createIQBuilder(ExecutorRegistry executorRegistry);
+    IntermediateQueryBuilder createIQBuilder();
 
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables);
 
@@ -63,6 +62,9 @@ public interface IntermediateQueryFactory {
                                                   VariableNullability variableNullability);
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
+
+    ValuesNode createValuesNode(@Assisted("orderedVariables") ImmutableList<Variable> orderedVariables,
+                                @Assisted("values") ImmutableList<ImmutableList<Constant>> values);
 
     NativeNode createNativeNode(ImmutableSortedSet<Variable> variables,
                                 @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,

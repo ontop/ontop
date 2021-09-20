@@ -61,6 +61,33 @@ public class VariableNullabilityImpl implements VariableNullability {
     }
 
     /**
+     *
+     * Treats all the variables of the functional term as independently nullable
+     */
+    @AssistedInject
+    private VariableNullabilityImpl(@Assisted ImmutableFunctionalTerm functionalTerm,
+                                         CoreUtilsFactory coreUtilsFactory, TermFactory termFactory,
+                                         SubstitutionFactory substitutionFactory) {
+        this(functionalTerm.getVariableStream(), coreUtilsFactory, termFactory, substitutionFactory);
+    }
+
+    /**
+     * Treats all the variables as independently nullable
+     */
+    @AssistedInject
+    protected VariableNullabilityImpl(@Assisted Stream<Variable> variableStream, CoreUtilsFactory coreUtilsFactory,
+                                      TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+        scope = variableStream.collect(ImmutableCollectors.toSet());
+        nullableGroups = scope.stream()
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet());
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.nullableVariables = scope;
+    }
+
+    /**
      * Non-projected variables ("external") are considered as nullable.
      *
      * Relevant when propagating down constraints
@@ -158,6 +185,25 @@ public class VariableNullabilityImpl implements VariableNullability {
         return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);
     }
 
+    @Override
+    public VariableNullability extendToExternalVariables(Stream<Variable> possiblyExternalVariables) {
+        ImmutableSet<Variable> externalVariables = possiblyExternalVariables
+                .filter(v -> !scope.contains(v))
+                .collect(ImmutableCollectors.toSet());
+
+        if (externalVariables.isEmpty())
+            return this;
+
+        ImmutableSet<Variable> newScope = Sets.union(scope, externalVariables).immutableCopy();
+        ImmutableSet<ImmutableSet<Variable>> newNullableGroups = Stream.concat(
+                externalVariables.stream()
+                        .map(ImmutableSet::of),
+                nullableGroups.stream())
+                .collect(ImmutableCollectors.toSet());
+
+        return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);
+    }
+
     private VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                        ImmutableSet<Variable> newScope,
                                        VariableGenerator variableGenerator) {
@@ -180,7 +226,7 @@ public class VariableNullabilityImpl implements VariableNullability {
                 .filter(g -> !g.isEmpty())
                 .collect(ImmutableCollectors.toSet());
 
-        return new VariableNullabilityImpl(nullableGroups, newScope, coreUtilsFactory, termFactory, substitutionFactory);
+        return coreUtilsFactory.createVariableNullability(nullableGroups, newScope);
     }
 
     /*

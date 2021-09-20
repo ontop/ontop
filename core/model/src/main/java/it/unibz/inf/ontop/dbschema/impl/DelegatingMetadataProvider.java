@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import java.util.List;
+
 public class DelegatingMetadataProvider implements MetadataProvider {
 
     protected final MetadataProvider provider;
@@ -18,12 +20,17 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
+    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+        provider.normalizeRelations(relationDefinitions);
+    }
+
+    @Override
     public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
         return provider.getRelationIDs();
     }
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
+    public NamedRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
         return provider.getRelation(relationId);
     }
 
@@ -33,7 +40,7 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         provider.insertIntegrityConstraints(relation, metadataLookup);
     }
 }

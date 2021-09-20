@@ -5,9 +5,19 @@
 
 	<extension id="DatasourcesManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Datasource editor"/>
+		<label value="Connection parameters"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.DatasourcesManagerView">
+			value="it.unibz.inf.ontop.protege.connection.DataSourceView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="ontop"/>
+	</extension>
+
+	<extension id="OntopPropertiesViewComponent"
+			   point="org.protege.editor.core.application.ViewComponent">
+		<label value="Ontop properties"/>
+		<class
+				value="it.unibz.inf.ontop.protege.connection.OntopPropertiesView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -17,7 +27,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping editor"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.MappingsManagerView">
+			value="it.unibz.inf.ontop.protege.mapping.MappingManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -30,7 +40,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Query manager"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.QueryManagerView">
+			value="it.unibz.inf.ontop.protege.query.QueryManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -40,7 +50,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="SPARQL query editor"/>
 		<class
-			value="it.unibz.inf.ontop.protege.views.QueryInterfaceView">
+			value="it.unibz.inf.ontop.protege.query.QueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -52,7 +62,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop Mappings"/>
 		<class
-			value="it.unibz.inf.ontop.protege.gui.tab.OntopMappingsTab">
+			value="it.unibz.inf.ontop.protege.mapping.OntopMappingTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -64,7 +74,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop SPARQL"/>
 		<class
-			value="it.unibz.inf.ontop.protege.gui.tab.OntopSPARQLTab">
+			value="it.unibz.inf.ontop.protege.query.OntopSPARQLTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -79,72 +89,67 @@
   	<editorKitId value="OWLEditorKit"/>
   </extension>
 
-  <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
-    <label value="Ontop Reasoner"/>
-    <class value="it.unibz.inf.ontop.protege.gui.preferences.QuestPreferencesPanel"/>
-  </extension>
-
   <!-- MENUS -->
 
 	<extension id="menu.ontop" point="org.protege.editor.core.application.EditorKitMenuAction">
        <name value="Ontop"/>
-       <toolTip value="Actions related to the Ontop plugin"/>
+       <toolTip value="Actions of the Ontop plugin"/>
        <path value="/SlotZ-A"/>
        <editorKitId value="any"/>
    </extension>
 
   <extension id="menu.ontop.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Materialize triples..."/>
-		<toolTip value="Dump OWL Assertions (ABox/Triples) derived by the mappings and ontology"/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.AboxMaterializationAction"/>
+		<toolTip value="Dump RDF triples derived from the mapping and ontology"/>
+		<class value="it.unibz.inf.ontop.protege.action.RDFGraphMaterializationAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotA-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
    <extension id="menu.ontop.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Display the mapping statistics..."/>
-		<toolTip value="Provide information about the number of assertions (triples) from the mappings"/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.ABoxStatisticsAction"/>
+		<name value="Display mapping statistics..."/>
+		<toolTip value="Provide information about the number of RDF triples produces by the mapping"/>
+		<class value="it.unibz.inf.ontop.protege.action.MappingStatisticsAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	 <extension id="menu.ontop.inconsistecychecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check for inconsistencies..."/>
-		<toolTip value="Run consistency check regarding disjoint and functional properties"/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.InconsistencyCheckAction"/>
+		<toolTip value="Run consistency check for disjoint and functional properties"/>
+		<class value="it.unibz.inf.ontop.protege.action.InconsistencyCheckAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-B"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	<extension id="menu.ontop.emptieschecking" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Check for empties..."/>
-		<toolTip value="Provide information about empty concepts and roles "/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.EmptiesCheckAction"/>
+		<name value="Check empty entities..."/>
+		<toolTip value="Provide the list of empty classes and properties"/>
+		<class value="it.unibz.inf.ontop.protege.action.EmptyEntitiesCheckAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-C"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	 <extension id="menu.ontop.importr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Import R2RML mappings..."/>
-		<toolTip value="Import mappings from an R2RML mapping file"/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.R2RMLImportAction"/>
+		<name value="Import R2RML mapping..."/>
+		<toolTip value="Import mapping from an R2RML file"/>
+		<class value="it.unibz.inf.ontop.protege.action.R2RMLImportAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotC-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	 <extension id="menu.ontop.exportr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Export R2RML mappings..."/>
-		<toolTip value="Export mappings as an R2RML mapping file"/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.R2RMLExportAction"/>
+		<name value="Export R2RML mapping..."/>
+		<toolTip value="Export mapping as an R2RML file"/>
+		<class value="it.unibz.inf.ontop.protege.action.R2RMLExportAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotC-B"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
 
 	<extension id="menu.ontop.bootstrap" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Generate ontology and mappings..."/>
-		<toolTip value="Automatically generates classes/propertis and mappings for a DB..."/>
-		<class value="it.unibz.inf.ontop.protege.gui.action.BootstrapAction"/>
+		<name value="Bootstrap ontology and mapping..."/>
+		<toolTip value="Automatically generates classes/properties and mapping from a DB..."/>
+		<class value="it.unibz.inf.ontop.protege.action.BootstrapAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotD-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -160,7 +165,14 @@
     <extension id="jdbc.prefs"
                point="org.protege.editor.core.application.preferencespanel">
         <label value="JDBC Drivers"/>
-        <class value="org.protege.osgi.jdbc.prefs.PreferencesPanel"/>
+        <class value="it.unibz.inf.ontop.protege.jdbc.JdbcPreferencesPanel"/>
     </extension>
+
+	<!-- MappingListPreferences -->
+	<extension id="mapping.prefs"
+			   point="org.protege.editor.core.application.preferencespanel">
+		<label value="Mapping Preferences"/>
+		<class value="it.unibz.inf.ontop.protege.mapping.MappingListPreferencesPanel"/>
+	</extension>
 
 </plugin>

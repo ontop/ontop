@@ -66,7 +66,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap) {
+    public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
         return new InjectiveVar2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory, this);
     }
 
@@ -91,7 +91,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
         Variable proposedVariable = variableGenerator.generateNewVariableIfConflicting(v);
         if (proposedVariable.equals(v)
-                // Makes sure that a "fresh" variable does not exists in the variable set
+                // Makes sure that a "fresh" variable does not exist in the variable set
                 || (!variables.contains(proposedVariable)))
             return proposedVariable;
 

@@ -1,0 +1,93 @@
+{
+    "relations": [
+        {
+            "name": "\"hr\".\"persons\"",
+            "columns": [
+                {
+                    "name": "\"id\"",
+                    "datatype": "integer",
+                    "isNullable": false
+                },
+                {
+                    "name": "\"ssn\"",
+                    "datatype": "text",
+                    "isNullable": false
+                },
+                {
+                    "name": "\"firstName\"",
+                    "datatype": "text",
+                    "isNullable": true
+                },
+                {
+                    "name": "\"lastName\"",
+                    "datatype": "text",
+                    "isNullable": false
+                },
+                {
+                    "name": "\"zipCode\"",
+                    "datatype": "text",
+                    "isNullable": true
+                },
+                {
+                    "name": "\"locality\"",
+                    "datatype": "text",
+                    "isNullable": true
+                },
+                {
+                    "name": "\"country\"",
+                    "datatype": "text",
+                    "isNullable": true
+                },
+                {
+                    "name": "\"status\"",
+                    "datatype": "integer",
+                    "isNullable": false
+                },
+                {
+                    "name": "\"email\"",
+                    "datatype": "text",
+                    "isNullable": true
+                },
+                {
+                    "name": "\"tags\"",
+                    "datatype": "jsonb",
+                    "isNullable": true
+                },
+                {
+                    "name": "\"friends\"",
+                    "datatype": "jsonb",
+                    "isNullable": true
+                }
+
+            ],
+            "uniqueConstraints": [
+                {
+                    "determinants": ["\"id\""],
+                    "isPrimaryKey": true
+                },
+                {
+                    "determinants": ["\"ssn\""],
+                    "isPrimaryKey": false
+                }
+            ],
+            "otherFunctionalDependencies": [
+                {
+                    "determinants": ["\"zipCode\"", "\"country\""],
+                    "dependents": ["\"locality\""]
+                }
+            ],
+            "foreignKeys": [
+                {
+                    "from": "\"country\"",
+                    "to": {
+                        "relation": "\"countries\"",
+                        "column": "\"id\""
+                    }
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "extractionTime": "2020-02-01T10:11:12"
+    }
+}

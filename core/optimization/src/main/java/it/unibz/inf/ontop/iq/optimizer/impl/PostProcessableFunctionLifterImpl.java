@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -177,7 +177,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         private final IntermediateQueryFactory iqFactory;
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
-        private final UniqueTermTypeExtractor typeExtractor;
+        private final SingleTermTypeExtractor typeExtractor;
         private final CoreSingletons coreSingletons;
 
         /**
@@ -299,9 +299,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     substitutionFactory.getSubstitution(idVariable, termFactory.getDBIntegerConstant(position));
 
             ImmutableSubstitution<ImmutableTerm> substitutionBeforeRenaming = originalSubstitution
-                    .flatMap(s -> s.unionHeterogeneous(positionSubstitution))
-                    .map(s -> (ImmutableSubstitution<ImmutableTerm>)
-                            s.reduceDomainToIntersectionWith(projectedVariablesBeforeRenaming))
+                    .flatMap(s -> s.union(positionSubstitution))
+                    .map(s -> s.reduceDomainToIntersectionWith(projectedVariablesBeforeRenaming))
                     .orElse(positionSubstitution);
 
 
@@ -335,7 +334,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(ChildDefinitionLift::getPartiallyPaddedChild)
                     .filter(c -> c.getVariables().contains(variable))
                     .findAny()
-                    .flatMap(t -> typeExtractor.extractUniqueTermType(variable, t))
+                    .flatMap(t -> typeExtractor.extractSingleTermType(variable, t))
                     .filter(t -> t instanceof DBTermType)
                     .map(t -> (DBTermType) t);
         }

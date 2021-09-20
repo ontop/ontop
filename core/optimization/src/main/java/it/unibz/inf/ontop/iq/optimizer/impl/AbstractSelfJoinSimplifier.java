@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency> {
@@ -38,23 +40,33 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
         this.noSolutionState = new OptimizationState(ImmutableSet.of(), ImmutableList.of(), substitutionFactory.getSubstitution());
     }
 
-    public IQTree transformInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children,
+    /**
+     * Returns an empty result to indicate that no optimization has been applied
+     */
+    public Optional<IQTree> transformInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children,
                                      ImmutableSet<Variable> projectedVariables) {
         ImmutableMap<Boolean, ImmutableList<IQTree>> childPartitions = children.stream()
-                .collect(ImmutableCollectors.partitioningBy(n -> n instanceof ExtensionalDataNode));
+                .collect(ImmutableCollectors.partitioningBy(n -> (n instanceof ExtensionalDataNode)
+                        && hasConstraint((ExtensionalDataNode) n)));
 
-        Optional<ImmutableList<IQTree>> nonExtensionalChildren = Optional.ofNullable(childPartitions.get(false));
-        Optional<ImmutableList<IQTree>> extensionalChildren = Optional.ofNullable(childPartitions.get(true));
+        Optional<ImmutableList<IQTree>> extensionalChildrenWithConstraint = Optional.ofNullable(childPartitions.get(true));
 
-        Optional<ImmutableMultimap<RelationDefinition, ExtensionalDataNode>> optionalDataNodeMap = extensionalChildren
+        Optional<ImmutableMap<RelationDefinition, Collection<ExtensionalDataNode>>> optionalDataNodeMap = extensionalChildrenWithConstraint
                 .map(ns -> ns.stream()
                         .map(n -> (ExtensionalDataNode) n)
                         .collect(ImmutableCollectors.toMultimap(
                                 ExtensionalDataNode::getRelationDefinition,
-                                n -> n)));
+                                n -> n)).asMap());
+
+        // No room for optimization (no self-join involving a constraint of the desired type) -> returns fast
+        if (!optionalDataNodeMap
+                .filter(m -> m.values().stream()
+                        .anyMatch(c -> c.size() > 1))
+                .isPresent())
+            return Optional.empty();
 
         ImmutableList<OptimizationState> optimizationStates = optionalDataNodeMap
-                .map(m -> m.asMap().entrySet().stream()
+                .map(m -> m.entrySet().stream()
                         .map(e -> optimizeExtensionalDataNodes(e.getKey(), e.getValue()))
                         .collect(ImmutableCollectors.toList()))
                 .orElseGet(ImmutableList::of);
@@ -63,7 +75,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
          * First empty case: no solution for one relation
          */
         if (optimizationStates.stream().anyMatch(s -> s.extensionalDataNodes.isEmpty())) {
-            return iqFactory.createEmptyNode(projectedVariables);
+            return Optional.of(iqFactory.createEmptyNode(projectedVariables));
         }
 
         // NB: may return an unifier with no entry
@@ -75,7 +87,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
          * Second empty case: incompatible unifications between relations
          */
         if (!optionalUnifier.isPresent()) {
-            return iqFactory.createEmptyNode(projectedVariables);
+            return Optional.of(iqFactory.createEmptyNode(projectedVariables));
         }
         ImmutableSubstitution<VariableOrGroundTerm> unifier = optionalUnifier.get();
 
@@ -83,12 +95,14 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .flatMap(s -> s.extensionalDataNodes.stream())
                 .collect(ImmutableCollectors.toList());
 
-        if (optimizedExtensionalDataNodes.size() == extensionalChildren.map(AbstractCollection::size)
+        if (canEliminateNodes() && optimizedExtensionalDataNodes.size() == extensionalChildrenWithConstraint.map(AbstractCollection::size)
                 .orElse(0)) {
-            return iqFactory.createNaryIQTree(rootNode, children);
+            return Optional.empty();
         }
 
-        ImmutableList<IQTree> newChildren = nonExtensionalChildren
+        Optional<ImmutableList<IQTree>> nonExtensionalChildrenWithConstraint = Optional.ofNullable(childPartitions.get(false));
+
+        ImmutableList<IQTree> newChildren = nonExtensionalChildrenWithConstraint
                 .map(nes -> Stream.concat(optimizedExtensionalDataNodes.stream(), nes.stream())
                         .collect(ImmutableCollectors.toList()))
                 .orElse(optimizedExtensionalDataNodes);
@@ -101,8 +115,12 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                         optimizationStates.stream()
                                 .flatMap(s -> s.newExpressions.stream())));
 
-        return buildNewTree(newChildren, newExpression, unifier, projectedVariables);
+        return Optional.of(buildNewTree(newChildren, newExpression, unifier, projectedVariables));
     }
+
+    protected abstract boolean canEliminateNodes();
+
+    protected abstract boolean hasConstraint(ExtensionalDataNode node);
 
     private IQTree buildNewTree(ImmutableList<IQTree> children, Optional<ImmutableExpression> expression,
                                 ImmutableSubstitution<VariableOrGroundTerm> unifier,
@@ -221,12 +239,12 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableList<ExtensionalDataNode> newDataNodes = Stream.concat(
-                simplifications.stream()
-                        .map(Optional::get)
-                        .flatMap(s -> s.dataNodes.stream()),
-                map.entrySet().stream()
-                        .filter(e -> e.getKey().stream().anyMatch(o -> !o.isPresent()) || e.getValue().size() < 2)
-                        .flatMap(e -> e.getValue().stream()))
+                        simplifications.stream()
+                                .map(Optional::get)
+                                .flatMap(s -> s.dataNodes.stream()),
+                        map.entrySet().stream()
+                                .filter(e -> e.getKey().stream().anyMatch(o -> !o.isPresent()) || e.getValue().size() < 2)
+                                .flatMap(e -> e.getValue().stream()))
                 .map(n -> applySubstitution(unifier, n))
                 .collect(ImmutableCollectors.toList());
 
@@ -244,14 +262,16 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
                                                                                      Collection<ExtensionalDataNode> dataNodes,
                                                                                      C constraint);
 
-    protected Optional<ImmutableUnificationTools.ArgumentMapUnification> unifyDataNodes(Stream<ExtensionalDataNode> dataNodes) {
+    protected Optional<ImmutableUnificationTools.ArgumentMapUnification> unifyDataNodes(
+            Stream<ExtensionalDataNode> dataNodes,
+            Function<ExtensionalDataNode, ImmutableMap<Integer, ? extends VariableOrGroundTerm>> argumentMapSelector) {
          return dataNodes
                 .reduce(null,
                         (o, n) -> o == null
                                 ? Optional.of(new ImmutableUnificationTools.ArgumentMapUnification(
-                                n.getArgumentMap(),
+                                argumentMapSelector.apply(n),
                                 substitutionFactory.getSubstitution()))
-                                : o.flatMap(u -> unify(u, n.getArgumentMap())),
+                                : o.flatMap(u -> unify(u, argumentMapSelector.apply(n))),
                         (m1, m2) -> {
                             throw new MinorOntopInternalBugException("Was not expected to be runned in //");
                         });
@@ -261,7 +281,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             ImmutableUnificationTools.ArgumentMapUnification previousUnification,
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
 
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> updatedArgumentMap =
                 previousUnification.substitution.applyToArgumentMap(argumentMap);
 
         return unificationTools.computeArgumentMapMGU(previousUnification.argumentMap, updatedArgumentMap)
@@ -286,7 +306,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
      * TODO: we don't need to remove the functional terms for the determinants
      */
     protected NormalizationBeforeUnification normalizeDataNodes(
-            Collection<ExtensionalDataNode> dataNodes, UniqueConstraint constraint) {
+            Collection<ExtensionalDataNode> dataNodes, C constraint) {
         ImmutableSet<GroundFunctionalTerm> groundFunctionalTerms = dataNodes.stream()
                 .flatMap(n -> n.getArgumentMap().values().stream())
                 .filter(t -> t instanceof GroundFunctionalTerm)

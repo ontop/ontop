@@ -33,8 +33,11 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
 
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder =
                 OntopSQLOWLAPIConfiguration.defaultBuilder()
-                        .ontologyFile(owlFile)
-                        .propertyFile(propertiesFile);
+                        .ontologyFile(owlFile);
+        //                .propertyFile(propertiesFile);
+
+        if (propertiesFile != null)
+            builder.propertyFile(propertiesFile);
 
         if (dbPassword != null)
             builder.jdbcPassword(dbPassword);
@@ -45,10 +48,22 @@ public class OntopValidate extends OntopMappingOntologyRelatedCommand {
         if (dbUser != null)
             builder.jdbcUser(dbUser);
 
+        if (dbName != null)
+            builder.jdbcName(dbName);
+
+        if (dbDriver != null)
+            builder.jdbcDriver(dbDriver);
+
         if (isR2rmlFile(mappingFile))
             builder.r2rmlMappingFile(mappingFile);
         else
             builder.nativeOntopMappingFile(mappingFile);
+
+        if (dbMetadataFile != null)
+            builder.dbMetadataFile(dbMetadataFile);
+
+        if (ontopViewFile != null)
+            builder.ontopViewFile(ontopViewFile);
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 

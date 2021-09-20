@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -18,12 +21,12 @@ public interface DBFunctionSymbolFactory {
     /**
      * NB: a functional term using this symbol is producing a NULL or a DB string
      */
-    IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate);
+    IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<Template.Component> iriTemplate);
 
     /**
      * NB: a functional term using this symbol is producing a NULL or a DB string
      */
-    BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(String bnodeTemplate);
+    BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<Template.Component> bnodeTemplate);
 
     /**
      * Returns a fresh Bnode template
@@ -91,6 +94,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIfThenElse();
 
+    DBFunctionSymbol getDBNullIf();
+
     DBFunctionSymbol getDBUpper();
 
     DBFunctionSymbol getDBLower();
@@ -152,6 +157,11 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBCoalesce(int arity);
 
+    /**
+     * Min arity is 1
+     */
+    DBBooleanFunctionSymbol getDBBooleanCoalesce(int arity);
+
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 
     TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity);
@@ -193,6 +203,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBRegexpMatches3();
 
     DBBooleanFunctionSymbol getDBLike();
+    DBBooleanFunctionSymbol getDBSimilarTo();
 
     DBFunctionSymbol getDBStrBefore();
     DBFunctionSymbol getDBStrAfter();
@@ -290,4 +301,40 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);
+
+    // Topological functions
+    DBBooleanFunctionSymbol getDBSTWithin();
+    DBBooleanFunctionSymbol getDBSTEquals();
+    DBBooleanFunctionSymbol getDBSTIntersects();
+    DBBooleanFunctionSymbol getDBSTOverlaps();
+    DBBooleanFunctionSymbol getDBSTContains();
+    DBBooleanFunctionSymbol getDBSTCrosses();
+    DBBooleanFunctionSymbol getDBSTDisjoint();
+    DBBooleanFunctionSymbol getDBSTTouches();
+    DBBooleanFunctionSymbol getDBSTCoveredBy();
+    DBBooleanFunctionSymbol getDBSTCovers();
+    DBBooleanFunctionSymbol getDBSTContainsProperly();
+
+    // Non-topological and form functions
+    DBFunctionSymbol getDBSTDistance();
+    DBFunctionSymbol getDBSTDistanceSphere();
+    DBFunctionSymbol getDBSTDistanceSpheroid();
+    DBFunctionSymbol getDBSTTransform();
+    DBFunctionSymbol getDBSTGeomFromText();
+    DBFunctionSymbol getDBSTMakePoint();
+    DBFunctionSymbol getDBSTSetSRID();
+    FunctionSymbol getDBAsText();
+    FunctionSymbol getDBSTFlipCoordinates();
+    FunctionSymbol getDBBuffer();
+    FunctionSymbol getDBIntersection();
+    FunctionSymbol getDBBoundary();
+    FunctionSymbol getDBSymDifference();
+    FunctionSymbol getDBUnion();
+    FunctionSymbol getDBEnvelope();
+    FunctionSymbol getDBConvexHull();
+    FunctionSymbol getDBDifference();
+    DBBooleanFunctionSymbol getDBRelate();
+    FunctionSymbol getDBRelateMatrix();
+    FunctionSymbol getDBGetSRID();
+
 }

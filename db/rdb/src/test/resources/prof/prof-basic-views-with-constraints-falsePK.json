@@ -1,0 +1,36 @@
+{
+  "relations": [
+    {
+      "name": [
+        "\"views\"",
+        "\"uni1\"",
+        "\"academic\""
+      ],
+      "baseRelation": [
+        "\"uni1\"",
+        "\"academic\""
+      ],
+      "filterExpression": "",
+      "columns": {
+        "added": [],
+        "hidden": ["\"ssn\""]
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "student_position_id",
+            "determinants": ["\"position\""],
+            "isPrimaryKey": false
+          }
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [ ]
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "BasicViewDefinition"
+    }
+  ]
+}

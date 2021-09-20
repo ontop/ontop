@@ -1,0 +1,44 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C",
+      "determinants" : [ "\"id\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ {
+      "determinants": ["\"locality\""],
+      "dependents": ["\"status\""]
+    }],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"fullName\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }, {
+      "name" : "\"status\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"country\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : true
+    }, {
+      "name" : "\"locality\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    } ],
+    "name" : ["\"person\""]
+  } ],
+  "metadata" : {
+    "dbmsProductName" : "H2",
+    "dbmsVersion" : "1.4.199 (2019-03-13)",
+    "driverName" : "H2 JDBC Driver",
+    "driverVersion" : "1.4.199 (2019-03-13)",
+    "quotationString" : "\"",
+    "extractionTime" : "2020-11-12T17:24:30"
+  }
+}

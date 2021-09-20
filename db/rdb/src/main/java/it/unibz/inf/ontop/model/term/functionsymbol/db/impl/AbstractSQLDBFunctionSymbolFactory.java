@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.model.type.*;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
@@ -45,6 +47,45 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CONCAT_OP_STR = "||";
     protected static final String NULLIF_STR = "NULLIF";
 
+    // Geographic Boolean Relation Functions
+    protected static final String ST_WITHIN = "ST_WITHIN";
+    protected static final String ST_CONTAINS = "ST_CONTAINS";
+    protected static final String ST_CROSSES = "ST_CROSSES";
+    protected static final String ST_DISJOINT = "ST_DISJOINT";
+    protected static final String ST_EQUALS = "ST_EQUALS";
+    protected static final String ST_OVERLAPS = "ST_OVERLAPS";
+    protected static final String ST_INTERSECTS = "ST_INTERSECTS";
+    protected static final String ST_TOUCHES = "ST_TOUCHES";
+    protected static final String ST_COVERS = "ST_COVERS";
+    protected static final String ST_COVEREDBY = "ST_COVEREDBY";
+    protected static final String ST_CONTAINSPROPERLY = "ST_CONTAINSPROPERLY";
+
+    // Geographic Boolean Relation Functions
+
+    protected static final String ST_DISTANCE = "ST_DISTANCE";
+
+    protected static final String ST_DISTANCE_SPHERE = "ST_DISTANCESPHERE";
+
+    protected static final String ST_DISTANCE_SPHEROID = "ST_DISTANCESPHEROID";
+
+    protected static final String ST_TRANSFORM = "ST_TRANSFORM";
+    protected static final String ST_GEOMFROMTEXT = "ST_GEOMFROMTEXT";
+    protected static final String ST_MAKEPOINT = "ST_MAKEPOINT";
+    protected static final String ST_SETSRID = "ST_SETSRID";
+
+    protected static final String ST_FLIP_COORDINATES = "ST_FLIPCOORDINATES";
+
+    protected static final String ST_ASTEXT = "ST_ASTEXT";
+    private static final String ST_BUFFER = "ST_BUFFER";
+    private static final String ST_INTERSECTION = "ST_INTERSECTION";
+    private static final String ST_CONVEXHULL = "ST_CONVEXHULL";
+    private static final String ST_BOUNDARY = "ST_BOUNDARY";
+    private static final String ST_ENVELOPE = "ST_ENVELOPE";
+    private static final String ST_DIFFERENCE = "ST_DIFFERENCE";
+    private static final String ST_SYMDIFFERENCE = "ST_SYMDIFFERENCE";
+    private static final String ST_UNION = "ST_UNION";
+    private static final String ST_RELATE = "ST_RELATE";
+    private static final String ST_SRID = "ST_SRID";
 
     protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
@@ -53,6 +94,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected final DBTermType dbDoubleType;
     protected final DBTermType dbIntegerType;
     protected final DBTermType dbDecimalType;
+
     protected final DBTermType abstractRootDBType;
     protected final TermType abstractRootType;
     private final Map<Integer, DBConcatFunctionSymbol> nullRejectingConcatMap;
@@ -133,6 +175,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType dbDateTimestamp = dbTypeFactory.getDBDateTimestampType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+        DBTermType dbDoubleType = dbTypeFactory.getDBDoubleType();
+        DBTermType dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
@@ -202,6 +246,123 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol nullIfFunctionSymbol = new NullIfDBFunctionSymbolImpl(abstractRootDBType);
         builder.put(NULLIF_STR, 2, nullIfFunctionSymbol);
 
+        // GEO Functions
+        DBFunctionSymbol withinFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_WITHIN, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_WITHIN, 2, withinFunctionSymbol);
+
+        DBFunctionSymbol containsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_CONTAINS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_CONTAINS, 2, containsFunctionSymbol);
+
+        DBFunctionSymbol crossesFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_CROSSES, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_CROSSES, 2, crossesFunctionSymbol);
+
+        DBFunctionSymbol disjointFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_DISJOINT, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_DISJOINT, 2, disjointFunctionSymbol);
+
+        DBFunctionSymbol equalsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_EQUALS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_EQUALS, 2, equalsFunctionSymbol);
+
+        DBFunctionSymbol intersectsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_INTERSECTS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_INTERSECTS, 2, intersectsFunctionSymbol);
+
+        DBFunctionSymbol overlapsFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_OVERLAPS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_OVERLAPS, 2, overlapsFunctionSymbol);
+
+        DBFunctionSymbol touchesFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_TOUCHES, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_TOUCHES, 2, touchesFunctionSymbol);
+
+        DBFunctionSymbol coversFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_COVERS, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_COVERS, 2, coversFunctionSymbol);
+
+        DBFunctionSymbol coveredbyFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_COVEREDBY, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_COVEREDBY, 2, coveredbyFunctionSymbol);
+
+        DBFunctionSymbol containsproperlyFunctionSymbol = new GeoDBBooleanFunctionSymbol(ST_CONTAINSPROPERLY, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_CONTAINSPROPERLY, 2, containsproperlyFunctionSymbol);
+
+        DBFunctionSymbol distanceFunctionSymbol = new GeoDBTypedFunctionSymbol(ST_DISTANCE, 2, dbDoubleType, false,
+                abstractRootDBType);
+        builder.put(ST_DISTANCE, 2, distanceFunctionSymbol);
+
+        DBFunctionSymbol distanceSphereFunctionSymbol = new GeoDBTypedFunctionSymbol(ST_DISTANCE_SPHERE, 2, dbDoubleType, false,
+                abstractRootDBType);
+        builder.put(ST_DISTANCE_SPHERE, 2, distanceSphereFunctionSymbol);
+
+        DBFunctionSymbol distanceSpheroidFunctionSymbol = new GeoDBTypedFunctionSymbol(ST_DISTANCE_SPHEROID, 3, dbDoubleType, false,
+                abstractRootDBType);
+        builder.put(ST_DISTANCE_SPHEROID, 3, distanceSpheroidFunctionSymbol);
+
+        DBFunctionSymbol asTextSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(ST_ASTEXT, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_ASTEXT, 1, asTextSymbol);
+
+        DBFunctionSymbol bufferSymbol = new GeoDBTypedFunctionSymbol(ST_BUFFER, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_BUFFER, 2, bufferSymbol);
+
+        DBFunctionSymbol intersectionSymbol = new GeoDBTypedFunctionSymbol(ST_INTERSECTION, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_INTERSECTION, 2, intersectionSymbol);
+
+        DBFunctionSymbol boundarySymbol = new GeoDBTypedFunctionSymbol(ST_BOUNDARY, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_BOUNDARY, 1, boundarySymbol);
+
+        DBFunctionSymbol convexhullSymbol = new GeoDBTypedFunctionSymbol(ST_CONVEXHULL, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_CONVEXHULL, 1, convexhullSymbol);
+
+        DBFunctionSymbol differenceSymbol = new GeoDBTypedFunctionSymbol(ST_DIFFERENCE, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_DIFFERENCE, 2, differenceSymbol);
+
+        DBFunctionSymbol symdifferenceSymbol = new GeoDBTypedFunctionSymbol(ST_SYMDIFFERENCE, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_SYMDIFFERENCE, 2, symdifferenceSymbol);
+
+        DBFunctionSymbol envelopeSymbol = new GeoDBTypedFunctionSymbol(ST_ENVELOPE, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_ENVELOPE, 1, envelopeSymbol);
+
+        DBFunctionSymbol unionSymbol = new GeoDBTypedFunctionSymbol(ST_UNION, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_UNION, 2, unionSymbol);
+
+        DBFunctionSymbol relateSymbol = new GeoDBBooleanFunctionSymbol(ST_RELATE, 3, dbBooleanType,
+                abstractRootDBType);
+        builder.put(ST_RELATE, 3, relateSymbol);
+
+        DBFunctionSymbol relatematrixSymbol = new GeoDBTypedFunctionSymbol(ST_RELATE, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_RELATE, 2, relatematrixSymbol);
+
+        DBFunctionSymbol getsridSymbol = new GeoDBTypedFunctionSymbol(ST_SRID, 1, dbIntType, false,
+                abstractRootDBType);
+        builder.put(ST_SRID, 1, getsridSymbol);
+
+        DBFunctionSymbol setsridSymbol = new GeoDBTypedFunctionSymbol(ST_SETSRID, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_SETSRID, 2, setsridSymbol);
+
+        DBFunctionSymbol geomfromtextSymbol = new GeoDBTypedFunctionSymbol(ST_GEOMFROMTEXT, 1, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_GEOMFROMTEXT, 1, geomfromtextSymbol);
+
+        DBFunctionSymbol makepointSymbol = new GeoDBTypedFunctionSymbol(ST_MAKEPOINT, 2, dbStringType, false,
+                abstractRootDBType);
+        builder.put(ST_MAKEPOINT, 2, makepointSymbol);
+
         return builder.build();
     }
 
@@ -222,6 +383,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     protected abstract DBConcatFunctionSymbol createNullRejectingDBConcat(int arity);
+
     protected abstract DBConcatFunctionSymbol createDBConcatOperator(int arity);
 
     @Override
@@ -379,7 +541,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
      * By default explicit
      */
     protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
-                                                                                    DBTermType targetType) {
+                                                                                        DBTermType targetType) {
         return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType, Serializers.getCastSerializer(targetType));
     }
 
@@ -427,6 +589,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
+                dbBooleanType,
+                (terms, termConverter, termFactory) -> {
+                    String parameterString = terms.stream()
+                            .map(termConverter)
+                            .collect(Collectors.joining(","));
+                    return String.format("COALESCE(%s) IS TRUE", parameterString);
+                });
+    }
+
+    @Override
     protected DBStrictEqFunctionSymbol createDBStrictEquality(int arity) {
         return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }
@@ -463,13 +637,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeYearFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
-                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeYear(terms, termConverter, termFactory);
     }
 
     @Override
     protected String serializeYearFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeYear(terms, termConverter, termFactory);
     }
 
@@ -483,13 +657,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeMonthFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
-                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeMonth(terms, termConverter, termFactory);
     }
 
     @Override
     protected String serializeMonthFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeMonth(terms, termConverter, termFactory);
     }
 
@@ -503,13 +677,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeDayFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
-                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeDay(terms, termConverter, termFactory);
     }
 
     @Override
     protected String serializeDayFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializeDay(terms, termConverter, termFactory);
     }
 
@@ -567,6 +741,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
         return new DefaultBooleanDenormFunctionSymbol(dbBooleanType, dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType) {
+        return new DefaultSimpleDBCastFunctionSymbol(geoType, geoType, Serializers.getCastSerializer(geoType));
     }
 
     @Override
@@ -668,6 +847,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBIfThenElse() {
         return ifThenElse;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBNullIf() {
+        return getRegularDBFunctionSymbol(NULLIF_STR, 2);
     }
 
     @Override
@@ -774,9 +958,162 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 
+    // Topological functions
+    @Override
+    public DBBooleanFunctionSymbol getDBSTWithin() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_WITHIN, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTContains() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_CONTAINS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTCrosses() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_CROSSES, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTDisjoint() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_DISJOINT, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTEquals() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_EQUALS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTIntersects() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_INTERSECTS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTOverlaps() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_OVERLAPS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTTouches() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_TOUCHES, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTCoveredBy() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_COVEREDBY, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTCovers() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_COVERS, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSTContainsProperly() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_CONTAINSPROPERLY, 2);
+    }
+
+    // Non-topological and common form functions
+    @Override
+    public DBFunctionSymbol getDBSTDistance() {
+        return getRegularDBFunctionSymbol(ST_DISTANCE, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTDistanceSphere() {
+        return getRegularDBFunctionSymbol(ST_DISTANCE_SPHERE, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTDistanceSpheroid() {
+        return getRegularDBFunctionSymbol(ST_DISTANCE_SPHEROID, 3);
+    }
+
+    @Override
+    public FunctionSymbol getDBAsText() {
+        return getRegularDBFunctionSymbol(ST_ASTEXT, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBSTFlipCoordinates() {
+        return getRegularDBFunctionSymbol(ST_FLIP_COORDINATES, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBBuffer() {
+        return getRegularDBFunctionSymbol(ST_BUFFER, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBIntersection() {
+        return getRegularDBFunctionSymbol(ST_INTERSECTION, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBBoundary() {
+        return getRegularDBFunctionSymbol(ST_BOUNDARY, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBConvexHull() {
+        return getRegularDBFunctionSymbol(ST_CONVEXHULL, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBDifference() {
+        return getRegularDBFunctionSymbol(ST_DIFFERENCE, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBEnvelope() {
+        return getRegularDBFunctionSymbol(ST_ENVELOPE, 1);
+    }
+
+    @Override
+    public FunctionSymbol getDBSymDifference() {
+        return getRegularDBFunctionSymbol(ST_SYMDIFFERENCE, 2);
+    }
+
+    @Override
+    public FunctionSymbol getDBUnion() {
+        return getRegularDBFunctionSymbol(ST_UNION, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRelate() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(ST_RELATE, 3);
+    }
+
+    @Override
+    public FunctionSymbol getDBRelateMatrix() {
+        return getRegularDBFunctionSymbol(ST_RELATE, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBGetSRID() {
+        return getRegularDBFunctionSymbol(ST_SRID, 1);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTTransform() {
+        return getRegularDBFunctionSymbol(ST_TRANSFORM, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTSetSRID() {
+        return getRegularDBFunctionSymbol(ST_SETSRID, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSTGeomFromText() { return getRegularDBFunctionSymbol(ST_GEOMFROMTEXT, 1); }
+
+    @Override
+    public DBFunctionSymbol getDBSTMakePoint() { return getRegularDBFunctionSymbol(ST_MAKEPOINT, 2); }
+
     /**
      * Can be overridden.
-     *
+     * <p>
      * Not an official SQL function
      */
     protected String getRandNameInDialect() {

@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -27,14 +27,14 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
     private final SelectFromWhereSerializer serializer;
     private final IQTree2SelectFromWhereConverter converter;
     private final IntermediateQueryFactory iqFactory;
-    private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
+    private final SingleTermTypeExtractor uniqueTermTypeExtractor;
     private final DBTermType abstractRootDBType;
 
     @Inject
     private DefaultSQLIQTree2NativeNodeGenerator(SelectFromWhereSerializer serializer,
                                                  IQTree2SelectFromWhereConverter converter,
                                                  IntermediateQueryFactory iqFactory,
-                                                 UniqueTermTypeExtractor uniqueTermTypeExtractor,
+                                                 SingleTermTypeExtractor uniqueTermTypeExtractor,
                                                  TypeFactory typeFactory) {
         this.serializer = serializer;
         this.converter = converter;
@@ -70,7 +70,7 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
     }
 
     private DBTermType extractUniqueKnownType(Variable v, IQTree tree, boolean tolerateUnknownTypes) {
-        return uniqueTermTypeExtractor.extractUniqueTermType(v, tree)
+        return uniqueTermTypeExtractor.extractSingleTermType(v, tree)
                 .filter(t -> t instanceof DBTermType)
                 .map(t -> (DBTermType) t)
                 .map(Optional::of)

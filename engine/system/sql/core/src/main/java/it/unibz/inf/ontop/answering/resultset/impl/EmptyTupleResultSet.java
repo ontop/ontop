@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -59,12 +60,17 @@ public class EmptyTupleResultSet implements TupleResultSet {
 		return 0;
 	}
 
-    @Override
-    public OntopBindingSet next() {
-        throw new NoSuchElementException();
-    }
+	@Override
+	public boolean isConnectionAlive() throws OntopConnectionException {
+		return false;
+	}
 
-    @Override
+	@Override
+	public OntopBindingSet next() {
+		throw new NoSuchElementException();
+	}
+
+	@Override
 	public List<String> getSignature() {
 		return signature;
 	}

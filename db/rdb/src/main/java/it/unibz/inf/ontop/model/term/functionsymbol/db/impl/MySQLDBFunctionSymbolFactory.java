@@ -246,8 +246,8 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return new DBBooleanFunctionSymbolWithSerializerImpl("REGEXP_MATCHES_2",
                 ImmutableList.of(abstractRootDBType, abstractRootDBType), dbBooleanType, false,
                 (terms, termConverter, termFactory) -> String.format(
-                        // NB: BINARY is for making it case sensitive
-                        "(%s REGEXP BINARY %s)",
+                        // NB: BINARY is for making it case sensitive & CAST necessary since v8.0.22
+                        "(CAST(%s AS BINARY) REGEXP BINARY %s)",
                         termConverter.apply(terms.get(0)),
                         termConverter.apply(terms.get(1))));
     }
@@ -272,7 +272,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
             switch (flags) {
                 // Case sensitive
                 case "":
-                    return String.format("(%s REGEXP BINARY %s)", string, pattern);
+                    return String.format("(CAST(%s AS BINARY) REGEXP BINARY %s)", string, pattern);
                 // Case insensitive
                 case "i":
                     // TODO: is it robust to collation?

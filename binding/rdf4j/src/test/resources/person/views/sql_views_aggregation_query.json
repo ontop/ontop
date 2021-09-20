@@ -1,0 +1,22 @@
+{
+  "relations": [
+    {
+      "name": ["\"hr\"", "\"persons\""],
+      "query": "SELECT r.\"id\", r.\"country\", SUM(r.\"status\") AS sum FROM \"person\" AS r WHERE r.\"status\" = 0 AND \"firstName\" IS NULL GROUP BY r.\"country\" HAVING sum=0",
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "SQLViewDefinition"
+    }
+  ]
+}

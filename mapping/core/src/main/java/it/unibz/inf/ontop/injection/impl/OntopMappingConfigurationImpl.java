@@ -10,8 +10,6 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
-import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -59,20 +57,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     public OntopMappingSettings getSettings() {
         return settings;
     }
-
-    /**
-     * Can be overloaded by sub-classes
-     */
-    @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-    generateOptimizationConfigurationMap() {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
-                internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-        internalExecutorMapBuilder.putAll(optimizationConfiguration.generateOptimizationConfigurationMap());
-
-        return internalExecutorMapBuilder.build();
-    }
+    
 
     /**
      * Can be overloaded.
@@ -81,6 +66,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     @Override
     protected OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         return loadSpecification(
+                Optional::empty,
+                Optional::empty,
+                Optional::empty,
+                Optional::empty,
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
@@ -95,7 +84,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Graph>> mappingGraphSupplier,
-                                                  Supplier<Optional<File>> constraintFileSupplier
+                                                  Supplier<Optional<File>> constraintFileSupplier,
+                                                  Supplier<Optional<File>> dbMetadataFileSupplier,
+                                                  Supplier<Optional<Reader>> dbMetadataReaderSupplier,
+                                                  Supplier<Optional<File>> ontopViewFileSupplier,
+                                                  Supplier<Optional<Reader>> ontopViewReaderSupplier
                                                   ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
@@ -109,12 +102,19 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         OBDASpecInput.Builder specInputBuilder = OBDASpecInput.defaultBuilder();
         constraintFileSupplier.get()
                 .ifPresent(specInputBuilder::addConstraintFile);
+        dbMetadataFileSupplier.get()
+                .ifPresent(specInputBuilder::addDBMetadataFile);
+        dbMetadataReaderSupplier.get()
+                .ifPresent(specInputBuilder::addDBMetadataReader);
+        ontopViewFileSupplier.get()
+                .ifPresent(specInputBuilder::addOntopViewFile);
+        ontopViewReaderSupplier.get()
+                .ifPresent(specInputBuilder::addOntopViewReader);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
 
-            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalOntology);
         }
 
         /*
@@ -124,8 +124,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingFile.isPresent()) {
             specInputBuilder.addMappingFile(optionalMappingFile.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         /*
@@ -135,8 +134,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingReader.isPresent()) {
             specInputBuilder.addMappingReader(optionalMappingReader.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         /*
@@ -146,8 +144,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (optionalMappingGraph.isPresent()) {
             specInputBuilder.addMappingGraph(optionalMappingGraph.get());
 
-            return extractor.extract(specInputBuilder.build(), optionalOntology,
-                    getExecutorRegistry());
+            return extractor.extract(specInputBuilder.build(), optionalOntology);
         }
 
         throw new MissingInputMappingException();
@@ -229,6 +226,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
         private boolean isMappingDefined;
         private boolean isDBMetadataDefined;
+        private boolean isOntopViewDefined;
 
         OntopMappingBuilderMixin() {
             B builder = (B) this;
@@ -287,6 +285,13 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             isDBMetadataDefined = true;
         }
 
+        final void declareOntopViewDefined() {
+            if (isOBDASpecificationAssigned()) {
+                throw new InvalidOntopConfigurationException("The OBDA specification has already been assigned");
+            }
+            isOntopViewDefined = true;
+        }
+
         @Override
         void declareOBDASpecificationAssigned() {
             super.declareOBDASpecificationAssigned();
@@ -297,6 +302,10 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             }
             if (isMappingDefined()) {
                 throw new InvalidOntopConfigurationException("The mapping is already defined, " +
+                        "cannot assign the OBDA specification");
+            }
+            if (isOntopViewDefined) {
+                throw new InvalidOntopConfigurationException("Ontop views are already defined, " +
                         "cannot assign the OBDA specification");
             }
         }

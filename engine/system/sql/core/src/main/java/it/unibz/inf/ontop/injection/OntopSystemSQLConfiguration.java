@@ -12,7 +12,7 @@ public interface OntopSystemSQLConfiguration extends OntopSystemConfiguration, O
     /**
      * This builder will require a OBDA specification to be directly assigned
      */
-    static Builder<? extends Builder> defaultBuilder() {
+    static Builder<? extends Builder<?>> defaultBuilder() {
         return new OntopSystemSQLConfigurationImpl.BuilderImpl<>();
     }
 

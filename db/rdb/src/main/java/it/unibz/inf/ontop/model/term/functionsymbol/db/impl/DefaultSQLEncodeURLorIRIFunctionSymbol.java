@@ -6,8 +6,9 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
-import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class DefaultSQLEncodeURLorIRIFunctionSymbol extends AbstractEncodeURIorIRIFunctionSymbol {
 
@@ -18,24 +19,14 @@ public class DefaultSQLEncodeURLorIRIFunctionSymbol extends AbstractEncodeURIorI
         /*
          * Imported from SQL99DialectAdapter
          */
-        StringBuilder sb1 = new StringBuilder();
-        StringBuilder sb2 = new StringBuilder();
-        for (Map.Entry<String, String> e : R2RMLIRISafeEncoder.TABLE.entrySet()) {
-            sb1.append("REPLACE(");
-            String value = e.getValue();
-            String encode = e.getKey();
-            sb2.append(", ").append(encodeSQLStringConstant(value))
-                    .append(", ").append(encodeSQLStringConstant(encode))
-                    .append(")");
+        this.encodeForIriStart = R2RMLIRISafeEncoder.TABLE.entrySet().stream()
+                .map(e -> "REPLACE(")
+                .collect(Collectors.joining());
 
-        }
-        this.encodeForIriStart = sb1.toString();
-        this.encodeForIriEnd = sb2.toString();
-    }
-
-    @Override
-    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
-        return false;
+        this.encodeForIriEnd = R2RMLIRISafeEncoder.TABLE.entrySet().stream()
+                .map(e -> ", " + encodeSQLStringConstant(e.getValue().toString())
+                        + ", " + encodeSQLStringConstant(e.getKey()) + ")")
+                .collect(Collectors.joining());
     }
 
     @Override
@@ -53,13 +44,15 @@ public class DefaultSQLEncodeURLorIRIFunctionSymbol extends AbstractEncodeURIorI
         return encodeForIriStart + termConverter.apply(terms.get(0)) + encodeForIriEnd;
     }
 
+    private static final Pattern QUOTATION_MARK = Pattern.compile("(?<!')'(?!')");
+
     /**
      * Imported from SQL99DialectAdapter
      *
      * By default, quotes and escapes isolated single quotes
      */
     protected String encodeSQLStringConstant(String constant) {
-        return "'" + constant.replaceAll("(?<!')'(?!')", getEscapedSingleQuote()) + "'";
+        return "'" + QUOTATION_MARK.matcher(constant).replaceAll(getEscapedSingleQuote()) + "'";
     }
 
     /**

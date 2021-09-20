@@ -43,7 +43,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     // serializeLimit and serializeOffset are standard
 
                     @Override
-                    protected String serializeLimitOffset(long limit, long offset) {
+                    protected String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("LIMIT %d\nOFFSET %d", limit, offset);
                     }
                 });

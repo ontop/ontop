@@ -228,7 +228,10 @@ public class TrueNodesRemovalOptimizerTest {
 
         UnionNode un = IQ_FACTORY.createUnionNode(ImmutableSet.of());
         queryBuilder.addChild(rootNode, un);
-        queryBuilder.addChild(un, DATA_NODE_1);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR1, ImmutableMap.of());
+
+        queryBuilder.addChild(un, dataNode);
         queryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
@@ -238,8 +241,7 @@ public class TrueNodesRemovalOptimizerTest {
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, un);
-        expectedQueryBuilder.addChild(un, IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR1, ImmutableMap.of()));
+        expectedQueryBuilder.addChild(un, dataNode);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -359,7 +361,10 @@ public class TrueNodesRemovalOptimizerTest {
         UnionNode un = IQ_FACTORY.createUnionNode(ImmutableSet.of());
         queryBuilder.addChild(jn, un);
         queryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
-        queryBuilder.addChild(un, DATA_NODE_1);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR1, ImmutableMap.of());
+
+        queryBuilder.addChild(un, dataNode);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
@@ -368,8 +373,7 @@ public class TrueNodesRemovalOptimizerTest {
 
         expectedQueryBuilder.init(projectionAtom, un);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
-        expectedQueryBuilder.addChild(un, IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR1, ImmutableMap.of()));
+        expectedQueryBuilder.addChild(un, dataNode);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 

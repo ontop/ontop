@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import java.util.List;
+
 /**
  */
 
@@ -18,8 +20,12 @@ public interface MetadataProvider extends MetadataLookup {
      * Inserts the user-supplied primary keys, unique constraints and foreign keys
      * into the metadata object
      */
-    void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException;
+    void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException;
 
     DBParameters getDBParameters();
 
+    /**
+     * Mostly useful for OntopViewMetadataProvider-s
+     */
+    void normalizeRelations(List<NamedRelationDefinition> relationDefinitions);
 }

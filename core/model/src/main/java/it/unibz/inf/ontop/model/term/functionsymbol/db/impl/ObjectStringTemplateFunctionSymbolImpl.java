@@ -1,107 +1,96 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.template.Template;
+import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractEncodeURIorIRIFunctionSymbol.IRISafeEnDecoder;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.Templates;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.SafeSeparatorFragment.NOT_A_SAFE_SEPARATOR_REGEX;
 
 public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSymbolImpl
         implements ObjectStringTemplateFunctionSymbol {
 
-    private final String template;
     private final DBTermType lexicalType;
-    private final Pattern pattern;
     private final boolean isInjective;
+    private final ImmutableList<Template.Component> components;
+    private final ImmutableList<SafeSeparatorFragment> safeSeparatorFragments;
+    private final IRISafeEnDecoder enDecoder;
+    private final Pattern patternForInteger;
+    private final Pattern patternForDecimalFloat;
+    private final Pattern patternForUuid;
 
-    /**
-     * TODO: enrich this list (incomplete)
-     */
-    protected static final ImmutableList<Character> SOME_SAFE_SEPARATORS = ImmutableList.of(
-        '/','!','$','&','\'', '(', ')','*','+',',',';', '=', '#');
-    protected static final String PLACE_HOLDER = "{}";
-
-    // Lazy
-    @Nullable
-    private ImmutableList<DBConstant> templateConstants;
-
-    protected ObjectStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
-        super(template, createBaseTypes(arity, typeFactory));
-        this.template = template;
+    protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
+        super(getTemplateString(components), createBaseTypes(components, typeFactory));
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
-        this.templateConstants = null;
-        this.pattern = extractPattern(template, true);
+        this.components = components;
+        this.safeSeparatorFragments = SafeSeparatorFragment.split(TemplateParser.getEncodedTemplateString(components));
+        // must not produce false positives
+        this.isInjective = atMostOnePlaceholderPerSeparator(safeSeparatorFragments);
+        this.enDecoder = new IRISafeEnDecoder();
 
-        this.isInjective = isInjective(arity, template);
+        this.patternForInteger = Pattern.compile("^[0-9]+$");
+        this.patternForDecimalFloat = Pattern.compile("^[0-9.+\\-eE]+$");
+        this.patternForUuid = Pattern.compile("^[0-9a-fA-F\\-]+$");
     }
 
-    /**
-     * Must not produce false positive
-     */
-    protected boolean isInjective(int arity, String template) {
-        if (arity < 2)
-            return true;
-
-        ImmutableList<String> intermediateStrings = extractIntermediateStrings(template);
-        if (intermediateStrings.size() != (arity - 1))
-            throw new IllegalArgumentException(
-                    String.format("The template %s is not matching the arity %d",
-                            template,
-                            arity));
-        return intermediateStrings.stream()
-                .allMatch(interm -> SOME_SAFE_SEPARATORS.stream()
-                        .anyMatch(sep -> interm.indexOf(sep) >= 0));
+    private boolean atMostOnePlaceholderPerSeparator(ImmutableList<SafeSeparatorFragment> safeSeparatorFragments) {
+        return safeSeparatorFragments.stream()
+                .map(SafeSeparatorFragment::getComponents)
+                .allMatch(this::atMostOnePlaceholder);
     }
 
-    /**
-     * Strings between the place holders
-     */
-    protected static ImmutableList<String> extractIntermediateStrings(String template) {
-        ImmutableList.Builder<String> builder = ImmutableList.builder();
-
-        // Non-final
-        int afterPlaceHolderIndex = template.indexOf(PLACE_HOLDER) + 2;
-        // Following index
-        int nextPlaceHolderIndex = template.indexOf(PLACE_HOLDER, afterPlaceHolderIndex);
-        while(nextPlaceHolderIndex > 0) {
-            builder.add(template.substring(afterPlaceHolderIndex, nextPlaceHolderIndex));
-            afterPlaceHolderIndex = nextPlaceHolderIndex + 2;
-            nextPlaceHolderIndex = template.indexOf(PLACE_HOLDER, afterPlaceHolderIndex);
-        }
-        return builder.build();
+    private boolean atMostOnePlaceholder(ImmutableList<Template.Component> components) {
+        return components.stream()
+                .filter(Template.Component::isColumnNameReference)
+                .count() <= 1;
     }
 
-    private static ImmutableList<TermType> createBaseTypes(int arity, TypeFactory typeFactory) {
+    private static String getTemplateString(ImmutableList<Template.Component> components) {
+        return components.stream()
+                .map(c -> c.isColumnNameReference() ? "{}" : c.getComponent())
+                .collect(Collectors.joining());
+    }
+
+
+    private static ImmutableList<TermType> createBaseTypes(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
         // TODO: require DB string instead
         TermType stringType = typeFactory.getXsdStringDatatype();
-
-        return IntStream.range(0, arity)
-                .boxed()
-                .map(i -> stringType)
+        return components.stream()
+                .filter(Template.Component::isColumnNameReference)
+                .map(c -> stringType)
                 .collect(ImmutableCollectors.toList());
     }
 
     @Override
     public String getTemplate() {
-        return template;
+        return getName();
     }
+
+    @Override
+    public ImmutableList<Template.Component> getTemplateComponents() { return components; }
 
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
@@ -116,44 +105,31 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        if (newTerms.stream()
-            .allMatch(t -> t instanceof DBConstant)) {
-            ImmutableList<String> values = newTerms.stream()
-                    .map(t -> (DBConstant) t)
-                    .map(c -> encodeParameter(c, termFactory, variableNullability))
-                    .collect(ImmutableCollectors.toList());
 
-            return termFactory.getDBConstant(Templates.format(template, values), lexicalType);
+        if (newTerms.stream().allMatch(t -> t instanceof DBConstant)) {
+            String value = components.stream()
+                    .map(c -> c.isColumnNameReference()
+                        ? encodeParameter((DBConstant)newTerms.get(c.getIndex()), termFactory, variableNullability)
+                        : c.getComponent())
+                    .collect(Collectors.joining());
+
+            return termFactory.getDBConstant(value, lexicalType);
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
-        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(variableNullability))
+    private static String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
+        return Optional.of(constant)
+                .map(termFactory::getR2RMLIRISafeEncodeFunctionalTerm)
+                .map(t -> t.simplify(variableNullability))
                 .filter(t -> t instanceof DBConstant)
-                .map(t -> ((DBConstant) t).getValue())
+                .map(t -> ((DBConstant) t))
+                .map(Constant::getValue)
                 .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting " +
                         "the getR2RMLIRISafeEncodeFunctionalTerm to simplify itself to a DBConstant " +
-                        "when receving a DBConstant"));
+                        "when receiving a DBConstant"));
     }
-
-
-    protected ImmutableList<DBConstant> getTemplateConstants(TermFactory termFactory) {
-        if (templateConstants == null) {
-            // An actual template: the first term is a string of the form
-            // http://.../.../ or empty "{}" with placeholders of the form {}
-            // The other terms are variables or constants that should replace
-            // the placeholders. We need to tokenize and form the CONCAT
-            String[] split = template.split("[{][}]");
-            templateConstants = Stream.of(split)
-                    .map(termFactory::getDBStringConstant)
-                    .collect(ImmutableCollectors.toList());
-        }
-
-        return templateConstants;
-    }
-
 
     @Override
     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
@@ -178,24 +154,21 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        ImmutableList<DBConstant> templateCsts = getTemplateConstants(termFactory);
 
-        ImmutableList<ImmutableTerm> termsToConcatenate = IntStream.range(0, templateCsts.size())
-                .boxed()
-                .flatMap(i -> (i < terms.size())
-                        ? Stream.of(
-                                templateCsts.get(i),
-                                termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i))
-                                        // Avoids the encoding when possible
-                                        .simplify())
-                        : Stream.of(templateCsts.get(i)))
+        ImmutableList<ImmutableTerm> termsToConcatenate = components.stream()
+                .map(c -> c.isColumnNameReference()
+                        ? termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(c.getIndex()))
+                            // Avoids the encoding when possible
+                            .simplify()
+                        : termFactory.getDBStringConstant(c.getComponent()))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableTerm concatTerm = termsToConcatenate.isEmpty()
                 ? termFactory.getDBStringConstant("")
                 : (termsToConcatenate.size() == 1)
                     ? termsToConcatenate.get(0)
-                    : termFactory.getNullRejectingDBConcatFunctionalTerm(termsToConcatenate).simplify();
+                    : termFactory.getNullRejectingDBConcatFunctionalTerm(termsToConcatenate)
+                            .simplify();
 
         return termConverter.apply(concatTerm);
     }
@@ -205,11 +178,23 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                                                        ImmutableFunctionalTerm otherTerm, TermFactory termFactory,
                                                                        VariableNullability variableNullability) {
         FunctionSymbol otherFunctionSymbol = otherTerm.getFunctionSymbol();
-        if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
-            String otherTemplate = ((ObjectStringTemplateFunctionSymbol) otherFunctionSymbol).getTemplate();
+        if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbolImpl) {
+            ObjectStringTemplateFunctionSymbolImpl other = (ObjectStringTemplateFunctionSymbolImpl) otherFunctionSymbol;
 
-            if (!areCompatible(otherTemplate))
-                return IncrementalEvaluation.declareIsFalse();
+            if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, other.safeSeparatorFragments)) {
+                // 3VL: needs to check for term nullability (null: if at least one is null, false otherwise)
+                Optional<ImmutableExpression> newExpression = termFactory.getDisjunction(
+                                Stream.concat(terms.stream(), otherTerm.getTerms().stream())
+                                        .map(termFactory::getDBIsNull))
+                        .map(e -> termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(e)));
+
+                return newExpression
+                        .map(e -> e.evaluate(variableNullability, true))
+                        .orElseGet(IncrementalEvaluation::declareIsFalse);
+            }
+
+            if (!other.equals(this))
+                return tryToSimplifyCompatibleTemplates(other, terms, otherTerm, termFactory, variableNullability);
         }
 
         // May decompose in case of injectivity
@@ -217,63 +202,233 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     /**
-     * Is guaranteed not to return false negative.
+     * TODO: shall we try to handle non-injective templates?
      */
-    protected boolean areCompatible(String otherTemplate) {
-        if (template.equals(otherTemplate))
-            return true;
+    private IncrementalEvaluation tryToSimplifyCompatibleTemplates(ObjectStringTemplateFunctionSymbolImpl other,
+                                                                   ImmutableList<? extends ImmutableTerm> subTerms,
+                                                                   ImmutableFunctionalTerm otherTerm,
+                                                                   TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
+        UnmodifiableIterator<? extends ImmutableTerm> subTermIterator = subTerms.iterator();
+        UnmodifiableIterator<? extends ImmutableTerm> otherSubTermIterator = otherTerm.getTerms().iterator();
 
-        String prefix = extractPrefix(template);
-        String otherPrefix = extractPrefix(otherTemplate);
+        Stream<ImmutableExpression> expressionStream = IntStream.range(0, safeSeparatorFragments.size())
+                // Sequential execution is essential
+                .mapToObj(i -> convertToEquality(
+                        safeSeparatorFragments.get(i), subTermIterator,
+                        other.safeSeparatorFragments.get(i), otherSubTermIterator, termFactory))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
 
-        int prefixLength = prefix.length();
-        int otherPrefixLength = otherPrefix.length();
+        Optional<ImmutableExpression> expression = termFactory.getConjunction(expressionStream);
+        if (expression.isPresent()) {
+            ImmutableExpression nonNull = termFactory.getConjunction(
+                    Stream.concat(subTerms.stream(), otherTerm.getTerms().stream())
+                            .map(termFactory::getDBIsNotNull))
+                    .get(); // this conjunction cannot be empty because
+                            // there is at least one variable in the templates (taken together)
+            ImmutableExpression ifElseNull = termFactory.getBooleanIfElseNull(nonNull, expression.get());
+            return ifElseNull.evaluate(variableNullability, true);
+        }
+        else
+            return IncrementalEvaluation.declareIsTrue();
+    }
 
-        int minLength = Math.min(prefixLength, otherPrefixLength);
+    private Optional<ImmutableExpression> convertToEquality(SafeSeparatorFragment safeSeparatorFragment,
+                                            UnmodifiableIterator<? extends ImmutableTerm> subTermIterator,
+                                            SafeSeparatorFragment otherSafeSeparatorFragment,
+                                            UnmodifiableIterator<? extends ImmutableTerm> otherSubTermIterator,
+                                            TermFactory termFactory) {
 
-        /*
-         * Prefix comparison
-         */
-        if (!prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength)))
+        ImmutableList<Template.Component> components = safeSeparatorFragment.getComponents();
+        ImmutableList<Template.Component> otherComponents = otherSafeSeparatorFragment.getComponents();
+
+        if (!components.get(0).isColumnNameReference()
+                && !otherComponents.get(0).isColumnNameReference()) {
+            String first = components.get(0).getComponent();
+            String otherFirst = otherComponents.get(0).getComponent();
+            if (first.startsWith(otherFirst)) {
+                components = Template.replaceFirst(components, first.substring(otherFirst.length()));
+                otherComponents = Template.replaceFirst(otherComponents, "");
+            }
+            else if (otherFirst.startsWith(first)) {
+                components = Template.replaceFirst(components, "");
+                otherComponents = Template.replaceFirst(otherComponents, otherFirst.substring(first.length()));
+            }
+            else
+                return Optional.of(termFactory.getIsTrue(termFactory.getDBBooleanConstant(false)));
+
+            if (components.isEmpty() && otherComponents.isEmpty())
+                return Optional.empty();
+        }
+
+        if (components.size() > 0 && !components.get(components.size() - 1).isColumnNameReference()
+                && otherComponents.size() > 0 && !otherComponents.get(otherComponents.size() - 1).isColumnNameReference()) {
+            String last = components.get(components.size() - 1).getComponent();
+            String otherLast = otherComponents.get(otherComponents.size() - 1).getComponent();
+            if (last.endsWith(otherLast)) {
+                components = Template.replaceLast(components, last.substring(0, last.length() - otherLast.length()));
+                otherComponents = Template.replaceLast(otherComponents, "");
+            }
+            else if (otherLast.endsWith(last)) {
+                components = Template.replaceLast(components, "");
+                otherComponents = Template.replaceLast(otherComponents, otherLast.substring(0, otherLast.length() - last.length()));
+            }
+            else
+                return Optional.of(termFactory.getIsTrue(termFactory.getDBBooleanConstant(false)));
+
+            if (components.isEmpty() && otherComponents.isEmpty())
+                return Optional.empty();
+        }
+
+        return Optional.of(termFactory.getStrictEquality(
+                convertIntoTerm(components, subTermIterator, termFactory),
+                convertIntoTerm(otherComponents, otherSubTermIterator, termFactory)));
+    }
+
+    /**
+     * To be used only in equalities.
+     *
+     * As an optimization, we directly apply decoding to the strings. This saves the column references from being
+     * encoded, while the string constants are immediately decoded.
+     *
+     * Particularly useful when the CONCAT cannot be eliminated. In particular, the SQL queries become much less
+     * verbose.
+     */
+    private ImmutableTerm convertIntoTerm(ImmutableList<Template.Component> components,
+                                          UnmodifiableIterator<? extends ImmutableTerm> subTermIterator,
+                                          TermFactory termFactory) {
+
+        ImmutableList<ImmutableTerm> args = components.stream()
+                .map(c -> c.isColumnNameReference()
+                        ? subTermIterator.next()
+                        : termFactory.getDBStringConstant(enDecoder.decode(c.getComponent())))
+                .collect(ImmutableCollectors.toList());
+
+        switch (args.size()) {
+            case 0:
+                return termFactory.getDBStringConstant("");
+            case 1:
+                return args.get(0);
+            default:
+                return termFactory.getNullRejectingDBConcatFunctionalTerm(args);
+        }
+    }
+
+    @Override
+    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                           VariableNullability variableNullability,
+                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+        if (isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
+            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+
+        ImmutableSet<Integer> columnPositions = IntStream.range(0, components.size())
+                .filter(i -> components.get(i).isColumnNameReference())
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+
+        // Needs to have a separator between variables
+        if (columnPositions.stream().anyMatch(i -> columnPositions.contains(i+1)))
             return false;
 
-        String remainingTemplate = template.substring(minLength);
-        String otherRemainingTemplate = otherTemplate.substring(minLength);
+        ImmutableSet<Integer> separatorPositions = IntStream.range(0, components.size())
+                .filter(i -> !components.get(i).isColumnNameReference())
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
 
-        Pattern subPattern = extractPattern(remainingTemplate, false);
-        return subPattern.matcher(otherRemainingTemplate).find();
+        // TODO: remove this restriction and tolerates consecutive separators
+        if (IntStream.range(0, components.size() - 1)
+                .anyMatch(i -> separatorPositions.contains(i) && separatorPositions.contains(i+1)))
+            return false;
+
+        if (separatorPositions.stream()
+                // Only those separating columns
+                .filter(i -> columnPositions.contains(i-1) && columnPositions.contains(i+1))
+                .allMatch(i -> isSafelySeparating(i, terms, otherTerms))) {
+            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+        }
+
+        return false;
     }
 
-    protected static Pattern extractPattern(String template, boolean surroundWithParentheses) {
-        String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
-        String safeTemplate = makeRegexSafe(template
-                .replace(PLACE_HOLDER, tmpPlaceholder));
+    private boolean isSafelySeparating(int separatorIndex, ImmutableList<? extends ImmutableTerm> terms,
+                                       ImmutableList<? extends ImmutableTerm> otherTerms) {
+        String separatorString = components.get(separatorIndex).getComponent();
 
-        String notSeparator = SOME_SAFE_SEPARATORS.stream()
-                .map(Object::toString)
-                .map(ObjectStringTemplateFunctionSymbolImpl::makeRegexSafe)
-                .reduce("[^", (c1, c2) -> c1 + c2, (c1, c2) -> c1 + c2) + "]*";
+        if (separatorString.isEmpty())
+            return false;
 
-        String replacement = surroundWithParentheses ? "(" + notSeparator + ")" : notSeparator;
+        int previousTermIndex = components.get(separatorIndex - 1).getIndex();
+        int nextTermIndex = components.get(separatorIndex + 1).getIndex();
 
-        String patternString = "^" + safeTemplate
-                .replace(tmpPlaceholder, replacement)
-                + "$";
-
-        return Pattern.compile(patternString);
+        return Stream.of(terms.get(previousTermIndex), otherTerms.get(previousTermIndex))
+                .anyMatch(t -> !couldContain(t, separatorString, true))
+                || Stream.of(terms.get(nextTermIndex), otherTerms.get(nextTermIndex))
+                .anyMatch(t -> !couldContain(t, separatorString, false));
     }
 
-    private static String makeRegexSafe(String s) {
-        return s.replaceAll(
-                "[\\<\\(\\[\\{\\\\\\^\\=\\$\\!\\|\\]\\}\\)\\?\\*\\+\\.\\>]", "\\\\$0");
+    /**
+     * Must not return false negative
+     */
+    private boolean couldContain(ImmutableTerm term, String separatorString, boolean isTermBefore) {
+        if (term instanceof Variable)
+            return true;
+
+        if (term instanceof Constant) {
+            Constant constant = (Constant) term;
+
+            // Should normally not happen
+            return term.isNull()
+                    || (isTermBefore
+                        ? constant.getValue().endsWith(separatorString)
+                        : constant.getValue().startsWith(separatorString));
+        }
+        else {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+
+            if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
+                boolean isSafelySeparating = ((DBTypeConversionFunctionSymbol) functionSymbol).getInputType()
+                        .filter(t -> { switch(t.getCategory()) {
+                            case INTEGER:
+                                return !patternForInteger.matcher(separatorString).find();
+                            case DECIMAL:
+                            case FLOAT_DOUBLE:
+                                return !patternForDecimalFloat.matcher(separatorString).find();
+                            case UUID:
+                                return !patternForUuid.matcher(separatorString).find();
+                            default:
+                                return false;
+                        }
+                        })
+                        .isPresent();
+
+                return !isSafelySeparating;
+            }
+
+            return true;
+        }
     }
 
+    @Nullable
+    private Pattern injectivePattern; // lazy initalization
 
-    private static String extractPrefix(String template) {
-        int index = template.indexOf("{");
-        return index >= 0
-                ? template.substring(0, index)
-                : template;
+    /**
+     *  gives the pattern with a group for each placeholder
+     *  applicable only to injective function symbols
+     * @return
+     */
+    private Pattern getPattern() {
+        if (injectivePattern == null) {
+            String patternString = components.stream()
+                    .map(c -> c.isColumnNameReference()
+                            ? "(" + NOT_A_SAFE_SEPARATOR_REGEX + ")"
+                            : SafeSeparatorFragment.makeRegexSafe(c.getComponent()))
+                    .collect(Collectors.joining());
+
+            injectivePattern = Pattern.compile("^" + patternString + "$");
+        }
+        return injectivePattern;
     }
 
     @Override
@@ -283,17 +438,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         String otherValue = otherTerm.getValue();
 
         if (isInjective(terms, variableNullability, termFactory)) {
-            Matcher matcher = pattern.matcher(otherTerm.getValue());
+            Matcher matcher = getPattern().matcher(otherTerm.getValue());
             if (matcher.find()) {
-                ImmutableList<DBConstant> subConstants = IntStream.range(0, getArity())
-                        .boxed()
-                        .map(i -> matcher.group(i + 1))
-                        .map(termFactory::getDBStringConstant)
-                        .collect(ImmutableCollectors.toList());
                 ImmutableExpression newExpression = termFactory.getConjunction(
                         IntStream.range(0, getArity())
-                                .boxed()
-                                .map(i -> termFactory.getStrictEquality(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)), subConstants.get(i))))
+                                .mapToObj(i -> termFactory.getStrictEquality(
+                                        termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)),
+                                        termFactory.getDBStringConstant(matcher.group(i + 1)))))
                         .orElseThrow(() -> new MinorOntopInternalBugException(
                                 "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
 
@@ -302,7 +453,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             else
                 return IncrementalEvaluation.declareIsFalse();
         }
-        else if (!areCompatible(otherValue))
+        else if (!SafeSeparatorFragment.areCompatible(this.safeSeparatorFragments, SafeSeparatorFragment.split(otherValue)))
             return IncrementalEvaluation.declareIsFalse();
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
@@ -313,3 +464,4 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return true;
     }
 }
+
