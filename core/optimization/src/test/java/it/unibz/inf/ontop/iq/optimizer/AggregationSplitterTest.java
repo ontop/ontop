@@ -202,7 +202,6 @@ public class AggregationSplitterTest {
         optimizeAndCompare(initialQuery, expectedQuery);
     }
 
-    @Ignore("TODO: fix a problem with IRI template comparison")
     @Test
     public void testLiftAggregation3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
