@@ -262,8 +262,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 return Optional.empty();
         }
 
-        if (!components.get(components.size() - 1).isColumnNameReference()
-                && !otherComponents.get(otherComponents.size() - 1).isColumnNameReference()) {
+        if (components.size() > 0 && !components.get(components.size() - 1).isColumnNameReference()
+                && otherComponents.size() > 0 && !otherComponents.get(otherComponents.size() - 1).isColumnNameReference()) {
             String last = components.get(components.size() - 1).getComponent();
             String otherLast = otherComponents.get(otherComponents.size() - 1).getComponent();
             if (last.endsWith(otherLast)) {
@@ -305,9 +305,14 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                         : termFactory.getDBStringConstant(enDecoder.decode(c.getComponent())))
                 .collect(ImmutableCollectors.toList());
 
-        return args.size() == 1
-                ? args.get(0)
-                : termFactory.getNullRejectingDBConcatFunctionalTerm(args);
+        switch (args.size()) {
+            case 0:
+                return termFactory.getDBStringConstant("");
+            case 1:
+                return args.get(0);
+            default:
+                return termFactory.getNullRejectingDBConcatFunctionalTerm(args);
+        }
     }
 
     @Override
