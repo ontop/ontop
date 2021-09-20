@@ -233,6 +233,10 @@ public class OptimizationTestingTools {
         public RelationDefinition createRelationWithIntAttributes(int tableNumber, int arity, boolean canBeNull) {
             return createRelation(tableNumber, arity, getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
         }
+
+        public RelationDefinition createRelationWithUuidAttributes(int tableNumber, int arity, boolean canBeNull) {
+            return createRelation(tableNumber, arity, getDBTypeFactory().getDBTermType("UUID"), "UUID_", canBeNull);
+        }
     }
 
     public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<VariableOrGroundTerm> arguments) {

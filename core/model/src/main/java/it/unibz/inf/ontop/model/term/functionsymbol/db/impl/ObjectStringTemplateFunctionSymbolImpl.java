@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -8,6 +9,7 @@ import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.impl.TemplateParser;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractEncodeURIorIRIFunctionSymbol.IRISafeEnDecoder;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
@@ -36,6 +38,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final ImmutableList<Template.Component> components;
     private final ImmutableList<SafeSeparatorFragment> safeSeparatorFragments;
     private final IRISafeEnDecoder enDecoder;
+    private final Pattern patternForInteger;
+    private final Pattern patternForDecimalFloat;
+    private final Pattern patternForUuid;
 
     protected ObjectStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> components, TypeFactory typeFactory) {
         super(getTemplateString(components), createBaseTypes(components, typeFactory));
@@ -45,6 +50,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // must not produce false positives
         this.isInjective = atMostOnePlaceholderPerSeparator(safeSeparatorFragments);
         this.enDecoder = new IRISafeEnDecoder();
+
+        this.patternForInteger = Pattern.compile("^[0-9]+$");
+        this.patternForDecimalFloat = Pattern.compile("^[0-9.+\\-eE]+$");
+        this.patternForUuid = Pattern.compile("^[0-9a-fA-F\\-]+$");
     }
 
     private boolean atMostOnePlaceholderPerSeparator(ImmutableList<SafeSeparatorFragment> safeSeparatorFragments) {
@@ -306,6 +315,100 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         }
     }
 
+    @Override
+    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                           VariableNullability variableNullability,
+                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+        if (isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
+            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+
+        ImmutableSet<Integer> columnPositions = IntStream.range(0, components.size())
+                .filter(i -> components.get(i).isColumnNameReference())
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+
+        // Needs to have a separator between variables
+        if (columnPositions.stream().anyMatch(i -> columnPositions.contains(i+1)))
+            return false;
+
+        ImmutableSet<Integer> separatorPositions = IntStream.range(0, components.size())
+                .filter(i -> !components.get(i).isColumnNameReference())
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+
+        // TODO: remove this restriction and tolerates consecutive separators
+        if (IntStream.range(0, components.size() - 1)
+                .anyMatch(i -> separatorPositions.contains(i) && separatorPositions.contains(i+1)))
+            return false;
+
+        if (separatorPositions.stream()
+                // Only those separating columns
+                .filter(i -> columnPositions.contains(i-1) && columnPositions.contains(i+1))
+                .allMatch(i -> isSafelySeparating(i, terms, otherTerms))) {
+            return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+        }
+
+        return false;
+    }
+
+    private boolean isSafelySeparating(int separatorIndex, ImmutableList<? extends ImmutableTerm> terms,
+                                       ImmutableList<? extends ImmutableTerm> otherTerms) {
+        String separatorString = components.get(separatorIndex).getComponent();
+
+        if (separatorString.isEmpty())
+            return false;
+
+        int previousTermIndex = components.get(separatorIndex - 1).getIndex();
+        int nextTermIndex = components.get(separatorIndex + 1).getIndex();
+
+        return Stream.of(terms.get(previousTermIndex), otherTerms.get(previousTermIndex))
+                .anyMatch(t -> !couldContain(t, separatorString, true))
+                || Stream.of(terms.get(nextTermIndex), otherTerms.get(nextTermIndex))
+                .anyMatch(t -> !couldContain(t, separatorString, false));
+    }
+
+    /**
+     * Must not return false negative
+     */
+    private boolean couldContain(ImmutableTerm term, String separatorString, boolean isTermBefore) {
+        if (term instanceof Variable)
+            return true;
+
+        if (term instanceof Constant) {
+            Constant constant = (Constant) term;
+
+            // Should normally not happen
+            return term.isNull()
+                    || (isTermBefore
+                        ? constant.getValue().endsWith(separatorString)
+                        : constant.getValue().startsWith(separatorString));
+        }
+        else {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+
+            if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
+                boolean isSafelySeparating = ((DBTypeConversionFunctionSymbol) functionSymbol).getInputType()
+                        .filter(t -> { switch(t.getCategory()) {
+                            case INTEGER:
+                                return !patternForInteger.matcher(separatorString).find();
+                            case DECIMAL:
+                            case FLOAT_DOUBLE:
+                                return !patternForDecimalFloat.matcher(separatorString).find();
+                            case UUID:
+                                return !patternForUuid.matcher(separatorString).find();
+                            default:
+                                return false;
+                        }
+                        })
+                        .isPresent();
+
+                return !isSafelySeparating;
+            }
+
+            return true;
+        }
+    }
 
     @Nullable
     private Pattern injectivePattern; // lazy initalization
