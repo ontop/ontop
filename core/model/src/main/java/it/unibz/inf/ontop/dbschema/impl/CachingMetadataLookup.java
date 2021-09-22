@@ -29,6 +29,14 @@ public class CachingMetadataLookup implements MetadataLookup {
         return retrievedRelation;
     }
 
+    /**
+     * At the moment, black-box views are not cached
+     */
+    @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+        return provider.getBlackBoxView(query);
+    }
+
     @Override
     public QuotedIDFactory getQuotedIDFactory() {
         return provider.getQuotedIDFactory();

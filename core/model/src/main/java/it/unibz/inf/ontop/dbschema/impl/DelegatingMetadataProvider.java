@@ -35,6 +35,11 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+        return provider.getBlackBoxView(query);
+    }
+
+    @Override
     public QuotedIDFactory getQuotedIDFactory() {
         return provider.getQuotedIDFactory();
     }

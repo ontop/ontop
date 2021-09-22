@@ -36,6 +36,11 @@ public class CachingMetadataLookupWithDependencies extends CachingMetadataLookup
             }
 
             @Override
+            public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+                return CachingMetadataLookupWithDependencies.this.getBlackBoxView(query);
+            }
+
+            @Override
             public QuotedIDFactory getQuotedIDFactory() {
                 return CachingMetadataLookupWithDependencies.this.getQuotedIDFactory();
             }

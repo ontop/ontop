@@ -12,5 +12,7 @@ public interface MetadataLookup {
      */
     NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
 
+    RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException;
+
     QuotedIDFactory getQuotedIDFactory();
 }

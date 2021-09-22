@@ -17,6 +17,11 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean areAbstractDatatypesToleratedInMapping();
 
+    /**
+     * If true, metadata about the black-box view will be retrieved by querying the DB.
+     */
+    boolean allowRetrievingBlackBoxViewMetadataFromDB();
+
 
     /**
      * Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology).
@@ -50,6 +55,7 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";
     String ENABLE_VALUES_NODE = "ontop.enableValuesNode";
+    String ALLOW_RETRIEVING_BLACK_BOX_VIEW_METADATA_FROM_DB = "ontop.allowRetrievingBlackBoxViewMetadataFromDB";
 
 
     /**

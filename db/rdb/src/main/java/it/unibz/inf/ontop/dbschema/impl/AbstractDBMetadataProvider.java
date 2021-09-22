@@ -297,6 +297,11 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
+    @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+        throw new RuntimeException("TODO: implement");
+    }
+
     protected abstract RelationID getCanonicalRelationId(RelationID id);
 
     protected abstract ImmutableList<RelationID> getAllIDs(RelationID id);

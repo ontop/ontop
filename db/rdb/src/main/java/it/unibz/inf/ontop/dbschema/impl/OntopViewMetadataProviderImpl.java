@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,6 +93,11 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
             return jsonView.createViewDefinition(getDBParameters(), parentCacheMetadataLookup.getCachingMetadataLookupFor(id));
 
         return parentCacheMetadataLookup.getRelation(id);
+    }
+
+    @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+        return parentMetadataProvider.getBlackBoxView(query);
     }
 
     @Override
