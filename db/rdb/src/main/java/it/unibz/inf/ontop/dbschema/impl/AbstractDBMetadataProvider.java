@@ -95,7 +95,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     }
 
     private static String escape(String s, String esc) {
-        return s.replace("_", esc + "_").replace("%", esc + "%");
+        return s == null ? null : s.replace("_", esc + "_").replace("%", esc + "%");
     }
 
     @Override
