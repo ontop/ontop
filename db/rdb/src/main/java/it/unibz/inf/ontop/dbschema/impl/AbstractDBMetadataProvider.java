@@ -94,11 +94,22 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
     }
 
+    private static String escape(String s, String esc) {
+        return s.replace("_", esc + "_").replace("%", esc + "%");
+    }
+
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
+        String esc;
+        try {
+            esc = metadata.getSearchStringEscape();
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
         RelationID id = getCanonicalRelationId(id0);
-        try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
+        try (ResultSet rs = metadata.getColumns(escape(getRelationCatalog(id), esc), escape(getRelationSchema(id), esc), escape(getRelationName(id), esc), null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
