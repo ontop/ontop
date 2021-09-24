@@ -98,7 +98,10 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     }
 
     protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
-        return s == null ? null : s.replace("_", escape + "_").replace("%", escape + "%");
+        return (s == null || escape == null)
+                ? s
+                : s.replace("_", escape + "_")
+                    .replace("%", escape + "%");
     }
 
     @Override
