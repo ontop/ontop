@@ -26,17 +26,7 @@ public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataP
     }
 
     @Override
-    protected @Nullable String escapeRelationNamePattern(@Nullable String s) {
-        return s;
-    }
-
-    @Override
-    protected @Nullable String escapeRelationSchemaPattern(@Nullable String s) {
-        return s;
-    }
-
-    @Override
-    protected @Nullable String escapeRelationCatalogPattern(@Nullable String s) {
+    protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
         return s;
     }
 

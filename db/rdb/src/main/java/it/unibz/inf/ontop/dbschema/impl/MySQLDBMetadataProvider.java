@@ -40,9 +40,4 @@ public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(tableNameColumn));
     }
-
-    @Override
-    protected @Nullable String escapeRelationCatalogPattern(@Nullable String s) { // catalogs are matched literally in MySQL
-        return s;
-    }
 }

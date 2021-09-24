@@ -97,13 +97,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
     }
 
-    protected @Nullable String escapeRelationNamePattern(@Nullable String s) {
-        return s == null ? null : s.replace("_", escape + "_").replace("%", escape + "%");
-    }
-    protected @Nullable String escapeRelationSchemaPattern(@Nullable String s) {
-        return s == null ? null : s.replace("_", escape + "_").replace("%", escape + "%");
-    }
-    protected @Nullable String escapeRelationCatalogPattern(@Nullable String s) {
+    protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
         return s == null ? null : s.replace("_", escape + "_").replace("%", escape + "%");
     }
 
@@ -112,9 +106,9 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
         RelationID id = getCanonicalRelationId(id0);
         try (ResultSet rs = metadata.getColumns(
-                escapeRelationCatalogPattern(getRelationCatalog(id)),
-                escapeRelationSchemaPattern(getRelationSchema(id)),
-                escapeRelationNamePattern(getRelationName(id)),
+                getRelationCatalog(id), // catalog is not escaped
+                escapeRelationIdComponentPattern(getRelationSchema(id)),
+                escapeRelationIdComponentPattern(getRelationName(id)),
                 null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
