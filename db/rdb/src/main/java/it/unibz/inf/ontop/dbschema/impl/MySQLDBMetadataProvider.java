@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,5 +39,10 @@ public class MySQLDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     @Override
     protected RelationID getRelationID(ResultSet rs, String catalogNameColumn, String schemaNameColumn, String tableNameColumn) throws SQLException {
         return rawIdFactory.createRelationID(rs.getString(catalogNameColumn), rs.getString(tableNameColumn));
+    }
+
+    @Override
+    protected @Nullable String escapeRelationCatalogPattern(@Nullable String s) { // catalogs are matched literally in MySQL
+        return s;
     }
 }
