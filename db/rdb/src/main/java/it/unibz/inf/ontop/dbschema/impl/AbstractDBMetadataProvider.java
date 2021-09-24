@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected final Connection connection;
     protected final DBParameters dbParameters;
     protected final DatabaseMetaData metadata;
+    protected final String escape;
 
     protected final QuotedIDFactory rawIdFactory;
 
@@ -38,6 +40,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         try {
             this.connection = connection;
             this.metadata = connection.getMetaData();
+            this.escape = metadata.getSearchStringEscape();
             QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
             this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
@@ -94,8 +97,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
     }
 
-    private static String escape(String s, String esc) {
-        return s == null ? null : s.replace("_", esc + "_").replace("%", esc + "%");
+    protected @Nullable String escapeRelationIdComponent(@Nullable String s) {
+        return s == null ? null : s.replace("_", escape + "_").replace("%", escape + "%");
     }
 
     @Override
@@ -109,7 +112,11 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             throw new MetadataExtractionException(e);
         }
         RelationID id = getCanonicalRelationId(id0);
-        try (ResultSet rs = metadata.getColumns(escape(getRelationCatalog(id), esc), escape(getRelationSchema(id), esc), escape(getRelationName(id), esc), null)) {
+        try (ResultSet rs = metadata.getColumns(
+                escapeRelationIdComponent(getRelationCatalog(id)),
+                escapeRelationIdComponent(getRelationSchema(id)),
+                escapeRelationIdComponent(getRelationName(id)),
+                null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
