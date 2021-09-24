@@ -1,7 +1,7 @@
-CREATE TABLE "v_accommodationsopen" (
+CREATE TABLE "v_accomm" (
   "Id" int(11) primary key
 );
 
-CREATE TABLE "vaaccommodationsopen" (
+CREATE TABLE "vaaccomm" (
   "Ident" int(11) primary key
 );
