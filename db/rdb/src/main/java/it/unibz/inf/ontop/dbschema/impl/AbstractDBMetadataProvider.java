@@ -29,6 +29,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -145,26 +146,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 int columnSize = rs.getInt("COLUMN_SIZE");
                 DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
-                String sqlTypeName;
-                switch (rs.getInt("DATA_TYPE")) {
-                    case Types.CHAR:
-                    case Types.VARCHAR:
-                    case Types.NVARCHAR:
-                        sqlTypeName = (columnSize != 0) ? typeName + "(" + columnSize + ")" : typeName;
-                        break;
-                    case Types.DECIMAL:
-                    case Types.NUMERIC:
-                        int decimalDigits = rs.getInt("DECIMAL_DIGITS");
-                        if (columnSize == 0)
-                            sqlTypeName = typeName;
-                        else if (decimalDigits == 0)
-                            sqlTypeName = typeName + "(" + columnSize + ")";
-                        else
-                            sqlTypeName = typeName + "(" + columnSize + ", " + decimalDigits + ")";
-                        break;
-                    default:
-                        sqlTypeName = typeName;
-                }
+                String sqlTypeName = extractSQLTypeName(typeName, rs.getInt("DATA_TYPE"), columnSize,
+                        () -> rs.getInt("DATA_TYPE"));
                 builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
             }
 
@@ -178,6 +161,27 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
+        }
+    }
+
+    protected String extractSQLTypeName(String typeName, int jdbcType, int columnSize,
+                                        PrecisionSupplier precisionSupplier) throws SQLException {
+        switch (jdbcType) {
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.NVARCHAR:
+                return (columnSize != 0) ? typeName + "(" + columnSize + ")" : typeName;
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                int decimalDigits = precisionSupplier.getPrecision();
+                if (columnSize == 0)
+                    return typeName;
+                else if (decimalDigits == 0)
+                    return typeName + "(" + columnSize + ")";
+                else
+                    return typeName + "(" + columnSize + ", " + decimalDigits + ")";
+            default:
+                return typeName;
         }
     }
 
@@ -334,11 +338,44 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 : extractBlackBoxViewWithoutConnectingToDB(query);
     }
 
-    protected RelationDefinition extractBlackBoxViewByConnectingToDB(String query) {
-        throw new RuntimeException("TODO: implement extraction by connection to DB");
+    protected RelationDefinition extractBlackBoxViewByConnectingToDB(String query) throws MetadataExtractionException {
+        try (Statement st = connection.createStatement();
+             ResultSet resultSet = st.executeQuery(makeQueryMinimizeResultSet(query))) {
+
+            ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
+            int columnCount = resultSetMetadata.getColumnCount();
+
+            RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
+
+            for (int i=1; i <= columnCount; i++) {
+
+                QuotedID attributeId = rawIdFactory.createAttributeID(resultSetMetadata.getColumnName(i));
+                String typeName = resultSetMetadata.getColumnTypeName(i);
+
+                int columnSize = resultSetMetadata.getColumnDisplaySize(i);
+                DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
+
+                final int index = i;
+                String sqlTypeName = extractSQLTypeName(typeName, resultSetMetadata.getColumnType(i), columnSize,
+                        () -> resultSetMetadata.getPrecision(index));
+
+                builder.addAttribute(attributeId, termType, sqlTypeName, true);
+            }
+            return new ParserViewDefinition(builder, query);
+
+        } catch (SQLException e) {
+            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. ", e);
+        }
     }
 
-    protected RelationDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws MetadataExtractionException, InvalidQueryException {
+    /**
+     * Can be overridden
+     */
+    protected String makeQueryMinimizeResultSet(String query) {
+        return String.format("SELECT * FROM (%s) subQ LIMIT 1", query);
+    }
+
+    protected RelationDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws InvalidQueryException {
         ImmutableList<QuotedID> attributes;
         try {
             DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
@@ -396,4 +433,9 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract String getRelationSchema(RelationID id);
 
     protected abstract String getRelationName(RelationID id);
+
+    @FunctionalInterface
+    interface PrecisionSupplier {
+        int getPrecision() throws SQLException;
+    }
 }
