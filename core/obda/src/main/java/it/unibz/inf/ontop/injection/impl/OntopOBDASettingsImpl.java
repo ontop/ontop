@@ -29,4 +29,9 @@ public class OntopOBDASettingsImpl extends OntopModelSettingsImpl implements Ont
     public boolean isSameAsInMappingsEnabled() {
         return isSameAs;
     }
+
+    @Override
+    public boolean allowRetrievingBlackBoxViewMetadataFromDB() {
+        return getRequiredBoolean(ALLOW_RETRIEVING_BLACK_BOX_VIEW_METADATA_FROM_DB);
+    }
 }

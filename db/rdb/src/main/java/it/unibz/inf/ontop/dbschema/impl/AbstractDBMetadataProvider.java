@@ -1,12 +1,27 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.spec.sqlparser.ApproximateSelectQueryAttributeExtractor;
+import it.unibz.inf.ontop.spec.sqlparser.DefaultSelectQueryAttributeExtractor;
+import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
+import it.unibz.inf.ontop.spec.sqlparser.ParserViewDefinition;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.TokenMgrException;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +29,8 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
@@ -24,6 +41,9 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected final DatabaseMetaData metadata;
 
     protected final QuotedIDFactory rawIdFactory;
+    private final CoreSingletons coreSingletons;
+    private final DBTypeFactory dbTypeFactory;
+    private final OntopOBDASettings settings;
 
     protected interface QuotedIDFactoryFactory {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
@@ -46,6 +66,16 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     metadata.getDatabaseProductVersion(),
                     idFactory,
                     coreSingletons);
+            this.coreSingletons = coreSingletons;
+            this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
+
+            OntopModelSettings modelSettings = coreSingletons.getSettings();
+            // HACK! Done so as to avoid changing the constructor of this highly-derived class.
+            if (modelSettings instanceof OntopOBDASettings) {
+                this.settings = (OntopOBDASettings) modelSettings;
+            }
+            else
+                throw new MinorOntopInternalBugException("Was expecting the settings being an instance of OntopOBDASettings");
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -298,8 +328,62 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     }
 
     @Override
-    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
-        throw new RuntimeException("TODO: implement");
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
+        return settings.allowRetrievingBlackBoxViewMetadataFromDB()
+                ? extractBlackBoxViewByConnectingToDB(query)
+                : extractBlackBoxViewWithoutConnectingToDB(query);
+    }
+
+    protected RelationDefinition extractBlackBoxViewByConnectingToDB(String query) {
+        throw new RuntimeException("TODO: implement extraction by connection to DB");
+    }
+
+    protected RelationDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws MetadataExtractionException, InvalidQueryException {
+        ImmutableList<QuotedID> attributes;
+        try {
+            DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
+            SelectBody selectBody = JSqlParserTools.parse(query);
+            ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(selectBody).getUnqualifiedAttributes();
+            attributes = ImmutableList.copyOf(attrs.keySet());
+        } catch (JSQLParserException e) {
+            // TODO: LOGGER.warn() should be instead after revising the logging policy
+            System.out.println(String.format("FAILED TO PARSE: %s %s", query, getJSQLParserErrorMessage(query, e)));
+
+            ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
+            attributes = sqae.getAttributes(query);
+        } catch (UnsupportedSelectQueryException e) {
+            ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
+            attributes = sqae.getAttributes(query);
+        }
+        return new ParserViewDefinition(attributes, query, dbTypeFactory);
+    }
+
+    private static String getJSQLParserErrorMessage(String sourceQuery, JSQLParserException e) {
+        try {
+            // net.sf.jsqlparser.parser.TokenMgrException: Lexical error at line 1, column 165.
+            if (e.getCause() instanceof TokenMgrException) {
+                Pattern pattern = Pattern.compile("at line (\\d+), column (\\d+)");
+                Matcher matcher = pattern.matcher(e.getCause().getMessage());
+                if (matcher.find()) {
+                    int line = Integer.parseInt(matcher.group(1));
+                    int col = Integer.parseInt(matcher.group(2));
+                    String sourceQueryLine = sourceQuery.split("\n")[line - 1];
+                    final int MAX_LENGTH = 40;
+                    if (sourceQueryLine.length() > MAX_LENGTH) {
+                        sourceQueryLine = sourceQueryLine.substring(sourceQueryLine.length() - MAX_LENGTH);
+                        if (sourceQueryLine.length() > 2 * MAX_LENGTH)
+                            sourceQueryLine = sourceQueryLine.substring(0, 2 * MAX_LENGTH);
+                        col = MAX_LENGTH;
+                    }
+                    return "FAILED TO PARSE: " + sourceQueryLine + "\n" +
+                            Strings.repeat(" ", "FAILED TO PARSE: ".length() + col - 2) + "^\n" + e.getCause();
+                }
+            }
+        }
+        catch (Exception e1) {
+            // NOP
+        }
+        return e.getCause().toString();
     }
 
     protected abstract RelationID getCanonicalRelationId(RelationID id);

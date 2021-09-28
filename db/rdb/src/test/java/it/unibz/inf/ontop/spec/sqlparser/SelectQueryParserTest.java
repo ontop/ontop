@@ -5,10 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class SelectQueryParserTest {
     private static final String D1 = "D1";
     private static final String D2 = "D2";
 
-    private RAExpression parse(String sql) throws JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
+    private RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
 
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
@@ -90,20 +90,20 @@ public class SelectQueryParserTest {
     }
 
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void inner_join_on_inner_join_ambiguity_test() throws Exception {
         // common column name "A" appears more than once in left table
         parse("SELECT A, C FROM P INNER JOIN Q on P.A =  Q.A NATURAL JOIN R");
     }
 
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void inner_join_on_inner_join_ambiguity2_test() throws Exception {
         // column reference "a" is ambiguous
         RAExpression re = parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void inner_join_on_inner_join_test() throws Exception {
         // common column name "A" appears more than once in left table
         parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C");
@@ -154,7 +154,7 @@ public class SelectQueryParserTest {
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_Q, A1, C1)), re.getDataAtoms());
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_missing_column_test2() throws Exception {
         parse("SELECT R FROM Q");
     }
@@ -234,19 +234,19 @@ public class SelectQueryParserTest {
     }
 
     // JSQLParser apparently allows more weird combinations like this
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_left_simple() throws Exception {
         RAExpression re = parse("SELECT * FROM P LEFT, Q");
         System.out.println(re);
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_simple_on() throws Exception {
         RAExpression re = parse("SELECT * FROM P, Q ON P.A = Q.A");
         System.out.println(re);
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_simple_using() throws Exception {
         RAExpression re = parse("SELECT * FROM P, Q USING (A)");
         System.out.println(re);
@@ -258,7 +258,7 @@ public class SelectQueryParserTest {
         System.out.println(re);
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_left_semi_join_using() throws Exception {
         RAExpression re = parse("SELECT * FROM P LEFT SEMI JOIN Q USING (A)");
         System.out.println(re);
@@ -472,62 +472,62 @@ public class SelectQueryParserTest {
     // -------------------------------------------------------
     // invalid combinations of join modifiers (see SQL standard)
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_join() throws Exception {
         parse("SELECT * FROM P JOIN Q"); // requires on or using
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_right_join() throws Exception {
         parse("SELECT * FROM P RIGHT JOIN Q");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_full_join() throws Exception {
         parse("SELECT * FROM P FULL JOIN Q");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_left_join() throws Exception {
         parse("SELECT * FROM P LEFT JOIN Q");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_right_outer_join() throws Exception {
         parse("SELECT * FROM P RIGHT OUTER JOIN Q");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_full_outer_join() throws Exception {
         parse("SELECT * FROM P FULL OUTER JOIN Q");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_left_outer_join() throws Exception {
         parse("SELECT * FROM P LEFT OUTER JOIN Q");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_inner_join() throws Exception {
         parse("SELECT * FROM P INNER JOIN Q"); // requires on or using
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_join_on() throws Exception {
         parse("SELECT * FROM P NATURAL JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_join_on() throws Exception {
         parse("SELECT * FROM P CROSS JOIN Q ON P.A = Q.A");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_natural_join_using() throws Exception {
         parse("SELECT * FROM P NATURAL JOIN Q USING(A)");
     }
 
-    @Test(expected = InvalidSelectQueryException.class)
+    @Test(expected = InvalidQueryException.class)
     public void select_cross_join_using() throws Exception {
         parse("SELECT * FROM P CROSS JOIN Q USING(A)");
     }

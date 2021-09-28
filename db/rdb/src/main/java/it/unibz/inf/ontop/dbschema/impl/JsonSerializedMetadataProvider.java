@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -111,7 +112,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
         if (parentProvider != null)
             return parentProvider.getBlackBoxView(query);
 

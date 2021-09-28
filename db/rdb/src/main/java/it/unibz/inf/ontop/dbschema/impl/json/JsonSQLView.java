@@ -6,9 +6,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
-import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -17,7 +16,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -25,9 +23,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.*;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -112,7 +108,7 @@ public class JsonSQLView extends JsonView {
         try {
             raExpression = extractRAExpression(dbParameters, parentCacheMetadataLookup);
             initialChild = raExpression2IQConverter.convert(raExpression);
-        } catch (JSQLParserException | UnsupportedSelectQueryException | InvalidSelectQueryException e) {
+        } catch (JSQLParserException | UnsupportedSelectQueryException | InvalidQueryException e) {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
         }
 
@@ -164,7 +160,7 @@ public class JsonSQLView extends JsonView {
     }
 
     private RAExpression extractRAExpression(DBParameters dbParameters, MetadataLookup metadataLookup)
-            throws JSQLParserException, UnsupportedSelectQueryException, InvalidSelectQueryException {
+            throws JSQLParserException, UnsupportedSelectQueryException, InvalidQueryException, MetadataExtractionException {
         CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
         SQLQueryParser sq = new SQLQueryParser(coreSingletons);
         return sq.getRAExpression(query, metadataLookup);

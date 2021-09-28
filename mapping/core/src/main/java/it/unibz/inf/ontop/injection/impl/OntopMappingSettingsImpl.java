@@ -57,11 +57,6 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     }
 
     @Override
-    public boolean allowRetrievingBlackBoxViewMetadataFromDB() {
-        return getRequiredBoolean(ALLOW_RETRIEVING_BLACK_BOX_VIEW_METADATA_FROM_DB);
-    }
-
-    @Override
     public boolean isOntologyAnnotationQueryingEnabled() {
         return getRequiredBoolean(QUERY_ONTOLOGY_ANNOTATIONS);
     }

@@ -10,6 +10,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.json.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -96,7 +97,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
         return parentMetadataProvider.getBlackBoxView(query);
     }
 

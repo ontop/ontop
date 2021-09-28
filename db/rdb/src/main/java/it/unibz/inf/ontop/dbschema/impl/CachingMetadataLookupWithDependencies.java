@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class CachingMetadataLookupWithDependencies extends CachingMetadataLookup
             }
 
             @Override
-            public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+            public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
                 return CachingMetadataLookupWithDependencies.this.getBlackBoxView(query);
             }
 

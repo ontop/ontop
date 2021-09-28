@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ public class SelectQueryAttributeExtractorTest {
     }
 
     @Test
-    public void test_approximation() throws InvalidSelectQueryException {
+    public void test_approximation() throws InvalidQueryException {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         QuotedIDFactory idfac = builder.getQuotedIDFactory();
 
@@ -68,7 +68,7 @@ public class SelectQueryAttributeExtractorTest {
 
     // issue 366
     @Test
-    public void test_approximation_distinct() throws InvalidSelectQueryException {
+    public void test_approximation_distinct() throws InvalidQueryException {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         QuotedIDFactory idfac = builder.getQuotedIDFactory();
 
