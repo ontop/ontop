@@ -41,11 +41,6 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return getRequiredBoolean(DISTINCT_RESULTSET);
-    }
-
-    @Override
     public boolean isPostProcessingAvoided() {
         return getRequiredBoolean(AVOID_POST_PROCESSING);
     }

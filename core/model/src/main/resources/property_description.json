@@ -65,7 +65,7 @@
   },
   "ontop.distinctResultSet": {
     "type": "Boolean",
-    "description": "DEPRECATED. Default value: `false`. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
+    "description": "REMOVED from 4.2.0. Default value: `false`. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
   },
   "ontop.avoidPostProcessing": {
     "type": "Boolean",
