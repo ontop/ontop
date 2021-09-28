@@ -45,7 +45,8 @@ import java.util.*;
 @Deprecated
 public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements TupleResultSet {
 
-    private Set<List<Object>> rowKeys;
+    private final Set<List<Object>> rowKeys = new HashSet<>();
+    private final ImmutableSortedSet<Variable> sqlSignature;
 
     public DistinctJDBCTupleResultSet(ResultSet rs, ImmutableSortedSet<Variable> sqlSignature, ImmutableMap<Variable, DBTermType> sqlTypes,
                                       ConstructionNode constructionNode,
@@ -54,7 +55,7 @@ public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements Tu
                                       SubstitutionFactory substitutionFactory) {
 
         super(rs, sqlSignature, sqlTypes, constructionNode, answerAtom, queryLogger, statementClosingCB, termFactory, substitutionFactory);
-        rowKeys = new HashSet<>();
+        this.sqlSignature = sqlSignature;
     }
 
     /**
@@ -70,27 +71,23 @@ public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements Tu
            if(!foundFreshTuple) {
                break;
            }
-           currentKey = computeTupleKey(rs);
+           currentKey = computeTupleKey();
         } while(!rowKeys.add(currentKey));
 
         return foundFreshTuple;
     }
 
-    private List<Object> computeTupleKey(ResultSet rs) throws OntopConnectionException {
-
-        ArrayList rowKey = new ArrayList<>();
-        for (int i = 1; i <= getSignature().size();  i ++ ) {
-            rowKey.add(getRawObject(i)); //value
-        }
-        return rowKey;
-    }
-
-    Object getRawObject(int column) throws OntopConnectionException {
+    private List<Object> computeTupleKey() throws OntopConnectionException {
         try {
-            Object realValue = rs.getObject(column);
-            return realValue;
-        } catch (Exception e) {
+            ArrayList<Object> rowKey = new ArrayList<>(sqlSignature.size());
+            for (int i = 1; i <= sqlSignature.size(); i++) {
+                rowKey.add(rs.getObject(i)); //value
+            }
+            return rowKey;
+        }
+        catch (Exception e) {
             throw buildConnectionException(e);
         }
     }
+
 }
