@@ -29,7 +29,7 @@ public class ImmutableMetadataLookup implements MetadataLookup {
     }
 
     @Override
-    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException {
+    public RelationDefinition getBlackBoxView(String query) {
         throw new UnsupportedOperationException();
     }
 
