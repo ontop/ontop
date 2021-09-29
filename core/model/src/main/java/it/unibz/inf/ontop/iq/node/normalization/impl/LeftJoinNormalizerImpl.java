@@ -221,7 +221,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         private LJNormalizationState liftLeftDistinct(UnaryIQTree liftedLeftChild) {
             DistinctNode distinctNode = (DistinctNode) liftedLeftChild.getRootNode();
-            if (rightChild.isDistinct()) {
+            if (isLJDistinctWhileLeftIsDistinct(liftedLeftChild)) {
                 IQTree newRightChild = rightChild.removeDistincts();
                 IQTree newLeftChild = liftedLeftChild.getChild();
                 return updateParentConditionChildren(distinctNode, ljCondition, newLeftChild, newRightChild)
@@ -231,6 +231,20 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             else
                 // Stops the liftLeftChild() recursion
                 return updateLeftChild(liftedLeftChild);
+        }
+
+        /**
+         * When the left is distinct, isDistinct() behaves like for inner joins
+         */
+        private boolean isLJDistinctWhileLeftIsDistinct(IQTree distinctLeftChild) {
+            if (rightChild.isDistinct())
+                return true;
+
+            IQTree innerJoinTree = iqFactory.createNaryIQTree(
+                    iqFactory.createInnerJoinNode(ljCondition),
+                    ImmutableList.of(distinctLeftChild, rightChild));
+
+            return innerJoinTree.isDistinct();
         }
 
         private Optional<LJNormalizationState> tryToLiftRightDistinct(UnaryIQTree liftedRightChild) {
@@ -440,6 +454,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         private Optional<LJNormalizationState> tryToLiftRightConstruction(ImmutableSet<Variable> rightChildRequiredVariables, IQTree rightGrandChild,
                                                                           ImmutableSubstitution<ImmutableTerm> rightSubstitution) {
+            if (rightGrandChild instanceof TrueNode)
+                return liftRightConstructionWithTrueNode(rightSubstitution);
+
             ImmutableSet<Variable> leftVariables = leftChild.getVariables();
 
             // Empty substitution -> replace the construction node by its child
@@ -489,6 +506,27 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     liftableSubstitution);
 
             return Optional.of(updateParentConditionRightChild(newParentNode, notOptimizedLJCondition, newRightChild));
+        }
+
+        /**
+         * Right child: a ConstructionNode followed by a TrueNode
+         */
+        private Optional<LJNormalizationState> liftRightConstructionWithTrueNode(
+                ImmutableSubstitution<ImmutableTerm> rightSubstitution) {
+
+            ImmutableSubstitution<ImmutableTerm> liftableSubstitution = ljCondition
+                    .map(c -> rightSubstitution.getImmutableMap().entrySet().stream()
+                            .collect(ImmutableCollectors.toMap(
+                                    Map.Entry::getKey,
+                                    e -> (ImmutableTerm)termFactory.getIfElseNull(c, e.getValue()))))
+                    .map(substitutionFactory::getSubstitution)
+                    .orElse(rightSubstitution);
+
+            ConstructionNode newParentNode = iqFactory.createConstructionNode(
+                    Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy(),
+                    liftableSubstitution);
+
+            return Optional.of(updateParentConditionRightChild(newParentNode, ljCondition, iqFactory.createTrueNode()));
         }
 
         /**

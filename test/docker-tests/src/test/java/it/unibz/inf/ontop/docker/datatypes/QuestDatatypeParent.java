@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.docker.datatypes;
  */
 
 import it.unibz.inf.ontop.docker.ResultSetInfo;
-import it.unibz.inf.ontop.docker.ResultSetInfoTupleUtil;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import junit.framework.TestCase;
@@ -48,7 +47,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -106,7 +107,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		}
 	}
 
-	protected Repository createRepository() throws Exception {
+	protected Repository createRepository()  {
 		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
 				.enableTestMode()
@@ -200,7 +201,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 			Set<String> names = bs.getBindingNames();
 			StringBuilder b = new StringBuilder();
 			for (String name: names) {
-				b.append(name + "=" + bs.getValue(name) + ", ");
+				b.append(name).append("=").append(bs.getValue(name)).append(", ");
 			}
 //			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
 			logger.debug(b.toString());
@@ -215,23 +216,20 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 
 	private String readQueryString() throws IOException {
-		InputStream stream = new URL(queryFileURL).openStream();
-		try {
-			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-		} finally {
-			stream.close();
+		try (InputStream stream = new URL(queryFileURL).openStream()) {
+			return IOUtil.readString(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		}
 	}
 
 	private ResultSetInfo readResultSetInfo() throws Exception {
 		Set<Statement> resultGraph = readGraphResultSetInfo();
-		return ResultSetInfoTupleUtil.toResuleSetInfo(resultGraph);
+		return ResultSetInfo.toResultSetInfo(resultGraph);
 	}
 
 	private Set<Statement> readGraphResultSetInfo() throws Exception {
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
-		if (rdfFormat != null) {
-			RDFParser parser = Rio.createParser(rdfFormat);
+		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
+		if (rdfFormat.isPresent()) {
+			RDFParser parser = Rio.createParser(rdfFormat.get());
 
 			ParserConfig config = parser.getParserConfig();
 			// To emulate DatatypeHandling.IGNORE
@@ -241,17 +239,15 @@ public abstract class QuestDatatypeParent extends TestCase {
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 //			parser.setValueFactory(dataRep.getValueFactory());
-			Set<Statement> result = new LinkedHashSet<Statement>();
+			Set<Statement> result = new LinkedHashSet<>();
 			parser.setRDFHandler(new StatementCollector(result));
 
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
+			try (InputStream in = new URL(resultFileURL).openStream()) {
 				parser.parse(in, resultFileURL);
-			} finally {
-				in.close();
 			}
 			return result;
-		} else {
+		}
+		else {
 			throw new RuntimeException("Unable to determine file type of results file");
 		}
 	}

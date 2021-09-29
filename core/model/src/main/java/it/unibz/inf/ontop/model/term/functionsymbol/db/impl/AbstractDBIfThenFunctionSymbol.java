@@ -54,6 +54,14 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
         return false;
     }
 
+    /**
+     * Due to the presence of boolean expressions, seems better to avoid decomposing it (can be revisited)
+     */
+    @Override
+    public boolean shouldBeDecomposedInUnion() {
+        return false;
+    }
+
     @Override
     public Stream<ImmutableTerm> extractPossibleValues(ImmutableList<? extends ImmutableTerm> terms) {
         return IntStream.range(1, terms.size())

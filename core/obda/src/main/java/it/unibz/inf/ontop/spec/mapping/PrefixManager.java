@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.util.Optional;
-
 /**
  * Abstracts the prefix mapping mechanism.
  *
@@ -31,23 +29,13 @@ import java.util.Optional;
  */
 public interface PrefixManager {
 
-	String getURIDefinition(String prefix);
-
-	Optional<String> getPrefix(String uri);
-
-	String getDefaultPrefix();
-	
-	ImmutableMap<String, String> getPrefixMap();
-
-	String getShortForm(String uri);
-
-	String getShortForm(String uri, boolean insideQuotes);
+	String getShortForm(String iri);
 
 	String getExpandForm(String prefixedName);
-	
-	String getExpandForm(String prefixedName, boolean insideQuotes);
-	
-	boolean contains(String prefix);
+
+	ImmutableMap<String, String> getPrefixMap();
+
+	String getDefaultIriPrefix();
 
 	String DEFAULT_PREFIX = ":";
 }

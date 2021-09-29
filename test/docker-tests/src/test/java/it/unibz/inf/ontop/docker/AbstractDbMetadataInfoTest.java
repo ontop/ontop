@@ -32,10 +32,10 @@ import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
-	private String propertyFile;
+	private final String propertyFile;
 	private Properties properties;
 
-	private static Logger log = LoggerFactory.getLogger(AbstractDbMetadataInfoTest.class);
+	private static final Logger log = LoggerFactory.getLogger(AbstractDbMetadataInfoTest.class);
 
 	public AbstractDbMetadataInfoTest(String propertyFile) {
 		this.propertyFile = propertyFile;

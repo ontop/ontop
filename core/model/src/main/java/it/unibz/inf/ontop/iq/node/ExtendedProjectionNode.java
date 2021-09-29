@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 /**
- * Common abstraction for ConstructionNode and AggregationNode
+ * Common abstraction for {@link ConstructionNode} and  {@link AggregationNode}
  */
 public interface ExtendedProjectionNode extends ExplicitVariableProjectionNode, UnaryOperatorNode {
 

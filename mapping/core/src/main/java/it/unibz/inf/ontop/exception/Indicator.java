@@ -26,10 +26,10 @@ package it.unibz.inf.ontop.exception;
  */
 public class Indicator {
 
-    private int lineNumber;
-    private int columnNumber;
-    private Object hint;
-    private int reason;
+    private final int lineNumber;
+    private final int columnNumber;
+    private final Object hint;
+    private final int reason;
 
     /**
      * An error indicator that points to a given line number in the file. Users can

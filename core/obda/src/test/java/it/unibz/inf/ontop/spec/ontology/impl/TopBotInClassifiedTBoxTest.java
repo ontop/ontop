@@ -10,10 +10,11 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl.rdfsLiteral;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class TopBotInClassifiedTBoxTest {
 
-    private RDF rdfFactory = new SimpleRDF();
+    private final RDF rdfFactory = new SimpleRDF();
     private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
     @Test
@@ -39,7 +40,7 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
@@ -111,7 +112,7 @@ public class TopBotInClassifiedTBoxTest {
 
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ObjectPropertyExpression> bot = tbox.objectPropertiesDAG().getVertex(ObjectPropertyExpressionImpl.owlBottomObjectProperty);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
@@ -124,7 +125,7 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
@@ -137,7 +138,7 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
 
@@ -196,7 +197,7 @@ public class TopBotInClassifiedTBoxTest {
 
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<DataPropertyExpression> bot = tbox.dataPropertiesDAG().getVertex(DataPropertyExpressionImpl.owlBottomDataProperty);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test
@@ -210,7 +211,7 @@ public class TopBotInClassifiedTBoxTest {
         // A <= bot is replaced by disjointness
         ClassifiedTBox tbox = ontology.tbox();
         Equivalences<ClassExpression> bot = tbox.classesDAG().getVertex(ClassImpl.owlNothing);
-        assertEquals(null, bot);
+        assertNull(bot);
     }
 
     @Test

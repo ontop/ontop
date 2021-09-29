@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -111,35 +109,26 @@ public class ComplexWhereMappingTest {
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopOWLReasoner reasoner = factory.createReasoner(config);
 
-		// Now we are ready for querying
-		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
-
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
-		StringBuilder bf = new StringBuilder(query);
-		try {
+		try (OWLConnection conn = reasoner.getConnection();
+			 OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-            final OWLBindingSet bindingSet = rs.next();
+            OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
 			OWLIndividual ind2 = bindingSet.getOWLIndividual("y");
 			OWLLiteral val = bindingSet.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind1.toString());
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind2.toString());
 			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
-
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			conn.close();
+		}
+		finally {
 			reasoner.dispose();
 		}
 	}
 
 	private static OntopSQLOWLAPIConfiguration createConfiguration() {
 		Properties p = new Properties();
-		// p.put(OPTIMIZE_EQUIVALENCES, "true");
 		return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -158,11 +147,9 @@ public class ComplexWhereMappingTest {
 
     @Test
     public void testClassicEqSig() throws Exception {
-
-		Properties p = new Properties();
-		// p.put(OPTIMIZE_EQUIVALENCES, "true");
 		OntopSQLOWLAPIConfiguration obdaConfig = createConfiguration();
 
+		Properties p = new Properties();
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadVirtualAbox(obdaConfig, p)) {
 			runTests(loader.getConfiguration());
 		}

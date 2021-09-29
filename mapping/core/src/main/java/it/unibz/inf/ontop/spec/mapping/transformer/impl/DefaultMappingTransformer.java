@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
@@ -13,8 +10,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
@@ -64,8 +60,9 @@ public class DefaultMappingTransformer implements MappingTransformer {
     @Override
     public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, Optional<Ontology> ontology) {
         if (ontology.isPresent()) {
-            ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(ontology.get().abox(),
-                    settings.isOntologyAnnotationQueryingEnabled());
+            ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(extractAboxFacts(ontology.get()),
+                    // Useless. To be removed (temporary)
+                    true);
 
             ImmutableList<MappingAssertion> mappingWithFacts =
                     Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
@@ -77,6 +74,20 @@ public class DefaultMappingTransformer implements MappingTransformer {
             return createSpecification(mapping, dbParameters, emptyTBox);
         }
     }
+
+    /**
+     * Temporary (before introducing FactExtractor)
+     */
+    protected ImmutableSet<RDFFact> extractAboxFacts(Ontology ontology) {
+        if (settings.isOntologyAnnotationQueryingEnabled())
+            return ontology.abox();
+
+        OntologyVocabularyCategory<AnnotationProperty> annotationProperties = ontology.annotationProperties();
+        return ontology.abox().stream()
+                .filter(f -> !annotationProperties.contains(f.getProperty().getIRI()))
+                .collect(ImmutableCollectors.toSet());
+    }
+
 
     private OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, ClassifiedTBox tbox) {
 

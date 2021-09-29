@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -16,7 +14,6 @@ import org.apache.commons.rdf.api.RDF;
 
 public class SQLMappingTestingTools {
 
-    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
 
     public static final TermFactory TERM_FACTORY;
@@ -28,7 +25,7 @@ public class SQLMappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
-    public static final SQLPPMappingConverterImpl LEGACY_SQL_PP_MAPPING_CONVERTER;
+    public static final SQLPPMappingConverterImpl SQLPP_MAPPING_CONVERTER;
     public static final SQLPPSourceQueryFactory SOURCE_QUERY_FACTORY;
 
     static {
@@ -41,7 +38,6 @@ public class SQLMappingTestingTools {
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
-        EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
@@ -54,11 +50,11 @@ public class SQLMappingTestingTools {
 
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
-        LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(SQLPPMappingConverterImpl.class);
+        SQLPP_MAPPING_CONVERTER = injector.getInstance(SQLPPMappingConverterImpl.class);
         SOURCE_QUERY_FACTORY = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
     public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
-        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS.getTypeFactory());
+        return new OfflineMetadataProviderBuilder(CORE_SINGLETONS);
     }
 }

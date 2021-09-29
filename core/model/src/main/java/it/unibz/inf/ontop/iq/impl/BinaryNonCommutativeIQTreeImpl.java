@@ -29,6 +29,12 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private final IQTree leftChild;
     private final IQTree rightChild;
 
+
+    /**
+     * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
+     *      BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild, IQProperties iqProperties)}
+     */
+    @SuppressWarnings("unused")
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
@@ -42,6 +48,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
             validate();
     }
 
+    /**
+     * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
+     *      BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild, IQTreeCache treeCache)}
+     */
+    @SuppressWarnings("unused")
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
@@ -56,6 +67,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
             validate();
     }
 
+    /**
+     * See {@link IntermediateQueryFactory#createBinaryNonCommutativeIQTree(
+     *      BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild)}
+     */
+    @SuppressWarnings("unused")
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild,

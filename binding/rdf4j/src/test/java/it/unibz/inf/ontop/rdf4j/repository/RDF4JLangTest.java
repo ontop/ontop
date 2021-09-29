@@ -394,4 +394,63 @@ public class RDF4JLangTest extends AbstractRDF4JTest {
 
         runGraphQueryAndCompare(query, expectedValues, bindings);
     }
+
+    @Test
+    public void testExternalBindingGraph2() {
+        String query = "CONSTRUCT {\n" +
+                "  <http://ex.org/21> rdfs:label ?l \n" +
+                "} \n" +
+                "{\n" +
+                "   ?s rdfs:label ?l ; rdfs:comment ?v .\n" +
+                "}\n";
+
+        ValueFactory valueFactory = SimpleValueFactory.getInstance();
+        Literal label = valueFactory.createLiteral("testdata", "en");
+
+        ImmutableSet<Statement> expectedValues = ImmutableSet.of(
+                valueFactory.createStatement(
+                        valueFactory.createIRI("http://ex.org/21"),
+                        RDFS.LABEL,
+                        label));
+
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("l", label);
+
+        runGraphQueryAndCompare(query, expectedValues, bindings);
+    }
+
+    @Test
+    public void testExternalBindingGraph3() {
+        String query = "# CONSTRUCT or DESCRIBE query.\n" +
+                "CONSTRUCT WHERE {\n" +
+                " ?s ?p ?o .\n" +
+                "}\n" +
+                "LIMIT 10";
+
+        ValueFactory valueFactory = SimpleValueFactory.getInstance();
+        Literal label = valueFactory.createLiteral("testdata", "en");
+
+        ImmutableSet<Statement> expectedValues = ImmutableSet.of(
+                valueFactory.createStatement(
+                        valueFactory.createIRI("http://example.org/Individual1"),
+                        RDFS.LABEL,
+                        label));
+
+        MapBindingSet bindings = new MapBindingSet();
+        bindings.addBinding("p", RDFS.LABEL);
+        bindings.addBinding("o", label);
+
+        runGraphQueryAndCompare(query, expectedValues, bindings);
+    }
+
+    @Test
+    public void testDescribe1() {
+        String query = "# CONSTRUCT or DESCRIBE query.\n" +
+                "DESCRIBE ?s WHERE {\n" +
+                " ?s ?p ?o .\n" +
+                "}\n" +
+                "LIMIT 10";
+
+        evaluateGraph(query);
+    }
 }

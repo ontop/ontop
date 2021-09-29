@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
@@ -33,7 +34,7 @@ public class EmptyNodeRemovalTest {
     private static Variable C = TERM_FACTORY.getVariable("c");
     private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
-    private static String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
+    private static ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
     private static ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
     private static ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
     private static final EmptyNode DB_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
@@ -380,7 +381,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
         IQ newQuery = IQ_CONVERTER.convert(query).normalizeForOptimization();
         // Must throw an EmptyQueryException
-        IntermediateQuery convertedQuery = IQ_CONVERTER.convert(newQuery, query.getExecutorRegistry());
+        IntermediateQuery convertedQuery = IQ_CONVERTER.convert(newQuery);
         System.err.println("Unexpected query: " + convertedQuery);
     }
 
@@ -797,8 +798,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(
-                IQ_CONVERTER.convert(query).normalizeForOptimization(),
-                query.getExecutorRegistry());
+                IQ_CONVERTER.convert(query).normalizeForOptimization());
 
         System.out.println("\n Optimized query: \n" +  optimizedQuery);
 

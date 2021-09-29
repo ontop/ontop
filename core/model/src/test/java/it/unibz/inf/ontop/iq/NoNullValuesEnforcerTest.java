@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -47,7 +48,7 @@ public class NoNullValuesEnforcerTest {
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;
     private final static ExtensionalDataNode DATA_NODE_3;
-    private static final DatabaseRelationDefinition TABLE2;
+    private static final NamedRelationDefinition TABLE2;
 
     static {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
@@ -65,7 +66,7 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void testConstructionNodeAsRoot() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Y);
@@ -80,7 +81,7 @@ public class NoNullValuesEnforcerTest {
         LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_Z);
-        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder();
         queryBuilder2.init(projectionAtom, filterNode);
         queryBuilder2.addChild(filterNode, constructionNode);
         queryBuilder2.addChild(constructionNode, innerJoinNode);
@@ -95,7 +96,7 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void testConstructionNodeAsRoot_noNullableVariable() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Y);
@@ -115,7 +116,7 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void testNonConstructionNodeAsRoot() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_Y_Z);
         queryBuilder.init(projectionAtom, innerJoinNode);
@@ -128,7 +129,7 @@ public class NoNullValuesEnforcerTest {
         LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X);
-        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder();
         queryBuilder2.init(projectionAtom, filterNode);
         queryBuilder2.addChild(filterNode, innerJoinNode);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
@@ -143,7 +144,7 @@ public class NoNullValuesEnforcerTest {
     @Test
     public void test2NonNullableVariables() throws QueryTransformationException {
 
-        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS4_PREDICATE, W, X, Y, Z);
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_Y_Z);
         queryBuilder.init(projectionAtom, innerJoinNode);
@@ -156,7 +157,7 @@ public class NoNullValuesEnforcerTest {
         LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X_AND_NOT_NULL_W);
-        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder();
         queryBuilder2.init(projectionAtom, filterNode);
         queryBuilder2.addChild(filterNode, innerJoinNode);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
@@ -178,7 +179,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}",
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0),
                                 ImmutableList.of(TERM_FACTORY.getDBCoalesce(A, B)))));
 
 
@@ -212,7 +213,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}",
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0),
                                 ImmutableList.of(TERM_FACTORY.getImmutableFunctionalTerm(
                                         TERM_FACTORY.getDBFunctionSymbolFactory()
                                                 .getRegularDBFunctionSymbol("NULLIF", 2),
@@ -225,7 +226,7 @@ public class NoNullValuesEnforcerTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X,
-                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}", ImmutableList.of(A))));
+                        TERM_FACTORY.getIRIFunctionalTerm(Template.of("http://example.org/", 0), ImmutableList.of(A))));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode,
                 IQ_FACTORY.createUnaryIQTree(

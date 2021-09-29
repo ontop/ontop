@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.repository.impl;
 
-
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
@@ -9,13 +8,10 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
-import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
+import it.unibz.inf.ontop.rdf4j.query.impl.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.NamespaceImpl;
@@ -246,29 +242,15 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 
         //execute construct query
         try {
-            List<Statement> list = new LinkedList<Statement>();
-
             if (contexts.length == 0 || (contexts.length > 0 && contexts[0] == null)) {
                 GraphQuery query = prepareGraphQuery(QueryLanguage.SPARQL,
                         queryString.toString());
                 GraphQueryResult result = query.evaluate();
-
-                // System.out.println("result: "+result.hasNext());
-                while (result.hasNext())
-                    list.add(result.next());
-                // result.close();
+                return new RepositoryResult<>(new CloseableIteratorIteration<>(result.iterator()));
             }
-            CloseableIteration<Statement, RepositoryException> iter = new CloseableIteratorIteration<Statement, RepositoryException>(
-                    list.iterator());
-            RepositoryResult<Statement> repoResult = new RepositoryResult<Statement>(iter);
-
-            return repoResult;
-        } catch (MalformedQueryException e) {
+            return new RepositoryResult<>(new CloseableIteratorIteration<>());
+        } catch (MalformedQueryException | QueryEvaluationException e) {
             throw new RepositoryException(e);
-
-        } catch (QueryEvaluationException e) {
-            throw new RepositoryException(e);
-
         }
     }
 

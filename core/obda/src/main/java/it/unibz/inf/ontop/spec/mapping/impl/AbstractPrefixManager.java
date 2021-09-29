@@ -20,115 +20,64 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.List;
+import java.util.*;
 
 public abstract class AbstractPrefixManager implements PrefixManager {
 
-	public abstract List<String> getOrderedNamespaces();
-	
-	@Override
-	public String getShortForm(String uri) {
-		return getShortForm(uri, false);
+	protected abstract Optional<String> getIriDefinition(String prefix);
+
+	protected abstract ImmutableList<Map.Entry<String, String>> getOrderedMap();
+
+	protected static ImmutableList<Map.Entry<String, String>> orderMap(Map<String, String> map) {
+		Comparator<Map.Entry<String, String>> comparator =
+				Map.Entry.<String, String>comparingByValue()
+						.thenComparing(Map.Entry.comparingByKey());
+		return map.entrySet().stream()
+				.sorted(comparator)
+				.collect(ImmutableCollectors.toList());
 	}
-	
+
 	@Override
-	public String getShortForm(String originalUri, boolean insideQuotes) {
-		final List<String> namespaceList = getOrderedNamespaces();
-		
-		/* Clean the URI string from <...> signs, if they exist.
-		 * <http://www.example.org/library#Book> --> http://www.example.org/library#Book
-		 */
-		String cleanUri = originalUri;
-		if (originalUri.contains("<") && originalUri.contains(">")) {
-			cleanUri = originalUri.replace("<", "").replace(">", "");
-		}
+	public String getShortForm(String stringIri) {
+		// Clean the IRI string from <...> signs, if they exist.
+		// <http://www.example.org/library#Book> --> http://www.example.org/library#Book
+		String fullIri = stringIri.startsWith("<") && stringIri.endsWith(">")
+				? stringIri.substring(1, stringIri.length() - 1)
+				: stringIri;
 		
 		// Check if the URI string has a matched prefix
-		for (String prefixUriDefinition : namespaceList) {
-			if (cleanUri.startsWith(prefixUriDefinition)) {
-				String prefix = getPrefix(prefixUriDefinition)
-						.orElseThrow(() -> new PrefixManagerException("A prefix is expected"));
-				if (insideQuotes) {
-					prefix = String.format("&%s;", removeColon(prefix));
-				}
-				// Replace the URI with the corresponding prefix.
-				return cleanUri.replace(prefixUriDefinition, prefix);
+		for (Map.Entry<String, String> e : getOrderedMap()) {
+			String iri = e.getValue();
+			if (fullIri.startsWith(iri)) {
+				// Replace the IRI with the corresponding prefix.
+				return e.getKey() + fullIri.substring(iri.length());
 			}
 		}
-		return originalUri; // return the original URI if no prefix definition was found
+		return stringIri; // return the original IRI if no prefix definition was found
 	}
 	
 	@Override
 	public String getExpandForm(String prefixedName) {
-		return getExpandForm(prefixedName, false);
-	}
-	
-	@Override
-	public String getExpandForm(String prefixedName, boolean insideQuotes) {
-		String prefix = "";
-		String prefixPlaceHolder = "";
-		
-		try {
-			/* Clean the URI string from <"..."> signs, if they exist.
-			 * e.g., <"&ex;Book"> --> &ex;Book
-			 */
-			if (prefixedName.contains("<\"") && prefixedName.contains("\">")) {
-				prefixedName = prefixedName.replace("<\"", "").replace("\">", "");
-			}
-			
-			if (insideQuotes) {
-				// &ex;Book
-				int start = prefixedName.indexOf("&");
-				int end = prefixedName.indexOf(";");
-	
-				// extract the whole prefix placeholder, e.g., "&ex;Book" --> "&ex;"
-				prefixPlaceHolder = prefixedName.substring(start, end + 1);
-	
-				// extract the prefix name, e.g., "&ex;" --> "ex:"
-				prefix = prefixPlaceHolder.substring(1, prefixPlaceHolder.length() - 1);
-				if (!prefix.equals(":")) {
-					prefix = prefix + ":"; // add a colon
-				}
-			} else {
-				// ex:Book
-				int index = prefixedName.indexOf(":");
-				
-				// extract the whole prefix placeholder, e.g., "ex:Book" --> "ex:"
-				prefixPlaceHolder = prefixedName.substring(0, index);
-				
-				// extract the prefix name
-				prefix = prefixPlaceHolder + ":";
-			}
-		} catch (StringIndexOutOfBoundsException e) {
+		int index = prefixedName.indexOf(":") + 1;
+		if (index == 0)
 			throw new InvalidPrefixWritingException();
-		}
-		
-		String uri = getURIDefinition(prefix);
-		if (uri == null) {
-			throw new InvalidPrefixWritingException("The prefix name is unknown: " + prefix); // the prefix is unknown.
-		}
-		return prefixedName.replaceFirst(prefix, uri);
+
+		// extract the whole prefix, e.g., "ex:Book" --> "ex:"
+		String prefix = prefixedName.substring(0, index);
+		String iri = getIriDefinition(prefix)
+				.orElseThrow(() -> new InvalidPrefixWritingException("The prefix name is unknown: " + prefix));
+
+		return iri + prefixedName.substring(index);
 	}
 	
 	@Override
-	public String getDefaultPrefix() {
-		return getPrefixMap().get(DEFAULT_PREFIX);
-	}
-	
-	private String removeColon(String prefix) {
-		if (prefix.equals(DEFAULT_PREFIX)) {
-			return prefix; // TODO Remove this code in the future.
-		}
-		return prefix.replace(":", "");
-	}
-
-	private static class PrefixManagerException extends OntopInternalBugException {
-		private PrefixManagerException(String msg) {
-			super(msg);
-		}
+	public String getDefaultIriPrefix() {
+		return getIriDefinition(DEFAULT_PREFIX)
+				.orElseThrow(() -> new InvalidPrefixWritingException("No default prefix"));
 	}
 }

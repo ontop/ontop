@@ -12,5 +12,5 @@ public interface IQConverter {
 
     IQTree convertTree(IntermediateQuery query, QueryNode rootNode);
 
-    IntermediateQuery convert(IQ query, ExecutorRegistry executorRegistry) throws EmptyQueryException;
+    IntermediateQuery convert(IQ query) throws EmptyQueryException;
 }

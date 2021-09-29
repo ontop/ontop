@@ -7,11 +7,12 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
@@ -35,11 +36,38 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbGeometryType = dbTypeFactory.getDBGeometryType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
         return ImmutableTable.copyOf(table);
+    }
+
+    /**
+     * Ensure geometries are recast back from text
+     */
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // Date time
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
+        DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
+        builder.put(defaultDBDateTimestampType, xsdDatetime, datetimeNormFunctionSymbol);
+        builder.put(defaultDBDateTimestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+        // Boolean
+        builder.put(dbBooleanType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(dbBooleanType));
+
+        //GEOMETRY
+        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
+        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
+        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
+
+        return builder.build();
     }
 
     @Override

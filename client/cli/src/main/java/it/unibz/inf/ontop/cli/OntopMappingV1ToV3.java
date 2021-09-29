@@ -67,13 +67,13 @@ public class OntopMappingV1ToV3 implements OntopCommand {
     }
 
     //Group related triples in TTL together
-    private boolean PRETTY_PRINT = true;
+    private final boolean PRETTY_PRINT = true;
 
     //Replace rr:template with rr:column whenever possible
-    private boolean REDUCE_TEMPLATES_TO_COLUMNS = true;
+    private final boolean REDUCE_TEMPLATES_TO_COLUMNS = true;
 
     //Replace rr:sqlQuery with rr:tableName whenever possible
-    private boolean REPLACE_SIMPLE_SQL = true;
+    private final boolean REPLACE_SIMPLE_SQL = true;
 
 
     @Override
@@ -103,7 +103,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 outputMappingFile = inputFile.getName();
             }
 
-            System.out.println(String.format("New mapping file %s", outputMappingFile));
+            System.out.printf("New mapping file %s%n", outputMappingFile);
 
         } catch (Exception e) {
             System.err.println("Error occurred during v1-to-v3 mapping conversion: "
@@ -175,8 +175,6 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         if (SIMPLIFY_SQL_PROJECTIONS)
                             resultingSql = getSimplifiedProjection(resultingSql);
 
-
-
                         for (Map.Entry<String, String> r : renaming.entrySet())
                             target = target.replace("{" + r.getKey() + "}", "{" + r.getValue() + "}");
 
@@ -227,12 +225,9 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         }
 
         String propertyFilePath = f.substring(0, f.lastIndexOf(".")) + ".properties";
-        File propertyFile = new File(propertyFilePath);
-        FileOutputStream outputStream = new FileOutputStream(propertyFile);
-        dataSourceProperties.store(outputStream, null);
-        outputStream.flush();
-        outputStream.close();
-
+        try (FileOutputStream outputStream = new FileOutputStream(new File(propertyFilePath))) {
+            dataSourceProperties.store(outputStream, null);
+        }
     }
 
     private void processR2RML(File outputFile) throws Exception {
@@ -337,20 +332,13 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         }
                     }
 
-                    lst.sort((s1, s2) -> {
-                        int i = s1.getSubject().toString().compareTo(s2.getSubject().toString());
-                        if (i == 0)
-                            i = s1.getPredicate().toString().compareTo(s2.getPredicate().toString());
-                        if (i == 0)
-                            i = s1.getObject().toString().compareTo(s2.getObject().toString());
-                        return i;
-                    });
+                    lst.sort(Comparator.comparing((Statement s) -> s.getSubject().toString())
+                            .thenComparing(s -> s.getPredicate().toString())
+                            .thenComparing(s -> s.getObject().toString()));
 
                     statements = lst;
 
-
                     if (PRETTY_PRINT) {
-
                         writer.write(System.lineSeparator());
 
                         Resource currentSubject = null;
@@ -454,11 +442,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 }
 
                 if (statement.getSubject() instanceof BNode) {
-                    List<Statement> list = bmap.get(statement.getSubject());
-                    if (list == null) {
-                        list = new ArrayList<>();
-                        bmap.put((BNode) statement.getSubject(), list);
-                    }
+                    List<Statement> list = bmap.computeIfAbsent((BNode) statement.getSubject(), k -> new ArrayList<>());
                     list.add(statement);
                 }
 
@@ -507,11 +491,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             }
 
             private void addToList(Map<Resource, List<Resource>> map, Resource subject, Value object) {
-                List<Resource> list = map.get(subject);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    map.put(subject, list);
-                }
+                List<Resource> list = map.computeIfAbsent(subject, k -> new ArrayList<>());
                 list.add((Resource) object);
             }
 

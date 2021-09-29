@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -11,12 +10,12 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -31,12 +30,12 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private final SubstitutionFactory substitutionFactory;
     private final TypeFactory typeFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final UniqueTermTypeExtractor typeExtractor;
+    private final SingleTermTypeExtractor typeExtractor;
 
     @Inject
     private MappingDatatypeFillerImpl(OntopMappingSettings settings,
                                       CoreSingletons coreSingletons,
-                                      UniqueTermTypeExtractor typeExtractor) {
+                                      SingleTermTypeExtractor typeExtractor) {
         this.settings = settings;
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
@@ -135,8 +134,8 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private RDFDatatype extractObjectType(ImmutableTerm objectLexicalTerm, IQTree subTree) throws UnknownDatatypeException {
 
         // Only if partially cast
-        ImmutableTerm uncastObjectLexicalTerm = uncast(objectLexicalTerm);
-        Optional<TermType> optionalType = typeExtractor.extractUniqueTermType(uncastObjectLexicalTerm, subTree);
+        ImmutableTerm uncastObjectLexicalTerm = DBTypeConversionFunctionSymbol.uncast(objectLexicalTerm);
+        Optional<TermType> optionalType = typeExtractor.extractSingleTermType(uncastObjectLexicalTerm, subTree);
 
         if (optionalType
                 .filter(t -> !(t instanceof DBTermType))
@@ -167,16 +166,5 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         return optionalRDFDatatype
                 .orElseGet(typeFactory::getXsdStringDatatype);
-    }
-
-    /**
-     * Uncast the term only if it is temporally cast
-     */
-    private ImmutableTerm uncast(ImmutableTerm term) {
-        return (term instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol)
-                && (((DBTypeConversionFunctionSymbol) ((ImmutableFunctionalTerm) term).getFunctionSymbol()).isTemporary())
-                ? ((ImmutableFunctionalTerm) term).getTerm(0)
-                : term;
     }
 }

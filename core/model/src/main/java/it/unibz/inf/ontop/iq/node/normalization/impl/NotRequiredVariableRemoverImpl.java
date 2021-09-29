@@ -10,19 +10,19 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Singleton
 public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemover {
@@ -113,6 +113,34 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         @Override
         public IQTree transformTrue(TrueNode rootNode) {
             return rootNode;
+        }
+
+        @Override
+        public IQTree transformValues(ValuesNode valuesNode) {
+
+            ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
+            int arity = orderedVariables.size();
+
+            ImmutableList<Integer> indexesToRemove = IntStream.range(0,arity)
+                    .filter(i -> variablesToRemove.contains(orderedVariables.get(i)))
+                    .boxed()
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<Variable> newOrderedVariables = IntStream.range(0,arity)
+                    .filter(i -> !indexesToRemove.contains(i))
+                    .boxed()
+                    .map(orderedVariables::get)
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<ImmutableList<Constant>> newValues = valuesNode.getValues().stream()
+                    .map(t -> IntStream.range(0, arity)
+                            .filter(i -> !indexesToRemove.contains(i))
+                            .boxed()
+                            .map(t::get)
+                            .collect(ImmutableCollectors.toList()))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createValuesNode(newOrderedVariables, newValues);
         }
 
         @Override
@@ -223,11 +251,21 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            UnionNode newUnionNode = iqFactory.createUnionNode(Sets.difference(rootNode.getVariables(), variablesToRemove)
-                    .immutableCopy());
+            ImmutableSet<Variable> newVariables = Sets.difference(rootNode.getVariables(), variablesToRemove)
+                    .immutableCopy();
+            UnionNode newUnionNode = iqFactory.createUnionNode(newVariables);
+
+            if (rootNode.equals(newUnionNode))
+                return tree.normalizeForOptimization(variableGenerator);
+
+            ImmutableList<IQTree> newChildren = children.stream()
+                    .map(c -> c.getVariables().equals(newVariables)
+                            ? c
+                            : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(newVariables), c))
+                    .collect(ImmutableCollectors.toList());
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")
-            return iqFactory.createNaryIQTree(newUnionNode, children)
+            return iqFactory.createNaryIQTree(newUnionNode, newChildren)
                     .normalizeForOptimization(variableGenerator);
         }
 

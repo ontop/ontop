@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.*;
@@ -74,6 +75,9 @@ public class ReferenceValueReplacer {
         }
         else if (rootNode instanceof NativeNode) {
             return transformNativeNode((NativeNode) rootNode, referenceToInputMap);
+        }
+        else if (rootNode instanceof EmptyNode) {
+            return tree;
         }
         else
             throw new IllegalArgumentException("Was only expecting construction nodes and native nodes");

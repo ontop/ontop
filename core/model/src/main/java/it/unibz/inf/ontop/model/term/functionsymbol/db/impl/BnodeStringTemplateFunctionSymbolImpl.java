@@ -1,19 +1,19 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.Templates;
 
 public class BnodeStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFunctionSymbolImpl
         implements BnodeStringTemplateFunctionSymbol {
 
-    private BnodeStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
-        super(template, arity, typeFactory);
+    private BnodeStringTemplateFunctionSymbolImpl(ImmutableList<Template.Component> template, TypeFactory typeFactory) {
+        super(template, typeFactory);
     }
 
-    public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(String template,
+    public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(ImmutableList<Template.Component> template,
                                                                          TypeFactory typeFactory) {
-        int arity = Templates.getArity(template);
-        return new BnodeStringTemplateFunctionSymbolImpl(template, arity, typeFactory);
+        return new BnodeStringTemplateFunctionSymbolImpl(template, typeFactory);
     }
 }

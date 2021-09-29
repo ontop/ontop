@@ -32,6 +32,8 @@ catalog-v*.xml
 *~
 \#*
 tmp.*
+**.swp
+**.swo
 
 # Antlr generated files
 *.tokens
@@ -44,3 +46,6 @@ tmp
 *.log
 
 .run
+
+# vi
+*.sw[klmnop]

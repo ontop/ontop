@@ -1,0 +1,22 @@
+{
+  "relations": [
+    {
+      "name": ["\"hr\"", "\"persons\""],
+      "query": "SELECT r.\"id\", h.\"description\" FROM \"person\" AS r, \"statuses\" AS h  WHERE r.\"status\" = h.\"status_id\"",
+      "columns": {
+        "added": [],
+        "hidden": []
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": []
+      },
+      "type": "SQLViewDefinition"
+    }
+  ]
+}

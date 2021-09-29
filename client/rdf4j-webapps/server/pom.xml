@@ -1,48 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-rdf4j-webapps</artifactId>
-        <version>4.1.0-beta-1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+        <version>4.2.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ontop-rdf4j-server</artifactId>
     <packaging>war</packaging>
-    <name>ontop-rdf4j-server</name>
+
+    <properties>
+        <finalName>rdf4j-server</finalName>
+        <!-- disable install and deploy in case war generation is disabled too -->
+        <maven.install.skip>${maven.war.skip}</maven.install.skip>
+        <maven.deploy.skip>${maven.war.skip}</maven.deploy.skip>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-http-server</artifactId>
             <type>war</type>
-            <version>${rdf4j.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>it.unibz.inf.ontop</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdf4j-config-sql</artifactId>
-            <version>${project.version}</version>
         </dependency>
-
-        <!-- for debugging -->
         <dependency>
+            <!-- for debugging -->
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
+            <!-- for debugging -->
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-config</artifactId>
-            <version>${rdf4j.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
 
-    <build>
-        <finalName>rdf4j-server</finalName>
-    </build>
 </project>

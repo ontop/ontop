@@ -1242,6 +1242,19 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
         assertTrue(sql.toUpperCase().contains("LEFT"));
     }
 
+    @Test
+    public void testValuesNodeOntologyProperty() throws Exception {
+        String querySelect = "SELECT ?o WHERE {\n" +
+                "?s <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab> ?o\n" +
+                "}";
+
+        checkReturnedValues(querySelect, "o", ImmutableList.of(
+                // From the facts
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Algorithms>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/DataIntegration>"));
+
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {

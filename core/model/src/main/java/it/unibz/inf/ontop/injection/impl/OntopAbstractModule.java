@@ -7,13 +7,14 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 
 import java.util.List;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class OntopAbstractModule extends AbstractModule {
 
     /**
      * Interface not found in the settings or impossibility to load the
      * declared implementation class.
      */
-    public class UnknownClassException extends RuntimeException {
+    public static class UnknownClassException extends RuntimeException {
         public UnknownClassException(String message) {
             super(message);
         }
@@ -25,7 +26,7 @@ public abstract class OntopAbstractModule extends AbstractModule {
         this.settings = settings;
     }
 
-    public Class getImplementation(String interfaceClassName) throws UnknownClassException {
+    public Class<?> getImplementation(String interfaceClassName) throws UnknownClassException {
         String implementationClassName = settings.getProperty(interfaceClassName)
                 .orElseThrow(() -> new UnknownClassException(String.format(
                         "No entry for the interface %s in the settings.",
@@ -45,7 +46,7 @@ public abstract class OntopAbstractModule extends AbstractModule {
     protected Module buildFactory(List<Class> types,  Class factoryInterface) {
         FactoryModuleBuilder builder = new FactoryModuleBuilder();
 
-        /**
+        /*
          * Types to be implemented by the factory
          */
         for (Class type : types) {
@@ -55,7 +56,7 @@ public abstract class OntopAbstractModule extends AbstractModule {
     }
 
     /**
-     * TO be called by sub-classes, inside the configure() method.
+     * To be called by sub-classes, inside the {@link #configure()} method.
      */
     protected void configureCoreConfiguration() {
         bind(OntopModelSettings.class).toInstance(settings);

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -16,7 +17,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
@@ -40,6 +40,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     // Created in init()
     private DBBooleanFunctionSymbol dbLikeFunctionSymbol;
+    // Created in init()
+    private DBBooleanFunctionSymbol dbSimilarToFunctionSymbol;
     // Created in init()
     private DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
     // Created in init()
@@ -192,6 +194,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<Integer, DBFunctionSymbol> coalesceMap;
 
+
+    /**
+     * Coalesce functions according to their arities
+     */
+    private final Map<Integer, DBBooleanFunctionSymbol> booleanCoalesceMap;
+
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> numericInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> booleanInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> stringInequalityMap;
@@ -225,8 +233,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<String, Integer, DBBooleanFunctionSymbol> notPredefinedBooleanFunctionTable;
 
-    private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
-    private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+    private final Map<ImmutableList<Template.Component>, IRIStringTemplateFunctionSymbol> iriTemplateMap;
+    private final Map<ImmutableList<Template.Component>, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
     private final Map<IRI, DBFunctionSymbol> iriStringResolverMap;
 
@@ -285,6 +293,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dateInequalityMap = new ConcurrentHashMap<>();
         this.defaultInequalityMap = new ConcurrentHashMap<>();
         this.coalesceMap = new ConcurrentHashMap<>();
+        this.booleanCoalesceMap = new ConcurrentHashMap<>();
 
         this.absMap = new ConcurrentHashMap<>();
         this.ceilMap = new ConcurrentHashMap<>();
@@ -319,6 +328,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         dbStartsWithFunctionSymbol = createStrStartsFunctionSymbol();
         dbEndsWithFunctionSymbol = createStrEndsFunctionSymbol();
         dbLikeFunctionSymbol = createLikeFunctionSymbol();
+        dbSimilarToFunctionSymbol = createSimilarToFunctionSymbol();
         ifElseNullFunctionSymbol = createRegularIfElseNull();
         dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
 
@@ -405,29 +415,28 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
 
     @Override
-    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
-        return iriTemplateMap
-                .computeIfAbsent(iriTemplate,
-                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+    public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(ImmutableList<Template.Component> iriTemplate) {
+        return iriTemplateMap.computeIfAbsent(iriTemplate,
+                        t -> IRIStringTemplateFunctionSymbolImpl.createFunctionSymbol(iriTemplate, typeFactory));
     }
 
     @Override
-    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(String bnodeTemplate) {
-        return bnodeTemplateMap
-                .computeIfAbsent(bnodeTemplate,
-                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(t, typeFactory));
+    public BnodeStringTemplateFunctionSymbol getBnodeStringTemplateFunctionSymbol(ImmutableList<Template.Component> bnodeTemplate) {
+        return bnodeTemplateMap.computeIfAbsent(bnodeTemplate,
+                        t -> BnodeStringTemplateFunctionSymbolImpl.createFunctionSymbol(bnodeTemplate, typeFactory));
     }
 
     @Override
     public BnodeStringTemplateFunctionSymbol getFreshBnodeStringTemplateFunctionSymbol(int arity) {
-        String bnodeTemplate = IntStream.range(0, arity)
-                .boxed()
-                .map(i -> PLACEHOLDER)
-                .reduce(
-                        BNODE_PREFIX + counter.incrementAndGet(),
-                        (prefix, suffix) -> prefix + "/" + suffix);
+        if (arity <= 0)
+            throw new IllegalArgumentException("A positive BNode arity is expected");
 
-        return getBnodeStringTemplateFunctionSymbol(bnodeTemplate);
+        Template.Builder builder = Template.builder();
+        builder.addSeparator(BNODE_PREFIX + counter.incrementAndGet());
+        for (int i = 0; i < arity - 1; i++) // except the last one
+            builder.addColumn().addSeparator("/");
+        builder.addColumn();
+        return getBnodeStringTemplateFunctionSymbol(builder.build());
     }
 
     @Override
@@ -681,6 +690,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBBooleanCoalesce(int arity) {
+        if (arity < 1)
+            throw new IllegalArgumentException("Minimal arity is 1");
+
+        return booleanCoalesceMap
+                .computeIfAbsent(arity, (this::createBooleanCoalesceFunctionSymbol));
+    }
+
+    @Override
     public FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity) {
         return falseOrNullMap
                 .computeIfAbsent(arity, (this::createFalseOrNullFunctionSymbol));
@@ -700,6 +718,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBBooleanFunctionSymbol getDBLike() {
         return dbLikeFunctionSymbol;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBSimilarTo() {
+        return dbSimilarToFunctionSymbol;
     }
 
     @Override
@@ -937,6 +960,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
     }
 
+
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
@@ -958,9 +982,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createGeometryNormFunctionSymbol(DBTermType geoType);
 
     protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {
         return new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
+    }
+
+    protected DBBooleanFunctionSymbol createSimilarToFunctionSymbol() {
+        return new DBSimilarToFunctionSymbolImpl(dbBooleanType, rootDBType);
     }
 
     protected DBIfElseNullFunctionSymbol createRegularIfElseNull() {
@@ -1160,6 +1189,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter);
 
     protected abstract DBFunctionSymbol createCoalesceFunctionSymbol(int arity);
+    protected abstract DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity);
 
     protected DBBooleanFunctionSymbol createDBBooleanIfElseNull() {
         return new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);

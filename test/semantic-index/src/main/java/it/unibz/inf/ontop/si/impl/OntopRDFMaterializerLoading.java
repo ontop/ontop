@@ -65,7 +65,7 @@ public class OntopRDFMaterializerLoading {
                                 try {
                                     return graphResultSet.next();
                                 }
-                                catch (OntopQueryAnsweringException e) {
+                                catch (OntopQueryAnsweringException | OntopConnectionException e) {
                                     throw new RuntimeException(e);
                                 }
                             }

@@ -60,12 +60,12 @@ public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                     // serializeLimit is standard
                     @Override
-                    public String serializeLimitOffset(long limit, long offset) {
+                    public String serializeLimitOffset(long limit, long offset, boolean noSortCondition) {
                         return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
                     }
 
                     @Override
-                    protected String serializeOffset(long offset) {
+                    protected String serializeOffset(long offset, boolean noSortCondition) {
                         return String.format("OFFSET %d ROWS", offset);
                     }
 

@@ -22,6 +22,11 @@ public class DefaultJDBCStatementInitializer implements JDBCStatementInitializer
         return init(create(connection));
     }
 
+    @Override
+    public void closeStatement(Statement statement) throws SQLException {
+        statement.close();
+    }
+
     protected Statement create(Connection connection) throws SQLException {
         return connection.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
     }
