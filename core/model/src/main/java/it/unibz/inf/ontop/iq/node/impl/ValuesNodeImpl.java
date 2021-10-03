@@ -26,6 +26,8 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -296,11 +298,18 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .map(formerOrderedVariables::get)
                 .collect(ImmutableCollectors.toList());
 
+        ImmutableList<ImmutableList<Constant>> filteredValues = formerValues.stream()
+                .filter(tuple -> substitutionVariableIndices.stream()
+                        .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
+                .collect(ImmutableCollectors.toList());
+
         ImmutableList<ImmutableList<Constant>> newValues = formerValues.stream()
                 .filter(tuple -> substitutionVariableIndices.stream()
                         .allMatch(i -> tuple.get(i).equals(substitution.get(formerOrderedVariables.get(i)))))
-                .map(tuple -> tuple.stream()
-                        .filter(constant -> !substitutionVariableIndices.contains(tuple.indexOf(constant)))
+                .map(tuple -> IntStream.range(0, tuple.size())//tuple.stream()
+                        .filter(i -> !substitutionVariableIndices.contains(i))
+                        .boxed()
+                        .map(tuple::get)
                         .collect(ImmutableCollectors.toList()))
                 .collect(ImmutableCollectors.toList());
 
