@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
+import it.unibz.inf.ontop.spec.fact.FactExtractor;
 import it.unibz.inf.ontop.spec.mapping.transformer.FactIntoMappingConverter;
 
 import java.util.Properties;
@@ -39,6 +40,22 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
             properties.put(factConverterKey, factConverterValue);
         }
 
+        String factExtractorKey = FactExtractor.class.getCanonicalName();
+        if (!userProperties.containsKey(factExtractorKey)) {
+            Boolean withTBoxFactExtractor = getBoolean(properties, ENABLE_FACT_EXTRACTION_WITH_TBOX)
+                    .orElseThrow(() -> new InvalidOntopConfigurationException
+                            (ENABLE_FACT_EXTRACTION_WITH_TBOX + "is required but missing " + "(must have a default value)"));
+
+            String factExtractorValue = withTBoxFactExtractor
+                    ? properties.getProperty("fact-extraction-with-tbox")
+                    : properties.getProperty("fact-extraction-without-tbox");
+
+            if (factExtractorValue == null) {
+                throw new InvalidOntopConfigurationException("Missing a default value for using the fact extractor");
+            }
+            properties.put(factExtractorKey, factExtractorValue);
+        }
+
         return properties;
     }
 
@@ -68,4 +85,7 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
 
     @Override
     public boolean isValuesNodeEnabled() { return getRequiredBoolean(OntopMappingSettings.ENABLE_VALUES_NODE);}
+
+    @Override
+    public boolean isFactExtractionWithTBoxEnabled() { return getRequiredBoolean(OntopMappingSettings.ENABLE_FACT_EXTRACTION_WITH_TBOX);}
 }
