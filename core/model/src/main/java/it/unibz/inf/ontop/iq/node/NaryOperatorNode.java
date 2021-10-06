@@ -49,8 +49,8 @@ public interface NaryOperatorNode extends QueryNode {
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children);
 
-    IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, ImmutableList<IQTree> children,
-                             VariableGenerator variableGenerator);
+    <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, ImmutableList<IQTree> children,
+                             T context);
 
     <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children);
 

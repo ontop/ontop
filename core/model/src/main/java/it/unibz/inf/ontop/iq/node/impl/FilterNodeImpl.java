@@ -166,9 +166,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree child,
-                                    VariableGenerator variableGenerator) {
-        return transformer.transformFilter(tree,this, child, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformFilter(tree,this, child, context);
     }
 
     @Override

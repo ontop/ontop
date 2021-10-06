@@ -102,8 +102,8 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
-        return transformer.transformTrue(this, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformTrue(this, context);
     }
 
     @Override

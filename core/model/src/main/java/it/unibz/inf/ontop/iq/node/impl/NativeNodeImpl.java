@@ -133,7 +133,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
         throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
     }
 

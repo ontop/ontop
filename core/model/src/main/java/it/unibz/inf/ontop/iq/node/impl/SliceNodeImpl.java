@@ -150,9 +150,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree child,
-                                    VariableGenerator variableGenerator) {
-        return transformer.transformSlice(tree, this, child, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformSlice(tree, this, child, context);
     }
 
     @Override

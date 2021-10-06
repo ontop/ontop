@@ -29,7 +29,7 @@ public interface IQTree {
 
     IQTree acceptTransformer(IQTreeVisitingTransformer transformer);
 
-    IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator);
+    <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context);
 
     <T> T acceptVisitor(IQVisitor<T> visitor);
 

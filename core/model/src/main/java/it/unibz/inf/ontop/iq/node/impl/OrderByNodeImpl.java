@@ -117,9 +117,8 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree child,
-                                    VariableGenerator variableGenerator) {
-        return transformer.transformOrderBy(tree, this, child, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformOrderBy(tree, this, child, context);
     }
 
     @Override

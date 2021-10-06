@@ -48,7 +48,7 @@ public interface UnaryOperatorNode extends QueryNode {
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child);
 
-    IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree child, VariableGenerator variableGenerator);
+    <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context);
 
     <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child);
 

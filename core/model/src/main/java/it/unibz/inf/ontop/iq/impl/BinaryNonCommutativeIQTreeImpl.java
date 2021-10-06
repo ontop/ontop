@@ -100,8 +100,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
-        return getRootNode().acceptTransformer(this, transformer, leftChild, rightChild, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return getRootNode().acceptTransformer(this, transformer, leftChild, rightChild, context);
     }
 
     @Override

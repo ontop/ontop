@@ -145,8 +145,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
-        return transformer.transformExtensionalData(this, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformExtensionalData(this, context);
     }
 
     @Override

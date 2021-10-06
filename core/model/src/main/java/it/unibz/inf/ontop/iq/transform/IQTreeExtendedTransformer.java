@@ -12,32 +12,32 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
  *  in case the transformer does not transform the tree,
  *  so as to avoid creating unnecessary new objects.
  */
-public interface IQTreeExtendedTransformer {
+public interface IQTreeExtendedTransformer<T> {
 
-    IQTree transformIntensionalData(IntensionalDataNode rootNode, VariableGenerator variableGenerator);
-    IQTree transformExtensionalData(ExtensionalDataNode rootNode, VariableGenerator variableGenerator);
-    IQTree transformEmpty(EmptyNode rootNode, VariableGenerator variableGenerator);
-    IQTree transformTrue(TrueNode rootNode, VariableGenerator variableGenerator);
-    IQTree transformValues(ValuesNode valuesNode, VariableGenerator variableGenerator);
-    IQTree transformNonStandardLeafNode(LeafIQTree rootNode, VariableGenerator variableGenerator);
+    IQTree transformIntensionalData(IntensionalDataNode rootNode, T context);
+    IQTree transformExtensionalData(ExtensionalDataNode rootNode, T context);
+    IQTree transformEmpty(EmptyNode rootNode, T context);
+    IQTree transformTrue(TrueNode rootNode, T context);
+    IQTree transformValues(ValuesNode valuesNode, T context);
+    IQTree transformNonStandardLeafNode(LeafIQTree rootNode, T context);
 
-    IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child, VariableGenerator variableGenerator);
-    IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child, VariableGenerator variableGenerator);
-    IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child, VariableGenerator variableGenerator);
-    IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child, VariableGenerator variableGenerator);
-    IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child, VariableGenerator variableGenerator);
-    IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child, VariableGenerator variableGenerator);
-    IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child, VariableGenerator variableGenerator);
+    IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child, T context);
+    IQTree transformAggregation(IQTree tree, AggregationNode aggregationNode, IQTree child, T context);
+    IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child, T context);
+    IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child, T context);
+    IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child, T context);
+    IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child, T context);
+    IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child, T context);
 
-    IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
+    IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild, T context);
     IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
-                                                        IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
+                                                        IQTree leftChild, IQTree rightChild, T context);
 
-    IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
-    IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
-    IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
+    IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children, T context);
+    IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children, T context);
+    IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children, T context);
 
-    default IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptTransformer(this, variableGenerator);
+    default IQTree transform(IQTree tree, T context) {
+        return tree.acceptTransformer(this, context);
     }
 }

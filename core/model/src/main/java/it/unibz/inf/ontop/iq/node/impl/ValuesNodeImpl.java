@@ -203,8 +203,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
-        return transformer.transformValues(this, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformValues(this, context);
     }
 
     @Override

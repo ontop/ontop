@@ -72,8 +72,8 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
-        return transformer.transformIntensionalData(this, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformIntensionalData(this, context);
     }
 
     /**

@@ -228,9 +228,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree child,
-                                    VariableGenerator variableGenerator) {
-        return transformer.transformAggregation(tree, this, child, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformAggregation(tree, this, child, context);
     }
 
     @Override

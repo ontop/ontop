@@ -238,9 +238,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree child,
-                                    VariableGenerator variableGenerator) {
-        return transformer.transformConstruction(tree,this, child, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformConstruction(tree,this, child, context);
     }
 
     @Override

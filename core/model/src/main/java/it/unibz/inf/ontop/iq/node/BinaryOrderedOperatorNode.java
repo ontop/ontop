@@ -39,8 +39,8 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild);
 
-    IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree leftChild, IQTree rightChild,
-                             VariableGenerator variableGenerator);
+    <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree leftChild, IQTree rightChild,
+                                 T context);
 
     <T> T acceptVisitor(IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
 

@@ -324,9 +324,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer,
-                                    ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
-        return transformer.transformUnion(tree,this, children, variableGenerator);
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer,
+                                    ImmutableList<IQTree> children, T context) {
+        return transformer.transformUnion(tree,this, children, context);
     }
 
     @Override
