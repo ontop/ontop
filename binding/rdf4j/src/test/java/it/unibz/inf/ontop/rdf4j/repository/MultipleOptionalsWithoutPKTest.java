@@ -28,7 +28,6 @@ public class MultipleOptionalsWithoutPKTest extends AbstractMultipleOptionalsTes
         release();
     }
 
-    @Ignore("TODO: support it")
     @Test
     @Override
     public void testThreeOptionalsWithLimit() {
