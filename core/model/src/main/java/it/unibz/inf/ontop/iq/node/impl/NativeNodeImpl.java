@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -24,8 +25,7 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-
-import java.util.Optional;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 
 public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
@@ -129,6 +129,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
+        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
         throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
     }
 

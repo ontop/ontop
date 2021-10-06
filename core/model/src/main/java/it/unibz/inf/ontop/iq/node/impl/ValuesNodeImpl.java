@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -199,6 +200,11 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformValues(this);
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
+        return transformer.transformValues(this, variableGenerator);
     }
 
     @Override

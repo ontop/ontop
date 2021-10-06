@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -96,6 +97,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return getRootNode().acceptTransformer(this, transformer, leftChild, rightChild);
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTreeExtendedTransformer transformer, VariableGenerator variableGenerator) {
+        return getRootNode().acceptTransformer(this, transformer, leftChild, rightChild, variableGenerator);
     }
 
     @Override

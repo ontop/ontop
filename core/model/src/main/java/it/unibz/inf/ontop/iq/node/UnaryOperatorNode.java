@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -46,6 +47,8 @@ public interface UnaryOperatorNode extends QueryNode {
     IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child);
 
     IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child);
+
+    IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer transformer, IQTree child, VariableGenerator variableGenerator);
 
     <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child);
 
