@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.teiid.services;
 
-import java.io.Closeable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.teiid.core.types.DataTypeManager;
 import org.teiid.language.AndOr;
 import org.teiid.language.Argument;
+import org.teiid.language.BulkCommand;
 import org.teiid.language.Call;
 import org.teiid.language.ColumnReference;
 import org.teiid.language.Command;
@@ -39,11 +41,11 @@ import org.teiid.language.Insert;
 import org.teiid.language.InsertValueSource;
 import org.teiid.language.Literal;
 import org.teiid.language.NamedTable;
+import org.teiid.language.Parameter;
 import org.teiid.language.QueryExpression;
 import org.teiid.language.Select;
 import org.teiid.language.TableReference;
 import org.teiid.metadata.AbstractMetadataRecord;
-import org.teiid.metadata.BaseColumn.NullType;
 import org.teiid.metadata.FunctionMethod;
 import org.teiid.metadata.FunctionParameter;
 import org.teiid.metadata.Procedure;
@@ -70,46 +72,25 @@ public class ServiceExecutionFactory
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceExecutionFactory.class);
 
+    private static final String OPERATION_SELECT = "select";
+
+    private static final String OPERATION_INSERT = "insert";
+
+    private static final String OPERATION_UPSERT = "upsert";
+
+    private static final String OPERATION_UPDATE = "update";
+
+    private static final String OPERATION_DELETE = "delete";
+
     public ServiceExecutionFactory() {
-        // TODO: supportsSelectExpression, supportsRowLimit/supportsRowOffset
+        // TODO: supportsRowLimit/supportsRowOffset
         // TODO: supportsOnlyLiteralComparison, supportsOnlyFormatLiterals
         // TODO: supportsBatchedUpdates, supportsBulkUpdate
         // TODO: getCacheDirective, isThreadBound
-    }
 
-    @Override
-    public boolean isImmutable() {
-        return false;
-    }
-
-    @Override
-    public boolean isSourceRequired() {
-        return true;
-    }
-
-    @Override
-    public boolean isSourceRequiredForCapabilities() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsSelectDistinct() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsInnerJoins() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsOuterJoins() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsFullOuterJoins() {
-        return false;
+        this.setImmutable(false); // can be reasonably changed by users
+        this.setSourceRequired(true);
+        this.setSupportsSelectDistinct(false);
     }
 
     @Override
@@ -123,16 +104,31 @@ public class ServiceExecutionFactory
     }
 
     @Override
+    public boolean supportsInCriteria() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDependentJoins() {
+        return true; // TODO experimental
+    }
+
+    // @Override
+    // public boolean supportsFullDependentJoins() {
+    // return true; // TODO may want to support this too
+    // }
+
+    @Override
+    public boolean supportsUpsert() {
+        return true;
+    }
+
+    @Override
     public boolean supportsConvert(final int fromType, final int toType) {
         if (fromType == RUNTIME_CODES.STRING && toType == RUNTIME_CODES.CLOB) {
             return true;
         }
         return super.supportsConvert(fromType, toType);
-    }
-
-    @Override
-    public boolean supportsUpsert() {
-        return true;
     }
 
     @Override
@@ -175,7 +171,7 @@ public class ServiceExecutionFactory
             inputTuple.set(name, value);
         }
 
-        return new ServiceExecution(service, inputTuple, null);
+        return new ServiceExecution(service, ImmutableList.of(inputTuple), null);
     }
 
     @Nullable
@@ -183,17 +179,28 @@ public class ServiceExecutionFactory
             final RuntimeMetadata metadata, final ServiceConnection conn)
             throws TranslatorException {
 
+        // Require the command to be a SELECT
         if (!(command instanceof Select)) {
             return null;
         }
         final Select select = (Select) command;
 
+        // Process dependent values: if present, there must be at most a list of parameters
+        final Map<String, List<? extends List<?>>> depVals = select.getDependentValues();
+        if (depVals != null && depVals.size() > 1) {
+            return null;
+        }
+        final Iterator<? extends List<?>> pars = depVals == null || depVals.isEmpty() ? null
+                : depVals.values().iterator().next().iterator();
+
+        // Process the FROM clause, checking it comprises a single table
         final List<TableReference> from = select.getFrom();
         if (from.size() != 1 && !(from.get(0) instanceof NamedTable)) {
             return null;
         }
         final Table table = ((NamedTable) from.get(0)).getMetadataObject();
 
+        // Process the SELECT clause, extracting projected output columns (no exprs supported)
         final Set<String> outputAttrs = Sets.newHashSet();
         final List<Attribute> outputAttrsList = Lists.newArrayList();
         for (final DerivedColumn c : select.getDerivedColumns()) {
@@ -209,20 +216,24 @@ public class ServiceExecutionFactory
             outputAttrsList.add(Attribute.create(a, DataTypeManager.getDataTypeName(e.getType())));
         }
 
-        final Map<String, Object> inputAttrs = getConstraints(select.getWhere());
+        // Process the WHERE clause, extracting <column, constant|parameter> pairs
+        final Map<String, Expression> inputAttrs = getConstraints(select.getWhere());
         if (inputAttrs == null) {
             return null;
         }
 
+        // Lookup a procedure/service matching the given table, input columns, output columns
         final Procedure proc = getProcedure(table, "select", inputAttrs.keySet(), outputAttrs);
         if (proc == null) {
             return null;
         }
-
         final Service service = getService(conn.getServiceManager(), proc);
-        final Tuple inputTuple = Tuple.create(service.getInputSignature(), inputAttrs);
-        final Signature outputSignature = Signature.create(outputAttrsList);
-        return new ServiceExecution(service, inputTuple, outputSignature);
+
+        // Prepare the service input tuples based on WHERE clause + parameters
+        final List<Tuple> inputTuples = getTuples(service.getInputSignature(), inputAttrs, pars);
+
+        // Return a ResultSetExecution based on a (bulk) service invocation
+        return new ServiceExecution(service, inputTuples, Signature.create(outputAttrsList));
     }
 
     @Nullable
@@ -231,12 +242,12 @@ public class ServiceExecutionFactory
 
         Table table = null;
         String operation = null;
-        Map<String, Object> attrs = null;
+        Map<String, Expression> attrs = null;
 
         if (command instanceof Insert) {
             final Insert insert = (Insert) command;
             table = insert.getTable().getMetadataObject();
-            operation = insert.isUpsert() ? "upsert" : "insert";
+            operation = insert.isUpsert() ? OPERATION_UPSERT : OPERATION_INSERT;
             final InsertValueSource vs = insert.getValueSource();
             if (!(vs instanceof ExpressionValueSource)) {
                 return null;
@@ -246,7 +257,7 @@ public class ServiceExecutionFactory
         } else if (command instanceof Delete) {
             final Delete delete = (Delete) command;
             table = delete.getTable().getMetadataObject();
-            operation = "delete";
+            operation = OPERATION_DELETE;
             attrs = getConstraints(delete.getWhere());
         }
 
@@ -259,13 +270,15 @@ public class ServiceExecutionFactory
             return null;
         }
 
+        // TODO
         final Service service = getService(conn.getServiceManager(), proc);
-        final Tuple inputTuple = Tuple.create(service.getInputSignature(), attrs);
-        return new ServiceExecution(service, inputTuple, null);
+        final List<Tuple> inputTuples = getTuples(service.getInputSignature(), attrs,
+                ((BulkCommand) command).getParameterValues());
+        return new ServiceExecution(service, inputTuples, null);
     }
 
-    private synchronized Service getService(final ServiceManager manager, final AbstractMetadataRecord metadata)
-            throws TranslatorException {
+    private synchronized Service getService(final ServiceManager manager,
+            final AbstractMetadataRecord metadata) throws TranslatorException {
 
         final String name = metadata.getName();
 
@@ -311,14 +324,14 @@ public class ServiceExecutionFactory
     }
 
     @Nullable
-    private Map<String, Object> getConstraints(final Condition condition) {
-        final Map<String, Object> constrainedAttributes = Maps.newHashMap();
+    private Map<String, Expression> getConstraints(final Condition condition) {
+        final Map<String, Expression> constrainedAttributes = Maps.newHashMap();
         final boolean success = getConstraints(condition, constrainedAttributes);
         return success ? constrainedAttributes : null;
     }
 
     private boolean getConstraints(final Condition condition,
-            final Map<String, Object> constrainedAttributes) {
+            final Map<String, Expression> constrainedAttributes) {
 
         if (condition instanceof Comparison) {
             final Comparison e = (Comparison) condition;
@@ -327,12 +340,10 @@ public class ServiceExecutionFactory
             }
             final Expression el = e.getLeftExpression();
             final Expression er = e.getRightExpression();
-            final ColumnReference c = (ColumnReference) (el instanceof ColumnReference ? el
-                    : er instanceof ColumnReference ? er : null);
-            final Literal l = (Literal) (el instanceof Literal ? el
-                    : er instanceof Literal ? er : null);
-            return c != null && l != null
-                    && constrainedAttributes.put(c.getName(), l.getValue()) == null;
+            final Expression c = el instanceof ColumnReference ? el : er;
+            final Expression v = el instanceof ColumnReference ? er : el;
+            return c instanceof ColumnReference && (v instanceof Literal || v instanceof Parameter)
+                    && constrainedAttributes.put(((ColumnReference) c).getName(), v) == null;
 
         } else if (condition instanceof AndOr) {
             final AndOr e = (AndOr) condition;
@@ -348,24 +359,59 @@ public class ServiceExecutionFactory
     }
 
     @Nullable
-    private Map<String, Object> getConstraints(final List<ColumnReference> columns,
+    private Map<String, Expression> getConstraints(final List<ColumnReference> columns,
             final List<Expression> values) {
 
         if (columns.size() != values.size()) {
             return null;
         }
 
-        final Map<String, Object> constraints = Maps.newHashMap();
+        final Map<String, Expression> constraints = Maps.newHashMap();
         for (int i = 0; i < columns.size(); ++i) {
             final String column = columns.get(i).getName();
             final Expression value = values.get(i);
-            if (!(value instanceof Literal)) {
+            if (!(value instanceof Literal) && !(value instanceof Parameter)) {
                 return null;
             }
-            constraints.put(column, ((Literal) value).getValue());
+            constraints.put(column, value);
         }
 
         return constraints;
+    }
+
+    private List<Tuple> getTuples(final Signature signature, final Map<String, Expression> exprs,
+            @Nullable final Iterator<? extends List<?>> pars) {
+
+        // Check whether we need to expand parameters in the expressions
+        final boolean parametric = exprs.values().stream().anyMatch(e -> e instanceof Parameter);
+
+        if (!parametric) {
+            // Parameters missing: return a single tuple based on literal values in expressions
+            final Tuple tuple = Tuple.create(signature);
+            for (final Entry<String, Expression> e : exprs.entrySet()) {
+                tuple.set(e.getKey(), ((Literal) e.getValue()).getValue());
+            }
+            return ImmutableList.of(tuple);
+
+        } else {
+            // Parameters present: return a tuple for each parameters' tuple, based on literals'
+            // and parameters' values (return no tuples if there are no parameters' tuples)
+            final ImmutableList.Builder<Tuple> builder = ImmutableList.builder();
+            while (pars != null && pars.hasNext()) {
+                final List<?> parameters = pars.next();
+                final Tuple tuple = Tuple.create(signature);
+                for (final Entry<String, Expression> e : exprs.entrySet()) {
+                    if (e.getValue() instanceof Literal) {
+                        tuple.set(e.getKey(), ((Literal) e.getValue()).getValue());
+                    } else {
+                        final int index = ((Parameter) e.getValue()).getValueIndex();
+                        tuple.set(e.getKey(), parameters.get(index));
+                    }
+                }
+                builder.add(tuple);
+            }
+            return builder.build();
+        }
     }
 
     private Procedure getProcedure(final Table table, final String operation,
@@ -373,12 +419,16 @@ public class ServiceExecutionFactory
             throws TranslatorException {
 
         // Differentiate between select vs. update operations
-        final boolean isSelect = operation.equals("select");
+        final boolean isSelect = operation.equals(OPERATION_SELECT);
 
         // Retrieve all procedures in the same schema of the table
         final Map<String, Procedure> procs = table.getParent().getProcedures();
 
-        // Iterate over the procedure names in comma-separated list of operation option
+        // Iterate over the procedure names in comma-separated list of operation option, selecting
+        // the procedure callable given input/output attrs for which the largest number of
+        // parameters can be supplied (optimality criterion to solve ambiguity cases)
+        Procedure bestProc = null;
+        int bestProcNumParams = 0;
         outer: for (final String procName : Splitter.on(',').trimResults().omitEmptyStrings()
                 .split(Strings.nullToEmpty(table.getProperty(operation)))) {
 
@@ -390,9 +440,12 @@ public class ServiceExecutionFactory
             }
 
             // Verify that all procedure's required parameters can be assigned
+            int numParams = 0;
             for (final ProcedureParameter param : proc.getParameters()) {
-                if (!isOptional(param) && !inputAttrs.contains(param.getName())) {
-                    continue outer;
+                if (inputAttrs.contains(param.getName())) {
+                    ++numParams; // param can be assigned based on input tuples
+                } else if (!isOptional(param)) {
+                    continue outer; // param cannot be assigned and is mandatory
                 }
             }
 
@@ -416,39 +469,42 @@ public class ServiceExecutionFactory
                 }
             }
 
-            // Return the procedure if all checks have been satisfied
-            return proc;
+            // Select the procedure if better than the one (if any) selected before
+            if (bestProc == null || numParams > bestProcNumParams) {
+                bestProc = proc;
+                bestProcNumParams = numParams;
+            }
         }
 
-        // Return null if no suitable procedure could be found
-        return null;
+        // Return the best matching procedure, or null if no suitable procedure could be found
+        return bestProc;
     }
 
     private boolean isOptional(final ProcedureParameter param) {
-        return param.getNullType() == NullType.Nullable; // TODO
+        final boolean hasDefault = param.getDefaultValue() != null;
+        return hasDefault; // note: Teiid maps DEFAULT NULL to lowercase string 'null'
     }
 
     private static class ServiceExecution implements ProcedureExecution, UpdateExecution {
 
         private final Service service;
 
-        private final Tuple inputTuple;
+        private final List<Tuple> inputTuples;
 
-        private Iterator<Tuple> outputTuples;
-
-        @Nullable
         private final Signature outputProjection;
 
-        public ServiceExecution(final Service service, final Tuple inputTuple,
+        private List<Iterator<Tuple>> outputTuples;
+
+        public ServiceExecution(final Service service, final List<Tuple> inputTuples,
                 @Nullable final Signature outputProjection) {
             this.service = service;
-            this.inputTuple = inputTuple;
+            this.inputTuples = inputTuples;
             this.outputProjection = outputProjection;
         }
 
         @Override
         public void execute() throws TranslatorException {
-            this.outputTuples = this.service.invoke(this.inputTuple);
+            this.outputTuples = Lists.newLinkedList(this.service.invokeBatch(this.inputTuples));
         }
 
         @Override
@@ -463,14 +519,22 @@ public class ServiceExecutionFactory
 
         @Override
         public List<?> next() throws TranslatorException, DataNotAvailableException {
-            if (!this.outputTuples.hasNext()) {
-                return null;
+
+            while (!this.outputTuples.isEmpty()) {
+
+                final Iterator<Tuple> iter = this.outputTuples.get(0);
+                if (iter.hasNext()) {
+                    Tuple t = iter.next();
+                    if (this.outputProjection != null) {
+                        t = t.project(this.outputProjection);
+                    }
+                    return t;
+                }
+
+                closeQuietly(iter);
+                this.outputTuples.remove(0);
             }
-            Tuple t = this.outputTuples.next();
-            if (this.outputProjection != null) {
-                t = t.project(this.outputProjection);
-            }
-            return t;
+            return null;
         }
 
         @Override
@@ -479,14 +543,20 @@ public class ServiceExecutionFactory
 
         @Override
         public void close() {
-            if (this.outputTuples instanceof Closeable) {
-                try {
-                    ((Closeable) this.outputTuples).close();
-                } catch (final Throwable ex) {
-                    // ignore
-                }
+            for (final Iterator<Tuple> iter : this.outputTuples) {
+                closeQuietly(iter);
             }
             this.outputTuples = null;
+        }
+
+        private static void closeQuietly(@Nullable final Object object) {
+            if (object instanceof AutoCloseable) {
+                try {
+                    ((AutoCloseable) object).close();
+                } catch (final Throwable ex) {
+                    LOGGER.warn("Ignoring error closing " + object.getClass().getSimpleName(), ex);
+                }
+            }
         }
 
     }

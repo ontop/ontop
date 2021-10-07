@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.teiid.services.util;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -13,10 +14,9 @@ import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,15 +28,11 @@ import com.google.common.collect.Lists;
 
 import org.teiid.core.types.DataTypeManager.DefaultDataTypes;
 
-// TODO
-// - boolean property indicating whether multiple tuples can be formatted/parsed
-// - signatureFixed indicating which fields must have a unique value
-// - support for JSON values
-
 public final class JsonTemplate implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // Matches {<name>,json,<type>} with type optional
     private static final Pattern CUSTOM_PLACEHOLDER_PATTERN = Pattern.compile("[{]([^,]+)[,]json"
             + "(?:[,](boolean|double|float|real|long|integer|short|byte|tinyint|smallint|biginteger))?[}]");
 
@@ -45,8 +41,16 @@ public final class JsonTemplate implements Serializable {
     @Nullable
     private transient List<Path> paths;
 
+    private transient boolean scalar;
+
     @Nullable
     private transient Signature signature;
+
+    @Nullable
+    private transient Signature signatureFixed;
+
+    @Nullable
+    private transient Signature signatureVariable;
 
     public JsonTemplate(final String template) {
         this(Json.read(template, JsonNode.class));
@@ -57,9 +61,48 @@ public final class JsonTemplate implements Serializable {
         processTemplateIfNeeded();
     }
 
-    public Signature signature() {
+    /**
+     * Returns true if this template formats/parses exactly one tuple.
+     * 
+     * @return true, if this template deals with a scalar (1 tuple) input/output
+     */
+    public boolean isScalar() {
+        processTemplateIfNeeded();
+        return this.scalar;
+    }
+
+    /**
+     * Returns the signature of tuples formatted/parsed by this template.
+     * 
+     * @return the tuples' signature
+     */
+    public Signature getSignature() {
         processTemplateIfNeeded();
         return this.signature;
+    }
+
+    /**
+     * Returns the fixed part of the signature, i.e., the attributes that must have fixed values
+     * in all the tuples formatted/parsed by this template. For scalar (see {@link #isScalar()})
+     * templates, the fixed signature corresponds to the whole signature.
+     * 
+     * @return the fixed part of the signature
+     */
+    public Signature getSignatureFixed() {
+        processTemplateIfNeeded();
+        return this.signatureFixed;
+    }
+
+    /**
+     * Returns the variable part of the signature, i.e., the attributes whose values may change
+     * along tuples formatted/parsed by this template. For scalar (see {@link #isScalar()})
+     * templates, the variable signature is empty.
+     * 
+     * @return the variable part of the signature
+     */
+    public Signature getSignatureVariable() {
+        processTemplateIfNeeded();
+        return this.signatureVariable;
     }
 
     public JsonNode format(final List<Tuple> tuples) {
@@ -136,9 +179,15 @@ public final class JsonTemplate implements Serializable {
     }
 
     private void processTemplateIfNeeded() {
-        if (this.paths == null || this.signature == null) {
+        if (this.paths == null) {
             this.paths = processTemplateRecursive(this.template, true);
-            this.signature = Signature.join(Iterables.transform(this.paths, p -> p.signature()));
+            this.signature = Signature
+                    .join(Iterables.transform(this.paths, p -> p.getSignature()));
+            this.signatureFixed = Signature.join(Iterables.transform(
+                    Iterables.filter(this.paths, p -> p.scalar), p -> p.getSignature()));
+            this.signatureVariable = Signature.join(Iterables.transform(
+                    Iterables.filter(this.paths, p -> !p.scalar), p -> p.getSignature()));
+            this.scalar = this.signatureVariable.isEmpty();
         }
     }
 
@@ -158,9 +207,9 @@ public final class JsonTemplate implements Serializable {
                         return ImmutableList.of(Path.createBooleanPlaceholder(name));
                     } else if (type.equals("double") || type.equals("float")
                             || type.equals("real")) {
-                        return ImmutableList.of(Path.createDoublePlaceholder(name));
+                        return ImmutableList.of(Path.createDecimalPlaceholder(name));
                     } else {
-                        return ImmutableList.of(Path.createLongPlaceholder(name));
+                        return ImmutableList.of(Path.createIntegerPlaceholder(name));
                     }
                 }
                 final StringTemplate template = new StringTemplate(text);
@@ -208,12 +257,19 @@ public final class JsonTemplate implements Serializable {
 
         private final Signature signature;
 
-        private Path(final Signature signature) {
+        private final boolean scalar;
+
+        private Path(final Signature signature, final boolean scalar) {
             this.signature = Objects.requireNonNull(signature);
+            this.scalar = scalar;
         }
 
-        final Signature signature() {
+        final Signature getSignature() {
             return this.signature;
+        }
+
+        final boolean isScalar() {
+            return this.scalar;
         }
 
         abstract void get(final JsonNode node, List<Tuple> tuples);
@@ -221,16 +277,17 @@ public final class JsonTemplate implements Serializable {
         abstract JsonNode set(final JsonNode node, List<Tuple> tuples);
 
         static Path createJsonPlaceholder(final String name) {
-            return new Path(Signature.create(Attribute.create(name, DefaultDataTypes.JSON))) {
+            return new Path(Signature.create(Attribute.create(name, DefaultDataTypes.JSON)),
+                    true) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    tuples.add(Tuple.create(signature(), node));
+                    tuples.add(Tuple.create(getSignature(), node));
                 }
 
                 @Override
                 JsonNode set(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    final String name = signature().get(0).getName();
+                    final String name = getSignature().get(0).getName();
                     return !tuples.isEmpty()
                             ? DataTypes.convert(tuples.get(0).get(name), JsonNode.class)
                             : null;
@@ -239,49 +296,64 @@ public final class JsonTemplate implements Serializable {
             };
         }
 
-        static Path createLongPlaceholder(final String name) {
-            return new Path(
-                    Signature.create(Attribute.create(name, DefaultDataTypes.BIG_DECIMAL))) {
+        static Path createIntegerPlaceholder(final String name) {
+            return new Path(Signature.create(Attribute.create(name, DefaultDataTypes.BIG_INTEGER)),
+                    true) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    tuples.add(Tuple.create(signature(),
-                            node instanceof ValueNode ? ((ValueNode) node).asLong() : null));
+                    final BigInteger value;
+                    if (!(node instanceof ValueNode)) {
+                        value = null;
+                    } else if (node.isNumber()) {
+                        value = node.bigIntegerValue();
+                    } else {
+                        final String text = node.asText(null);
+                        value = text != null ? new BigInteger(text) : null;
+                    }
+                    tuples.add(Tuple.create(getSignature(), value));
                 }
 
                 @Override
                 JsonNode set(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    final String name = signature().get(0).getName();
-                    final BigDecimal value = !tuples.isEmpty() //
-                            ? DataTypes.convert(tuples.get(0).get(name), BigDecimal.class)
+                    final String name = getSignature().get(0).getName();
+                    final BigInteger value = !tuples.isEmpty() //
+                            ? DataTypes.convert(tuples.get(0).get(name), BigInteger.class)
                             : null;
                     return value != null //
-                            ? new LongNode(value.longValue())
+                            ? new BigIntegerNode(value)
                             : NullNode.getInstance();
                 }
 
             };
         }
 
-        static Path createDoublePlaceholder(final String name) {
-            return new Path(
-                    Signature.create(Attribute.create(name, DefaultDataTypes.BIG_DECIMAL))) {
+        static Path createDecimalPlaceholder(final String name) {
+            return new Path(Signature.create(Attribute.create(name, DefaultDataTypes.BIG_DECIMAL)),
+                    true) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    tuples.add(Tuple.create(signature(), node instanceof ValueNode //
-                            ? new BigDecimal(((ValueNode) node).asText())
-                            : null));
+                    final BigDecimal value;
+                    if (!(node instanceof ValueNode)) {
+                        value = null;
+                    } else if (node.isNumber()) {
+                        value = node.decimalValue();
+                    } else {
+                        final String text = node.asText(null);
+                        value = text != null ? new BigDecimal(text) : null;
+                    }
+                    tuples.add(Tuple.create(getSignature(), value));
                 }
 
                 @Override
                 JsonNode set(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    final String name = signature().get(0).getName();
+                    final String name = getSignature().get(0).getName();
                     final BigDecimal value = !tuples.isEmpty() //
                             ? DataTypes.convert(tuples.get(0).get(name), BigDecimal.class)
                             : null;
                     return value != null //
-                            ? new DoubleNode(value.doubleValue())
+                            ? new DecimalNode(value)
                             : NullNode.getInstance();
                 }
 
@@ -289,17 +361,21 @@ public final class JsonTemplate implements Serializable {
         }
 
         static Path createBooleanPlaceholder(final String name) {
-            return new Path(Signature.create(Attribute.create(name, DefaultDataTypes.BOOLEAN))) {
+            return new Path(Signature.create(Attribute.create(name, DefaultDataTypes.BOOLEAN)),
+                    true) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    tuples.add(Tuple.create(signature(),
-                            node instanceof ValueNode ? ((ValueNode) node).asBoolean() : null));
+                    final Boolean value = node instanceof ValueNode && !node.isNull()
+                            && !node.isMissingNode() //
+                                    ? ((ValueNode) node).asBoolean()
+                                    : null;
+                    tuples.add(Tuple.create(getSignature(), value));
                 }
 
                 @Override
                 JsonNode set(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    final String name = signature().get(0).getName();
+                    final String name = getSignature().get(0).getName();
                     final Boolean value = !tuples.isEmpty()
                             ? DataTypes.convert(tuples.get(0).get(name), Boolean.class)
                             : null;
@@ -312,13 +388,13 @@ public final class JsonTemplate implements Serializable {
         }
 
         static Path createStringPlaceholder(final StringTemplate template) {
-            Objects.requireNonNull(template);
-            return new Path(template.signature()) {
+            return new Path(template.signature(), true) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
-                    tuples.add(node instanceof ValueNode //
-                            ? template.parse(node.asText())
+                    final String text = node instanceof ValueNode ? node.asText(null) : null;
+                    tuples.add(text != null //
+                            ? template.parse(text)
                             : Tuple.create(template.signature()));
                 }
 
@@ -337,8 +413,7 @@ public final class JsonTemplate implements Serializable {
 
         static Path createObjectField(final String field, final Path next) {
             Objects.requireNonNull(field);
-            Objects.requireNonNull(next);
-            return new Path(next.signature()) {
+            return new Path(next.getSignature(), next.isScalar()) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
@@ -349,10 +424,12 @@ public final class JsonTemplate implements Serializable {
                 @Override
                 JsonNode set(@Nullable final JsonNode node, final List<Tuple> tuples) {
                     final ObjectNode n = node instanceof ObjectNode ? (ObjectNode) node
-                            : JsonNodeFactory.instance.objectNode();
-                    JsonNode childNode = n.get(field);
-                    childNode = next.set(childNode, tuples);
-                    n.set(field, childNode);
+                            : Json.getNodeFactory().objectNode();
+                    final JsonNode oldChildNode = n.get(field);
+                    final JsonNode newChildNode = next.set(oldChildNode, tuples);
+                    if (newChildNode != oldChildNode) {
+                        n.set(field, newChildNode);
+                    }
                     return n;
                 }
 
@@ -360,8 +437,7 @@ public final class JsonTemplate implements Serializable {
         }
 
         static Path createArrayElement(final int index, final Path next) {
-            Objects.requireNonNull(next);
-            return new Path(next.signature()) {
+            return new Path(next.getSignature(), next.isScalar()) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
@@ -372,13 +448,15 @@ public final class JsonTemplate implements Serializable {
                 @Override
                 JsonNode set(@Nullable final JsonNode node, final List<Tuple> tuples) {
                     final ArrayNode n = node instanceof ArrayNode ? (ArrayNode) node
-                            : JsonNodeFactory.instance.arrayNode();
-                    JsonNode childNode = index < n.size() ? n.get(index) : null;
-                    childNode = next.set(childNode, tuples);
-                    while (n.size() <= index) {
-                        n.add(NullNode.getInstance());
+                            : Json.getNodeFactory().arrayNode();
+                    final JsonNode oldChildNode = index < n.size() ? n.get(index) : null;
+                    final JsonNode newChildNode = next.set(oldChildNode, tuples);
+                    if (newChildNode != oldChildNode) {
+                        while (n.size() <= index) {
+                            n.add(NullNode.getInstance());
+                        }
+                        n.set(index, oldChildNode);
                     }
-                    n.set(index, childNode);
                     return n;
                 }
 
@@ -387,8 +465,7 @@ public final class JsonTemplate implements Serializable {
 
         static Path createArrayIteration(final JsonNode childTemplate, final Path next) {
             Objects.requireNonNull(childTemplate);
-            Objects.requireNonNull(next);
-            return new Path(next.signature()) {
+            return new Path(next.getSignature(), false) {
 
                 @Override
                 void get(@Nullable final JsonNode node, final List<Tuple> tuples) {
@@ -401,17 +478,21 @@ public final class JsonTemplate implements Serializable {
                 @Override
                 JsonNode set(@Nullable final JsonNode node, final List<Tuple> tuples) {
                     final ArrayNode n = node instanceof ArrayNode ? (ArrayNode) node
-                            : JsonNodeFactory.instance.arrayNode();
+                            : Json.getNodeFactory().arrayNode();
                     while (n.size() > tuples.size()) {
                         n.remove(n.size() - 1);
                     }
                     for (int i = 0; i < tuples.size(); ++i) {
-                        JsonNode childNode = i < n.size() ? n.get(i) : childTemplate.deepCopy();
-                        childNode = next.set(childNode, ImmutableList.of(tuples.get(i)));
-                        if (i < n.size()) {
-                            n.set(i, childNode);
-                        } else {
-                            n.add(childNode);
+                        final JsonNode oldChildNode = i < n.size() ? n.get(i) : null;
+                        final JsonNode newChildNode = next.set(
+                                oldChildNode != null ? oldChildNode : childTemplate.deepCopy(),
+                                ImmutableList.of(tuples.get(i)));
+                        if (newChildNode != oldChildNode) {
+                            if (i < n.size()) {
+                                n.set(i, newChildNode);
+                            } else {
+                                n.add(newChildNode);
+                            }
                         }
                     }
                     return n;

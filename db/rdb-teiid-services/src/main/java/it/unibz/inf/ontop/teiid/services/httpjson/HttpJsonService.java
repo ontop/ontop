@@ -91,7 +91,7 @@ public class HttpJsonService extends AbstractService {
         this.requestBodyTemplate = requestBody != null ? new JsonTemplate(requestBody) : null;
         this.responseBodyTemplate = responseBody != null ? new JsonTemplate(responseBody) : null;
         this.projection = this.responseBodyTemplate == null ? null
-                : Tuple.projectFunction(outputSignature, this.responseBodyTemplate.signature(),
+                : Tuple.projectFunction(outputSignature, this.responseBodyTemplate.getSignature(),
                         inputSignature);
     }
 
