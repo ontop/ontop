@@ -59,7 +59,7 @@ public abstract class AbstractMultipleOptionalsTest extends AbstractRDF4JTest {
     }
 
     @Test
-    public void testThreeOptionalsWithLimit() {
+    public void testThreeOptionalsWithOrderBy() {
         String query = "PREFIX ex: <http://example.org/>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
