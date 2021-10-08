@@ -1,7 +1,6 @@
 ﻿[PrefixDeclaration]
 :		http://noi.example.org/ontology/odh#
 dc:		http://purl.org/dc/terms/
-geo:		http://www.opengis.net/ont/geosparql#
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 xml:		http://www.w3.org/XML/1998/namespace
@@ -14,8 +13,14 @@ schema:		http://schema.org/
 
 [MappingDeclaration] @collection [[
 
-mappingId	LodgingBusiness - address
-target		data:address/accommodation/{id} a schema:PostalAddress . data:accommodation/{id} schema:address data:address/accommodation/{id} .
+mappingId	original mapping
+target		data:address/accommodation/{id} a schema:PostalAddress .
 source		SELECT "Id" AS id
-			FROM "v_accommodationsopen"
+			FROM "v_accomm"
+
+mappingId	duplicate mapping
+target		data:address/accommodation/{id} a schema:PostalAddress .
+source		SELECT "Ident" AS id
+			FROM "vaaccomm"
+
 ]]

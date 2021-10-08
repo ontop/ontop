@@ -59,4 +59,23 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(1, count);
     }
 
+    @Test
+    public void testSubQueryOrderByNonProjectedVariable() {
+        int count = runQueryAndCount("PREFIX schema: <http://schema.org/>\n" +
+                "\n" +
+                "SELECT * WHERE {\n" +
+                "  { SELECT DISTINCT ?h ?nStr WHERE {\n" +
+                "      ?h a schema:LodgingBusiness ;\n" +
+                "         schema:name ?n .\n" +
+                "      BIND(str(?n) AS ?nStr)\n" +
+                "    }\n" +
+                "    ORDER BY DESC(CONCAT(?nStr, ?nStr))\n" +
+                "    LIMIT 2\n" +
+                "  }\n" +
+                "  ?h schema:name ?name\n" +
+                "}");
+
+        assertEquals(6, count);
+    }
+
 }

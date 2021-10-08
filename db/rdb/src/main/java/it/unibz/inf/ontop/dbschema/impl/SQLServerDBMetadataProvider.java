@@ -6,8 +6,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import javax.annotation.Nullable;
 import java.sql.Connection;
 
 public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProvider {
@@ -22,6 +22,11 @@ public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataP
     @Override
     protected boolean isRelationExcluded(RelationID id) {
         return IGNORED_SCHEMAS.contains(getRelationSchema(id));
+    }
+
+    @Override
+    protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
+        return s;
     }
 
     @Override

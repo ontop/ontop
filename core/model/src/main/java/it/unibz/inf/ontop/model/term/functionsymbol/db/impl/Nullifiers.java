@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -17,7 +18,9 @@ public class Nullifiers {
                                         ImmutableTerm termToReplaceByNull,
                                         TermFactory termFactory) {
         if (termToReplaceByNull.equals(term))
-            return termFactory.getNullConstant();
+            return (termToReplaceByNull instanceof ImmutableExpression)
+                    ? termFactory.getIsTrue(termFactory.getNullConstant())
+                    : termFactory.getNullConstant();
         else if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             return termFactory.getImmutableFunctionalTerm(
