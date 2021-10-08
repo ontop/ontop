@@ -24,6 +24,11 @@ public class SQLServerDBMetadataProvider extends DefaultSchemaCatalogDBMetadataP
         return IGNORED_SCHEMAS.contains(getRelationSchema(id));
     }
 
+    @Override
+    protected String makeQueryMinimizeResultSet(String query) {
+        return String.format("SELECT * FROM (%s) subQ ORDER BY (SELECT NULL) OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY", query);
+    }
+
     /*
                 "SELECT DB_NAME() AS TABLE_CAT, SCHEMA_NAME() AS TABLE_SCHEM");
         https://msdn.microsoft.com/en-us/library/ms175068.aspx
