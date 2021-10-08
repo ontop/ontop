@@ -161,7 +161,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
                 String sqlTypeName = extractSQLTypeName(typeName, rs.getInt("DATA_TYPE"), columnSize,
-                        () -> rs.getInt("DATA_TYPE"));
+                        () -> rs.getInt("DECIMAL_DIGITS"));
                 builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
             }
 
@@ -362,15 +362,15 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
 
             for (int i=1; i <= columnCount; i++) {
+                final int index = i;
 
-                QuotedID attributeId = rawIdFactory.createAttributeID(resultSetMetadata.getColumnName(i));
-                String typeName = resultSetMetadata.getColumnTypeName(i);
+                QuotedID attributeId = rawIdFactory.createAttributeID(resultSetMetadata.getColumnName(index));
+                String typeName = resultSetMetadata.getColumnTypeName(index);
 
-                int columnSize = resultSetMetadata.getColumnDisplaySize(i);
+                int columnSize = resultSetMetadata.getColumnDisplaySize(index);
                 DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
-                final int index = i;
-                String sqlTypeName = extractSQLTypeName(typeName, resultSetMetadata.getColumnType(i), columnSize,
+                String sqlTypeName = extractSQLTypeName(typeName, resultSetMetadata.getColumnType(index), columnSize,
                         () -> resultSetMetadata.getPrecision(index));
 
                 builder.addAttribute(attributeId, termType, sqlTypeName, true);
