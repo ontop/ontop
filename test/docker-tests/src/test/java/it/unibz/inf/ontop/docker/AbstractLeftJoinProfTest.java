@@ -1206,8 +1206,12 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}" +
                 "ORDER BY ?v\n" ;
 
-        ImmutableList<String> expectedValues = ImmutableList.of("12", "13", "31");
+        ImmutableList<String> expectedValues = getExpectedAggregationMappingProfStudentCountPropertyResults();
         checkReturnedValuesAndOrderReturnSql(querySelect, expectedValues);
+    }
+
+    protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
+        return ImmutableList.of("12", "13", "31");
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
