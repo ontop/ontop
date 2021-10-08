@@ -88,8 +88,7 @@ public abstract class JsonView extends JsonOpenObject {
 
             builder.addAttribute(attributeId,
                     (DBTermType) uniqueTermTypeExtractor.extractSingleTermType(v, iqTree)
-                            // TODO: give the name of the view
-                            .orElseThrow(() -> new MetadataExtractionException("No type inferred for " + v + " in " + iq)),
+                            .orElseGet(() -> dbParameters.getDBTypeFactory().getAbstractRootDBType()),
                     isNullable);
         }
         return builder;

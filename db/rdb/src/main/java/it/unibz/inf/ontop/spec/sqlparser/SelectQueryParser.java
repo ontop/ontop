@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
@@ -22,12 +23,12 @@ public class SelectQueryParser extends FromItemParser<RAExpression> {
         this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
 
-    public RAExpression parse(SelectBody selectBody) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+    public RAExpression parse(SelectBody selectBody) throws InvalidQueryException, UnsupportedSelectQueryException {
         try {
             return translateSelectBody(selectBody);
         }
         catch (InvalidSelectQueryRuntimeException e) {
-            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
+            throw new InvalidQueryException(e.getMessage(), e.getObject());
         }
         catch (UnsupportedSelectQueryRuntimeException e) {
             throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());

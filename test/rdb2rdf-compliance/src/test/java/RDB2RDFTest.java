@@ -27,10 +27,7 @@ import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
-import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
@@ -87,8 +84,6 @@ public class RDB2RDFTest {
 			"tc0005a",
 			// Different XSD.DOUBLE lexical form; was expecting the engineering notation. Modified version added.
 			"tc0005b",
-			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
-			"tc0009d",
 			// Modified (different XSD.DOUBLE lexical form)
 			"dg0012",
 			// Direct mapping and bnodes: row unique ids are not considered, leadinq to incomplete results
@@ -255,6 +250,7 @@ public class RDB2RDFTest {
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_URL, JDBC_URL);
 		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, JDBC_DRIVER);
 		PROPERTIES.setProperty(OntopMappingSettings.BASE_IRI, BASE_IRI);
+		PROPERTIES.setProperty(OntopOBDASettings.ALLOW_RETRIEVING_BLACK_BOX_VIEW_METADATA_FROM_DB, "true");
 	}
 
 	@Before

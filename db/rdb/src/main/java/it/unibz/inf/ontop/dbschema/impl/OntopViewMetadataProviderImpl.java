@@ -10,12 +10,12 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.json.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,6 +94,11 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
             return jsonView.createViewDefinition(getDBParameters(), parentCacheMetadataLookup.getCachingMetadataLookupFor(id));
 
         return parentCacheMetadataLookup.getRelation(id);
+    }
+
+    @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
+        return parentMetadataProvider.getBlackBoxView(query);
     }
 
     @Override
