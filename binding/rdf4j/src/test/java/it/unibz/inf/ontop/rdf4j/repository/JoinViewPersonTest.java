@@ -3,12 +3,14 @@ package it.unibz.inf.ontop.rdf4j.repository;
 import com.google.common.collect.ImmutableList;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 
+@Ignore("TODO: enable it")
 public class JoinViewPersonTest extends AbstractRDF4JTest {
     private static final String OBDA_FILE = "/person/person_joinviews.obda";
     private static final String SQL_SCRIPT = "/person/person.sql";
