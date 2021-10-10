@@ -21,6 +21,14 @@
           {
             "name": "\"region\"",
             "expression": "\"locality\""
+          },
+          {
+            "name": "\"nickname\"",
+            "expression": "UPPER(\"nickname\")"
+          },
+          {
+            "name": "\"nick\"",
+            "expression": "CONCAT(\"nickname\", '!')"
           }
         ],
         "hidden": [

@@ -47,7 +47,13 @@
       "name" : "\"locality\"",
       "datatype" : "VARCHAR",
       "isNullable" : false
-    } ],
+    },
+      {
+        "name" : "\"nickname\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : true
+      }
+    ],
     "name" : ["\"person\""]
   }, {
     "uniqueConstraints" : [ {
