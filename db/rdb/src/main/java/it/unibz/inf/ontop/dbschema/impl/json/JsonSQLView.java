@@ -13,8 +13,11 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -62,6 +65,12 @@ public class JsonSQLView extends JsonView {
 
         IQ iq = createIQ(relationId, dbParameters, parentCacheMetadataLookup);
 
+        int maxParentLevel = extractMaxParentLevel(iq, dbParameters.getCoreSingletons());
+
+        if (maxParentLevel > 0)
+            LOGGER.warn("It is dangerous to build JoinViewDefinition above OntopViewDefinitions, " +
+                    "because the view definition will fail if the SQL query cannot be parsed by Ontop");
+
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
 
@@ -69,9 +78,15 @@ public class JsonSQLView extends JsonView {
                 ImmutableList.of(relationId),
                 attributeBuilder,
                 iq,
-                // TODO: consider other levels
-                1,
+                maxParentLevel + 1,
                 dbParameters.getCoreSingletons());
+    }
+
+    private int extractMaxParentLevel(IQ iq, CoreSingletons coreSingletons) {
+        LevelExtractor transformer = new LevelExtractor(coreSingletons);
+        // Side-effect (cheap but good enough implementation)
+        transformer.transform(iq.getTree());
+        return transformer.getMaxLevel();
     }
 
     @Override
@@ -206,5 +221,29 @@ public class JsonSQLView extends JsonView {
             }
         }
 
+    }
+
+    private static class LevelExtractor extends DefaultRecursiveIQTreeVisitingTransformer {
+        // Non-final
+        int maxLevel;
+
+        public int getMaxLevel() {
+            return maxLevel;
+        }
+
+        public LevelExtractor(CoreSingletons coreSingletons) {
+            super(coreSingletons);
+            maxLevel = 0;
+        }
+
+        @Override
+        public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
+            RelationDefinition parentRelation = dataNode.getRelationDefinition();
+            int level = (parentRelation instanceof OntopViewDefinition)
+                    ? ((OntopViewDefinition) parentRelation).getLevel()
+                    : 0;
+            maxLevel = Math.max(maxLevel, level);
+            return dataNode;
+        }
     }
 }

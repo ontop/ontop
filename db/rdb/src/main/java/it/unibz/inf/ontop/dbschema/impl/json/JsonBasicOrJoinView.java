@@ -71,6 +71,12 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
         ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap = extractParentDefinitions(dbParameters, parentCacheMetadataLookup);
 
+        Integer maxParentLevel = parentDefinitionMap.keySet().stream()
+                .map(r -> (r instanceof OntopViewDefinition)
+                        ? ((OntopViewDefinition) r).getLevel()
+                        : 0)
+                .reduce(0, Math::max, Math::max);
+
         QuotedIDFactory quotedIDFactory = dbParameters.getQuotedIDFactory();
         RelationID relationId = quotedIDFactory.createRelationID(name.toArray(new String[0]));
 
@@ -83,8 +89,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 ImmutableList.of(relationId),
                 attributeBuilder,
                 iq,
-                // TODO: consider other levels
-                1,
+                maxParentLevel + 1,
                 dbParameters.getCoreSingletons());
     }
 
