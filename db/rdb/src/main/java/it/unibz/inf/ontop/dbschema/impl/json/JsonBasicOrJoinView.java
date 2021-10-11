@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OntopViewDefinitionImpl;
@@ -47,9 +46,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class JsonNonSQLView extends JsonView {
+public abstract class JsonBasicOrJoinView extends JsonView {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonNonSQLView.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonBasicOrJoinView.class);
 
     @Nonnull
     public final Columns columns;
@@ -57,10 +56,10 @@ public abstract class JsonNonSQLView extends JsonView {
     @Nonnull
     public final String filterExpression;
 
-    protected JsonNonSQLView(List<String> name, UniqueConstraints uniqueConstraints,
-                          OtherFunctionalDependencies otherFunctionalDependencies,
-                          ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
-                          Columns columns, String filterExpression) {
+    protected JsonBasicOrJoinView(List<String> name, UniqueConstraints uniqueConstraints,
+                                  OtherFunctionalDependencies otherFunctionalDependencies,
+                                  ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+                                  Columns columns, String filterExpression) {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
         this.columns = columns;
         this.filterExpression = filterExpression;
@@ -376,6 +375,8 @@ public abstract class JsonNonSQLView extends JsonView {
 
     /**
      * Infer functional dependencies from the parent
+     *
+     * TODO: for joins, we could convert the non-inherited unique constraints into general functional dependencies.
      */
     private void insertFunctionalDependencies(NamedRelationDefinition relation,
                                               QuotedIDFactory idFactory,
@@ -510,10 +511,6 @@ public abstract class JsonNonSQLView extends JsonView {
         builder.build();
     }
 
-    @JsonPropertyOrder({
-            "added",
-            "hidden"
-    })
     protected static class Columns extends JsonOpenObject {
         @Nonnull
         public final List<AddColumns> added;
@@ -528,10 +525,6 @@ public abstract class JsonNonSQLView extends JsonView {
         }
     }
 
-    @JsonPropertyOrder({
-            "name",
-            "expression",
-    })
     protected static class AddColumns extends JsonOpenObject {
         @Nonnull
         public final String name;

@@ -13,13 +13,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @JsonDeserialize(as = JsonBasicView.class)
-public class JsonBasicView extends JsonNonSQLView {
+public class JsonBasicView extends JsonBasicOrJoinView {
 
     @Nonnull
     public final List<String> baseRelation;
 
     @JsonCreator
-    public JsonBasicView(@JsonProperty("columns") JsonNonSQLView.Columns columns, @JsonProperty("name") List<String> name,
+    public JsonBasicView(@JsonProperty("columns") JsonBasicOrJoinView.Columns columns, @JsonProperty("name") List<String> name,
                          @JsonProperty("baseRelation") List<String> baseRelation,
                          @JsonProperty("filterExpression") String filterExpression,
                          @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,

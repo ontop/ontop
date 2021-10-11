@@ -18,16 +18,15 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @JsonDeserialize(as = JsonJoinView.class)
-public class JsonJoinView extends JsonNonSQLView {
+public class JsonJoinView extends JsonBasicOrJoinView {
 
     @Nonnull
     public final JoinPart joinPart;
 
-    protected JsonJoinView(@JsonProperty("columns") JsonNonSQLView.Columns columns, @JsonProperty("name") List<String> name,
+    protected JsonJoinView(@JsonProperty("columns") JsonBasicOrJoinView.Columns columns, @JsonProperty("name") List<String> name,
                            @JsonProperty("join") JoinPart joinPart,
                            @JsonProperty("filterExpression") String filterExpression,
                            @JsonProperty("uniqueConstraints") UniqueConstraints uniqueConstraints,
