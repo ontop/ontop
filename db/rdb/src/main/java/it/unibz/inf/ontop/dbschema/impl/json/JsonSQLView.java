@@ -75,7 +75,7 @@ public class JsonSQLView extends JsonView {
     }
 
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation,
+    public void insertIntegrityConstraints(OntopViewDefinition relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
                                            MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();

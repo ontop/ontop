@@ -3,16 +3,22 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.dbschema.MetadataLookup;
-import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @JsonDeserialize(as = JsonJoinView.class)
@@ -53,6 +59,43 @@ public class JsonJoinView extends JsonNonSQLView {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Inferred from the tree
+     */
+    @Override
+    protected ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation,
+                                                                            ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                            ImmutableList<QuotedID> addedConstraintsColumns,
+                                                                            QuotedIDFactory idFactory) {
+        IQ relationIQ = relation.getIQ();
+
+        ImmutableSet<ImmutableSet<Variable>> variableUniqueConstraints = relationIQ.getTree().inferUniqueConstraints();
+
+        ImmutableList<Attribute> attributes = relation.getAttributes();
+        DistinctVariableOnlyDataAtom projectedAtom = relationIQ.getProjectionAtom();
+
+        ImmutableMap<Variable, QuotedID> variableIds = IntStream.range(0, attributes.size())
+                .boxed()
+                .collect(ImmutableCollectors.toMap(
+                        projectedAtom::getTerm,
+                        i -> attributes.get(i).getID()
+                ));
+
+        return variableUniqueConstraints.stream()
+                .map(vs -> new AddUniqueConstraints(
+                        UUID.randomUUID().toString(),
+                        vs.stream()
+                                .map(v -> Optional.ofNullable(variableIds.get(v))
+                                        .orElseThrow(() -> new MinorOntopInternalBugException(
+                                                "The variables of the unique constraints should be projected")))
+                                        .map(QuotedID::getSQLRendering)
+                                        .collect(ImmutableCollectors.toList()),
+                        // PK by default false
+                        false
+                ))
+                .collect(ImmutableCollectors.toList());
     }
 
     protected static class JoinPart extends JsonOpenObject {

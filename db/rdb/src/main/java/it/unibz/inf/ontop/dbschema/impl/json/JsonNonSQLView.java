@@ -90,7 +90,7 @@ public abstract class JsonNonSQLView extends JsonView {
     }
 
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation,
+    public void insertIntegrityConstraints(OntopViewDefinition relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
                                            MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
 
@@ -323,14 +323,14 @@ public abstract class JsonNonSQLView extends JsonView {
                         .map(i -> dbRootType).collect(ImmutableCollectors.toList()));
     }
 
-    private void insertUniqueConstraints(NamedRelationDefinition relation,
-                                         QuotedIDFactory idFactory,
-                                         List<AddUniqueConstraints> addUniqueConstraints,
-                                         ImmutableList<NamedRelationDefinition> baseRelations)
+    private void insertUniqueConstraints(OntopViewDefinition relation,
+                                           QuotedIDFactory idFactory,
+                                           List<AddUniqueConstraints> addUniqueConstraints,
+                                           ImmutableList<NamedRelationDefinition> baseRelations)
             throws MetadataExtractionException {
 
 
-        List<AddUniqueConstraints> list = extractUniqueConstraints(addUniqueConstraints, baseRelations, idFactory);
+        List<AddUniqueConstraints> list = extractUniqueConstraints(relation, addUniqueConstraints, baseRelations, idFactory);
 
         for (AddUniqueConstraints addUC : list) {
             if (addUC.isPrimaryKey != null && addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
@@ -342,10 +342,7 @@ public abstract class JsonNonSQLView extends JsonView {
         }
     }
 
-    /**
-     * Infer unique constraints from the parent
-     */
-    private List<AddUniqueConstraints> extractUniqueConstraints(List<AddUniqueConstraints> addUniqueConstraints,
+    private List<AddUniqueConstraints> extractUniqueConstraints(OntopViewDefinition relation, List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations,
                                                                 QuotedIDFactory idFactory){
 
@@ -356,43 +353,9 @@ public abstract class JsonNonSQLView extends JsonView {
                 .map(idFactory::createAttributeID)
                 .collect(ImmutableCollectors.toList());
 
-
-        // List of added columns
-        ImmutableList<QuotedID> addedNewColumns = columns.added.stream()
-                .map(a -> idFactory.createAttributeID(a.name))
-                .collect(ImmutableCollectors.toList());
-
-        // List of hidden columns
-        ImmutableList<QuotedID> hiddenColumnNames = columns.hidden.stream()
-                .map(idFactory::createAttributeID)
-                .collect(ImmutableCollectors.toList());
-
         // Filter inherited constraints
-        ImmutableList<UniqueConstraint> inheritedConstraints = baseRelations.stream()
-                .map(RelationDefinition::getUniqueConstraints)
-                .flatMap(Collection::stream)
-                .filter(c -> c.getAttributes().stream()
-                        .map(Attribute::getID)
-                        .noneMatch(addedConstraintsColumns::contains))
-                .filter(c -> c.getAttributes().stream()
-                        .map(Attribute::getID)
-                        .noneMatch(addedNewColumns::contains))
-                .filter(c -> c.getAttributes().stream()
-                        .map(Attribute::getID)
-                        .noneMatch(hiddenColumnNames::contains))
-                .collect(ImmutableCollectors.toList());
-
-        // Create unique constraints
-        List<AddUniqueConstraints> inferredUniqueConstraints = inheritedConstraints.stream()
-                .map(i -> new AddUniqueConstraints(
-                        i.getName(),
-                        i.getDeterminants().stream()
-                                .map(c -> c.getID().getSQLRendering())
-                                .collect(Collectors.toList()),
-                        // PK by default false
-                        false
-                ))
-                .collect(Collectors.toList());
+        ImmutableList<AddUniqueConstraints> inheritedConstraints = inferInheritedConstraints(relation, baseRelations,
+                addedConstraintsColumns, idFactory);
 
         // Throw a warning if duplicate unique constraints are added
         if (!(addUniqueConstraints.stream())
@@ -401,10 +364,15 @@ public abstract class JsonNonSQLView extends JsonView {
 
 
         // Return full list of added and inherited constraints, remove duplicates based on constraint attribute
-        return Stream.concat(addUniqueConstraints.stream(), inferredUniqueConstraints.stream())
+        return Stream.concat(addUniqueConstraints.stream(), inheritedConstraints.stream())
                 .distinct()
                 .collect(Collectors.toList());
     }
+
+    protected abstract ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation, ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                                     ImmutableList<QuotedID> addedConstraintsColumns,
+                                                                                     QuotedIDFactory idFactory);
+
 
     /**
      * Infer functional dependencies from the parent

@@ -111,7 +111,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                 parentMetadataProvider.insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
 
-            jsonView.insertIntegrityConstraints(relation, baseRelations, metadataLookupForFK);
+            jsonView.insertIntegrityConstraints((OntopViewDefinition) relation, baseRelations, metadataLookupForFK);
         }
         else {
             parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);

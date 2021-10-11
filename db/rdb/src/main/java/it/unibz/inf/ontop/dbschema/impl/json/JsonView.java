@@ -60,7 +60,7 @@ public abstract class JsonView extends JsonOpenObject {
     public abstract OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
 
-    public abstract void insertIntegrityConstraints(NamedRelationDefinition relation,
+    public abstract void insertIntegrityConstraints(OntopViewDefinition relation,
                                                     ImmutableList<NamedRelationDefinition> baseRelations,
                                                     MetadataLookup metadataLookup) throws MetadataExtractionException;
 
