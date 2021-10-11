@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -95,9 +94,6 @@ public abstract class JsonView extends JsonOpenObject {
     }
 
 
-    @JsonPropertyOrder({
-            "added"
-    })
     protected static class UniqueConstraints extends JsonOpenObject {
         @Nonnull
         public final List<AddUniqueConstraints> added;
@@ -108,11 +104,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "name",
-            "determinants",
-            "isPrimaryKey"
-    })
     protected static class AddUniqueConstraints extends JsonOpenObject {
         @Nonnull
         public final String name;
@@ -167,10 +158,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
     protected static class AddFunctionalDependency extends JsonOpenObject {
         @Nonnull
         public final List<String> determinants;
@@ -221,10 +208,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
     protected static class AddForeignKey extends JsonOpenObject {
         @Nonnull
         public final String name;
@@ -242,10 +225,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "relation",
-            "columns"
-    })
     public static class ForeignKeyPart extends JsonOpenObject {
         public final List<String> relation;
         public final List<String> columns;
@@ -282,9 +261,9 @@ public abstract class JsonView extends JsonOpenObject {
                 case "SQLViewDefinition":
                     instanceClass = JsonSQLView.class;
                     break;
-                //case "JoinViewDefinition":
-                //    instanceClass = JsonJoinView.class;
-                //    break;
+                case "JoinViewDefinition":
+                    instanceClass = JsonJoinView.class;
+                    break;
                 default:
                     // TODO: throw proper exception
                     throw new RuntimeException("Unsupported type of Ontop views: " + type);
@@ -293,9 +272,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "added"
-    })
     protected static class NonNullConstraints extends JsonOpenObject {
         @Nonnull
         public final List<String> added;

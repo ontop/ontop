@@ -35,9 +35,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.IntStream;
 
-@JsonPropertyOrder({
-        "relations"
-})
 @JsonDeserialize(as = JsonSQLView.class)
 public class JsonSQLView extends JsonView {
     @Nonnull

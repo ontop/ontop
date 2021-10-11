@@ -2,15 +2,21 @@
   "relations": [
     {
       "name": ["\"views\"", "\"person_countries\""],
-      "relations": [
-          ["\"person\""],
-          ["\"country\""]
+      "join": {
+        "relations": [
+          [
+            "\"person\""
+          ],
+          [
+            "\"country\""
+          ]
         ],
-      "columnPrefixes": [
-        "",
-        "c_"
-      ],
-      "filterExpression": "\"c_acronym\" <> 'de'",
+        "columnPrefixes": [
+          "",
+          "c_"
+        ]
+      },
+      "filterExpression": "\"country\"=\"c_acronym\" AND \"c_acronym\" <> 'de'",
       "columns": {
         "added": [
           {

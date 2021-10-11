@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
@@ -11,9 +10,6 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-@JsonPropertyOrder({
-        "relations"
-})
 @JsonDeserialize(as = JsonBasicView.class)
 public class JsonBasicView extends JsonNonSQLView {
 
