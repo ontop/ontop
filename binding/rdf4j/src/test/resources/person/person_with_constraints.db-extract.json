@@ -88,6 +88,34 @@
         "isNullable" : false
       }],
       "name" : ["\"entity\""]
+    },
+    {
+      "uniqueConstraints" : [ {
+        "name" : "CONSTRAINT_CNAME",
+        "determinants" : [ "\"name\"" ],
+        "isPrimaryKey" : true
+      },
+        {
+          "name" : "CONSTRAINT_ACRO",
+          "determinants" : [ "\"acronym\"" ],
+          "isPrimaryKey" : false
+        }],
+      "otherFunctionalDependencies" : [ ],
+      "foreignKeys" : [ ],
+      "columns" : [ {
+        "name" : "\"name\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : false
+      }, {
+        "name" : "\"acronym\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : false
+      }, {
+        "name" : "\"continent\"",
+        "datatype" : "VARCHAR",
+        "isNullable" : false
+      }],
+      "name" : ["\"country\""]
     }
   ],
   "metadata" : {

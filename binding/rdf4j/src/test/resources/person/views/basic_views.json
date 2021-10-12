@@ -3,7 +3,6 @@
     {
       "name": ["\"views\"", "\"persons\""],
       "baseRelation": ["\"person\""],
-      "filterExpression": "",
       "columns": {
         "added": [
           {

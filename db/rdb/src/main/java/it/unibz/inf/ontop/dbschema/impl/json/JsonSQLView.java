@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
@@ -16,7 +15,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -92,7 +90,7 @@ public class JsonSQLView extends JsonView {
     @Override
     public void insertIntegrityConstraints(OntopViewDefinition relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
-                                           MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
+                                           MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
         insertUniqueConstraints(relation, idFactory, uniqueConstraints.added);

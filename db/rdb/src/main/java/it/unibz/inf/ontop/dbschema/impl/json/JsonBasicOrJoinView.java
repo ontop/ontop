@@ -96,11 +96,11 @@ public abstract class JsonBasicOrJoinView extends JsonView {
     @Override
     public void insertIntegrityConstraints(OntopViewDefinition relation,
                                            ImmutableList<NamedRelationDefinition> baseRelations,
-                                           MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
+                                           MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
 
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations);
+        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations, dbParameters.getCoreSingletons());
 
         insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added, baseRelations);
 
@@ -327,14 +327,15 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                         .map(i -> dbRootType).collect(ImmutableCollectors.toList()));
     }
 
-    private void insertUniqueConstraints(OntopViewDefinition relation,
-                                           QuotedIDFactory idFactory,
-                                           List<AddUniqueConstraints> addUniqueConstraints,
-                                           ImmutableList<NamedRelationDefinition> baseRelations)
+    private void insertUniqueConstraints(OntopViewDefinition relation, QuotedIDFactory idFactory,
+                                         List<AddUniqueConstraints> addUniqueConstraints,
+                                         ImmutableList<NamedRelationDefinition> baseRelations,
+                                         CoreSingletons coreSingletons)
             throws MetadataExtractionException {
 
 
-        List<AddUniqueConstraints> list = extractUniqueConstraints(relation, addUniqueConstraints, baseRelations, idFactory);
+        List<AddUniqueConstraints> list = extractUniqueConstraints(relation, addUniqueConstraints, baseRelations, idFactory,
+                coreSingletons);
 
         for (AddUniqueConstraints addUC : list) {
             if (addUC.isPrimaryKey != null && addUC.isPrimaryKey) LOGGER.warn("Primary key set in the view file for " + addUC.name);
@@ -348,7 +349,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
     private List<AddUniqueConstraints> extractUniqueConstraints(OntopViewDefinition relation, List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                QuotedIDFactory idFactory){
+                                                                QuotedIDFactory idFactory, CoreSingletons coreSingletons){
 
         // List of constraints added
         ImmutableList<QuotedID> addedConstraintsColumns = uniqueConstraints.added.stream()
@@ -359,7 +360,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
         // Filter inherited constraints
         ImmutableList<AddUniqueConstraints> inheritedConstraints = inferInheritedConstraints(relation, baseRelations,
-                addedConstraintsColumns, idFactory);
+                addedConstraintsColumns, idFactory, coreSingletons);
 
         // Throw a warning if duplicate unique constraints are added
         if (!(addUniqueConstraints.stream())
@@ -375,7 +376,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
     protected abstract ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation, ImmutableList<NamedRelationDefinition> baseRelations,
                                                                                      ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                                     QuotedIDFactory idFactory);
+                                                                                     QuotedIDFactory idFactory, CoreSingletons coreSingletons);
 
 
     /**

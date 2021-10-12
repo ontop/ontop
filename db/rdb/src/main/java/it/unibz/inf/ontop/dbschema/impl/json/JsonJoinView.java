@@ -9,7 +9,10 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -67,10 +70,15 @@ public class JsonJoinView extends JsonBasicOrJoinView {
     protected ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation,
                                                                             ImmutableList<NamedRelationDefinition> baseRelations,
                                                                             ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                            QuotedIDFactory idFactory) {
+                                                                            QuotedIDFactory idFactory,
+                                                                            CoreSingletons coreSingletons) {
         IQ relationIQ = relation.getIQ();
 
-        ImmutableSet<ImmutableSet<Variable>> variableUniqueConstraints = relationIQ.getTree().inferUniqueConstraints();
+        NotYetTypedEqualityTransformer eqTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
+        IQTree tree = eqTransformer.transform(relationIQ.getTree())
+                .normalizeForOptimization(relationIQ.getVariableGenerator());
+
+        ImmutableSet<ImmutableSet<Variable>> variableUniqueConstraints = tree.inferUniqueConstraints();
 
         ImmutableList<Attribute> attributes = relation.getAttributes();
         DistinctVariableOnlyDataAtom projectedAtom = relationIQ.getProjectionAtom();

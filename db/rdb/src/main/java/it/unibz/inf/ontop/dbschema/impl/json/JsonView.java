@@ -62,7 +62,7 @@ public abstract class JsonView extends JsonOpenObject {
 
     public abstract void insertIntegrityConstraints(OntopViewDefinition relation,
                                                     ImmutableList<NamedRelationDefinition> baseRelations,
-                                                    MetadataLookup metadataLookup) throws MetadataExtractionException;
+                                                    MetadataLookup metadataLookup, DBParameters dbParameters) throws MetadataExtractionException;
 
     protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
         SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
