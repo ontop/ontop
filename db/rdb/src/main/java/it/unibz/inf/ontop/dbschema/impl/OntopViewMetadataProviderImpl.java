@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider {
 
     private final MetadataProvider parentMetadataProvider;
-    private final CachingMetadataLookupWithDependencies parentCacheMetadataLookup;
+    private final CachingMetadataLookupWithDependencies dependencyCacheMetadataLookup;
     private final OntopViewNormalizer ontopViewNormalizer;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
@@ -46,7 +46,6 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                     provider.insertIntegrityConstraints(relation, metadataLookup);
             }
         };
-        this.parentCacheMetadataLookup = new CachingMetadataLookupWithDependencies(parentMetadataProvider);
 
         try (Reader viewReader = ontopViewReader) {
             JsonViews jsonViews = loadAndDeserialize(viewReader);
@@ -57,13 +56,15 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                             t -> t));
         }
         catch (JsonProcessingException e) { // subsumed by IOException (redundant)
-            throw new MetadataExtractionException("problem with JSON processing.\n" + e);
+            throw new MetadataExtractionException("Problem with JSON processing.\n" + e);
         }
         catch (IOException e) {
             throw new MetadataExtractionException(e);
         }
 
         this.ontopViewNormalizer = ontopViewNormalizer;
+        // Depends on this provider for supporting views of level >1
+        this.dependencyCacheMetadataLookup = new CachingMetadataLookupWithDependencies(this);
     }
 
     /**
@@ -91,9 +92,9 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         JsonView jsonView = jsonMap.get(id);
         if (jsonView != null)
-            return jsonView.createViewDefinition(getDBParameters(), parentCacheMetadataLookup.getCachingMetadataLookupFor(id));
+            return jsonView.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id));
 
-        return parentCacheMetadataLookup.getRelation(id);
+        return parentMetadataProvider.getRelation(id);
     }
 
     @Override
@@ -106,7 +107,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         JsonView jsonView = jsonMap.get(relation.getID());
         if (jsonView != null) {
 
-            ImmutableList<NamedRelationDefinition> baseRelations = parentCacheMetadataLookup.getBaseRelations(relation.getID());
+            ImmutableList<NamedRelationDefinition> baseRelations = dependencyCacheMetadataLookup.getBaseRelations(relation.getID());
             for (NamedRelationDefinition baseRelation : baseRelations)
                 parentMetadataProvider.insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
