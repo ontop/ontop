@@ -28,6 +28,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     private final OntopViewNormalizer ontopViewNormalizer;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
+    private final CachingMetadataLookup parentCachingMetadataLookup;
 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
@@ -46,6 +47,8 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                     provider.insertIntegrityConstraints(relation, metadataLookup);
             }
         };
+        // Safety for making sure the parent never builds the same relation twice
+        this.parentCachingMetadataLookup = new CachingMetadataLookup(parentMetadataProvider);
 
         try (Reader viewReader = ontopViewReader) {
             JsonViews jsonViews = loadAndDeserialize(viewReader);
@@ -94,12 +97,12 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         if (jsonView != null)
             return jsonView.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id));
 
-        return parentMetadataProvider.getRelation(id);
+        return parentCachingMetadataLookup.getRelation(id);
     }
 
     @Override
     public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
-        return parentMetadataProvider.getBlackBoxView(query);
+        return parentCachingMetadataLookup.getBlackBoxView(query);
     }
 
     @Override
@@ -109,7 +112,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
             ImmutableList<NamedRelationDefinition> baseRelations = dependencyCacheMetadataLookup.getBaseRelations(relation.getID());
             for (NamedRelationDefinition baseRelation : baseRelations)
-                parentMetadataProvider.insertIntegrityConstraints(baseRelation, metadataLookupForFK);
+                insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
 
             jsonView.insertIntegrityConstraints((OntopViewDefinition) relation, baseRelations, metadataLookupForFK,
