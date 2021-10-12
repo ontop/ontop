@@ -28,9 +28,12 @@ public class CachingMetadataLookupWithDependencies extends CachingMetadataLookup
     public MetadataLookup getCachingMetadataLookupFor(RelationID id) {
         return new MetadataLookup() {
             private final Set<RelationID> bases = baseRelationIds.computeIfAbsent(id, i -> new HashSet<>());
+            private final RelationID childRelationId = id;
 
             @Override
             public NamedRelationDefinition getRelation(RelationID baseId) throws MetadataExtractionException {
+                if (baseId.equals(childRelationId))
+                    throw new MetadataExtractionException("Self-dependent (i.e. recursive) relations are not supported. Relation: " + childRelationId);
                 NamedRelationDefinition base = CachingMetadataLookupWithDependencies.this.getRelation(baseId);
                 bases.add(base.getID());
                 return base;

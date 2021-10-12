@@ -1,8 +1,22 @@
 {
   "relations": [
     {
-      "name": ["\"views\"", "\"persons\""],
-      "baseRelation": ["\"person\""],
+      "name": ["\"views\"", "\"person_countries\""],
+      "join": {
+        "relations": [
+          [
+            "\"person\""
+          ],
+          [
+            "\"country\""
+          ]
+        ],
+        "columnPrefixes": [
+          "",
+          "c_"
+        ]
+      },
+      "filterExpression": "\"country\"=\"c_acronym\" AND \"c_acronym\" <> 'de'",
       "columns": {
         "added": [
           {
@@ -22,24 +36,36 @@
             "expression": "\"locality\""
           },
           {
-            "name": "\"nickname\"",
-            "expression": "UPPER(\"nickname\")"
+            "name": "\"country_with_code\"",
+            "expression": "CONCAT(UPPER(\"c_name\"),' ',\"c_acronym\")"
           },
           {
-            "name": "\"nick\"",
-            "expression": "CONCAT(\"nickname\", '!')"
+            "name": "\"id2\"",
+            "expression": "\"id\" + 2"
           }
         ],
         "hidden": [
           "\"fullName\"",
-          "\"locality\""
+          "\"locality\"",
+          "\"c_acronym\""
         ]
       },
       "uniqueConstraints": {
-        "added": []
+        "added": [
+          {
+            "name": "\"id2Constraint\"",
+            "determinants" : [ "\"id2\""],
+            "isPrimaryKey" : false
+          }
+        ]
       },
       "otherFunctionalDependencies": {
-        "added": []
+        "added": [
+          {
+            "determinants": ["\"c_name\""],
+            "dependents": ["\"c_continent\""]
+          }
+        ]
       },
       "foreignKeys": {
         "added": [
@@ -58,7 +84,7 @@
           "\"country\""
         ]
       },
-      "type": "BasicViewDefinition"
+      "type": "JoinViewDefinition"
     }
   ]
 }

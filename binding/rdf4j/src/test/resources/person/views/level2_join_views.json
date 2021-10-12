@@ -59,6 +59,60 @@
         ]
       },
       "type": "BasicViewDefinition"
+    },
+    {
+      "name": ["\"views\"", "\"person_countries\""],
+      "join": {
+        "relations": [
+          [
+            "\"views\"",
+            "\"persons\""
+          ],
+          [
+            "\"country\""
+          ]
+        ],
+        "columnPrefixes": [
+          "",
+          "c_"
+        ]
+      },
+      "filterExpression": "\"country\"=\"c_acronym\" AND \"c_acronym\" <> 'de'",
+      "columns": {
+        "added": [
+          {
+            "name": "\"country_with_code\"",
+            "expression": "CONCAT(UPPER(\"c_name\"),' ',\"c_acronym\")"
+          }
+        ],
+        "hidden": [
+          "\"c_acronym\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": []
+      },
+      "otherFunctionalDependencies": {
+        "added": []
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "status_id_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"statuses\""]
+            }
+          }
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
+        ]
+      },
+      "type": "JoinViewDefinition"
     }
   ]
 }
