@@ -42,6 +42,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -240,10 +241,10 @@ public abstract class JsonBasicOrJoinView extends JsonView {
     private ImmutableMap<QualifiedAttributeID, ImmutableTerm> extractParentAttributeMap(
             ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap,
             ImmutableTable<NamedRelationDefinition, Integer, Variable> parentArgumentTable,
-            QuotedIDFactory quotedIdFactory) {
+            QuotedIDFactory quotedIdFactory) throws MetadataExtractionException {
 
-        return parentArgumentTable.cellSet().stream()
-                .collect(ImmutableCollectors.toMap(
+        ImmutableMap<QualifiedAttributeID, Collection<Variable>> map = parentArgumentTable.cellSet().stream()
+                .collect(ImmutableCollectors.toMultimap(
                         c -> new QualifiedAttributeID(null,
                                 quotedIdFactory.createAttributeID(
                                         quotedIdFactory.getIDQuotationString() +
@@ -253,6 +254,21 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                                                 c.getRowKey().getAttributes().get(c.getColumnKey()).getID().getName() +
                                                 quotedIdFactory.getIDQuotationString())),
                         Table.Cell::getValue
+                )).asMap();
+
+        ImmutableList<QualifiedAttributeID> conflicts = map.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toList());
+
+        if (!conflicts.isEmpty())
+            throw new MetadataExtractionException("Conflict(s) detected: the following attribute(s) correspond(s) to multiple" +
+                    " columns in the parent relations: " + conflicts);
+
+        return map.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().iterator().next()
                 ));
 
     }
