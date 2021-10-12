@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
@@ -20,7 +19,7 @@ public class JoinViewPersonTest {
     }
 
     @Test
-    public void testPersonUniqueConstraint() throws Exception {
+    public void testPersonUniqueConstraint() {
         ImmutableSet<String> constraints = viewDefinitions.stream()
                 .map(RelationDefinition::getUniqueConstraints)
                 .flatMap(Collection::stream)
@@ -29,14 +28,15 @@ public class JoinViewPersonTest {
                 .map(v -> v.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableSet.of("id"), constraints);
+        assertEquals(ImmutableSet.of("id", "id2"), constraints);
     }
 
     /**
+     * Incomplete
      * TODO: enrich
      */
     @Test
-    public void testPersonAddFunctionalDependencyDependent() throws Exception {
+    public void testPersonAddFunctionalDependencyDependent() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -45,14 +45,15 @@ public class JoinViewPersonTest {
                 .map(d -> d.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableSet.of(), otherFD);
+        assertEquals(ImmutableSet.of("c_continent"), otherFD);
     }
 
     /**
+     * Incomplete
      * TODO: enrich
      */
     @Test
-    public void testPersonAddFunctionalDependencyDeterminant() throws Exception {
+    public void testPersonAddFunctionalDependencyDeterminant() {
         ImmutableSet<String> otherFD = viewDefinitions.stream()
                 .map(RelationDefinition::getOtherFunctionalDependencies)
                 .flatMap(Collection::stream)
@@ -61,14 +62,14 @@ public class JoinViewPersonTest {
                 .map(d -> d.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(ImmutableSet.of(), otherFD);
+        assertEquals(ImmutableSet.of("c_name"), otherFD);
     }
 
     /**
      * Non-null constraint taken into account
      */
     @Test
-    public void testPersonAddNonNullConstraint() throws Exception {
+    public void testPersonAddNonNullConstraint() {
         ImmutableSet<String> nonNullColumns = viewDefinitions.stream()
                 .map(RelationDefinition::getAttributes)
                 .flatMap(Collection::stream)
@@ -77,6 +78,34 @@ public class JoinViewPersonTest {
                 .collect(ImmutableCollectors.toSet());
 
         assertTrue(nonNullColumns.contains("country"));
+    }
+
+    @Test
+    public void testForeignKeySources() {
+        ImmutableSet<String> nonNullColumns = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
+                .flatMap(Collection::stream)
+                .map(ForeignKeyConstraint::getComponents)
+                .flatMap(Collection::stream)
+                .map(ForeignKeyConstraint.Component::getAttribute)
+                .map(v -> v.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertTrue(nonNullColumns.contains("status"));
+    }
+
+    @Test
+    public void testForeignKeyTargets() {
+        ImmutableSet<String> nonNullColumns = viewDefinitions.stream()
+                .map(RelationDefinition::getForeignKeys)
+                .flatMap(Collection::stream)
+                .map(ForeignKeyConstraint::getComponents)
+                .flatMap(Collection::stream)
+                .map(ForeignKeyConstraint.Component::getReferencedAttribute)
+                .map(v -> v.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertTrue(nonNullColumns.contains("status_id"));
     }
 
 }

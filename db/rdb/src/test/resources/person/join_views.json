@@ -38,6 +38,10 @@
           {
             "name": "\"country_with_code\"",
             "expression": "CONCAT(UPPER(\"c_name\"),' ',\"c_acronym\")"
+          },
+          {
+            "name": "\"id2\"",
+            "expression": "\"id\" + 2"
           }
         ],
         "hidden": [
@@ -47,10 +51,21 @@
         ]
       },
       "uniqueConstraints": {
-        "added": []
+        "added": [
+          {
+            "name": "\"id2Constraint\"",
+            "determinants" : [ "\"id2\""],
+            "isPrimaryKey" : false
+          }
+        ]
       },
       "otherFunctionalDependencies": {
-        "added": []
+        "added": [
+          {
+            "determinants": ["\"c_name\""],
+            "dependents": ["\"c_continent\""]
+          }
+        ]
       },
       "foreignKeys": {
         "added": [
