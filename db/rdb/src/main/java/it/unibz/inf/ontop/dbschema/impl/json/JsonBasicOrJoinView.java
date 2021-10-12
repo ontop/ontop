@@ -256,14 +256,13 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                         Table.Cell::getValue
                 )).asMap();
 
-        ImmutableList<QualifiedAttributeID> conflicts = map.entrySet().stream()
+        ImmutableSet<QualifiedAttributeID> conflictingAttributeIds = map.entrySet().stream()
                 .filter(e -> e.getValue().size() > 1)
                 .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        if (!conflicts.isEmpty())
-            throw new MetadataExtractionException("Conflict(s) detected: the following attribute(s) correspond(s) to multiple" +
-                    " columns in the parent relations: " + conflicts);
+        if (!conflictingAttributeIds.isEmpty())
+            throw new ConflictingVariableInJoinViewException(conflictingAttributeIds);
 
         return map.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(

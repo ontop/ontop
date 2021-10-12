@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.dbschema;
 
-import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.impl.json.ConflictingVariableInJoinViewException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -16,10 +18,11 @@ public class ConflictingVariableJoinViewTest {
     public void testPersonUniqueConstraint() throws Exception {
         try {
             ViewDefinitionParsingTest.loadViewDefinitions(VIEW_FILE, DBMETADATA_FILE);
-        } catch (MetadataExtractionException e) {
+        } catch (ConflictingVariableInJoinViewException e) {
             assertEquals(
-                    "Conflict(s) detected: the following attribute(s) correspond(s) to multiple columns in the parent relations: [\"c_id\"]",
-                    e.getMessage());
+                    e.getConflictingAttributeIds().stream().map(
+                            id -> id.getAttribute().getName()).collect(ImmutableCollectors.toSet()),
+                    ImmutableSet.of("c_id"));
             return;
         }
         fail();
