@@ -93,9 +93,11 @@ public class JsonSQLView extends JsonView {
                                            MetadataLookup metadataLookupForFK, DBParameters dbParameters) throws MetadataExtractionException {
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added);
+        if (uniqueConstraints != null)
+            insertUniqueConstraints(relation, idFactory, uniqueConstraints.added);
 
-        insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added);
+        if (otherFunctionalDependencies != null)
+            insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added);
 
     }
 

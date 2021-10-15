@@ -35,20 +35,20 @@ public abstract class JsonView extends JsonOpenObject {
     @Nonnull
     public final List<String> name;
 
-    @Nonnull
+    @Nullable
     public final UniqueConstraints uniqueConstraints;
 
-    @Nonnull
+    @Nullable
     public final OtherFunctionalDependencies otherFunctionalDependencies;
 
-    @Nonnull
+    @Nullable
     public final ForeignKeys foreignKeys;
 
     @Nullable
     public final NonNullConstraints nonNullConstraints;
 
-    public JsonView(List<String> name, UniqueConstraints uniqueConstraints,
-                    OtherFunctionalDependencies otherFunctionalDependencies, ForeignKeys foreignKeys,
+    public JsonView(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
+                    @Nullable OtherFunctionalDependencies otherFunctionalDependencies, @Nullable ForeignKeys foreignKeys,
                     @Nullable NonNullConstraints nonNullConstraints) {
         this.name = name;
         this.uniqueConstraints = uniqueConstraints;

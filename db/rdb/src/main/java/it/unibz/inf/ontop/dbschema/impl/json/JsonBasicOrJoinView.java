@@ -57,9 +57,9 @@ public abstract class JsonBasicOrJoinView extends JsonView {
     @Nonnull
     public final String filterExpression;
 
-    protected JsonBasicOrJoinView(List<String> name, UniqueConstraints uniqueConstraints,
-                                  OtherFunctionalDependencies otherFunctionalDependencies,
-                                  ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+    protected JsonBasicOrJoinView(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
+                                  @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
+                                  @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
                                   Columns columns, String filterExpression) {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints);
         this.columns = columns;
@@ -101,12 +101,16 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations, dbParameters.getCoreSingletons());
+        if (uniqueConstraints != null)
+            insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations, dbParameters.getCoreSingletons());
 
-        insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added, baseRelations);
+        if (otherFunctionalDependencies != null)
+            insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added, baseRelations);
 
-        for (AddForeignKey fk : foreignKeys.added) {
-            insertForeignKeys(relation, metadataLookupForFK, fk);
+        if (foreignKeys != null) {
+            for (AddForeignKey fk : foreignKeys.added) {
+                insertForeignKeys(relation, metadataLookupForFK, fk);
+            }
         }
     }
 
@@ -367,7 +371,9 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                                                                 QuotedIDFactory idFactory, CoreSingletons coreSingletons){
 
         // List of constraints added
-        ImmutableList<QuotedID> addedConstraintsColumns = uniqueConstraints.added.stream()
+        ImmutableList<QuotedID> addedConstraintsColumns = (uniqueConstraints == null)
+                ? ImmutableList.of()
+                : uniqueConstraints.added.stream()
                 .map(a -> a.determinants)
                 .flatMap(Collection::stream)
                 .map(idFactory::createAttributeID)
