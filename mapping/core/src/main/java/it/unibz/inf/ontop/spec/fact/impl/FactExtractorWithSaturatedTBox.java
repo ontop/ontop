@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -19,6 +20,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static java.util.Objects.isNull;
 
 @Singleton
 public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
@@ -56,6 +59,8 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                 generateIdEntries(tbox.classesDAG(), this::generateIdFromClassExpression),
                 generateIdEntries(tbox.dataPropertiesDAG(), this::generateIdFromDataPropertyExpression)),
                 generateIdEntries(tbox.objectPropertiesDAG(), this::generateIdFromObjectPropertyExpression))
+                .filter(v -> !(v.getValue() instanceof BNode)) // Remove BNodes
+                .filter(v -> !((v.getValue().getValue().contains("urn:AUX.ROLE")))) // Remove auxiliary object property
                 .collect(ImmutableCollectors.toMap());
 
         // TODO: also consider class disjointness
@@ -117,6 +122,7 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
         return Stream.concat(
                 expressionIdMap.keySet().stream()
                         .filter(expressionClass::isInstance)
+                        .filter(v -> !(expressionIdMap.get(v) instanceof BNode))
                         .flatMap(e -> expressionConverter.apply((T) e)),
                 extractSub(dag, subClassOrSubProperty, expressionIdMap));
     }
@@ -127,6 +133,10 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                     .flatMap(supEq -> supEq.getMembers().stream()
                             .flatMap(sup -> dag.getSub(supEq).stream()
                                     .flatMap(subEq -> subEq.getMembers().stream()
+                                            // Necessary to remove dag elements whose corresponding value from the
+                                            // expressionIdMap were BNodes. ExpressionIdMap was filtered.
+                                            .filter(sub -> !(isNull(expressionIdMap.get(sub)))
+                                                    && !(isNull(expressionIdMap.get(sup))))
                                             .map(sub -> RDFFact.createTripleFact(
                                                     expressionIdMap.get(sub),
                                                     subPredicateProperty,
@@ -196,14 +206,11 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                                                     EquivalencesDAG<ClassExpression> classDag) {
         Equivalences<ClassExpression> eq = classDag.getVertex(classExpression);
 
-        Stream<RDFFact> siblings = eq.stream()
-                .map(s -> RDFFact.createTripleFact(propertyId, rangeOrDomainProperty, expressionIdMap.get(s)));
+        return classDag.getSuper(eq).stream()
+                .flatMap(supEq -> supEq.stream()
+                        .filter(sup -> sup instanceof OClass)
+                        .map(sup -> RDFFact.createTripleFact(propertyId, rangeOrDomainProperty, expressionIdMap.get(sup))));
 
-        Stream<RDFFact> subs = classDag.getSub(eq).stream()
-                .flatMap(subEq -> subEq.stream()
-                        .map(sub -> RDFFact.createTripleFact(propertyId, rangeOrDomainProperty, expressionIdMap.get(sub))));
-
-        return Stream.concat(siblings, subs);
     }
 
     /**
@@ -214,11 +221,48 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                                                             EquivalencesDAG<ClassExpression> classDag) {
         ObjectConstant propertyId = expressionIdMap.get(e);
         return Stream.concat(Stream.concat(
-                Stream.of(
-                    RDFFact.createTripleFact(propertyId, rdfType, rdfProperty),
-                    RDFFact.createTripleFact(propertyId, rdfType, objectProperty)),
+                Stream.concat(
+                        Stream.of(
+                            RDFFact.createTripleFact(propertyId, rdfType, rdfProperty),
+                            RDFFact.createTripleFact(propertyId, rdfType, objectProperty)),
                 extractSubDomainOrRange(propertyId, e.getDomain(), domain, expressionIdMap, classDag)),
-                extractSubDomainOrRange(propertyId, e.getRange(), range, expressionIdMap, classDag));
+                extractSubDomainOrRange(propertyId, e.getRange(), range, expressionIdMap, classDag)),
+                extractFactsFromSubClassRestriction(propertyId, e.getRange(), expressionIdMap, classDag));
     }
 
+    private Stream<RDFFact> extractFactsFromSubClassRestriction(ObjectConstant propertyId, ClassExpression classExpression,
+                                                                ImmutableMap<DescriptionBT, ObjectConstant> expressionIdMap,
+                                                                EquivalencesDAG<ClassExpression> classDag) {
+        Equivalences<ClassExpression> eq = classDag.getVertex(classExpression);
+        boolean restrictionPresent = classDag.getDirectSub(eq).stream()
+                .map(c -> c.toString())
+                .anyMatch(c -> c.contains("urn:AUX.ROLE"));
+
+        if (restrictionPresent) {
+            BNode newBNode = termFactory.getConstantBNode(UUID.randomUUID().toString());
+            Stream<RDFFact> restriction = Stream.of(RDFFact.createTripleFact(newBNode, rdfType, owlRestriction));
+            Stream<RDFFact> restrictionOnProperty = Stream.of(RDFFact.createTripleFact(newBNode, onProperty, propertyId));
+            Stream<RDFFact> restrictionSomeValuesFrom = classDag.getDirectSub(eq).stream()
+                    .flatMap(sup -> classDag.getSuper(sup).stream()
+                            .flatMap(supEq2 -> supEq2.stream()
+                                    .filter(sup2 -> sup2 instanceof OClass)
+                                    .map(sup3 -> RDFFact.createTripleFact(newBNode, someValuesFrom, expressionIdMap.get(sup3)))
+                            )
+                    );
+            Stream<RDFFact> newBNodeclasses = Stream.of(
+                    RDFFact.createTripleFact(newBNode, rdfType, rdfsClass),
+                    RDFFact.createTripleFact(newBNode, rdfType, owlClass));
+            Stream<RDFFact> restrictionSubClasses = classDag.getSub(eq).stream()
+                    .flatMap(supEq -> supEq.stream()
+                            .filter(sup -> sup instanceof OClass)
+                            .map(sup -> RDFFact.createTripleFact(expressionIdMap.get(sup), subClassOf, newBNode)));
+
+            return Stream.concat(restriction,
+                    Stream.concat(restrictionOnProperty,
+                            Stream.concat(restrictionSomeValuesFrom,
+                                    Stream.concat(newBNodeclasses, restrictionSubClasses))));
+        }
+
+        return Stream.of();
+    }
 }
