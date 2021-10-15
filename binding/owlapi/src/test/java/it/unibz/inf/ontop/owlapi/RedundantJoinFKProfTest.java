@@ -12,7 +12,8 @@ public class RedundantJoinFKProfTest extends AbstractOWLAPITest {
     public static void setUp() throws Exception {
         initOBDA("/test/redundant_join/redundant_join_fk_create.sql",
                 "/test/redundant_join/redundant_join_fk_test.obda",
-                "/test/redundant_join/redundant_join_fk_test.owl");
+                "/test/redundant_join/redundant_join_fk_test.owl",
+                "/test/redundant_join/redundant_join_fk_test.properties");
     }
 
     @AfterClass

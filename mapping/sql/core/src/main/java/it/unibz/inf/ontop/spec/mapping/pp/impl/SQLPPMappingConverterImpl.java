@@ -7,6 +7,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -15,7 +17,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.sqlparser.*;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -53,7 +54,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
 
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         for (SQLPPTriplesMap assertion : mapping) {
@@ -133,12 +134,12 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
     }
 
-    public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
         String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
         try {
             return sqlQueryParser.getRAExpression(sourceQuery, metadataLookup);
         }
-        catch (InvalidSelectQueryException e) {
+        catch (InvalidQueryException e) {
             throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()
                     + " \nProblem location: source query of triplesMap \n["
                     +  mappingAssertion.getTriplesMapProvenance().getProvenanceInfo() + "]");

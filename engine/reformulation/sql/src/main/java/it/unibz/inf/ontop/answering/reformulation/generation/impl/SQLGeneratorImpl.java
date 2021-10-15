@@ -124,7 +124,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         LOGGER.debug("New query after top construction elimination in order by cases: \n" + treeAfterTopConstructionNormalization);
 
         // Dialect specific
-        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterPullOut, variableGenerator);
+        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterTopConstructionNormalization, variableGenerator);
         LOGGER.debug("New query after the dialect-specific extra normalization:\n{}\n", afterDialectNormalization);
 
         return afterDialectNormalization;

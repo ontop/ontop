@@ -197,8 +197,18 @@ public class SQLMappingExtractor implements MappingExtractor {
         try {
             if (optionalDbMetadataReader.isPresent()) {
                 try (Reader dbMetadataReader = optionalDbMetadataReader.get()) {
-                    return convert(mapping, constraintFile, ontopViewReader,
-                            serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
+
+                    if (settings.allowRetrievingBlackBoxViewMetadataFromDB()) {
+                        try (Connection connection = LocalJDBCConnectionUtils.createLazyConnection(settings)) {
+                            DBMetadataProvider parentProvider = metadataProviderFactory.getMetadataProvider(connection);
+
+                            return convert(mapping, constraintFile, ontopViewReader,
+                                    serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader, parentProvider));
+                        }
+                    }
+                    else
+                        return convert(mapping, constraintFile, ontopViewReader,
+                                serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader));
                 }
             }
             else {

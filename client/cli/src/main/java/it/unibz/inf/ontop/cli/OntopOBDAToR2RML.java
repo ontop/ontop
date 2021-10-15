@@ -233,7 +233,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
                                 .map(t -> normalize(t, lookup))
                                 .collect(ImmutableCollectors.toList()));
             }
-            catch (InvalidMappingSourceQueriesException e) {
+            catch (InvalidMappingSourceQueriesException | MetadataExtractionException e) {
                throw new RuntimeException(e);
             }
         }
