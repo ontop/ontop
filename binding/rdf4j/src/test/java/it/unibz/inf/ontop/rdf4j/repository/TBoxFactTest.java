@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 import com.google.common.collect.ImmutableList;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class TBoxFactTest extends AbstractRDF4JTest {
     /**
      * TODO: replace MY_CLASS_TO_TEST by a concrete class
      */
+    @Ignore
     @Test
     public void testSubclasses() {
         String query = "SELECT  *\n" +
@@ -45,6 +47,7 @@ public class TBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results);
     }
 
+    @Ignore
     @Test
     public void testRDFSClasses() {
         String query = "SELECT  *\n" +
@@ -56,6 +59,7 @@ public class TBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, getExpectedClasses());
     }
 
+    @Ignore
     @Test
     public void testOWLClasses() {
         String query = "SELECT  *\n" +
