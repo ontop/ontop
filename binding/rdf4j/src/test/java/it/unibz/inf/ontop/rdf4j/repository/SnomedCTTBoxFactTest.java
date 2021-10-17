@@ -69,6 +69,7 @@ public class SnomedCTTBoxFactTest extends AbstractRDF4JTest {
         String query = "SELECT  *\n" +
                 "WHERE {\n" +
                 "   ?v a rdfs:Class .\n" +
+                "   FILTER (!isBlank(?v)) . \n" +
                 "}\n";
 
         runQueryAndCompare(query, getExpectedClasses());
@@ -79,11 +80,15 @@ public class SnomedCTTBoxFactTest extends AbstractRDF4JTest {
         String query = "SELECT  *\n" +
                 "WHERE {\n" +
                 "   ?v a owl:Class .\n" +
+                "   FILTER (!isBlank(?v)) . \n" +
                 "}\n";
 
         runQueryAndCompare(query, getExpectedClasses());
     }
 
+    /**
+     * Cannot retrieve any domain info from file format
+     */
     @Ignore
     @Test
     public void testRDFSDomainRelation() {
@@ -96,6 +101,9 @@ public class SnomedCTTBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results);
     }
 
+    /**
+     * Cannot retrieve any domain info from file format
+     */
     @Ignore
     @Test
     public void testRDFSDomain() {

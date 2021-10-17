@@ -8,11 +8,13 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static org.junit.Assert.assertEquals;
+
 public class UniversityTBoxFactTest extends AbstractRDF4JTest {
 
     private static final String CREATE_DB_FILE = "/tbox-facts/university.sql";
     private static final String OBDA_FILE = "/tbox-facts/university.obda";
-    private static final String OWL_FILE = "/tbox-facts/university.ttl";
+    private static final String OWL_FILE = "/tbox-facts/university-complete.ttl";
     private static final String PROPERTIES_FILE = "/tbox-facts/factextraction.properties";
 
     @BeforeClass
@@ -41,6 +43,9 @@ public class UniversityTBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results);
     }
 
+    /**
+     * Filter one BNode due to EQ from restriction
+     */
     @Test
     public void testRDFSClasses() {
         String query = "SELECT  *\n" +
@@ -52,6 +57,24 @@ public class UniversityTBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, getExpectedClasses());
     }
 
+    /**
+     * One BNode due to EQ from restriction
+     */
+    @Test
+    public void testRDFSClassesBNodes() {
+        String query = "SELECT  *\n" +
+                "WHERE {\n" +
+                "   ?v a rdfs:Class .\n" +
+                "FILTER (isBlank(?v)) . \n" +
+                "}\n";
+
+        int resultCount = runQueryAndCount(query);
+        assertEquals(1, resultCount);
+    }
+
+    /**
+     * Filter one BNode due to EQ from restriction
+     */
     @Test
     public void testOWLClasses() {
         String query = "SELECT  *\n" +
@@ -61,6 +84,21 @@ public class UniversityTBoxFactTest extends AbstractRDF4JTest {
                 "}\n";
 
         runQueryAndCompare(query, getExpectedClasses());
+    }
+
+    /**
+     * One BNode due to EQ from restriction
+     */
+    @Test
+    public void testOWLClassesBNodes() {
+        String query = "SELECT  *\n" +
+                "WHERE {\n" +
+                "   ?v a owl:Class .\n" +
+                "FILTER (isBlank(?v)) . \n" +
+                "}\n";
+
+        int resultCount = runQueryAndCount(query);
+        assertEquals(1, resultCount);
     }
 
     @Test
@@ -76,6 +114,8 @@ public class UniversityTBoxFactTest extends AbstractRDF4JTest {
                 "http://example.org/voc#isGivenAt",
                 "http://example.org/voc#teaches",
                 "http://example.org/voc#givesLab",
+                "http://example.org/voc#isTaughtBy",
+                "http://example.org/voc#givesLecture",
                 "http://xmlns.com/foaf/0.1/firstName",
                 "http://xmlns.com/foaf/0.1/lastName");
         runQueryAndCompare(query, results);
@@ -109,7 +149,9 @@ public class UniversityTBoxFactTest extends AbstractRDF4JTest {
         ImmutableSet<String> results = ImmutableSet.of("http://example.org/voc#attends",
                 "http://example.org/voc#isGivenAt",
                 "http://example.org/voc#teaches",
-                "http://example.org/voc#givesLab");
+                "http://example.org/voc#givesLab",
+                "http://example.org/voc#isTaughtBy",
+                "http://example.org/voc#givesLecture");
         runQueryAndCompare(query, results);
     }
 
@@ -119,13 +161,14 @@ public class UniversityTBoxFactTest extends AbstractRDF4JTest {
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "SELECT  ?v\n" +
                 "WHERE {\n" +
-                /*"?x rdfs:domain ?y .\n" +
-                "?y rdfs:subClassOf ?v .\n" +*/
                 "   ?z rdfs:range ?v .\n" +
                 "}\n";
 
         ImmutableSet<String> results = ImmutableSet.of("http://example.org/voc#Course",
-                "http://example.org/voc#EducationalInstitution");
+                "http://example.org/voc#EducationalInstitution",
+                "http://example.org/voc#Teacher",
+                "http://example.org/voc#FacultyMember",
+                "http://xmlns.com/foaf/0.1/Person");
         runQueryAndCompare(query, results);
     }
 

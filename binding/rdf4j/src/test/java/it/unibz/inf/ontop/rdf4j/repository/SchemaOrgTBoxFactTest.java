@@ -63,6 +63,9 @@ public class SchemaOrgTBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, getExpectedClasses());
     }
 
+    /**
+     * Cannot retrieve any domain info from file format
+     */
     @Ignore
     @Test
     public void testRDFSDomainRelation() {
@@ -75,6 +78,9 @@ public class SchemaOrgTBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results);
     }
 
+    /**
+     * Cannot retrieve any domain info from file format
+     */
     @Ignore
     @Test
     public void testRDFSDomain() {
