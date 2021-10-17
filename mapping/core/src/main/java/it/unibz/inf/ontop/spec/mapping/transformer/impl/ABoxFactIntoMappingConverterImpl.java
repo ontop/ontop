@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.transformer.FactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 
-public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConverter {
+public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ABoxFactIntoMappingConverterImpl.class);
 
@@ -86,7 +86,7 @@ public class ABoxFactIntoMappingConverterImpl implements ABoxFactIntoMappingConv
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts, boolean isOntologyAnnotationQueryingEnabled) {
+    public ImmutableList<MappingAssertion> convert(ImmutableSet<RDFFact> facts) {
         // Group facts by class name or property name (for properties != rdf:type), by isClass, by isQuad.
         ImmutableMap<CustomKey, ImmutableList<RDFFact>> dict = facts.stream()
                 .collect(ImmutableCollectors.toMap(

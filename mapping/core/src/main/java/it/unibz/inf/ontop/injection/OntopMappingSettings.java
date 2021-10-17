@@ -40,6 +40,12 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean isValuesNodeEnabled();
 
+    /**
+     * If false, do not use the tbox to derive facts
+     * If true use tbox saturation
+     */
+    boolean isFactExtractionWithTBoxEnabled();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -49,7 +55,7 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";
     String ENABLE_VALUES_NODE = "ontop.enableValuesNode";
-
+    String ENABLE_FACT_EXTRACTION_WITH_TBOX = "ontop.enableFactExtractionWithTBox";
 
     /**
      * Options to specify base IRI.
