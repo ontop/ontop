@@ -51,6 +51,10 @@
     "type": "Boolean",
     "description": "Default value: `true`. Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology). And let dom(M(S)) (resp. range(M(S))) be all subjects (resp. objects) of some triple in M(S). Now let C be all mapping assertions with isCanonicalIRIOf as predicate, and let A_sub (resp(A_obj)) be all mapping assertions whose subject (resp. object) is built with a URI template, and whose predicate is not isCanonicalIRIOf. If this parameter is set to `true`, then for any a in A_sub, either dom({a}(S)) \\cap range(C(S)) = \\emptyset, or dom({a}(S)) \\subseteq range(C(S))). Similarly, for any a in A_obj, either range({a}(S)) \\cap range(C(S)) = \\emptyset, or range({a}(S)) \\subseteq range(C(S)))."
   },
+  "ontop.allowRetrievingBlackBoxViewMetadataFromDB": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If `true`, the column names of black-box views and their data types are retrieved by querying the database. If `false`, data types remain unknown and the extraction of column names is unsafe."
+  },
   "ontop.isValuesNodeEnabled": {
     "type": "Boolean",
     "description": "Default value: `true`. If false Union Nodes are used instead of Values Nodes for facts."
@@ -65,7 +69,7 @@
   },
   "ontop.distinctResultSet": {
     "type": "Boolean",
-    "description": "DEPRECATED. Default value: `false`. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
+    "description": "REMOVED from 4.2.0. Default value: `false`. If true, performs a post-processing operation removing duplicates from the result set, independently from the query."
   },
   "ontop.avoidPostProcessing": {
     "type": "Boolean",

@@ -7,8 +7,6 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
 
     boolean isExistentialReasoningEnabled();
 
-    boolean isDistinctPostProcessingEnabled();
-
     boolean isPostProcessingAvoided();
 
     /**
@@ -44,8 +42,6 @@ public interface OntopReformulationSettings extends OntopOBDASettings, OntopOpti
     //--------------------------
 
     String EXISTENTIAL_REASONING = "ontop.existentialReasoning";
-    @Deprecated
-    String DISTINCT_RESULTSET = "ontop.distinctResultSet";
     String AVOID_POST_PROCESSING = "ontop.avoidPostProcessing";
     String EXCLUDE_INVALID_TRIPLES_FROM_RESULT_SET = "ontop.excludeInvalidTriplesFromResultSet";
     String QUERY_CACHE_MAX_SIZE = "ontop.cache.query.size";

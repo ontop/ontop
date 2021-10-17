@@ -50,11 +50,6 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     }
 
     @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return systemSettings.isDistinctPostProcessingEnabled();
-    }
-
-    @Override
     public boolean isKeepAliveEnabled() {
         return getRequiredBoolean(KEEP_ALIVE);
     }

@@ -17,7 +17,6 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean areAbstractDatatypesToleratedInMapping();
 
-
     /**
      * Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology).
      * And let dom(M(S)) (resp. range(M(S))) be all subjects (resp. objects) of some triple in M(S).

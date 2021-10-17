@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
@@ -1504,6 +1505,26 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                     convertToXsdBooleanTerm(getTerm(ifExpr.getCondition(), knownVariables, externalBindings)),
                     getTerm(ifExpr.getResult(), knownVariables, externalBindings),
                     getTerm(ifExpr.getAlternative(), knownVariables, externalBindings));
+        }
+        if (expr instanceof ListMemberOperator) {
+            ListMemberOperator listMemberOperator = (ListMemberOperator) expr;
+            List<ValueExpr> arguments = listMemberOperator.getArguments();
+            if (arguments.size() < 2)
+                throw new MinorOntopInternalBugException("Was not expecting a ListMemberOperator from RDF4J with less than 2 args");
+
+            ImmutableList<ImmutableTerm> argTerms = arguments.stream()
+                    .map(a -> getTerm(a, knownVariables, externalBindings))
+                    .collect(ImmutableCollectors.toList());
+            ImmutableTerm firstArgument = argTerms.get(0);
+
+            SPARQLFunctionSymbol eq = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
+            SPARQLFunctionSymbol or = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2);
+
+            return argTerms.stream()
+                    .skip(1)
+                    .map(t -> termFactory.getImmutableFunctionalTerm(eq, firstArgument, t))
+                    .reduce((e1, e2) -> termFactory.getImmutableFunctionalTerm(or, e1, e2))
+                    .get();
         }
         // other subclasses
         // SubQueryValueOperator

@@ -16,6 +16,6 @@ schema:		http://schema.org/
 
 mappingId	LodgingBusiness - address
 target		data:address/accommodation/{id} a schema:PostalAddress . data:accommodation/{id} schema:address data:address/accommodation/{id} .
-source		SELECT "Id" AS id,
+source		SELECT "Id" AS id
 			FROM "v_accommodationsopen"
 ]]
