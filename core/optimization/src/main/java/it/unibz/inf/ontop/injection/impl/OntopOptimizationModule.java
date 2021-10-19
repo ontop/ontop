@@ -43,7 +43,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(InnerJoinIQOptimizer.class);
         bindFromSettings(LeftJoinIQOptimizer.class);
         bindFromSettings(BooleanExpressionPushDownTransformer.class);
-        bindFromSettings(ValuesNodeTransformer.class);
+        bindFromSettings(EmptyRowsValuesNodeTransformer.class);
         bindFromSettings(GeneralStructuralAndSemanticIQOptimizer.class);
         bindFromSettings(QueryPlanner.class);
         bindFromSettings(SelfJoinSameTermIQOptimizer.class);

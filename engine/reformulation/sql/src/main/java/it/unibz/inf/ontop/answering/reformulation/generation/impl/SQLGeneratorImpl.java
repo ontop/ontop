@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
-import it.unibz.inf.ontop.iq.transformer.ValuesNodeTransformer;
+import it.unibz.inf.ontop.iq.transformer.EmptyRowsValuesNodeTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final OntopReformulationSQLSettings settings;
     private final DialectExtraNormalizer extraNormalizer;
     private final BooleanExpressionPushDownTransformer pushDownTransformer;
-    private final ValuesNodeTransformer valuesNodeTransformer;
+    private final EmptyRowsValuesNodeTransformer valuesNodeTransformer;
 
     @AssistedInject
     private SQLGeneratorImpl(@Assisted DBParameters dbParameters,
@@ -55,7 +55,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                              TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
                              IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
                              DialectExtraNormalizer extraNormalizer, BooleanExpressionPushDownTransformer pushDownTransformer,
-                             ValuesNodeTransformer valuesNodeTransformer,
+                             EmptyRowsValuesNodeTransformer valuesNodeTransformer,
                              OntopReformulationSQLSettings settings)
     {
         this.functionLifter = functionLifter;
@@ -128,12 +128,12 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         LOGGER.debug("New query after top construction elimination in order by cases: \n" + treeAfterTopConstructionNormalization);
 
         // Handle VALUES [] () () edge case
-        IQTree treeAfterValuesNodeNormalization = valuesNodeTransformer.transform(
-                treeAfterTopConstructionNormalization);
-        LOGGER.debug("New query after values node edge case handling:\n{}\n", treeAfterValuesNodeNormalization);
+        IQTree treeAfterEmptyRowsValuesNodeNormalization = valuesNodeTransformer.transform(
+                treeAfterTopConstructionNormalization, variableGenerator);
+        LOGGER.debug("New query after empty rows values node transformation:\n{}\n", treeAfterEmptyRowsValuesNodeNormalization);
 
         // Dialect specific
-        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterValuesNodeNormalization, variableGenerator);
+        IQTree afterDialectNormalization = extraNormalizer.transform(treeAfterEmptyRowsValuesNodeNormalization, variableGenerator);
         LOGGER.debug("New query after the dialect-specific extra normalization:\n{}\n", afterDialectNormalization);
 
         return afterDialectNormalization;

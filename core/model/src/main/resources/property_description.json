@@ -59,6 +59,10 @@
     "type": "Boolean",
     "description": "Default value: `true`. If false Union Nodes are used instead of Values Nodes for facts."
   },
+  "ontop.enableFactExtractionWithTBox": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If `true`, saturated tbox will be used to extract facts in addition to the explicit ontology facts."
+  },
   "mapping.baseIri": {
     "type": "IRI",
     "description": "See http://www.w3.org/TR/r2rml/#dfn-base-iri"
