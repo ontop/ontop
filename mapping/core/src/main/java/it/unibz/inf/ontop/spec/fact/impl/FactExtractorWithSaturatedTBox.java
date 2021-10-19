@@ -27,19 +27,23 @@ import static java.util.Objects.isNull;
 public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
 
     private final TermFactory termFactory;
+    private final OntopMappingSettings settings;
     private final IRIConstant someValuesFrom, subClassOf, subPropertyOf, domain, range, rdfType;
     private final IRIConstant rdfsClass, owlClass, owlRestriction, onProperty, owlThing;
     private final IRIConstant rdfProperty, objectProperty, dataProperty;
+    private final IRIConstant inverseOf;
 
     @Inject
     protected FactExtractorWithSaturatedTBox(TermFactory termFactory, OntopMappingSettings settings) {
         super(settings);
+        this.settings = settings;
         this.termFactory = termFactory;
         someValuesFrom = termFactory.getConstantIRI(OWL.SOME_VALUES_FROM);
         subClassOf = termFactory.getConstantIRI(RDFS.SUBCLASSOF);
         subPropertyOf = termFactory.getConstantIRI(RDFS.SUBPROPERTYOF);
         domain = termFactory.getConstantIRI(RDFS.DOMAIN);
         range = termFactory.getConstantIRI(RDFS.RANGE);
+        inverseOf = termFactory.getConstantIRI(OWL.INVERSE_OF);
         rdfType = termFactory.getConstantIRI(RDF.TYPE);
         rdfsClass = termFactory.getConstantIRI(RDFS.CLASS);
         owlClass = termFactory.getConstantIRI(OWL.CLASS);
@@ -206,10 +210,17 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                                                     EquivalencesDAG<ClassExpression> classDag) {
         Equivalences<ClassExpression> eq = classDag.getVertex(classExpression);
 
-        return classDag.getSuper(eq).stream()
-                .flatMap(supEq -> supEq.stream()
-                        .filter(sup -> sup instanceof OClass)
-                        .map(sup -> RDFFact.createTripleFact(propertyId, rangeOrDomainProperty, expressionIdMap.get(sup))));
+        if (settings.areSuperClassesOfDomainRangeInferred()) {
+            return classDag.getSuper(eq).stream()
+                    .flatMap(supEq -> supEq.stream()
+                            .filter(sup -> sup instanceof OClass)
+                            .map(sup -> RDFFact.createTripleFact(propertyId, rangeOrDomainProperty, expressionIdMap.get(sup))));
+        } else {
+            return classDag.getDirectSuper(eq).stream()
+                    .flatMap(supEq -> supEq.stream()
+                            .filter(sup -> sup instanceof OClass)
+                            .map(sup -> RDFFact.createTripleFact(propertyId, rangeOrDomainProperty, expressionIdMap.get(sup))));
+        }
 
     }
 
@@ -220,23 +231,32 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                                                             ImmutableMap<DescriptionBT, ObjectConstant> expressionIdMap,
                                                             EquivalencesDAG<ClassExpression> classDag) {
         ObjectConstant propertyId = expressionIdMap.get(e);
-        return Stream.concat(Stream.concat(
+
+        return Stream.concat(
+                Stream.concat(
+                Stream.concat(
                 Stream.concat(
                         Stream.of(
                             RDFFact.createTripleFact(propertyId, rdfType, rdfProperty),
                             RDFFact.createTripleFact(propertyId, rdfType, objectProperty)),
                 extractSubDomainOrRange(propertyId, e.getDomain(), domain, expressionIdMap, classDag)),
                 extractSubDomainOrRange(propertyId, e.getRange(), range, expressionIdMap, classDag)),
-                extractFactsFromSubClassRestriction(propertyId, e.getRange(), expressionIdMap, classDag));
+                extractFactsFromSubClassRestriction(propertyId, e.getRange(), expressionIdMap, classDag)),
+                extractInverse(propertyId, e, expressionIdMap, classDag));
     }
 
     private Stream<RDFFact> extractFactsFromSubClassRestriction(ObjectConstant propertyId, ClassExpression classExpression,
                                                                 ImmutableMap<DescriptionBT, ObjectConstant> expressionIdMap,
                                                                 EquivalencesDAG<ClassExpression> classDag) {
         Equivalences<ClassExpression> eq = classDag.getVertex(classExpression);
-        boolean restrictionPresent = classDag.getDirectSub(eq).stream()
+
+        boolean restrictionPresent = (classDag.getDirectSub(eq).stream()
                 .map(c -> c.toString())
-                .anyMatch(c -> c.contains("urn:AUX.ROLE"));
+                .anyMatch(c -> c.contains("urn:AUX.ROLE"))) &&
+                // Avoid scenarios of functional property declaration by checking already defined domain/range
+                // Only auxiliary object property connects restriction to graph
+                (eq.getMembers().size()==1) &&
+                (classDag.getDirectSuper(eq).size()==0);
 
         if (restrictionPresent) {
             BNode newBNode = termFactory.getConstantBNode(UUID.randomUUID().toString());
@@ -249,9 +269,11 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
                                     .map(sup3 -> RDFFact.createTripleFact(newBNode, someValuesFrom, expressionIdMap.get(sup3)))
                             )
                     );
+
             Stream<RDFFact> newBNodeclasses = Stream.of(
                     RDFFact.createTripleFact(newBNode, rdfType, rdfsClass),
                     RDFFact.createTripleFact(newBNode, rdfType, owlClass));
+
             Stream<RDFFact> restrictionSubClasses = classDag.getSub(eq).stream()
                     .flatMap(supEq -> supEq.stream()
                             .filter(sup -> sup instanceof OClass)
@@ -264,5 +286,17 @@ public class FactExtractorWithSaturatedTBox extends AbstractFactExtractor {
         }
 
         return Stream.of();
+    }
+
+    private Stream<RDFFact> extractInverse(ObjectConstant propertyId, ObjectPropertyExpression e,
+                                                                ImmutableMap<DescriptionBT, ObjectConstant> expressionIdMap,
+                                                                EquivalencesDAG<ClassExpression> classDag) {
+        Equivalences<ClassExpression> eq = classDag.getVertex(e.getInverse().getDomain());
+
+        return eq.getMembers().stream()
+                .filter(m -> m instanceof ObjectSomeValuesFrom)
+                .map(m -> (ObjectSomeValuesFrom) m)
+                .filter(m -> !m.getProperty().isInverse()) //Drop the inverse of itself generated by Ontop
+                .map(m -> RDFFact.createTripleFact(propertyId, inverseOf, expressionIdMap.get(m.getProperty())));
     }
 }

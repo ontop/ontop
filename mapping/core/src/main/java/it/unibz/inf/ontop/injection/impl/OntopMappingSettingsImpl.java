@@ -88,4 +88,9 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
 
     @Override
     public boolean isFactExtractionWithTBoxEnabled() { return getRequiredBoolean(OntopMappingSettings.ENABLE_FACT_EXTRACTION_WITH_TBOX);}
+
+    @Override
+    public boolean areSuperClassesOfDomainRangeInferred() {
+        return getRequiredBoolean(OntopMappingSettings.INFER_SUPER_CLASSES_OF_DOMAIN_RANGE);
+    }
 }
