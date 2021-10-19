@@ -48,10 +48,6 @@ public class EmptyRowsValuesNodeTransformerImpl extends DefaultRecursiveIQTreeEx
                         .map(i -> placeholder)
                         .collect(ImmutableCollectors.toList()));
 
-        ImmutableList<Variable> newOrderedVariables = valuesNode.getOrderedVariables().stream()
-                .map(variableGenerator::generateNewVariableFromVar)
-                .collect(ImmutableCollectors.toList());
-
-        return iqFactory.createValuesNode(newOrderedVariables, newValues);
+        return iqFactory.createValuesNode(ImmutableList.of(variableGenerator.generateNewVariable()), newValues);
     }
 }
