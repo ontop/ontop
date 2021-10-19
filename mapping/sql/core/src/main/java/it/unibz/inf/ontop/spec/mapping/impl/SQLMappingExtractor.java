@@ -200,10 +200,10 @@ public class SQLMappingExtractor implements MappingExtractor {
 
                     if (settings.allowRetrievingBlackBoxViewMetadataFromDB()) {
                         try (Connection connection = LocalJDBCConnectionUtils.createLazyConnection(settings)) {
-                            DBMetadataProvider parentProvider = metadataProviderFactory.getMetadataProvider(connection);
 
                             return convert(mapping, constraintFile, ontopViewReader,
-                                    serializedMetadataProviderFactory.getMetadataProvider(dbMetadataReader, parentProvider));
+                                    serializedMetadataProviderFactory.getMetadataProvider(
+                                            dbMetadataReader, () -> metadataProviderFactory.getMetadataProvider(connection)));
                         }
                     }
                     else

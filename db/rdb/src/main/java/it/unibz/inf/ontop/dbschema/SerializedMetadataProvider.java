@@ -11,7 +11,12 @@ public interface SerializedMetadataProvider extends MetadataProvider {
         /**
          * The parent provider may only be used for creating black-box views
          */
-        SerializedMetadataProvider getMetadataProvider(Reader dbMetadataReader, MetadataLookup parentProvider)
+        SerializedMetadataProvider getMetadataProvider(Reader dbMetadataReader, MetadataLookupSupplier parentProviderSupplier)
                 throws MetadataExtractionException;
+    }
+
+    @FunctionalInterface
+    interface MetadataLookupSupplier {
+        MetadataLookup get() throws MetadataExtractionException;
     }
 }
