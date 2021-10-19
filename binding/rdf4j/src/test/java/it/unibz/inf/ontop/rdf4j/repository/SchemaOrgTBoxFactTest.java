@@ -94,6 +94,38 @@ public class SchemaOrgTBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results);
     }
 
+    @Test
+    public void testOWLInverseOf() {
+        String query = "PREFIX schema: <https://schema.org/>" +
+                "SELECT  ?v\n" +
+                "WHERE {\n" +
+                "   ?z owl:inverseOf ?v .\n" +
+                "}\n";
+
+        ImmutableSet<String> results = ImmutableSet.of("https://schema.org/recordedAt",
+                "https://schema.org/about", "https://schema.org/alumni", "https://schema.org/isPartOf",
+                "https://schema.org/member", "https://schema.org/albumRelease", "https://schema.org/subOrganization",
+                "https://schema.org/makesOffer", "https://schema.org/hasPart", "https://schema.org/parentOrganization",
+                "https://schema.org/providesBroadcastService", "https://schema.org/exampleOfWork",
+                "https://schema.org/archiveHeld", "https://schema.org/subTrip", "https://schema.org/offers",
+                "https://schema.org/alumniOf", "https://schema.org/parentTaxon", "https://schema.org/itemOffered",
+                "https://schema.org/childTaxon", "https://schema.org/subEvent", "https://schema.org/releaseOf",
+                "https://schema.org/subjectOf", "https://schema.org/mainEntityOfPage",
+                "https://schema.org/holdingArchive", "https://schema.org/dataset", "https://schema.org/partOfTrip",
+                "https://schema.org/isPartOfBioChemEntity", "https://schema.org/game",
+                "https://schema.org/encodesCreativeWork", "https://schema.org/encoding", "https://schema.org/offeredBy",
+                "https://schema.org/containedInPlace", "https://schema.org/hasVariant", "https://schema.org/recordingOf",
+                "https://schema.org/hasBioChemEntityPart", "https://schema.org/superEvent",
+                "https://schema.org/containsPlace", "https://schema.org/mainEntity", "https://schema.org/recordedAs",
+                "https://schema.org/memberOf", "https://schema.org/encodesBioChemEntity",
+                "https://schema.org/gameServer", "https://schema.org/hasBroadcastChannel",
+                "https://schema.org/isVariantOf", "https://schema.org/translationOfWork",
+                "https://schema.org/isEncodedByBioChemEntity", "https://schema.org/workExample",
+                "https://schema.org/recordedIn", "https://schema.org/workTranslation",
+                "https://schema.org/includedInDataCatalog");
+        runQueryAndCompare(query, results);
+    }
+
     private ImmutableSet<String> getExpectedClasses() {
         return ImmutableSet.of("https://schema.org/Thing", "https://schema.org/Intangible", "https://schema.org/Audience",
                 "https://schema.org/PeopleAudience", "https://schema.org/Action", "https://schema.org/ConsumeAction", "https://schema.org/UseAction",

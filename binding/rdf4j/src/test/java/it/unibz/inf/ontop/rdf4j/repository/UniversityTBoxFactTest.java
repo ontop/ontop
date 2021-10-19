@@ -172,6 +172,20 @@ public class UniversityTBoxFactTest extends AbstractRDF4JTest {
         runQueryAndCompare(query, results);
     }
 
+    @Test
+    public void testOWLInverseOf() {
+        String query = "PREFIX : <http://example.org/voc#>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT  ?v\n" +
+                "WHERE {\n" +
+                "   ?z owl:inverseOf ?v .\n" +
+                "}\n";
+
+        ImmutableSet<String> results = ImmutableSet.of("http://example.org/voc#isTaughtBy",
+                "http://example.org/voc#teaches");
+        runQueryAndCompare(query, results);
+    }
+
     private ImmutableSet<String> getExpectedClasses() {
         return ImmutableSet.of("http://example.org/voc#Professor",
                 "http://example.org/voc#AssociateProfessor",

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
 import com.google.common.collect.ImmutableSet;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -69,7 +68,6 @@ public class SnomedCTTBoxFactTest extends AbstractRDF4JTest {
         String query = "SELECT  *\n" +
                 "WHERE {\n" +
                 "   ?v a rdfs:Class .\n" +
-                "   FILTER (!isBlank(?v)) . \n" +
                 "}\n";
 
         runQueryAndCompare(query, getExpectedClasses());
@@ -80,16 +78,11 @@ public class SnomedCTTBoxFactTest extends AbstractRDF4JTest {
         String query = "SELECT  *\n" +
                 "WHERE {\n" +
                 "   ?v a owl:Class .\n" +
-                "   FILTER (!isBlank(?v)) . \n" +
                 "}\n";
 
         runQueryAndCompare(query, getExpectedClasses());
     }
 
-    /**
-     * Cannot retrieve any domain info from file format
-     */
-    @Ignore
     @Test
     public void testRDFSDomainRelation() {
         String query = "SELECT  ?v\n" +
@@ -97,14 +90,36 @@ public class SnomedCTTBoxFactTest extends AbstractRDF4JTest {
                 "   ?v rdfs:domain ?z .\n" +
                 "}\n";
 
-        ImmutableSet<String> results = ImmutableSet.of("");
+        ImmutableSet<String> results = ImmutableSet.of("http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000031",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000030",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000011",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000033",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000010",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_000000003",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000013",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000035",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000004",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000015",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000014",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000036",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000006",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000017",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000005",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000016",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000008",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000019",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000018",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000009",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000020",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000022",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000021",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000024",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000012",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000023",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_0000006");
         runQueryAndCompare(query, results);
     }
 
-    /**
-     * Cannot retrieve any domain info from file format
-     */
-    @Ignore
     @Test
     public void testRDFSDomain() {
         String query = "PREFIX obo: <http://purl.obolibrary.org/obo/>" +
@@ -113,7 +128,65 @@ public class SnomedCTTBoxFactTest extends AbstractRDF4JTest {
                 "   ?z rdfs:domain ?v .\n" +
                 "}\n";
 
-        ImmutableSet<String> results = ImmutableSet.of("");
+        ImmutableSet<String> results = ImmutableSet.of("http://purl.obolibrary.org/obo/ogms.owl#SCTO_138875005",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000000",
+                "http://purl.obolibrary.org/obo/IAO_0000030", "http://purl.obolibrary.org/obo/BFO_0000031",
+                "http://purl.obolibrary.org/obo/BFO_0000002", "http://purl.obolibrary.org/obo/BFO_0000001",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000001",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000002");
+        runQueryAndCompare(query, results);
+    }
+
+    @Test
+    public void testRDFSRangeRelation() {
+        String query = "SELECT  ?v\n" +
+                "WHERE {\n" +
+                "   ?v rdfs:range ?z .\n" +
+                "}\n";
+
+        ImmutableSet<String> results = ImmutableSet.of("http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000020",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000022",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000021",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000024",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000012",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000023",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_0000006");
+        runQueryAndCompare(query, results);
+    }
+
+    @Test
+    public void testRDFSRange() {
+        String query = "PREFIX obo: <http://purl.obolibrary.org/obo/>" +
+                "SELECT  ?v\n" +
+                "WHERE {\n" +
+                "   ?z rdfs:range ?v .\n" +
+                "}\n";
+
+        ImmutableSet<String> results = ImmutableSet.of("http://purl.obolibrary.org/obo/ogms.owl#SCTO_138875005",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000000",
+                "http://purl.obolibrary.org/obo/IAO_0000030", "http://purl.obolibrary.org/obo/BFO_0000031",
+                "http://purl.obolibrary.org/obo/BFO_0000002", "http://purl.obolibrary.org/obo/BFO_0000001",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000001",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000002",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_106237007");
+        runQueryAndCompare(query, results);
+    }
+
+    @Test
+    public void testOWLInverseOf() {
+        String query = "PREFIX obo: <http://purl.obolibrary.org/obo/>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT  ?v\n" +
+                "WHERE {\n" +
+                "   ?z owl:inverseOf ?v .\n" +
+                "}\n";
+
+        ImmutableSet<String> results = ImmutableSet.of("http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000023",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000024",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000021",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_0000006",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000020",
+                "http://purl.obolibrary.org/obo/ogms.owl#SCTO_00000012");
         runQueryAndCompare(query, results);
     }
 
