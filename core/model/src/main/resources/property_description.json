@@ -55,9 +55,17 @@
     "type": "Boolean",
     "description": "Default value: `false`. If `true`, the column names of black-box views and their data types are retrieved by querying the database. If `false`, data types remain unknown and the extraction of column names is unsafe."
   },
-  "ontop.isValuesNodeEnabled": {
+  "ontop.enableValuesNode": {
     "type": "Boolean",
     "description": "Default value: `true`. If false Union Nodes are used instead of Values Nodes for facts."
+  },
+  "ontop.enableFactExtractionWithTBox": {
+    "type": "Boolean",
+    "description": "Default value: `false`. If `true`, saturated tbox will be used to extract facts in addition to the explicit ontology facts."
+  },
+  "ontop.ontop.querySuperClassesOfDomainRange": {
+    "type": "Boolean",
+    "description": "Default value: `true`. If `false`, no additional facts on superclasses for rdfs:domain/range are integrated in addition to the explicit ontology facts."
   },
   "mapping.baseIri": {
     "type": "IRI",
