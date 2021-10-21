@@ -3,6 +3,9 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.annotations.restrictions.Required;
+import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
@@ -15,11 +18,24 @@ import java.util.Objects;
 
 @Command(name = "bootstrap",
         description = "Bootstrap ontology and mapping from the database")
-public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
+public class OntopBootstrap extends AbstractOntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-b", "--base-iri"}, title = "base IRI",
             description = "base uri of the generated mapping")
-    protected String baseIRI = "";
+    @Required
+    protected String baseIRI;
+
+    @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontology file",
+            description = "OWL ontology file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    @Required
+    String owlFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
+            description = "Mapping file in Ontop native format (.obda)")
+    @Required
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    String mappingFile;
 
     @Override
     public void run() {
