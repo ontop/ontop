@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -294,8 +295,8 @@ public abstract class JsonBasicOrJoinView extends JsonView {
             try {
                 ImmutableTerm value = extractExpression(a.expression, parentAttributeMap, quotedIdFactory, coreSingletons);
                 substitutionMapBuilder.put(v, value);
-            } catch (JSQLParserException e) {
-                throw new MetadataExtractionException("Unsupported expression for " + a.name + " in " + name + ":\n" + e);
+            } catch (JSQLParserException | UnsupportedSelectQueryRuntimeException e) {
+                throw new UnsupportedAddedColumnExpressionException("Unsupported expression for " + a.name + " in " + name + ":\n" + e, e);
             }
         }
 
@@ -309,7 +310,8 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
     private ImmutableTerm extractExpression(String partialExpression,
                                             ImmutableMap<QualifiedAttributeID, ImmutableTerm> parentAttributeMap,
-                                            QuotedIDFactory quotedIdFactory, CoreSingletons coreSingletons) throws JSQLParserException {
+                                            QuotedIDFactory quotedIdFactory, CoreSingletons coreSingletons)
+            throws JSQLParserException, UnsupportedSelectQueryRuntimeException {
         String sqlQuery = "SELECT " + partialExpression + " FROM fakeTable";
         ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
         Statement statement = CCJSqlParserUtil.parse(sqlQuery);
