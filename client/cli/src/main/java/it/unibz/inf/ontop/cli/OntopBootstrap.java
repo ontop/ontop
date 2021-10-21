@@ -21,18 +21,18 @@ import java.util.Objects;
 public class OntopBootstrap extends AbstractOntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-b", "--base-iri"}, title = "base IRI",
-            description = "base uri of the generated mapping")
+            description = "Base IRI of the generated mapping")
     @Required
     protected String baseIRI;
 
     @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontology file",
-            description = "OWL ontology file")
+            description = "Output OWL ontology file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     @Required
     String owlFile;
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
-            description = "Mapping file in Ontop native format (.obda)")
+            description = "Output mapping file in the Ontop native format (.obda)")
     @Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     String mappingFile;
