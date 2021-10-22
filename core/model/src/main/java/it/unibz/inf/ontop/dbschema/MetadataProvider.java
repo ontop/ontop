@@ -22,6 +22,17 @@ public interface MetadataProvider extends MetadataLookup {
      */
     void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException;
 
+    /**
+     * Can be overloaded to take advantage of the presence of all relations to inference new constraints.
+     * Useful for inferring FK between basic views.
+     */
+    default void insertIntegrityConstraints(ImmutableList<NamedRelationDefinition> relations, MetadataLookup metadataLookup)
+            throws MetadataExtractionException {
+        for (NamedRelationDefinition relation : relations) {
+            insertIntegrityConstraints(relation, metadataLookup);
+        }
+    }
+
     DBParameters getDBParameters();
 
     /**
