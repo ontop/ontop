@@ -5,11 +5,11 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQuery;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.query.impl.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
@@ -33,10 +33,10 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.*;
 
-public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection {
+public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection {
 
     private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
-    private static Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnection.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnectionImpl.class);
     private OntopRepository repository;
     private OntopConnection ontopConnection;
     private final RDF4JInputQueryFactory inputQueryFactory;
@@ -47,8 +47,8 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     private Map<String, String> namespaces;
 
 
-    OntopRepositoryConnection(OntopRepository rep, OntopConnection connection,
-                              RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
+    OntopRepositoryConnectionImpl(OntopRepository rep, OntopConnection connection,
+                                  RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
         this.repository = rep;
         this.ontopConnection = connection;
         this.inputQueryFactory = inputQueryFactory;
@@ -322,6 +322,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         return prepareBooleanQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
     }
 
+    @Override
     public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString,
                 String baseIRI, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException, MalformedQueryException {
         //Prepares true/false queries.
@@ -351,6 +352,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         return prepareGraphQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
     }
 
+    @Override
     public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString,
                                         String baseIRI, ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException, MalformedQueryException {
@@ -376,6 +378,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         return prepareTupleQuery(ql, query, null, ImmutableMultimap.of());
     }
 
+    @Override
     public Query prepareQuery(QueryLanguage ql, String query, ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException, MalformedQueryException {
         //Prepares a query for evaluation on this repository (optional operation).
@@ -390,6 +393,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         return prepareQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
     }
 
+    @Override
     public Query prepareQuery(QueryLanguage ql, String queryString, String baseIRI,
                               ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException, MalformedQueryException {
@@ -426,6 +430,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         return prepareTupleQuery(ql, queryString, baseIRI, ImmutableMultimap.of());
     }
 
+    @Override
     public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString, String baseIRI,
                                         ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException, MalformedQueryException {
@@ -605,10 +610,15 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         throw new UnsupportedOperationException(READ_ONLY_MESSAGE);
     }
 
+    @Override
     public String reformulate(String sparql)
-            throws OntopConnectionException, OntopInvalidInputQueryException, OntopReformulationException {
-        SPARQLQuery sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-        return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
+            throws RepositoryException {
+        try {
+            SPARQLQuery sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
+            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery).toString();
+        } catch (OntopReformulationException | OntopConnectionException e) {
+            throw new RepositoryException(e);
+        }
     }
 
 }
