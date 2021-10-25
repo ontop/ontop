@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,9 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
     private final CachingMetadataLookup parentCachingMetadataLookup;
+
+    // "Processed": constraints already inserted
+    private final Set<RelationID> alreadyProcessedViews = new HashSet<>();
 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
@@ -107,16 +111,19 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     @Override
     public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
-        JsonView jsonView = jsonMap.get(relation.getID());
+        RelationID relationId = relation.getID();
+        JsonView jsonView = jsonMap.get(relationId);
         if (jsonView != null) {
+            // Useful for views having multiple children
+            boolean notInserted = alreadyProcessedViews.add(relationId);
+            if (notInserted) {
+                ImmutableList<NamedRelationDefinition> baseRelations = dependencyCacheMetadataLookup.getBaseRelations(relation.getID());
+                for (NamedRelationDefinition baseRelation : baseRelations)
+                    insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
-            ImmutableList<NamedRelationDefinition> baseRelations = dependencyCacheMetadataLookup.getBaseRelations(relation.getID());
-            for (NamedRelationDefinition baseRelation : baseRelations)
-                insertIntegrityConstraints(baseRelation, metadataLookupForFK);
-
-
-            jsonView.insertIntegrityConstraints((OntopViewDefinition) relation, baseRelations, metadataLookupForFK,
-                    getDBParameters());
+                jsonView.insertIntegrityConstraints((OntopViewDefinition) relation, baseRelations, metadataLookupForFK,
+                        getDBParameters());
+            }
         }
         else {
             parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);
@@ -134,16 +141,22 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
-        // TODO: normalize the parents before the children using the OntopViewNormalizer.
+    public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         ImmutableList<OntopViewDefinition> viewDefinitions = relationDefinitions.stream()
                 .filter(OntopViewDefinition.class::isInstance)
                 .map(OntopViewDefinition.class::cast)
-                // Sort by view level in ascending order - To be reviewed when level >1 views are introduced
-                // .sorted(Comparator.comparing(OntopViewDefinition::getLevel))
+                .sorted(Comparator.comparingInt(OntopViewDefinition::getLevel))
                 .collect(ImmutableCollectors.toList());
 
         // Apply normalization
         viewDefinitions.forEach(ontopViewNormalizer::normalize);
+
+        optimizeViews(viewDefinitions);
+
+        viewDefinitions.forEach(OntopViewDefinition::freeze);
+    }
+
+    private void optimizeViews(ImmutableList<OntopViewDefinition> viewDefinitions) {
+
     }
 }
