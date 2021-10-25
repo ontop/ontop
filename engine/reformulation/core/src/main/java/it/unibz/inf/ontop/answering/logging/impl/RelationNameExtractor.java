@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.node.ValuesNode;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.Stream;

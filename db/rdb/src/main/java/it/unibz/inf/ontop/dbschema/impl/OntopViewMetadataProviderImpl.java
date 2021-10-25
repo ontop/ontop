@@ -27,6 +27,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     private final MetadataProvider parentMetadataProvider;
     private final CachingMetadataLookupWithDependencies dependencyCacheMetadataLookup;
     private final OntopViewNormalizer ontopViewNormalizer;
+    private final OntopViewFKSaturator fkSaturator;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
     private final CachingMetadataLookup parentCachingMetadataLookup;
@@ -37,7 +38,8 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
                                             @Assisted Reader ontopViewReader,
-                                            OntopViewNormalizer ontopViewNormalizer) throws MetadataExtractionException {
+                                            OntopViewNormalizer ontopViewNormalizer,
+                                            OntopViewFKSaturator fkSaturator) throws MetadataExtractionException {
         this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
             private final Set<RelationID> completeRelations = new HashSet<>();
 
@@ -53,6 +55,7 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         };
         // Safety for making sure the parent never builds the same relation twice
         this.parentCachingMetadataLookup = new CachingMetadataLookup(parentMetadataProvider);
+        this.fkSaturator = fkSaturator;
 
         try (Reader viewReader = ontopViewReader) {
             JsonViews jsonViews = loadAndDeserialize(viewReader);
@@ -157,6 +160,6 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     private void optimizeViews(ImmutableList<OntopViewDefinition> viewDefinitions) {
-
+        fkSaturator.saturateForeignKeys(viewDefinitions, dependencyCacheMetadataLookup.getChildrenMultimap(), jsonMap);
     }
 }

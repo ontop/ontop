@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.logging.impl;
+package it.unibz.inf.ontop.iq.visit.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;

@@ -105,6 +105,14 @@ public class JsonJoinView extends JsonBasicOrJoinView {
                 .collect(ImmutableCollectors.toList());
     }
 
+    /**
+     * TODO: consider implementing it (using FKs between parents)
+     */
+    @Override
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes) {
+        return ImmutableList.of();
+    }
+
     protected static class JoinPart extends JsonOpenObject {
         public final List<List<String>> relations;
         public final List<String> columnPrefixes;
