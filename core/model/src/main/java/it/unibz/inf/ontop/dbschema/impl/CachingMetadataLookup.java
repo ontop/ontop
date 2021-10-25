@@ -49,7 +49,8 @@ public class CachingMetadataLookup implements MetadataLookup {
         ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(getQuotedIDFactory(), ImmutableMap.copyOf(map));
         ImmutableList<NamedRelationDefinition> list = lookup.getRelations();
 
-        provider.insertIntegrityConstraints(list, lookup);
+        for (NamedRelationDefinition relation : list)
+            provider.insertIntegrityConstraints(relation, lookup);
 
         provider.normalizeRelations(list);
 
