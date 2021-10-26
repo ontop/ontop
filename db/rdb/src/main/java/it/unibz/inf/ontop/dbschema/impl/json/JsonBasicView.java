@@ -7,19 +7,11 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @JsonDeserialize(as = JsonBasicView.class)
 public class JsonBasicView extends JsonBasicOrJoinView {
@@ -56,10 +48,10 @@ public class JsonBasicView extends JsonBasicOrJoinView {
      * TODO: support renamings
      */
     @Override
-    protected ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation, ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                            ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                            QuotedIDFactory idFactory,
-                                                                            CoreSingletons coreSingletons) {
+    protected ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation, ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                                  ImmutableList<QuotedID> addedConstraintsColumns,
+                                                                                  QuotedIDFactory idFactory,
+                                                                                  CoreSingletons coreSingletons) {
         // List of added columns
         ImmutableList<QuotedID> addedNewColumns = columns.added.stream()
                 .map(a -> idFactory.createAttributeID(a.name))
@@ -75,6 +67,7 @@ public class JsonBasicView extends JsonBasicOrJoinView {
                 .flatMap(Collection::stream)
                 .filter(c -> c.getAttributes().stream()
                         .map(Attribute::getID)
+                        // TODO: replace this superficial logic for better handling composite UCs.
                         .noneMatch(addedConstraintsColumns::contains))
                 .filter(c -> c.getAttributes().stream()
                         .map(Attribute::getID)
@@ -107,54 +100,6 @@ public class JsonBasicView extends JsonBasicOrJoinView {
             // TODO: log a warning
             return ImmutableList.of();
 
-        IQ viewIQ = ontopViewDefinition.getIQ();
-
-        Optional<ExtensionalDataNode> optionalParentNode = viewIQ.getTree()
-                .acceptVisitor(new ExtensionalNodeExtractor())
-                .findAny();
-
-        if (!optionalParentNode.isPresent())
-            // TODO: log a warning
-            return ImmutableList.of();
-
-        ImmutableMap<Integer, ? extends VariableOrGroundTerm> parentNodeArgumentMap = optionalParentNode.get().getArgumentMap();
-
-        ImmutableList.Builder<Variable> parentVariableBuilder = ImmutableList.builder();
-        for (Attribute parentAttribute : parentAttributes) {
-            ImmutableTerm argument = parentNodeArgumentMap.get(parentAttribute.getIndex() - 1);
-            if (!(argument instanceof Variable))
-                // Unused or filtering column (the latter should not happen)
-                return ImmutableList.of();
-            parentVariableBuilder.add((Variable) argument);
-        }
-
-        ImmutableList<Variable> parentVariables = parentVariableBuilder.build();
-        ImmutableList<Variable> projectedVariables = viewIQ.getProjectionAtom().getArguments();
-
-        ImmutableList<Integer> parentVariableIndexes = parentVariables.stream()
-                .map(projectedVariables::indexOf)
-                .collect(ImmutableCollectors.toList());
-
-        if (parentVariableIndexes.stream().anyMatch(i -> i < 0))
-            // Non-projected parent variable
-            return ImmutableList.of();
-
-        return ImmutableList.of(
-                parentVariableIndexes.stream()
-                        .map(i -> ontopViewDefinition.getAttribute(i + 1))
-                        .collect(ImmutableCollectors.toList()));
-    }
-
-
-    private static class ExtensionalNodeExtractor extends AbstractPredicateExtractor<ExtensionalDataNode> {
-        @Override
-        public Stream<ExtensionalDataNode> visitIntensionalData(IntensionalDataNode dataNode) {
-            return Stream.empty();
-        }
-
-        @Override
-        public Stream<ExtensionalDataNode> visitExtensionalData(ExtensionalDataNode dataNode) {
-            return Stream.of(dataNode);
-        }
+        return getDerivedFromParentAttributes(ontopViewDefinition, parentAttributes);
     }
 }
