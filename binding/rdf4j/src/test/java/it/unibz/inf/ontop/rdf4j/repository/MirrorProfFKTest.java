@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,7 +29,6 @@ public class MirrorProfFKTest extends AbstractRDF4JTest {
     /**
      * Test if the FK between views is inferred, so that some unions can be eliminated after mapping saturation.
      */
-    @Ignore("TODO: enable it")
     @Test
     public void testNoUnion() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +

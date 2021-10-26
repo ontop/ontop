@@ -530,6 +530,9 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 .collect(ImmutableCollectors.toList());
     }
 
+    /**
+     * TODO: add FKs towards the base relations
+     */
     protected Stream<AddForeignKey> inferForeignKeys(OntopViewDefinition relation,
                                                      ImmutableList<NamedRelationDefinition> baseRelations) {
         return baseRelations.stream()

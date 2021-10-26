@@ -107,15 +107,6 @@ public class JsonJoinView extends JsonBasicOrJoinView {
     }
 
     /**
-     * TODO: add FKs towards the base relations
-     */
-    @Override
-    protected Stream<AddForeignKey> inferForeignKeys(OntopViewDefinition relation,
-                                                     ImmutableList<NamedRelationDefinition> baseRelations) {
-        return super.inferForeignKeys(relation, baseRelations);
-    }
-
-    /**
      * TODO: consider implementing it (using FKs between parents)
      */
     @Override
