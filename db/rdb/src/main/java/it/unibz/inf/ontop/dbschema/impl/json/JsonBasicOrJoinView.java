@@ -548,7 +548,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                                 UUID.randomUUID().toString(),
                                 JsonMetadata.serializeAttributeList(as.stream()),
                                 new ForeignKeyPart(
-                                        JsonMetadata.serializeRelationID(fk.getRelation().getID()),
+                                        JsonMetadata.serializeRelationID(fk.getReferencedRelation().getID()),
                                         JsonMetadata.serializeAttributeList(
                                         fk.getComponents().stream()
                                                 .map(ForeignKeyConstraint.Component::getReferencedAttribute))))));
