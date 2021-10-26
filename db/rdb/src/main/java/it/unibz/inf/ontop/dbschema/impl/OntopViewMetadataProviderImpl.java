@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Comparator;
@@ -34,6 +35,10 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     // "Processed": constraints already inserted
     private final Set<RelationID> alreadyProcessedViews = new HashSet<>();
+
+    // Lazy (built lately)
+    @Nullable
+    private MetadataLookup mergedMetadataLookupForFK;
 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
@@ -113,7 +118,11 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup initialMetadataLookupForFK)
+            throws MetadataExtractionException {
+
+        MetadataLookup metadataLookupForFK = getMergedMetadataLookupForFK(initialMetadataLookupForFK);
+
         RelationID relationId = relation.getID();
         JsonView jsonView = jsonMap.get(relationId);
         if (jsonView != null) {
@@ -131,6 +140,17 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
         else {
             parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);
         }
+    }
+
+    /**
+     * Creates a new metadata lookup including all the view dependencies.
+     * Important for getting FKs where these dependencies are the target.
+     */
+    private synchronized MetadataLookup getMergedMetadataLookupForFK(MetadataLookup initialMetadataLookupForFK) {
+        if (mergedMetadataLookupForFK != null)
+            return mergedMetadataLookupForFK;
+
+        return new MergingMetadataLookup(initialMetadataLookupForFK, dependencyCacheMetadataLookup.extractImmutableMetadataLookup());
     }
 
     @Override
@@ -161,5 +181,35 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
 
     private void optimizeViews(ImmutableList<OntopViewDefinition> viewDefinitions) {
         fkSaturator.saturateForeignKeys(viewDefinitions, dependencyCacheMetadataLookup.getChildrenMultimap(), jsonMap);
+    }
+
+    private static class MergingMetadataLookup implements MetadataLookup {
+
+        private final MetadataLookup mainLookup;
+        private final MetadataLookup secondaryLookup;
+
+        public MergingMetadataLookup(MetadataLookup mainLookup, MetadataLookup secondaryLookup) {
+            this.mainLookup = mainLookup;
+            this.secondaryLookup = secondaryLookup;
+        }
+
+        @Override
+        public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+            try {
+                return mainLookup.getRelation(id);
+            } catch (MetadataExtractionException e) {
+                return secondaryLookup.getRelation(id);
+            }
+        }
+
+        @Override
+        public RelationDefinition getBlackBoxView(String query) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public QuotedIDFactory getQuotedIDFactory() {
+            return mainLookup.getQuotedIDFactory();
+        }
     }
 }
