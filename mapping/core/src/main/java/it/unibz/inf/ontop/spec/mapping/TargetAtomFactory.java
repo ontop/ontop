@@ -14,6 +14,9 @@ public interface TargetAtomFactory {
 
     TargetAtom getTripleTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm object);
 
+    TargetAtom getRDFStarTripleTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm object,
+                                          ImmutableTerm tripleRef, boolean nestedSubject, boolean nestedObject, boolean tripleRefExists);
+
     /**
      * Used for Datalog conversion.
      * Please consider the other methods

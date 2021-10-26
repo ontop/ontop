@@ -90,6 +90,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final DBTermType dbStringType;
     private final SPARQLFunctionSymbol iriNoBaseFunctionSymbol;
 
+    private final NonLiteralRDFStarTermType abstractNonLiteralRDFStarTermType;
+    private final ObjectRDFType iriTermType;
+    private final RDFStarTermType abstractRDFStarTermType;
+
     /**
      * Created in init()
      */
@@ -113,6 +117,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
+
+        this.abstractNonLiteralRDFStarTermType = typeFactory.getAbstractNonLiteralRDFStarTermType();
+        this.iriTermType = typeFactory.getIRITermType();
+        this.abstractRDFStarTermType = typeFactory.getAbstractRDFStarTermType();
 
         this.commonDenominatorMap = new ConcurrentHashMap<>();
         this.concatMap = new ConcurrentHashMap<>();
@@ -587,10 +595,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     public NestedTripleFunctionSymbol getNestedTripleFunctionSymbol() {
         return new NestedTripleFunctionSymbolImpl(
                 typeFactory,
-                ImmutableList.of(   // TODO: Move typefactory calls up to constructor
-                        typeFactory.getAbstractNonLiteralRDFStarTermType(),
-                        typeFactory.getIRITermType(),
-                        typeFactory.getAbstractRDFStarTermType()));
+                ImmutableList.of(
+                        abstractNonLiteralRDFStarTermType,
+                        iriTermType,
+                        abstractRDFStarTermType));
     }
 
 }

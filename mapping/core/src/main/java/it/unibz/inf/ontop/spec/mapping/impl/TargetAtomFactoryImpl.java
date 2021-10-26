@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.functionsymbol.NestedTripleFunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -18,7 +19,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
 
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final Variable s, p, o, g;
+    private final Variable s, p, o, g, r;
 
     @Inject
     private TargetAtomFactoryImpl(AtomFactory atomFactory, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
@@ -28,6 +29,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
         this.p = termFactory.getVariable("p");
         this.o = termFactory.getVariable("o");
         this.g = termFactory.getVariable("g");
+        this.r = termFactory.getVariable("r");
     }
 
     @Override
@@ -38,6 +40,28 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
                 (object instanceof Variable) && !object.equals(subject) && !object.equals(pred) ? (Variable) object : o);
 
         return getTargetAtom(projectionAtom, ImmutableList.of(subject, pred, object));
+    }
+
+    @Override
+    public TargetAtom getRDFStarTripleTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm object, ImmutableTerm tripleRef, boolean nestedSubject, boolean nestedObject, boolean tripleRefExists) {
+        if (tripleRefExists) {
+            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctRDFStarTripleRefAtom(
+                    (subject instanceof Variable) ? (Variable) subject : s,
+                    (pred instanceof Variable) && !pred.equals(subject) ? (Variable) pred : p,
+                    (object instanceof Variable) && !object.equals(subject) && !object.equals(pred) ? (Variable) object : o,
+                    r,
+                    nestedSubject,
+                    nestedObject);
+            return getTargetAtom(projectionAtom, ImmutableList.of(subject, pred, object, tripleRef));
+        } else {
+            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctRDFStarTripleAtom(
+                    (subject instanceof Variable) ? (Variable) subject : s,
+                    (pred instanceof Variable) && !pred.equals(subject) ? (Variable) pred : p,
+                    (object instanceof Variable) && !object.equals(subject) && !object.equals(pred) ? (Variable) object : o,
+                    nestedSubject,
+                    nestedObject);
+            return getTargetAtom(projectionAtom, ImmutableList.of(subject, pred, object));
+        }
     }
 
     @Override

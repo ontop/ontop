@@ -126,6 +126,44 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
+    public DistinctVariableOnlyDataAtom getDistinctRDFStarTripleAtom(Variable subject, Variable property, Variable object, boolean nestedSubject, boolean nestedObject) {
+        RDFAtomPredicate predicate;
+        if (nestedSubject) {
+            if (nestedObject) {
+                predicate = tripleNestedSOPredicate;
+            } else {
+                predicate = tripleNestedSubjectPredicate;
+            }
+        } else {
+            if (nestedObject) {
+                predicate = tripleNestedObjectPredicate;
+            } else {
+                predicate = triplePredicate;    // This case should never occur?
+            }
+        }
+        return getDistinctVariableOnlyDataAtom(predicate, subject, property, object);
+    }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getDistinctRDFStarTripleRefAtom(Variable subject, Variable property, Variable object, Variable tripleRef, boolean nestedSubject, boolean nestedObject) {
+        RDFAtomPredicate predicate;
+        if (nestedSubject) {
+            if (nestedObject) {
+                predicate = tripleRefNestedSOPredicate;
+            } else {
+                predicate = tripleRefNestedSubjectPredicate;
+            }
+        } else {
+            if (nestedObject) {
+                predicate = tripleRefNestedObjectPredicate;
+            } else {
+                predicate = tripleRefSimplePredicate;
+            }
+        }
+        return getDistinctVariableOnlyDataAtom(predicate, subject, property, object, tripleRef);
+    }
+
+    @Override
     public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
                                                             VariableOrGroundTerm object) {
         return getDataAtom(triplePredicate, subject, property, object);

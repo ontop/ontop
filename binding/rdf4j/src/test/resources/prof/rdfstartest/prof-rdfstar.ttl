@@ -10,7 +10,7 @@
   rr:logicalTable [ a rr:R2RMLView;
       rr:sqlQuery "SELECT prof_id FROM professors;"
     ];
-  rr:subjectMap [ a rr:SubjectMap, star:RDFStarTermMap;
+  rr:subjectMap [ a rr:SubjectMap;
       rr:termType star:RDFStarTermType;
       star:subject [a rr:ObjectMap;
         rr:template "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#individuals/professor_{prof_id}";
@@ -21,7 +21,6 @@
       star:object [a rr:ObjectMap;
         rr:constant :Professor
         ];
-      rr:class :RDFStarTriple;
     ];
   rr:predicateObjectMap [
       rr:predicate :source;
@@ -38,7 +37,7 @@
     ];
   rr:predicateObjectMap [
       rr:predicate :isMentionedBy;
-      rr:objectMap [  a rr:ObjectMap, star:RDFStarTermMap;
+      rr:objectMap [  a rr:ObjectMap;
         rr:termType star:RDFStarTermType;
         star:subject [a rr:ObjectMap;
             rr:template "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#individuals/professor_{prof_id}";

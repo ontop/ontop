@@ -8,12 +8,16 @@ import com.google.inject.Inject;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.*;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.template.TemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.BnodeTemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.IRITemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.LiteralTemplateFactory;
 import it.unibz.inf.ontop.model.template.impl.RDFStarTemplateFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.NestedTripleFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -42,6 +46,7 @@ public class R2RMLToSQLPPTriplesMapConverter {
 	private final TargetAtomFactory targetAtomFactory;
 	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final SubstitutionFactory substitutionFactory;
+	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 	private final IRIConstant rdfType;
 
 	private final String baseIri = "http://example.com/base/";
@@ -55,11 +60,13 @@ public class R2RMLToSQLPPTriplesMapConverter {
 											TypeFactory typeFactory,
 											TargetAtomFactory targetAtomFactory,
 											SQLPPSourceQueryFactory sourceQueryFactory,
-											SubstitutionFactory substitutionFactory) {
+											SubstitutionFactory substitutionFactory,
+											DBFunctionSymbolFactory dbFunctionSymbolFactory) {
 		this.termFactory = termFactory;
 		this.targetAtomFactory = targetAtomFactory;
 		this.sourceQueryFactory = sourceQueryFactory;
 		this.substitutionFactory = substitutionFactory;
+		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 
 		this.rdfType = termFactory.getConstantIRI(RDF.TYPE);
 
@@ -104,17 +111,17 @@ public class R2RMLToSQLPPTriplesMapConverter {
 	}
 
 	private Optional<SQLPPTriplesMap> getSQLPPTriplesMap(TriplesMap tm)  {
-		ImmutableList<TargetAtom> targetAtoms = getTargetAtoms(tm)
+		ImmutableList<TargetAtom> baseTargetAtoms = getTargetAtoms(tm)
 				.collect(ImmutableCollectors.toList());
 
-		if (targetAtoms.isEmpty()) {
+		if (baseTargetAtoms.isEmpty()) {
 			LOGGER.warn("WARNING a triples map without target query will not be introduced : "+ tm);
 			return Optional.empty();
 		}
 
 		String sourceQuery = tm.getLogicalTable().getSQLQuery().trim();
 		return Optional.of(new R2RMLSQLPPtriplesMap("mapping-" + tm.hashCode(),
-				sourceQueryFactory.createSourceQuery(sourceQuery),  targetAtoms));
+				sourceQueryFactory.createSourceQuery(sourceQuery),  baseTargetAtoms));
 	}
 
     /*
@@ -129,12 +136,28 @@ public class R2RMLToSQLPPTriplesMapConverter {
 				.map(m -> extract(iriTerm, m))
 				.collect(ImmutableCollectors.toList());
 
-		return Stream.concat(
+		ImmutableList<TargetAtom> returnValue = Stream.concat(
 				subjectMap.getClasses().stream()
 						.map(termFactory::getConstantIRI)
 						.flatMap(iri -> getTargetAtoms(subject, rdfType, iri, subject_graphs)),
 				tm.getPredicateObjectMaps().stream()
-						.flatMap(pom -> getTargetAtoms(subject, pom, subject_graphs)));
+						.flatMap(pom -> getTargetAtoms(subject, pom, subject_graphs)))
+				.collect(ImmutableCollectors.toList());
+		// For RDF-star support, add target atoms with different predicates than TriplePredicate
+		ImmutableList<TargetAtom> debugReturnValue = Stream.concat(
+						returnValue.stream(),
+						returnValue.stream()
+								.filter(targetAtom -> targetAtom.getProjectionAtom().getPredicate() instanceof TriplePredicate)
+								.flatMap(targetAtom -> getRDFStarTargetAtoms(
+										targetAtom.getSubstitution().get(termFactory.getVariable("s")),
+										targetAtom.getSubstitution().get(termFactory.getVariable("p")),
+										targetAtom.getSubstitution().get(termFactory.getVariable("o")),
+										targetAtom.getProjectionAtom().getPredicate() instanceof TripleRefPredicate ?
+												((TripleRefPredicate) targetAtom.getProjectionAtom().getPredicate()).getTripleReference(targetAtom.getSubstitutedTerms()) :
+												null,
+										(RDFAtomPredicate) targetAtom.getProjectionAtom().getPredicate())))
+				.collect(ImmutableCollectors.toList());
+		return debugReturnValue.stream();
 	}
 
 	private Stream<TargetAtom> getTargetAtoms(ImmutableTerm subject, PredicateObjectMap pom, ImmutableList<NonVariableTerm> subject_graphs) {
@@ -162,6 +185,88 @@ public class R2RMLToSQLPPTriplesMapConverter {
 					.map(g -> isDefaultGraph(g)
 						? targetAtomFactory.getTripleTargetAtom(subject, predicate, object)
 						: targetAtomFactory.getQuadTargetAtom(subject, predicate, object, g));
+	}
+
+	private Stream<TargetAtom> getRDFStarTargetAtoms(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object, ImmutableTerm rootRef, RDFAtomPredicate rootPredicate) {
+		boolean nestedSubjectExists = subject instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm) subject).getFunctionSymbol() instanceof NestedTripleFunctionSymbol;
+		boolean nestedObjectExists = object instanceof NonGroundFunctionalTerm && ((NonGroundFunctionalTerm) object).getFunctionSymbol() instanceof NestedTripleFunctionSymbol;
+		ImmutableFunctionalTerm tripleRef;
+		ImmutableList<TargetAtom> termsCreatedFromNestedSubject = ImmutableList.of();
+		ImmutableList<TargetAtom> termsCreatedFromNestedObject = ImmutableList.of();
+
+		if (!(nestedSubjectExists || nestedObjectExists)) {
+			return Stream.of();
+		} if (nestedSubjectExists) {
+			ImmutableList<? extends ImmutableTerm> nestedTerms = ((NonGroundFunctionalTerm) subject).getTerms();
+			UUID uuid = UUID.randomUUID();
+			// TODO: Make the tripleRef have an IRIStringTemplateFunctionSymbol, this leads to errors and would need
+			// further exceptions in UniqueTermTypeMappingCaster.transform().
+			/*IRIStringTemplateFunctionSymbol dbTemplate = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(Template.builder()
+					.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid+ '/')
+					.addColumn().addSeparator("/")
+					.addColumn().addSeparator("/").addColumn()
+					.build());
+			tripleRef = termFactory.getImmutableFunctionalTerm(dbTemplate, nestedTerms);*/
+			tripleRef = termFactory.getIRIFunctionalTerm(
+					Template.builder()
+							.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid + '/')
+							.addColumn().addSeparator("/")
+							.addColumn().addSeparator("/").addColumn()
+							.build(),
+					nestedTerms);
+			termsCreatedFromNestedSubject = Stream.of(
+					getRDFStarTargetAtom(nestedTerms.get(0), nestedTerms.get(1), nestedTerms.get(2), tripleRef, false, false, true),
+					getRDFStarTargetAtom(tripleRef, predicate, object, rootRef, true, rootPredicate instanceof TripleNestedObjectPredicate, rootPredicate instanceof TripleRefPredicate)
+			).collect(ImmutableCollectors.toList());
+		} if (nestedObjectExists) {
+			ImmutableList<? extends ImmutableTerm> nestedTerms = ((NonGroundFunctionalTerm) object).getTerms();
+			UUID uuid = UUID.randomUUID();
+			// TODO: Make the tripleRef have an IRIStringTemplateFunctionSymbol, this leads to errors and would need
+			// further exceptions in UniqueTermTypeMappingCaster.transform().
+			/*IRIStringTemplateFunctionSymbol dbTemplate = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(Template.builder()
+					.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid+ '/')
+					.addColumn().addSeparator("/")
+					.addColumn().addSeparator("/").addColumn()
+					.build());
+			tripleRef = termFactory.getImmutableFunctionalTerm(dbTemplate, nestedTerms);*/
+			tripleRef = termFactory.getIRIFunctionalTerm(
+					Template.builder()
+							.addSeparator("http://tripleRef.ontop-vkg.org/2021/rdfstar" + uuid+ '/')
+							.addColumn().addSeparator("/")
+							.addColumn().addSeparator("/").addColumn()
+							.build(),
+					nestedTerms);
+			termsCreatedFromNestedObject = Stream.of(
+					getRDFStarTargetAtom(nestedTerms.get(0), nestedTerms.get(1), nestedTerms.get(2), tripleRef, false, false, true),
+					getRDFStarTargetAtom(subject, predicate, tripleRef, rootRef, rootPredicate instanceof TripleNestedSubjectPredicate, true, rootPredicate instanceof TripleRefPredicate)
+			).collect(ImmutableCollectors.toList());
+		}
+		return Stream.concat(Stream.concat(Stream.concat(
+				termsCreatedFromNestedSubject.stream(),
+				termsCreatedFromNestedObject.stream()),
+				termsCreatedFromNestedSubject.stream()
+						.flatMap(targetAtom -> getRDFStarTargetAtoms(
+								targetAtom.getSubstitution().get(termFactory.getVariable("s")),
+								targetAtom.getSubstitution().get(termFactory.getVariable("p")),
+								targetAtom.getSubstitution().get(termFactory.getVariable("o")),
+								targetAtom.getProjectionAtom().getPredicate() instanceof TripleRefPredicate ?
+										((TripleRefPredicate) targetAtom.getProjectionAtom().getPredicate()).getTripleReference(targetAtom.getSubstitutedTerms()) :
+										null,
+								(RDFAtomPredicate) targetAtom.getProjectionAtom().getPredicate()))),
+				termsCreatedFromNestedObject.stream()
+						.flatMap(targetAtom -> getRDFStarTargetAtoms(
+								targetAtom.getSubstitution().get(termFactory.getVariable("s")),
+								targetAtom.getSubstitution().get(termFactory.getVariable("p")),
+								targetAtom.getSubstitution().get(termFactory.getVariable("o")),
+								targetAtom.getProjectionAtom().getPredicate() instanceof TripleRefPredicate ?
+										((TripleRefPredicate) targetAtom.getProjectionAtom().getPredicate()).getTripleReference(targetAtom.getSubstitutedTerms()) :
+										null,
+								(RDFAtomPredicate) targetAtom.getProjectionAtom().getPredicate())));
+	}
+
+	private TargetAtom getRDFStarTargetAtom(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object,
+													ImmutableTerm tripleRef, boolean nestedSubject, boolean nestedObject, boolean tripleRefExists) {
+		return targetAtomFactory.getRDFStarTripleTargetAtom(subject, predicate, object, tripleRef, nestedSubject, nestedObject, tripleRefExists);
 	}
 
 	private static boolean isDefaultGraph(ImmutableTerm graphTerm) {

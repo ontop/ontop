@@ -31,6 +31,11 @@ public interface AtomFactory {
 
     DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object);
 
+
+    DistinctVariableOnlyDataAtom getDistinctRDFStarTripleAtom(Variable subject, Variable property, Variable object, boolean nestedSubject, boolean nestedObject);
+
+    DistinctVariableOnlyDataAtom getDistinctRDFStarTripleRefAtom(Variable subject, Variable property, Variable object, Variable tripleRef, boolean nestedSubject, boolean nestedObject);
+
     /**
      * TODO: change the generic-type to RDFAtomPredicate?
      */
