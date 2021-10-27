@@ -81,4 +81,17 @@ public class DestinationTest extends AbstractRDF4JTest {
         assertEquals(6, count);
     }
 
+    @Test
+    public void testSPO() {
+        runQueryAndCount(
+                "SELECT * WHERE {\n" +
+                        "  ?s ?p ?o \n" +
+                        "  VALUES ?p {\n" +
+                        "<http://qudt.org/schema/qudt#conversionOffset>\n" +
+                        "<http://www.linkedmodel.org/schema/vaem#namespace>\n" +
+                        "  }" +
+                        "}\n" +
+                        "LIMIT 10");
+    }
+
 }
