@@ -158,7 +158,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             quadAtom.getVariables(), substitutionFactory.getSubstitution(
                                 quadAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                             subjectDBType,
                                             valuesNode.getOrderedVariables().get(0),
                                             subjectRDFTypeConstant.getRDFTermType()),
@@ -171,7 +171,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                                 tripleAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                             subjectDBType,
                                             valuesNode.getOrderedVariables().get(0),
                                             subjectRDFTypeConstant.getRDFTermType()),
@@ -202,7 +202,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         quadAtom.getVariables(), substitutionFactory.getSubstitution(
                             quadAtom.getTerm(0),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         subjectDBType,
                                         valuesNode.getOrderedVariables().get(0),
                                         subjectRDFTypeConstant.getRDFTermType()),
@@ -210,7 +210,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             quadAtom.getTerm(1), customKey.classOrProperty,
                             quadAtom.getTerm(2),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         objectDBType,
                                         valuesNode.getOrderedVariables().get(1),
                                         objectRDFTypeConstant.getRDFTermType()),
@@ -221,7 +221,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                             tripleAtom.getTerm(0),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         subjectDBType,
                                         valuesNode.getOrderedVariables().get(0),
                                         subjectRDFTypeConstant.getRDFTermType()),
@@ -229,7 +229,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             tripleAtom.getTerm(1), customKey.classOrProperty,
                             tripleAtom.getTerm(2),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         objectDBType,
                                         valuesNode.getOrderedVariables().get(1),
                                         objectRDFTypeConstant.getRDFTermType()),
@@ -283,7 +283,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             quadAtom.getVariables(), substitutionFactory.getSubstitution(
                                 quadAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                             valuesNode.getOrderedVariables().get(0),
                                             RDFTERMTYPE_TEXT),
                                         valuesNode.getOrderedVariables().get(1)),
@@ -295,7 +295,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                                 tripleAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                             valuesNode.getOrderedVariables().get(0),
                                                 RDFTERMTYPE_TEXT),
                                             valuesNode.getOrderedVariables().get(1)),
@@ -316,14 +316,14 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         quadAtom.getVariables(), substitutionFactory.getSubstitution(
                                 quadAtom.getTerm(0),
                                 termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                                 valuesNode.getOrderedVariables().get(0),
                                                 RDFTERMTYPE_TEXT),
                                         valuesNode.getOrderedVariables().get(2)),
                                 quadAtom.getTerm(1), customKey.classOrProperty,
                                 quadAtom.getTerm(2),
                                 termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                                 valuesNode.getOrderedVariables().get(1),
                                                 RDFTERMTYPE_TEXT),
                                         valuesNode.getOrderedVariables().get(3)),
@@ -333,14 +333,14 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                                 tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                                         tripleAtom.getTerm(0),
                                         termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversionFromRDFLexical2DB(
+                                                termFactory.getConversion2RDFLexical(
                                                         valuesNode.getOrderedVariables().get(0),
                                                         RDFTERMTYPE_TEXT),
                                                 valuesNode.getOrderedVariables().get(2)),
                                         tripleAtom.getTerm(1), customKey.classOrProperty,
                                         tripleAtom.getTerm(2),
                                         termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversionFromRDFLexical2DB(
+                                                termFactory.getConversion2RDFLexical(
                                                         valuesNode.getOrderedVariables().get(1),
                                                         RDFTERMTYPE_TEXT),
                                                 valuesNode.getOrderedVariables().get(3)))));
