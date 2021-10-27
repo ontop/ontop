@@ -351,9 +351,6 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
     private ValuesNode createSingleTypeDBValuesNode(Entry < CustomKey, ImmutableList < RDFFact >> entry){
         ImmutableList<RDFFact> rdfFacts = entry.getValue();
-        // This method is used only in case of a single type existing so this is okay here
-        DBTermType subjectDBTermType = rdfFacts.get(0).getSubject().getType().getClosestDBType(dbTypeFactory);
-        DBTermType objectDBTermType = rdfFacts.get(0).getObject().getType().getClosestDBType(dbTypeFactory);
         // Two cases, class assertion or not
         return entry.getKey().isClass
 
@@ -362,8 +359,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        subjectDBTermType)))
+                                extractNaturalDBValue(rdfFact.getSubject())))
                         .collect(ImmutableCollectors.toList()))
 
                 : iqFactory.createValuesNode(
@@ -372,10 +368,8 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        subjectDBTermType),
-                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
-                                        objectDBTermType)))
+                                extractNaturalDBValue(rdfFact.getSubject()),
+                                extractNaturalDBValue(rdfFact.getObject())))
                         .collect(ImmutableCollectors.toList()));
     }
 
@@ -389,10 +383,10 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         projectedVariableGenerator.generateNewVariable(),
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory)),
-                                termFactory.getRDFTermTypeConstant(rdfFact.getSubject().getType())))
+                        .map(RDFFact::getSubject)
+                        .map(subject -> ImmutableList.of(
+                                extractNaturalDBValue(subject),
+                                termFactory.getRDFTermTypeConstant(subject.getType())))
                         .collect(ImmutableCollectors.toList()))
 
                 : iqFactory.createValuesNode(
@@ -403,13 +397,18 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory)),
-                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
-                                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory)),
+                                extractNaturalDBValue(rdfFact.getSubject()),
+                                extractNaturalDBValue(rdfFact.getObject()),
                                 termFactory.getRDFTermTypeConstant(rdfFact.getSubject().getType()),
                                 termFactory.getRDFTermTypeConstant(rdfFact.getObject().getType())))
                         .collect(ImmutableCollectors.toList()));
+    }
+
+    private Constant extractNaturalDBValue(RDFConstant rdfConstant) {
+        ImmutableFunctionalTerm functionalTerm = termFactory.getConversionFromRDFLexical2DB(
+                termFactory.getDBStringConstant(rdfConstant.getValue()),
+                rdfConstant.getType());
+        return (Constant) functionalTerm.simplify();
     }
 
     private static class ABoxFactProvenance implements PPMappingAssertionProvenance {
