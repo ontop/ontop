@@ -5,3 +5,6 @@ ex:v2 ex:p1 20, "plop"@fr .
 
 ex:v1 ex:p2 6, "hallo"@de, 8.0, false .
 ex:v2 ex:p2 30 .
+
+ex:v1 ex:p3 false .
+ex:v2 ex:p3 true .
