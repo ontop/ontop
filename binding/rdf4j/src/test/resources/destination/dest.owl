@@ -36272,4 +36272,22 @@ For an [[AudioObject]] to be 'staged content': Audio that has been created using
     <rdfs:comment xml:lang="en">[[ArchiveOrganization]] that holds, keeps or maintains the [[ArchiveComponent]].</rdfs:comment>
     <schema:source rdf:resource="https://github.com/schemaorg/schemaorg/issues/1758"/>
   </rdf:Description>
+  <rdf:Description rdf:about="http://qudt.org/vocab/unit#Stokes">
+  	<conversionOffset xmlns="http://qudt.org/schema/qudt#" rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0</conversionOffset>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://qudt.org/vocab/unit#DryQuartUS">
+  	<conversionOffset xmlns="http://qudt.org/schema/qudt#" rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0</conversionOffset>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://qudt.org/vocab/unit#KilogramMeterPerSecond">
+  	<conversionOffset xmlns="http://qudt.org/schema/qudt#" rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0</conversionOffset>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://qudt.org/1.1/schema/qudt">
+  	<namespace xmlns="http://www.linkedmodel.org/schema/vaem#">http://qudt.org/schema/qudt</namespace>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://qudt.org/1.1/vocab/unit">
+  	<namespace xmlns="http://www.linkedmodel.org/schema/vaem#">http://qudt.org/vocab/unit</namespace>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.linkedmodel.org/1.0/schema/dtype">
+  	<namespace xmlns="http://www.linkedmodel.org/schema/vaem#" rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.linkedmodel.org/schema/dtype</namespace>
+  </rdf:Description>
 </rdf:RDF>
