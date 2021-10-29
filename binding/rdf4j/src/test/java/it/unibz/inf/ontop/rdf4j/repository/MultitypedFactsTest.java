@@ -15,7 +15,7 @@ public class MultitypedFactsTest extends AbstractRDF4JTest {
     private static final String OBDA_FILE = "/empty.obda";
     private static final String SQL_SCRIPT = "/destination/schema.sql";
     private static final String ONTOLOGY_FILE = "/multityped-facts.ttl";
-    private static final String PROPERTIES_FILE = "/destination/dest.properties";
+    private static final String PROPERTIES_FILE = "/destination/dest-no-tbox.properties";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
