@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -234,6 +235,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformConstruction(tree,this, child);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
+        return transformer.transformConstruction(tree,this, child, context);
     }
 
     @Override

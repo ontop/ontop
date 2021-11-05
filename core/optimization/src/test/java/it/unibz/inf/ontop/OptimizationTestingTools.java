@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
+import org.mapdb.Atomic;
 
 import java.util.Properties;
 import java.util.stream.IntStream;
@@ -53,6 +54,7 @@ public class OptimizationTestingTools {
     public static final CoreSingletons CORE_SINGLETONS;
 
     public static final Variable X;
+    public static final Variable XF0;
     public static final Variable Y;
     public static final Variable W;
     public static final Variable Z;
@@ -91,7 +93,7 @@ public class OptimizationTestingTools {
     public static final Variable N;
     public static final Variable NF0;
     public static final Variable PROV;
-    public static final DBConstant ONE, TWO, ONE_STR, TWO_STR;
+    public static final DBConstant ONE, TWO, ONE_STR, TWO_STR, THREE_STR, FOUR_STR, FIVE_STR;
 
     public static final AtomPredicate ANS1_AR0_PREDICATE, ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,
             ANS1_AR4_PREDICATE, ANS1_AR5_PREDICATE;
@@ -133,6 +135,7 @@ public class OptimizationTestingTools {
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         X = TERM_FACTORY.getVariable("x");
+        XF0 = TERM_FACTORY.getVariable("xf0");
         Y = TERM_FACTORY.getVariable("y");
         W = TERM_FACTORY.getVariable("w");
         Z = TERM_FACTORY.getVariable("z");
@@ -175,6 +178,9 @@ public class OptimizationTestingTools {
         TWO = TERM_FACTORY.getDBIntegerConstant(2);
         ONE_STR = TERM_FACTORY.getDBStringConstant("1");
         TWO_STR = TERM_FACTORY.getDBStringConstant("2");
+        THREE_STR = TERM_FACTORY.getDBStringConstant("3");
+        FOUR_STR = TERM_FACTORY.getDBStringConstant("4");
+        FIVE_STR = TERM_FACTORY.getDBStringConstant("5");
 
         ANS1_AR0_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(0);
         ANS1_AR1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
@@ -232,6 +238,10 @@ public class OptimizationTestingTools {
 
         public RelationDefinition createRelationWithIntAttributes(int tableNumber, int arity, boolean canBeNull) {
             return createRelation(tableNumber, arity, getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
+        }
+
+        public RelationDefinition createRelationWithUuidAttributes(int tableNumber, int arity, boolean canBeNull) {
+            return createRelation(tableNumber, arity, getDBTypeFactory().getDBTermType("UUID"), "UUID_", canBeNull);
         }
     }
 

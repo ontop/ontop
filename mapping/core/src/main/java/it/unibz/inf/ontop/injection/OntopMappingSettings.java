@@ -17,7 +17,6 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean areAbstractDatatypesToleratedInMapping();
 
-
     /**
      * Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology).
      * And let dom(M(S)) (resp. range(M(S))) be all subjects (resp. objects) of some triple in M(S).
@@ -35,6 +34,24 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean isCanIRIComplete();
 
+    /**
+     * If false, use Union Node instead of Values Node
+     * If true use Values Node
+     */
+    boolean isValuesNodeEnabled();
+
+    /**
+     * If false, do not use the tbox to derive facts
+     * If true use tbox saturation
+     */
+    boolean isFactExtractionWithTBoxEnabled();
+
+    /**
+     * If true, rdfs:subClassOf is used to integrate rdfs:domain/rdfs:range facts
+     * If false, no additional facts are integrated in addition to the explicit ontology facts
+     */
+    boolean areSuperClassesOfDomainRangeInferred();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -43,7 +60,9 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     String INFER_DEFAULT_DATATYPE = "ontop.inferDefaultDatatype";
     String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";
-
+    String ENABLE_VALUES_NODE = "ontop.enableValuesNode";
+    String ENABLE_FACT_EXTRACTION_WITH_TBOX = "ontop.enableFactExtractionWithTBox";
+    String INFER_SUPER_CLASSES_OF_DOMAIN_RANGE = "ontop.querySuperClassesOfDomainRange";
 
     /**
      * Options to specify base IRI.

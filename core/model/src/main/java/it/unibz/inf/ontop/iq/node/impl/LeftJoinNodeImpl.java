@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionImpl;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -233,6 +234,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree leftChild, IQTree rightChild) {
         return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree leftChild,
+                                    IQTree rightChild, T context) {
+        return transformer.transformLeftJoin(tree,this, leftChild, rightChild, context);
     }
 
     @Override

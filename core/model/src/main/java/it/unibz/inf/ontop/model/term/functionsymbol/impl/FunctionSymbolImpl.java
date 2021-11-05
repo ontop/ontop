@@ -340,15 +340,9 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
          * In case of injectivity
          */
         if (otherTerm.getFunctionSymbol().equals(this)
-                && isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms()) {
+                && canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms())) {
             if (getArity() == 0)
                 return IncrementalEvaluation.declareIsTrue();
-
-            if (!canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms()))
-                /*
-                 * TODO: support this special case? Could potentially be wrapped into an IF-ELSE-NULL
-                 */
-                return IncrementalEvaluation.declareSameExpression();
 
             ImmutableExpression newExpression = termFactory.getConjunction(
                     IntStream.range(0, getArity())
@@ -363,18 +357,33 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
-     * ONLY for injective function symbols
      *
      * Makes sure that the conjunction would never evaluate as FALSE instead of NULL
      * (first produced equality evaluated as false, while the second evaluates as NULL)
+     *
+     * TODO: could be refactored so as to signal it needs to be wrapped in a BOOL_IF_ELSE_NULL.
      *
      */
     protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
                                                          VariableNullability variableNullability,
                                                          ImmutableList<? extends ImmutableTerm> otherTerms) {
+        // Can be relaxed by overriding
+        if (!isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
+            return false;
+
+        return canBeSafelyDecomposedIntoConjunctionWhenInjective(terms, variableNullability, otherTerms);
+    }
+
+    /**
+     * ONLY when injectivity has been proved
+     *
+     */
+    protected boolean canBeSafelyDecomposedIntoConjunctionWhenInjective(ImmutableList<? extends ImmutableTerm> terms,
+                                                           VariableNullability variableNullability,
+                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (mayReturnNullWithoutNullArguments())
             return false;
-        if (getArity() == 1)
+        if (getArity() < 2)
             return true;
 
         return !(variableNullability.canPossiblyBeNullSeparately(terms)

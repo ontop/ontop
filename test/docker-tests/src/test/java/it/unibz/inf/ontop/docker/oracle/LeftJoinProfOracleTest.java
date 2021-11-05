@@ -140,4 +140,9 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
     protected List<String> getExpectedValueSumStudents5() {
         return ImmutableList.of("John: 12", "Mary: 13", "Roger: 21");
     }
+
+    @Override
+    protected ImmutableList<String> getExpectedAggregationMappingProfStudentCountPropertyResults() {
+        return ImmutableList.of("12", "13", "21");
+    }
 }

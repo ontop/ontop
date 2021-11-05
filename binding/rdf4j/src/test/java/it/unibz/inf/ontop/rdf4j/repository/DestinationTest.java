@@ -13,16 +13,19 @@ public class DestinationTest extends AbstractRDF4JTest {
 
     private static final String OBDA_FILE = "/destination/dest.obda";
     private static final String SQL_SCRIPT = "/destination/schema.sql";
+    private static final String ONTOLOGY_FILE = "/destination/dest.owl";
+    private static final String PROPERTIES_FILE = "/destination/dest.properties";
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        initOBDA(SQL_SCRIPT, OBDA_FILE);
+        initOBDA(SQL_SCRIPT, OBDA_FILE, ONTOLOGY_FILE, PROPERTIES_FILE);
     }
 
     @AfterClass
     public static void after() throws SQLException {
         release();
     }
+
     @Test
     public void testQuery() {
         int count = runQueryAndCount("PREFIX schema: <http://schema.org/>\n" +
@@ -57,6 +60,38 @@ public class DestinationTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 500\n");
         assertEquals(1, count);
+    }
+
+    @Test
+    public void testSubQueryOrderByNonProjectedVariable() {
+        int count = runQueryAndCount("PREFIX schema: <http://schema.org/>\n" +
+                "\n" +
+                "SELECT * WHERE {\n" +
+                "  { SELECT DISTINCT ?h ?nStr WHERE {\n" +
+                "      ?h a schema:LodgingBusiness ;\n" +
+                "         schema:name ?n .\n" +
+                "      BIND(str(?n) AS ?nStr)\n" +
+                "    }\n" +
+                "    ORDER BY DESC(CONCAT(?nStr, ?nStr))\n" +
+                "    LIMIT 2\n" +
+                "  }\n" +
+                "  ?h schema:name ?name\n" +
+                "}");
+
+        assertEquals(6, count);
+    }
+
+    @Test
+    public void testSPO() {
+        runQueryAndCount(
+                "SELECT * WHERE {\n" +
+                        "  ?s ?p ?o \n" +
+                        "  VALUES ?p {\n" +
+                        "<http://qudt.org/schema/qudt#conversionOffset>\n" +
+                        "<http://www.linkedmodel.org/schema/vaem#namespace>\n" +
+                        "  }" +
+                        "}\n" +
+                        "LIMIT 10");
     }
 
 }

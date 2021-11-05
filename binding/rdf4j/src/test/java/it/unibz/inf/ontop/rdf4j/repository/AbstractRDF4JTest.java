@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,14 +31,14 @@ public class AbstractRDF4JTest {
     private static final String PASSWORD = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRDF4JTest.class);
     private static Connection SQL_CONNECTION;
-    private static RepositoryConnection REPO_CONNECTION;
+    private static OntopRepositoryConnection REPO_CONNECTION;
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath) throws SQLException, IOException {
         initOBDA(dbScriptRelativePath, obdaRelativePath, null);
     }
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
                                    @Nullable String ontologyRelativePath) throws SQLException, IOException {
-        initOBDA(dbScriptRelativePath, obdaRelativePath, null, null);
+        initOBDA(dbScriptRelativePath, obdaRelativePath, ontologyRelativePath, null);
     }
 
     protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath,
@@ -95,13 +95,14 @@ public class AbstractRDF4JTest {
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
-        OntopRepository repo = OntopRepository.defaultRepository(config);
+        OntopVirtualRepository repo = OntopRepository.defaultRepository(config);
         repo.init();
         /*
          * Prepare the data connection for querying.
          */
         REPO_CONNECTION = repo.getConnection();
     }
+
 
     protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
         initR2RML(dbScriptRelativePath, r2rmlRelativePath, null, null);
@@ -149,7 +150,7 @@ public class AbstractRDF4JTest {
 
         OntopSQLOWLAPIConfiguration config = builder.build();
 
-        OntopRepository repo = OntopRepository.defaultRepository(config);
+        OntopVirtualRepository repo = OntopRepository.defaultRepository(config);
         repo.init();
         /*
          * Prepare the data connection for querying.
@@ -194,6 +195,10 @@ public class AbstractRDF4JTest {
                                       BindingSet bindings) {
         ImmutableList<String> vValues = runQuery(queryString, bindings);
         assertEquals(expectedVValues, vValues);
+    }
+
+    protected String reformulate(String queryString) {
+        return REPO_CONNECTION.reformulate(queryString);
     }
 
     protected ImmutableList<String> runQuery(String queryString) {
