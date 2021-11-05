@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
@@ -34,7 +31,11 @@ import org.apache.commons.rdf.api.RDF;
 public class OntopModelModule extends OntopAbstractModule {
 
     protected OntopModelModule(OntopModelConfiguration configuration) {
-        super(configuration.getSettings());
+        this(configuration.getSettings());
+    }
+
+    protected OntopModelModule(OntopModelSettings settings) {
+        super(settings);
     }
 
     @Override
