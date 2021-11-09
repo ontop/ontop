@@ -1,5 +1,11 @@
 package it.unibz.inf.ontop.protege.core;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import javax.annotation.Nonnull;
+
 /*
  * #%L
  * ontop-protege
@@ -23,10 +29,6 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
-import it.unibz.inf.ontop.utils.OWLAPIAdapter;
-
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -35,9 +37,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
-import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.stream.StreamSupport;
+import it.unibz.inf.ontop.protege.utils.OWLAPIAdapter;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 
 
 /**
@@ -92,7 +94,7 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
 	    
-        final IRI ontologyIri = OWLAPIAdapter.getOntologyIRI(ontologyID).orNull();
+        final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
 
 		if (ontologyIri == null)
 			return;
