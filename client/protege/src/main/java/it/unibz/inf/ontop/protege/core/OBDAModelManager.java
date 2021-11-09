@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.protege.core;
 
+import com.github.jsonldjava.shaded.com.google.common.base.Throwables;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -192,34 +193,49 @@ public class OBDAModelManager implements Disposable {
 	private class OBDAPluginOWLModelManagerListener implements OWLModelManagerListener {
 		@Override
 		public void handleChange(OWLModelManagerChangeEvent event) {
-			LOGGER.debug(event.getType().name());
-			setUpReasonerInfo();
-			switch (event.getType()) {
-				case ONTOLOGY_CREATED: // fired before ACTIVE_ONTOLOGY_CHANGED
-					ontologyCreated();
-					break;
-
-				case ACTIVE_ONTOLOGY_CHANGED:
-					activeOntologyChanged();
-					break;
-
-				case ONTOLOGY_LOADED: // fired after ACTIVE_ONTOLOGY_CHANGED
-				case ONTOLOGY_RELOADED:
-					ontologyLoadedReloaded();
-					break;
-
-				case ONTOLOGY_SAVED:
-					ontologySaved();
-					break;
-
-				case REASONER_CHANGED:
-				case ABOUT_TO_CLASSIFY:
-				case ONTOLOGY_CLASSIFIED:
-				case ENTITY_RENDERER_CHANGED:
-				case ONTOLOGY_VISIBILITY_CHANGED:
-				case ENTITY_RENDERING_CHANGED:
-					break;
-			}
+		    try {
+    			LOGGER.debug(event.getType().name());
+    			setUpReasonerInfo();
+    			switch (event.getType()) {
+    				case ONTOLOGY_CREATED: // fired before ACTIVE_ONTOLOGY_CHANGED
+    					ontologyCreated();
+    					break;
+    
+    				case ACTIVE_ONTOLOGY_CHANGED:
+    					activeOntologyChanged();
+    					break;
+    
+    				case ONTOLOGY_LOADED: // fired after ACTIVE_ONTOLOGY_CHANGED
+    				case ONTOLOGY_RELOADED:
+    					ontologyLoadedReloaded();
+    					break;
+    
+    				case ONTOLOGY_SAVED:
+    					ontologySaved();
+    					break;
+    
+    				case REASONER_CHANGED:
+    				case ABOUT_TO_CLASSIFY:
+    				case ONTOLOGY_CLASSIFIED:
+    				case ENTITY_RENDERER_CHANGED:
+    				case ONTOLOGY_VISIBILITY_CHANGED:
+    				case ENTITY_RENDERING_CHANGED:
+    					break;
+    			}
+		    } catch (Throwable ex) {
+                // Report the error, either using the logging system or by directly writing on
+                // STDERR (an error here will crash the Ontop Protégé plugin, so it's important to
+                // report it as otherwise there will be no debugging info to work on)
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("", ex);
+                } else {
+                    ex.printStackTrace();
+                }
+                
+                // Propagate the error
+                Throwables.throwIfUnchecked(ex);
+                throw new RuntimeException(ex);
+		    }
 		}
 	}
 

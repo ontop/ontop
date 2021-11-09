@@ -6,53 +6,61 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.github.jsonldjava.shaded.com.google.common.base.Joiner;
-import com.github.jsonldjava.shaded.com.google.common.base.Preconditions;
-import com.github.jsonldjava.shaded.com.google.common.base.Throwables;
-import com.github.jsonldjava.shaded.com.google.common.collect.ImmutableMap;
-import com.github.jsonldjava.shaded.com.google.common.collect.Maps;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationValue;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
+import org.semanticweb.owlapi.search.EntitySearcher;
+import org.semanticweb.owlapi.util.OWLObjectTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Adapter class for calling certain OWL API methods involving a conflicting version of Guava.
+ * Adapter class for calling OWL API methods involving Guava arguments and/or results.
  * <p>
  * Ontop and Protégé use different versions of Guava (resp. v30+ and v18), which cause clashes in
- * the Ontop Protégé plugin where those versions coexist, one provided by Protégé bundle and the
- * other by Ontop bundle, using different OSGI {@link ClassLoader}s. As the Ontop Protégé plugin
- * bundle is configured to use Ontop's Guava version (v30+), directly calling from the Ontop
- * Protégé plugin any OWL API method that has a Guava class as argument or result will result in a
- * runtime {@link LinkageError}, because the Ontop Protégé plugin compiler sees a version of Guava
- * classes that is different from the one seen at runtime and coming from the Protégé bundle.
+ * the Ontop Protégé plugin where those versions coexist, one version provided by Protégé bundle
+ * and the other (newer) version by the Ontop Protégé plugin bundle, through the use of different
+ * OSGI {@link ClassLoader}s. As the Ontop Protégé plugin bundle is configured to use Ontop's
+ * Guava version (v30+), directly calling from the Ontop Protégé plugin any OWL API method that
+ * has a Guava class as argument or result will produce a runtime {@link LinkageError}, because
+ * the Guava classes seen by the compiler of the Ontop Protégé plugin are different from the ones
+ * coming from the Protégé bundle and seen by the JVM at runtime.
  * </p>
  * <p>
  * The Guava version clash problem is overcome by calling OWL API methods involving Guava classes
  * via reflection using this adapter class, which takes care of performing the necessary
  * conversions between method arguments/results of mismatching Guava classes (same class name,
- * different ClassLoader). This adapter class defines methods for wrapping only OWL API methods
- * needed by the Ontop Protégé plugin. There are other unused OWL API methods that need
+ * different ClassLoaders). This adapter class defines methods for wrapping only the OWL API
+ * methods needed by the Ontop Protégé plugin. There are other unused OWL API methods that need
  * adaptations, and they can be handled here by easily extending this adapter class. The following
  * table reports a comprehensive list of OWL API methods requiring adaptation, along with the
- * corresponding wrapper method definitions to be added to this adapter class (implementation
- * note: besides adding these method definitions to this interface, the developer should also add
- * a corresponding mapping from the wrapper method to the target wrapped method in private map
- * {@code targets}, following instructions in source code comments).
+ * corresponding wrapper method definitions to be added to this adapter class (for the methods
+ * listed below, no further code change is needed besides adding the corresponding method
+ * declaration in the interface).
  * </p>
  * <table>
  * <tr>
@@ -132,6 +140,22 @@ import org.slf4j.LoggerFactory;
  * <td>{@code <T> OWLObjectTransformer<T> newOWLObjectTransformer(Predicate<Object> predicate,
  * Function<T, T> transformer, OWLDataFactory df, Class<T> witness)}</td>
  * </tr>
+ * </table>
+ * <p>
+ * <b>Implementation note</b>: each adapter class method is mapped to a target executable member
+ * (method or constructor), which is located as follows:
+ * <ol>
+ * <li>first, a target instance method is searched by treating the first argument of the adapter
+ * method as the {@code self} object on which to call the target instance method; other arguments
+ * and result type must match in number and class names (as ClassLoaders may be different);
+ * <li>on failure, a target static method is searched in a selected list of target classes
+ * hard-coded in this adapter class; also in this case, arguments and result type must match in
+ * number and class names;
+ * <li>on failure, a target constructor is searched in the class corresponding to the result type
+ * of the adapter method; arguments must match in number and type;
+ * <li>on failure, the initialization of the adapter class fails.
+ * </ol>
+ * </p>
  */
 public interface OWLAPIAdapter {
 
@@ -159,20 +183,40 @@ public interface OWLAPIAdapter {
                 private final Logger logger = LoggerFactory.getLogger(OWLAPIAdapter.class);
 
                 /**
-                 * Mappings from adapter method names to target methods/constructors to invoke.
-                 * Each entry here should match a method in the adapter interface.
+                 * Method handlers, created eagerly.
                  */
-                private final Map<String, Executable> targets = ImmutableMap
-                        .<String, Executable>builder() //
-                        .put("getOntologyIRI", resolve(OWLOntologyID.class, "getOntologyIRI")) //
-                        // EXTENSION POINT: add here mappings for further adapter methods
-                        .build();
+                private final Map<Method, BiFunction<Object, Object[], Object>> handlers = Arrays
+                        .asList(OWLAPIAdapter.class.getDeclaredMethods()).stream()
+                        .collect(Collectors.toMap(m -> m, m -> {
 
-                /**
-                 * Method handlers, created at first access and then cached.
-                 */
-                private final Map<Method, BiFunction<Object, Object[], Object>> handlers = Maps
-                        .newConcurrentMap();
+                            // Try mapping to an instance method (defined by arg[0] class)
+                            Executable target = null;
+                            final Class<?>[] args = m.getParameterTypes();
+                            if (args.length > 0) {
+                                target = resolve(args[0], m.getName(),
+                                        Arrays.copyOfRange(args, 1, args.length));
+                            }
+
+                            // EXTENSION POINT: add here the classes where to look for target
+                            // static methods
+                            final Class<?>[] classes = new Class<?>[] { EntitySearcher.class };
+
+                            // Try mapping to a static method (defined by one of targetClasses)
+                            for (int i = 0; target == null && i < classes.length; ++i) {
+                                target = resolve(classes[i], m.getName(), args);
+                            }
+
+                            // Try mapping to a constructor (defined by result class)
+                            if (target == null) {
+                                target = resolve(m.getReturnType(), null, args);
+                            }
+
+                            // Check mapping was successful
+                            Preconditions.checkArgument(target != null, "Could not map %s", m);
+
+                            // Create handler mapping source method to target executable
+                            return newHandler(m, target);
+                        }));
 
                 /**
                  * {@inheritDoc} Implements the call to an adapter interface method by delegating
@@ -183,11 +227,8 @@ public interface OWLAPIAdapter {
                 public Object invoke(final Object proxy, final Method method, final Object[] args)
                         throws Throwable {
 
-                    // Delegate to handler associated to invoked method, creating it if needed
-                    return this.handlers
-                            .computeIfAbsent(method,
-                                    m -> newHandler(m, this.targets.get(m.getName()))) //
-                            .apply(null, args);
+                    // Delegate to handler associated to invoked method
+                    return this.handlers.get(method).apply(null, args);
                 }
 
                 /**
@@ -202,15 +243,13 @@ public interface OWLAPIAdapter {
                  *            the name of the executable member, in case it is a method
                  * @param argClasses
                  *            the classes of the arguments accepted by the executable member
-                 * @return the resolved executable member
-                 * @throws Error
-                 *             if a matching executable member cannot be resolved
+                 * @return the resolved executable member, or null if no match was found
                  */
                 private Executable resolve(final Class<?> clazz, @Nullable final String name,
                         final Class<?>... argClasses) {
 
                     // Check all public constructors or methods
-                    for (final Executable e : name == null ? clazz.getConstructors()
+                    outer: for (final Executable e : name == null ? clazz.getConstructors()
                             : clazz.getMethods()) {
 
                         // Skip candidate member if argument count does not match
@@ -227,7 +266,7 @@ public interface OWLAPIAdapter {
                         for (int i = 0; i < argClasses.length; ++i) {
                             if (!e.getParameterTypes()[i].getName()
                                     .equals(argClasses[i].getName())) {
-                                continue;
+                                continue outer;
                             }
                         }
 
@@ -235,10 +274,8 @@ public interface OWLAPIAdapter {
                         return e;
                     }
 
-                    // Should not happen
-                    throw new Error("Could not resolve member " + clazz.getName() + "."
-                            + (name != null ? name : "<constructor>") + "("
-                            + Joiner.on(", ").join(argClasses) + ")");
+                    // No matching member found
+                    return null;
                 }
 
                 /**
@@ -259,7 +296,7 @@ public interface OWLAPIAdapter {
 
                     try {
                         // Log executable call
-                        if (this.logger.isDebugEnabled()) {
+                        if (this.logger.isTraceEnabled()) {
                             final StringBuilder sb = new StringBuilder();
                             sb.append("Calling ").append(executable);
                             if (self != null) {
@@ -269,7 +306,7 @@ public interface OWLAPIAdapter {
                             sb.append(" with ").append(args.length).append(" arguments (");
                             Joiner.on(", ").appendTo(sb, args);
                             sb.append(")");
-                            this.logger.debug(sb.toString());
+                            this.logger.trace(sb.toString());
                         }
 
                         // Handle constructors and methods calls separately
@@ -367,27 +404,16 @@ public interface OWLAPIAdapter {
                     // Retrieve class name, which MUST be the same for source and target classes
                     // (only ClassLoader may change)
                     final String name = sourceClass.getName();
-                    Preconditions.checkArgument(name.equals(targetClass.getName()));
+                    Preconditions.checkArgument(name.equals(targetClass.getName()),
+                            "mismatching class names: %s != %s", name, targetClass.getName());
 
                     // Handle various conversion cases:
                     if (targetClass.isAssignableFrom(sourceClass)) {
                         // (1) no conversion needed
                         return Functions.identity();
 
-                    } else if (sourceClass.isInterface() && targetClass.isInterface()) {
-                        // (2) interface conversion, handled using handlers + Java proxy mechanism
-                        final Map<Method, BiFunction<Object, Object[], Object>> handlers;
-                        handlers = Maps.newHashMap();
-                        for (final Method method : targetClass.getMethods()) {
-                            handlers.put(method, newHandler(method, resolve(sourceClass,
-                                    method.getName(), method.getParameterTypes())));
-                        }
-                        return o -> Proxy.newProxyInstance(targetClass.getClassLoader(),
-                                new Class<?>[] { targetClass },
-                                (proxy, method, args) -> handlers.get(method).apply(o, args));
-
                     } else if (name.equals(Optional.class.getName())) {
-                        // (3) guava Optional conversion
+                        // (2) guava Optional conversion
                         final Executable orNull = resolve(sourceClass, "orNull");
                         final Executable fromNullable = resolve(targetClass, "fromNullable",
                                 Object.class);
@@ -396,7 +422,7 @@ public interface OWLAPIAdapter {
                     } else if (name.equals(Multimap.class.getName())
                             || name.equals(ListMultimap.class.getName())
                             || name.equals(LinkedListMultimap.class.getName())) {
-                        // (4) guava Multimap conversion
+                        // (3) guava Multimap conversion
                         final Class<?> targetImplClass;
                         try {
                             targetImplClass = Class.forName(LinkedListMultimap.class.getName(),
@@ -416,6 +442,18 @@ public interface OWLAPIAdapter {
                             }
                             return result;
                         };
+
+                    } else if (sourceClass.isInterface() && targetClass.isInterface()) {
+                        // (4) interface conversion, handled using handlers + Java proxy mechanism
+                        final Map<Method, BiFunction<Object, Object[], Object>> handlers;
+                        handlers = Maps.newHashMap();
+                        for (final Method method : targetClass.getMethods()) {
+                            handlers.put(method, newHandler(method, resolve(sourceClass,
+                                    method.getName(), method.getParameterTypes())));
+                        }
+                        return o -> Proxy.newProxyInstance(targetClass.getClassLoader(),
+                                new Class<?>[] { targetClass },
+                                (proxy, method, args) -> handlers.get(method).apply(o, args));
                     }
 
                     // EXTENSION POINT: add here other conversion cases as required
