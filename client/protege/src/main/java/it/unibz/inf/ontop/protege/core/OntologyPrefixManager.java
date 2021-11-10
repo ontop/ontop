@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,7 +49,7 @@ import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 
 public class OntologyPrefixManager extends AbstractPrefixManager {
 
-    private final OWLOntology ontology;
+	private final OWLOntology ontology;
 
 	private final boolean hasExplicitDefaultPrefixNamespace;
 
@@ -93,8 +93,8 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
-	    
-        final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
+		
+		final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
 
 		if (ontologyIri == null)
 			return;
