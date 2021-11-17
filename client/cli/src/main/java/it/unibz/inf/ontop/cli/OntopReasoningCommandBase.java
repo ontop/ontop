@@ -32,14 +32,14 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
 	protected static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
 
-        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI().get();
-        System.err.println("Ontology " + ontologyIRI);
+        OWLOntologyID ontologyId = ontology.getOntologyID();
+        System.err.println("Ontology " + ontologyId);
 
         Set<OWLDeclarationAxiom> declarationAxioms = ontology.getAxioms(AxiomType.DECLARATION);
 
         manager.removeOntology(ontology);
 
-        OWLOntology newOntology = manager.createOntology(ontologyIRI);
+        OWLOntology newOntology = manager.createOntology(ontologyId);
 
         manager.addAxioms(newOntology, declarationAxioms);
 
