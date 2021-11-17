@@ -175,7 +175,7 @@
 
         <!-- Dependency versions: indirectly used & pinned for enforcer plugin -->
         <checkerframework.version>3.8.0</checkerframework.version>
-        <commons-io.version>2.5</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <commons-logging.version>1.2</commons-logging.version>
         <errorprone.version>2.5.1</errorprone.version>
         <jsonld-java.version>0.13.0</jsonld-java.version>
