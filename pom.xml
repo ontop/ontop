@@ -178,7 +178,7 @@
         <commons-io.version>2.5</commons-io.version>
         <commons-logging.version>1.2</commons-logging.version>
         <errorprone.version>2.5.1</errorprone.version>
-        <jsonld-java.version>0.13.0</jsonld-java.version>
+        <jsonld-java.version>0.13.3</jsonld-java.version>
         <junit-jupiter-api.version>5.6.2</junit-jupiter-api.version>
         <osgi.version>6.0.0</osgi.version>
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
