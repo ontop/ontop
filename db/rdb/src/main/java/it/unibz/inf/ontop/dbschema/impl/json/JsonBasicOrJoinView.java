@@ -13,9 +13,8 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
+import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -615,7 +614,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
         }
 
         Optional<ExtensionalDataNode> optionalParentNode = viewIQ.getTree()
-                .acceptVisitor(new ExtensionalNodeExtractor())
+                .acceptVisitor(new RelationExtractor())
                 .filter(n -> n.getRelationDefinition().equals(parentRelation))
                 .findAny();
 
@@ -677,18 +676,6 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                           @JsonProperty("expression") String expression) {
             this.name = name;
             this.expression = expression;
-        }
-    }
-
-    private static class ExtensionalNodeExtractor extends AbstractPredicateExtractor<ExtensionalDataNode> {
-        @Override
-        public Stream<ExtensionalDataNode> visitIntensionalData(IntensionalDataNode dataNode) {
-            return Stream.empty();
-        }
-
-        @Override
-        public Stream<ExtensionalDataNode> visitExtensionalData(ExtensionalDataNode dataNode) {
-            return Stream.of(dataNode);
         }
     }
 }

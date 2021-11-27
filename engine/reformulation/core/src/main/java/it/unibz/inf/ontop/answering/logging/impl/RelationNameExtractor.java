@@ -4,34 +4,23 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
+import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.stream.Stream;
-
 @Singleton
-public class RelationNameExtractor extends AbstractPredicateExtractor<ExtensionalDataNode> {
+public class RelationNameExtractor {
+
+    private final RelationExtractor relationExtractor;
 
     @Inject
-    protected RelationNameExtractor() {
+    protected RelationNameExtractor(RelationExtractor relationExtractor) {
+        this.relationExtractor = relationExtractor;
     }
 
     public ImmutableSet<String> extractRelationNames(IQ iq) {
-        return iq.getTree().acceptVisitor(this)
+        return iq.getTree().acceptVisitor(relationExtractor)
                 // TODO: improve the way to get the name
                 .map(n -> n.getRelationDefinition().getAtomPredicate().getName())
                 .collect(ImmutableCollectors.toSet());
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> visitIntensionalData(IntensionalDataNode dataNode) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<ExtensionalDataNode> visitExtensionalData(ExtensionalDataNode dataNode) {
-        return Stream.of(dataNode);
     }
 }
