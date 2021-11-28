@@ -122,7 +122,8 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
         argList.toArray(args);
 
         // Spring boot gives warns when the logback.configurationFile property is set
-        System.setProperty("logback.configurationFile", "");
+        System.clearProperty("logback.configurationFile");
+        // System.setProperty("logback.configurationFile", "");
 
         OntopEndpointApplication.main(args);
     }

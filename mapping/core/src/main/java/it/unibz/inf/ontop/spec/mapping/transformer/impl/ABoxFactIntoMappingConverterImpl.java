@@ -53,7 +53,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
     private final RDFAtomPredicate quadAtomPredicate;
 
     private final IRIConstant RDF_TYPE;
-    private final RDFTermType RDFTERMTYPE_TEXT;
+    private final RDFTermType XSD_STRING_TYPE;
 
     @Inject
     protected ABoxFactIntoMappingConverterImpl(TermFactory termFactory, IntermediateQueryFactory iqFactory,
@@ -67,7 +67,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
 
         RDF_TYPE = termFactory.getConstantIRI(RDF.TYPE);
-        RDFTERMTYPE_TEXT = typeFactory.getXsdStringDatatype();
+        XSD_STRING_TYPE = typeFactory.getXsdStringDatatype();
 
         projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
 
@@ -134,14 +134,14 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
         }
     }
 
-    private IQ createIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+    private IQ createIQ (Entry<CustomKey,ImmutableList<RDFFact>> entry){
         return entry.getKey().isClass
                 ? createClassIQ(entry)
                 : createPropertyIQ(entry);
     }
 
-    private IQ createClassIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
-        if (containsMultipleSubjectTypes(entry)) {
+    private IQ createClassIQ (Entry<CustomKey,ImmutableList<RDFFact>> entry){
+        if (containsMultipleSubjectOrObjectTypes(entry, true)) {
             LOGGER.debug("This should only be reached if blank nodes are accepted.");
             return createMultiTypedClassIQ(entry);
         }
@@ -158,7 +158,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             quadAtom.getVariables(), substitutionFactory.getSubstitution(
                                 quadAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                             subjectDBType,
                                             valuesNode.getOrderedVariables().get(0),
                                             subjectRDFTypeConstant.getRDFTermType()),
@@ -171,7 +171,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                                 tripleAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
+                                        termFactory.getConversion2RDFLexical(
                                             subjectDBType,
                                             valuesNode.getOrderedVariables().get(0),
                                             subjectRDFTypeConstant.getRDFTermType()),
@@ -184,7 +184,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
     }
 
     private IQ createPropertyIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
-        if (containsMultipleObjectTypes(entry) || containsMultipleSubjectTypes(entry)) {
+        if (containsMultipleSubjectOrObjectTypes(entry, true) || containsMultipleSubjectOrObjectTypes(entry, false)) {
             return createMultiTypedPropertyIQ(entry);
         }
 
@@ -202,7 +202,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         quadAtom.getVariables(), substitutionFactory.getSubstitution(
                             quadAtom.getTerm(0),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         subjectDBType,
                                         valuesNode.getOrderedVariables().get(0),
                                         subjectRDFTypeConstant.getRDFTermType()),
@@ -210,7 +210,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             quadAtom.getTerm(1), customKey.classOrProperty,
                             quadAtom.getTerm(2),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         objectDBType,
                                         valuesNode.getOrderedVariables().get(1),
                                         objectRDFTypeConstant.getRDFTermType()),
@@ -221,7 +221,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                             tripleAtom.getTerm(0),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         subjectDBType,
                                         valuesNode.getOrderedVariables().get(0),
                                         subjectRDFTypeConstant.getRDFTermType()),
@@ -229,7 +229,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             tripleAtom.getTerm(1), customKey.classOrProperty,
                             tripleAtom.getTerm(2),
                                 termFactory.getRDFFunctionalTerm(
-                                    termFactory.getConversionFromRDFLexical2DB(
+                                    termFactory.getConversion2RDFLexical(
                                         objectDBType,
                                         valuesNode.getOrderedVariables().get(1),
                                         objectRDFTypeConstant.getRDFTermType()),
@@ -241,52 +241,35 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
     }
 
     /**
-     * Returns true if the given list of RDFFacts contains multiple types of object.
-     *
-     * @param entry, our custom (key, ImList[RDFFact]) entry
-     * @return a boolean
-     */
-    private boolean containsMultipleObjectTypes (Entry < CustomKey, ImmutableList < RDFFact >> entry){
-        ImmutableList<RDFFact> rdfFacts = entry.getValue();
-        RDFTermType canonicalRDFTermType = rdfFacts.get(0).getObject().getType();
-        DBTermType canonicalDBTermType = canonicalRDFTermType.getClosestDBType(dbTypeFactory);
-
-        return rdfFacts.stream()
-                .anyMatch(rdfFact -> !(
-                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory).equals(canonicalDBTermType) &&
-                        rdfFact.getObject().getType().equals(canonicalRDFTermType)));
-    }
-
-    /**
      * Returns true if the given list of RDFFacts contains multiple types of subject.
      *
      * @param entry, our custom (key, ImList[RDFFact]) entry
      * @return a boolean
      */
-    private boolean containsMultipleSubjectTypes (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+    private boolean containsMultipleSubjectOrObjectTypes(Entry <CustomKey, ImmutableList <RDFFact>> entry, boolean isSubject){
         ImmutableList<RDFFact> rdfFacts = entry.getValue();
-        RDFTermType canonicalRDFTermType = rdfFacts.get(0).getSubject().getType();
-        DBTermType canonicalDBTermType = canonicalRDFTermType.getClosestDBType(dbTypeFactory);
+        RDFFact firstFact = rdfFacts.get(0);
+        RDFConstant firstTerm = isSubject ? firstFact.getSubject() : firstFact.getObject();
+        RDFTermType firstRDFTermType = firstTerm.getType();
 
         return rdfFacts.stream()
-                .anyMatch(rdfFact -> !(
-                        rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory).equals(canonicalDBTermType) &&
-                        rdfFact.getSubject().getType().equals(canonicalRDFTermType)));
+                .map(f -> isSubject ? f.getSubject() : f.getObject())
+                .anyMatch(c -> !(c.getType().equals(firstRDFTermType)));
     }
 
-    private IQ createMultiTypedClassIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+    private IQ createMultiTypedClassIQ (Entry <CustomKey, ImmutableList<RDFFact>> entry){
         ValuesNode valuesNode = createMultiTypedDBValuesNode(entry);
         CustomKey customKey = entry.getKey();
+
+        ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
 
         ConstructionNode topConstructionNode = customKey.graphOptional.map(
                 graph -> iqFactory.createConstructionNode(
                             quadAtom.getVariables(), substitutionFactory.getSubstitution(
                                 quadAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
-                                            valuesNode.getOrderedVariables().get(0),
-                                            RDFTERMTYPE_TEXT),
-                                        valuesNode.getOrderedVariables().get(1)),
+                                            orderedVariables.get(0),
+                                            orderedVariables.get(1)),
                                 quadAtom.getTerm(1), RDF_TYPE,
                                 quadAtom.getTerm(2), customKey.classOrProperty,
                                 quadAtom.getTerm(3), graph)))
@@ -295,10 +278,8 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                             tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                                 tripleAtom.getTerm(0),
                                     termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
-                                            valuesNode.getOrderedVariables().get(0),
-                                                RDFTERMTYPE_TEXT),
-                                            valuesNode.getOrderedVariables().get(1)),
+                                            orderedVariables.get(0),
+                                            orderedVariables.get(1)),
                                 tripleAtom.getTerm(1), RDF_TYPE,
                                 tripleAtom.getTerm(2), customKey.classOrProperty)));
 
@@ -308,42 +289,37 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
 
 
-    private IQ createMultiTypedPropertyIQ (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+    private IQ createMultiTypedPropertyIQ (Entry <CustomKey, ImmutableList<RDFFact>> entry){
         ValuesNode valuesNode = createMultiTypedDBValuesNode(entry);
         CustomKey customKey = entry.getKey();
+
+        ImmutableList<Variable> orderedVariables = valuesNode.getOrderedVariables();
+
         ConstructionNode topConstructionNode = customKey.graphOptional.map(
                 graph -> iqFactory.createConstructionNode(
                         quadAtom.getVariables(), substitutionFactory.getSubstitution(
                                 quadAtom.getTerm(0),
                                 termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
-                                                valuesNode.getOrderedVariables().get(0),
-                                                RDFTERMTYPE_TEXT),
-                                        valuesNode.getOrderedVariables().get(2)),
+                                        orderedVariables.get(0),
+                                        orderedVariables.get(2)),
                                 quadAtom.getTerm(1), customKey.classOrProperty,
                                 quadAtom.getTerm(2),
                                 termFactory.getRDFFunctionalTerm(
-                                        termFactory.getConversionFromRDFLexical2DB(
-                                                valuesNode.getOrderedVariables().get(1),
-                                                RDFTERMTYPE_TEXT),
-                                        valuesNode.getOrderedVariables().get(3)),
+                                        orderedVariables.get(1),
+                                        orderedVariables.get(3)),
                                 quadAtom.getTerm(3), graph)))
                 .orElseGet(() ->
                         iqFactory.createConstructionNode(
                                 tripleAtom.getVariables(), substitutionFactory.getSubstitution(
                                         tripleAtom.getTerm(0),
                                         termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversionFromRDFLexical2DB(
-                                                        valuesNode.getOrderedVariables().get(0),
-                                                        RDFTERMTYPE_TEXT),
-                                                valuesNode.getOrderedVariables().get(2)),
+                                                orderedVariables.get(0),
+                                                orderedVariables.get(2)),
                                         tripleAtom.getTerm(1), customKey.classOrProperty,
                                         tripleAtom.getTerm(2),
                                         termFactory.getRDFFunctionalTerm(
-                                                termFactory.getConversionFromRDFLexical2DB(
-                                                        valuesNode.getOrderedVariables().get(1),
-                                                        RDFTERMTYPE_TEXT),
-                                                valuesNode.getOrderedVariables().get(3)))));
+                                                orderedVariables.get(1),
+                                                orderedVariables.get(3)))));
 
         IQTree iqTree = iqFactory.createUnaryIQTree(topConstructionNode, valuesNode);
         return iqFactory.createIQ(tripleAtom, iqTree);
@@ -351,9 +327,6 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
 
     private ValuesNode createSingleTypeDBValuesNode(Entry < CustomKey, ImmutableList < RDFFact >> entry){
         ImmutableList<RDFFact> rdfFacts = entry.getValue();
-        // This method is used only in case of a single type existing so this is okay here
-        DBTermType subjectDBTermType = rdfFacts.get(0).getSubject().getType().getClosestDBType(dbTypeFactory);
-        DBTermType objectDBTermType = rdfFacts.get(0).getObject().getType().getClosestDBType(dbTypeFactory);
         // Two cases, class assertion or not
         return entry.getKey().isClass
 
@@ -362,8 +335,7 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        subjectDBTermType)))
+                                extractNaturalDBValue(rdfFact.getSubject())))
                         .collect(ImmutableCollectors.toList()))
 
                 : iqFactory.createValuesNode(
@@ -372,27 +344,24 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        subjectDBTermType),
-                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
-                                        objectDBTermType)))
+                                extractNaturalDBValue(rdfFact.getSubject()),
+                                extractNaturalDBValue(rdfFact.getObject())))
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private ValuesNode createMultiTypedDBValuesNode (Entry < CustomKey, ImmutableList < RDFFact >> entry){
+    private ValuesNode createMultiTypedDBValuesNode(Entry<CustomKey, ImmutableList<RDFFact>> entry){
         ImmutableList<RDFFact> rdfFacts = entry.getValue();
         // Two cases, class assertion or not
         return entry.getKey().isClass
-
                 ? iqFactory.createValuesNode(
                 ImmutableList.of(
                         projectedVariableGenerator.generateNewVariable(),
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
-                        .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory)),
-                                termFactory.getRDFTermTypeConstant(rdfFact.getSubject().getType())))
+                        .map(RDFFact::getSubject)
+                        .map(subject -> ImmutableList.of(
+                                (Constant) termFactory.getDBStringConstant(subject.getValue()),
+                                termFactory.getRDFTermTypeConstant(subject.getType())))
                         .collect(ImmutableCollectors.toList()))
 
                 : iqFactory.createValuesNode(
@@ -403,13 +372,18 @@ public class ABoxFactIntoMappingConverterImpl implements FactIntoMappingConverte
                         projectedVariableGenerator.generateNewVariable()),
                 rdfFacts.stream()
                         .map(rdfFact -> ImmutableList.of(
-                                (Constant) termFactory.getDBConstant(rdfFact.getSubject().getValue(),
-                                        rdfFact.getSubject().getType().getClosestDBType(dbTypeFactory)),
-                                termFactory.getDBConstant(rdfFact.getObject().getValue(),
-                                        rdfFact.getObject().getType().getClosestDBType(dbTypeFactory)),
+                                (Constant) termFactory.getDBStringConstant(rdfFact.getSubject().getValue()),
+                                termFactory.getDBStringConstant(rdfFact.getObject().getValue()),
                                 termFactory.getRDFTermTypeConstant(rdfFact.getSubject().getType()),
                                 termFactory.getRDFTermTypeConstant(rdfFact.getObject().getType())))
                         .collect(ImmutableCollectors.toList()));
+    }
+
+    private Constant extractNaturalDBValue(RDFConstant rdfConstant) {
+        ImmutableFunctionalTerm functionalTerm = termFactory.getConversionFromRDFLexical2DB(
+                termFactory.getDBStringConstant(rdfConstant.getValue()),
+                rdfConstant.getType());
+        return (Constant) functionalTerm.simplify();
     }
 
     private static class ABoxFactProvenance implements PPMappingAssertionProvenance {
