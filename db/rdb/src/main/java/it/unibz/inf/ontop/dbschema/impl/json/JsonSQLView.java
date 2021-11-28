@@ -101,6 +101,11 @@ public class JsonSQLView extends JsonView {
 
     }
 
+    @Override
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes) {
+        return ImmutableList.of();
+    }
+
 
     private IQ createIQ(RelationID relationId, DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException {

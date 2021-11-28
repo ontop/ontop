@@ -44,12 +44,14 @@ public class JsonBasicView extends JsonBasicOrJoinView {
 
     /**
      * Infer unique constraints from the parent
+     *
+     * TODO: support renamings
      */
     @Override
-    protected ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation, ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                            ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                            QuotedIDFactory idFactory,
-                                                                            CoreSingletons coreSingletons) {
+    protected ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation, ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                                  ImmutableList<QuotedID> addedConstraintsColumns,
+                                                                                  QuotedIDFactory idFactory,
+                                                                                  CoreSingletons coreSingletons) {
         // List of added columns
         ImmutableList<QuotedID> addedNewColumns = columns.added.stream()
                 .map(a -> idFactory.createAttributeID(a.name))
@@ -65,6 +67,7 @@ public class JsonBasicView extends JsonBasicOrJoinView {
                 .flatMap(Collection::stream)
                 .filter(c -> c.getAttributes().stream()
                         .map(Attribute::getID)
+                        // TODO: replace this superficial logic for better handling composite UCs.
                         .noneMatch(addedConstraintsColumns::contains))
                 .filter(c -> c.getAttributes().stream()
                         .map(Attribute::getID)
@@ -87,4 +90,16 @@ public class JsonBasicView extends JsonBasicOrJoinView {
                 .collect(ImmutableCollectors.toList());
     }
 
+    /**
+     * TODO: support duplication of the column (not just renamings)
+     */
+    @Override
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition,
+                                                                                    ImmutableList<Attribute> parentAttributes) {
+        if (filterExpression != null && (!filterExpression.isEmpty()))
+            // TODO: log a warning
+            return ImmutableList.of();
+
+        return getDerivedFromParentAttributes(ontopViewDefinition, parentAttributes);
+    }
 }

@@ -64,6 +64,17 @@ public abstract class JsonView extends JsonOpenObject {
                                                     ImmutableList<NamedRelationDefinition> baseRelations,
                                                     MetadataLookup metadataLookup, DBParameters dbParameters) throws MetadataExtractionException;
 
+    /**
+     * May be incomplete, but must not produce any false positive.
+     *
+     * Returns the attributes for which it can be proved that the projection over them includes the results
+     * of the projection of the parent relation over the parent attributes under set semantics (no concern for duplicates).
+     *
+     * Parent attributes are expected to all come from the same parent.
+     */
+    public abstract ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(
+            OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes);
+
     protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
         SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
         QuotedIDFactory quotedIdFactory = dbParameters.getQuotedIDFactory();
@@ -209,6 +220,7 @@ public abstract class JsonView extends JsonOpenObject {
     }
 
     protected static class AddForeignKey extends JsonOpenObject {
+        // TODO: make it nullable
         @Nonnull
         public final String name;
         @Nonnull
@@ -222,6 +234,25 @@ public abstract class JsonView extends JsonOpenObject {
             this.name = name;
             this.from = from;
             this.to = to;
+        }
+
+        /**
+         * Name is not considered
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            AddForeignKey that = (AddForeignKey) o;
+            return from.equals(that.from) && to.equals(that.to);
+        }
+
+        /**
+         * Name is not considered
+         */
+        @Override
+        public int hashCode() {
+            return Objects.hash(from, to);
         }
     }
 

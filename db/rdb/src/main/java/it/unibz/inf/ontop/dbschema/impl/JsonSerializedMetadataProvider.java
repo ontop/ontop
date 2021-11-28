@@ -147,7 +147,7 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+    public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         // Does nothing
     }
 

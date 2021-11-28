@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @JsonDeserialize(as = JsonJoinView.class)
 public class JsonJoinView extends JsonBasicOrJoinView {
@@ -67,11 +68,11 @@ public class JsonJoinView extends JsonBasicOrJoinView {
      * Inferred from the tree
      */
     @Override
-    protected ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation,
-                                                                            ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                            ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                            QuotedIDFactory idFactory,
-                                                                            CoreSingletons coreSingletons) {
+    protected ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation,
+                                                                                  ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                                  ImmutableList<QuotedID> addedConstraintsColumns,
+                                                                                  QuotedIDFactory idFactory,
+                                                                                  CoreSingletons coreSingletons) {
         IQ relationIQ = relation.getIQ();
 
         NotYetTypedEqualityTransformer eqTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
@@ -103,6 +104,14 @@ public class JsonJoinView extends JsonBasicOrJoinView {
                         false
                 ))
                 .collect(ImmutableCollectors.toList());
+    }
+
+    /**
+     * TODO: consider implementing it (using FKs between parents)
+     */
+    @Override
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes) {
+        return ImmutableList.of();
     }
 
     protected static class JoinPart extends JsonOpenObject {

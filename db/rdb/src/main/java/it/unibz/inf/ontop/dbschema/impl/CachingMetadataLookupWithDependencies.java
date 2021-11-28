@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,5 +52,15 @@ public class CachingMetadataLookupWithDependencies extends CachingMetadataLookup
                 return CachingMetadataLookupWithDependencies.this.getQuotedIDFactory();
             }
         };
+    }
+
+    /**
+     * Parent -> child
+     */
+    public ImmutableMultimap<RelationID, RelationID> getChildrenMultimap() {
+        return baseRelationIds.entrySet().stream()
+                .flatMap(e -> e.getValue().stream()
+                        .map(parent -> Maps.immutableEntry(parent, e.getKey())))
+                .collect(ImmutableCollectors.toMultimap());
     }
 }

@@ -12,14 +12,13 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
@@ -40,10 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -102,17 +98,19 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
         QuotedIDFactory idFactory = metadataLookupForFK.getQuotedIDFactory();
 
-        if (uniqueConstraints != null)
-            insertUniqueConstraints(relation, idFactory, uniqueConstraints.added, baseRelations, dbParameters.getCoreSingletons());
+        CoreSingletons coreSingletons = dbParameters.getCoreSingletons();
 
-        if (otherFunctionalDependencies != null)
-            insertFunctionalDependencies(relation, idFactory, otherFunctionalDependencies.added, baseRelations);
+        insertUniqueConstraints(relation, idFactory,
+                (uniqueConstraints != null) ? uniqueConstraints.added : ImmutableList.of(),
+                baseRelations, coreSingletons);
 
-        if (foreignKeys != null) {
-            for (AddForeignKey fk : foreignKeys.added) {
-                insertForeignKeys(relation, metadataLookupForFK, fk);
-            }
-        }
+        insertFunctionalDependencies(relation, idFactory,
+                (otherFunctionalDependencies != null) ? otherFunctionalDependencies.added : ImmutableList.of(),
+                baseRelations);
+
+        insertForeignKeys(relation, metadataLookupForFK,
+                (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
+                baseRelations);
     }
 
     private IQ createIQ(RelationID relationId, ImmutableMap<NamedRelationDefinition, String> parentDefinitionMap, DBParameters dbParameters)
@@ -370,7 +368,7 @@ public abstract class JsonBasicOrJoinView extends JsonView {
 
     private List<AddUniqueConstraints> extractUniqueConstraints(OntopViewDefinition relation, List<AddUniqueConstraints> addUniqueConstraints,
                                                                 ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                QuotedIDFactory idFactory, CoreSingletons coreSingletons){
+                                                                QuotedIDFactory idFactory, CoreSingletons coreSingletons) {
 
         // List of constraints added
         ImmutableList<QuotedID> addedConstraintsColumns = (uniqueConstraints == null)
@@ -382,7 +380,8 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 .collect(ImmutableCollectors.toList());
 
         // Filter inherited constraints
-        ImmutableList<AddUniqueConstraints> inheritedConstraints = inferInheritedConstraints(relation, baseRelations,
+        ImmutableList<AddUniqueConstraints> inheritedConstraints = inferInheritedUniqueConstraints(relation, baseRelations,
+                // TODO: refactor this parameter (should preserve composite UCs)
                 addedConstraintsColumns, idFactory, coreSingletons);
 
         // Throw a warning if duplicate unique constraints are added
@@ -397,9 +396,11 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 .collect(Collectors.toList());
     }
 
-    protected abstract ImmutableList<AddUniqueConstraints> inferInheritedConstraints(OntopViewDefinition relation, ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                                     ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                                     QuotedIDFactory idFactory, CoreSingletons coreSingletons);
+    protected abstract ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation,
+                                                                                           ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                                           ImmutableList<QuotedID> addedConstraintsColumns,
+                                                                                           QuotedIDFactory idFactory,
+                                                                                           CoreSingletons coreSingletons);
 
 
     /**
@@ -507,7 +508,56 @@ public abstract class JsonBasicOrJoinView extends JsonView {
         builder.build();
     }
 
-    public void insertForeignKeys(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
+    protected void insertForeignKeys(OntopViewDefinition relation, MetadataLookup lookup,
+                                     List<AddForeignKey> addForeignKeys,
+                                     ImmutableList<NamedRelationDefinition> baseRelations)
+            throws MetadataExtractionException {
+
+        List<AddForeignKey> list = extractForeignKeys(relation, addForeignKeys, baseRelations);
+
+        for (AddForeignKey fk : list) {
+            insertForeignKey(relation, lookup, fk);
+        }
+    }
+
+    private ImmutableList<AddForeignKey> extractForeignKeys(OntopViewDefinition relation, List<AddForeignKey> addForeignKeys,
+                                                   ImmutableList<NamedRelationDefinition> baseRelations) {
+        return Stream.concat(
+                    addForeignKeys.stream(),
+                    inferForeignKeys(relation, baseRelations))
+                .distinct()
+                .collect(ImmutableCollectors.toList());
+    }
+
+    /**
+     * TODO: add FKs towards the base relations
+     */
+    protected Stream<AddForeignKey> inferForeignKeys(OntopViewDefinition relation,
+                                                     ImmutableList<NamedRelationDefinition> baseRelations) {
+        return baseRelations.stream()
+                .flatMap(p -> inferForeignKeysFromParent(relation, p));
+    }
+
+    protected Stream<AddForeignKey> inferForeignKeysFromParent(OntopViewDefinition relation,
+                                                               NamedRelationDefinition baseRelation) {
+        return baseRelation.getForeignKeys().stream()
+                .flatMap(fk -> getDerivedFromParentAttributes(
+                        relation,
+                        fk.getComponents().stream()
+                                .map(ForeignKeyConstraint.Component::getAttribute)
+                                .collect(ImmutableCollectors.toList())).stream()
+                        .map(as -> new AddForeignKey(
+                                UUID.randomUUID().toString(),
+                                JsonMetadata.serializeAttributeList(as.stream()),
+                                new ForeignKeyPart(
+                                        JsonMetadata.serializeRelationID(fk.getReferencedRelation().getID()),
+                                        JsonMetadata.serializeAttributeList(
+                                        fk.getComponents().stream()
+                                                .map(ForeignKeyConstraint.Component::getReferencedAttribute))))));
+
+    }
+
+    protected void insertForeignKey(NamedRelationDefinition relation, MetadataLookup lookup, AddForeignKey addForeignKey) throws MetadataExtractionException {
 
         RelationID targetRelationId = JsonMetadata.deserializeRelationID(lookup.getQuotedIDFactory(), addForeignKey.to.relation);
         NamedRelationDefinition targetRelation;
@@ -538,6 +588,66 @@ public abstract class JsonBasicOrJoinView extends JsonView {
         }
 
         builder.build();
+    }
+
+    /**
+     * Parent attributes are expected to all come from the same parent
+     */
+    protected ImmutableList<ImmutableList<Attribute>> getDerivedFromParentAttributes(
+            OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes) {
+        IQ viewIQ = ontopViewDefinition.getIQ();
+
+        ImmutableList<RelationDefinition> parentRelations = parentAttributes.stream()
+                .map(Attribute::getRelation)
+                .distinct()
+                .collect(ImmutableCollectors.toList());
+
+        RelationDefinition parentRelation;
+        switch (parentRelations.size()) {
+            case 0:
+                return ImmutableList.of();
+            case 1:
+                parentRelation = parentRelations.get(0);
+                break;
+            default:
+                throw new MinorOntopInternalBugException("Was expecting all the attributes to come from the same parent");
+        }
+
+        Optional<ExtensionalDataNode> optionalParentNode = viewIQ.getTree()
+                .acceptVisitor(new RelationExtractor())
+                .filter(n -> n.getRelationDefinition().equals(parentRelation))
+                .findAny();
+
+        if (!optionalParentNode.isPresent())
+            // TODO: log a warning
+            return ImmutableList.of();
+
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> parentNodeArgumentMap = optionalParentNode.get().getArgumentMap();
+
+        ImmutableList.Builder<Variable> parentVariableBuilder = ImmutableList.builder();
+        for (Attribute parentAttribute : parentAttributes) {
+            ImmutableTerm argument = parentNodeArgumentMap.get(parentAttribute.getIndex() - 1);
+            if (!(argument instanceof Variable))
+                // Unused or filtering column (the latter should not happen)
+                return ImmutableList.of();
+            parentVariableBuilder.add((Variable) argument);
+        }
+
+        ImmutableList<Variable> parentVariables = parentVariableBuilder.build();
+        ImmutableList<Variable> projectedVariables = viewIQ.getProjectionAtom().getArguments();
+
+        ImmutableList<Integer> parentVariableIndexes = parentVariables.stream()
+                .map(projectedVariables::indexOf)
+                .collect(ImmutableCollectors.toList());
+
+        if (parentVariableIndexes.stream().anyMatch(i -> i < 0))
+            // Non-projected parent variable
+            return ImmutableList.of();
+
+        return ImmutableList.of(
+                parentVariableIndexes.stream()
+                        .map(i -> ontopViewDefinition.getAttribute(i + 1))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     protected static class Columns extends JsonOpenObject {
