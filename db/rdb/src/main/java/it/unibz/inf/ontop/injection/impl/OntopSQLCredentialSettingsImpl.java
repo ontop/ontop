@@ -2,13 +2,15 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+
+import java.util.Optional;
 import java.util.Properties;
 
 
 public class OntopSQLCredentialSettingsImpl extends OntopSQLCoreSettingsImpl implements OntopSQLCredentialSettings {
 
-    private final String jdbcUser;
-    private final String jdbcPassword;
+    private final Optional<String> jdbcUser;
+    private final Optional<String> jdbcPassword;
 
     /**
      * Beware: immutable class!
@@ -23,16 +25,17 @@ public class OntopSQLCredentialSettingsImpl extends OntopSQLCoreSettingsImpl imp
     protected OntopSQLCredentialSettingsImpl(Properties userProperties) {
         super(userProperties);
 
-        jdbcUser = getRequiredProperty(OntopSQLCredentialSettings.JDBC_USER);
-        jdbcPassword = getRequiredProperty(OntopSQLCredentialSettings.JDBC_PASSWORD);
+        jdbcUser = getProperty(OntopSQLCredentialSettings.JDBC_USER);
+        jdbcPassword = getProperty(OntopSQLCredentialSettings.JDBC_PASSWORD);
     }
 
     @Override
-    public String getJdbcUser() {
+    public Optional<String> getJdbcUser() {
         return jdbcUser;
     }
 
-    public String getJdbcPassword() {
+    @Override
+    public Optional<String> getJdbcPassword() {
         return jdbcPassword;
     }
 }
