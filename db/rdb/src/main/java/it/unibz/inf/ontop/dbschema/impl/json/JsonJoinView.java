@@ -65,48 +65,6 @@ public class JsonJoinView extends JsonBasicOrJoinView {
     }
 
     /**
-     * Inferred from the tree
-     */
-    @Override
-    protected ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation,
-                                                                                  ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                                  ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                                  QuotedIDFactory idFactory,
-                                                                                  CoreSingletons coreSingletons) {
-        IQ relationIQ = relation.getIQ();
-
-        NotYetTypedEqualityTransformer eqTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
-        IQTree tree = eqTransformer.transform(relationIQ.getTree())
-                .normalizeForOptimization(relationIQ.getVariableGenerator());
-
-        ImmutableSet<ImmutableSet<Variable>> variableUniqueConstraints = tree.inferUniqueConstraints();
-
-        ImmutableList<Attribute> attributes = relation.getAttributes();
-        DistinctVariableOnlyDataAtom projectedAtom = relationIQ.getProjectionAtom();
-
-        ImmutableMap<Variable, QuotedID> variableIds = IntStream.range(0, attributes.size())
-                .boxed()
-                .collect(ImmutableCollectors.toMap(
-                        projectedAtom::getTerm,
-                        i -> attributes.get(i).getID()
-                ));
-
-        return variableUniqueConstraints.stream()
-                .map(vs -> new AddUniqueConstraints(
-                        UUID.randomUUID().toString(),
-                        vs.stream()
-                                .map(v -> Optional.ofNullable(variableIds.get(v))
-                                        .orElseThrow(() -> new MinorOntopInternalBugException(
-                                                "The variables of the unique constraints should be projected")))
-                                        .map(QuotedID::getSQLRendering)
-                                        .collect(ImmutableCollectors.toList()),
-                        // PK by default false
-                        false
-                ))
-                .collect(ImmutableCollectors.toList());
-    }
-
-    /**
      * TODO: consider implementing it (using FKs between parents)
      */
     @Override
