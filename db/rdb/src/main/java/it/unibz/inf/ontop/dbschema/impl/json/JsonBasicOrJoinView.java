@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -396,11 +397,46 @@ public abstract class JsonBasicOrJoinView extends JsonView {
                 .collect(Collectors.toList());
     }
 
-    protected abstract ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation,
-                                                                                           ImmutableList<NamedRelationDefinition> baseRelations,
-                                                                                           ImmutableList<QuotedID> addedConstraintsColumns,
-                                                                                           QuotedIDFactory idFactory,
-                                                                                           CoreSingletons coreSingletons);
+    /**
+     * Inferred from the tree
+     */
+    protected ImmutableList<AddUniqueConstraints> inferInheritedUniqueConstraints(OntopViewDefinition relation,
+                                                                                  ImmutableList<NamedRelationDefinition> baseRelations,
+                                                                                  ImmutableList<QuotedID> addedConstraintsColumns,
+                                                                                  QuotedIDFactory idFactory,
+                                                                                  CoreSingletons coreSingletons) {
+        IQ relationIQ = relation.getIQ();
+
+        NotYetTypedEqualityTransformer eqTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
+        IQTree tree = eqTransformer.transform(relationIQ.getTree())
+                .normalizeForOptimization(relationIQ.getVariableGenerator());
+
+        ImmutableSet<ImmutableSet<Variable>> variableUniqueConstraints = tree.inferUniqueConstraints();
+
+        ImmutableList<Attribute> attributes = relation.getAttributes();
+        DistinctVariableOnlyDataAtom projectedAtom = relationIQ.getProjectionAtom();
+
+        ImmutableMap<Variable, QuotedID> variableIds = IntStream.range(0, attributes.size())
+                .boxed()
+                .collect(ImmutableCollectors.toMap(
+                        projectedAtom::getTerm,
+                        i -> attributes.get(i).getID()
+                ));
+
+        return variableUniqueConstraints.stream()
+                .map(vs -> new AddUniqueConstraints(
+                        UUID.randomUUID().toString(),
+                        vs.stream()
+                                .map(v -> Optional.ofNullable(variableIds.get(v))
+                                        .orElseThrow(() -> new MinorOntopInternalBugException(
+                                                "The variables of the unique constraints should be projected")))
+                                .map(QuotedID::getSQLRendering)
+                                .collect(ImmutableCollectors.toList()),
+                        // PK by default false
+                        false
+                ))
+                .collect(ImmutableCollectors.toList());
+    }
 
 
     /**
