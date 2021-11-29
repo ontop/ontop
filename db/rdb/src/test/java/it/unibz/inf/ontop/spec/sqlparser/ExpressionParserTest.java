@@ -442,7 +442,7 @@ public class ExpressionParserTest {
                                 SQLTestingTools.TERM_FACTORY.getDBConstant("3", dbLongType)))), translation.get(0));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void in_multi_test() throws JSQLParserException {
         Variable v1 = SQLTestingTools.TERM_FACTORY.getVariable("x0");
         Variable v2 = SQLTestingTools.TERM_FACTORY.getVariable("y0");
@@ -459,12 +459,14 @@ public class ExpressionParserTest {
                         SQLTestingTools.TERM_FACTORY.getNotYetTypedEquality(
                                 v2,
                                 SQLTestingTools.TERM_FACTORY.getDBConstant("3", dbLongType))),
-                SQLTestingTools.TERM_FACTORY.getNotYetTypedEquality(
-                        v1,
-                        SQLTestingTools.TERM_FACTORY.getDBConstant("2", dbLongType)),
-                SQLTestingTools.TERM_FACTORY.getNotYetTypedEquality(
-                        v2,
-                        SQLTestingTools.TERM_FACTORY.getDBConstant("4", dbLongType))), translation.get(0));
+                SQLTestingTools.TERM_FACTORY.getConjunction(
+                        SQLTestingTools.TERM_FACTORY.getNotYetTypedEquality(
+                                v1,
+                                SQLTestingTools.TERM_FACTORY.getDBConstant("2", dbLongType)),
+                        SQLTestingTools.TERM_FACTORY.getNotYetTypedEquality(
+                                v2,
+                                SQLTestingTools.TERM_FACTORY.getDBConstant("4", dbLongType)))),
+                translation.get(0));
     }
 
 

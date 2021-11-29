@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
@@ -10,10 +11,12 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeExce
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class FromItemParser<T> {
 
@@ -97,7 +100,7 @@ public abstract class FromItemParser<T> {
             // a table-valued function that takes column values from the left_table_source as one of its arguments.
             if (join.isLeft() || join.isRight() || join.isFull() || join.isSemi()
                     || join.isInner() || join.isNatural()
-                    || join.getOnExpression() != null || join.getUsingColumns() != null)
+                    || !join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("Invalid APPLY join", join);
 
             if (!join.isCross() && !join.isOuter())
@@ -121,27 +124,27 @@ public abstract class FromItemParser<T> {
                     || join.isInner() || join.isNatural() || join.isCross())
                 throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
 
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+            if (!join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("Invalid simple join", join);
 
             return operations.crossJoin(left, right);
         }
         else if (join.isCross()) {
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+            if (!join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("CROSS JOIN cannot have USING/ON conditions", join);
 
             return operations.crossJoin(left, right);
         }
         else if (join.isNatural()) {
-            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+            if (!join.getOnExpressions().isEmpty() || !join.getUsingColumns().isEmpty())
                 throw new InvalidSelectQueryRuntimeException("NATURAL JOIN cannot have USING/ON conditions", join);
 
             return operations.naturalJoin(left, right);
         }
         else {
             // also covers STRAIGHT_JOIN
-            if (join.getOnExpression() != null) {
-                if (join.getUsingColumns() !=null)
+            if (!join.getOnExpressions().isEmpty()) {
+                if (!join.getUsingColumns().isEmpty())
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
                 if (join.isSemi()) {
@@ -152,10 +155,11 @@ public abstract class FromItemParser<T> {
                 }
 
                 return operations.joinOn(left, right,
-                        (attributes -> expressionParser.parseBooleanExpression(
-                                join.getOnExpression(), attributes)));
+                        attributes -> join.getOnExpressions().stream()
+                                .flatMap(exp -> expressionParser.parseBooleanExpression(exp, attributes).stream())
+                                .collect(ImmutableCollectors.toList()));
             }
-            else if (join.getUsingColumns() != null) {
+            else if (!join.getUsingColumns().isEmpty()) {
                 if (join.isSemi())
                     throw new InvalidSelectQueryRuntimeException("Invalid SEMI JOIN", join);
 

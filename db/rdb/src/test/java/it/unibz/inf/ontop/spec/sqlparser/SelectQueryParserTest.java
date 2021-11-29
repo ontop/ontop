@@ -178,7 +178,7 @@ public class SelectQueryParserTest {
         RAExpression re = parse("SELECT A FROM P CROSS APPLY Q");
     }
 
-    @Test(expected = JSQLParserException.class) // is valid in MS SQL Server
+    @Test(expected = UnsupportedSelectQueryException.class) // is valid in MS SQL Server
     public void select_outer_apply() throws Exception {
         RAExpression re = parse("SELECT A FROM P OUTER APPLY Q");
     }
@@ -345,13 +345,26 @@ public class SelectQueryParserTest {
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
-    // -----------------------------------------------
-    // invalid combinations for JSQLParser
 
-    @Test(expected = JSQLParserException.class)
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_outer_join_using() throws Exception {
+        parse("SELECT * FROM P OUTER JOIN Q USING(A)");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_outer_join_on() throws Exception {
+        parse("SELECT * FROM P OUTER JOIN Q ON P.A = Q.A");
+    }
+
+    // Invalid queries
+    @Test(expected = InvalidQueryException.class)
     public void select_outer_join() throws Exception {
         parse("SELECT * FROM P OUTER JOIN Q");
     }
+
+
+    // -----------------------------------------------
+    // invalid combinations for JSQLParser
 
     @Test(expected = JSQLParserException.class)
     public void select_natural_outer_join() throws Exception {
@@ -389,11 +402,6 @@ public class SelectQueryParserTest {
     }
 
     @Test(expected = JSQLParserException.class)
-    public void select_outer_join_on() throws Exception {
-        parse("SELECT * FROM P OUTER JOIN Q ON P.A = Q.A");
-    }
-
-    @Test(expected = JSQLParserException.class)
     public void select_natural_outer_join_on() throws Exception {
         parse("SELECT * FROM P NATURAL OUTER JOIN Q ON P.A = Q.A");
     }
@@ -426,11 +434,6 @@ public class SelectQueryParserTest {
     @Test(expected = JSQLParserException.class)
     public void select_left_inner_join_on() throws Exception {
         parse("SELECT * FROM P LEFT INNER JOIN Q ON P.A = Q.A");
-    }
-
-    @Test(expected = JSQLParserException.class)
-    public void select_outer_join_using() throws Exception {
-        parse("SELECT * FROM P OUTER JOIN Q USING(A)");
     }
 
     @Test(expected = JSQLParserException.class)
