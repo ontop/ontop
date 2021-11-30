@@ -98,4 +98,58 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     public void testIRI7() throws Exception {
         super.testIRI7();
     }
+
+    /**
+     * SQL Server rounds hours up instead of truncating.
+     */
+    protected List<String> getDaysBetweenDTExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"24767\"^^xsd:long");
+        return expectedValues;
+    }
+
+    /**
+     * SQL Server rounds hours up instead of truncating.
+     */
+    @Override
+    protected List<String> getDaysDTExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16359\"^^xsd:long");
+        expectedValues.add("\"17269\"^^xsd:long");
+        expectedValues.add("\"17743\"^^xsd:long");
+        expectedValues.add("\"256\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    /**
+     * SQL Server rounds hours up instead of truncating.
+     */
+    @Override
+    protected List<String> getDaysExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16359\"^^xsd:long");
+        expectedValues.add("\"17269\"^^xsd:long");
+        expectedValues.add("\"17742\"^^xsd:long");
+        expectedValues.add("\"255\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    /**
+     * SQL Server rounds hours up instead of truncating. +1 compared to result for other DBs.
+     */
+    @Override
+    protected List<String> getHoursBetweenExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"594408\"^^xsd:long");
+        return expectedValues;
+    }
+
+    @Ignore("Current MS SQL Server handling does not allow operation between DATE and DATETIME, db example has only DATE")
+    @Test
+    @Override
+    public void testDaysBetweenDateMappingInput() throws Exception {
+        super.testDaysBetweenDateMappingInput();
+    }
 }

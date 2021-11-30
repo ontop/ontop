@@ -151,4 +151,70 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     @Override
     public void testStrUuid() {
     }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testWeeksBetweenDate() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDate() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testWeeksBetweenDateTime() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDateTime() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDateTimeMappingInput() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testDaysBetweenDateMappingInput() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testHoursBetween() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testMinutesBetween() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testSecondsBetween() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testSecondsBetweenMappingInput() {
+    }
+
+    @Test
+    @Ignore("Test not applicable")
+    @Override
+    public void testMilliSeconds() {
+    }
 }

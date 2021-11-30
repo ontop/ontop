@@ -150,4 +150,37 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
+    @Override
+    protected List<String> getDaysExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17309\"^^xsd:long");
+        expectedValues.add("\"17743\"^^xsd:long");
+        expectedValues.add("\"256\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getDaysDTExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17309\"^^xsd:long");
+        expectedValues.add("\"17743\"^^xsd:long");
+        expectedValues.add("\"255\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getSecondsExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1413514800\"^^xsd:long");
+        expectedValues.add("\"1495509472\"^^xsd:long");
+        expectedValues.add("\"1533001986\"^^xsd:long");
+        expectedValues.add("\"22112400\"^^xsd:long");
+
+        return expectedValues;
+    }
+
 }

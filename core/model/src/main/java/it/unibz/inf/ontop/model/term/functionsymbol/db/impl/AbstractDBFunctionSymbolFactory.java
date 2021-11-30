@@ -86,6 +86,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
 
+    // Time extension - duration arithmetic
+    private DBFunctionSymbol weeksBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol weeksBetweenFromDateFunctionSymbol;
+    private DBFunctionSymbol daysBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol daysBetweenFromDateFunctionSymbol;
+    private DBFunctionSymbol hoursBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol minutesBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol secondsBetweenFromDateTimeFunctionSymbol;
+    private DBFunctionSymbol millisBetweenFromDateTimeFunctionSymbol;
+
     private final Map<String, DBFunctionSymbol> extractFunctionSymbolsMap;
     private final Map<String, DBFunctionSymbol> currentDateTimeFunctionSymbolsMap;
 
@@ -359,6 +369,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         minutesFunctionSymbol = createMinutesFunctionSymbol();
         secondsFunctionSymbol = createSecondsFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
+
+        weeksBetweenFromDateTimeFunctionSymbol = createWeeksBetweenFromDateTimeFunctionSymbol();
+        weeksBetweenFromDateFunctionSymbol = createWeeksBetweenFromDateFunctionSymbol();
+        daysBetweenFromDateTimeFunctionSymbol = createDaysBetweenFromDateTimeFunctionSymbol();
+        daysBetweenFromDateFunctionSymbol = createDaysBetweenFromDateFunctionSymbol();
+        hoursBetweenFromDateTimeFunctionSymbol = createHoursBetweenFromDateTimeFunctionSymbol();
+        minutesBetweenFromDateTimeFunctionSymbol = createMinutesBetweenFromDateTimeFunctionSymbol();
+        secondsBetweenFromDateTimeFunctionSymbol = createSecondsBetweenFromDateTimeFunctionSymbol();
+        millisBetweenFromDateTimeFunctionSymbol = createMillisBetweenFromDateTimeFunctionSymbol();
 
         nonDistinctGroupConcat = createDBGroupConcat(dbStringType, false);
         distinctGroupConcat = createDBGroupConcat(dbStringType, true);
@@ -882,6 +901,45 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return currentDateTimeFunctionSymbolsMap.computeIfAbsent(type, c -> createCurrentDateTimeFunctionSymbol(c));
     }
 
+    /**
+     * Time extension - duration arithmetic
+     */
+    @Override
+    public DBFunctionSymbol getDBWeeksBetweenFromDateTime() { return weeksBetweenFromDateTimeFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol getDBWeeksBetweenFromDate() { return weeksBetweenFromDateFunctionSymbol; }
+
+    @Override
+    public DBFunctionSymbol getDBDaysBetweenFromDateTime() {
+        return daysBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDaysBetweenFromDate() {
+        return daysBetweenFromDateFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBHoursBetweenFromDateTime() {
+        return hoursBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMinutesBetweenFromDateTime() {
+        return minutesBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSecondsBetweenFromDateTime() {
+        return secondsBetweenFromDateTimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMillisBetweenFromDateTime() {
+        return millisBetweenFromDateTimeFunctionSymbol;
+    }
+
     @Override
     public DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType) {
         return typeNullMap
@@ -1296,6 +1354,85 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                       Function<ImmutableTerm, String> termConverter,
                                       TermFactory termFactory) {
         return "CURRENT_" + type;
+    }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    protected abstract String serializeWeeksBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                                Function<ImmutableTerm, String> termConverter,
+                                                                TermFactory termFactory);
+
+    protected abstract String serializeWeeksBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                            Function<ImmutableTerm, String> termConverter,
+                                                            TermFactory termFactory);
+
+    protected abstract String serializeDaysBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter,
+                                                               TermFactory termFactory);
+
+    protected abstract String serializeDaysBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                           Function<ImmutableTerm, String> termConverter,
+                                                           TermFactory termFactory);
+
+    protected abstract String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter,
+                                                    TermFactory termFactory);
+
+    protected abstract String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter,
+                                                      TermFactory termFactory);
+
+    protected abstract String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter,
+                                                      TermFactory termFactory);
+
+    protected abstract String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter,
+                                                     TermFactory termFactory);
+
+    /**
+     * Time extension - duration arithmetic
+     */
+    protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_WEEK_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeWeeksBetweenFromDateTime);
+    }
+
+    protected DBFunctionSymbol createWeeksBetweenFromDateFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_WEEK_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeWeeksBetweenFromDate);
+    }
+
+    protected DBFunctionSymbol createDaysBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DAY_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeDaysBetweenFromDateTime);
+    }
+
+    protected DBFunctionSymbol createDaysBetweenFromDateFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_DAY_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeDaysBetweenFromDate);
+    }
+
+    protected DBFunctionSymbol createHoursBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_HOUR_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeHoursBetween);
+    }
+
+    protected DBFunctionSymbol createMinutesBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_MINUTE_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeMinutesBetween);
+    }
+
+    protected DBFunctionSymbol createSecondsBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_SECOND_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeSecondsBetween);
+    }
+
+    protected DBFunctionSymbol createMillisBetweenFromDateTimeFunctionSymbol() {
+        return new DBFunctionSymbolWithSerializerImpl("DB_MILLIS_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
+                this::serializeMillisBetween);
     }
 
     /**

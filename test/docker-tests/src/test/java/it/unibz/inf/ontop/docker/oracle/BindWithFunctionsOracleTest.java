@@ -161,4 +161,34 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
 
         return expectedValues;
     }
+
+    @Override
+    protected List<String> getDaysDTExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17270\"^^xsd:long");
+        expectedValues.add("\"17743\"^^xsd:long");
+        expectedValues.add("\"255\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getSecondsExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1413514800\"^^xsd:long");
+        expectedValues.add("\"1492136272\"^^xsd:long");
+        expectedValues.add("\"1532998386\"^^xsd:long");
+        expectedValues.add("\"22112400\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Ignore("Current Oracle handling does not allow operation between DATE and DATETIME, db example has only DATE")
+    @Test
+    @Override
+    public void testDaysBetweenDateMappingInput() throws Exception {
+        super.testDaysBetweenDateMappingInput();
+    }
+
 }

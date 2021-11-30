@@ -351,4 +351,103 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String getUUIDNameInDialect() {
         throw new UnsupportedOperationException("Do not call getUUIDNameInDialect for Oracle");
     }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC(EXTRACT(DAY FROM %s - %s) / 7)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeWeeksBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC((%s - %s)/7)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetweenFromDateTime(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(DAY FROM %s - %s)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("%s - %s",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(DAY FROM %s - %s) * 24 + " +
+                        "EXTRACT(HOUR FROM %s - %s)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(DAY FROM %s - %s) * 24 * 60 + " +
+                        "EXTRACT(HOUR FROM %s - %s) * 60 + " +
+                        "EXTRACT(MINUTE FROM %s - %s)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(DAY FROM %s - %s) * 24 * 60 * 60 + " +
+                        "EXTRACT(HOUR FROM %s - %s) * 60 * 60 + " +
+                        "EXTRACT(MINUTE FROM %s - %s) * 60 + " +
+                        "EXTRACT(SECOND FROM %s - %s)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(EXTRACT(DAY FROM %s - %s) * 24 * 60 * 60 + " +
+                        "EXTRACT(HOUR FROM %s - %s) * 60 * 60 + " +
+                        "EXTRACT(MINUTE FROM %s - %s) * 60 + " +
+                        "EXTRACT(SECOND FROM %s - %s))*1000",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
 }

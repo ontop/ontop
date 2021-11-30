@@ -288,4 +288,77 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 return super.createStringToStringCastFunctionSymbol(inputType, targetType);
         }
     }
+
+    /**
+     * Time extension - duration arithmetic
+     */
+
+    @Override
+    protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC(DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP)/7)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("TRUNC(DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP))",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP) * 24 + \n" +
+                        "              DATE_PART('HOUR', (%s)::TIMESTAMP - (%s)::TIMESTAMP)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP) * 24 + \n" +
+                        "               DATE_PART('HOUR', (%s)::TIMESTAMP - (%s)::TIMESTAMP)) * 60 +\n" +
+                        "               DATE_PART('MINUTE', (%s)::TIMESTAMP - (%s)::TIMESTAMP)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("((DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP) * 24 + \n" +
+                        "                DATE_PART('HOUR', (%s)::TIMESTAMP - (%s)::TIMESTAMP)) * 60 +\n" +
+                        "                DATE_PART('MINUTE', (%s)::TIMESTAMP - (%s)::TIMESTAMP)) * 60 +\n" +
+                        "                DATE_PART('SECOND', (%s)::TIMESTAMP - (%s)::TIMESTAMP)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("ROUND ((\n" +
+                        "        EXTRACT (EPOCH FROM TIMESTAMP %s) -\n" +
+                        "        EXTRACT (EPOCH FROM TIMESTAMP %s)\n" +
+                        "    ) * 1000)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
 }

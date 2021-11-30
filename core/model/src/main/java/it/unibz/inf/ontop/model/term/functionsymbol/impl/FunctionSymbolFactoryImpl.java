@@ -45,11 +45,10 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8NtppiFunct
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8PoFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.geof.GeofRcc8TppiFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnMultitypedInputBinarySPARQLFunctionSymbolImpl;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.ofn.OfnSimpleBinarySPARQLFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.GEOF;
-import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.model.vocabulary.*;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
@@ -152,6 +151,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         RDFDatatype xsdDecimal = typeFactory.getXsdDecimalDatatype();
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
+        RDFDatatype xsdLong = typeFactory.getXsdLongDatatype();
         RDFDatatype xsdDouble = typeFactory.getXsdDoubleDatatype();
         RDFDatatype wktLiteral = typeFactory.getWktLiteralDatatype();
         RDFDatatype xsdAnyUri = typeFactory.getXsdAnyUri();
@@ -311,19 +311,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                  */
 
                 /*
-                 * Geo Properties
-                 */
-                /*new GeoDimensionFunctionSymbolImpl(GEOF.DIMENSION, wktLiteral, xsdInteger),
-                new GeoCoordinateDimensionFunctionSymbolImpl(GEOF.COORDINATEDIMENSION, wktLiteral, xsdInteger),
-                //new GeoSpatialDimensionFunctionSymbolImpl(GEOF.SPATIALDIMENSION, wktLiteral, xsdInteger),
-                new GeoIsEmptyFunctionSymbolImpl(GEOF.ISSIMPLE, wktLiteral, xsdBoolean),
-                new GeoIsSimpleFunctionSymbolImpl(GEOF.ISEMPTY, wktLiteral, xsdBoolean),*/
-                //new GeoHasSerializationFunctionSymbolImpl(GEOF.HASSERIALIZATION, wktLiteral, iriType),
-                /*
-                 * Geo Properties
-                 */
-
-                /*
                  * Geo Non-Topological Functions
                  */
                 new GeofDistanceFunctionSymbolImpl(GEOF.DISTANCE, wktLiteral, iriType, xsdDouble, this),
@@ -333,13 +320,44 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GeofConvexHullFunctionSymbolImpl(GEOF.CONVEXHULL, wktLiteral),
                 new GeofDifferenceFunctionSymbolImpl(GEOF.DIFFERENCE, wktLiteral),
                 new GeofEnvelopeFunctionSymbolImpl(GEOF.ENVELOPE, wktLiteral),
-                //new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, xsdDecimal),
                 new GeofGetSRIDFunctionSymbolImpl(GEOF.GETSRID, wktLiteral, xsdAnyUri),
                 new GeofSymDifferenceFunctionSymbolImpl(GEOF.SYMDIFFERENCE, wktLiteral, iriType),
                 new GeofUnionFunctionSymbolImpl(GEOF.UNION, wktLiteral, iriType),
                 new GeofRelateFunctionSymbolImpl(GEOF.RELATE, wktLiteral, xsdString, xsdBoolean),
-                //new GeofRelateMatrixFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString)
-                new GeofRelateFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString)
+                new GeofRelateFunctionSymbolImpl(GEOF.RELATEM, wktLiteral, xsdString),
+
+                /*
+                 * Time extension - duration arithmetic
+                 */
+                new OfnMultitypedInputBinarySPARQLFunctionSymbolImpl("OFN_WEEKS_BETWEEN", OFN.WEEKSBETWEEN,
+                dateOrDatetime, xsdLong, false, dbTypeFactory,
+                (DBTermType t) ->  {
+                    if (t.isA(dbTimestamp))
+                        return dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime();
+                    else if (t.isA(dbDate))
+                        return dbFunctionSymbolFactory.getDBWeeksBetweenFromDate();
+                    else
+                        throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                }),
+                new OfnMultitypedInputBinarySPARQLFunctionSymbolImpl("OFN_DAYS_BETWEEN", OFN.DAYSBETWEEN,
+                        dateOrDatetime, xsdLong, false, dbTypeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTimestamp))
+                                return dbFunctionSymbolFactory.getDBDaysBetweenFromDateTime();
+                            else if (t.isA(dbDate))
+                                return dbFunctionSymbolFactory.getDBDaysBetweenFromDate();
+                            else
+                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                        }),
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_HOURS_BETWEEN", OFN.HOURSBETWEEN, xsdDatetime, xsdLong,
+                        false, TermFactory::getDBHoursBetweenFromDateTime),
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_MINUTES_BETWEEN", OFN.MINUTESBETWEEN, xsdDatetime, xsdLong,
+                        false, TermFactory::getDBMinutesBetweenFromDateTime),
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_SECONDS_BETWEEN", OFN.SECONDSBETWEEN, xsdDatetime, xsdLong,
+                        false, TermFactory::getDBSecondsBetweenFromDateTime),
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_MILLIS_BETWEEN", OFN.MILLISBETWEEN, xsdDatetime, xsdLong,
+                        false, TermFactory::getDBMillisBetweenFromDateTime)
+
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -580,6 +598,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
+    }
+
+    @Override
+    public FunctionSymbol getBinaryLatelyTypedFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct,
+                                                             DBTermType targetType) {
+        return new BinaryLatelyTypedFunctionSymbolImpl(dbStringType, dbStringType, metaRDFType, targetType, dbFunctionSymbolFct);
     }
 
 }
