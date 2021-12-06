@@ -43,7 +43,7 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 (terms, termConverter, termFactory) -> String.format("POSITION(%s IN %s)",
                         termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1))));
         table.put(POSITION_STR, 2, positionFunctionSymbol);
-        return createDefaultRegularFunctionTable(typeFactory);
+        return ImmutableTable.copyOf(table);
     }
 
     @Override
