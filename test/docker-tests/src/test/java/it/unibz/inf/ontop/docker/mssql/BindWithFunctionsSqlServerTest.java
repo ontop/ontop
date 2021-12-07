@@ -100,36 +100,13 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     }
 
     /**
-     * SQL Server rounds hours up instead of truncating.
-     */
-    protected List<String> getDaysBetweenDTExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"24767\"^^xsd:long");
-        return expectedValues;
-    }
-
-    /**
-     * SQL Server rounds hours up instead of truncating.
+     * SQL Server different input file.
      */
     @Override
     protected List<String> getDaysDTExpectedValuesMappingInput() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"16359\"^^xsd:long");
-        expectedValues.add("\"17269\"^^xsd:long");
-        expectedValues.add("\"17743\"^^xsd:long");
-        expectedValues.add("\"256\"^^xsd:long");
-
-        return expectedValues;
-    }
-
-    /**
-     * SQL Server rounds hours up instead of truncating.
-     */
-    @Override
-    protected List<String> getDaysExpectedValuesMappingInput() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"16359\"^^xsd:long");
-        expectedValues.add("\"17269\"^^xsd:long");
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17270\"^^xsd:long");
         expectedValues.add("\"17742\"^^xsd:long");
         expectedValues.add("\"255\"^^xsd:long");
 
@@ -137,12 +114,16 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     }
 
     /**
-     * SQL Server rounds hours up instead of truncating. +1 compared to result for other DBs.
+     * SQL Server different input file.
      */
     @Override
-    protected List<String> getHoursBetweenExpectedValues() {
+    protected List<String> getSecondsExpectedValuesMappingInput() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"594408\"^^xsd:long");
+        expectedValues.add("\"1413514800\"^^xsd:long");
+        expectedValues.add("\"1492161472\"^^xsd:long");
+        expectedValues.add("\"1532994786\"^^xsd:long");
+        expectedValues.add("\"22112400\"^^xsd:long");
+
         return expectedValues;
     }
 

@@ -296,7 +296,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("TRUNC(DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP)/7)",
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/604800)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -304,7 +304,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("TRUNC(DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP))",
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/86400)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -312,10 +312,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP) * 24 + \n" +
-                        "              DATE_PART('HOUR', (%s)::TIMESTAMP - (%s)::TIMESTAMP)",
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/3600)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -323,13 +320,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("(DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP) * 24 + \n" +
-                        "               DATE_PART('HOUR', (%s)::TIMESTAMP - (%s)::TIMESTAMP)) * 60 +\n" +
-                        "               DATE_PART('MINUTE', (%s)::TIMESTAMP - (%s)::TIMESTAMP)",
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))/60)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -337,16 +328,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("((DATE_PART('DAY', (%s)::TIMESTAMP - (%s)::TIMESTAMP) * 24 + \n" +
-                        "                DATE_PART('HOUR', (%s)::TIMESTAMP - (%s)::TIMESTAMP)) * 60 +\n" +
-                        "                DATE_PART('MINUTE', (%s)::TIMESTAMP - (%s)::TIMESTAMP)) * 60 +\n" +
-                        "                DATE_PART('SECOND', (%s)::TIMESTAMP - (%s)::TIMESTAMP)",
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)),
-                termConverter.apply(terms.get(1)),
+        return String.format("TRUNC((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s)))",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }
@@ -354,10 +336,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     @Override
     protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("ROUND ((\n" +
-                        "        EXTRACT (EPOCH FROM TIMESTAMP %s) -\n" +
-                        "        EXTRACT (EPOCH FROM TIMESTAMP %s)\n" +
-                        "    ) * 1000)",
+        return String.format("CEIL((EXTRACT (EPOCH FROM %s) - EXTRACT (EPOCH FROM %s))*1000)",
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)));
     }

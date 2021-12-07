@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 
@@ -24,8 +25,11 @@ public class DremioSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         // Overloads DECIMAL to specify a precision for casting purposes
         NumberDBTermType decimalType = new NumberDBTermType(DECIMAL_STR, "DECIMAL(60,30)", rootAncestry,
                 typeFactory.getXsdDecimalDatatype(), DECIMAL);
+        DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
+                typeFactory.getDatatype(XSD.DATE));
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(DECIMAL_STR, decimalType);
+        map.put(DATE_STR, dateType);
         return map;
     }
 

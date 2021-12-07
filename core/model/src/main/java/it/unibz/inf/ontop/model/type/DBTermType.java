@@ -53,6 +53,7 @@ public interface DBTermType extends TermType {
         DECIMAL,
         FLOAT_DOUBLE,
         BOOLEAN,
+        DATE,
         DATETIME,
         UUID,
         OTHER

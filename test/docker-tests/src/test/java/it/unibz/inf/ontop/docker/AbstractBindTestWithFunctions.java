@@ -1669,9 +1669,9 @@ public abstract class AbstractBindTestWithFunctions {
     protected List<String> getDaysDTExpectedValuesMappingInput() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"16360\"^^xsd:long");
-        expectedValues.add("\"17270\"^^xsd:long");
-        expectedValues.add("\"17743\"^^xsd:long");
-        expectedValues.add("\"256\"^^xsd:long");
+        expectedValues.add("\"17309\"^^xsd:long");
+        expectedValues.add("\"17742\"^^xsd:long");
+        expectedValues.add("\"255\"^^xsd:long");
 
         return expectedValues;
     }
@@ -1698,7 +1698,7 @@ public abstract class AbstractBindTestWithFunctions {
     protected List<String> getDaysExpectedValuesMappingInput() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"16360\"^^xsd:long");
-        expectedValues.add("\"17270\"^^xsd:long");
+        expectedValues.add("\"17309\"^^xsd:long");
         expectedValues.add("\"17743\"^^xsd:long");
         expectedValues.add("\"256\"^^xsd:long");
 
@@ -1776,8 +1776,8 @@ public abstract class AbstractBindTestWithFunctions {
     protected List<String> getSecondsExpectedValuesMappingInput() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"1413514800\"^^xsd:long");
-        expectedValues.add("\"1492161472\"^^xsd:long");
-        expectedValues.add("\"1532994786\"^^xsd:long");
+        expectedValues.add("\"1495505872\"^^xsd:long");
+        expectedValues.add("\"1532998386\"^^xsd:long");
         expectedValues.add("\"22112400\"^^xsd:long");
 
         return expectedValues;

@@ -7,11 +7,9 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullIgnoringDBGroupConcatFunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 @Singleton
 public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -26,6 +24,30 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                     throw new UnsupportedOperationException("GROUP_CONCAT or LIST_AGG not yet supported by Dremio");
                 }
                 return super.serialize(term,columnIDs);
+            }
+
+            @Override
+            protected String serializeDBConstant(DBConstant constant) {
+                DBTermType dbType = constant.getType();
+
+                switch (dbType.getCategory()) {
+                    case DECIMAL:
+                    case FLOAT_DOUBLE:
+                        // TODO: handle the special case of not-a-number!
+                        return castFloatingConstant(constant.getValue(), dbType);
+                    case INTEGER:
+                    case BOOLEAN:
+                        return constant.getValue();
+                    case DATE:
+                    case DATETIME:
+                        return serializeDatetimeConstant(serializeStringConstant(constant.getValue()), dbType);
+                    default:
+                        return serializeStringConstant(constant.getValue());
+                }
+            }
+
+            protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
+                return String.format("CAST(%s AS %s)", datetime, dbType.getCastName());
             }
         });
     }

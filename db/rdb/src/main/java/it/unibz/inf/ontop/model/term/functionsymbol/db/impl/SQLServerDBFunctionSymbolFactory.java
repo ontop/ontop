@@ -430,7 +430,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("DATEDIFF(DAY, %s, %s) - IIF(CAST(%s AS TIME) < CAST(%s AS TIME), 1, 0)",
+        return String.format("DATEDIFF(DAY, %s, %s) - IIF(CAST(%s AS TIME) > CAST(%s AS TIME), 1, 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)),
@@ -440,7 +440,9 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeHoursBetween(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("DATEDIFF(HOUR, %s, %s)",
+        return String.format("DATEDIFF(HOUR, %s, %s) - IIF(DATEPART(MINUTE, %s) > DATEPART(MINUTE, %s), 1, 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
@@ -448,7 +450,9 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeMinutesBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("DATEDIFF(MINUTE, %s, %s)",
+        return String.format("DATEDIFF(MINUTE, %s, %s) - IIF(DATEPART(SECOND, %s) > DATEPART(SECOND, %s), 1, 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
@@ -456,7 +460,9 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeSecondsBetween(ImmutableList<? extends ImmutableTerm> terms,
                                              Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("DATEDIFF(SECOND, %s, %s)",
+        return String.format("DATEDIFF(SECOND, %s, %s) - IIF(DATEPART(MILLISECOND, %s) > DATEPART(MILLISECOND, %s), 1, 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }

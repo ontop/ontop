@@ -95,11 +95,6 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
-        return new DremioTimestampDenormFunctionSymbol(timestampType, dbStringType);
-    }
-
-    @Override
     protected String getUUIDNameInDialect() {
         throw new UnsupportedOperationException("Do not call getUUIDNameInDialect for Dremio");
     }
@@ -143,25 +138,6 @@ public class DremioDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
             return new NonSimplifiableTypedNullFunctionSymbol(termType);
-    }
-
-    /**
-     * Time extension - duration arithmetic
-     */
-    @Override
-    protected String serializeWeeksBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("TIMESTAMPDIFF(WEEK, DATE %s, DATE %s)",
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeDaysBetweenFromDate(ImmutableList<? extends ImmutableTerm> terms,
-                                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("TIMESTAMPDIFF(DAY, DATE %s, DATE %s)",
-                termConverter.apply(terms.get(1)),
-                termConverter.apply(terms.get(0)));
     }
 
     @Override
