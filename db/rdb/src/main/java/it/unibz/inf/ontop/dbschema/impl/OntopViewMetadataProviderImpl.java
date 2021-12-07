@@ -14,8 +14,10 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,15 +26,25 @@ import java.util.stream.Stream;
 public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider {
 
     private final MetadataProvider parentMetadataProvider;
-    private final CachingMetadataLookupWithDependencies parentCacheMetadataLookup;
+    private final CachingMetadataLookupWithDependencies dependencyCacheMetadataLookup;
     private final OntopViewNormalizer ontopViewNormalizer;
+    private final OntopViewFKSaturator fkSaturator;
 
     private final ImmutableMap<RelationID, JsonView> jsonMap;
+    private final CachingMetadataLookup parentCachingMetadataLookup;
+
+    // "Processed": constraints already inserted
+    private final Set<RelationID> alreadyProcessedViews = new HashSet<>();
+
+    // Lazy (built lately)
+    @Nullable
+    private MetadataLookup mergedMetadataLookupForFK;
 
     @AssistedInject
     protected OntopViewMetadataProviderImpl(@Assisted MetadataProvider parentMetadataProvider,
                                             @Assisted Reader ontopViewReader,
-                                            OntopViewNormalizer ontopViewNormalizer) throws MetadataExtractionException {
+                                            OntopViewNormalizer ontopViewNormalizer,
+                                            OntopViewFKSaturator fkSaturator) throws MetadataExtractionException {
         this.parentMetadataProvider = new DelegatingMetadataProvider(parentMetadataProvider) {
             private final Set<RelationID> completeRelations = new HashSet<>();
 
@@ -46,7 +58,9 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                     provider.insertIntegrityConstraints(relation, metadataLookup);
             }
         };
-        this.parentCacheMetadataLookup = new CachingMetadataLookupWithDependencies(parentMetadataProvider);
+        // Safety for making sure the parent never builds the same relation twice
+        this.parentCachingMetadataLookup = new CachingMetadataLookup(parentMetadataProvider);
+        this.fkSaturator = fkSaturator;
 
         try (Reader viewReader = ontopViewReader) {
             JsonViews jsonViews = loadAndDeserialize(viewReader);
@@ -57,13 +71,15 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
                             t -> t));
         }
         catch (JsonProcessingException e) { // subsumed by IOException (redundant)
-            throw new MetadataExtractionException("problem with JSON processing.\n" + e);
+            throw new MetadataExtractionException("Problem with JSON processing.\n" + e);
         }
         catch (IOException e) {
             throw new MetadataExtractionException(e);
         }
 
         this.ontopViewNormalizer = ontopViewNormalizer;
+        // Depends on this provider for supporting views of level >1
+        this.dependencyCacheMetadataLookup = new CachingMetadataLookupWithDependencies(this);
     }
 
     /**
@@ -91,31 +107,50 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         JsonView jsonView = jsonMap.get(id);
         if (jsonView != null)
-            return jsonView.createViewDefinition(getDBParameters(), parentCacheMetadataLookup.getCachingMetadataLookupFor(id));
+            return jsonView.createViewDefinition(getDBParameters(), dependencyCacheMetadataLookup.getCachingMetadataLookupFor(id));
 
-        return parentCacheMetadataLookup.getRelation(id);
+        return parentCachingMetadataLookup.getRelation(id);
     }
 
     @Override
     public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
-        return parentMetadataProvider.getBlackBoxView(query);
+        return parentCachingMetadataLookup.getBlackBoxView(query);
     }
 
     @Override
-    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookupForFK) throws MetadataExtractionException {
-        JsonView jsonView = jsonMap.get(relation.getID());
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup initialMetadataLookupForFK)
+            throws MetadataExtractionException {
+
+        MetadataLookup metadataLookupForFK = getMergedMetadataLookupForFK(initialMetadataLookupForFK);
+
+        RelationID relationId = relation.getID();
+        JsonView jsonView = jsonMap.get(relationId);
         if (jsonView != null) {
+            // Useful for views having multiple children
+            boolean notInserted = alreadyProcessedViews.add(relationId);
+            if (notInserted) {
+                ImmutableList<NamedRelationDefinition> baseRelations = dependencyCacheMetadataLookup.getBaseRelations(relation.getID());
+                for (NamedRelationDefinition baseRelation : baseRelations)
+                    insertIntegrityConstraints(baseRelation, metadataLookupForFK);
 
-            ImmutableList<NamedRelationDefinition> baseRelations = parentCacheMetadataLookup.getBaseRelations(relation.getID());
-            for (NamedRelationDefinition baseRelation : baseRelations)
-                parentMetadataProvider.insertIntegrityConstraints(baseRelation, metadataLookupForFK);
-
-
-            jsonView.insertIntegrityConstraints(relation, baseRelations, metadataLookupForFK);
+                jsonView.insertIntegrityConstraints((OntopViewDefinition) relation, baseRelations, metadataLookupForFK,
+                        getDBParameters());
+            }
         }
         else {
             parentMetadataProvider.insertIntegrityConstraints(relation, metadataLookupForFK);
         }
+    }
+
+    /**
+     * Creates a new metadata lookup including all the view dependencies.
+     * Important for getting FKs where these dependencies are the target.
+     */
+    private synchronized MetadataLookup getMergedMetadataLookupForFK(MetadataLookup initialMetadataLookupForFK) {
+        if (mergedMetadataLookupForFK != null)
+            return mergedMetadataLookupForFK;
+
+        return new MergingMetadataLookup(initialMetadataLookupForFK, dependencyCacheMetadataLookup.extractImmutableMetadataLookup());
     }
 
     @Override
@@ -129,16 +164,52 @@ public class OntopViewMetadataProviderImpl implements OntopViewMetadataProvider 
     }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
-        // TODO: normalize the parents before the children using the OntopViewNormalizer.
+    public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         ImmutableList<OntopViewDefinition> viewDefinitions = relationDefinitions.stream()
                 .filter(OntopViewDefinition.class::isInstance)
                 .map(OntopViewDefinition.class::cast)
-                // Sort by view level in ascending order - To be reviewed when level >1 views are introduced
-                // .sorted(Comparator.comparing(OntopViewDefinition::getLevel))
+                .sorted(Comparator.comparingInt(OntopViewDefinition::getLevel))
                 .collect(ImmutableCollectors.toList());
 
         // Apply normalization
         viewDefinitions.forEach(ontopViewNormalizer::normalize);
+
+        optimizeViews(viewDefinitions);
+
+        viewDefinitions.forEach(OntopViewDefinition::freeze);
+    }
+
+    private void optimizeViews(ImmutableList<OntopViewDefinition> viewDefinitions) {
+        fkSaturator.saturateForeignKeys(viewDefinitions, dependencyCacheMetadataLookup.getChildrenMultimap(), jsonMap);
+    }
+
+    private static class MergingMetadataLookup implements MetadataLookup {
+
+        private final MetadataLookup mainLookup;
+        private final MetadataLookup secondaryLookup;
+
+        public MergingMetadataLookup(MetadataLookup mainLookup, MetadataLookup secondaryLookup) {
+            this.mainLookup = mainLookup;
+            this.secondaryLookup = secondaryLookup;
+        }
+
+        @Override
+        public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+            try {
+                return mainLookup.getRelation(id);
+            } catch (MetadataExtractionException e) {
+                return secondaryLookup.getRelation(id);
+            }
+        }
+
+        @Override
+        public RelationDefinition getBlackBoxView(String query) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public QuotedIDFactory getQuotedIDFactory() {
+            return mainLookup.getQuotedIDFactory();
+        }
     }
 }

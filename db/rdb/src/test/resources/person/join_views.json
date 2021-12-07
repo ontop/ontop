@@ -1,0 +1,90 @@
+{
+  "relations": [
+    {
+      "name": ["\"views\"", "\"person_countries\""],
+      "join": {
+        "relations": [
+          [
+            "\"person\""
+          ],
+          [
+            "\"country\""
+          ]
+        ],
+        "columnPrefixes": [
+          "",
+          "c_"
+        ]
+      },
+      "filterExpression": "\"country\"=\"c_acronym\" AND \"c_acronym\" <> 'de'",
+      "columns": {
+        "added": [
+          {
+            "name": "\"fullNameAndLocality\"",
+            "expression": "CONCAT(UPPER(\"fullName\"),' ',\"locality\")"
+          },
+          {
+            "name": "\"localityAbbrev\"",
+            "expression": "REGEXP_REPLACE(\"locality\",'Botzen', 'Bz')"
+          },
+          {
+            "name": "\"nullifItaly\"",
+            "expression": "NULLIF(\"country\",'it')"
+          },
+          {
+            "name": "\"region\"",
+            "expression": "\"locality\""
+          },
+          {
+            "name": "\"country_with_code\"",
+            "expression": "CONCAT(UPPER(\"c_name\"),' ',\"c_acronym\")"
+          },
+          {
+            "name": "\"id2\"",
+            "expression": "\"id\" + 2"
+          }
+        ],
+        "hidden": [
+          "\"fullName\"",
+          "\"locality\"",
+          "\"c_acronym\""
+        ]
+      },
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "\"id2Constraint\"",
+            "determinants" : [ "\"id2\""],
+            "isPrimaryKey" : false
+          }
+        ]
+      },
+      "otherFunctionalDependencies": {
+        "added": [
+          {
+            "determinants": ["\"c_name\""],
+            "dependents": ["\"c_continent\""]
+          }
+        ]
+      },
+      "foreignKeys": {
+        "added": [
+          {
+            "name": "status_id_fkey",
+            "from": "\"status\"",
+            "to": {
+              "columns": ["\"status_id\""],
+              "relation": ["\"statuses\""]
+            }
+          }
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
+        ]
+      },
+      "type": "JoinViewDefinition"
+    }
+  ]
+}

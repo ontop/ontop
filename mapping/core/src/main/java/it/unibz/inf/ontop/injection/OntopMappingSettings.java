@@ -40,6 +40,18 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean isValuesNodeEnabled();
 
+    /**
+     * If false, do not use the tbox to derive facts
+     * If true use tbox saturation
+     */
+    boolean isFactExtractionWithTBoxEnabled();
+
+    /**
+     * If true, rdfs:subClassOf is used to integrate rdfs:domain/rdfs:range facts
+     * If false, no additional facts are integrated in addition to the explicit ontology facts
+     */
+    boolean areSuperClassesOfDomainRangeInferred();
+
     //--------------------------
     // Keys
     //--------------------------
@@ -49,7 +61,8 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";
     String ENABLE_VALUES_NODE = "ontop.enableValuesNode";
-
+    String ENABLE_FACT_EXTRACTION_WITH_TBOX = "ontop.enableFactExtractionWithTBox";
+    String INFER_SUPER_CLASSES_OF_DOMAIN_RANGE = "ontop.querySuperClassesOfDomainRange";
 
     /**
      * Options to specify base IRI.

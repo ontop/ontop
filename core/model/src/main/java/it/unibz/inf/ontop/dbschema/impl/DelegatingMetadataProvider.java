@@ -21,8 +21,8 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
-        provider.normalizeRelations(relationDefinitions);
+    public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+        provider.normalizeAndOptimizeRelations(relationDefinitions);
     }
 
     @Override

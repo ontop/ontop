@@ -30,7 +30,6 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,7 +92,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     public DBParameters getDBParameters() { return dbParameters; }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+    public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         // Does nothing
     }
 

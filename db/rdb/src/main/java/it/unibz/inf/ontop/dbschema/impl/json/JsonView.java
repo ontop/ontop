@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.dbschema.impl.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -36,20 +35,20 @@ public abstract class JsonView extends JsonOpenObject {
     @Nonnull
     public final List<String> name;
 
-    @Nonnull
+    @Nullable
     public final UniqueConstraints uniqueConstraints;
 
-    @Nonnull
+    @Nullable
     public final OtherFunctionalDependencies otherFunctionalDependencies;
 
-    @Nonnull
+    @Nullable
     public final ForeignKeys foreignKeys;
 
     @Nullable
     public final NonNullConstraints nonNullConstraints;
 
-    public JsonView(List<String> name, UniqueConstraints uniqueConstraints,
-                    OtherFunctionalDependencies otherFunctionalDependencies, ForeignKeys foreignKeys,
+    public JsonView(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
+                    @Nullable OtherFunctionalDependencies otherFunctionalDependencies, @Nullable ForeignKeys foreignKeys,
                     @Nullable NonNullConstraints nonNullConstraints) {
         this.name = name;
         this.uniqueConstraints = uniqueConstraints;
@@ -61,9 +60,20 @@ public abstract class JsonView extends JsonOpenObject {
     public abstract OntopViewDefinition createViewDefinition(DBParameters dbParameters, MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
 
-    public abstract void insertIntegrityConstraints(NamedRelationDefinition relation,
+    public abstract void insertIntegrityConstraints(OntopViewDefinition relation,
                                                     ImmutableList<NamedRelationDefinition> baseRelations,
-                                                    MetadataLookup metadataLookup) throws MetadataExtractionException;
+                                                    MetadataLookup metadataLookup, DBParameters dbParameters) throws MetadataExtractionException;
+
+    /**
+     * May be incomplete, but must not produce any false positive.
+     *
+     * Returns the attributes for which it can be proved that the projection over them includes the results
+     * of the projection of the parent relation over the parent attributes under set semantics (no concern for duplicates).
+     *
+     * Parent attributes are expected to all come from the same parent.
+     */
+    public abstract ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(
+            OntopViewDefinition ontopViewDefinition, ImmutableList<Attribute> parentAttributes);
 
     protected RelationDefinition.AttributeListBuilder createAttributeBuilder(IQ iq, DBParameters dbParameters) throws MetadataExtractionException {
         SingleTermTypeExtractor uniqueTermTypeExtractor = dbParameters.getCoreSingletons().getUniqueTermTypeExtractor();
@@ -95,9 +105,6 @@ public abstract class JsonView extends JsonOpenObject {
     }
 
 
-    @JsonPropertyOrder({
-            "added"
-    })
     protected static class UniqueConstraints extends JsonOpenObject {
         @Nonnull
         public final List<AddUniqueConstraints> added;
@@ -108,11 +115,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "name",
-            "determinants",
-            "isPrimaryKey"
-    })
     protected static class AddUniqueConstraints extends JsonOpenObject {
         @Nonnull
         public final String name;
@@ -167,10 +169,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
     protected static class AddFunctionalDependency extends JsonOpenObject {
         @Nonnull
         public final List<String> determinants;
@@ -221,11 +219,8 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "determinants",
-            "dependents"
-    })
     protected static class AddForeignKey extends JsonOpenObject {
+        // TODO: make it nullable
         @Nonnull
         public final String name;
         @Nonnull
@@ -240,12 +235,27 @@ public abstract class JsonView extends JsonOpenObject {
             this.from = from;
             this.to = to;
         }
+
+        /**
+         * Name is not considered
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            AddForeignKey that = (AddForeignKey) o;
+            return from.equals(that.from) && to.equals(that.to);
+        }
+
+        /**
+         * Name is not considered
+         */
+        @Override
+        public int hashCode() {
+            return Objects.hash(from, to);
+        }
     }
 
-    @JsonPropertyOrder({
-            "relation",
-            "columns"
-    })
     public static class ForeignKeyPart extends JsonOpenObject {
         public final List<String> relation;
         public final List<String> columns;
@@ -282,6 +292,9 @@ public abstract class JsonView extends JsonOpenObject {
                 case "SQLViewDefinition":
                     instanceClass = JsonSQLView.class;
                     break;
+                case "JoinViewDefinition":
+                    instanceClass = JsonJoinView.class;
+                    break;
                 default:
                     // TODO: throw proper exception
                     throw new RuntimeException("Unsupported type of Ontop views: " + type);
@@ -290,9 +303,6 @@ public abstract class JsonView extends JsonOpenObject {
         }
     }
 
-    @JsonPropertyOrder({
-            "added"
-    })
     protected static class NonNullConstraints extends JsonOpenObject {
         @Nonnull
         public final List<String> added;

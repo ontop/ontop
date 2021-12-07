@@ -44,15 +44,19 @@ public class CachingMetadataLookup implements MetadataLookup {
     }
 
 
+    public ImmutableMetadataLookup extractImmutableMetadataLookup() {
+        return new ImmutableMetadataLookup(getQuotedIDFactory(), ImmutableMap.copyOf(map));
+    }
+
     public ImmutableMetadata extractImmutableMetadata() throws MetadataExtractionException {
 
-        ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(getQuotedIDFactory(), ImmutableMap.copyOf(map));
+        ImmutableMetadataLookup lookup = extractImmutableMetadataLookup();
         ImmutableList<NamedRelationDefinition> list = lookup.getRelations();
 
         for (NamedRelationDefinition relation : list)
             provider.insertIntegrityConstraints(relation, lookup);
 
-        provider.normalizeRelations(list);
+        provider.normalizeAndOptimizeRelations(list);
 
         return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }

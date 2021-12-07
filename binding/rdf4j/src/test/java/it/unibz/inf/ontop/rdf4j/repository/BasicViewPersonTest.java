@@ -72,4 +72,28 @@ public class BasicViewPersonTest extends AbstractRDF4JTest {
                 "}";
         runQueryAndCompare(query, ImmutableList.of("Botzen"));
     }
+
+    @Test
+    public void testPersonNickname() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>\n" +
+                "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?x a :Person . \n" +
+                " ?x :nickname ?v . \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableList.of("ROG"));
+    }
+
+    @Test
+    public void testPersonNick() throws Exception {
+        String query = "PREFIX : <http://person.example.org/>\n" +
+                "PREFIX  xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT  ?v \n" +
+                "WHERE {\n" +
+                " ?x a :Person . \n" +
+                " ?x :nick ?v . \n" +
+                "}";
+        runQueryAndCompare(query, ImmutableList.of("Rog!"));
+    }
 }
