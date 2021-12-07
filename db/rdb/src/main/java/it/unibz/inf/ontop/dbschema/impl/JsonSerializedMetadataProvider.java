@@ -10,18 +10,18 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import it.unibz.inf.ontop.dbschema.impl.json.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 public class JsonSerializedMetadataProvider implements SerializedMetadataProvider {
 
@@ -29,9 +29,22 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     private final ImmutableMap<RelationID, JsonDatabaseTable> relationMap;
     private final ImmutableMap<RelationID, RelationID> otherNames;
 
+    // Lazy
+    @Nullable
+    private MetadataLookup parentProvider;
+    @Nullable
+    private final MetadataLookupSupplier parentProviderSupplier;
+
 
     @AssistedInject
     protected JsonSerializedMetadataProvider(@Assisted Reader dbMetadataReader,
+                                             CoreSingletons coreSingletons) throws MetadataExtractionException, IOException {
+        this(dbMetadataReader, null, coreSingletons);
+    }
+
+    @AssistedInject
+    protected JsonSerializedMetadataProvider(@Assisted Reader dbMetadataReader,
+                                             @Nullable @Assisted MetadataLookupSupplier parentProviderSupplier,
                                              CoreSingletons coreSingletons) throws MetadataExtractionException, IOException {
         JsonMetadata jsonMetadata = loadAndDeserialize(dbMetadataReader);
 
@@ -56,6 +69,8 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
                             .map(id -> Maps.immutableEntry(id, mainId));
                 })
                 .collect(ImmutableCollectors.toMap());
+
+        this.parentProviderSupplier = parentProviderSupplier;
     }
 
 
@@ -97,6 +112,16 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
+        Optional<MetadataLookup> optionalParentProvider = getParentProvider();
+
+        if (optionalParentProvider.isPresent())
+            return optionalParentProvider.get().getBlackBoxView(query);
+
+        throw new UnsupportedOperationException("Has no parent provider. Should not have been called");
+    }
+
+    @Override
     public QuotedIDFactory getQuotedIDFactory() {
         return dbParameters.getQuotedIDFactory();
     }
@@ -122,7 +147,14 @@ public class JsonSerializedMetadataProvider implements SerializedMetadataProvide
     }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+    public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         // Does nothing
+    }
+
+    protected synchronized Optional<MetadataLookup> getParentProvider() throws MetadataExtractionException {
+        if (parentProvider == null && parentProviderSupplier != null)
+            parentProvider = parentProviderSupplier.get();
+
+        return Optional.ofNullable(parentProvider);
     }
 }

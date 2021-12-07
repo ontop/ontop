@@ -1,5 +1,11 @@
 package it.unibz.inf.ontop.protege.core;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import javax.annotation.Nonnull;
+
 /*
  * #%L
  * ontop-protege
@@ -10,7 +16,7 @@ package it.unibz.inf.ontop.protege.core;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,18 +28,18 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
+
 import org.protege.editor.owl.model.entity.EntityCreationPreferences;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
-import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.stream.StreamSupport;
+import it.unibz.inf.ontop.protege.utils.OWLAPIAdapter;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
 
 
 /**
@@ -43,7 +49,7 @@ import java.util.stream.StreamSupport;
 
 public class OntologyPrefixManager extends AbstractPrefixManager {
 
-    private final OWLOntology ontology;
+	private final OWLOntology ontology;
 
 	private final boolean hasExplicitDefaultPrefixNamespace;
 
@@ -87,10 +93,13 @@ public class OntologyPrefixManager extends AbstractPrefixManager {
 
 
 	private void generateDefaultPrefixNamespaceIfPossible(OWLOntologyID ontologyID) {
-		if (!ontologyID.getOntologyIRI().isPresent())
+		
+		final IRI ontologyIri = OWLAPIAdapter.INSTANCE.getOntologyIRI(ontologyID).orNull();
+
+		if (ontologyIri == null)
 			return;
 
-		String prefixUri = ontologyID.getOntologyIRI().get().toString();
+		String prefixUri = ontologyIri.toString();
 		if (!prefixUri.endsWith("#") && !prefixUri.endsWith("/")) {
 			String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
 			if (!prefixUri.endsWith(defaultSeparator))  {

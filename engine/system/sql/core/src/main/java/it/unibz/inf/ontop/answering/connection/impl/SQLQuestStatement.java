@@ -196,10 +196,7 @@ public class SQLQuestStatement extends QuestStatement {
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 queryLogger.declareResultSetUnblockedAndSerialize();
-                return settings.isDistinctPostProcessingEnabled()
-                        ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode,
-                            executableQuery.getProjectionAtom(), queryLogger, statementClosingCB, termFactory, substitutionFactory)
-                        : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(),
+                return new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(),
                             queryLogger, statementClosingCB, termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e);

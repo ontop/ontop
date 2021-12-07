@@ -15,10 +15,11 @@ public class RAExpression2IQConverter {
     private final CoreSingletons coreSingletons;
 
     @Inject
-    private RAExpression2IQConverter(TermFactory termFactory, IntermediateQueryFactory iqFactory) {
+    private RAExpression2IQConverter(TermFactory termFactory, IntermediateQueryFactory iqFactory,
+                                     CoreSingletons coreSingletons) {
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
-        this.coreSingletons = null;
+        this.coreSingletons = coreSingletons;
     }
 
     public RAExpression2IQConverter(CoreSingletons coreSingletons) {
@@ -32,7 +33,7 @@ public class RAExpression2IQConverter {
                 re.getDataAtoms().stream()
                         .collect(ImmutableCollectors.toList()),
                 termFactory.getConjunction(re.getFilterAtoms().stream()),
-                iqFactory);
+                coreSingletons);
     }
 
 

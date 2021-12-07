@@ -2,13 +2,12 @@ package it.unibz.inf.ontop.iq.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
@@ -30,7 +29,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
 
     @Inject
     protected NotYetTypedEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
-                                                 UniqueTermTypeExtractor typeExtractor,
+                                                 SingleTermTypeExtractor typeExtractor,
                                                  TermFactory termFactory,
                                                  SubstitutionFactory substitutionFactory) {
         this.expressionTransformer = new ExpressionTransformer(iqFactory,
@@ -47,12 +46,12 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
 
     protected static class ExpressionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final UniqueTermTypeExtractor typeExtractor;
+        private final SingleTermTypeExtractor typeExtractor;
         private final TermFactory termFactory;
         private final SubstitutionFactory substitutionFactory;
 
         protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
-                                        UniqueTermTypeExtractor typeExtractor,
+                                        SingleTermTypeExtractor typeExtractor,
                                         TermFactory termFactory,
                                         SubstitutionFactory substitutionFactory) {
             super(iqFactory);
@@ -221,7 +220,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
             ImmutableTerm term2 = newTerms.get(1);
 
             ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
-                    .map(t -> typeExtractor.extractUniqueTermType(t, tree))
+                    .map(t -> typeExtractor.extractSingleTermType(t, tree))
                     .collect(ImmutableCollectors.toList());
 
             if (extractedTypes.stream()

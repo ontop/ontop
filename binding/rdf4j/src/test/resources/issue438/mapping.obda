@@ -1,0 +1,14 @@
+[PrefixDeclaration]
+:    http://example.com/ontology#
+
+[MappingDeclaration] @collection [[
+mappingId  mytable_cover
+target     <{url}> a :Image .
+source     SELECT CONCAT('file:', cover) AS url
+              FROM mytable WHERE cover IS NOT NULL
+
+mappingId  mytable_coveren
+target     <{url}> a :Image .
+source     SELECT CONCAT('file:', coveren) AS url
+           FROM mytable WHERE coveren IS NOT NULL
+]]

@@ -11,10 +11,7 @@ import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
-import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
-import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
-import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
+import it.unibz.inf.ontop.iq.transformer.*;
 import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 
@@ -46,6 +43,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(InnerJoinIQOptimizer.class);
         bindFromSettings(LeftJoinIQOptimizer.class);
         bindFromSettings(BooleanExpressionPushDownTransformer.class);
+        bindFromSettings(EmptyRowsValuesNodeTransformer.class);
         bindFromSettings(GeneralStructuralAndSemanticIQOptimizer.class);
         bindFromSettings(QueryPlanner.class);
         bindFromSettings(SelfJoinSameTermIQOptimizer.class);
@@ -53,6 +51,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(SelfJoinUCIQOptimizer.class);
         bindFromSettings(RedundantJoinFKOptimizer.class);
         bindFromSettings(OntopViewUnfolder.class);
+        bindFromSettings(AggregationSplitter.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 

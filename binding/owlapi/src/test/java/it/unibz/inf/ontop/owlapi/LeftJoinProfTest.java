@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.junit.*;
 
 import java.util.Arrays;
@@ -18,7 +19,8 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
     public static void setUp() throws Exception {
         initOBDA("/test/redundant_join/redundant_join_fk_create.sql",
                 "/test/redundant_join/redundant_join_fk_test.obda",
-                "/test/redundant_join/redundant_join_fk_test.owl");
+                "/test/redundant_join/redundant_join_fk_test.owl",
+                "/test/redundant_join/redundant_join_fk_test.properties");
 
     }
 
@@ -1240,6 +1242,35 @@ public class LeftJoinProfTest extends AbstractOWLAPITest {
         String sql = checkReturnedValuesAndReturnSql(query, "v", Arrays.asList(expectedValues));
 
         assertTrue(sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
+    public void testValuesNodeOntologyProperty() throws Exception {
+        String querySelect = "SELECT ?o WHERE {\n" +
+                "?s <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#conductsLab> ?o\n" +
+                "}";
+
+        checkReturnedValues(querySelect, "o", ImmutableList.of(
+                // From the facts
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/Algorithms>",
+                "<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#course/DataIntegration>"));
+
+    }
+
+    @Test
+    public void testAggregationMappingProfStudentCountProperty() throws Exception {
+
+        String querySelect =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "?p a :Teacher ;\n" +
+                "   :nbStudents ?v .\n" +
+                "}" +
+                "ORDER BY ?v\n" ;
+
+        ImmutableList<String> expectedValues = ImmutableList.of("\"12\"^^xsd:integer", "\"13\"^^xsd:integer", "\"21\"^^xsd:integer");
+        checkReturnedValues(querySelect, "v", expectedValues);
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {

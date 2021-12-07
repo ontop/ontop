@@ -461,7 +461,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<ConstructionNode> idleCns = getIdleCns(children.stream());
             return idleCns.isEmpty() ?
                     tree :

@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BasicViewWithConstraintsParsingTest {
     private static final String VIEW_FILE = "src/test/resources/person/basic_views_with_constraints.json";
@@ -140,5 +141,21 @@ public class BasicViewWithConstraintsParsingTest {
                 .collect(ImmutableCollectors.toList());
 
         assertEquals(ImmutableList.of("status", "statusDescription"), destination_column);
+    }
+
+
+    /**
+     * Non-null constraint taken into account
+     */
+    @Test
+    public void testPersonAddNonNullConstraint() throws Exception {
+        ImmutableSet<String> nonNullColumns = viewDefinitions.stream()
+                .map(RelationDefinition::getAttributes)
+                .flatMap(Collection::stream)
+                .filter(a -> !a.isNullable())
+                .map(v -> v.getID().getName())
+                .collect(ImmutableCollectors.toSet());
+
+        assertTrue(nonNullColumns.contains("country"));
     }
 }

@@ -29,11 +29,6 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return getRequiredBoolean(DISTINCT_RESULTSET);
-    }
-
-    @Override
     public boolean isPostProcessingAvoided() {
         return systemSettings.isPostProcessingAvoided();
     }

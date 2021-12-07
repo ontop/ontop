@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,18 +46,18 @@ public class ApproximateSelectQueryAttributeExtractor {
         this.idfac = idfac;
     }
 
-    public ImmutableList<QuotedID> getAttributes(String sql) throws InvalidSelectQueryException {
+    public ImmutableList<QuotedID> getAttributes(String sql) throws InvalidQueryException {
 
         // COULD NOT PARSE - do a rough approximation
 
         Matcher startMatcher = SELECT.matcher(sql);
         if (!startMatcher.find())
-            throw new InvalidSelectQueryException("Error parsing SQL query: Couldn't find SELECT clause", sql);
+            throw new InvalidQueryException("Error parsing SQL query: Couldn't find SELECT clause", sql);
         int start = startMatcher.end();
 
         Matcher endMatcher = FROM.matcher(sql);
         if (!endMatcher.find())
-            throw new InvalidSelectQueryException("Error parsing SQL query: Couldn't find FROM clause", sql);
+            throw new InvalidQueryException("Error parsing SQL query: Couldn't find FROM clause", sql);
         int end = endMatcher.start();
 
         String projection = sql.substring(start, end);

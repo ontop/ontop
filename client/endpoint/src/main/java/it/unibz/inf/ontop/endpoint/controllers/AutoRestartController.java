@@ -25,7 +25,7 @@ public class AutoRestartController {
 
     @Autowired
     public AutoRestartController(@Value("${mapping}") String mappingFile,
-                                 @Value("${properties}") String propertiesFile,
+                                 @Value("${properties:#{null}}") String propertiesFile,
                                  @Value("${ontology:#{null}}") String owlFile,
                                  @Value("${portal:#{null}}") String portalFile) {
         registerFileWatcher(mappingFile, owlFile, propertiesFile, portalFile);
@@ -36,7 +36,7 @@ public class AutoRestartController {
         OntopEndpointApplication.restart();
     }
 
-    private void registerFileWatcher(String mappingFile, @Nullable String owlFile, String propertiesFile, @Nullable String portalFile) {
+    private void registerFileWatcher(String mappingFile, @Nullable String owlFile, @Nullable String propertiesFile, @Nullable String portalFile) {
         FileSystem fileSystem = FileSystems.getDefault();
 
         ImmutableList<Path> filesToWatch = Stream.of(mappingFile, owlFile, propertiesFile, portalFile)

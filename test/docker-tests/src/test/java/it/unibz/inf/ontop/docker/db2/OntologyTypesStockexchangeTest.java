@@ -155,6 +155,13 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
         countResults(0, query1);
     }
 
+    // The ontology contains three facts (Joe, Jane, Bane are Investors), the database contains three more.
+    @Test
+    public void testAbox() throws Exception {
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Investor. }";
+        countResults(6, query1);
+    }
+
     @Ignore("Consider updating the DB2 instance as its TZ behavior does not seem to be compliant with the docs")
     @Test
     public void testDatetimeTimezone() throws Exception {

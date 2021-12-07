@@ -2,7 +2,7 @@
   "relations": [
     {
       "name": ["\"hr\"", "\"persons\""],
-      "query": "SELECT r.\"id\", r.\"status\" FROM \"person\" AS r WHERE r.\"status\" = 1",
+      "query": "SELECT r.\"id\", r.\"status\", r.\"country\" FROM \"person\" AS r WHERE r.\"status\" = 1",
       "columns": {
         "added": [],
         "hidden": []
@@ -25,6 +25,11 @@
       },
       "foreignKeys": {
         "added": []
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
+        ]
       },
       "type": "SQLViewDefinition"
     }

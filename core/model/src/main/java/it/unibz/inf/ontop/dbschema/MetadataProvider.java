@@ -27,5 +27,5 @@ public interface MetadataProvider extends MetadataLookup {
     /**
      * Mostly useful for OntopViewMetadataProvider-s
      */
-    void normalizeRelations(List<NamedRelationDefinition> relationDefinitions);
+    void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions);
 }

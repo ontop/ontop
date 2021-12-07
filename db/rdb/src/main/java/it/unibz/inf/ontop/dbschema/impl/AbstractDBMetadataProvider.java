@@ -1,19 +1,37 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.spec.sqlparser.ApproximateSelectQueryAttributeExtractor;
+import it.unibz.inf.ontop.spec.sqlparser.DefaultSelectQueryAttributeExtractor;
+import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
+import it.unibz.inf.ontop.spec.sqlparser.ParserViewDefinition;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.TokenMgrException;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
@@ -22,8 +40,12 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected final Connection connection;
     protected final DBParameters dbParameters;
     protected final DatabaseMetaData metadata;
+    protected final String escape;
 
     protected final QuotedIDFactory rawIdFactory;
+    private final CoreSingletons coreSingletons;
+    private final DBTypeFactory dbTypeFactory;
+    private final OntopOBDASettings settings;
 
     protected interface QuotedIDFactoryFactory {
         QuotedIDFactory create(DatabaseMetaData m) throws SQLException;
@@ -38,6 +60,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         try {
             this.connection = connection;
             this.metadata = connection.getMetaData();
+            this.escape = metadata.getSearchStringEscape();
             QuotedIDFactory idFactory = idFactoryProvider.create(metadata);
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
             this.dbParameters = new BasicDBParametersImpl(metadata.getDriverName(),
@@ -46,6 +69,16 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                     metadata.getDatabaseProductVersion(),
                     idFactory,
                     coreSingletons);
+            this.coreSingletons = coreSingletons;
+            this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
+
+            OntopModelSettings modelSettings = coreSingletons.getSettings();
+            // HACK! Done so as to avoid changing the constructor of this highly-derived class.
+            if (modelSettings instanceof OntopOBDASettings) {
+                this.settings = (OntopOBDASettings) modelSettings;
+            }
+            else
+                throw new MinorOntopInternalBugException("Was expecting the settings being an instance of OntopOBDASettings");
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -59,7 +92,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     public DBParameters getDBParameters() { return dbParameters; }
 
     @Override
-    public void normalizeRelations(List<NamedRelationDefinition> relationDefinitions) {
+    public void normalizeAndOptimizeRelations(List<NamedRelationDefinition> relationDefinitions) {
         // Does nothing
     }
 
@@ -94,11 +127,22 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId );
     }
 
+    protected @Nullable String escapeRelationIdComponentPattern(@Nullable String s) {
+        return (s == null || escape == null)
+                ? s
+                : s.replace("_", escape + "_")
+                    .replace("%", escape + "%");
+    }
+
     @Override
     public NamedRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
         DBTypeFactory dbTypeFactory = dbParameters.getDBTypeFactory();
         RelationID id = getCanonicalRelationId(id0);
-        try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
+        try (ResultSet rs = metadata.getColumns(
+                getRelationCatalog(id), // catalog is not escaped
+                escapeRelationIdComponentPattern(getRelationSchema(id)),
+                escapeRelationIdComponentPattern(getRelationName(id)),
+                null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
@@ -115,26 +159,8 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 int columnSize = rs.getInt("COLUMN_SIZE");
                 DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
-                String sqlTypeName;
-                switch (rs.getInt("DATA_TYPE")) {
-                    case Types.CHAR:
-                    case Types.VARCHAR:
-                    case Types.NVARCHAR:
-                        sqlTypeName = (columnSize != 0) ? typeName + "(" + columnSize + ")" : typeName;
-                        break;
-                    case Types.DECIMAL:
-                    case Types.NUMERIC:
-                        int decimalDigits = rs.getInt("DECIMAL_DIGITS");
-                        if (columnSize == 0)
-                            sqlTypeName = typeName;
-                        else if (decimalDigits == 0)
-                            sqlTypeName = typeName + "(" + columnSize + ")";
-                        else
-                            sqlTypeName = typeName + "(" + columnSize + ", " + decimalDigits + ")";
-                        break;
-                    default:
-                        sqlTypeName = typeName;
-                }
+                String sqlTypeName = extractSQLTypeName(typeName, rs.getInt("DATA_TYPE"), columnSize,
+                        () -> rs.getInt("DECIMAL_DIGITS"));
                 builder.addAttribute(attributeId, termType, sqlTypeName, isNullable);
             }
 
@@ -148,6 +174,27 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
+        }
+    }
+
+    protected String extractSQLTypeName(String typeName, int jdbcType, int columnSize,
+                                        PrecisionSupplier precisionSupplier) throws SQLException {
+        switch (jdbcType) {
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.NVARCHAR:
+                return (columnSize != 0) ? typeName + "(" + columnSize + ")" : typeName;
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                int decimalDigits = precisionSupplier.getPrecision();
+                if (columnSize == 0)
+                    return typeName;
+                else if (decimalDigits == 0)
+                    return typeName + "(" + columnSize + ")";
+                else
+                    return typeName + "(" + columnSize + ", " + decimalDigits + ")";
+            default:
+                return typeName;
         }
     }
 
@@ -297,6 +344,98 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
+    @Override
+    public RelationDefinition getBlackBoxView(String query) throws MetadataExtractionException, InvalidQueryException {
+        return settings.allowRetrievingBlackBoxViewMetadataFromDB()
+                ? extractBlackBoxViewByConnectingToDB(query)
+                : extractBlackBoxViewWithoutConnectingToDB(query);
+    }
+
+    protected RelationDefinition extractBlackBoxViewByConnectingToDB(String query) throws MetadataExtractionException {
+        try (Statement st = connection.createStatement();
+             ResultSet resultSet = st.executeQuery(makeQueryMinimizeResultSet(query))) {
+
+            ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
+            int columnCount = resultSetMetadata.getColumnCount();
+
+            RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
+
+            for (int i=1; i <= columnCount; i++) {
+                final int index = i;
+
+                QuotedID attributeId = rawIdFactory.createAttributeID(resultSetMetadata.getColumnName(index));
+                String typeName = resultSetMetadata.getColumnTypeName(index);
+
+                int columnSize = resultSetMetadata.getColumnDisplaySize(index);
+                DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
+
+                String sqlTypeName = extractSQLTypeName(typeName, resultSetMetadata.getColumnType(index), columnSize,
+                        () -> resultSetMetadata.getPrecision(index));
+
+                builder.addAttribute(attributeId, termType, sqlTypeName, true);
+            }
+            return new ParserViewDefinition(builder, query);
+
+        } catch (SQLException e) {
+            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. ", e);
+        }
+    }
+
+    /**
+     * Can be overridden
+     */
+    protected String makeQueryMinimizeResultSet(String query) {
+        return String.format("SELECT * FROM (%s) subQ LIMIT 1", query);
+    }
+
+    protected RelationDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws InvalidQueryException {
+        ImmutableList<QuotedID> attributes;
+        try {
+            DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
+            SelectBody selectBody = JSqlParserTools.parse(query);
+            ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(selectBody).getUnqualifiedAttributes();
+            attributes = ImmutableList.copyOf(attrs.keySet());
+        } catch (JSQLParserException e) {
+            // TODO: LOGGER.warn() should be instead after revising the logging policy
+            System.out.println(String.format("FAILED TO PARSE: %s %s", query, getJSQLParserErrorMessage(query, e)));
+
+            ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
+            attributes = sqae.getAttributes(query);
+        } catch (UnsupportedSelectQueryException e) {
+            ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
+            attributes = sqae.getAttributes(query);
+        }
+        return new ParserViewDefinition(attributes, query, dbTypeFactory);
+    }
+
+    private static String getJSQLParserErrorMessage(String sourceQuery, JSQLParserException e) {
+        try {
+            // net.sf.jsqlparser.parser.TokenMgrException: Lexical error at line 1, column 165.
+            if (e.getCause() instanceof TokenMgrException) {
+                Pattern pattern = Pattern.compile("at line (\\d+), column (\\d+)");
+                Matcher matcher = pattern.matcher(e.getCause().getMessage());
+                if (matcher.find()) {
+                    int line = Integer.parseInt(matcher.group(1));
+                    int col = Integer.parseInt(matcher.group(2));
+                    String sourceQueryLine = sourceQuery.split("\n")[line - 1];
+                    final int MAX_LENGTH = 40;
+                    if (sourceQueryLine.length() > MAX_LENGTH) {
+                        sourceQueryLine = sourceQueryLine.substring(sourceQueryLine.length() - MAX_LENGTH);
+                        if (sourceQueryLine.length() > 2 * MAX_LENGTH)
+                            sourceQueryLine = sourceQueryLine.substring(0, 2 * MAX_LENGTH);
+                        col = MAX_LENGTH;
+                    }
+                    return "FAILED TO PARSE: " + sourceQueryLine + "\n" +
+                            Strings.repeat(" ", "FAILED TO PARSE: ".length() + col - 2) + "^\n" + e.getCause();
+                }
+            }
+        }
+        catch (Exception e1) {
+            // NOP
+        }
+        return e.getCause().toString();
+    }
+
     protected abstract RelationID getCanonicalRelationId(RelationID id);
 
     protected abstract ImmutableList<RelationID> getAllIDs(RelationID id);
@@ -307,4 +446,9 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
     protected abstract String getRelationSchema(RelationID id);
 
     protected abstract String getRelationName(RelationID id);
+
+    @FunctionalInterface
+    interface PrecisionSupplier {
+        int getPrecision() throws SQLException;
+    }
 }
