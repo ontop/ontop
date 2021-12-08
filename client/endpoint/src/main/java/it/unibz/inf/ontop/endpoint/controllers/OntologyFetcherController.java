@@ -30,8 +30,8 @@ public class OntologyFetcherController {
     private final OntopSQLOWLAPIConfiguration configuration;
 
     // Davide> The useless "repository" argument is apparently required by Spring. If not provided, then
-    //         the instantiation of the configuration object fails. Can some expert in Spring explain me
-    //         what is going (terribly wrong, imho) on here?
+    //         the instantiation of the configuration object fails. Can some expert of Spring explain me
+    //         what is going on here?
     @Autowired
     public OntologyFetcherController(OntopVirtualRepository repository, OntopSQLOWLAPIConfiguration configuration) {
         this.configuration = configuration;
@@ -49,12 +49,17 @@ public class OntologyFetcherController {
         OutputStream out = new ByteArrayOutputStream();
         try{
             ontology = configuration.loadInputOntology().get();
-            ontology.getOWLOntologyManager().saveOntology(ontology, out);
-            output = out.toString();
-            out.close();
+            boolean downOnto = configuration.getSettings().downloadOntology();
+            if( true || downOnto ){
+                ontology.getOWLOntologyManager().saveOntology(ontology, out);
+                output = out.toString();
+                out.close();
+            }
+            return new ResponseEntity<>(output, headers, HttpStatus.OK);
         } catch (OWLOntologyCreationException | OWLOntologyStorageException | IOException e) {
             e.printStackTrace();
         }
-        return new ResponseEntity<>(output, headers, HttpStatus.OK);
+        // Forbidden
+        return new ResponseEntity<>("Forbidden", headers, HttpStatus.FORBIDDEN);
     }
 }

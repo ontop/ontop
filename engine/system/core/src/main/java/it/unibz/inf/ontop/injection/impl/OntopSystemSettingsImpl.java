@@ -53,4 +53,9 @@ public class OntopSystemSettingsImpl extends OntopReformulationSettingsImpl impl
         return Optional.of(cacheControl)
                 .filter(s -> !s.isEmpty());
     }
+
+    @Override
+    public boolean downloadOntology() {
+        return getRequiredBoolean(DOWNLOAD_ONTOLOGY);
+    }
 }

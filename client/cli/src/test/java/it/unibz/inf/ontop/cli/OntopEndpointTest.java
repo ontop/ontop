@@ -127,9 +127,10 @@ public class OntopEndpointTest {
 
         // When
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
-//        StringWriter writer = new StringWriter();
-//        IOUtils.copy(httpResponse.getEntity().getContent(), writer);
-//        String theString = writer.toString();
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(httpResponse.getEntity().getContent(), writer);
+        String theString = writer.toString();
+        System.out.println(theString);
 
         // Then
         assertThat(

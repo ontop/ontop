@@ -142,4 +142,9 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     public Optional<String> getHttpCacheControl() {
         return systemSettings.getHttpCacheControl();
     }
+
+    @Override
+    public boolean downloadOntology() {
+        return getRequiredBoolean(DOWNLOAD_ONTOLOGY);
+    }
 }
