@@ -184,7 +184,7 @@
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
         <sesame.version>2.7.16</sesame.version>
-        <tomcat-embed-core.version>9.0.43</tomcat-embed-core.version>
+        <tomcat-embed-core.version>10.0.14</tomcat-embed-core.version>
     </properties>
 
     <dependencyManagement>
