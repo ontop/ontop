@@ -59,7 +59,7 @@ public class OntopEndpoint extends OntopReasoningCommandBase {
     private boolean disablePortalPage = false;
 
     @Option(type = OptionType.COMMAND, name = {"--enable-download-ontology"}, title = "allow to download the ontology",
-            description = "Allow to download the ontology as a plain text file. Default: false")
+            description = "Allow to download the ontology as a plain text file (/ontology). Default: false")
     private boolean enableDownloadOntology = false;
     
     @Override
