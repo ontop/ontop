@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.cli;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -18,7 +17,6 @@ import org.junit.Test;
 import org.junit.rules.ExternalResource;
 
 import java.io.IOException;
-import java.io.StringWriter;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
