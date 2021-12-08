@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.rdf4j.model.Statement;
@@ -127,15 +128,24 @@ public class OntopEndpointTest {
 
         // When
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
-        StringWriter writer = new StringWriter();
-        IOUtils.copy(httpResponse.getEntity().getContent(), writer);
-        String theString = writer.toString();
-        System.out.println(theString);
 
         // Then
         assertThat(
                 httpResponse.getStatusLine().getStatusCode(),
-                equalTo(HttpStatus.SC_OK));
+                equalTo(HttpStatus.SC_NOT_FOUND)); // Should be disabled by default
+    }
+
+    @Test
+    public void testOntologyFetcherPost() throws IOException {
+        HttpUriRequest request = new HttpPost("http://localhost:" + PORT + "/ontology");
+
+        // When
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+        // Then
+        assertThat(
+                httpResponse.getStatusLine().getStatusCode(),
+                equalTo(HttpStatus.SC_NOT_FOUND)); // The controller should be disabled by default
     }
 
 }

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSeriali
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
+import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
@@ -87,7 +88,6 @@ public class OntopBootstrap extends AbstractOntopCommand {
 
             OWLOntology onto = results.getOntology();
             onto.getOWLOntologyManager().saveOntology(onto, new FileDocumentTarget(ontologyFile));
-
         } catch (Exception e) {
             System.err.println("Error occurred during bootstrapping: "
                     + e.getMessage());

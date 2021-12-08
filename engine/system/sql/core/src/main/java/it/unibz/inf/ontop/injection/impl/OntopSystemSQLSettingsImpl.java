@@ -103,9 +103,4 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     public Optional<String> getJdbcPassword() {
         return sqlCredentialSettings.getJdbcPassword();
     }
-
-    @Override
-    public boolean downloadOntology() {
-        return getRequiredBoolean(DOWNLOAD_ONTOLOGY);
-    }
 }

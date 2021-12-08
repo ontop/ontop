@@ -21,9 +21,6 @@ public interface OntopSystemSettings extends OntopReformulationSettings {
     // HTTP Caching
     Optional<String> getHttpCacheControl();
 
-    // Enables the OntologyFetcherController
-    boolean downloadOntology();
-
     //--------------------------
     // Keys
     //--------------------------
@@ -39,8 +36,4 @@ public interface OntopSystemSettings extends OntopReformulationSettings {
     String HTTP_CACHE_STALE_WHILE_REVALIDATE = "ontop.http.cache.staleWhileRevalidate";
     @Deprecated
     String HTTP_CACHE_STALE_IF_ERROR = "ontop.http.cache.staleIfError";
-
-    // Download ontology controller
-    String DOWNLOAD_ONTOLOGY = "ontop.downloadOntology";
-
 }
