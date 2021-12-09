@@ -27,27 +27,8 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
             }
 
             @Override
-            protected String serializeDBConstant(DBConstant constant) {
-                DBTermType dbType = constant.getType();
-
-                switch (dbType.getCategory()) {
-                    case DECIMAL:
-                    case FLOAT_DOUBLE:
-                        // TODO: handle the special case of not-a-number!
-                        return castFloatingConstant(constant.getValue(), dbType);
-                    case INTEGER:
-                    case BOOLEAN:
-                        return constant.getValue();
-                    case DATE:
-                    case DATETIME:
-                        return serializeDatetimeConstant(serializeStringConstant(constant.getValue()), dbType);
-                    default:
-                        return serializeStringConstant(constant.getValue());
-                }
-            }
-
             protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
-                return String.format("CAST(%s AS %s)", datetime, dbType.getCastName());
+                return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
             }
         });
     }
