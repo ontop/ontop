@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.resultset.impl.DistinctJDBCTupleResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -24,15 +23,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
-/**
- * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link DistinctJDBCTupleResultSet}
- */
-
-public class DistinctResultSetTest { //
+public class DistinctResultSetTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 

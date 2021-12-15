@@ -50,6 +50,11 @@ public class OracleDBMetadataProvider extends DefaultSchemaDBMetadataProvider {
     }
 
     @Override
+    protected String makeQueryMinimizeResultSet(String query) {
+        return String.format("SELECT * FROM (%s) subQ FETCH NEXT 1 ROWS ONLY", query);
+    }
+
+    @Override
     protected ImmutableList<RelationID> getAllIDs(RelationID id) {
         if (isDual(id))
             return ImmutableList.of(sysDualId);

@@ -399,8 +399,11 @@ public class BindingLiftTest {
         initialQueryBuilder.addChild(unionNode, leftConstructionNode);
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
+        ConstructionNode subConstructionNode1 = IQ_FACTORY.createConstructionNode(unionNode.getVariables());
+        initialQueryBuilder.addChild(unionNode, subConstructionNode1);
+
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        initialQueryBuilder.addChild(unionNode, joinNode);
+        initialQueryBuilder.addChild(subConstructionNode1, joinNode);
 
         ConstructionNode centralConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateIRIWithTemplate1(C)));

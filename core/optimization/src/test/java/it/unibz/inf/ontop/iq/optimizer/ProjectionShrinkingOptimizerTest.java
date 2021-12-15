@@ -85,8 +85,7 @@ public class ProjectionShrinkingOptimizerTest {
     private static IntermediateQuery optimize(IntermediateQuery initialQuery) throws EmptyQueryException {
         IQ initialIQ = IQ_CONVERTER.convert(initialQuery);
         return IQ_CONVERTER.convert(
-                initialIQ.normalizeForOptimization(),
-                EXECUTOR_REGISTRY);
+                initialIQ.normalizeForOptimization());
     }
 
     @Test

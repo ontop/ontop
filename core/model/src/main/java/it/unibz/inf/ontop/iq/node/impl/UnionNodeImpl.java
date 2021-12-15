@@ -10,9 +10,11 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -322,6 +324,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer,
+                                    ImmutableList<IQTree> children, T context) {
+        return transformer.transformUnion(tree,this, children, context);
+    }
+
+    @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, ImmutableList<IQTree> children) {
         return visitor.visitUnion(this, children);
     }
@@ -336,10 +344,10 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableSet<Variable> unionVariables = getVariables();
 
         for (IQTree child : children) {
-            if (!child.getVariables().containsAll(unionVariables)) {
+            if (!child.getVariables().equals(unionVariables)) {
                 throw new InvalidIntermediateQueryException("This child " + child
-                        + " does not project all the variables " +
-                        "required by the UNION node (" + unionVariables + ")\n" + this);
+                        + " does not project exactly all the variables " +
+                        "of the UNION node (" + unionVariables + ")\n" + this);
             }
         }
     }
@@ -531,6 +539,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .map(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
                                 tmpNormalizedChildSubstitutions.get(i), unionVariables))
                         .flatMap(this::flattenChild)
+                        .map(c -> c.getVariables().equals(unionVariables)
+                                ? c
+                                : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(unionVariables), c))
                         .collect(ImmutableCollectors.toList()));
 
         return iqFactory.createUnaryIQTree(newRootNode, unionIQ);
@@ -643,10 +654,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             ImmutableFunctionalTerm functionalTerm1 = (ImmutableFunctionalTerm) d1;
             ImmutableFunctionalTerm functionalTerm2 = (ImmutableFunctionalTerm) d2;
 
+            FunctionSymbol firstFunctionSymbol = functionalTerm1.getFunctionSymbol();
+
             /*
-             * Different function symbols: stops the common part here
+             * Different function symbols: stops the common part here.
+             *
+             * Same for functions that do not strongly type their arguments (unsafe to decompose). Example: STRICT_EQ
              */
-            if (!functionalTerm1.getFunctionSymbol().equals(functionalTerm2.getFunctionSymbol())) {
+            if ((!firstFunctionSymbol.equals(functionalTerm2.getFunctionSymbol()))
+                    || (!firstFunctionSymbol.shouldBeDecomposedInUnion())) {
                 return topLevel
                         ? Optional.empty()
                         : Optional.of(variableGenerator.generateNewVariable());
@@ -666,7 +682,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                             .orElseGet(variableGenerator::generateNewVariable);
                     argumentBuilder.add(newArgument);
                 }
-                return Optional.of(termFactory.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
+                return Optional.of(termFactory.getImmutableFunctionalTerm(firstFunctionSymbol,
                         argumentBuilder.build()));
             }
         }

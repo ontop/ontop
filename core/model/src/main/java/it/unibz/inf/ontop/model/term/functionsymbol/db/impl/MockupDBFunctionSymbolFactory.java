@@ -160,6 +160,15 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol("BOOL_COALESCE", arity, abstractRootDBType,
+                dbBooleanType,
+                (terms, termConverter, termFactory) -> {
+                    throw new UnsupportedOperationException("Not serialization for a mockup coalesce");
+                });
+    }
+
+    @Override
     protected DBStrictEqFunctionSymbol createDBStrictEquality(int arity) {
         return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }

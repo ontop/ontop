@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-build</artifactId>
-        <version>4.1.1</version>
+        <version>4.2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-distribution</artifactId>
@@ -18,46 +18,34 @@
         <assembly.attach>false</assembly.attach>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ontop-protege</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>*</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-owlapi</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-rdf4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-cli</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-rdf4j-server</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-rdf4j-workbench</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <!-- this dependency serves to order ontop-distribution after ontop-protege
-                 during a multi-module build, so that ontop-protege bundle can be
-                 resolved from reactor instead of having to install & download it from
-                 a maven repository -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-protege</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>*</artifactId>
-                    <groupId>*</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
     </dependencies>
 
@@ -241,5 +229,54 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>cli</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-cli</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>protege</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-protege</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>webapps</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-rdf4j-server</artifactId>
+                    <type>war</type>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-rdf4j-workbench</artifactId>
+                    <type>war</type>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>release</id>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-cli</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>ontop-protege</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>

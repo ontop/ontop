@@ -67,4 +67,9 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
     protected boolean enableIfElseNullLifting() {
         return true;
     }
+
+    @Override
+    protected boolean enableCoalesceLifting() {
+        return true;
+    }
 }

@@ -3,7 +3,6 @@
     {
       "name": ["\"views\"", "\"persons\""],
       "baseRelation": ["\"person\""],
-      "filterExpression": "",
       "columns": {
         "added": [
           {
@@ -21,6 +20,14 @@
           {
             "name": "\"region\"",
             "expression": "\"locality\""
+          },
+          {
+            "name": "\"nickname\"",
+            "expression": "UPPER(\"nickname\")"
+          },
+          {
+            "name": "\"nick\"",
+            "expression": "CONCAT(\"nickname\", '!')"
           }
         ],
         "hidden": [
@@ -44,6 +51,11 @@
               "relation": ["\"statuses\""]
             }
           }
+        ]
+      },
+      "nonNullConstraints": {
+        "added": [
+          "\"country\""
         ]
       },
       "type": "BasicViewDefinition"

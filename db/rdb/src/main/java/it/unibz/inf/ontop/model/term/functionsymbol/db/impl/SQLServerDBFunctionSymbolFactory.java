@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
 
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.NTEXT_STR;
@@ -390,6 +391,18 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
         return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createBooleanCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBBooleanCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
+                dbBooleanType,
+                (terms, termConverter, termFactory) -> {
+                    String parameterString = terms.stream()
+                            .map(termConverter)
+                            .collect(Collectors.joining(","));
+                    return String.format("COALESCE(%s) = 1", parameterString);
+                });
     }
 
     protected String serializeSubString2(ImmutableList<? extends ImmutableTerm> terms,

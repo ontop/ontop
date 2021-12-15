@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
@@ -172,6 +173,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return getRootNode().acceptTransformer(this, transformer, getChild());
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return getRootNode().acceptTransformer(this, transformer, getChild(), context);
     }
 
     @Override

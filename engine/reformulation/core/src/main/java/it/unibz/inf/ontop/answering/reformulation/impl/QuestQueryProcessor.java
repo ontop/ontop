@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private final QueryUnfolder queryUnfolder;
 
-	private final ExecutorRegistry executorRegistry;
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
@@ -47,7 +45,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
-								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
@@ -68,7 +65,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
-		this.executorRegistry = executorRegistry;
 
 		LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -108,8 +104,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, executorRegistry);
-				IQ plannedQuery = queryPlanner.optimize(optimizedQuery, executorRegistry);
+                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ);
+				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
 				queryLogger.setPlannedQuery(plannedQuery);

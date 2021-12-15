@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-professor
+target		:professor/{prof_id} a :Professor ; :nickname {nickname} ; :ufirstname {"upper_first_name"} ; :vnickname {"valid_nick_name"} .
+source		SELECT prof_id, nickname, "upper_first_name", "valid_nick_name" FROM "views"."profs";
+
+]]

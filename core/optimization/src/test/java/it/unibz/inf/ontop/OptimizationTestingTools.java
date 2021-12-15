@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -26,13 +25,13 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
+import org.mapdb.Atomic;
 
 import java.util.Properties;
 import java.util.stream.IntStream;
 
 public class OptimizationTestingTools {
 
-    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
@@ -49,11 +48,13 @@ public class OptimizationTestingTools {
     public static final DBConstant TRUE, FALSE;
     public static final Constant NULL;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
+    public static final GeneralStructuralAndSemanticIQOptimizer GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
     public static final Variable X;
+    public static final Variable XF0;
     public static final Variable Y;
     public static final Variable W;
     public static final Variable Z;
@@ -84,13 +85,15 @@ public class OptimizationTestingTools {
     public static final Variable G;
     public static final Variable GF1;
     public static final Variable H;
+    public static final Variable HF0;
     public static final Variable I;
     public static final Variable IF7;
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
+    public static final Variable NF0;
     public static final Variable PROV;
-    public static final DBConstant ONE, TWO, ONE_STR, TWO_STR;
+    public static final DBConstant ONE, TWO, ONE_STR, TWO_STR, THREE_STR, FOUR_STR, FIVE_STR;
 
     public static final AtomPredicate ANS1_AR0_PREDICATE, ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,
             ANS1_AR4_PREDICATE, ANS1_AR5_PREDICATE;
@@ -107,7 +110,6 @@ public class OptimizationTestingTools {
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
-        EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
         BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
@@ -123,6 +125,7 @@ public class OptimizationTestingTools {
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
+        GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
@@ -132,6 +135,7 @@ public class OptimizationTestingTools {
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         X = TERM_FACTORY.getVariable("x");
+        XF0 = TERM_FACTORY.getVariable("xf0");
         Y = TERM_FACTORY.getVariable("y");
         W = TERM_FACTORY.getVariable("w");
         Z = TERM_FACTORY.getVariable("z");
@@ -162,16 +166,21 @@ public class OptimizationTestingTools {
         G = TERM_FACTORY.getVariable("g");
         GF1 = TERM_FACTORY.getVariable("gf1");
         H = TERM_FACTORY.getVariable("h");
+        HF0 = TERM_FACTORY.getVariable("hf0");
         I = TERM_FACTORY.getVariable("i");
         IF7 = TERM_FACTORY.getVariable("if7");
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
+        NF0 = TERM_FACTORY.getVariable("nf0");
         PROV = TERM_FACTORY.getVariable("prov");
         ONE = TERM_FACTORY.getDBIntegerConstant(1);
         TWO = TERM_FACTORY.getDBIntegerConstant(2);
         ONE_STR = TERM_FACTORY.getDBStringConstant("1");
         TWO_STR = TERM_FACTORY.getDBStringConstant("2");
+        THREE_STR = TERM_FACTORY.getDBStringConstant("3");
+        FOUR_STR = TERM_FACTORY.getDBStringConstant("4");
+        FIVE_STR = TERM_FACTORY.getDBStringConstant("5");
 
         ANS1_AR0_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(0);
         ANS1_AR1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
@@ -182,7 +191,7 @@ public class OptimizationTestingTools {
     }
 
     public static IntermediateQueryBuilder createQueryBuilder() {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
+        return IQ_FACTORY.createIQBuilder();
     }
 
     public static OfflineMetadataProviderBuilder3 createMetadataProviderBuilder() {
@@ -229,6 +238,10 @@ public class OptimizationTestingTools {
 
         public RelationDefinition createRelationWithIntAttributes(int tableNumber, int arity, boolean canBeNull) {
             return createRelation(tableNumber, arity, getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
+        }
+
+        public RelationDefinition createRelationWithUuidAttributes(int tableNumber, int arity, boolean canBeNull) {
+            return createRelation(tableNumber, arity, getDBTypeFactory().getDBTermType("UUID"), "UUID_", canBeNull);
         }
     }
 

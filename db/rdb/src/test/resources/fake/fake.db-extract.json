@@ -1,0 +1,43 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C",
+      "determinants" : [ "\"id\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }, {
+      "name" : "\"c_id\"",
+      "datatype" : "VARCHAR",
+      "isNullable" : false
+    }],
+    "name" : ["\"table1\""]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_S",
+      "determinants" : [ "\"id\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "otherFunctionalDependencies" : [ ],
+    "foreignKeys" : [ ],
+    "columns" : [ {
+      "name" : "\"id\"",
+      "datatype" : "INTEGER",
+      "isNullable" : false
+    }],
+    "name" : ["\"table2\""]
+  }],
+  "metadata" : {
+    "dbmsProductName" : "H2",
+    "dbmsVersion" : "1.4.199 (2019-03-13)",
+    "driverName" : "H2 JDBC Driver",
+    "driverVersion" : "1.4.199 (2019-03-13)",
+    "quotationString" : "\"",
+    "extractionTime" : "2020-11-12T17:24:30"
+  }
+}

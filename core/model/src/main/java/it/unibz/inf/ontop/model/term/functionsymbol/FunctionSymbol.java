@@ -78,6 +78,15 @@ public interface FunctionSymbol extends Predicate {
     FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms,
                                                                  TermFactory termFactory);
 
+    /**
+     * Returns true if it can be decomposed to be lifted above a UNION.
+     *
+     * One good reason for not decomposed is when some arguments may have very different types
+     * (avoiding strong-typing issues).
+     */
+    boolean shouldBeDecomposedInUnion();
+
+
     interface FunctionalTermNullability {
 
         boolean isNullable();

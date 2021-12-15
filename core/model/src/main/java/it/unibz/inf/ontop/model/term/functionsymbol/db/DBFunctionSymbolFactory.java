@@ -157,6 +157,11 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBCoalesce(int arity);
 
+    /**
+     * Min arity is 1
+     */
+    DBBooleanFunctionSymbol getDBBooleanCoalesce(int arity);
+
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 
     TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity);

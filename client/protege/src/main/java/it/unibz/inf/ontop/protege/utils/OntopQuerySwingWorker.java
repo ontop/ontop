@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
+import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +62,14 @@ public abstract class OntopQuerySwingWorker<T, V> extends SwingWorkerWithTimeInt
             statement = ontop.getStatement();
             if (statement == null)
                 throw new NullPointerException("OntopQuerySwingWorker received a null OntopOWLStatement object from the reasoner");
-
-            IQ sqlExecutableQuery = statement.getExecutableQuery(query);
-            String sql = sqlExecutableQuery.toString();
-
+            String sql;
+            try {
+                IQ sqlExecutableQuery = statement.getExecutableQuery(query);
+                sql = sqlExecutableQuery.toString();
+            } catch (OWLException ex) {
+                // e.g. DESCRIBE query
+                sql = ex.getMessage();
+            }
             startLoop(() -> 50, () -> getCount() == 0
                     ? "Started retrieving results..."
                     : String.format("%d results retrieved...", getCount()));

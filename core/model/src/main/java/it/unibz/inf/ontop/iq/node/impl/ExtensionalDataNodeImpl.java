@@ -10,23 +10,22 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * "Default" implementation for an extensional data node.
@@ -65,6 +64,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
      */
+    @SuppressWarnings("unused")
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
@@ -142,6 +142,11 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformExtensionalData(this);
+    }
+
+    @Override
+    public <T> IQTree acceptTransformer(IQTreeExtendedTransformer<T> transformer, T context) {
+        return transformer.transformExtensionalData(this, context);
     }
 
     @Override

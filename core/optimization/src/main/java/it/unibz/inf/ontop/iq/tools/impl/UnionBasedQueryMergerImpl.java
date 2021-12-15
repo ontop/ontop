@@ -84,10 +84,15 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     return queryRenamer.transform(def).getTree();
                 });
 
+        ImmutableSet<Variable> unionVariables = projectionAtom.getVariables();
+
         ImmutableList<IQTree> unionChildren = Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitions)
+                .map(c -> c.getVariables().equals(unionVariables)
+                        ? c
+                        : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(unionVariables), c))
                 .collect(ImmutableCollectors.toList());
 
-        IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(projectionAtom.getVariables()),
+        IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(unionVariables),
                 unionChildren);
 
         return Optional.of(iqFactory.createIQ(projectionAtom, unionTree));

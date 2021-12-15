@@ -51,10 +51,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			// the SI does not preserve the original timezone
 			functionsManifest + "day",
 
-			//not supported in SPARQL transformation
-			functionsManifest + "in01",
-			functionsManifest + "in02",
-
 			//not supported in H2 transformation
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",

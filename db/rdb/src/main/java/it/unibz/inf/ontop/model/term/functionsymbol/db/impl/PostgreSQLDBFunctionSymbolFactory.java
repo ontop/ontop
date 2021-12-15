@@ -25,6 +25,7 @@ import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String RANDOM_STR = "RANDOM";
+    private static final String POSITION_STR = "POSITION";
 
     @Inject
     protected PostgreSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -38,6 +39,12 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
+
+        DBFunctionSymbol positionFunctionSymbol = new SimpleTypedDBFunctionSymbolImpl(POSITION_STR, 2,
+                dbTypeFactory.getDBLargeIntegerType(), false, abstractRootDBType,
+                (terms, termConverter, termFactory) -> String.format("position(%s in %s)",
+                        termConverter.apply(terms.get(0)), termConverter.apply(terms.get(1))));
+        table.put(POSITION_STR, 2, positionFunctionSymbol);
 
         DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
                 CURRENT_TIMESTAMP_STR,

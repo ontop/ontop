@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop-test</artifactId>
-        <version>4.1.1</version>
+        <version>4.2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ontop-docker-tests</artifactId>
@@ -59,12 +59,6 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>madgik.adp</groupId>
-            <artifactId>adp-jdbc</artifactId>
-            <version>0.1.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>

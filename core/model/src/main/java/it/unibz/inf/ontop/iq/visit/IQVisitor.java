@@ -13,6 +13,7 @@ public interface IQVisitor<T> {
     T visitEmpty(EmptyNode node);
     T visitTrue(TrueNode node);
     T visitNative(NativeNode nativeNode);
+    T visitValues(ValuesNode valuesNode);
     T visitNonStandardLeafNode(LeafIQTree leafNode);
 
     T visitConstruction(ConstructionNode rootNode, IQTree child);

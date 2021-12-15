@@ -8,14 +8,12 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.iq.proposal.impl.UnionLiftProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
@@ -23,6 +21,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 import static org.junit.Assert.assertTrue;
 
+@Ignore("TODO: see if something interesting could be ported to immutable IQs")
 public class UnionLiftInternalTest {
 
     private static ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
@@ -58,7 +57,7 @@ public class UnionLiftInternalTest {
     @Test
     public void unionLiftInternalTest1 () throws EmptyQueryException {
 
-        /**
+        /*
          * Original Query
          */
         IntermediateQueryBuilder originalBuilder = createQueryBuilder();
@@ -106,9 +105,9 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        query.applyProposal(new UnionLiftProposalImpl(unionNode, leftJoinNode));
+        query = transform(query, unionNode, leftJoinNode);
 
-        /**
+        /*
          * Expected Query
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
@@ -147,10 +146,14 @@ public class UnionLiftInternalTest {
 
     }
 
+    private IntermediateQuery transform(IntermediateQuery query, UnionNode unionNode, QueryNode targetNode) {
+        throw new RuntimeException("TODO: see how to do something similar with immutable IQs");
+    }
+
     @Test
     public void unionLiftInternalTest2 () throws EmptyQueryException {
 
-        /**
+        /*
          * Original Query
          */
 
@@ -188,11 +191,11 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        query.applyProposal(new UnionLiftProposalImpl(unionNode2, joinNode));
+        query = transform(query, unionNode2, joinNode);
 
         System.out.println("\n Optimized query: \n" +  query);
 
-        /**
+        /*
          * Expected Query
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
@@ -227,7 +230,7 @@ public class UnionLiftInternalTest {
     @Test
     public void unionLiftFirstUnion () throws EmptyQueryException {
 
-        /**
+        /*
          * Original Query
          */
 
@@ -269,11 +272,11 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = query.applyProposal(new UnionLiftProposalImpl(unionNode21, joinNode));
+        query = transform(query, unionNode21, joinNode);
 
         System.out.println("\n Optimized query: \n" +  query);
 
-        /**
+        /*
          * Expected Query
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
@@ -362,7 +365,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = query.applyProposal(new UnionLiftProposalImpl(unionNode22, joinNode));
+        query = transform(query, unionNode22, joinNode);
 
         System.out.println("\n Optimized query: \n" +  query);
 
@@ -456,8 +459,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = query.applyProposal(
-                new UnionLiftProposalImpl(unionNode21, joinNode));
+        query = transform(query, unionNode21, joinNode);
 
         System.out.println("\n Optimized query: \n" +  query);
 
@@ -520,12 +522,12 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Continue from the expected query: \n" +  expectedQuery);
 
-        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults2 = expectedQuery.applyProposal(new UnionLiftProposalImpl(unionNode5, joinNode2));
+        query = transform(query, unionNode5, joinNode2);
         IntermediateQuery query2 = expectedQuery;
 
         System.out.println("\n Optimized query: \n" +  query2);
 
-        /**
+        /*
          * Second Expected Query
          */
         IntermediateQueryBuilder expectedBuilder2 = createQueryBuilder();
@@ -593,7 +595,9 @@ public class UnionLiftInternalTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query2, expectedQuery2));
     }
 
-    @Test(expected = InvalidQueryOptimizationProposalException.class)
+    // Was expecting a InvalidQueryOptimizationProposalException
+    @Ignore
+    @Test
     public void unionLiftInternalTest3 () throws EmptyQueryException {
 
         /*
@@ -634,11 +638,12 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        query.applyProposal(new UnionLiftProposalImpl(unionNode2, unionNode1))
-                ;
+        query = transform(query, unionNode2, unionNode1);
     }
 
-    @Test(expected = InvalidQueryOptimizationProposalException.class)
+    // Was expecting a InvalidQueryOptimizationProposalException
+    @Ignore
+    @Test
     public void unionLiftInternalTest4 () throws EmptyQueryException {
 
         /*
@@ -680,14 +685,15 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        query.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode1))
-                ;
+        query = transform(query, unionNode, joinNode1);
 
         System.out.println("\n Optimized query: \n" +  query);
 
     }
 
-    @Test(expected = InvalidQueryOptimizationProposalException.class)
+    // Was expecting a InvalidQueryOptimizationProposalException
+    @Ignore
+    @Test
     public void unionLiftInternalTest5 () throws EmptyQueryException {
 
         /*
@@ -729,8 +735,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        query.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode1))
-                ;
+        query = transform(query, unionNode, joinNode1);
 
         System.out.println("\n Optimized query: \n" +  query);
 
@@ -775,7 +780,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Original query: \n" +  query);
 
-        query.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode));
+        query = transform(query, unionNode, joinNode);
 
         System.out.println("\n Optimized query: \n" +  query);
 

@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.view.OntopViewUnfolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,22 +19,25 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
     private final OntopViewUnfolder viewUnfolder;
+    private final AggregationSplitter aggregationSplitter;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
                                                         OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier,
-                                                        OntopViewUnfolder viewUnfolder) {
+                                                        OntopViewUnfolder viewUnfolder,
+                                                        AggregationSplitter aggregationSplitter) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.viewUnfolder = viewUnfolder;
+        this.aggregationSplitter = aggregationSplitter;
     }
 
     @Override
-    public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
+    public IQ optimize(IQ query) {
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
 
@@ -44,7 +46,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ queryAfterJoinLikeAndViewUnfolding = liftedQuery;
         do {
             long beginningJoinLike = System.currentTimeMillis();
-            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding, executorRegistry);
+            queryAfterJoinLikeAndViewUnfolding = joinLikeOptimizer.optimize(queryAfterJoinLikeAndViewUnfolding);
 
             LOGGER.debug("New query after fixed point join optimization ({} ms):\n{}\n",
                         System.currentTimeMillis() - beginningJoinLike,
@@ -62,7 +64,10 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeAndViewUnfolding);
         LOGGER.debug("New query after simplifying the aggregation node:\n{}\n", queryAfterAggregationSimplification);
 
-        IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
+        IQ queryAfterAggregationSplitting = aggregationSplitter.optimize(queryAfterAggregationSimplification);
+        LOGGER.debug("New query after trying to split the aggregation node:\n{}\n", queryAfterAggregationSplitting);
+
+        IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSplitting);
         LOGGER.debug("New query after simplifying the order by node:\n{}\n", optimizedQuery);
 
         return optimizedQuery;
