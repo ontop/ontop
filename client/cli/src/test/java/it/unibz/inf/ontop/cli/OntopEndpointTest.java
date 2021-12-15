@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.cli;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.rdf4j.model.Statement;
@@ -60,6 +61,7 @@ public class OntopEndpointTest {
                     "\t\t ?y a :Author; :name ?author.\n" +
                     "\t\t ?z a :Edition; :editionNumber ?edition\n" +
                     "}";
+
             TupleQuery tupleQuery = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
             //TupleQueryResult result = tupleQuery.evaluate();
             try (TupleQueryResult result = tupleQuery.evaluate()) {
@@ -116,6 +118,32 @@ public class OntopEndpointTest {
         assertThat(
                 httpResponse.getStatusLine().getStatusCode(),
                 equalTo(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void testOntologyFetcher() throws IOException {
+        HttpUriRequest request = new HttpGet("http://localhost:" + PORT + "/ontology");
+
+        // When
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+        // Then
+        assertThat(
+                httpResponse.getStatusLine().getStatusCode(),
+                equalTo(HttpStatus.SC_NOT_FOUND)); // Should be disabled by default
+    }
+
+    @Test
+    public void testOntologyFetcherPost() throws IOException {
+        HttpUriRequest request = new HttpPost("http://localhost:" + PORT + "/ontology");
+
+        // When
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(request);
+
+        // Then
+        assertThat(
+                httpResponse.getStatusLine().getStatusCode(),
+                equalTo(HttpStatus.SC_NOT_FOUND)); // The controller should be disabled by default
     }
 
 }

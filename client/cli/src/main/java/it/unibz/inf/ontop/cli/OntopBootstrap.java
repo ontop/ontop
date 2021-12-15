@@ -87,7 +87,7 @@ public class OntopBootstrap extends AbstractOntopCommand {
 
             OWLOntology onto = results.getOntology();
             onto.getOWLOntologyManager().saveOntology(onto, new FileDocumentTarget(ontologyFile));
-
+            
         } catch (Exception e) {
             System.err.println("Error occurred during bootstrapping: "
                     + e.getMessage());

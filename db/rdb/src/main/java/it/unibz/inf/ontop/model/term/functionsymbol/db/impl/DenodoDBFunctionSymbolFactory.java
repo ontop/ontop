@@ -196,6 +196,11 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new LowerCaseDBIsTrueFunctionSymbolImpl(dbBooleanType);
     }
 
+    @Override
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
+        return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
+    }
+
     /**
      * Supported in the WHERE clause.
      * Fails in the SELECT clause (e.g. fails for unit test AbstractBindTestWithFunctions.testREGEX())
