@@ -92,6 +92,15 @@ public class OntopMaterializeTest {
     }
 
     @Test
+    public void testOntopMaterializeJsonLD (){
+        Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "jsonld",
+                "-o", "src/test/resources/output/exampleBooks.materialized.jsonld");
+    }
+    
+    @Test
     public void testOntopMaterializeSeparatefiles (){
         Ontop.main("materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
