@@ -68,12 +68,6 @@ public class OntopBootstrap extends AbstractOntopCommand {
             if (dbDriver != null)
                 builder.jdbcDriver(dbDriver);
 
-            if (dbMetadataFile != null)
-                builder.dbMetadataFile(dbMetadataFile);
-
-            if (ontopViewFile != null)
-                builder.ontopViewFile(ontopViewFile);
-
             OntopSQLOWLAPIConfiguration configuration = builder.build();
 
             DirectMappingBootstrapper bootstrapper = DirectMappingBootstrapper.defaultBootstrapper();
