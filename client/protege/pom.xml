@@ -63,16 +63,16 @@
             <artifactId>ontop-mapping-r2rml</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpcore-osgi</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpclient-osgi</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -85,8 +85,8 @@
             <artifactId>ontop-ontology-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -95,12 +95,12 @@
             <artifactId>ontop-mapping-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
                 <exclusion>
-                    <groupId>edu.stanford.protege</groupId>
                     <artifactId>org.protege.xmlcatalog</artifactId>
+                    <groupId>edu.stanford.protege</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -109,8 +109,8 @@
             <artifactId>ontop-mapping-sql-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -135,8 +135,8 @@
             <artifactId>ontop-system-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -145,8 +145,8 @@
             <artifactId>ontop-system-sql-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -155,8 +155,8 @@
             <artifactId>ontop-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -165,12 +165,12 @@
             <artifactId>ontop-rdf4j</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
         <!-- Extra dependencies -->
         <dependency>
             <groupId>xerces</groupId>
@@ -185,8 +185,8 @@
             <artifactId>libthrift</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>javax.annotation</groupId>
                     <artifactId>javax.annotation-api</artifactId>
+                    <groupId>javax.annotation</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -206,7 +206,7 @@
             <groupId>com.google.guava</groupId>
             <artifactId>failureaccess</artifactId>
         </dependency>
-        
+
         <!-- COMPILE DEPENDENCIES (IMPORTED VIA OSGI FROM PROTÉGÉ) -->
 
         <dependency>
@@ -242,7 +242,7 @@
         </dependency>
 
         <!-- TEST DEPENDENCIES -->
-        
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -282,13 +282,11 @@
                                 <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                                 <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
                                      as .classes (uncompressed, no jars) and the rest is packed as .jars -->
-                                <Embed-Dependency>
-                                    *;groupId=it.unibz.inf.ontop.*;inline=true,
+                                <Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,
                                     *;groupId=it.unibz.inf.ontop.protege.*;inline=true,
-                                    *;groupId=!it.unibz.inf.ontop;scope=compile|runtime
-                                </Embed-Dependency>
+                                    *;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
                                 <Embed-Transitive>true</Embed-Transitive>
-                                
+
                                 <!-- necessary for protege plugins -->
                                 <Bundle-Category>protege</Bundle-Category>
 
@@ -304,15 +302,13 @@
                                     <!-- No need to export any package -->
                                 </Export-Package>
 
-                                <Import-Package>
-                                    !javax.servlet.*,
+                                <Import-Package>!javax.servlet.*,
                                     javax.*,
                                     org.osgi.framework;version="[1.8,2)",
                                     org.slf4j.*;version="[1.7,2)",
                                     org.protege.editor.*;version="[5.5,6)",
                                     org.semanticweb.owlapi.*;version="[4.5,5)",
-                                    uk.ac.manchester.cs.owl.owlapi.*;version="[4.5,5)"
-                                </Import-Package>
+                                    uk.ac.manchester.cs.owl.owlapi.*;version="[4.5,5)"</Import-Package>
 
                                 <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                                      or protege wont load it -->
