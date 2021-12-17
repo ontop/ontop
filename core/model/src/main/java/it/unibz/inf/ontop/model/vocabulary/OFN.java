@@ -11,17 +11,17 @@ public class OFN {
     /*
      * Time extension - duration arithmetic
      */
-    public static final IRI WEEKSBETWEEN;
+    public static final IRI WEEKS_BETWEEN;
 
-    public static final IRI DAYSBETWEEN;
+    public static final IRI DAYS_BETWEEN;
 
-    public static final IRI HOURSBETWEEN;
+    public static final IRI HOURS_BETWEEN;
 
-    public static final IRI MINUTESBETWEEN;
+    public static final IRI MINUTES_BETWEEN;
 
-    public static final IRI SECONDSBETWEEN;
+    public static final IRI SECONDS_BETWEEN;
 
-    public static final IRI MILLISBETWEEN;
+    public static final IRI MILLIS_BETWEEN;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -29,17 +29,17 @@ public class OFN {
         /*
          * Time extension - duration arithmetic
          */
-        WEEKSBETWEEN = factory.createIRI(PREFIX + "weeksBetween");
+        WEEKS_BETWEEN = factory.createIRI(PREFIX + "weeksBetween");
 
-        DAYSBETWEEN = factory.createIRI(PREFIX + "daysBetween");
+        DAYS_BETWEEN = factory.createIRI(PREFIX + "daysBetween");
 
-        HOURSBETWEEN = factory.createIRI(PREFIX + "hoursBetween");
+        HOURS_BETWEEN = factory.createIRI(PREFIX + "hoursBetween");
 
-        MINUTESBETWEEN = factory.createIRI(PREFIX + "minutesBetween");
+        MINUTES_BETWEEN = factory.createIRI(PREFIX + "minutesBetween");
 
-        SECONDSBETWEEN = factory.createIRI(PREFIX + "secondsBetween");
+        SECONDS_BETWEEN = factory.createIRI(PREFIX + "secondsBetween");
 
-        MILLISBETWEEN = factory.createIRI(PREFIX + "millisBetween");
+        MILLIS_BETWEEN = factory.createIRI(PREFIX + "millisBetween");
     }
 }
 

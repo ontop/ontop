@@ -329,19 +329,19 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 /*
                  * Time extension - duration arithmetic
                  */
-                new OfnMultitypedInputBinarySPARQLFunctionSymbolImpl("OFN_WEEKS_BETWEEN", OFN.WEEKSBETWEEN,
-                dateOrDatetime, xsdLong, false, dbTypeFactory,
-                (DBTermType t) ->  {
-                    if (t.isA(dbTimestamp))
-                        return dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime();
-                    else if (t.isA(dbDate))
-                        return dbFunctionSymbolFactory.getDBWeeksBetweenFromDate();
-                    else
-                        throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
-                }),
-                new OfnMultitypedInputBinarySPARQLFunctionSymbolImpl("OFN_DAYS_BETWEEN", OFN.DAYSBETWEEN,
+                new OfnMultitypedInputBinarySPARQLFunctionSymbolImpl("OFN_WEEKS_BETWEEN", OFN.WEEKS_BETWEEN,
                         dateOrDatetime, xsdLong, false, dbTypeFactory,
-                        (DBTermType t) ->  {
+                        (DBTermType t) -> {
+                            if (t.isA(dbTimestamp))
+                                return dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime();
+                            else if (t.isA(dbDate))
+                                return dbFunctionSymbolFactory.getDBWeeksBetweenFromDate();
+                            else
+                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                        }),
+                new OfnMultitypedInputBinarySPARQLFunctionSymbolImpl("OFN_DAYS_BETWEEN", OFN.DAYS_BETWEEN,
+                        dateOrDatetime, xsdLong, false, dbTypeFactory,
+                        (DBTermType t) -> {
                             if (t.isA(dbTimestamp))
                                 return dbFunctionSymbolFactory.getDBDaysBetweenFromDateTime();
                             else if (t.isA(dbDate))
@@ -349,13 +349,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                             else
                                 throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
                         }),
-                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_HOURS_BETWEEN", OFN.HOURSBETWEEN, xsdDatetime, xsdLong,
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_HOURS_BETWEEN", OFN.HOURS_BETWEEN, xsdDatetime, xsdLong,
                         false, TermFactory::getDBHoursBetweenFromDateTime),
-                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_MINUTES_BETWEEN", OFN.MINUTESBETWEEN, xsdDatetime, xsdLong,
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_MINUTES_BETWEEN", OFN.MINUTES_BETWEEN, xsdDatetime, xsdLong,
                         false, TermFactory::getDBMinutesBetweenFromDateTime),
-                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_SECONDS_BETWEEN", OFN.SECONDSBETWEEN, xsdDatetime, xsdLong,
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_SECONDS_BETWEEN", OFN.SECONDS_BETWEEN, xsdDatetime, xsdLong,
                         false, TermFactory::getDBSecondsBetweenFromDateTime),
-                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_MILLIS_BETWEEN", OFN.MILLISBETWEEN, xsdDatetime, xsdLong,
+                new OfnSimpleBinarySPARQLFunctionSymbolImpl("OFN_MILLIS_BETWEEN", OFN.MILLIS_BETWEEN, xsdDatetime, xsdLong,
                         false, TermFactory::getDBMillisBetweenFromDateTime)
 
         );

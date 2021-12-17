@@ -47,7 +47,7 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
                                                             @Nonnull RDFTermType targetType,
                                                             boolean isAlwaysInjective,
                                                             DBTypeFactory dbTypeFactory,
-                                                            java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                            Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         this(functionSymbolName, functionIRI, inputBaseType, targetType, isAlwaysInjective,
                 createLatelyTypedFct(targetType, dbTypeFactory, dbFunctionSymbolFct));
     }
@@ -71,7 +71,7 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
                                                             @Nonnull RDFTermType targetType,
                                                             boolean isAlwaysInjective,
                                                             DBTypeFactory dbTypeFactory,
-                                                            java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                                            Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         this(functionSymbolName, officialName, inputBaseType, targetType, isAlwaysInjective,
                 createLatelyTypedFct(targetType, dbTypeFactory, dbFunctionSymbolFct));
     }
