@@ -286,4 +286,12 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3)
                 .getNativeDBString(terms, termConverter, termFactory);
     }
+
+    @Override
+    protected String serializeMillisBetween(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("ROUND(TIMESTAMPDIFF(MICROSECOND, %s, %s)/1000)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
+    }
 }

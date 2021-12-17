@@ -461,6 +461,15 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1,
+																	  ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
+																	  java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getBinaryLatelyTypedFunctionSymbol(dbFunctionSymbolFct, targetType),
+				lexicalTerm0, lexicalTerm1, inputRDFTypeTerm);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getSPARQLNonStrictEquality(ImmutableTerm rdfTerm1, ImmutableTerm rdfTerm2) {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2),
 				rdfTerm1, rdfTerm2);
@@ -724,7 +733,51 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBGetSRID(), ImmutableList.of(arg1));
     }
 
-    @Override
+	/**
+	 * Time extension - duration arithmetic
+	 */
+
+	@Override
+	public ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBWeeksBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBWeeksBetweenFromDate(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDaysBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBDaysBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDaysBetweenFromDate(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBHoursBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBHoursBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBMinutesBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMinutesBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBSecondsBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSecondsBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBMillisBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMillisBetweenFromDateTime(), arg1, arg2);
+	}
+
+	@Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {
 		return getImmutableExpression(functionSymbolFactory.getNotYetTypedEquality(), t1, t2);
     }

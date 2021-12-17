@@ -1584,6 +1584,222 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValuesUnordered(queryBind, expectedValues);
     }
 
+    @Test
+    public void testWeeksBetweenDate() throws Exception {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14\"^^xsd:date AS ?end )\n"
+                + "   BIND(\"1932-02-22\"^^xsd:date AS ?start )\n"
+                + "   BIND (ofn:weeksBetween(?start, ?end) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"3538\"^^xsd:long");
+        checkReturnedValuesUnordered(query, expectedValues);
+    }
+
+    @Test
+    public void testDaysBetweenDate() throws Exception {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14\"^^xsd:date AS ?end )\n"
+                + "   BIND(\"1932-02-22\"^^xsd:date AS ?start )\n"
+                + "   BIND (ofn:daysBetween(?start, ?end) AS ?w)\n"
+                + "}";
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"24767\"^^xsd:long");
+        checkReturnedValuesUnordered(query, expectedValues);
+    }
+
+    @Test
+    public void testWeeksBetweenDateTime() throws Exception {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
+                + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:weeksBetween(?start, ?end) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"3538\"^^xsd:long");
+        checkReturnedValuesUnordered(query, expectedValues);
+    }
+
+    @Test
+    public void testDaysBetweenDateTime() throws Exception {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
+                + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:daysBetween(?start, ?end) AS ?w)\n"
+                + "}";
+
+        checkReturnedValuesUnordered(query, getDaysBetweenDTExpectedValues());
+    }
+
+    protected List<String> getDaysBetweenDTExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"24766\"^^xsd:long");
+        return expectedValues;
+    }
+
+    @Test
+    public void testDaysBetweenDateTimeMappingInput() throws Exception {
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND(\"1967-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:daysBetween(?start, ?year) AS ?w)\n"
+                + "}";
+
+        checkReturnedValuesUnordered(queryBind, getDaysDTExpectedValuesMappingInput());
+    }
+
+    protected List<String> getDaysDTExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17309\"^^xsd:long");
+        expectedValues.add("\"17742\"^^xsd:long");
+        expectedValues.add("\"255\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Test
+    public void testDaysBetweenDateMappingInput() throws Exception {
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND(\"1967-02-22\"^^xsd:date AS ?start )\n"
+                + "   BIND (ofn:daysBetween(?start, ?year) AS ?w)\n"
+                + "}";
+
+        checkReturnedValuesUnordered(queryBind, getDaysExpectedValuesMappingInput());
+    }
+
+    protected List<String> getDaysExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"16360\"^^xsd:long");
+        expectedValues.add("\"17309\"^^xsd:long");
+        expectedValues.add("\"17743\"^^xsd:long");
+        expectedValues.add("\"256\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Test
+    public void testHoursBetween() throws Exception {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
+                + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:hoursBetween(?start, ?end) AS ?w)\n"
+                + "}";
+
+        checkReturnedValuesUnordered(query, getHoursBetweenExpectedValues());
+    }
+
+    protected List<String> getHoursBetweenExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"594407\"^^xsd:long");
+        return expectedValues;
+    }
+
+    @Test
+    public void testMinutesBetween() throws Exception {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
+                + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:minutesBetween(?start, ?end) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"35664450\"^^xsd:long");
+        checkReturnedValuesUnordered(query, expectedValues);
+    }
+
+    @Test
+    public void testSecondsBetween() throws Exception {
+
+        String query = "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
+                + "   BIND(\"1932-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:secondsBetween(?start, ?end) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2139867000\"^^xsd:long");
+        checkReturnedValuesUnordered(query, expectedValues);
+    }
+
+    @Test
+    public void testSecondsBetweenMappingInput() throws Exception {
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND(\"1967-02-22T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:secondsBetween(?start, ?year) AS ?w)\n"
+                + "}";
+
+        checkReturnedValuesUnordered(queryBind, getSecondsExpectedValuesMappingInput());
+    }
+    
+    protected List<String> getSecondsExpectedValuesMappingInput() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1413514800\"^^xsd:long");
+        expectedValues.add("\"1495505872\"^^xsd:long");
+        expectedValues.add("\"1532998386\"^^xsd:long");
+        expectedValues.add("\"22112400\"^^xsd:long");
+
+        return expectedValues;
+    }
+
+    @Test
+    public void testMilliSeconds() throws Exception {
+
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX  ofn:  <http://www.ontotext.com/sparql/functions/>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  BIND(\"1999-12-14T09:00:00\"^^xsd:dateTime AS ?end )\n"
+                + "   BIND(\"1999-12-13T09:30:00\"^^xsd:dateTime AS ?start )\n"
+                + "   BIND (ofn:millisBetween(?start, ?end) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"84600000\"^^xsd:long");
+        checkReturnedValuesUnordered(query, expectedValues);
+    }
+    
     private void checkReturnedValuesAndOrder(String query, List<String> expectedValues) throws Exception {
         checkReturnedValues(query, expectedValues, true);
     }

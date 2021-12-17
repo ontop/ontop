@@ -521,6 +521,10 @@ public interface TermFactory {
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
 			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
 
+	ImmutableFunctionalTerm getBinaryLatelyTypedFunctionalTerm(
+			ImmutableTerm lexicalTerm0, ImmutableTerm lexicalTerm1, ImmutableTerm inputRDFTypeTerm,
+			DBTermType targetType, java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
 	/**
 	 * Using the SPARQL "=" operator
 	 *
@@ -599,5 +603,17 @@ public interface TermFactory {
 	ImmutableTerm getDBGetSRID(ImmutableTerm arg1);
 	ImmutableTerm getDBAsText(ImmutableTerm arg1);
 	ImmutableTerm getDBBuffer(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	/**
+	 * Time extension - duration arithmetic
+	 */
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBWeeksBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBDaysBetweenFromDate(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBHoursBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMinutesBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBSecondsBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBMillisBetweenFromDateTime(ImmutableTerm arg1, ImmutableTerm arg2);
 
 }
