@@ -62,11 +62,6 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <!-- jsql parser -->
-            <groupId>com.github.jsqlparser</groupId>
-            <artifactId>jsqlparser</artifactId>
-        </dependency>
-        <dependency>
             <groupId>eu.optique-project</groupId>
             <artifactId>r2rml-api-core</artifactId>
             <scope>test</scope>
@@ -99,10 +94,6 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-assistedinject</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

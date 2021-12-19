@@ -98,6 +98,7 @@
         <metadata.git.skip>true</metadata.git.skip>
         <metadata.buildInfo.phase>none</metadata.buildInfo.phase>
         <thirdparty.skip>true</thirdparty.skip>
+        <ignoreNonCompile>true</ignoreNonCompile>
 
         <!-- Plugin versions -->
         <antlr4-maven-plugin.version>4.8-1</antlr4-maven-plugin.version>
@@ -167,7 +168,6 @@
         <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
         <slf4j.version>1.7.13</slf4j.version>
-        <spring.version>5.2.8.RELEASE</spring.version>
         <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
         <thrift.version>[0.12.0,)</thrift.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
@@ -745,28 +745,6 @@
                 <version>${rdf4j.version}</version>
             </dependency>
 
-            <!-- Spring -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
             <!-- Spring Boot -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -1241,9 +1219,14 @@
                     <version>${maven-dependency-plugin.version}</version>
                     <configuration>
                         <ignoreDirect>false</ignoreDirect>
+                        <ignoreNonCompile>${ignoreNonCompile}</ignoreNonCompile>
+                        <ignoredUsedUndeclaredDependencies>
+                            <!-- Spring deps are indirectly imported using starter deps -->
+                            <ignoredUsedUndeclaredDependency>org.springframework:::</ignoredUsedUndeclaredDependency>
+                        </ignoredUsedUndeclaredDependencies>
                         <ignoredUnusedDeclaredDependencies>
-                            <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-classic::</ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-core::</ignoredUnusedDeclaredDependency>
+                            <!-- Spring Boot starter deps must be declared but being empty their content is never used in code -->
+                            <ignoredUnusedDeclaredDependency>org.springframework.boot:::</ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
                         <outputXML>true</outputXML>
                     </configuration>
