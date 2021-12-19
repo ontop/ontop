@@ -142,6 +142,7 @@
         <guice.version>5.0.1</guice.version>
         <h2gis.version>1.3.2</h2gis.version>
         <h2.version>1.4.196</h2.version>
+        <hamcrest.version>1.3</hamcrest.version>
         <hikari-cp.version>3.4.5</hikari-cp.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.14</httpcore.version>
@@ -156,14 +157,17 @@
         <logback.version>1.2.3</logback.version>
         <opencsv.version>4.6</opencsv.version>
         <owlapi.version>4.5.19</owlapi.version>
+        <owlapi-osgi.version>4.5.9</owlapi-osgi.version>
         <proj4j.version>1.1.1</proj4j.version>
         <protege.version>5.5.0</protege.version>
         <protege-xmlcatalog.version>1.0.5</protege-xmlcatalog.version>
         <r2rml-api.version>0.6.0</r2rml-api.version>
         <rdf4j.version>3.3.0</rdf4j.version>
-        <servlet-api.version>2.5</servlet-api.version>
+        <servlet2-api.version>2.5</servlet2-api.version>
+        <servlet4-api.version>4.0.1</servlet4-api.version>
         <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
         <slf4j.version>1.7.13</slf4j.version>
+        <spring.version>5.2.8.RELEASE</spring.version>
         <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
         <thrift.version>[0.12.0,)</thrift.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
@@ -484,12 +488,27 @@
                 <artifactId>semargl-sesame</artifactId>
                 <version>${semargl-sesame.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.semarglproject</groupId>
+                <artifactId>semargl-rdfa</artifactId>
+                <version>${semargl.version}</version>
+            </dependency>
 
             <!-- JSONLD-Java -->
             <dependency>
                 <groupId>com.github.jsonld-java</groupId>
                 <artifactId>jsonld-java</artifactId>
                 <version>${jsonld-java.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>httpcore-osgi</artifactId>
+                        <groupId>org.apache.httpcomponents</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>httpclient-osgi</artifactId>
+                        <groupId>org.apache.httpcomponents</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Apache Commons RDF -->
@@ -534,6 +553,11 @@
                 <groupId>net.sourceforge.owlapi</groupId>
                 <artifactId>owlapi-oboformat</artifactId>
                 <version>${owlapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-osgidistribution</artifactId>
+                <version>${owlapi-osgi.version}</version>
             </dependency>
 
             <!-- RDF4J API -->
@@ -591,6 +615,11 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-rio-rdfxml</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-binary</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
             <dependency>
@@ -716,7 +745,39 @@
                 <version>${rdf4j.version}</version>
             </dependency>
 
+            <!-- Spring -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
             <!-- Spring Boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
@@ -748,7 +809,12 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
+                <version>${servlet2-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet4-api.version}</version>
             </dependency>
 
             <!-- Apache HttpClient -->
@@ -1009,6 +1075,13 @@
                 <version>${junit.version}</version>
             </dependency>
 
+            <!-- Hamcrest -->
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>${hamcrest.version}</version>
+            </dependency>
+
             <!-- H2 -->
             <dependency>
                 <groupId>com.h2database</groupId>
@@ -1168,6 +1241,10 @@
                     <version>${maven-dependency-plugin.version}</version>
                     <configuration>
                         <ignoreDirect>false</ignoreDirect>
+                        <ignoredUnusedDeclaredDependencies>
+                            <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-classic::</ignoredUnusedDeclaredDependency>
+                            <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-core::</ignoredUnusedDeclaredDependency>
+                        </ignoredUnusedDeclaredDependencies>
                         <outputXML>true</outputXML>
                     </configuration>
                 </plugin>

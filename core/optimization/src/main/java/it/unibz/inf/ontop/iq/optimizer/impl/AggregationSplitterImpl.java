@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
