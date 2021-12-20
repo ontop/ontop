@@ -36,10 +36,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-optimization</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-obda-core</artifactId>
         </dependency>
         <dependency>
@@ -63,16 +59,16 @@
             <artifactId>ontop-mapping-r2rml</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpcore-osgi</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpclient-osgi</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -85,8 +81,8 @@
             <artifactId>ontop-ontology-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -95,12 +91,12 @@
             <artifactId>ontop-mapping-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
                 <exclusion>
-                    <groupId>edu.stanford.protege</groupId>
                     <artifactId>org.protege.xmlcatalog</artifactId>
+                    <groupId>edu.stanford.protege</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -109,18 +105,10 @@
             <artifactId>ontop-mapping-sql-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-reformulation-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-reformulation-sql</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -132,21 +120,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-system-owlapi</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-system-sql-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -155,8 +133,8 @@
             <artifactId>ontop-owlapi</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -165,50 +143,138 @@
             <artifactId>ontop-rdf4j</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>net.sourceforge.owlapi</groupId>
                     <artifactId>*</artifactId>
+                    <groupId>net.sourceforge.owlapi</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
+        <!-- Commons RDF -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-simple</artifactId>
+        </dependency>
+
+        <!-- RDF4J -->
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-turtle</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-ntriples</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-rdfxml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-query</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-queryparser-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-queryparser-sparql</artifactId>
+        </dependency>
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!-- Guice -->
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+
+        <!-- Guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!-- JSR-305 annotation -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+
         <!-- Extra dependencies -->
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
+            <scope>runtime</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>javax.annotation</groupId>
                     <artifactId>javax.annotation-api</artifactId>
+                    <groupId>javax.annotation</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.abego.treelayout</groupId>
             <artifactId>org.abego.treelayout.core</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- PROVIDED DEPENDENCIES (IMPORTED VIA OSGI FROM PROTÉGÉ) -->
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>failureaccess</artifactId>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-osgidistribution</artifactId>
+            <scope>provided</scope>
         </dependency>
-        
-        <!-- COMPILE DEPENDENCIES (IMPORTED VIA OSGI FROM PROTÉGÉ) -->
-
         <dependency>
             <groupId>edu.stanford.protege</groupId>
             <artifactId>protege-editor-core</artifactId>
@@ -240,14 +306,7 @@
             <artifactId>logback-core</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- TEST DEPENDENCIES -->
         
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -282,13 +341,11 @@
                                 <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                                 <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
                                      as .classes (uncompressed, no jars) and the rest is packed as .jars -->
-                                <Embed-Dependency>
-                                    *;groupId=it.unibz.inf.ontop.*;inline=true,
+                                <Embed-Dependency>*;groupId=it.unibz.inf.ontop.*;inline=true,
                                     *;groupId=it.unibz.inf.ontop.protege.*;inline=true,
-                                    *;groupId=!it.unibz.inf.ontop;scope=compile|runtime
-                                </Embed-Dependency>
+                                    *;groupId=!it.unibz.inf.ontop;scope=compile|runtime</Embed-Dependency>
                                 <Embed-Transitive>true</Embed-Transitive>
-                                
+
                                 <!-- necessary for protege plugins -->
                                 <Bundle-Category>protege</Bundle-Category>
 
@@ -304,15 +361,13 @@
                                     <!-- No need to export any package -->
                                 </Export-Package>
 
-                                <Import-Package>
-                                    !javax.servlet.*,
+                                <Import-Package>!javax.servlet.*,
                                     javax.*,
                                     org.osgi.framework;version="[1.8,2)",
                                     org.slf4j.*;version="[1.7,2)",
                                     org.protege.editor.*;version="[5.5,6)",
                                     org.semanticweb.owlapi.*;version="[4.5,5)",
-                                    uk.ac.manchester.cs.owl.owlapi.*;version="[4.5,5)"
-                                </Import-Package>
+                                    uk.ac.manchester.cs.owl.owlapi.*;version="[4.5,5)"</Import-Package>
 
                                 <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                                      or protege wont load it -->

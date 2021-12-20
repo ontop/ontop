@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
-import org.mapdb.Atomic;
 
 import java.util.Properties;
 import java.util.stream.IntStream;
