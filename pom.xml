@@ -155,7 +155,7 @@
         <jsqlparser.version>3.1</jsqlparser.version>
         <jsr305.version>3.0.2</jsr305.version>
         <junit.version>4.13.1</junit.version>
-        <logback.version>1.2.3</logback.version>
+        <logback.version>1.2.9</logback.version>
         <opencsv.version>4.6</opencsv.version>
         <owlapi.version>4.5.19</owlapi.version>
         <owlapi-osgi.version>4.5.9</owlapi-osgi.version>
