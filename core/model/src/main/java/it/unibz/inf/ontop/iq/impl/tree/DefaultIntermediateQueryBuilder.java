@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
@@ -31,6 +32,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         }
     }
 
+    private final IQConverter iqConverter;
     private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -40,10 +42,12 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private boolean canEdit;
 
     @AssistedInject
-    protected DefaultIntermediateQueryBuilder(IntermediateQueryFactory iqFactory,
+    protected DefaultIntermediateQueryBuilder(IQConverter iqConverter,
+                                              IntermediateQueryFactory iqFactory,
                                               IntermediateQueryValidator validator,
                                               CoreUtilsFactory coreUtilsFactory,
                                               OntopModelSettings settings) {
+        this.iqConverter = iqConverter;
         this.iqFactory = iqFactory;
         this.validator = validator;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -131,12 +135,18 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
 
     @Override
-    public IntermediateQuery build() throws IntermediateQueryBuilderException{
+    public IntermediateQuery build() throws IntermediateQueryBuilderException {
         checkInitialization();
 
         IntermediateQuery query = buildQuery(projectionAtom, new DefaultQueryTreeComponent(tree, coreUtilsFactory));
         canEdit = false;
         return query;
+    }
+
+    @Override
+    public IQ buildIQ() throws IntermediateQueryBuilderException {
+        IntermediateQuery query = build();
+        return iqConverter.convert(query);
     }
 
     /**

@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.iq.executor;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static org.junit.Assert.assertTrue;
@@ -26,10 +25,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class SubstitutionPropagationTest {
 
-
     private static final AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate( 1);
     private static final AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getRDFAnswerPredicate( 2);
-
 
     private static final Variable X = TERM_FACTORY.getVariable("x");
     private static final Variable Y = TERM_FACTORY.getVariable("y");
@@ -92,23 +89,21 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode newRootNode = leftConstructionNode;
-        expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
                 TABLE3_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, rightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
-    @Test(expected = EmptyQueryException.class)
-    public void testURI1PropURI2Branch() throws EmptyQueryException {
+    @Test
+    public void testURI1PropURI2Branch() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -132,16 +127,17 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
+        IQ initialQuery = initialQueryBuilder.buildIQ();
+        IQ resultQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
 
         System.out.println("\n Original query: \n" +  initialQuery);
+        System.out.println("\n Result query: \n" +  resultQuery);
 
-        BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
-
+        assertTrue(resultQuery.getTree().isDeclaredAsEmpty());
     }
 
-    @Test(expected = EmptyQueryException.class)
-    public void testURI2PropURI1Branch() throws EmptyQueryException {
+    @Test
+    public void testURI2PropURI1Branch() {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -165,12 +161,13 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
+        IQ initialQuery = initialQueryBuilder.buildIQ();
+        IQ resultQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
 
         System.out.println("\n Original query: \n" +  initialQuery);
+        System.out.println("\n Result query: \n" +  resultQuery);
 
-        // Updates the query (in-place optimization)
-        BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
+        assertTrue(resultQuery.getTree().isDeclaredAsEmpty());
     }
 
     @Test
@@ -198,17 +195,15 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode newRootNode = leftConstructionNode;
-        expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, B));
         expectedQueryBuilder.addChild(joinNode, rightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -243,12 +238,10 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, dataNode3);
         initialQueryBuilder.addChild(initialUnionNode, dataNode5);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode newRootNode = leftConstructionNode;
-        expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
@@ -259,7 +252,7 @@ public class SubstitutionPropagationTest {
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(newUnionNode, newDataNode2);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -296,12 +289,10 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, constructionNode3);
         initialQueryBuilder.addChild(constructionNode3, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F)));
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode newRootNode = leftConstructionNode;
-        expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
@@ -311,12 +302,13 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(newUnionNode, newDataNode2);
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
 
-    @Test(expected = EmptyQueryException.class)
-    public void testURI1PropOtherBranchWithJoin() throws EmptyQueryException {
+    @Test
+    public void testURI1PropOtherBranchWithJoin()  {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
@@ -348,12 +340,13 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode2, constructionNode3);
         initialQueryBuilder.addChild(constructionNode3, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F)));
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
+        IQ initialQuery = initialQueryBuilder.buildIQ();
+        IQ resultQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
 
         System.out.println("\n Original query: \n" +  initialQuery);
+        System.out.println("\n Result query: \n" +  resultQuery);
 
-        // Updates the query (in-place optimization)
-        BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
+        assertTrue(resultQuery.getTree().isDeclaredAsEmpty());
     }
 
     @Test
@@ -387,17 +380,16 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, constructionNode3);
         initialQueryBuilder.addChild(constructionNode3, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F)));
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode newRootNode = leftConstructionNode;
-        expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE3_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newDataNode1);
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -430,19 +422,17 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, DATA_NODE_3);
         initialQueryBuilder.addChild(initialUnionNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D)));
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode newRootNode = leftConstructionNode;
-        expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, B)));
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, B)));
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -476,7 +466,6 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, DATA_NODE_3);
         initialQueryBuilder.addChild(initialUnionNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D)));
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
@@ -492,7 +481,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(C, D)));
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D)));
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -528,18 +517,17 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, constructionNode3);
         initialQueryBuilder.addChild(constructionNode3, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F)));
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-        ConstructionNode newRootNode = leftConstructionNode;
-        expectedQueryBuilder.init(projectionAtom, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, B)));
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, B)));
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
 
@@ -576,7 +564,6 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, constructionNode3);
         initialQueryBuilder.addChild(constructionNode3, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(E, F)));
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
@@ -590,7 +577,8 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(CF0, DF1)));
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(CF0, DF1)));
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(CF0, DF1)));
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -619,13 +607,12 @@ public class SubstitutionPropagationTest {
 
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -651,7 +638,6 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(A),
@@ -661,7 +647,7 @@ public class SubstitutionPropagationTest {
                 TABLE1_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(expectedRootNode, newDataNode1);
 
-        propagateAndCompare(initialQueryBuilder.build(), expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -692,7 +678,6 @@ public class SubstitutionPropagationTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
-
         ConstructionNode newRootConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(AF0),
                         Y, generateURI1(BF1)));
@@ -703,7 +688,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(AF0, BF1)));
         expectedQueryBuilder.addChild(newUnionNode, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(AF0, BF1)));
 
-        propagateAndCompare(initialQueryBuilder.build(), expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -723,15 +708,12 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(uselessConstructionNode, thirdConstructionNode);
         initialQueryBuilder.addChild(thirdConstructionNode, DATA_NODE_1);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
-
-        System.out.println("\n Original query: \n" +  initialQuery);
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, thirdConstructionNode);
         expectedQueryBuilder.addChild(thirdConstructionNode, DATA_NODE_1);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -766,7 +748,6 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(initialUnionNode, dataNode3);
         initialQueryBuilder.addChild(initialUnionNode, dataNode5);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
@@ -785,7 +766,7 @@ public class SubstitutionPropagationTest {
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(newUnionNode, newDataNode2);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -807,13 +788,12 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, IQ_FACTORY.createTrueNode());
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, rightConstructionNode);
         expectedQueryBuilder.addChild(rightConstructionNode, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(ONE_STR, TWO_STR)));
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -837,7 +817,6 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
@@ -846,7 +825,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode,
                 createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, B)));
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -867,7 +846,6 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
@@ -876,7 +854,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode,
                 createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, B)));
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -908,7 +886,6 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(rightConstructionNode, rightSubConstructionNode);
         initialQueryBuilder.addChild(rightSubConstructionNode, DATA_NODE_3);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
@@ -924,7 +901,7 @@ public class SubstitutionPropagationTest {
 
         expectedQueryBuilder.addChild(joinNode, createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, A)));
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -955,7 +932,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, D));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, A),
@@ -970,7 +946,7 @@ public class SubstitutionPropagationTest {
                 TABLE3_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -1001,7 +977,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(C, D));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
@@ -1014,7 +989,7 @@ public class SubstitutionPropagationTest {
                 TABLE3_AR2, ImmutableMap.of(0, A, 1, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     /**
@@ -1048,7 +1023,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(C, D));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
@@ -1061,7 +1035,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     /**
@@ -1094,7 +1068,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, F));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         expectedQueryBuilder.init(projectionAtom, unionNode);
@@ -1111,7 +1084,7 @@ public class SubstitutionPropagationTest {
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -1141,7 +1114,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, F));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
@@ -1160,7 +1132,7 @@ public class SubstitutionPropagationTest {
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -1190,7 +1162,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, F));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
@@ -1209,7 +1180,7 @@ public class SubstitutionPropagationTest {
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -1239,8 +1210,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, F));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
-
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.init(projectionAtom, newUnionNode);
@@ -1258,7 +1227,7 @@ public class SubstitutionPropagationTest {
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     /**
@@ -1283,14 +1252,13 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, F));
         initialQueryBuilder.addChild(lastConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
         ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
                 TABLE2_AR2, ImmutableMap.of(0, B));
         expectedQueryBuilder.init(projectionAtom, newRightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -1313,7 +1281,6 @@ public class SubstitutionPropagationTest {
         ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, F));
         initialQueryBuilder.addChild(subConstructionNode, dataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = IQ_FACTORY.createIQBuilder();
 
@@ -1325,22 +1292,20 @@ public class SubstitutionPropagationTest {
                 TABLE2_AR2, ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(newConstructionNode, newDataNode1);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build());
+        propagateAndCompare(initialQueryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
 
-    private static void propagateAndCompare(
-            IntermediateQuery query, IntermediateQuery expectedQuery)
-            throws EmptyQueryException {
+    private static void propagateAndCompare(IQ query, IQ expectedQuery) throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery newQuery = BINDING_LIFT_OPTIMIZER.optimize(query);
+        IQ newQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query);
 
         System.out.println("\n Optimized query: \n" +  newQuery);
 
-        assertTrue(areEquivalent(newQuery, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(newQuery, expectedQuery));
     }
 
 

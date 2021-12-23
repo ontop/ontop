@@ -60,7 +60,7 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn, trueNode);
         queryBuilder.addChild(jn, DATA_NODE_1);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -68,7 +68,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -91,7 +91,7 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn, trueNode);
         queryBuilder.addChild(jn, DATA_NODE_3);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -101,7 +101,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, filterNode);
         expectedQueryBuilder.addChild(filterNode, DATA_NODE_3);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -123,7 +123,7 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn, DATA_NODE_1);
         queryBuilder.addChild(jn, DATA_NODE_2);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -132,7 +132,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, jn);
         expectedQueryBuilder.addChild(jn, DATA_NODE_1);
         expectedQueryBuilder.addChild(jn, DATA_NODE_2);
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -153,14 +153,14 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, DATA_NODE_1, LEFT);
         queryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), RIGHT);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -177,9 +177,9 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.init(projectionAtom, rootNode);
         queryBuilder.addChild(rootNode, DATA_NODE_1);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
-        IntermediateQuery expectedQuery = unOptimizedQuery.createSnapshot();
+        IQ expectedQuery = unOptimizedQuery;
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -201,7 +201,7 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), LEFT);
         queryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -211,7 +211,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), LEFT);
         expectedQueryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -234,7 +234,7 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(un, dataNode);
         queryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -244,7 +244,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(un, dataNode);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -268,7 +268,7 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn2, IQ_FACTORY.createTrueNode());
         queryBuilder.addChild(jn2, DATA_NODE_1);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -276,7 +276,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -299,14 +299,14 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, DATA_NODE_1, LEFT);
         queryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), RIGHT);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -331,7 +331,7 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), LEFT);
         queryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -340,7 +340,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, ljn);
         expectedQueryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), LEFT);
         expectedQueryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
@@ -366,7 +366,7 @@ public class TrueNodesRemovalOptimizerTest {
 
         queryBuilder.addChild(un, dataNode);
 
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -375,22 +375,22 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
         expectedQueryBuilder.addChild(un, dataNode);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
 
         optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
-    private static void optimizeAndCompare(IntermediateQuery unOptimizedQuery, IntermediateQuery expectedQuery)
+    private static void optimizeAndCompare(IQ unOptimizedQuery, IQ expectedQuery)
             throws EmptyQueryException {
 
         System.out.println("\nInitial query: \n" + unOptimizedQuery);
         System.out.println("\nExpected query: \n" + expectedQuery);
 
         // Optimize and compare
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nOptimized query: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, expectedQuery));
     }
 
 }

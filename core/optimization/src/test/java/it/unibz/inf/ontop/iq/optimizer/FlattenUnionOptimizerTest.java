@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -59,12 +57,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder1.addChild(unionNode3, dataNode4);
 
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" + query1);
-
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = query1.normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -79,16 +74,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
                 TABLE5_AR3, ImmutableMap.of(0, X)));
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
-    }
-
-    private IntermediateQuery optimize(IntermediateQuery initialQuery) throws EmptyQueryException {
-        IQ initialIQ = IQ_CONVERTER.convert(initialQuery);
-        IQ optimizedIQ = initialIQ.normalizeForOptimization();
-        return IQ_CONVERTER.convert(optimizedIQ);
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -122,12 +110,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder1.addChild(unionNode3, dataNode5);
 
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" + query1);
-
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = query1.normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -143,10 +128,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
                 TABLE5_AR3, ImmutableMap.of(0, X)));
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 
@@ -178,16 +162,12 @@ public class FlattenUnionOptimizerTest {
         queryBuilder1.addChild(unionNode2, dataNode3);
 
 
-        IntermediateQuery query1 = queryBuilder1.build();
-        IntermediateQuery snapshot = query1.createSnapshot();
-
+        IQ query1 = queryBuilder1.buildIQ();
+        IQ snapshot = query1;
         System.out.println("\nBefore optimization: \n" + query1);
-
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = query1.normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, snapshot));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, snapshot));
     }
 
     @Test
@@ -223,12 +203,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder1.addChild(unionNode3, dataNode4);
         queryBuilder1.addChild(unionNode3, dataNode5);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" + query1);
-
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = query1.normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -248,10 +225,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder2.addChild(unionNode2, IQ_FACTORY.createExtensionalDataNode(
                 TABLE3_AR2, ImmutableMap.of(0, X, 1, Y)));
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -283,12 +259,9 @@ public class FlattenUnionOptimizerTest {
         queryBuilder1.addChild(innerJoinNode, dataNode3);
         queryBuilder1.addChild(innerJoinNode, dataNode4);
 
-        IntermediateQuery query1 = queryBuilder1.build();
-
+        IQ query1 = queryBuilder1.buildIQ();
         System.out.println("\nBefore optimization: \n" + query1);
-
-        IntermediateQuery optimizedQuery = optimize(query1);
-
+        IQ optimizedQuery = query1.normalizeForOptimization();
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -304,9 +277,8 @@ public class FlattenUnionOptimizerTest {
         queryBuilder2.addChild(innerJoinNode, IQ_FACTORY.createExtensionalDataNode(
                 TABLE4_AR3, ImmutableMap.of(0, X, 1, Y)));
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 }

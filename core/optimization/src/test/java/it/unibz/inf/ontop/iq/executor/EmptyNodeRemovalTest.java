@@ -20,23 +20,22 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static org.junit.Assert.assertTrue;
 
 public class EmptyNodeRemovalTest {
 
-    private static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
-    private static Variable X = TERM_FACTORY.getVariable("x");
-    private static Variable Y = TERM_FACTORY.getVariable("y");
-    private static Variable A = TERM_FACTORY.getVariable("a");
-    private static Variable B = TERM_FACTORY.getVariable("b");
-    private static Variable B1 = TERM_FACTORY.getVariable("b1");
-    private static Variable C = TERM_FACTORY.getVariable("c");
-    private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+    private static final AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
+    private static final Variable X = TERM_FACTORY.getVariable("x");
+    private static final Variable Y = TERM_FACTORY.getVariable("y");
+    private static final Variable A = TERM_FACTORY.getVariable("a");
+    private static final Variable B = TERM_FACTORY.getVariable("b");
+    private static final Variable B1 = TERM_FACTORY.getVariable("b1");
+    private static final Variable C = TERM_FACTORY.getVariable("c");
+    private static final DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
-    private static ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
-    private static ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
-    private static ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
+    private static final ImmutableList<Template.Component> URI_TEMPLATE_STR_1 = Template.of("http://example.org/ds1/", 0);
+    private static final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+    private static final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
     private static final EmptyNode DB_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
 
     /**
@@ -48,7 +47,7 @@ public class EmptyNodeRemovalTest {
         ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
                 ImmutableMap.of(X, generateURI1(A, false), Y, generateURI1(B, false)));
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(PROJECTION_ATOM.getVariables());
-        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
+        IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
         /*
          * Expected query
@@ -60,9 +59,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -72,7 +69,7 @@ public class EmptyNodeRemovalTest {
         ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
                 ImmutableMap.of(Y, generateURI1(B, false)));
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(Y, A));
-        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
+        IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
         /*
          * Expected query
@@ -89,9 +86,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -101,20 +96,19 @@ public class EmptyNodeRemovalTest {
         ImmutableSubstitution<ImmutableTerm> leftBindings = SUBSTITUTION_FACTORY.getSubstitution(
                 ImmutableMap.of());
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, B));
-        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
+        IQ query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
         /*
          * Expected query
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
-        QueryNode rootNode = query.getRootNode();
+        ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables, topBindings);
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -152,13 +146,13 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.addChild(unionNode, rightConstructionNode);
         expectedQueryBuilder.addChild(rightConstructionNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
 
 
 
-    private static IntermediateQuery generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
+    private static IQ generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
                                                             ImmutableSubstitution<ImmutableTerm> leftBindings,
                                                             EmptyNode emptyNode) {
         ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getVariables();
@@ -184,7 +178,7 @@ public class EmptyNodeRemovalTest {
         }
         queryBuilder.addChild(unionNode, emptyNode);
 
-        return queryBuilder.build();
+        return queryBuilder.buildIQ();
     }
 
     @Test
@@ -202,8 +196,6 @@ public class EmptyNodeRemovalTest {
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(B));
         queryBuilder.addChild(leftJoinNode, emptyNode, RIGHT);
 
-        IntermediateQuery query = queryBuilder.build();
-
         /*
          * Expected query
          */
@@ -216,9 +208,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -236,8 +226,7 @@ public class EmptyNodeRemovalTest {
         queryBuilder.addChild(leftJoinNode, emptyNode, LEFT);
         queryBuilder.addChild(leftJoinNode, DATA_NODE_1, RIGHT);
 
-        IntermediateQuery query = queryBuilder.build();
-        optimizeUnsatisfiableQuery(query);
+        optimizeUnsatisfiableQuery(queryBuilder.buildIQ());
     }
 
     @Test
@@ -260,8 +249,6 @@ public class EmptyNodeRemovalTest {
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, B, C));
         queryBuilder.addChild(rightLeftJoinNode, emptyNode, RIGHT);
 
-        IntermediateQuery query = queryBuilder.build();
-
         /*
          * Expected query
          */
@@ -272,9 +259,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.addChild(topLeftJoinNode, DATA_NODE_2, LEFT);
         expectedQueryBuilder.addChild(topLeftJoinNode, DATA_NODE_1, RIGHT);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -297,8 +282,6 @@ public class EmptyNodeRemovalTest {
         queryBuilder.addChild(rightLeftJoinNode, emptyNode, LEFT);
         queryBuilder.addChild(rightLeftJoinNode, DATA_NODE_1, RIGHT);
 
-        IntermediateQuery query = queryBuilder.build();
-
         /*
          * Expected query
          */
@@ -311,9 +294,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -331,8 +312,7 @@ public class EmptyNodeRemovalTest {
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
         queryBuilder.addChild(joinNode, emptyNode);
 
-        IntermediateQuery query = queryBuilder.build();
-        optimizeUnsatisfiableQuery(query);
+        optimizeUnsatisfiableQuery(queryBuilder.buildIQ());
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -353,8 +333,7 @@ public class EmptyNodeRemovalTest {
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
         queryBuilder.addChild(constructionNode2, emptyNode);
 
-        IntermediateQuery query = queryBuilder.build();
-        optimizeUnsatisfiableQuery(query);
+        optimizeUnsatisfiableQuery(queryBuilder.buildIQ());
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -373,21 +352,21 @@ public class EmptyNodeRemovalTest {
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of());
         queryBuilder.addChild(joinNode, emptyNode);
 
-        IntermediateQuery query = queryBuilder.build();
-        optimizeUnsatisfiableQuery(query);
+        optimizeUnsatisfiableQuery(queryBuilder.buildIQ());
     }
 
-    private static void optimizeUnsatisfiableQuery(IntermediateQuery query) throws EmptyQueryException {
+    private static void optimizeUnsatisfiableQuery(IQ query) throws EmptyQueryException {
         System.out.println("\n Unsatisfiable query: \n" +  query);
-        IQ newQuery = IQ_CONVERTER.convert(query).normalizeForOptimization();
-        // Must throw an EmptyQueryException
-        IntermediateQuery convertedQuery = IQ_CONVERTER.convert(newQuery);
-        System.err.println("Unexpected query: " + convertedQuery);
+        IQ newQuery = query.normalizeForOptimization();
+        if (newQuery.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
+        System.err.println("Unexpected query: " + newQuery);
     }
 
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ1() throws EmptyQueryException {
-        IntermediateQuery query = generateJoinLJInitialQuery(
+        IQ query = generateJoinLJInitialQuery(
                 Optional.of(TERM_FACTORY.getStrictEquality(B, C)), B, false);
 
         optimizeUnsatisfiableQuery(query);
@@ -395,8 +374,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ2() throws EmptyQueryException {
-
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getDBIsNotNull(C)), B, false);
+        IQ query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getDBIsNotNull(C)), B, false);
 
         optimizeUnsatisfiableQuery(query);
     }
@@ -404,7 +382,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testJoinLJ3() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getDBIsNull(C)), B, false);
+        IQ query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getDBIsNull(C)), B, false);
 
         /*
          * Expected query
@@ -421,15 +399,13 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_2);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQueryBuilder.buildIQ());
     }
 
     @Test
     public void testJoinLJ4() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.empty(), C, true);
+        IQ query = generateJoinLJInitialQuery(Optional.empty(), C, true);
 
         /*
          * Expected query
@@ -449,13 +425,11 @@ public class EmptyNodeRemovalTest {
                 ImmutableMap.of(0, A)));
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_2);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQueryBuilder.buildIQ());
     }
 
 
-    private static IntermediateQuery generateJoinLJInitialQuery(Optional<ImmutableExpression> joiningCondition,
+    private static IQ generateJoinLJInitialQuery(Optional<ImmutableExpression> joiningCondition,
                                                                 Variable variableForBuildingY,
                                                                 boolean isVariableForBuildingYNullable) {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -475,7 +449,7 @@ public class EmptyNodeRemovalTest {
         queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
         queryBuilder.addChild(leftJoinNode, DB_NODE_1, RIGHT);
 
-        return queryBuilder.build();
+        return queryBuilder.buildIQ();
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -497,8 +471,7 @@ public class EmptyNodeRemovalTest {
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, B, C));
         queryBuilder.addChild(leftJoinNode, emptyNode, RIGHT);
 
-        IntermediateQuery query = queryBuilder.build();
-        optimizeUnsatisfiableQuery(query);
+        optimizeUnsatisfiableQuery(queryBuilder.buildIQ());
     }
 
     @Test
@@ -530,7 +503,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
 
@@ -569,7 +542,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     /**
@@ -605,7 +578,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     /**
@@ -641,7 +614,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
     @Test
@@ -676,7 +649,7 @@ public class EmptyNodeRemovalTest {
                 TABLE2_AR1,
                 ImmutableMap.of()));
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.buildIQ(), expectedQueryBuilder.buildIQ());
     }
 
 //    @Test
@@ -791,18 +764,16 @@ public class EmptyNodeRemovalTest {
 //    }
 
 
-    private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery)
-            throws EmptyQueryException {
+    private static void optimizeAndCompare(IQ query, IQ expectedQuery) throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(
-                IQ_CONVERTER.convert(query).normalizeForOptimization());
+        IQ optimizedQuery = query.normalizeForOptimization();
 
         System.out.println("\n Optimized query: \n" +  optimizedQuery);
 
-        assertTrue(areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, expectedQuery));
     }
 
 //    @Test

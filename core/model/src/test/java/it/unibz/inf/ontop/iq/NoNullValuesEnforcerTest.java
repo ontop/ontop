@@ -74,7 +74,7 @@ public class NoNullValuesEnforcerTest {
         queryBuilder.addChild(constructionNode, innerJoinNode);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_2);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ query = queryBuilder.buildIQ();
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
@@ -87,7 +87,7 @@ public class NoNullValuesEnforcerTest {
         queryBuilder2.addChild(constructionNode, innerJoinNode);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_2);
-        IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
+        IQ expectedQuery = queryBuilder2.buildIQ().normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
         assertEquals(expectedQuery.getTree(), transformedTree);
@@ -104,7 +104,7 @@ public class NoNullValuesEnforcerTest {
         queryBuilder.addChild(constructionNode, innerJoinNode);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_3);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build()).normalizeForOptimization();
+        IQ query = queryBuilder.buildIQ().normalizeForOptimization();
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
@@ -122,7 +122,7 @@ public class NoNullValuesEnforcerTest {
         queryBuilder.init(projectionAtom, innerJoinNode);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_3);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ query = queryBuilder.buildIQ();
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
@@ -134,7 +134,7 @@ public class NoNullValuesEnforcerTest {
         queryBuilder2.addChild(filterNode, innerJoinNode);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_3);
-        IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build())
+        IQ expectedQuery = queryBuilder2.buildIQ()
                 .normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
@@ -150,7 +150,7 @@ public class NoNullValuesEnforcerTest {
         queryBuilder.init(projectionAtom, innerJoinNode);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_2);
-        IQ query = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ query = queryBuilder.buildIQ();
         LOGGER.info("Initial IQ:\n" + query);
 
         IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
@@ -162,7 +162,7 @@ public class NoNullValuesEnforcerTest {
         queryBuilder2.addChild(filterNode, innerJoinNode);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder2.addChild(innerJoinNode, DATA_NODE_2);
-        IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
+        IQ expectedQuery = queryBuilder2.buildIQ().normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
         assertEquals(expectedQuery.getTree(), transformedTree);

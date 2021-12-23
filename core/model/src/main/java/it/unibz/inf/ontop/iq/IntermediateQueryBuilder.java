@@ -45,6 +45,8 @@ public interface IntermediateQueryBuilder {
 
     IntermediateQuery build() throws IntermediateQueryBuilderException;
 
+    IQ buildIQ() throws IntermediateQueryBuilderException;
+
     QueryNode getRootNode() throws IntermediateQueryBuilderException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node) throws IntermediateQueryBuilderException;

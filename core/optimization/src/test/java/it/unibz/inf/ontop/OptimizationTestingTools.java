@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
+import it.unibz.inf.ontop.iq.tools.IQEqualityCheck;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -47,6 +48,7 @@ public class OptimizationTestingTools {
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final BooleanExpressionPushDownTransformer PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER;
     public static final IQConverter IQ_CONVERTER;
+    public static final IQEqualityCheck IQ_EQUALITY_CHECK;
     public static final DBConstant TRUE, FALSE;
     public static final Constant NULL;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
@@ -121,6 +123,7 @@ public class OptimizationTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
+        IQ_EQUALITY_CHECK = injector.getInstance(IQEqualityCheck.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
         BINDING_LIFT_OPTIMIZER = new IntermediateQueryOptimizer() {
             @Override

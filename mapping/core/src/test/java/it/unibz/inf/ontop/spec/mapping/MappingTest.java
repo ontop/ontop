@@ -102,7 +102,7 @@ public class MappingTest {
             mappingBuilder.init(mappingProjectionAtom, mappingRootNode);
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P1, ImmutableMap.of(0, A, 1, B));
             mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-            IQ mappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
+            IQ mappingAssertion = mappingBuilder.buildIQ();
             propertyMapBuilder.put(propertyIri, mappingAssertion);
             LOGGER.info("Mapping assertion:\n" +mappingAssertion);
         }
@@ -191,7 +191,7 @@ public class MappingTest {
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, table1DataNode);
 
-        IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
+        IQ mappingAssertion = queryBuilder.buildIQ();
         LOGGER.info(mappingAssertion.toString());
 
 //        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();

@@ -75,7 +75,7 @@ public class UriTemplateTest {
         ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(E));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
+        IQ initialQuery = initialQueryBuilder.buildIQ();
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
 
@@ -92,10 +92,10 @@ public class UriTemplateTest {
         expectedQueryBuilder.addChild(newJoinNode, leftDataNode);
         expectedQueryBuilder.addChild(newJoinNode, middleDataNode);
 
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialQuery);
 
         System.out.println("\n After optimization: \n" +  optimizedQuery);
     }
