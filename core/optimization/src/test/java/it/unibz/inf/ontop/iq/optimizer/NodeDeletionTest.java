@@ -44,13 +44,13 @@ public class NodeDeletionTest {
         ExtensionalDataNode table2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(x));
         queryBuilder.addChild(joinNode, table2);
 
-        IntermediateQuery initialQuery = queryBuilder.build();
+        IQ initialQuery = queryBuilder.buildIQ();
         System.out.println("Initial query: " + initialQuery.toString());
 
         /*
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
+        IQ optimizedQuery = optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
     }
 
@@ -84,13 +84,13 @@ public class NodeDeletionTest {
         ExtensionalDataNode table3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(x, y));
         queryBuilder.addChild(joinNode, table3);
 
-        IntermediateQuery initialQuery = queryBuilder.build();
+        IQ initialQuery = queryBuilder.buildIQ();
         System.out.println("Initial query: " + initialQuery.toString());
 
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
+        IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(optimize(initialQuery));
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
@@ -150,13 +150,13 @@ public class NodeDeletionTest {
         ExtensionalDataNode table5 = createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(x, y));
         queryBuilder.addChild(joinNode2, table5);
 
-        IntermediateQuery initialQuery = queryBuilder.build();
+        IQ initialQuery = queryBuilder.buildIQ();
         System.out.println("Initial query: " + initialQuery.toString());
 
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
+        IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(optimize(initialQuery));
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode newRootNode = optimizedQuery.getRootNode();
@@ -217,13 +217,13 @@ public class NodeDeletionTest {
         ExtensionalDataNode table5 = createExtensionalDataNode(TABLE5_AR2, ImmutableList.of(x, y));
         queryBuilder.addChild(joinNode2, table5);
 
-        IntermediateQuery initialQuery = queryBuilder.build();
+        IQ initialQuery = queryBuilder.buildIQ();
         System.out.println("Initial query: " + initialQuery.toString());
 
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
+        IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(optimize(initialQuery));
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode optimizedRootNode = optimizedQuery.getRootNode();
@@ -262,23 +262,21 @@ public class NodeDeletionTest {
         queryBuilder.addChild(ljNode, table4, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
 
-        IntermediateQuery initialQuery = queryBuilder.build();
+        IQ initialQuery = queryBuilder.buildIQ();
         System.out.println("Initial query: " + initialQuery.toString());
 
         /*
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = optimize(initialQuery);
+        IQ optimizedQuery = optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
     }
 
-    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
-        IQ initialIQ =  IQ_CONVERTER.convert(query);
-
+    private IQ optimize(IQ initialIQ) throws EmptyQueryException {
         IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ);
         if (optimizedIQ.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
-        return IQ_CONVERTER.convert(optimizedIQ);
+        return optimizedIQ;
     }
 }

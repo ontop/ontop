@@ -204,8 +204,6 @@ public class RedundantSelfJoinTest {
         ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2, ImmutableList.of(X, Y, TWO));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        IntermediateQuery query = queryBuilder.build();
-
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();

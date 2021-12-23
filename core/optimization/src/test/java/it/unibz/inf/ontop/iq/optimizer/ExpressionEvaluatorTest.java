@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
@@ -62,7 +61,7 @@ public class ExpressionEvaluatorTest {
                 wrappedLanguageTag));
 
 
-    private IntermediateQuery getExpectedQuery() {
+    private IQ getExpectedQuery() {
         //----------------------------------------------------------------------
         // Construct expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
@@ -86,7 +85,7 @@ public class ExpressionEvaluatorTest {
                 createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, D)));
 
         //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
         return expectedQuery;
     }
@@ -127,17 +126,16 @@ public class ExpressionEvaluatorTest {
         queryBuilder.addChild(rightNode, DATA_NODE_2);
 
         //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        unOptimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        unOptimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
-        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(IQ_CONVERTER.convert(unOptimizedQuery));
+        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IQ expectedQuery = IQ_CONVERTER.convert(getExpectedQuery());
-        assertEquals(expectedQuery, optimizedQuery);
+        assertEquals(getExpectedQuery(), optimizedQuery);
     }
 
     /**
@@ -178,10 +176,10 @@ public class ExpressionEvaluatorTest {
         queryBuilder.addChild(rightNode, DATA_NODE_1);
 
         //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -208,10 +206,10 @@ public class ExpressionEvaluatorTest {
                 createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(C, B)));
 
         //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, expectedQuery));
     }
 
     /**
@@ -241,10 +239,10 @@ public class ExpressionEvaluatorTest {
         queryBuilder.addChild(constructionNode2, DATA_NODE_2);
 
         //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        IQ unOptimizedQuery = queryBuilder.buildIQ();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
@@ -268,10 +266,10 @@ public class ExpressionEvaluatorTest {
         expectedQueryBuilder.addChild(joinNode2, DATA_NODE_2);
 
         //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        IQ expectedQuery = expectedQueryBuilder.buildIQ();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, expectedQuery));
     }
 
 

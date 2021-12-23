@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
@@ -69,7 +70,7 @@ public class ConstructionNodeCleanerTest {
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X, R1_IRI, Y));
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -80,15 +81,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(distinctNode, constructionNode1);
         queryBuilder2.addChild(constructionNode1, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class ConstructionNodeCleanerTest {
         IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X, R1_IRI, Y));
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -123,15 +123,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(distinctNode, constructionNode3);
         queryBuilder2.addChild(constructionNode3, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 
@@ -153,7 +152,7 @@ public class ConstructionNodeCleanerTest {
         queryBuilder1.addChild(constructionNode1, constructionNode2);
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -166,14 +165,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.init(projectionAtom1, constructionNode3);
         queryBuilder2.addChild(constructionNode3, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -202,7 +201,7 @@ public class ConstructionNodeCleanerTest {
 
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -216,16 +215,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(limitNode2, constructionNode3);
         queryBuilder2.addChild(constructionNode3, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 
@@ -256,7 +253,7 @@ public class ConstructionNodeCleanerTest {
 
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -275,16 +272,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(limitNode2, constructionNode4);
         queryBuilder2.addChild(constructionNode4, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 
@@ -318,7 +313,7 @@ public class ConstructionNodeCleanerTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
         queryBuilder1.addChild(constructionNode3, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -335,15 +330,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(limitNode, constructionNode4);
         queryBuilder2.addChild(constructionNode4, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 
@@ -378,7 +372,7 @@ public class ConstructionNodeCleanerTest {
         queryBuilder1.addChild(limit40, constructionNode3);
         queryBuilder1.addChild(constructionNode3, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -397,17 +391,15 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(limit90, constructionNode4);
         queryBuilder2.addChild(constructionNode4, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-
-
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -445,7 +437,7 @@ public class ConstructionNodeCleanerTest {
         queryBuilder1.addChild(limit40, constructionNode3);
         queryBuilder1.addChild(constructionNode3, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -468,15 +460,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(limit40, constructionNode5);
         queryBuilder2.addChild(constructionNode5, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
-
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 
@@ -521,7 +512,7 @@ public class ConstructionNodeCleanerTest {
         queryBuilder1.addChild(distinctNode2, constructionNode4);
         queryBuilder1.addChild(constructionNode4, dataNode2);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -545,14 +536,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(distinctNode1, constructionNode6);
         queryBuilder2.addChild(constructionNode6, dataNode2);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -575,13 +566,13 @@ public class ConstructionNodeCleanerTest {
         queryBuilder1.addChild(constructionNode1, constructionNode2);
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
@@ -589,10 +580,10 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.init(projectionAtom1, constructionNode1);
         queryBuilder2.addChild(constructionNode1, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -616,7 +607,7 @@ public class ConstructionNodeCleanerTest {
         queryBuilder1.addChild(constructionNode1, constructionNode2);
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -625,14 +616,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.init(projectionAtom1, constructionNode2);
         queryBuilder2.addChild(constructionNode2, dataNode1);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
     @Test
@@ -665,7 +656,7 @@ public class ConstructionNodeCleanerTest {
         queryBuilder1.addChild(constructionNode2, dataNode2);
         queryBuilder1.addChild(constructionNode3, dataNode3);
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IQ query1 = queryBuilder1.buildIQ();
 
         System.out.println("\nBefore optimization: \n" + query1);
 
@@ -676,14 +667,14 @@ public class ConstructionNodeCleanerTest {
         queryBuilder2.addChild(unionNode1, dataNode2);
         queryBuilder2.addChild(unionNode1, dataNode3);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IQ query2 = queryBuilder2.buildIQ();
         System.out.println("\nExpected: \n" + query2);
 
-        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(query1);
-        optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
+        IQ optimizedQuery = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(query1);
+        //optimizedQuery = constructionNodeCleaner.optimize(optimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQ_EQUALITY_CHECK.equal(optimizedQuery, query2));
     }
 
 

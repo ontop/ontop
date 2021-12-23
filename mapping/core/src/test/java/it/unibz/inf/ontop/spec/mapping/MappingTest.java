@@ -117,7 +117,7 @@ public class MappingTest {
         mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P3, ImmutableMap.of(0, A));
         mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-        IQ classMappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
+        IQ classMappingAssertion = mappingBuilder.buildIQ();
         ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
         LOGGER.info("Mapping assertion:\n" + classMappingAssertion);
 
